@@ -17,40 +17,44 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.forgerock.openidm</groupId>
-    <artifactId>openidm-root</artifactId>
+    <parent>
+        <groupId>org.forgerock.openidm</groupId>
+        <artifactId>openidm-root</artifactId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>openidm-zip</artifactId>
+    <name>OpenIDM ZIP file assembly</name>
     <packaging>pom</packaging>
-    <name>OpenIDM root project</name>
-    <version>2.0.0-SNAPSHOT</version>
-    <modules>
-        <module>openidm-core</module>
-        <module>openidm-zip</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
     <build>
+        <finalName>openidm-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <inherited>true</inherited>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                    <compilerArgument>-Xlint:all</compilerArgument>
-                    <showWarnings>true</showWarnings>
-                    <showDeprecation>true</showDeprecation>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/zip.xml</descriptor>
+                    </descriptors>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>zip-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    <repositories>
-        <repository>
-            <id>maven2-repository.dev.java.net</id>
-            <name>Java.net Repository for Maven</name>
-            <url>http://download.java.net/maven/2/</url>
-        </repository>
-    </repositories>
 </project>
