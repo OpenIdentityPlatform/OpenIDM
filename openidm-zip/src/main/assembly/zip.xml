@@ -31,6 +31,18 @@
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/bundle</outputDirectory>
+            <excludes>
+                 <exclude>org.apache.felix:org.apache.felix.main</exclude>
+                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
+            </excludes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>false</unpack>
+            <outputFileNameMapping>felix.jar</outputFileNameMapping>
+            <includes>
+                 <include>org.apache.felix:org.apache.felix.main</include>
+            </includes>
+            <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>
     </dependencySets>
 </assembly>
