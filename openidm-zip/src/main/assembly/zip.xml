@@ -23,7 +23,7 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${basedir}/src/main/files</directory>
+            <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
         </fileSet>
     </fileSets>
