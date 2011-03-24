@@ -34,6 +34,9 @@
             <excludes>
                  <exclude>org.apache.felix:org.apache.felix.main</exclude>
                  <exclude>org.apache.felix:org.apache.felix.framework</exclude>
+                 <exclude>org.apache.felix:org.osgi.foundation:jar</exclude>
+                 <exclude>org.osgi:**</exclude>
+                 <exclude>javax.transaction:jta:jar</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
