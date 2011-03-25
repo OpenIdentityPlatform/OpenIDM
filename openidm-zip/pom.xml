@@ -31,6 +31,11 @@
             <artifactId>openidm-core</artifactId>
             <version>${project.version}</version>
         </dependency>        
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo-orientdb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.apache.felix</groupId>

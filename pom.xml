@@ -24,6 +24,7 @@
     <version>2.0.0-SNAPSHOT</version>
     <modules>
         <module>openidm-core</module>
+        <module>openidm-repo-orientdb</module>
         <module>openidm-zip</module>
     </modules>
     <build>
@@ -63,5 +64,15 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
+        <!-- OrientDB -->
+        <repository> 
+            <id>orientechnologies-repository</id> 
+            <name>Orient Technologies Maven2 Repository</name> 
+            <url>http://www.orientechnologies.com/listing/m2</url> 
+            <snapshots> 
+                <enabled>true</enabled> 
+                <updatePolicy>always</updatePolicy> 
+            </snapshots> 
+        </repository> 
     </repositories>
 </project>
