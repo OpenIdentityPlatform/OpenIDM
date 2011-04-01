@@ -36,26 +36,26 @@ import org.slf4j.LoggerFactory;
  * @author aegloff
  */
 public class DocumentUtil  {
-	final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);
-	/**
-	 * Convert to simple binding model akin to JSON simple binding
-	 * @param doc the OrientDB document to convert
-	 * @return the doc converted into maps, lists, java types; or null if the doc was null
-	 */
+    final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);
+    /**
+     * Convert to simple binding model akin to JSON simple binding
+     * @param doc the OrientDB document to convert
+     * @return the doc converted into maps, lists, java types; or null if the doc was null
+     */
     public static Map<String, Object> toMap(ODocument doc) {    	
-    	Map<String, Object> result = null;
-    	if (doc != null) {
-	        result = new LinkedHashMap(); // Do we really need to maintain order?   
-	        result.put("_id", doc.getIdentity().toString()); 
-	        result.put("_rev", doc.getVersion());
-	        for (java.util.Map.Entry<String, Object> entry : doc) {
-	        	Object value = entry.getValue();
-	        	// TODO: Handle Embeddedset/Embeddedlist/Embeddedmap
-	        	// TODO: Handle reference relationship
-	        	result.put(entry.getKey(), value);
-	        }        
-    	}
-    	logger.trace("Converted document {} to {}", doc, result);
-    	return result;
+        Map<String, Object> result = null;
+        if (doc != null) {
+            result = new LinkedHashMap(); // Do we really need to maintain order?   
+            result.put("_id", doc.getIdentity().toString()); 
+            result.put("_rev", doc.getVersion());
+            for (java.util.Map.Entry<String, Object> entry : doc) {
+                Object value = entry.getValue();
+                // TODO: Handle Embeddedset/Embeddedlist/Embeddedmap
+                // TODO: Handle reference relationship
+                result.put(entry.getKey(), value);
+            }
+        }
+        logger.trace("Converted document {} to {}", doc, result);
+        return result;
     }
 }

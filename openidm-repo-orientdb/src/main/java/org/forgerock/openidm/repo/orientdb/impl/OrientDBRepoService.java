@@ -53,28 +53,28 @@ import com.orientechnologies.orient.core.id.ORecordId;
     @Property(name = "db.type", value = "OrientDB")
 })
 public class OrientDBRepoService implements RepositoryService {
-	final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
-	
-	ODatabaseDocumentPool pool;
-	
-	// TODO make configurable
+    final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
+
+    ODatabaseDocumentPool pool;
+
+    // TODO make configurable
     String dbURL = "local:./db/openidm"; 
     String user = "admin";
     String password = "admin";
-	int poolMinSize = 5;     				 
-	int poolMaxSize = 20;
+    int poolMinSize = 5;     				 
+    int poolMaxSize = 20;
 
-	/**
-	 * Retrieve a complete document by identifier
-	 * @param id the record identifier. Present in the _id property of documents. 
-	 * @return the document in simple binding format
-	 */
-	public Map<String, Object> get(String id) {
-		ORecordId recordId = new ORecordId(id); 
-		ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-		
-		ODocument doc = (ODocument) db.load(recordId);
-		doc.fieldNames(); // TODO TEMPORARY work-around: force the desiralization of the fields (fixed in SVN revision: 2568) Remove this line when fixed in OrientDB.
+    /**
+     * Retrieve a complete document by identifier
+     * @param id the record identifier. Present in the _id property of documents. 
+     * @return the document in simple binding format
+     */
+    public Map<String, Object> get(String id) {
+        ORecordId recordId = new ORecordId(id); 
+        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        
+        ODocument doc = (ODocument) db.load(recordId);
+        doc.fieldNames(); // TODO TEMPORARY work-around: force the desiralization of the fields (fixed in SVN revision: 2568) Remove this line when fixed in OrientDB.
         Map<String, Object> result = DocumentUtil.toMap(doc);
         pool.release(db);
         logger.trace("get id: {} result: {}", id, result);        
@@ -82,38 +82,38 @@ public class OrientDBRepoService implements RepositoryService {
         return result;
     }
 
-	/*
-	public void update(Map<String, Object> doc) {
-		String id = doc.get("_id")
-	    if (id == null) {
-	    //	throw new PermanentRepoException("Identifier missing in update");
-	    }
-		ORecordId recordId = new ORecordId(id); 
-		// handle OConcurrentModificationException too
-		try{
-	        db.begin();
-			ODocument doc = (ODocument) db.load(recordId);
+    /*
+    public void update(Map<String, Object> doc) {
+        String id = doc.get("_id");
+            if (id == null) {
+        //	throw new PermanentRepoException("Identifier missing in update");
+        }
+        ORecordId recordId = new ORecordId(id); 
+        // handle OConcurrentModificationException too
+        try{
+            db.begin();
+            ODocument doc = (ODocument) db.load(recordId);
             db.commit();
-	    } catch (Exception e){
-	    	db.rollback();
-	    	throw e;
-	    }
+        } catch (Exception e){
+            db.rollback();
+            throw e;
+        }
     }
-	*/
-	
+    */
+    
     @Activate
     private void activate(java.util.Map<String, Object> config) {
         logger.trace("Activating Service with configuration {}", config);
         try {
-        	pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize);
+            pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize);
             logger.info("Repository started.");
         } catch (RuntimeException ex) {
-        	logger.warn("Initializing Database Pool failed", ex);
-        	throw ex;
+            logger.warn("Initializing Database Pool failed", ex);
+            throw ex;
         } finally {
-        	if (pool != null) {
-        		pool.close();
-        	}
+            if (pool != null) {
+                pool.close();
+            }
         }
     }
     
@@ -121,7 +121,7 @@ public class OrientDBRepoService implements RepositoryService {
     private void deactivate(Map<String, Object> config) {
         logger.trace("Deactivating Service {}", config);
         if (pool != null) {
-        	pool.close();
+            pool.close();
         }
         logger.info("Repository stopped.");
     }

@@ -33,19 +33,19 @@ import static org.fest.assertions.MapAssert.entry;
 
 public class DBHelperTest {
 
-	@Test
-	public void initPoolTest() {
-		String dbURL = "local:./target/testdb";
-		String user = "admin";
-		String password = "admin";
-		int minSize = 5;
-		int maxSize = 20;
-		ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize);
-		assertNotNull(pool);
-		ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-		assertNotNull(db);
-		pool.release(db);
-		pool.close();
-	}
+    @Test
+    public void initPoolTest() {
+        String dbURL = "local:./target/testdb";
+        String user = "admin";
+        String password = "admin";
+        int minSize = 5;
+        int maxSize = 20;
+        ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize);
+        assertNotNull(pool);
+        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        assertNotNull(db);
+        pool.release(db);
+        pool.close();
+    }
 
 }
