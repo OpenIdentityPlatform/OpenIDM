@@ -23,23 +23,29 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 
-/**
- * OSGi bundle activator
- * @author aegloff
- */
-public class Activator implements BundleActivator {
-	final static Logger logger = LoggerFactory.getLogger(Activator.class);
- 
-     public void start(BundleContext context) {
-    	 logger.trace("Bundle started", context);
-     }
+import org.testng.annotations.*;
+import static org.testng.Assert.*;
+import static org.fest.assertions.Assertions.assertThat;
+import static org.fest.assertions.MapAssert.entry;
 
-     public void stop(BundleContext context) {
-    	 logger.trace("Bundle stopped", context);
-     }
+public class DBHelperTest {
+
+	@Test
+	public void initPoolTest() {
+		String dbURL = "local:./target/testdb";
+		String user = "admin";
+		String password = "admin";
+		int minSize = 5;
+		int maxSize = 20;
+		ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize);
+		assertNotNull(pool);
+		ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+		assertNotNull(db);
+		pool.release(db);
+		pool.close();
+	}
+
 }

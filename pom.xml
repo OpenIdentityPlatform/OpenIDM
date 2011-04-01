@@ -24,6 +24,7 @@
     <version>2.0.0-SNAPSHOT</version>
     <modules>
         <module>openidm-core</module>
+        <module>openidm-repo</module>
         <module>openidm-repo-orientdb</module>
         <module>openidm-zip</module>
     </modules>

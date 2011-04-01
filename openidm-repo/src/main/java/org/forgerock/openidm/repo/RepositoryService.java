@@ -21,25 +21,15 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.orientdb.impl;
+package org.forgerock.openidm.repo;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 /**
- * OSGi bundle activator
+ * Common OpenIDM repository interface
  * @author aegloff
  */
-public class Activator implements BundleActivator {
-	final static Logger logger = LoggerFactory.getLogger(Activator.class);
- 
-     public void start(BundleContext context) {
-    	 logger.trace("Bundle started", context);
-     }
-
-     public void stop(BundleContext context) {
-    	 logger.trace("Bundle stopped", context);
-     }
+public interface RepositoryService {
+    // TODO: Inherit/adjust to the common model API
+    Map<String, Object> get(String id);
 }

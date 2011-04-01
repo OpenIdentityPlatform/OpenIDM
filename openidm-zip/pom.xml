@@ -67,6 +67,12 @@
             <artifactId>org.apache.felix.log</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <!-- Declarative Services support -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+            <version>1.6.0</version>
+        </dependency>
         <!-- Jetty based web container -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
