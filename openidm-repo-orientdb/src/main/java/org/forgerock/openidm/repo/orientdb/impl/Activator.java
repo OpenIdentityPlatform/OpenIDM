@@ -37,6 +37,10 @@ public class Activator implements BundleActivator {
  
      public void start(BundleContext context) {
          logger.trace("Bundle started", context);
+         new Runnable() {
+        	 com.orientechnologies.orient.server.OServer server = new com.orientechnologies.orient.server.OServer();
+        	 server.startup();
+         }.start();
      }
 
      public void stop(BundleContext context) {
