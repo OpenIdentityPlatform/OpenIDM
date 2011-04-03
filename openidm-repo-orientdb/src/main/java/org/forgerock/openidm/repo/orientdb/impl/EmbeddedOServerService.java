@@ -23,23 +23,31 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Deactivate;
 
 /**
- * OSGi bundle activator
+ * Component for embedded OrientDB server
  * @author aegloff
  */
-public class Activator implements BundleActivator {
-    final static Logger logger = LoggerFactory.getLogger(Activator.class);
+@Component(name = "embedded-orientdb-server-component", immediate=true)
+public class EmbeddedOServerService {
+    final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
 
-     public void start(BundleContext context) {
-         logger.trace("Bundle started", context);
-     }
-
-     public void stop(BundleContext context) {
-         logger.trace("Bundle stopped", context);
-     }
+    @Activate
+    private void activate(java.util.Map<String, Object> config) {
+        logger.trace("Activating Service with configuration {}", config);
+        EmbeddedOServer.startEmbedded();
+    }
+    
+    @Deactivate
+    private void deactivate(Map<String, Object> config) {
+        EmbeddedOServer.stopEmbedded();
+        logger.debug("Embedded DB server stopped.");
+    }
+   
 }

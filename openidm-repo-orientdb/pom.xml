@@ -53,6 +53,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <version>0.9.25</version> 
         </dependency>
         <dependency> 
+            <groupId>com.orientechnologies</groupId> 
+            <artifactId>orientdb-enterprise</artifactId> 
+            <version>0.9.25</version> 
+        </dependency>
+        <dependency> 
             <groupId>javax.persistence</groupId> 
             <artifactId>persistence-api</artifactId> 
             <version>1.0</version> 
