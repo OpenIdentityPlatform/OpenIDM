@@ -79,11 +79,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Export-Package>org.forgerock.openidm.repo</Export-Package>
-                        <Import-Package>!org.testng.annotations,*</Import-Package>
+                        <Import-Package>*</Import-Package>
                         <!--<Private-Package>org.forgerock.openidm.repo.impl.*</Private-Package>-->
                         <!--<Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>-->
                     </instructions>

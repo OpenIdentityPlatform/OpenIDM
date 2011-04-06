@@ -45,7 +45,7 @@ public class DocumentUtil  {
     public static Map<String, Object> toMap(ODocument doc) {    	
         Map<String, Object> result = null;
         if (doc != null) {
-            result = new LinkedHashMap(); // Do we really need to maintain order?   
+            result = new LinkedHashMap<String, Object>(); // Do we really need to maintain order?   
             result.put("_id", doc.getIdentity().toString()); 
             result.put("_rev", doc.getVersion());
             for (java.util.Map.Entry<String, Object> entry : doc) {
