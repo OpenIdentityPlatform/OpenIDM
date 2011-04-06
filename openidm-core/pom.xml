@@ -24,7 +24,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     </parent>
     <artifactId>openidm-core</artifactId>
     <name>OpenIDM core library</name>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <dependencies>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
@@ -105,6 +105,21 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.4</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <!--<Embed-Dependency></Embed-Dependency>-->
+                        <!--<Export-Package>org.forgerock.openidm.core</Export-Package>-->
+                        <Import-Package>*</Import-Package>
+                        <!--<Private-Package>org.forgerock.openidm.core.impl.*</Private-Package>-->
+                        <!--<Bundle-Activator>org.forgerock.openidm.core.impl.Activator</Bundle-Activator>-->
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
