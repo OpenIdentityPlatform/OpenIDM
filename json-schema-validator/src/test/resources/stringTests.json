@@ -1,0 +1,53 @@
+[
+    {
+        "schema" : {
+            "type" : "string"
+        },
+        "valid" : [
+            null,
+            "String",
+            ""
+        ],
+        "invalid" : [
+            true,
+            { }
+        ]
+    },
+    {
+        "schema" : {
+            "type"      : "string",
+            "required"  : true,
+            "minLength" : 1,
+            "maxLength" : 8,
+            "enum" : [
+                " ",
+                "number1",
+                "number2",
+                "123456789"
+            ]
+        },
+        "valid" : [
+            " ",
+            "number1"
+        ],
+        "invalid" : [
+            null,
+            "123456789",
+            "",
+            "number3"
+        ]
+    },
+    {
+        "schema" : {
+            "type"        : "string",
+            "pattern-fix" : ".*",
+            "format-fix"  : "date"
+        },
+        "valid" : [
+            " "
+        ],
+        "invalid" : [
+            1
+        ]
+    }
+]

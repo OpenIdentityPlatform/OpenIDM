@@ -1,0 +1,85 @@
+[
+    {
+        "schema" : {
+            "type"     : "integer",
+            "required" : true
+        },
+        "valid" : [
+            -2147483648,
+            2147483647
+        ],
+        "invalid" : [
+            null,
+            "Type Error",
+            2147483648
+        ]
+    },
+    {
+        "schema" : {
+            "type"             : "integer",
+            "required"         : false,
+            "minimum"          : 3,
+            "maximum"          : 100,
+            "exclusiveMinimum" : false,
+            "exclusiveMaximum" : true,
+            "divisibleBy"      : 3
+        },
+        "valid" : [
+            null,
+            3,
+            99
+        ],
+        "invalid" : [
+            "Type Error",
+            100,
+            2,
+            4
+        ]
+    },
+    {
+        "schema" : {
+            "type"             : "integer",
+            "minimum"          : 3,
+            "maximum"          : 100,
+            "exclusiveMinimum" : "true",
+            "exclusiveMaximum" : "false"
+        },
+        "valid" : [
+            4,
+            100
+        ],
+        "invalid" : [
+            101,
+            3
+        ]
+    },
+    {
+        "schema" : {
+            "type" : "integer",
+            "enum" : [
+                0,
+                1,
+                1,
+                2,
+                3,
+                5,
+                8,
+                13,
+                21,
+                34,
+                55,
+                89,
+                144,
+                233
+            ]
+        },
+        "valid" : [
+            null,
+            1,
+            3
+        ],
+        "invalid" : [
+            4
+        ]
+    }
+]

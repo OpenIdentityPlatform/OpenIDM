@@ -1,0 +1,97 @@
+[
+    {
+        "schema" : {
+            "type"            : "array",
+            "required"        : true,
+            "uniqueItems"     : "true",
+            "minItems"        : 2,
+            "maxItems"        : 3,
+            "additionalItems" : false,
+            "items" : {
+                "type" : "string"
+            }
+        },
+        "valid" : [
+            [
+                "apple",
+                "kiwi",
+                "banana"
+            ],
+            [
+                "apple",
+                "kiwi"
+            ]
+        ],
+        "invalid" : [
+            null,
+            "Type Error",
+            [
+                "kiwi",
+                "kiwi",
+                "banana"
+            ],
+            [
+                "kiwi"
+            ],
+            [
+                "apple",
+                "kiwi",
+                "banana",
+                "orange"
+            ],
+            [
+                "apple",
+                true
+            ]
+        ]
+    },
+    {
+        "schema" : {
+            "type"            : "array",
+            "required"        : false,
+            "uniqueItems"     : false,
+            "additionalItems" : {
+                "type" : "string",
+                "enum" : [
+                    "test1",
+                    "test2",
+                    "test3"
+                ]
+            },
+            "items" : [
+                {
+                    "type" : "string"
+                },
+                {
+                    "type" : "integer"
+                }
+            ]
+        },
+        "valid" : [
+            null,
+            [
+                "test1",
+                1,
+                "test1"
+            ],
+            [
+                "apple",
+                2
+            ]
+        ],
+        "invalid" : [
+            [
+                "test1",
+                1,
+                "test4"
+            ],
+            [
+                "apple",
+                "banana"
+            ],
+            [
+                "apple"
+            ]
+        ]
+    }
+]
