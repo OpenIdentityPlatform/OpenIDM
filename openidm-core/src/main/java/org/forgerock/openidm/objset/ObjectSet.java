@@ -21,32 +21,45 @@ import java.util.List; // for Javadoc
 import java.util.Map;
 
 /**
- * An interface that provides resource-oriented access methods on a set of objects. Objects
- * are JSON object structures composed of the basic Java types: {@link Map}, {@link List},
- * {@link String}, {@link Number}, {@link Boolean}.
+ * An interface that provides access methods on a set of objects. Objects are JSON object
+ * structures composed of the basic Java types: {@link Map}, {@link List}, {@link String},
+ * {@link Number}, {@link Boolean}.
  * <p>
  * Implementations define their own object identifier taxonomy. By convention, identifiers
- * should follow the URI relative path pattern. Identifiers are provided through the
+ * should follow a URI relative path pattern. Identifiers are provided through the
  * {@code id} parameter in methods, and in the {@code _id} property within objects. In the
  * case where {@code id} parameter is {@code null}, the operation is being requested on the
- * entire object set itself.
+ * object set itself.
  * <p>
  * Implementations can elect for objects in the set to be optimistically concurrent; if so,
  * an object's version is provided through the {@code rev} parameter in methods, and in
- * the {@code _rev} property within objects.
+ * the {@code _rev} property within objects. Consumers of this interface should provide object
+ * version in the {@code rev} parameters if the {@code read} method yields objects that
+ * contain the {@code _rev} property.  
  * <p>
  * Implementations can define other reserved object property names with an underscore
  * {@code _} prefix.
- * <p>
- * Consumers of this interface should provide object version in the {@code rev} parameters
- * the {@code get} method yields objects that contain the {@code _rev} property.  
  *
  * @author Paul C. Bryan
  */
 public interface ObjectSet {
 
     /**
-     * Gets an object from the object set.
+     * Creates a new object in the object set.
+     * <p>
+     * This method sets the {@code _id} property to the assigned identifier for the object,
+     * and the {@code _rev} property to the revised object version if optimistic concurrency
+     * is supported.
+     *
+     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param object the contents of the object to create in the object set.
+     * @throws NotFoundException if the specified id could not be resolve. 
+     * @throws ForbiddenException if access to the object or object set is forbidden.
+     */
+    void create(String id, Map<String, Object> object) throws ObjectSetException;
+
+    /**
+     * Reads an object from the object set.
      * <p>
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} if optimistic concurrency is supported. If optimistic
@@ -57,25 +70,35 @@ public interface ObjectSet {
      * @throws ForbiddenException if access to the object is forbidden.
      * @return the requested object.
      */
-    Map<String, Object> get(String id) throws ObjectSetException;
+    Map<String, Object> read(String id) throws ObjectSetException;
 
     /**
-     * Puts the specified object in the object set. This operation serves to update an
-     * existing object, or to create a new object.
+     * Updates an existing specified object in the object set.
      * <p>
-     * If successful, this method updates metadata properties within the passed object,
-     * including: a new {@code _rev} value for the revised object's version; and the
-     * {@code _id} value if a new object is created.
+     * This method updates the {@code _rev} property to the revised object version on update
+     * if optimistic concurrency is supported.
      *
-     * @param id the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param id the identifier of the object to be updated.
      * @param rev the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to put in the object set.
+     * @param object the contents of the object to updated in the object set.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
-    void put(String id, String rev, Map<String, Object> object) throws ObjectSetException;
+    void update(String id, String rev, Map<String, Object> object) throws ObjectSetException;
+
+    /**
+     * Deletes the specified object from the object set.
+     *
+     * @param id the identifier of the object to be deleted.
+     * @param rev the version of the object to delete or {@code null} if not provided.
+     * @throws NotFoundException if the specified object could not be found. 
+     * @throws ForbiddenException if access to the object is forbidden.
+     * @throws ConflictException if version is required but is {@code null}.
+     * @throws PreconditionFailedException if version did not match the existing object in the set.
+     */ 
+    void delete(String id, String rev) throws ObjectSetException;
 
     /**
      * Applies a patch (partial change) to the specified object in the object set.
@@ -91,19 +114,7 @@ public interface ObjectSet {
     void patch(String id, String rev, Patch patch) throws ObjectSetException;
 
     /**
-     * Deletes the specified object from the object set.
-     *
-     * @param id the identifier of the object to be deleted.
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found. 
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws ConflictException if version is required but is {@code null}.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */ 
-    void delete(String id, String rev) throws ObjectSetException;
-
-    /**
-     * Performs the query on the specified object and returns the associated results.
+     * Performs a query on the specified object and returns the associated results.
      * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
      * The query result is a JSON object structure composed of basic Java types.
