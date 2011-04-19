@@ -31,7 +31,7 @@ import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.OServerCommandConfiguration;
 import com.orientechnologies.orient.server.config.OServerConfiguration;
-import com.orientechnologies.orient.server.config.OServerEntryConfiguration;
+//TODO: <temporary disable> import com.orientechnologies.orient.server.config.OServerEntryConfiguration;
 import com.orientechnologies.orient.server.config.OServerHandlerConfiguration;
 import com.orientechnologies.orient.server.config.OServerNetworkConfiguration;
 import com.orientechnologies.orient.server.config.OServerNetworkListenerConfiguration;
@@ -109,7 +109,7 @@ public class EmbeddedOServer extends OServer {
         OServerCommandConfiguration command1 = new OServerCommandConfiguration();
         command1.pattern = "POST|*.action GET|*.action";
         command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
-        command1.parameters = new OServerEntryConfiguration[0];
+        command1.parameters = null; // TODO: <temporary disable> new OServerEntryConfiguration[0];
         listener2.commands = new OServerCommandConfiguration[] {
                 command1
         };
@@ -135,11 +135,12 @@ public class EmbeddedOServer extends OServer {
         configuration.users = new OServerUserConfiguration[] {
                 new OServerUserConfiguration("root", "3358BE3413F53E0D3DDA03C95C0A3F8357D0D160F8186EDA0C191CE9A4FA271B", "*")
         };
-        configuration.properties = new OServerEntryConfiguration[] {
+        configuration.properties = null; /* TODO: <temporary disable> new OServerEntryConfiguration[] {
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
                 new OServerEntryConfiguration("log.console.level", "info"),
                 new OServerEntryConfiguration("log.file.level", "fine")
-        };
+                
+        };*/
 
         //loadStorages();
         //loadUsers();
