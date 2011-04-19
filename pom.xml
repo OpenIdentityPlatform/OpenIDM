@@ -28,6 +28,15 @@
         <module>openidm-repo-orientdb</module>
         <module>openidm-zip</module>
     </modules>
+    <profiles>        <profile>
+            <id>functional-test</id>
+            <activation>                <property>
+                    <name>enableCiProfile</name>
+                    <value>true</value>                </property>
+            </activation>
+            <modules>                <module>openidm-functional-tests</module>
+            </modules>        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>

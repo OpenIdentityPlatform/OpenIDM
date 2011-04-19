@@ -24,12 +24,11 @@
 package org.forgerock.openidm.repo;
 
 import java.util.Map;
+import org.forgerock.openidm.objset.ObjectSet;
 
 /**
  * Common OpenIDM repository interface
  * @author aegloff
  */
-public interface RepositoryService {
-    // TODO: Inherit/adjust to the common model API
-    Map<String, Object> get(String id);
+public interface RepositoryService extends ObjectSet {
 }

@@ -23,39 +23,203 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
+
+import org.forgerock.openidm.objset.ConflictException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A utility class for handling OrientDB ODocuments
+ * A utility class for handling and converting OrientDB ODocuments
  * 
  * @author aegloff
  */
 public class DocumentUtil  {
     final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);
+    
+    // Identifiers in the object model. 
+    // TDOO: replace with common definitions of these global variables 
+    public final static String TAG_ID = "_id";
+    public final static String TAG_REV = "_rev";
+    
+    // Identifier in the DB representation
+    public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id"; 
+    
     /**
-     * Convert to simple binding model akin to JSON simple binding
+     * Convert to JSON object structures (akin to simple binding), 
+     * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
      * @param doc the OrientDB document to convert
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
-    public static Map<String, Object> toMap(ODocument doc) {    	
+    public static Map<String, Object> toMap(ODocument doc) {
+        return toMap(doc, true);
+    }
+
+    /**
+     * Convert to JSON object structures (akin to simple binding), 
+     * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
+     * @param doc the OrientDB document to convert
+     * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
+     * @return the doc converted into maps, lists, java types; or null if the doc was null
+     */
+    private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {    	
         Map<String, Object> result = null;
         if (doc != null) {
-            result = new LinkedHashMap<String, Object>(); // Do we really need to maintain order?   
-            result.put("_id", doc.getIdentity().toString()); 
-            result.put("_rev", doc.getVersion());
+            result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?   
             for (java.util.Map.Entry<String, Object> entry : doc) {
                 Object value = entry.getValue();
-                // TODO: Handle Embeddedset/Embeddedlist/Embeddedmap
-                // TODO: Handle reference relationship
-                result.put(entry.getKey(), value);
+                String key = entry.getKey();
+                if (key.equals(ORIENTDB_PRIMARY_KEY)) {
+                    logger.trace("Setting primary key to value {}", value);
+                    result.put(TAG_ID, value);
+                    String revision = Integer.toString(doc.getVersion());
+                    logger.trace("Setting revision to {}", revision);
+                    result.put(TAG_REV, revision);
+                } else {
+                    // Handle embedded document
+                    if (value instanceof ODocument) {
+                        logger.trace("Converting embedded ODocument {} to map ", value);
+                        value = DocumentUtil.toMap((ODocument)value, false);
+                    } else if (value instanceof com.orientechnologies.orient.core.id.ORID) {
+                        // OrientDB should have resolved to an ODocument, might indicate a bug in OrientDB
+                        logger.warn("Unexpected value of type ORecordId in field {} {}. Returning as String.", key, value);
+                        value = value.toString();
+                    }
+                    logger.trace("Map setting {} to value {}", key, value);
+                    result.put(key, value);
+                }
             }
         }
         logger.trace("Converted document {} to {}", doc, result);
         return result;
+    }
+    
+    /**
+     * Convert from JSON object structures (akin to simple binding), 
+     * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
+     * to OrientDB document
+     * @param objModel the JSON object structure to convert
+     * @param docToPopulate an optional existing ODocument to update with new values from {@code objModel}
+     * @param db the database to associate with the ODocument
+     * @param orientDocClass the OrientDB class of the ODocument to create
+     * @return the converted orientdb document, or null if objModel was null
+     * @throws ConflictException when the revision in the Object model is invalid
+     */
+    public static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, ODatabaseDocumentTx db, String orientDocClass)
+            throws ConflictException {
+        return toDocument(objModel, docToPopulate, db, orientDocClass, false, true);
+    }
+    
+    /**
+     * Convert from JSON object structures (akin to simple binding), 
+     * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
+     * to OrientDB document
+     * @param objModel the JSON object structure to convert
+     * @param docToPopulate an optional existing ODocument to update with new values from {@code objModel}
+     * @param db the database to associate with the ODocument
+     * @param orientDocClass the OrientDB class of the ODocument to create
+     * @param patch whether the objModel passed in is only partial values (replacing and adding values), 
+     * or if false replaces the whole document with the given {@code objModel}
+     * @return the converted orientdb document, or null if objModel was null
+     * @throws ConflictException when the revision in the Object model is invalid
+     */
+    protected static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, ODatabaseDocumentTx db, String orientDocClass, boolean patch, 
+            boolean topLevel) throws ConflictException {
+        
+        ODocument result = null;
+        if (objModel != null) {
+            if (docToPopulate == null) {
+                result = new ODocument(db, orientDocClass); 
+            } else {
+                result = docToPopulate;
+                if (!patch) {
+                    // Remove entries from existing doc that don't exist anymore. ODocument.reset resets too much.
+                    List<String> removalList = new ArrayList<String>();
+                    for (java.util.Map.Entry<String, Object> entry : result) {
+                        String key = entry.getKey();
+                        if (!key.equals(ORIENTDB_PRIMARY_KEY) && !objModel.containsKey(key)) {
+                            removalList.add(key);
+                        }
+                    }
+                    for (String entry : removalList) {
+                        logger.trace("Removing entry {} ", entry);
+                        result.removeField(entry);
+                    }
+                }
+            }
+
+            for (Map.Entry<String, Object> entry : objModel.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (entry.getKey().equals(TAG_ID)) {
+                    // OpenIDM ID mapping
+                    if (topLevel) {
+                        if (!result.containsField(ORIENTDB_PRIMARY_KEY) 
+                                || !result.field(ORIENTDB_PRIMARY_KEY).equals(value)) {
+                            logger.trace("Setting primary key to {}", value);
+                            result.field(ORIENTDB_PRIMARY_KEY, value);
+                        }
+                    }
+                } else if (key.equals(TAG_REV)) {
+                    // OpenIDM revision to document version mapping
+                    if (topLevel) {
+                        String revString = (String) objModel.get(TAG_REV);
+                        if (revString != null) {
+                            int rev = parseVersion(revString);
+                            logger.trace("Setting version to {}", rev);
+                            if (result.getVersion() != rev) {
+                                result.setVersion(rev);
+                            }
+                        }
+                    }
+                } else if (value instanceof Map) {
+                    // TODO: consider if we should replace this with nested maps rather than nested ODocuments
+                    logger.trace("Handling field {} with embedded map {}", key, value);
+                    ODocument existingDoc = null;
+                    if (docToPopulate != null) {
+                        logger.trace("Update existing embedded map entry {}", key);
+                        existingDoc = docToPopulate.field(entry.getKey());
+                    }
+                    // TODO: below is temporary work-around for OrientDB update not saving embedded ODocument,
+                    // unless it is a new instance
+                    //if (existingDoc == null) {
+                    logger.trace("Instantiate new ODocument to represent embedded map for {}.", key);
+                    existingDoc = new ODocument(); 
+                    //} 
+                    ODocument converted = toDocument((Map<String, Object>) value, existingDoc, db, null, patch, false);
+                    result.field(entry.getKey(), converted, OType.EMBEDDED);
+                } else {
+                    logger.trace("Setting field {} to value {}", key, value);
+                    result.field(entry.getKey(), value);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Parse an OpenIDM revision into an OrientDB MVCC version. OrientDB expects these to be ints.
+     * @param revision the revision String with the OrientDB version in it.
+     * @return the OrientDB version
+     * @throws ConflictException if the revision String could not be parsed into the int expected by OrientDB
+     */
+    public static int parseVersion(String revision) throws ConflictException { 
+        int ver = -1;
+        try {
+            ver = Integer.parseInt(revision);
+        } catch (NumberFormatException ex) {
+            throw new ConflictException("OrientDB repository expects revisions as int, " 
+                    + "unable to parse passed revision: " + revision);
+        }
+        return ver;
     }
 }

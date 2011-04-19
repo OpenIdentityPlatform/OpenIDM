@@ -22,15 +22,22 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <artifactId>openidm-project</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-repo</artifactId>
-    <name>OpenIDM repository common</name>
-    <packaging>bundle</packaging>
+    <artifactId>openidm-integration-test</artifactId>
+    <name>OpenIDM automated integration tests</name>
+    <packaging>pom</packaging>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency> 
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo-orientdb</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
@@ -47,54 +54,27 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.6.1</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>META-INF/**/*</include>
-                </includes>
-            </resource>
-        </resources>
+        <testSourceDirectory>src/it</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <author>false</author>
-                    <bottom>Copyright &copy; 2011 ForgeRock AS. All rights reserved.</bottom>
-                    <links>
-                        <link>http://java.sun.com/javase/6/docs/api/</link>
-                        <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
-                    </links>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
+                <artifactId>maven-compiler-plugin</artifactId>
+                    <executions>                        <execution>
+                            <goals>                                <goal>testCompile</goal> 
+                            </goals>                        </execution> 
+                </executions>            </plugin>
+            <plugin>                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId> 
+                <executions>                    <execution> 
+                        <phase>integration-test</phase> 
+                        <goals>                            <goal>test</goal> 
+                        </goals>                    </execution> 
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.4</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Export-Package>org.forgerock.openidm.repo</Export-Package>
-                        <Import-Package>*</Import-Package>
-                        <!--<Private-Package>org.forgerock.openidm.repo.impl.*</Private-Package>-->
-                        <!--<Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>-->
-                    </instructions>
-                </configuration>
-            </plugin>
+            </plugin>            
         </plugins>
     </build>
 </project>

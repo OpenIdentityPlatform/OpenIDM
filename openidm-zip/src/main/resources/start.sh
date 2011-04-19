@@ -1,2 +1,2 @@
-java -jar bin/felix.jar
+java -Xmx1024mb -jar bin/felix.jar
 

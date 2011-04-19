@@ -31,7 +31,10 @@ import org.slf4j.LoggerFactory;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
+import com.orientechnologies.orient.core.metadata.schema.OProperty;
+import com.orientechnologies.orient.core.metadata.schema.OProperty.INDEX_TYPE;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
+import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
 
@@ -56,7 +59,7 @@ public class DBHelper {
         
         checkDB(dbURL, user, password);
         
-        ODatabaseDocumentPool pool = ODatabaseDocumentPool.global();
+        ODatabaseDocumentPool pool = new ODatabaseDocumentPool(); //ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this, is it safe?
         pool.setup(minSize, maxSize);
         warmUpPool(pool, dbURL, user, password, minSize);
         
@@ -103,53 +106,12 @@ public class DBHelper {
         }
     }
 
-    // TODO: This is temporary until we have the mechanisms in place to laod default and test data
+    // TODO: This is temporary until we have the mechanisms in place to laod default schema and test data
     private static void populateSample(ODatabaseDocumentTx db) {
         OSchema schema = db.getMetadata().getSchema();
-        OClass user = schema.createClass("User", OStorage.CLUSTER_TYPE.PHYSICAL); 
+        OClass user = schema.createClass("managed/user", OStorage.CLUSTER_TYPE.PHYSICAL); 
+        OProperty prop = user.createProperty("_openidm_id", OType.STRING);
+        prop.createIndex(INDEX_TYPE.UNIQUE);
         schema.save(); 
-        
-        // Sample test data
-        int counter = 0;
-        for(int i = 0; i < 10; i++, counter++) {
-            ODocument usr = new ODocument(db, "User");
-            usr.field( "firstname", "John-" + counter );
-            usr.field( "lastname", "Doe-" + counter );
-            usr.field( "address", "Somewhere Land " + counter );
-            usr.field( "zip", "12345");
-            usr.field( "_schema_id", "http://forgerock.com/schema/some/sample");
-            usr.field( "_schema_rev", Integer.valueOf(0));
-            usr.field( "time", "Time: " + new java.util.Date());
-            usr.save();
-            //System.out.println(usr.getIdentity());
-        }
-        System.out.println("DB populated with test data."); // output to console so we don't forget this is still here
-        
-/*
-        long start = System.currentTimeMillis();
-        java.util.Map result = this.get("5:50000");
-        long end = System.currentTimeMillis();
-        System.out.println("ms: " + (end - start));
-        System.out.println("result: " + result);
-        
-        start = System.currentTimeMillis();
-        System.out.println(((ODocument) db.load(new ORecordId("5:50000"))).toJSON());
-        result = DocumentUtil.toMap((ODocument) db.load(new ORecordId("5:50000")));
-        end = System.currentTimeMillis();
-        System.out.println("ms: " + (end - start));
-        System.out.println("result: " + result);
-        
-        start = System.currentTimeMillis();
-        result = this.get("5:10");
-        end = System.currentTimeMillis();
-        System.out.println("ms: " + (end - start));
-        System.out.println("result: " + result);
-        
-        start = System.currentTimeMillis();
-        result = this.get("5:99999");
-        end = System.currentTimeMillis();
-        System.out.println("ms: " + (end - start));
-        System.out.println("result: " + result);
-        */
     }
 }
