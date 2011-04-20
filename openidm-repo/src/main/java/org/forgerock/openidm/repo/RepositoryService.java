@@ -23,7 +23,6 @@
  */
 package org.forgerock.openidm.repo;
 
-import java.util.Map;
 import org.forgerock.openidm.objset.ObjectSet;
 
 /**

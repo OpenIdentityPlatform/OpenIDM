@@ -25,8 +25,6 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.util.Map;
 
-//import javax.management.Query;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
@@ -47,7 +45,6 @@ import org.forgerock.openidm.repo.RepositoryService;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
-//import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
@@ -55,7 +52,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  * Repository service implementation using OrientDB
  * @author aegloff
  */
-@Component(name = "repo-service-orientdb", immediate=true)
+@Component(name = "org.forgerock.repo.orientdb", immediate=true)
 @Service(value = RepositoryService.class) 
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
@@ -311,7 +308,7 @@ public class OrientDBRepoService implements RepositoryService {
     
     // TODO: replace with common utility to handle ID, this is temporary
     private String getLocalId(String id) {
-        String localId = null; //id;
+        String localId = null;
         int lastSlashPos = id.lastIndexOf("/");
         if (lastSlashPos > -1) {
             localId = id.substring(id.lastIndexOf("/") + 1);
