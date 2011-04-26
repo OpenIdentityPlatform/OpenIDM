@@ -30,7 +30,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${project.version}</version>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo</artifactId>
@@ -42,30 +42,30 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <version>RELEASE</version>
         </dependency>
         <!-- OrientDB --> 
-        <dependency> 
-            <groupId>com.orientechnologies</groupId> 
-            <artifactId>orientdb-core</artifactId> 
-            <version>1.0rc1-SNAPSHOT</version> 
-        </dependency> 
-        <dependency> 
-            <groupId>com.orientechnologies</groupId> 
-            <artifactId>orient-commons</artifactId> 
-            <version>1.0rc1-SNAPSHOT</version> 
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-core</artifactId>
+            <version>1.0rc1-SNAPSHOT</version>
         </dependency>
-        <dependency> 
-            <groupId>com.orientechnologies</groupId> 
-            <artifactId>orientdb-server</artifactId> 
-            <version>1.0rc1-SNAPSHOT</version> 
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orient-commons</artifactId>
+            <version>1.0rc1-SNAPSHOT</version>
         </dependency>
-        <dependency> 
-            <groupId>com.orientechnologies</groupId> 
-            <artifactId>orientdb-enterprise</artifactId> 
-            <version>1.0rc1-SNAPSHOT</version> 
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-server</artifactId>
+            <version>1.0rc1-SNAPSHOT</version>
         </dependency>
-        <dependency> 
-            <groupId>javax.persistence</groupId> 
-            <artifactId>persistence-api</artifactId> 
-            <version>1.0</version> 
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-enterprise</artifactId>
+            <version>1.0rc1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -73,22 +73,19 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <version>1.5.0</version>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
-            <version>1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.0</version>
             <scope>test</scope>
-        </dependency> 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
@@ -104,10 +101,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.7</version>
                 <configuration>
                     <author>false</author>
-                    <bottom>Copyright &copy; 2011 ForgeRock AS. All rights reserved.</bottom>
                     <links>
                         <link>http://java.sun.com/javase/6/docs/api/</link>
                         <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
@@ -125,7 +120,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.7.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
@@ -138,11 +132,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>2.3.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-<Embed-Dependency>orientdb*;orient*;persistence-api;scope=compile</Embed-Dependency>
+                        <Embed-Dependency>orientdb*;orient*;persistence-api;scope=compile</Embed-Dependency>
                         <!--<Export-Package>org.forgerock.openidm.repo.orientdb</Export-Package>-->
                         <Import-Package>!org.testng.annotations,*</Import-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
