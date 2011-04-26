@@ -90,6 +90,11 @@
             <artifactId>org.apache.felix.fileinstall</artifactId>
             <version>3.1.10</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>1.4.0</version>
+        </dependency>
         <!-- Declarative Services support -->
         <dependency>
             <groupId>org.apache.felix</groupId>
