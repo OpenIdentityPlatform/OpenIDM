@@ -17,65 +17,30 @@
 package org.forgerock.openidm.config;
 
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-/**
- * A utility to handle enhanced configuration, including nested lists and maps to 
- * represent JSON based structures. 
- *
- * @author aegloff
- */
-public class EnhancedConfig {
-
-    final static Logger logger = LoggerFactory.getLogger(EnhancedConfig.class);
-    
-    private static ObjectMapper mapper = new ObjectMapper();
+public interface EnhancedConfig {
 
     /**
      * Gets the extended Configuration which allows for nested Maps and Lists
      * 
      * @param compContext The component context with the configuration to retrieve
-     * @return the enhanced configuration with nesting allowed
+     * @return the enhanced configuration with nested maps, list allowed
      * @throws InvalidConfiguration
      */
-    public static Map<String, Object> getConfiguration(ComponentContext compContext) throws InvalidException { 
-        Dictionary dict = null;
-        if (compContext == null) {
-            dict = compContext.getProperties();
-        }
-        return getConfiguration(dict);
-    }
-    
+    public Map<String, Object> getConfiguration(ComponentContext compContext)
+            throws InvalidException;
+
     /**
      * Gets the extended Configuration which allows for nested Maps and Lists
      * 
      * @param dict The standard OSGi configuration properties dictionary
-     * @return the enhanced configuration with nesting allowed
+     * @return the enhanced configuration with nested maps, list allowed
      * @throws InvalidConfiguration
      */
-    public static Map<String, Object> getConfiguration(Dictionary<String, Object> dict) throws InvalidException {
-        Map<String, Object> parsedConfig = new HashMap<String, Object>();
-        
-        if (dict != null) {
-            String jsonConfig = (String) dict.get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
-            logger.debug("Get configuration from JSON config property ", jsonConfig);
-    
-            try {
-                if (jsonConfig != null && jsonConfig.trim().length() > 0) {
-                    parsedConfig = mapper.readValue(jsonConfig, Map.class);
-                }
-            } catch (Exception ex) {
-                throw new InvalidException("Configuration could not be parsed: " + ex.getMessage(), ex);
-            }
-        }
-        logger.debug("Parsed configuration ", parsedConfig);
-        return parsedConfig;
-    }
+    public Map<String, Object> getConfiguration(Dictionary<String, Object> dict)
+            throws InvalidException;
+
 }
