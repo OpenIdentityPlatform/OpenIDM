@@ -39,6 +39,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
+            <version>1.7R2_1</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet</artifactId>
             <version>2.0.5</version>
@@ -56,6 +62,7 @@
             <version>2.0.5</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
