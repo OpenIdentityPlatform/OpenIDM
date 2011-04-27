@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import java.util.ArrayList;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,24 +31,131 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 
+import com.orientechnologies.orient.server.OServer;
+import com.orientechnologies.orient.server.OServerMain;
+import com.orientechnologies.orient.server.config.OServerCommandConfiguration;
+import com.orientechnologies.orient.server.config.OServerConfiguration;
+import com.orientechnologies.orient.server.config.OServerHandlerConfiguration;
+import com.orientechnologies.orient.server.config.OServerNetworkConfiguration;
+import com.orientechnologies.orient.server.config.OServerNetworkListenerConfiguration;
+import com.orientechnologies.orient.server.config.OServerNetworkProtocolConfiguration;
+import com.orientechnologies.orient.server.config.OServerParameterConfiguration;
+import com.orientechnologies.orient.server.config.OServerStorageConfiguration;
+import com.orientechnologies.orient.server.config.OServerUserConfiguration;
+
 /**
  * Component for embedded OrientDB server
+ * 
  * @author aegloff
  */
 @Component(name = "embedded-orientdb-server-component", immediate=true)
 public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
 
+    OServer orientDBServer;
+    
     @Activate
-    private void activate(java.util.Map<String, Object> config) {
+    private void activate(java.util.Map<String, Object> config) throws Exception {
         logger.trace("Activating Service with configuration {}", config);
-        EmbeddedOServer.startEmbedded();
+        try {
+            orientDBServer = OServerMain.create();
+            OServerConfiguration serverConfig = getOrientDBConfig();
+            orientDBServer.startup(serverConfig);
+        } catch (Exception ex) {
+            logger.warn("Could not start OrientDB embedded server, service disabled.", ex);
+            throw ex;
+        }
     }
     
     @Deactivate
     private void deactivate(Map<String, Object> config) {
-        EmbeddedOServer.stopEmbedded();
-        logger.debug("Embedded DB server stopped.");
+        if (orientDBServer != null) {
+            orientDBServer.shutdown();
+            logger.debug("Embedded DB server stopped.");
+        }
     }
-   
+
+    // TODO: make configurable
+    protected OServerConfiguration getOrientDBConfig() {
+        OServerConfiguration configuration = new OServerConfiguration();
+        
+        configuration.handlers = new ArrayList<OServerHandlerConfiguration>();
+        OServerHandlerConfiguration handler = new OServerHandlerConfiguration();
+        handler.clazz = "com.orientechnologies.orient.server.handler.distributed.ODistributedServerManager";
+        configuration.handlers.add(handler);
+        handler.parameters = new OServerParameterConfiguration[] {
+                new OServerParameterConfiguration("name", "default"),
+                new OServerParameterConfiguration("security.algorithm", "Blowfish"),
+                new OServerParameterConfiguration("network.multicast.address", "235.1.1.1"),
+                new OServerParameterConfiguration("network.multicast.port", "2424"),
+                new OServerParameterConfiguration("network.multicast.heartbeat", "10"),
+                new OServerParameterConfiguration("server.update.delay", "5000"),
+                new OServerParameterConfiguration("server.electedForLeadership", "true"),
+                new OServerParameterConfiguration("security.key", "hw3CgjSzqm8I/axu"),
+        };
+
+        configuration.network = new OServerNetworkConfiguration();
+        configuration.network.protocols = new ArrayList<OServerNetworkProtocolConfiguration>();
+        OServerNetworkProtocolConfiguration protocol1 = new OServerNetworkProtocolConfiguration();
+        protocol1.name = "binary";
+        protocol1.implementation = "com.orientechnologies.orient.server.network.protocol.binary.ONetworkProtocolBinary";
+        configuration.network.protocols.add(protocol1);
+        OServerNetworkProtocolConfiguration protocol2 = new OServerNetworkProtocolConfiguration();
+        protocol2.name = "http";
+        protocol2.implementation = "com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb";
+        configuration.network.protocols.add(protocol2);
+        OServerNetworkProtocolConfiguration protocol3 = new OServerNetworkProtocolConfiguration();
+        protocol3.name = "distributed";
+        protocol3.implementation = "com.orientechnologies.orient.server.network.protocol.distributed.ONetworkProtocolDistributed";
+        configuration.network.protocols.add(protocol3);        
+
+        configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>();
+        OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
+        listener1.ipAddress = "127.0.0.1";
+        listener1.portRange = "2424-2430";
+        listener1.protocol = "distributed";
+        configuration.network.listeners.add(listener1);
+        OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
+        listener2.ipAddress = "127.0.0.1";
+        listener2.portRange = "2480-2490";
+        listener2.protocol = "http";
+        OServerCommandConfiguration command1 = new OServerCommandConfiguration();
+        command1.pattern = "POST|*.action GET|*.action";
+        command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
+        command1.parameters = null; // TODO: <temporary disable> new OServerEntryConfiguration[0];
+        listener2.commands = new OServerCommandConfiguration[] {
+                command1
+        };
+        listener2.parameters = new OServerParameterConfiguration[0];
+        configuration.network.listeners.add(listener2);
+        
+        OServerStorageConfiguration storage1 = new OServerStorageConfiguration();
+        storage1.name = "temp";
+        storage1.path = "memory:temp";
+        storage1.userName = "admin";
+        storage1.userPassword = "admin";
+        storage1.loadOnStartup = true;
+        OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
+        storage2.name = "openidm";
+        storage2.path = "local:./db/openidm";
+        storage2.userName = "admin";
+        storage2.userPassword = "admin";
+        storage2.loadOnStartup = true;
+        configuration.storages = new OServerStorageConfiguration[] {
+                storage1,
+                storage2
+        };
+        configuration.users = new OServerUserConfiguration[] {
+                new OServerUserConfiguration("root", "3358BE3413F53E0D3DDA03C95C0A3F8357D0D160F8186EDA0C191CE9A4FA271B", "*")
+        };
+        configuration.properties = null; /* disabled new OServerEntryConfiguration[] {
+                new OServerEntryConfiguration("server.cache.staticResources", "false"),
+                new OServerEntryConfiguration("log.console.level", "info"),
+                new OServerEntryConfiguration("log.file.level", "fine")
+                
+        };*/
+
+        return configuration;
+    }
+
 }
