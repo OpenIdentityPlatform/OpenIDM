@@ -11,8 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011 ForgeRock AS.
+ * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.script.javascript;
