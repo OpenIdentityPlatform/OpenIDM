@@ -23,8 +23,14 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
@@ -33,6 +39,9 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.NotFoundException;
@@ -41,7 +50,11 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepositoryService; 
+import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
+import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
+
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.exception.OConcurrentModificationException;
@@ -62,6 +75,9 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 public class OrientDBRepoService implements RepositoryService {
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
 
+    // Keys in the JSON configuration
+    final static String CONFIG_QUERIES = "queries";
+    
     ODatabaseDocumentPool pool;
 
     // TODO make configurable
@@ -73,6 +89,8 @@ public class OrientDBRepoService implements RepositoryService {
 
     // TODO: evaluate use of Guice instead
     PredefinedQueries predefinedQueries = new PredefinedQueries();
+    Queries queries = new Queries();
+    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     
     /**
      * Gets an object from the repository by identifier. The returned object is not validated 
@@ -84,6 +102,7 @@ public class OrientDBRepoService implements RepositoryService {
      * @param id the identifier of the object to retrieve from the object set.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
+     * @throws BadRequestException if the passed identifier is invalid
      * @return the requested object.
      */
     public Map<String, Object> read(String fullId) throws ObjectSetException {
@@ -147,26 +166,26 @@ public class OrientDBRepoService implements RepositoryService {
             newDoc.save();
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("create for id: {} doc: {}", fullId, newDoc);
-          } catch (OIndexException ex) {
-              // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
-              throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
-          } catch (com.orientechnologies.orient.core.exception.ODatabaseException ex) {
-              // Because the OpenIDM ID is defined as unique, duplicate inserts must fail. 
-              // OrientDB may wrap the IndexException root cause.
-              if (isCauseIndexException(ex, 10)) {
-                  throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
-                          + ex.getMessage(), ex);
-              } else {
-                  throw ex;
-              }
-          } catch (RuntimeException e){
-              throw e;
-          } finally {
-              if (db != null) {
-                  db.close();
-                  pool.release(db);
-              }
-          }
+        } catch (OIndexException ex) {
+            // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
+            throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
+        } catch (com.orientechnologies.orient.core.exception.ODatabaseException ex) {
+            // Because the OpenIDM ID is defined as unique, duplicate inserts must fail. 
+            // OrientDB may wrap the IndexException root cause.
+            if (isCauseIndexException(ex, 10)) {
+                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
+                        + ex.getMessage(), ex);
+            } else {
+                throw ex;
+            }
+        } catch (RuntimeException e){
+            throw e;
+        } finally {
+            if (db != null) {
+                db.close();
+                pool.release(db);
+            }
+        }
     }
     
     /**
@@ -185,6 +204,7 @@ public class OrientDBRepoService implements RepositoryService {
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws PreconditionFailedException if version did not match the existing object in the set.
+     * @throws BadRequestException if the passed identifier is invalid
      */
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
         
@@ -246,7 +266,7 @@ public class OrientDBRepoService implements RepositoryService {
         int ver = DocumentUtil.parseVersion(rev); // This throws ConflictException if parse fails
         
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-        try{
+        try {
             db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
@@ -258,19 +278,18 @@ public class OrientDBRepoService implements RepositoryService {
             db.delete(existingDoc); 
             db.commit();
             logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
-          } catch (OConcurrentModificationException ex) {  
-              db.rollback();
-              throw new PreconditionFailedException("Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.", ex);
-          } catch (RuntimeException e){
-              db.rollback();
-              throw e;
-          } finally {
-              System.out.println("db = " + db);
-              if (db != null) {
-                  db.close();
-                  pool.release(db);
-              }
-          }
+        } catch (OConcurrentModificationException ex) {  
+            db.rollback();
+            throw new PreconditionFailedException("Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval.", ex);
+        } catch (RuntimeException e){
+            db.rollback();
+            throw e;
+        } finally {
+            if (db != null) {
+                db.close();
+                pool.release(db);
+            }
+        }
     }
 
     /**
@@ -294,16 +313,61 @@ public class OrientDBRepoService implements RepositoryService {
      * Performs the query on the specified object and returns the associated results.
      * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
+     * The query result is a JSON object structure composed of basic Java types. 
+     * 
+     * The returned map is structured as follow: 
+     * - The top level map contains meta-data about the query, plus an entry with the actual result records.
+     * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
      * @param id identifies the object to query.
      * @param params the parameters of the query to perform.
-     * @return the query results object.
+     * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found. 
+     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
+     * configured, a query expression that is invalid, or missing query substitution tokens.
      * @throws ForbiddenException if access to the object or specified query is forbidden.
      */
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        return null;
+    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
+        // TODO: replace with common utility
+        String type = fullId; 
+        if (fullId != null && fullId.startsWith("/")) {
+            type = fullId.substring(1);
+            logger.trace("Full id: {} Extracted type: {}", fullId, type);
+        }
+        
+        Map<String, Object> result = new HashMap<String, Object>();
+        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        try {
+            List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
+            result.put(QueryConstants.QUERY_RESULT, docs);
+            long start = System.currentTimeMillis();
+            List<ODocument> queryResult = queries.query(type, params, db); 
+            long end = System.currentTimeMillis();
+            if (queryResult != null) {
+                long convStart = System.currentTimeMillis();
+                for (ODocument entry : queryResult) {
+                    Map<String, Object> convertedEntry = DocumentUtil.toMap(entry);
+                    docs.add(convertedEntry);
+                }
+                long convEnd = System.currentTimeMillis();
+                result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
+            }
+            result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end-start));
+            
+            if (logger.isDebugEnabled()) {
+                logger.debug("Query result contains {} records, took {} ms and took {} ms to convert result.",
+                        new Object[] {((Map) result.get(QueryConstants.QUERY_RESULT)).size(),
+                        result.get(QueryConstants.STATISTICS_QUERY_TIME),
+                        result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
+            }
+        } finally {
+            if (db != null) {
+                db.close();
+                pool.release(db);
+            }
+        }
+        
+        return result;
     }
     
     // TODO: replace with common utility to handle ID, this is temporary
@@ -350,26 +414,45 @@ public class OrientDBRepoService implements RepositoryService {
         }    
         return false;
     }
-    
+
     @Activate
-    void activate(java.util.Map<String, Object> config) {
-        logger.trace("Activating Service with configuration {}", config);
+    void activate(ComponentContext compContext) { 
+        logger.debug("Activating Service with configuration {}", compContext);
+        
+        Map<String, Object> config = enhancedConfig.getConfiguration(compContext);
+        Map<String, String> queryMap = (Map<String, String>) config.get(CONFIG_QUERIES);
+        queries.setConfiguredQueries(queryMap);
+
         try {
             pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize);
             logger.info("Repository started.");
         } catch (RuntimeException ex) {
-            logger.warn("Initializing Database Pool failed", ex);
+            logger.warn("Initializing database pool failed", ex);
             throw ex;
         } 
     }
+
+    /* Currently rely on deactivate/activate to be called by DS if config changes instead
+    //@Modified
+    void modified(ComponentContext compContext) {
+        logger.trace("Modifying service {}", compContext);
+        logger.info("Configuration of repository changed.");
+        deactivate(compContext);
+        activate(compContext);
+    }
+    */
+
     
     @Deactivate
-    void deactivate(Map<String, Object> config) {
-        logger.trace("Deactivating Service {}", config);
+    void deactivate(ComponentContext compContext) { 
+        logger.debug("Deactivating Service {}", compContext);
         if (pool != null) {
-            pool.close();
+            try {
+                pool.close();
+            } catch (Exception ex) {
+                logger.warn("Closing pool reported exception ", ex);
+            }
         }
         logger.info("Repository stopped.");
     }
-   
 }

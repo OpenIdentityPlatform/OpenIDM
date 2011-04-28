@@ -28,6 +28,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
@@ -56,6 +57,12 @@ public class DBHelper {
      */
     public static ODatabaseDocumentPool initPool(String dbURL, String user, String password, int minSize, int maxSize) {
         logger.trace("Initializing DB Pool");
+        
+        // Enable transaction log
+// disabled until appears in orientdb snapshot        OGlobalConfiguration.TX_USE_LOG.setValue(true);
+        
+        // Immediate disk sync for commit 
+// disabled until appears in orientdb snapshot        OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
         
         checkDB(dbURL, user, password);
         

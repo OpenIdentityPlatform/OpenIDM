@@ -25,16 +25,23 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.RepositoryService; 
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
+
+import static org.mockito.Mockito.*;
+
+import org.osgi.service.component.ComponentContext;
 
 import org.testng.annotations.*;
 
@@ -48,14 +55,18 @@ import static org.fest.assertions.MapAssert.entry;
 public class RepoServiceFunctionalTest {
 
     RepositoryService repo;
-    java.util.Map<String, Object> config;
+    ComponentContext mockContext;
     
     @BeforeClass
     public void activateService() {
         // TODO: Run in embedded felix?
         repo = new OrientDBRepoService();
         ((OrientDBRepoService)repo).dbURL = "local:./target/testdb";
-        ((OrientDBRepoService)repo).activate(config);
+        
+        mockContext = mock(ComponentContext.class);
+        Dictionary config = getQueryConfig();
+        when(mockContext.getProperties()).thenReturn(config);
+        ((OrientDBRepoService)repo).activate(mockContext);
     }
      
     @Test(groups = {"repo"})
@@ -119,7 +130,7 @@ public class RepoServiceFunctionalTest {
     }
     
     @Test(groups = {"repo"}, expectedExceptions = PreconditionFailedException.class)
-    public void dupplicateCreate() throws ObjectSetException {
+    public void duplicateCreate() throws ObjectSetException {
         String uuid = "ccf01ec0-66e0-11e0-ae3e-0800200c9a68";
         String id = "/managed/user/" + uuid;
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
@@ -131,7 +142,8 @@ public class RepoServiceFunctionalTest {
                 entry(DocumentUtil.TAG_REV, "0"));
         
         repo.create(id, obj); // Must detect duplicate
-        assertTrue(false, "Create with duplicate IDs must fail.");
+        assertTrue(false, "Create with duplicate IDs must fail, but did not for id " + id 
+                + ". Second result: " + obj);
         
     }
     
@@ -169,7 +181,6 @@ public class RepoServiceFunctionalTest {
         assertNotNull(retrievedHome, "home map entry null");
         retrievedHome.put("city", "Seal Beach");
         retrievedHome.remove("street");
-        
         repo.update(id, (String) objToUpdate.get(DocumentUtil.TAG_REV), objToUpdate);
         
         Map<String, Object> result = repo.read(id);
@@ -297,11 +308,166 @@ public class RepoServiceFunctionalTest {
         assertTrue(false, "Delete of changed object must fail, but did not.");
     }
     
+    // Test Queries
+
+    String queryUuid1 = "inlinequery-66e0-11e0-ae3e-0800200c9bb1";
+    String queryUuid2 = "inlinequery-66e0-11e0-ae3e-0800200c9bb2";
+    String queryUuid3 = "inlinequery-66e0-11e0-ae3e-0800200c9bb3";
+    String queryUuid4 = "inlinequery-66e0-11e0-ae3e-0800200c9bb4";
+    String queryUuid5 = "inlinequery-66e0-11e0-ae3e-0800200c9bb5";
+    
+    public Dictionary getQueryConfig() {
+        Dictionary config = new java.util.Hashtable();
+        config.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, 
+                "{" +
+                "    \"" + OrientDBRepoService.CONFIG_QUERIES + "\" : {" +
+                "        \"query-without-token\" : \"select * from managed/user where lastname like 'Eglo%' and test = 'inlinequery'\"," +
+                "        \"query-with-where-token\" : \"select * from managed/user where lastname like 'Eglo%' and test = ${querytype}\"," +
+                "        \"query-with-from-token\" : \"select * from ${_resource} where lastname like '${lastname}%' and test = '${querytype}'\"" +
+                "    }" +
+                "}");
+        
+        return config;
+    }
+    
+    @Test(groups = {"repo"})
+    public void populateQueryData() throws ObjectSetException {
+        Map userEx = new HashMap();
+        userEx.put("firstname", "Cloe");
+        userEx.put("lastname", "Egli");
+        userEx.put("test", "inlinequery");
+        repo.create("/managed/user/" + queryUuid1, userEx);
+        userEx.clear();
+        
+        userEx.put("firstname", "Andi");
+        userEx.put("lastname", "Egloff");
+        userEx.put("test", "inlinequery");
+        repo.create("/managed/user/" + queryUuid2, userEx);
+        userEx.clear();
+        
+        userEx.put("firstname", "Dorothy");
+        userEx.put("lastname", "Smorothy");
+        userEx.put("test", "inlinequery");
+        repo.create("/managed/user/" + queryUuid3, userEx);
+        userEx.clear();
+        
+        userEx.put("firstname", "Zoe");
+        userEx.put("lastname", "Egloff");
+        userEx.put("test", "inlinequery");
+        repo.create("/managed/user/" + queryUuid4, userEx);
+        userEx.clear();
+
+        userEx.put("firstname", "Cloe");
+        userEx.put("lastname", "Eglolof");
+        userEx.put("test", "inlinequery");
+        repo.create("/managed/user/" + queryUuid5, userEx);
+        userEx.clear();
+    }
+
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    public void inlineQuery() throws ObjectSetException {
+        Map params = new HashMap();
+        //params.put("firstname", "Zebra");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = 'inlinequery'");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+    
+// TODO: Work with OrientDB team as prepared statement seems to have side effects, e.g. the duplicateCreate test 
+    @Test(enabled = false, groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    public void inlineQueryWithWhereToken() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = ${querytype} ");
+        // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
+        // params.put("query-expression", "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    public void inlineQueryWithFromToken() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from ${_resource} where lastname like '${lastname}%' and test = '${querytype}'");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    public void configuredQuery() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put(QueryConstants.QUERY_ID, "query-without-token");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+    
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    public void configuredQueryWithWhereToken() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_ID, "query-with-where-token");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+
+    
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    public void configuredQueryWithFromToken() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_ID, "query-with-from-token");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+
+    // Test ideas: 
+    // - nested doc query
+    // - fields token substitution when supported
+    // - check exception - invalid query id
+    // - check exception - missing query token
+    // - check exception - invalid query expression
+    // Test pre-defined query
+
     
     @AfterClass
     public void deactivateService() {
         if (repo != null) {
-            ((OrientDBRepoService)repo).deactivate(config);
+            ((OrientDBRepoService)repo).deactivate(mockContext);
         }
     }
 }
