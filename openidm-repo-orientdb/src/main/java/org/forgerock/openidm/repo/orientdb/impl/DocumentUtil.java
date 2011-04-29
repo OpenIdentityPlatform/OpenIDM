@@ -30,8 +30,10 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 import org.forgerock.openidm.objset.ConflictException;
 import org.slf4j.Logger;
@@ -66,6 +68,8 @@ public class DocumentUtil  {
     /**
      * Convert to JSON object structures (akin to simple binding), 
      * composed of the basic Java types: {@link Map}, {@link List}, {@link String}, {@link Number}, {@link Boolean}.
+     * This may change the objects in the passed doc, it is not safe to use doc contents after calling this method.
+     * 
      * @param doc the OrientDB document to convert
      * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
      * @return the doc converted into maps, lists, java types; or null if the doc was null
@@ -84,15 +88,9 @@ public class DocumentUtil  {
                     logger.trace("Setting revision to {}", revision);
                     result.put(TAG_REV, revision);
                 } else {
-                    // Handle embedded document
-                    if (value instanceof ODocument) {
-                        logger.trace("Converting embedded ODocument {} to map ", value);
-                        value = DocumentUtil.toMap((ODocument)value, false);
-                    } else if (value instanceof com.orientechnologies.orient.core.id.ORID) {
-                        // OrientDB should have resolved to an ODocument, might indicate a bug in OrientDB
-                        logger.warn("Unexpected value of type ORecordId in field {} {}. Returning as String.", key, value);
-                        value = value.toString();
-                    }
+                    // TODO: optimization switch: if we know that no embedded ODocuments are used 
+                    // (i.e. only embedded Maps, Lists) then we would not need to traverse the whole graph
+                    value = asSimpleBinding(value);
                     logger.trace("Map setting {} to value {}", key, value);
                     result.put(key, value);
                 }
@@ -101,6 +99,86 @@ public class DocumentUtil  {
         logger.trace("Converted document {} to {}", doc, result);
         return result;
     }
+    
+    /**
+     * Recursively ensure that the passed type is represented
+     * or converted to JSON object model simple binding types,
+     * i.e. ODocument to Map, Set to List 
+     * 
+     * Modifies the passed in objToClean where possible (List, Map), 
+     * returns new types where it is not (ODocument, Set)
+     * 
+     * @param objToClean
+     * @return the object in JSON object model representation
+     */
+    @SuppressWarnings("rawtypes")
+    private static Object asSimpleBinding(Object objToClean) {
+        if (objToClean instanceof ODocument) {
+            logger.trace("Converting embedded ODocument {} to map ", objToClean);
+            return DocumentUtil.toMap((ODocument) objToClean, false); 
+        } else if (objToClean instanceof List) {
+            logger.trace("Checking embedded list {} ", objToClean);
+            return toSimpleModel((List) objToClean);
+        } else if (objToClean instanceof Set) {
+            logger.trace("Converting embedded Set {} ", objToClean);
+            return toSimpleModel((Set) objToClean);
+        } else if (objToClean instanceof Map) {
+            logger.trace("Checking embedded map {} ", objToClean);
+            return toSimpleModel((Map) objToClean);
+        } else if (objToClean instanceof com.orientechnologies.orient.core.id.ORID) {
+            // OrientDB should have resolved to an ODocument, might indicate a bug in OrientDB
+            logger.warn("Unexpected value of type ORecordId in document. Returning as String.{}", objToClean);
+            return objToClean.toString();
+        } else {
+            return objToClean;
+        }
+    }
+    
+    /**
+     * Iteratively convert contents as necessary to simple model 
+     * @param listToClean list to modify if necessary
+     * @return the modified list
+     */
+    private static List toSimpleModel(List listToClean) {
+        ListIterator<Object> listIter = listToClean.listIterator();
+        while(listIter.hasNext()) {
+            Object listEntry = listIter.next();
+            if (listEntry instanceof ODocument || listEntry instanceof Set) {
+                // Replace the entry with new type
+                listIter.set(asSimpleBinding(listEntry)); 
+            } else {
+                // Replace directly in the entry
+                asSimpleBinding(listEntry);
+            } 
+        }
+        return listToClean;
+    }
+
+    /**
+     * Iteratively convert contents as necessary to simple model 
+     * @param setToClean set to convert to List and modify if necessary
+     * @return the modified list
+     */
+    private static List toSimpleModel(Set setToClean) {
+        // In JSON there are ordered lists, not Set
+        List replacementList = new ArrayList();
+        for (Object setEntry : setToClean) {
+            replacementList.add(asSimpleBinding(setEntry));
+        }
+        return replacementList;
+    }
+
+    /**
+     * Iteratively convert contents as necessary to simple model 
+     * @param mapToClean map to modify if necessary
+     * @return the modified map
+     */
+    private static Map toSimpleModel(Map<String, Object> mapToClean) {
+        for(Map.Entry<String, Object> entry : mapToClean.entrySet()) {
+            entry.setValue(asSimpleBinding(entry.getValue()));
+        }
+        return mapToClean;
+    }    
     
     /**
      * Convert from JSON object structures (akin to simple binding), 

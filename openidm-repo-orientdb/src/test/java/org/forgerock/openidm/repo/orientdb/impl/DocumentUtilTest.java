@@ -30,8 +30,10 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.forgerock.openidm.objset.ConflictException;
 
@@ -120,7 +122,7 @@ public class DocumentUtilTest {
                 .includes(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
     }
     
-    @Test(enabled=false) // TODO: list support work in progress
+    @Test
     public void embeddedListToMap() {
 
         ODocument doc = new ODocument();
@@ -144,7 +146,7 @@ public class DocumentUtilTest {
         Object addrResult = result.get("addresses");
         assertNotNull(addrResult, "addresses map entry null");
         assertThat(addrResult).isInstanceOf(List.class);
-        List addr = (List)result;
+        List addr = (List)addrResult;
         assertThat(addr)
                 .hasSize(2);
 
@@ -159,9 +161,110 @@ public class DocumentUtilTest {
                 entry("type", "business"),
                 entry("street", "Wall st."),
                 entry("city", "New York")); 
-
     }
+    
+    @Test
+    public void deepNestingToMap() {
 
+        ODocument doc = new ODocument();
+        doc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY, "client-assigned-id");
+        List<ODocument> detail = new ArrayList<ODocument>();
+        List<ODocument> addresses = new ArrayList<ODocument>();
+        ODocument status1 = new ODocument("inventory", 10);
+        ODocument status2 = new ODocument("inventory", 20);
+        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Franciso").field("status", status1, OType.EMBEDDED));
+        addresses.add(new ODocument().field("street", "Wall st.").field("city", "New York").field("status", status2, OType.EMBEDDED));
+        detail.add(new ODocument().field("locations", addresses, OType.EMBEDDED));
+        
+        doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
+        
+        Map result = DocumentUtil.toMap(doc);
+        
+        assertThat(result).includes(
+                entry(DocumentUtil.TAG_ID, "client-assigned-id"),
+                entry(DocumentUtil.TAG_REV, "0"));
+
+        Map resultWidgets = (Map) result;
+        
+        Map resultWidget = (Map) resultWidgets.get("widget");
+        List resultDetails = (List) resultWidget.get("detail");
+        Map resultDetail1 = (Map) resultDetails.get(0);
+        List resultLocations = (List) resultDetail1.get("locations");
+        Map resultAddress2 = (Map) resultLocations.get(1);
+        System.out.println(resultAddress2);
+        Map resultStatus = (Map) resultAddress2.get("status");
+        Integer resultInventory = (Integer) resultStatus.get("inventory");
+        assertEquals(resultInventory.intValue(), 20);
+    }    
+    
+    @Test
+    public void deepNestingWithSetToMap() {
+
+        ODocument doc = new ODocument();
+        doc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY, "client-assigned-id");
+        Set<ODocument> detail = new HashSet<ODocument>();
+        Set<ODocument> addresses = new HashSet<ODocument>();
+        ODocument status1 = new ODocument("inventory", 10);
+        ODocument status2 = new ODocument("inventory", 20);
+        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Franciso").field("status", status1, OType.EMBEDDED));
+        detail.add(new ODocument().field("locations", addresses, OType.EMBEDDED));
+        
+        doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
+        
+        Map result = DocumentUtil.toMap(doc);
+        
+        assertThat(result).includes(
+                entry(DocumentUtil.TAG_ID, "client-assigned-id"),
+                entry(DocumentUtil.TAG_REV, "0"));
+
+        Map resultWidgets = (Map) result;
+        
+        Map resultWidget = (Map) resultWidgets.get("widget");
+        List resultDetails = (List) resultWidget.get("detail");
+        Map resultDetail1 = (Map) resultDetails.get(0);
+        List resultLocations = (List) resultDetail1.get("locations");
+        Map resultAddress1 = (Map) resultLocations.get(0);
+        System.out.println(resultAddress1);
+        Map resultStatus = (Map) resultAddress1.get("status");
+        Integer resultInventory = (Integer) resultStatus.get("inventory");
+        assertEquals(resultInventory.intValue(), 10);
+    }   
+
+    @Test
+    public void deepNestingMixedODocAndMapToMap() {
+
+        ODocument doc = new ODocument();
+        doc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY, "client-assigned-id");
+        List<Map<String, Object>> detail = new ArrayList<Map<String, Object>>();
+        List<ODocument> addresses = new ArrayList<ODocument>();
+        ODocument status1 = new ODocument("inventory", 10);
+        ODocument status2 = new ODocument("inventory", 20);
+        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Franciso").field("status", status1, OType.EMBEDDED));
+        addresses.add(new ODocument().field("street", "Wall st.").field("city", "New York").field("status", status2, OType.EMBEDDED));
+        Map<String, Object> locationsMap = new HashMap<String, Object>();
+        locationsMap.put("locations", addresses);
+        detail.add(locationsMap);
+        
+        doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
+        
+        Map result = DocumentUtil.toMap(doc);
+        
+        assertThat(result).includes(
+                entry(DocumentUtil.TAG_ID, "client-assigned-id"),
+                entry(DocumentUtil.TAG_REV, "0"));
+
+        Map resultWidgets = (Map) result;
+        
+        Map resultWidget = (Map) resultWidgets.get("widget");
+        List resultDetails = (List) resultWidget.get("detail");
+        Map resultDetail1 = (Map) resultDetails.get(0);
+        List resultLocations = (List) resultDetail1.get("locations");
+        Map resultAddress2 = (Map) resultLocations.get(1);
+        System.out.println(resultAddress2);
+        Map resultStatus = (Map) resultAddress2.get("status");
+        Integer resultInventory = (Integer) resultStatus.get("inventory");
+        assertEquals(resultInventory.intValue(), 20);
+    }    
     
     @Test
     public void mapToDocNullTest() throws ConflictException {
