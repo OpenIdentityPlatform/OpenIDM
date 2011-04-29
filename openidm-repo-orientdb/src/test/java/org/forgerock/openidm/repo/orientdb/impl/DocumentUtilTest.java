@@ -432,8 +432,8 @@ public class DocumentUtilTest {
                 .hasSize(2);
     }    
     
-    @Test(enabled=false) // TODO: list/set support work in progress
-    public void listToEmbeddedList() {
+    @Test
+    public void listToEmbeddedList() throws ConflictException {
     
         Map<String, Object> map = new HashMap<String, Object>();
         map.put(DocumentUtil.TAG_ID, "client-assigned-id");
