@@ -435,6 +435,38 @@ public class DocumentUtilTest {
     @Test(enabled=false) // TODO: list/set support work in progress
     public void listToEmbeddedList() {
     
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
+        map.put("firstname", "John");
+        map.put("lastname", "Doe");
+        
+        List<Object> cities = new ArrayList<Object>();
+        cities.add("Paris");
+        cities.add("St. Louis");
+        map.put("cities", cities);
+        
+        Map<String, Object> phone = new HashMap<String, Object>();
+        phone.put("home","555-666-7777");
+        phone.put("mobile", "555-111-2222");
+        map.put("phonenumbers", phone);
+        
+        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        
+        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
+        assertEquals(result.field("firstname"), "John", "unexpected firstname");
+        assertEquals(result.field("lastname"), "Doe", "unexpected lastname");
+        assertEquals(result.getVersion(), 0, "Version not as expected");
+        
+        Object resultCities = result.field("cities");
+        assertThat(resultCities).isInstanceOf(List.class);
+        assertThat((List)resultCities).containsOnly("Paris", "St. Louis");
+
+        ODocument phonenumbers = (ODocument)result.field("phonenumbers");
+        assertNotNull(phonenumbers, "phonenumbers map entry null");
+        assertEquals(phonenumbers.field("home"), "555-666-7777", "unexpected home phone");
+        assertEquals(phonenumbers.field("mobile"), "555-111-2222", "unexpected mobile phone");
+        assertThat((ODocument)phonenumbers)
+                .hasSize(2);
     }
     
     @Test(expectedExceptions = ConflictException.class)
