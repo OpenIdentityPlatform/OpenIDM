@@ -370,7 +370,7 @@
          "CreateApiOp":{
             "objectFeatures":{
                "user":{
-                  "operationOptionInfos":{
+                  "operationOptionInfo":{
                      "$schema":"http://json-schema.org/draft-03/schema#",
                      "id":"http://openidm.forgerock.org/openidm/system/_configuration/1AB5045E-607C-11E0-95F8-77CADFD72085/optionsByOperation/CreateApiOp/operationOptionInfos",
                      "type":"object",
@@ -389,7 +389,7 @@
                },
                "group":{
                   "denied":true,
-                  "onDeny":"error"
+                  "onDeny":"THROW_ERROR"
                }
             }
          },
@@ -397,16 +397,16 @@
             "objectFeatures":{
                "user":{
                   "denied":true,
-                  "onDeny":"ignore"
+                  "onDeny":"DO_NOTHING"
                },
                "group":{
                   "denied":true,
-                  "onDeny":"error"
+                  "onDeny":"THROW_ERROR"
                }
             }
          },
          "GetApiOp":{
-            "operationOptionInfos":{
+            "operationOptionInfo":{
                "$schema":"http://json-schema.org/draft-03/schema#",
                "id":"http://openidm.forgerock.org/openidm/system/_configuration/1AB5045E-607C-11E0-95F8-77CADFD72085/optionsByOperation/GetApiOp/operationOptionInfos",
                "type":"object",

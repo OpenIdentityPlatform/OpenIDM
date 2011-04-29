@@ -118,6 +118,7 @@ public class ConnectorUtil {
     private static final Map<String, Class> typeMap = new HashMap<String, Class>(43);
     public static final String OPENICF_CONNECTOR_REF = "connectorRef";
     public static final String OPENICF_OBJECT_TYPES = "objectTypes";
+    public static final String OPENICF_OPERATION_OPTIONS = "operationOptions";
 
     static {
         operationMap.put(OperationType.CREATE, CreateApiOp.class);
@@ -509,19 +510,64 @@ public class ConnectorUtil {
         for (Map.Entry<OperationType, Class<? extends APIOperation>> e : operationMap.entrySet()) {
 
         }
-        result.put("operationOptions", optionsByOperation);
+        result.put(OPENICF_OPERATION_OPTIONS, optionsByOperation);
 
         return result;
     }
 
 
-    public static Map<String, ConnectorObjectOptions> getOperationOptionConfiguration(JsonNode configuration) throws JsonNodeException {
-//        JsonNode operationOptions = configuration.get("operationOptions").expect(Map.class);
-//        if (!operationOptions.isNull()) {
-//            for (Map.Entry<OperationType, Class<? extends APIOperation>> e : operationMap.entrySet()) {
-//
-//            }
-//        }
+    public static Map<String, ConnectorObjectOptions> getOperationOptionConfiguration(JsonNode configuration) throws JsonNodeException, SchemaException {
+        JsonNode operationOptions = configuration.get(OPENICF_OPERATION_OPTIONS).expect(Map.class);
+        if (!operationOptions.isNull()) {
+            Map<String, ConnectorObjectOptions> operationOptionConfigurationMap = new HashMap<String, ConnectorObjectOptions>();
+            Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperationOptionMap = new HashMap<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>>();
+            Map<Class<? extends APIOperation>, OperationOptionInfoHelper> globalOperationOptionMap = new HashMap<Class<? extends APIOperation>, OperationOptionInfoHelper>();
+
+            for (Map.Entry<OperationType, Class<? extends APIOperation>> entry : operationMap.entrySet()) {
+                JsonNode operation = operationOptions.get(entry.getValue().getSimpleName()).expect(Map.class);
+
+                JsonNode operationOptionInfos = operation.get("operationOptionInfos").expect(Map.class);
+                OperationOptionInfoHelper globalOperationOptionInfoHelper = null;
+                if (operationOptionInfos.size() > 0) {
+                    globalOperationOptionInfoHelper = new OperationOptionInfoHelper(operationOptionInfos);
+                    globalOperationOptionMap.put(entry.getValue(), globalOperationOptionInfoHelper);
+                }
+
+                JsonNode objectFeatures = operation.get("objectFeatures").expect(Map.class);
+                if (objectFeatures.size() > 0) {
+                    for (String objectOperationName : objectFeatures.asMap().keySet()) {
+                        JsonNode objectOperationConfig = objectFeatures.get(objectOperationName).expect(Map.class);
+                        OperationOptionInfoHelper operationOptionInfoHelper;
+                        if (globalOperationOptionInfoHelper != null) {
+                            operationOptionInfoHelper = new OperationOptionInfoHelper(objectOperationConfig, globalOperationOptionInfoHelper);
+                        } else {
+                            operationOptionInfoHelper = new OperationOptionInfoHelper(objectOperationConfig);
+                        }
+
+                        if (objectOperationOptionMap.containsKey(objectOperationName)) {
+                            objectOperationOptionMap.get(objectOperationName).put(entry.getValue(), operationOptionInfoHelper);
+                        } else {
+                            Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operationMap = new HashMap<Class<? extends APIOperation>, OperationOptionInfoHelper>();
+                            operationMap.put(entry.getValue(), operationOptionInfoHelper);
+                            objectOperationOptionMap.put(objectOperationName, operationMap);
+                        }
+                    }
+                }
+            }
+            for (Map.Entry<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> objectOperation : objectOperationOptionMap.entrySet()) {
+                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> objectOperationsMap = objectOperation.getValue();
+
+                for (Map.Entry<Class<? extends APIOperation>, OperationOptionInfoHelper> globalOperation : globalOperationOptionMap.entrySet()) {
+                    if (!objectOperationsMap.containsKey(globalOperation.getKey())) {
+                        objectOperationsMap.put(globalOperation.getKey(), globalOperation.getValue());
+                    }
+                }
+
+                ConnectorObjectOptions connectorObjectOptions = new ConnectorObjectOptions(new OperationOptionInfoHelper(new JsonNode(new HashMap())), objectOperationsMap);
+                operationOptionConfigurationMap.put(objectOperation.getKey(), connectorObjectOptions);
+            }
+            return operationOptionConfigurationMap;
+        }
         return Collections.emptyMap();
     }
 
