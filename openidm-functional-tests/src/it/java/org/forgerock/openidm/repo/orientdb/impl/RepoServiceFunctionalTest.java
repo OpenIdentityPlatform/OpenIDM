@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -130,8 +131,7 @@ public class RepoServiceFunctionalTest {
         
     }
     
-// TODO: disabled whilst working with OrientDB team to resolve transient failures depending     
-    @Test(enabled = false, groups = {"repo"}, expectedExceptions = PreconditionFailedException.class)
+    @Test(enabled = true, groups = {"repo"}, expectedExceptions = PreconditionFailedException.class)
     @SuppressWarnings("unchecked")
     public void duplicateCreate() throws ObjectSetException {
         String uuid = "ccf01ec0-66e0-11e0-ae3e-0800200c9a68";
@@ -215,7 +215,6 @@ public class RepoServiceFunctionalTest {
                .includes(entry("street", "Business road"), entry("city", "Newport Beach"));
     }
 
-    // TODO: work with OrientDB team as seems to have side effects on duplicatCreate
     @Test(enabled = true, groups = {"repo"}, expectedExceptions = PreconditionFailedException.class)
     @SuppressWarnings("unchecked")
     public void updateChangedObject() throws ObjectSetException {
@@ -390,7 +389,6 @@ public class RepoServiceFunctionalTest {
         assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
     }
     
-// TODO: Work with OrientDB team as prepared statement seems to have side effects, e.g. the duplicateCreate test 
     @Test(enabled = true, groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
     @SuppressWarnings("unchecked")
     public void inlineQueryWithWhereToken() throws ObjectSetException {
@@ -399,7 +397,7 @@ public class RepoServiceFunctionalTest {
         params.put("querytype", "inlinequery");
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = ${querytype} ");
         // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
-        // params.put("query-expression", "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        //params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
         Map result = repo.query("/managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
@@ -408,6 +406,43 @@ public class RepoServiceFunctionalTest {
         assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
         assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
     }
+
+    // Enable this test once the OrientDB parser validation fix has propagated.
+    @Test(enabled = false, groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    @SuppressWarnings("unchecked")
+    public void inlineQueryWithNonSpaceWhereToken() throws ObjectSetException {
+        // OrientDB does not handle it if a token is not followed by space, e.g. :lastname%. Check we fall back onto manual token subst.
+        
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }
+    
+    @Test(enabled = true, groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    @SuppressWarnings("unchecked")
+    public void inlineQueryWithWildcardWhereToken() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo%");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname} and test = ${querytype} ");
+        // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
+        //params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }    
 
     @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
     @SuppressWarnings("unchecked")
@@ -472,14 +507,63 @@ public class RepoServiceFunctionalTest {
         assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
     }
 
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"}, expectedExceptions = BadRequestException.class )
+    @SuppressWarnings("unchecked")
+    public void invalidQueryId() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put(QueryConstants.QUERY_ID, "unknown-query-id");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        assertTrue(false, "Query with unknown ID should have failed but did not.");
+    }
+    
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"}, expectedExceptions = BadRequestException.class )
+    @SuppressWarnings("unchecked")
+    public void invalidQueryExpression() throws ObjectSetException {
+        // Unknown OrientDB document class
+        Map params = new HashMap();
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from unknown");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        assertTrue(false, "Query with unknown OrientDB document class should have failed but did not.");
+    }
+
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"}, expectedExceptions = BadRequestException.class )
+    @SuppressWarnings("unchecked")
+    public void invalidQueryExpression2() throws ObjectSetException {
+        // Syntax error in query definition
+        Map params = new HashMap();
+        params.put(QueryConstants.QUERY_EXPRESSION, "Sselect * Ffrom unknown");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        assertTrue(false, "Query with malformed query should have failed but did not.");
+    }
+    
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"}, expectedExceptions = BadRequestException.class )
+    @SuppressWarnings("unchecked")
+    public void missingQueryToken() throws ObjectSetException {
+        // Syntax error in query definition
+        Map params = new HashMap();
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from ${_resource} where lastname = ${undefined-token");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        assertTrue(false, "Query with undefined token should have failed but did not.");
+    }
+    
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"}, expectedExceptions = BadRequestException.class )
+    @SuppressWarnings("unchecked")
+    public void missingQueryIdOrExpression() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("querytype", "inlinequery");
+        Map result = repo.query("/managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        assertTrue(false, "Query with undefined token should have failed but did not.");
+    }
+    
     // Test ideas: 
     // - nested doc query
     // - fields token substitution when supported
-    // - check exception - invalid query id
-    // - check exception - missing query token
-    // - check exception - invalid query expression
-    // Test pre-defined query
-
     
     @AfterClass
     public void deactivateService() {

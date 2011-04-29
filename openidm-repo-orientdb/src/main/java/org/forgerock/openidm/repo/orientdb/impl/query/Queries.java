@@ -132,6 +132,10 @@ public class Queries {
                     throw new BadRequestException("Failed to resolve and parse the query " 
                             + foundQueryInfo.getQueryString() + " with params: " + params, firstTryEx);
                 }
+            } catch (IllegalArgumentException ex) {
+                // TODO: consider differentiating between bad configuration and bad request
+                throw new BadRequestException("Query is invalid: " 
+                        + foundQueryInfo.getQueryString() + " " + ex.getMessage(), ex);
             }
         }
         return result;
