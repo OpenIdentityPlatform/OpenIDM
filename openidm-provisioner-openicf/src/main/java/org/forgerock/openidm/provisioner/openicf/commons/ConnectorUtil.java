@@ -359,35 +359,37 @@ public class ConnectorUtil {
 
     public static void configureConfigurationProperties(JsonNode source, ConfigurationProperties target) throws JsonNodeException {
         source.required();
-        List<String> configPropNames = target.getPropertyNames();
-        for (Map.Entry<String, Object> e : source.asMap().entrySet()) {
-            if (!configPropNames.contains(e.getKey())) {
-                /*
-                * The connector's Configuration does not define this property.
-                */
-                continue;
-            }
-            ConfigurationProperty property = target.getProperty(e.getKey());
-            Class targetType = property.getType();
-            Object propertyValue = null;
-            if (targetType.isArray()) {
-                Class targetBaseType = targetType.getComponentType();
-                if (targetBaseType == byte.class || targetBaseType == char.class) {
-                    propertyValue = coercedTypeCasting(e.getValue(), targetType);
-                } else if (e.getValue() instanceof List) {
-                    List v = (List) e.getValue();
-                    propertyValue = Array.newInstance(targetBaseType, v.size());
-                    for (int i = 0; i < v.size(); i++) {
-                        Array.set(propertyValue, i, coercedTypeCasting(v.get(i), targetBaseType));
+        if (null != target) {
+            List<String> configPropNames = target.getPropertyNames();
+            for (Map.Entry<String, Object> e : source.asMap().entrySet()) {
+                if (!configPropNames.contains(e.getKey())) {
+                    /*
+                    * The connector's Configuration does not define this property.
+                    */
+                    continue;
+                }
+                ConfigurationProperty property = target.getProperty(e.getKey());
+                Class targetType = property.getType();
+                Object propertyValue = null;
+                if (targetType.isArray()) {
+                    Class targetBaseType = targetType.getComponentType();
+                    if (targetBaseType == byte.class || targetBaseType == char.class) {
+                        propertyValue = coercedTypeCasting(e.getValue(), targetType);
+                    } else if (e.getValue() instanceof List) {
+                        List v = (List) e.getValue();
+                        propertyValue = Array.newInstance(targetBaseType, v.size());
+                        for (int i = 0; i < v.size(); i++) {
+                            Array.set(propertyValue, i, coercedTypeCasting(v.get(i), targetBaseType));
+                        }
+                    } else {
+                        propertyValue = Array.newInstance(targetBaseType, 1);
+                        Array.set(propertyValue, 0, coercedTypeCasting(e.getValue(), targetBaseType));
                     }
                 } else {
-                    propertyValue = Array.newInstance(targetBaseType, 1);
-                    Array.set(propertyValue, 0, coercedTypeCasting(e.getValue(), targetBaseType));
+                    propertyValue = coercedTypeCasting(e.getValue(), targetType);
                 }
-            } else {
-                propertyValue = coercedTypeCasting(e.getValue(), targetType);
+                property.setValue(propertyValue);
             }
-            property.setValue(propertyValue);
         }
     }
 
@@ -848,8 +850,8 @@ public class ConnectorUtil {
                 if (sourceClass == Float.class || sourceClass == float.class) {
                     result = (T) source;
                     coerced = true;
-                } else  if (sourceClass == Double.class || sourceClass == double.class) {
-                    result = (T) new Float((Double)source);
+                } else if (sourceClass == Double.class || sourceClass == double.class) {
+                    result = (T) new Float((Double) source);
                     coerced = true;
                 } else if (sourceClass == int.class) {
                     result = (T) Float.valueOf((Integer.valueOf((Integer) source).floatValue()));
@@ -880,7 +882,7 @@ public class ConnectorUtil {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == String.class) {
-                    result = targetClazz.cast(Integer.valueOf((String) source));
+                    result = (T) Integer.valueOf((String) source);
                     coerced = true;
                 } else if (sourceClass == Float.class) {
                     result = targetClazz.cast(new Integer(((Float) source).intValue()));

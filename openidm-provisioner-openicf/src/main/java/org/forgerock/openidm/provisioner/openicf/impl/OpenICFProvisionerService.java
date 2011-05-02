@@ -229,14 +229,14 @@ public class OpenICFProvisionerService implements ProvisionerService {
             if (facade.getSupportedOperations().contains(GetApiOp.class)) {
                 if (helper.isOperationPermitted(GetApiOp.class)) {
                     //ConnectorObject connectorObject = helper.build(GetApiOp.class, complexId.getLocalId(), null);
-                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, (ConnectorObject)null, null);
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, (ConnectorObject) null, null);
                     ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());
                     return helper.build(connectorObject);
                 }
             } else if (facade.getSupportedOperations().contains(SearchApiOp.class)) {
                 if (helper.isOperationPermitted(SearchApiOp.class)) {
                     //ConnectorObject connectorObject = helper.build(SearchApiOp.class, complexId.getLocalId(), null);
-                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, (ConnectorObject)null, null);
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, (ConnectorObject) null, null);
                     Filter name = new EqualsFilter(new Name(complexId.getLocalId()));
                     facade.search(helper.getObjectClass(), name, helper.getResultsHandler(), operationOptionsBuilder.build());
 
@@ -363,7 +363,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
             try {
                 ConnectorObject connectorObject = helper.build(SearchApiOp.class, id, null);
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, connectorObject, null);
-                Filter filter = helper.build(params, params);
+                Filter filter = helper.build((Map<String, Object>) params.get("query"), (Map<String, Object>) params.get("params"));
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(connectorObject.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
             } catch (Exception e) {
                 TRACE.error("Error at Creating of {}", id, e);

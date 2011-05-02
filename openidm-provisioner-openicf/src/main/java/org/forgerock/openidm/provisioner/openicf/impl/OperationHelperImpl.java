@@ -31,6 +31,9 @@ import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
+import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
+import org.forgerock.openidm.provisioner.openicf.query.operators.BooleanOperator;
+import org.forgerock.openidm.provisioner.openicf.query.operators.Operator;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
@@ -40,6 +43,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
 
 /**
  * @author $author$
@@ -93,8 +98,10 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
     @Override
-    public Filter build(Map<String, Object> query, Map<String, Object> params) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception {
+        Map<String, Object> rootNode = (Map<String, Object>) query.get(getKey(query));
+        Operator operator = createOperator(rootNode, params);
+        return operator.createFilter();
     }
 
     @Override
@@ -189,5 +196,74 @@ public class OperationHelperImpl implements OperationHelper {
                 throw new IllegalArgumentException(e);
             }
         }
+    }
+
+        private Operator createOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
+
+        String nodeName = getKey(node);
+
+        if (isBooleanOperator(nodeName)) {
+
+            BooleanOperator booleanOperator = OperatorFactory.createBooleanOperator(nodeName);
+
+            List<Object> parts = (List<Object>) node.get(nodeName);
+
+            if (parts.size() < 2) {
+                throw new IllegalArgumentException("To few elements in the 'BooleanOperator'-object (" + parts.size() + "). Must be 2 or more");
+            }
+
+            for (Object part : parts) {
+                    Operator op = createOperator((Map<String, Object>) part, params);
+                    booleanOperator.addOperator(op);
+            }
+
+            return booleanOperator;
+
+        } else {
+            return createFunctionalOperator(node, params);
+        }
+    }
+
+    private Operator createFunctionalOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
+
+        String operatorName = getKey(node);
+
+        Map<String, Object> nodeValueMap = (Map<String, Object>) node.get(operatorName);
+
+        String field = (String) nodeValueMap.get("field");
+        List<String> values = (List<String>) nodeValueMap.get("values");
+
+        if (values == null) {
+            List<String> providedValues = (List<String>) params.get(field);
+
+            if (providedValues == null) {
+                throw new IllegalArgumentException("No predefined or provided values for property: " + field);
+            }
+
+            values = (List<String>) params.get(field);
+        }
+
+        Operator operator = OperatorFactory.createFunctionalOperator(operatorName,   objectClassInfoHelper.build( field, values));
+
+        return operator;
+    }
+
+    private boolean isBooleanOperator(String key) {
+        if (key.equals(OPERATOR_AND)
+                || key.equals(OPERATOR_OR)
+                || key.equals(OPERATOR_NOR)
+                || key.equals(OPERATOR_NAND)) {
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private String getKey(Map<String, Object> node) {
+        for (String s : node.keySet())
+            return s;
+
+        return null;
     }
 }

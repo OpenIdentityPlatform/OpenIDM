@@ -178,4 +178,17 @@ public class ObjectClassInfoHelper {
     public void resetUid(Uid uid, Map<String, Object> target) {
 
     }
+
+    public Attribute build(String attributeName, Object source) throws Exception {
+        for (AttributeInfoHelper attributeInfoHelper : attributes) {
+            if (attributeInfoHelper.getName().equals(attributeName)) {
+                return attributeInfoHelper.build(source);
+            }
+        }
+        if (source instanceof Collection) {
+            return AttributeBuilder.build(attributeName, (Collection) source);
+        } else {
+            return AttributeBuilder.build(attributeName, source);
+        }
+    }
 }

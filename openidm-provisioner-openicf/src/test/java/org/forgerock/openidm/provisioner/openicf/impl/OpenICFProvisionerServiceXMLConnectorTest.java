@@ -142,7 +142,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest {
     @Test(dependsOnMethods = {"testCreate"})
     public void testRead() throws Exception {
         for (String id : objectIDs) {
-            Map<String, Object> connectorObject = service.read("/system/xml"+id);
+            Map<String, Object> connectorObject = service.read("/system/xml" + id);
             Assert.assertNotNull(connectorObject);
         }
     }
@@ -162,8 +162,14 @@ public class OpenICFProvisionerServiceXMLConnectorTest {
 
     }
 
-    @Test
+    //@Test(dependsOnMethods = {"testCreate"})
     public void testQuery() throws Exception {
-
+        InputStream inputStream = OpenICFProvisionerServiceXMLConnectorTest.class.getResourceAsStream("/test/queryConnectorObjects.json");
+        Assert.assertNotNull(inputStream);
+        ObjectMapper mapper = new ObjectMapper();
+        List<Map<String, Object>> testInput = mapper.readValue(inputStream, List.class);
+        for (Map<String, Object> object : testInput) {
+            Map<String, Object> result = service.query("/system/xml/account/something", null);
+        }
     }
 }

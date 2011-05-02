@@ -149,11 +149,11 @@ public class AttributeInfoHelper {
         return attributeInfo;
     }
 
-    public Attribute build(Object source) throws IOException {
+    public Attribute build(Object source) throws Exception {
         return AttributeInfoHelper.build(attributeInfo, source);
     }
 
-    public static Attribute build(AttributeInfo attributeInfo, Object source) throws IOException {
+    public static Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
         if (attributeInfo.isMultiValued()) {
             return AttributeBuilder.build(attributeInfo.getName(), getMultiValue(source, attributeInfo.getType()));
         }
@@ -207,7 +207,17 @@ public class AttributeInfoHelper {
     private static <T> T getSingleValue(Object source, Class<T> clazz) throws IOException {
         if (null == source) {
             return null;
-        } else if ((source instanceof Collection) || source.getClass().isArray()) {
+        } else if ((source instanceof List)) {
+            List c = (List) source;
+            if (c.size() < 2) {
+                if (c.isEmpty()) {
+                    return null;
+                } else {
+                    return ConnectorUtil.coercedTypeCasting(c.get(0), clazz);
+                }
+            }
+            throw new IllegalArgumentException("Non multivalued argument has collection value");
+        } else if (source.getClass().isArray()) {
             throw new IllegalArgumentException("Non multivalued argument has collection value");
         } else {
             return ConnectorUtil.coercedTypeCasting(source, clazz);
