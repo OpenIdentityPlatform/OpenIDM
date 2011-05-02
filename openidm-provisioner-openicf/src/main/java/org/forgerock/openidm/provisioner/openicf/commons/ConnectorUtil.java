@@ -267,7 +267,7 @@ public class ConnectorUtil {
      * @return
      * @throws UnsupportedOperationException when the property value can not be converted to String.
      */
-    public static void configureObjectPoolConfiguration(JsonNode source, ObjectPoolConfiguration target) throws IOException, JsonNodeException {
+    public static void configureObjectPoolConfiguration(JsonNode source, ObjectPoolConfiguration target) throws JsonNodeException {
         Map<String, Object> poolConfiguration = source.asMap();
         if (null != poolConfiguration.get(OPENICF_MAX_OBJECTS)) {
             target.setMaxObjects(coercedTypeCasting(poolConfiguration.get(OPENICF_MAX_OBJECTS), int.class));
@@ -357,7 +357,7 @@ public class ConnectorUtil {
     }
 
 
-    public static void configureConfigurationProperties(JsonNode source, ConfigurationProperties target) throws IOException, JsonNodeException {
+    public static void configureConfigurationProperties(JsonNode source, ConfigurationProperties target) throws JsonNodeException {
         source.required();
         List<String> configPropNames = target.getPropertyNames();
         for (Map.Entry<String, Object> e : source.asMap().entrySet()) {
@@ -392,7 +392,7 @@ public class ConnectorUtil {
     }
 
 
-    public static void configureDefaultAPIConfiguration(JsonNode source, APIConfiguration target) throws IOException, JsonNodeException {
+    public static void configureDefaultAPIConfiguration(JsonNode source, APIConfiguration target) throws JsonNodeException {
         JsonNode poolConfigOption = source.get(OPENICF_POOL_CONFIG_OPTION);
         if (poolConfigOption.isMap()) {
             configureObjectPoolConfiguration(poolConfigOption, target.getConnectorPoolConfiguration());
@@ -405,7 +405,7 @@ public class ConnectorUtil {
         configureConfigurationProperties(configurationProperties, target.getConfigurationProperties());
     }
 
-    public static void getConfiguration(APIConfiguration source, Map<String, Object> target) throws IOException {
+    public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, Map<String, Object> target) {
         target.put(OPENICF_POOL_CONFIG_OPTION, getObjectPoolConfiguration(source.getConnectorPoolConfiguration()));
         target.put(OPENICF_OPERATION_TIMEOUT, getTimeout(source));
         Map<String, Object> configurationProperties = new LinkedHashMap<String, Object>();
@@ -427,7 +427,6 @@ public class ConnectorUtil {
         result.put(OPENICF_BUNDLENAME, info.getBundleName());
         result.put(OPENICF_BUNDLEVERSION, info.getBundleVersion());
         result.put(OPENICF_CONNECTOR_NAME, info.getConnectorName());
-        //result.put(OPENICF_CONNECTOR_HOST_REF, "#LOCAL");
         return result;
     }
 
@@ -453,7 +452,12 @@ public class ConnectorUtil {
         return new ConnectorKey(bundleName, bundleVersion, connectorName);
     }
 
-    public static RemoteFrameworkConnectionInfo getRemoteFrameworkConnectionInfo(Map<String, Object> info) throws IOException {
+    /**
+     * @param info
+     * @return
+     * @throws IllegalArgumentException if the configuration can not be read from {@code info}
+     */
+    public static RemoteFrameworkConnectionInfo getRemoteFrameworkConnectionInfo(Map<String, Object> info) {
         String _host = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_HOST), String.class);
         int _port = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_PORT), int.class);
         GuardedString _key = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_KEY), GuardedString.class);
@@ -485,6 +489,12 @@ public class ConnectorUtil {
         return new ConnectorReference(key, connectorHost);
     }
 
+    public static void setConnectorReference(ConnectorReference source, Map<String, Object> target) {
+        Map<String, Object> connectorReference = getConnectorKey(source.getConnectorKey());
+        connectorReference.put(OPENICF_CONNECTOR_HOST_REF, source.getConnectorHost());
+        target.put(OPENICF_CONNECTOR_REF, connectorReference);
+    }
+
 
     public static Map<String, ObjectClassInfoHelper> getObjectTypes(JsonNode configuration) throws JsonNodeException, SchemaException {
         JsonNode objectTypes = configuration.get(OPENICF_OBJECT_TYPES);
@@ -496,23 +506,21 @@ public class ConnectorUtil {
     }
 
 
-    public static Map<String, Object> getRemoteFrameworkConnectionMap(Schema info) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>(2);
+    public static void setObjectAndOperationConfiguration(Schema source, Map<String, Object> target) {
 
-        Map<String, Object> objectTypes = new LinkedHashMap<String, Object>(info.getObjectClassInfo().size());
-        for (ObjectClassInfo objectClassInfo : info.getObjectClassInfo()) {
+        Map<String, Object> objectTypes = new LinkedHashMap<String, Object>(source.getObjectClassInfo().size());
+        for (ObjectClassInfo objectClassInfo : source.getObjectClassInfo()) {
             objectTypes.put(objectClassInfo.getType(), getObjectClassInfoMap(objectClassInfo));
         }
-        result.put(OPENICF_OBJECT_TYPES, objectTypes);
+        target.put(OPENICF_OBJECT_TYPES, objectTypes);
 
 
         Map<String, Object> optionsByOperation = new LinkedHashMap<String, Object>(12);
         for (Map.Entry<OperationType, Class<? extends APIOperation>> e : operationMap.entrySet()) {
 
         }
-        result.put(OPENICF_OPERATION_OPTIONS, optionsByOperation);
+        target.put(OPENICF_OPERATION_OPTIONS, optionsByOperation);
 
-        return result;
     }
 
 
@@ -525,6 +533,9 @@ public class ConnectorUtil {
 
             for (Map.Entry<OperationType, Class<? extends APIOperation>> entry : operationMap.entrySet()) {
                 JsonNode operation = operationOptions.get(entry.getValue().getSimpleName()).expect(Map.class);
+                if (operation.isNull()) {
+                    continue;
+                }
 
                 JsonNode operationOptionInfos = operation.get("operationOptionInfos").expect(Map.class);
                 OperationOptionInfoHelper globalOperationOptionInfoHelper = null;
@@ -711,16 +722,33 @@ public class ConnectorUtil {
 
             if (targetClazz.isAssignableFrom(sourceClass)) {
                 return (T) source;
+            } else if (targetClazz == sourceClass) {
+                return (T) source;
             } else if (targetClazz.equals(java.math.BigDecimal.class)) {
-                if (sourceClass == String.class) {
+                if (Double.class.isAssignableFrom(sourceClass) || sourceClass == double.class) {
+                    result = (T) BigDecimal.valueOf((Double) source);
+                    coerced = true;
+                } else if (Integer.class.isAssignableFrom(sourceClass) || sourceClass == int.class) {
+                    result = (T) BigDecimal.valueOf((Integer) source);
+                    coerced = true;
+                } else if (Long.class.isAssignableFrom(sourceClass) || sourceClass == long.class) {
+                    result = (T) BigDecimal.valueOf((Long) source);
+                    coerced = true;
+                } else if (sourceClass == String.class) {
                     java.math.BigDecimal v = new java.math.BigDecimal((String) source);
                     result = targetClazz.cast(v);
                     coerced = true;
                 }
             } else if (targetClazz.equals(java.math.BigInteger.class)) {
-                if (sourceClass == String.class) {
+                if (Long.class.isAssignableFrom(sourceClass) || sourceClass == long.class) {
+                    result = (T) BigInteger.valueOf((Long) source);
+                    coerced = true;
+                } else if (sourceClass == String.class) {
                     java.math.BigInteger v = new java.math.BigInteger((String) source);
                     result = targetClazz.cast(v);
+                    coerced = true;
+                } else {
+                    result = (T) BigInteger.valueOf(coercedTypeCasting(source, Long.class));
                     coerced = true;
                 }
             } else if (targetClazz.equals(boolean.class) || targetClazz.equals(Boolean.class)) {
@@ -786,12 +814,27 @@ public class ConnectorUtil {
                 if (sourceClass == Double.class) {
                     result = (T) source;
                     coerced = true;
+                } else if (sourceClass == int.class) {
+                    result = (T) Double.valueOf((Integer.valueOf((Integer) source).doubleValue()));
+                    coerced = true;
+                } else if (sourceClass == Integer.class) {
+                    result = (T) Double.valueOf(((Integer) source).doubleValue());
+                    coerced = true;
                 } else if (sourceClass == String.class) {
                     result = targetClazz.cast(Double.valueOf((String) source));
                     coerced = true;
                 }
             } else if (targetClazz.equals(Double.class)) {
-                if (sourceClass == String.class) {
+                if (sourceClass == double.class) {
+                    result = (T) source;
+                    coerced = true;
+                } else if (sourceClass == int.class) {
+                    result = (T) Double.valueOf((Integer.valueOf((Integer) source).doubleValue()));
+                    coerced = true;
+                } else if (sourceClass == Integer.class) {
+                    result = (T) Double.valueOf(((Integer) source).doubleValue());
+                    coerced = true;
+                } else if (sourceClass == String.class) {
                     result = targetClazz.cast(Double.valueOf((String) source));
                     coerced = true;
                 }
@@ -802,14 +845,20 @@ public class ConnectorUtil {
                     coerced = true;
                 }
             } else if (targetClazz.equals(float.class) || targetClazz.equals(Float.class)) {
-                if (sourceClass == Float.class) {
+                if (sourceClass == Float.class || sourceClass == float.class) {
                     result = (T) source;
+                    coerced = true;
+                } else  if (sourceClass == Double.class || sourceClass == double.class) {
+                    result = (T) new Float((Double)source);
+                    coerced = true;
+                } else if (sourceClass == int.class) {
+                    result = (T) Float.valueOf((Integer.valueOf((Integer) source).floatValue()));
+                    coerced = true;
+                } else if (sourceClass == Integer.class) {
+                    result = (T) Float.valueOf(((Integer) source).floatValue());
                     coerced = true;
                 } else if (sourceClass == String.class) {
                     result = targetClazz.cast(Float.valueOf((String) source));
-                    coerced = true;
-                } else if (sourceClass == Integer.class) {
-                    result = targetClazz.cast(new Float(((Integer) source).floatValue()));
                     coerced = true;
                 }
             } else if (targetClazz.equals(GuardedByteArray.class)) {
@@ -827,7 +876,7 @@ public class ConnectorUtil {
                     coerced = true;
                 }
             } else if (targetClazz.equals(int.class) || targetClazz.equals(Integer.class)) {
-                if (sourceClass == Integer.class) {
+                if (sourceClass == Integer.class || sourceClass == int.class) {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == String.class) {
@@ -852,15 +901,17 @@ public class ConnectorUtil {
                     coerced = true;
                 }
             } else if (targetClazz.equals(long.class) || targetClazz.equals(Long.class)) {
-                if (sourceClass == Long.class) {
+                if (sourceClass == int.class) {
+                    result = (T) Long.valueOf((Integer.valueOf((Integer) source).longValue()));
+                    coerced = true;
+                } else if (sourceClass == Integer.class) {
+                    result = (T) Long.valueOf(((Integer) source).longValue());
+                    coerced = true;
+                } else if (sourceClass == Long.class || sourceClass == long.class) {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == String.class) {
                     result = targetClazz.cast(Long.valueOf((String) source));
-                    coerced = true;
-                } else if (sourceClass == Integer.class) {
-                    Integer i = (Integer) source;
-                    result = targetClazz.cast(new Long(i.longValue()));
                     coerced = true;
                 }
             } else if (targetClazz.equals(Name.class)) {
@@ -899,7 +950,21 @@ public class ConnectorUtil {
                     coerced = true;
                 }
             } else if (targetClazz.equals(String.class)) {
-                if (sourceClass == Double.class) {
+                if (sourceClass == byte[].class) {
+                    result = (T) new String((byte[]) source);
+                    coerced = true;
+                } else if (sourceClass == char.class) {
+                    result = (T) new String((char[]) source);
+                    coerced = true;
+                } else if (sourceClass == Character[].class) {
+                    Character[] characterArray = (Character[]) source;
+                    char[] charArray = new char[characterArray.length];
+                    for (int i = 0; i < characterArray.length; i++) {
+                        charArray[i] = characterArray[i];
+                    }
+                    result = (T) new String(charArray);
+                    coerced = true;
+                } else if (sourceClass == Double.class) {
                     String s = ((Double) source).toString();
                     result = targetClazz.cast(s);
                     coerced = true;
@@ -915,7 +980,6 @@ public class ConnectorUtil {
                     String s = ((Long) source).toString();
                     result = targetClazz.cast(s);
                     coerced = true;
-                    ;
                 } else if (sourceClass == Integer.class) {
                     String s = ((Integer) source).toString();
                     result = targetClazz.cast(s);

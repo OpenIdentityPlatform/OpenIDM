@@ -31,6 +31,8 @@ import org.apache.felix.scr.annotations.Properties;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonPath;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -41,6 +43,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
+import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.script.ConnectorScript;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -99,7 +102,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         JsonNode jsonConfiguration = null;
         ConnectorReference connectorReference = null;
         try {
-            jsonConfiguration = getConfiguration(context.getProperties());
+            jsonConfiguration = getConfiguration(context);
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
             connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
         } catch (Exception e) {
@@ -155,7 +158,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public Map<String, Object> getStatus() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         try {
-            JsonNode node = new JsonNode(result, new JsonPath("$"));
+            JsonNode node = new JsonNode(result);
             node.put("name", systemIdentifier.getName());
 
             //TODO component.id and component.name can cause problems in JsonPath
@@ -186,9 +189,8 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        String objectClass = getObjectType(id);
-        String localId = getLocalId(id);
-        OperationHelper helper = operationHelperBuilder.build(objectClass, object);
+        Id complexId = new Id(id);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
 
         if (helper.isOperationPermitted(CreateApiOp.class)) {
             try {
@@ -197,6 +199,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
             } catch (Exception e) {
+                //OperationTimeoutException
                 TRACE.error("Error at Creating of {}", id, e);
                 throw new ObjectSetException(e);
             }
@@ -219,39 +222,32 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
-        String objectClass = getObjectType(id);
-        String localId = getLocalId(id);
-        OperationHelper helper = operationHelperBuilder.build(objectClass, null);
+        Id complexId = new Id(id);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
+        try {
+            ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
+            if (facade.getSupportedOperations().contains(GetApiOp.class)) {
+                if (helper.isOperationPermitted(GetApiOp.class)) {
+                    //ConnectorObject connectorObject = helper.build(GetApiOp.class, complexId.getLocalId(), null);
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, (ConnectorObject)null, null);
+                    ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());
+                    return helper.build(connectorObject);
+                }
+            } else if (facade.getSupportedOperations().contains(SearchApiOp.class)) {
+                if (helper.isOperationPermitted(SearchApiOp.class)) {
+                    //ConnectorObject connectorObject = helper.build(SearchApiOp.class, complexId.getLocalId(), null);
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, (ConnectorObject)null, null);
+                    Filter name = new EqualsFilter(new Name(complexId.getLocalId()));
+                    facade.search(helper.getObjectClass(), name, helper.getResultsHandler(), operationOptionsBuilder.build());
 
-        if (helper.isOperationPermitted(GetApiOp.class)) {
-            try {
-                ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
-                ConnectorObject connectorObject = helper.build(CreateApiOp.class, localId, null);
-                if (facade.getSupportedOperations().contains(GetApiOp.class)) {
-                    try {
-                        OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, connectorObject, null);
-                        connectorObject = facade.getObject(helper.getObjectClass(), new Uid(localId), operationOptionsBuilder.build());
-                        return helper.build(connectorObject);
-                    } catch (UnsupportedOperationException e) {
-                        TRACE.debug("GetApiOp operation is not supported");
-                    }
-                } else if (facade.getSupportedOperations().contains(SearchApiOp.class)) {
-                    try {
-                        OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, connectorObject, null);
-                        Filter name = new EqualsFilter(new Name(localId));
-                        facade.search(helper.getObjectClass(), name, helper.getResultsHandler(), operationOptionsBuilder.build());
-
-                        if (!helper.getQueryResult().isEmpty()) {
-                            return helper.getQueryResult().get(0);
-                        }
-                    } catch (UnsupportedOperationException e) {
-                        TRACE.debug("SearchApiOp operation is not supported");
+                    if (!helper.getQueryResult().isEmpty()) {
+                        return helper.getQueryResult().get(0);
                     }
                 }
-            } catch (Exception e) {
-                TRACE.error("Error at Creating of {}", id, e);
-                throw new ObjectSetException(e);
             }
+        } catch (Exception e) {
+            TRACE.error("Error at Reading of {}", id, e);
+            throw new ObjectSetException(e);
         }
         throw new NotFoundException();
     }
@@ -276,13 +272,12 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        String objectClass = getObjectType(id);
-        String localId = getLocalId(id);
-        OperationHelper helper = operationHelperBuilder.build(objectClass, object);
+        Id complexId = new Id(id);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
 
         if (helper.isOperationPermitted(UpdateApiOp.class)) {
             try {
-                ConnectorObject connectorObject = helper.build(UpdateApiOp.class, localId, object);
+                ConnectorObject connectorObject = helper.build(UpdateApiOp.class, complexId.getLocalId(), object);
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
 
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), connectorObject.getAttributes(), operationOptionsBuilder.build());
@@ -309,13 +304,12 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
-        String objectClass = getObjectType(id);
-        String localId = getLocalId(id);
-        OperationHelper helper = operationHelperBuilder.build(objectClass, null);
+        Id complexId = new Id(id);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
 
         if (helper.isOperationPermitted(DeleteApiOp.class)) {
             try {
-                ConnectorObject connectorObject = helper.build(DeleteApiOp.class, localId, null);
+                ConnectorObject connectorObject = helper.build(DeleteApiOp.class, complexId.getLocalId(), null);
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, connectorObject, null);
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(connectorObject.getObjectClass(), connectorObject.getUid(), operationOptionsBuilder.build());
             } catch (Exception e) {
@@ -362,9 +356,8 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        String objectClass = getObjectType(id);
-        String localId = getLocalId(id);
-        OperationHelper helper = operationHelperBuilder.build(objectClass, null);
+        Id complexId = new Id(id);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
 
         if (helper.isOperationPermitted(SearchApiOp.class)) {
             try {
@@ -380,23 +373,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return null;
     }
 
-    private JsonNode getConfiguration(Dictionary properties) {
-        Object config = properties.get("jsonconfig");
-        TRACE.debug("JSON Configuration is: {}", config);
-        JsonNode result = null;
-        if (config instanceof String) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                Map map = mapper.readValue((String) config, Map.class);
-                result = new JsonNode(map);
-            } catch (IOException e) {
-                TRACE.error("JSON configuration can not be read.", e);
-            }
-        }
-        if (null == result) {
-            throw new ComponentException("Required JSON Configuration is missing.");
-        }
-        return result;
+    private JsonNode getConfiguration(ComponentContext componentContext) {
+        EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+        return new JsonNode(enhancedConfig.getConfiguration(componentContext));
     }
 
     private ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
@@ -412,30 +391,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
         }
         throw new ForbiddenException("Operation " + operationName + " is denied");
     }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getLocalId(String id) {
-        String localId = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            localId = id.substring(id.lastIndexOf("/") + 1);
-        }
-        TRACE.trace("Full id: {} Extracted local id: {}", id, localId);
-        return localId;
-    }
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getObjectType(String id) {
-        String type = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1 && id.startsWith("/")) {
-            int secondLastSlashPos = id.lastIndexOf("/", lastSlashPos - 1);
-            type = id.substring(1, lastSlashPos);
-            TRACE.trace("Full id: {} Extracted type: {}", id, type);
-        }
-        return type;
-    }
-
 
     protected List<Map<String, Object>> doSyncronization(ConnectorFacade connector, Object syncToken, OperationHelper helper) {
         final Collection<SyncDelta> result = new HashSet<SyncDelta>();

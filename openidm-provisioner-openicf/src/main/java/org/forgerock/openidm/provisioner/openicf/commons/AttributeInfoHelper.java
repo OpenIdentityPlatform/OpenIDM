@@ -46,6 +46,13 @@ public class AttributeInfoHelper {
         //type
         Object typeString = schema.get(Constants.TYPE);
         if (typeString instanceof String) {
+            //TODO fix the multivalue support
+//            if (Constants.TYPE_ARRAY.equals(typeString)) {
+//                Object items = schema.get(Constants.ITEMS);
+//                if (items instanceof Map) {
+//                    typeString = ((Map) items).get(Constants.TYPE);
+//                }
+//            }
             type = ConnectorUtil.findClassForName((String) typeString);
         } else {
             throw new SchemaException("type MUST be non empty String or List<String> value");
@@ -147,14 +154,17 @@ public class AttributeInfoHelper {
     }
 
     public static Attribute build(AttributeInfo attributeInfo, Object source) throws IOException {
-        return AttributeBuilder.build(attributeInfo.getName(), getNewValue(source, attributeInfo.isMultiValued(), attributeInfo.getType()));
+        if (attributeInfo.isMultiValued()) {
+            return AttributeBuilder.build(attributeInfo.getName(), getMultiValue(source, attributeInfo.getType()));
+        }
+        return AttributeBuilder.build(attributeInfo.getName(), getSingleValue(source, attributeInfo.getType()));
     }
 
     public Object build(Attribute source) throws IOException {
         if (attributeInfo.isMultiValued()) {
             List<Object> value = new ArrayList<Object>(source.getValue().size());
             for (Object o : source.getValue()) {
-                value.add(ConnectorUtil.coercedTypeCasting(o, type));
+                value.add(ConnectorUtil.coercedTypeCasting(o, Object.class));
             }
             return value;
         } else {

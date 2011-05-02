@@ -32,7 +32,6 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
-import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperBuilder;
@@ -42,25 +41,25 @@ import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorKey;
-import org.identityconnectors.framework.common.objects.ObjectClassInfo;
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.test.common.TestHelpers;
-import org.osgi.service.component.ComponentException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -105,7 +104,7 @@ public class ConnectorUtilTest {
     @Test
     public void testGetConfiguration() throws Exception {
         Map<String, Object> target = new LinkedHashMap<String, Object>();
-        ConnectorUtil.getConfiguration(runtimeAPIConfiguration, target);
+        ConnectorUtil.createSystemConfigurationFromAPIConfiguration(runtimeAPIConfiguration, target);
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
         ConnectorUtil.configureDefaultAPIConfiguration(new JsonNode(target), clonedConfiguration);
         //Assert.assertEquals(clonedConfiguration, runtimeAPIConfiguration);
@@ -120,7 +119,8 @@ public class ConnectorUtilTest {
         ConnectorFacade connectorFacade = getFacade();
         Schema schema = connectorFacade.schema();
         Assert.assertNotNull(schema);
-        Map schemaMAP = ConnectorUtil.getRemoteFrameworkConnectionMap(schema);
+        Map<String, Object> schemaMAP = new LinkedHashMap<String, Object>(2);
+        ConnectorUtil.setObjectAndOperationConfiguration(schema, schemaMAP);
         try {
             ObjectMapper mapper = new ObjectMapper();
             URL root = ObjectClassInfoHelperTest.class.getResource("/");
@@ -149,13 +149,19 @@ public class ConnectorUtilTest {
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(jsonConfiguration, runtimeAPIConfiguration);
 
         OperationHelper helper = operationHelperBuilder.build("__ACCOUNT__", null);
-        Assert.assertEquals(helper.getObjectClass().getObjectClassValue(),"__ACCOUNT__");
+        Assert.assertEquals(helper.getObjectClass().getObjectClassValue(), "__ACCOUNT__");
     }
 
     @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__")
     public void testUnsupportedObjectType() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(jsonConfiguration, runtimeAPIConfiguration);
         OperationHelper helper = operationHelperBuilder.build("__NONE__", null);
+    }
+
+    @Test
+    public void testCoercedTypeCasting() throws Exception {
+        BigInteger bigInteger = ConnectorUtil.coercedTypeCasting(new Integer(20), BigInteger.class);
+        Assert.assertEquals(bigInteger.intValue(),20);
     }
 
     public APIConfiguration getRuntimeAPIConfiguration() {
@@ -170,5 +176,4 @@ public class ConnectorUtilTest {
         _configuration.setConnectorInfo(((APIConfigurationImpl) runtimeAPIConfiguration).getConnectorInfo());
         return _configuration;
     }
-
 }

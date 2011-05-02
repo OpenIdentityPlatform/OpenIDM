@@ -37,6 +37,7 @@ import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -51,6 +52,7 @@ public class OperationHelperBuilder {
 
     public OperationHelperBuilder(JsonNode jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws SchemaException, JsonNodeException {
         runtimeAPIConfiguration = (APIConfigurationImpl) defaultAPIConfiguration;
+        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, defaultAPIConfiguration);
         supportedObjectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
         operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
     }
@@ -67,7 +69,7 @@ public class OperationHelperBuilder {
 //            ConnectorUtil.configureDefaultAPIConfiguration(null, _configuration);
 //        }
 
-        return new OperationHelperImpl(_configuration, objectClassInfoHelper, operationOptionHelpers.get(type));
+        return new OperationHelperImpl(_configuration, type, objectClassInfoHelper, operationOptionHelpers.get(type));
     }
 
 

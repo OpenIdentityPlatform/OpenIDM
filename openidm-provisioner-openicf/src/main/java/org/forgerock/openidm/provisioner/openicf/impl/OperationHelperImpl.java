@@ -28,6 +28,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
+import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -49,12 +50,14 @@ public class OperationHelperImpl implements OperationHelper {
     private APIConfiguration configuration;
     private ObjectClassInfoHelper objectClassInfoHelper;
     private ConnectorObjectOptions connectorObjectOptions;
-    private final List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
+    private List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
+    private String type;
 
-    public OperationHelperImpl(APIConfiguration configuration, ObjectClassInfoHelper objectClassInfoHelper, ConnectorObjectOptions connectorObjectOptions) {
+    public OperationHelperImpl(APIConfiguration configuration, String type, ObjectClassInfoHelper objectClassInfoHelper, ConnectorObjectOptions connectorObjectOptions) {
         this.configuration = configuration;
         this.objectClassInfoHelper = objectClassInfoHelper;
         this.connectorObjectOptions = connectorObjectOptions;
+        this.type = type;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class OperationHelperImpl implements OperationHelper {
     @Override
     public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, Map<String, Object> source) throws Exception {
         if (null != connectorObjectOptions) {
-            return connectorObjectOptions.find(operation).build(source,objectClassInfoHelper);
+            return connectorObjectOptions.find(operation).build(source, objectClassInfoHelper);
         }
         return new OperationOptionsBuilder();
     }
@@ -96,13 +99,13 @@ public class OperationHelperImpl implements OperationHelper {
 
     @Override
     public ConnectorObject build(Class<? extends APIOperation> operation, Map<String, Object> source) throws Exception {
-        return objectClassInfoHelper.build(operation, source);
+        return objectClassInfoHelper.build(operation, null, source);
     }
 
     @Override
     public ConnectorObject build(Class<? extends APIOperation> operation, String id, Map<String, Object> source) throws Exception {
         //TODO do something with ID
-        return objectClassInfoHelper.build(operation, source);
+        return objectClassInfoHelper.build(operation, id, source);
     }
 
     @Override
@@ -112,7 +115,13 @@ public class OperationHelperImpl implements OperationHelper {
 
     @Override
     public void resetUid(Uid uid, Map<String, Object> target) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        Object oldId = target.get("_id");
+        if (oldId instanceof String) {
+            Id newId = new Id((String) oldId, uid.getUidValue());
+            target.put("_id", newId.toString());
+        } else {
+            target.put("_id", "/" + type + "/" + uid.getUidValue());
+        }
     }
 
     @Override

@@ -26,11 +26,19 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
+import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelperTest;
+import org.identityconnectors.framework.api.APIConfiguration;
+import org.identityconnectors.framework.api.ConnectorInfo;
+import org.identityconnectors.framework.api.ConnectorKey;
 import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -38,10 +46,13 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
 import static org.mockito.Mockito.*;
+import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author $author$
@@ -50,6 +61,8 @@ import static org.mockito.Mockito.*;
 public class ConnectorInfoProviderServiceTest {
 
     private Dictionary properties = null;
+
+    protected ConnectorInfoProvider testableConnectorInfoProvider = null;
 
     @BeforeTest
     public void beforeTest() throws Exception {
@@ -64,192 +77,114 @@ public class ConnectorInfoProviderServiceTest {
         String config = new String(buffer.toByteArray());
 
         properties = new Hashtable<String, Object>();
-        properties.put("jsonconfig", config);
-
+        properties.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, config);
+        beforeMethod();
     }
 
-    @AfterTest
-    public void afterTest() {
-    }
-
-
-    @Test
-    public void testActivateProperly() throws Exception {
-        URL root = ConnectorInfoProviderServiceTest.class.getResource("/connectorServer/");
-        Assert.assertNotNull(root);
-        Map<String, String> systemProperties = new HashMap<String, String>(1);
-        systemProperties.put("bundles.configuration.location", root.getPath());
+    public void beforeMethod() throws Exception {
+        Map<String, String> systemProperties = getTestSystemConfiguration();
 
         ComponentContext context = mock(ComponentContext.class);
         //stubbing
         when(context.getProperties()).thenReturn(properties);
-        when(context.getBundleContext()).thenReturn(new InnerBundleContext(systemProperties));
+        when(context.getBundleContext()).thenReturn(new BundleContextStub(systemProperties));
         InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
         instance.activate(context);
+        testableConnectorInfoProvider = instance;
     }
 
-    @Test(expectedExceptions = ComponentException.class)
-    public void testActivateNoConfiguration() throws Exception {
+    //@Test
+    public void testActivateProperly() throws Exception {
+        Map<String, String> systemProperties = getTestSystemConfiguration();
+
         ComponentContext context = mock(ComponentContext.class);
         //stubbing
-        when(context.getProperties()).thenReturn(new Hashtable<String, String>());
-        when(context.getBundleContext()).thenReturn(new InnerBundleContext());
+        when(context.getProperties()).thenReturn(properties);
+        when(context.getBundleContext()).thenReturn(new BundleContextStub(systemProperties));
         InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
         instance.activate(context);
     }
 
-//    @Test
-//    public void testFindConnectorInfo() throws Exception {
+
+//    @Test(expectedExceptions = ComponentException.class)
+//    public void testActivateNoConfiguration() throws Exception {
 //        ComponentContext context = mock(ComponentContext.class);
 //        //stubbing
-//        when(context.getProperties()).thenReturn(properties);
-//        when(context.getBundleContext()).thenReturn(new InnerBundleContext());
+//        when(context.getProperties()).thenReturn(new Hashtable<String, String>());
+//        when(context.getBundleContext()).thenReturn(new BundleContextStub());
 //        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
 //        instance.activate(context);
 //    }
 
     @Test
-    public void testGetConnectorInfos() throws Exception {
+    public void testFindConnectorInfo() throws Exception {
+        Map<String, String> systemProperties = getTestSystemConfiguration();
+        ComponentContext context = mock(ComponentContext.class);
+        //stubbing
+        when(context.getProperties()).thenReturn(properties);
+        when(context.getBundleContext()).thenReturn(new BundleContextStub(systemProperties));
+        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
+        instance.activate(context);
 
+
+    }
+
+    @Test
+    public void testCreateSystemConfiguration() throws URISyntaxException {
+        ConnectorInfo xmlConnectorInfo = null;
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.bundles.file.xml", "1.1.0.0-SNAPSHOT", "com.forgerock.openicf.xml.XMLConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                xmlConnectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(xmlConnectorInfo);
+        APIConfiguration configuration = xmlConnectorInfo.createDefaultAPIConfiguration();
+        URL xmlRoot = OpenICFProvisionerServiceXMLConnectorTest.class.getResource("/xml/");
+        Assert.assertNotNull(xmlRoot);
+        URI xsdIcfFilePath = xmlRoot.toURI().resolve("resource-schema-1.xsd");
+        configuration.getConfigurationProperties().setPropertyValue("xsdIcfFilePath", xsdIcfFilePath.getPath());
+        URI xsdFilePath = xmlRoot.toURI().resolve("ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd");
+        configuration.getConfigurationProperties().setPropertyValue("xsdFilePath", xsdFilePath.getPath());
+        URI xmlFilePath = xmlRoot.toURI().resolve("data.xml");
+        configuration.getConfigurationProperties().setPropertyValue("xmlFilePath", xmlFilePath.getPath());
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            URL root = ObjectClassInfoHelperTest.class.getResource("/");
+            mapper.writeValue(new File((new URL(root, "XMLConnector_configuration.json")).toURI()),
+                    testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Test
+    public void testGetAllConnectorInfo() throws Exception {
+        List<ConnectorInfo> result = testableConnectorInfoProvider.getAllConnectorInfo();
+        assertThat(result).isNotNull().as("XML connector must be in /connectorServer/connectors/ directory").isNotEmpty();
+    }
+
+
+    private Map<String, String> getTestSystemConfiguration() {
+        URL root = ConnectorInfoProviderServiceTest.class.getResource("/connectorServer/");
+        Assert.assertNotNull(root);
+        Map<String, String> systemProperties = new HashMap<String, String>(1);
+        systemProperties.put("bundles.configuration.location", root.getPath());
+        return systemProperties;
     }
 
     public class InnerConnectorInfoProviderService extends ConnectorInfoProviderService {
         @Override
         public void activate(ComponentContext context) {
-            super.activate(context);    //To change body of overridden methods use File | Settings | File Templates.
+            super.activate(context);
         }
 
         @Override
         public void deactivate(ComponentContext context) {
-            super.deactivate(context);    //To change body of overridden methods use File | Settings | File Templates.
-        }
-    }
-
-    private class InnerBundleContext implements BundleContext {
-
-        private Map<String, String> properties;
-
-        private InnerBundleContext() {
-            properties = Collections.emptyMap();
-        }
-
-        private InnerBundleContext(Map<String, String> properties) {
-            assert null != properties;
-            this.properties = properties;
-        }
-
-        @Override
-        public String getProperty(String s) {
-            String value = properties.get(s);
-            if (null == value) {
-                value = System.getProperty(s);
-            }
-            return value;
-        }
-
-        @Override
-        public Bundle getBundle() {
-            return null;
-        }
-
-        @Override
-        public Bundle installBundle(String s) throws BundleException {
-            return null;
-        }
-
-        @Override
-        public Bundle installBundle(String s, InputStream inputStream) throws BundleException {
-            return null;
-        }
-
-        @Override
-        public Bundle getBundle(long l) {
-            return null;
-        }
-
-        @Override
-        public Bundle[] getBundles() {
-            return new Bundle[0];
-        }
-
-        @Override
-        public void addServiceListener(ServiceListener serviceListener, String s) throws InvalidSyntaxException {
-
-        }
-
-        @Override
-        public void addServiceListener(ServiceListener serviceListener) {
-
-        }
-
-        @Override
-        public void removeServiceListener(ServiceListener serviceListener) {
-
-        }
-
-        @Override
-        public void addBundleListener(BundleListener bundleListener) {
-
-        }
-
-        @Override
-        public void removeBundleListener(BundleListener bundleListener) {
-
-        }
-
-        @Override
-        public void addFrameworkListener(FrameworkListener frameworkListener) {
-
-        }
-
-        @Override
-        public void removeFrameworkListener(FrameworkListener frameworkListener) {
-
-        }
-
-        @Override
-        public ServiceRegistration registerService(String[] strings, Object o, Dictionary dictionary) {
-            return null;
-        }
-
-        @Override
-        public ServiceRegistration registerService(String s, Object o, Dictionary dictionary) {
-            return null;
-        }
-
-        @Override
-        public ServiceReference[] getServiceReferences(String s, String s1) throws InvalidSyntaxException {
-            return new ServiceReference[0];
-        }
-
-        @Override
-        public ServiceReference[] getAllServiceReferences(String s, String s1) throws InvalidSyntaxException {
-            return new ServiceReference[0];
-        }
-
-        @Override
-        public ServiceReference getServiceReference(String s) {
-            return null;
-        }
-
-        @Override
-        public Object getService(ServiceReference reference) {
-            return null;
-        }
-
-        @Override
-        public boolean ungetService(ServiceReference reference) {
-            return false;
-        }
-
-        @Override
-        public File getDataFile(String s) {
-            return null;
-        }
-
-        @Override
-        public Filter createFilter(String s) throws InvalidSyntaxException {
-            return null;
+            super.deactivate(context);
         }
     }
 }

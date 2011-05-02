@@ -26,6 +26,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
@@ -33,6 +34,7 @@ import org.identityconnectors.framework.common.objects.*;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.jar.Attributes;
 
 /**
  * @author $author$
@@ -41,6 +43,7 @@ import java.util.*;
 public class ObjectClassInfoHelper {
     private final Set<AttributeInfoHelper> attributes;
     private final ObjectClass objectClass;
+    private String nameAttribute = null;
 
     /**
      * Create a custom object class.
@@ -53,7 +56,11 @@ public class ObjectClassInfoHelper {
         Map<String, Object> properties = (Map<String, Object>) schema.get(Constants.PROPERTIES);
         attributes = new HashSet<AttributeInfoHelper>(properties.size());
         for (Map.Entry<String, Object> e : properties.entrySet()) {
-            attributes.add(new AttributeInfoHelper(e.getKey(), (Map<String, Object>) e.getValue()));
+            AttributeInfoHelper helper = new AttributeInfoHelper(e.getKey(), (Map<String, Object>) e.getValue());
+            if (helper.getAttributeInfo().getName().equals(Name.NAME)) {
+                nameAttribute = e.getKey();
+            }
+            attributes.add(helper);
         }
     }
 
@@ -71,14 +78,42 @@ public class ObjectClassInfoHelper {
 //        return Collections.unmodifiableSet(attributes);
 //    }
 
+    /**
+     * @param operation
+     * @param name
+     * @param source
+     * @return
+     * @throws PreconditionFailedException if ID value can not be determined from the {@code source}
+     */
+    public ConnectorObject build(Class<? extends APIOperation> operation, String name, Map<String, Object> source) throws Exception {
+        String nameValue = null;
 
-    public ConnectorObject build(Class<? extends APIOperation> operation, Map<String, Object> source) throws IOException {
+        if (null != name) {
+            nameValue = name;
+        } else if (null != source.get("_id")) {
+            Id id = new Id((String) source.get("_id"));
+            nameValue = id.getLocalId();
+        } else if (null != source.get(nameAttribute)) {
+            nameValue = source.get(nameAttribute).toString();
+        }
+
+        if (null == nameValue) {
+            throw new PreconditionFailedException("Required localId attribute is missing");
+        }
+
         ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
         builder.setObjectClass(objectClass);
 
         if (CreateApiOp.class.isAssignableFrom(operation)) {
+            builder.setUid(nameValue);
+            builder.setName(nameValue);
+            Set<String> keySet = source.keySet();
             for (AttributeInfoHelper attributeInfo : attributes) {
                 if (attributeInfo.getAttributeInfo().isCreateable()) {
+                    if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                            !keySet.contains(attributeInfo.getName())) {
+                        continue;
+                    }
                     Object v = source.get(attributeInfo.getName());
                     if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
                         throw new IllegalArgumentException("Required value is null");
@@ -87,14 +122,22 @@ public class ObjectClassInfoHelper {
                 }
             }
         } else if (UpdateApiOp.class.isAssignableFrom(operation)) {
+            builder.setUid(nameValue);
             for (AttributeInfoHelper attributeInfo : attributes) {
+                if (Uid.NAME.equals(attributeInfo.getName())) {
+                    continue;
+                }
                 if (attributeInfo.getAttributeInfo().isUpdateable()) {
                     Object v = source.get(attributeInfo.getName());
                     builder.addAttribute(attributeInfo.build(v));
                 }
             }
         } else {
+            builder.setUid(nameValue);
             for (AttributeInfoHelper attributeInfo : attributes) {
+                if (Uid.NAME.equals(attributeInfo.getName())) {
+                    continue;
+                }
                 Object v = source.get(attributeInfo.getName());
                 builder.addAttribute(attributeInfo.build(v));
 
@@ -132,7 +175,7 @@ public class ObjectClassInfoHelper {
         return result;
     }
 
-    public void resetUid(Uid uid,  Map<String, Object> target) {
+    public void resetUid(Uid uid, Map<String, Object> target) {
 
     }
 }

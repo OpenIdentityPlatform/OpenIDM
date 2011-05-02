@@ -29,6 +29,7 @@ import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorInfo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Sample Class Doc
@@ -51,5 +52,23 @@ public interface ConnectorInfoProvider {
      *
      * @return list of all available {@link ConnectorInfo}s
      */
-    public List<ConnectorInfo> getConnectorInfo();
+    public List<ConnectorInfo> getAllConnectorInfo();
+
+    /**
+     * Tests the {@link APIConfiguration Configuration} with the connector.
+     *
+     * @param configuration
+     * @throws RuntimeException if the configuration is not valid or the test failed.
+     */
+    public void testConnector(APIConfiguration configuration);
+
+    /**
+     * Create a new configuration object from the {@code configuration} parameter.
+     * <p/>
+     *
+     * @param configuration
+     * @param validate
+     * @return
+     */
+    public Map<String, Object> createSystemConfiguration(APIConfiguration configuration, boolean validate);
 }

@@ -2,13 +2,20 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.api.*;
-import org.identityconnectors.framework.impl.api.ConnectorInfoManagerFactoryImpl;
+import org.identityconnectors.framework.api.operations.SchemaApiOp;
+import org.identityconnectors.framework.api.operations.TestApiOp;
+import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
+import org.identityconnectors.framework.impl.api.AbstractConnectorInfo;
+import org.identityconnectors.framework.impl.api.remote.RemoteConnectorInfoImpl;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -33,7 +40,7 @@ import java.util.jar.JarInputStream;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = "org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService", policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service",immediate = true)
+@Component(name = "org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService", policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
@@ -63,11 +70,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
 
         //Initialise Local ConnectorInfoManager
         String connectorsArea = context.getBundleContext().getProperty(BUNDLES_CONFIGURATION_LOCATION);
-        Map<String, Object> configuration = getConfiguration(context.getProperties());
+        JsonNode configuration = getConfiguration(context);
         String connectorLocation = DEFAULT_CONNECTORS_LOCATION;
-        Object connectorURL = configuration.get(PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL);
-        if (connectorURL instanceof String) {
-            connectorLocation = connectorURL.toString();
+        try {
+            connectorLocation = configuration.get(PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL).asString();
+        } catch (JsonNodeException e) {
+            TRACE.error("Invalid configuration {}", configuration.getValue(), e);
+            throw new ComponentException("Invalid configuration, service can not be started", e);
         }
 
         // Only run the configuration changes if the connectorsArea is set.
@@ -77,30 +86,31 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
             connectorsArea = connectorLocation;
         } else {
             try {
-                connectorsArea = new URI(connectorsArea).resolve(connectorLocation+"/").toString();
+                connectorsArea = new URI(connectorsArea).resolve(connectorLocation + "/").toString();
             } catch (URISyntaxException e) {
-                TRACE.error("Invalid connectorsArea {}",connectorsArea,e);
+                TRACE.error("Invalid connectorsArea {}", connectorsArea, e);
             }
         }
 
-        TRACE.info("Using connectors from [" + connectorsArea + "]");
-        File dir = new File(connectorsArea);
-        if (!dir.exists()) {
-            String absolutePath = dir.getAbsolutePath();
-            TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
-        } else {
-            try {
-                URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
-                factory.getLocalManager(bundleUrls);
-            } catch (MalformedURLException e) {
-                TRACE.error("How can this happen?", e);
+        initialiseLocalManager(factory, connectorsArea);
+
+        JsonNode remoteConnectorHosts = null;
+        try {
+            remoteConnectorHosts = configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS).expect(List.class);
+            if (!remoteConnectorHosts.isNull()) {
+                initialiseRemoteManager(factory, remoteConnectorHosts);
             }
-
+        } catch (JsonNodeException e) {
+            TRACE.error("Invalid configuration remoteConnectorHosts must be list or null. {}", remoteConnectorHosts, e);
+            throw new ComponentException("Invalid configuration, service can not be started", e);
         }
+        TRACE.info("Component is activated.");
+    }
 
-        Object remoteConnectorHosts = configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS);
-        if (remoteConnectorHosts instanceof Collection) {
-            for (Map<String, Object> info : (List<Map<String, Object>>) remoteConnectorHosts) {
+    protected void initialiseRemoteManager(ConnectorInfoManagerFactory factory, JsonNode remoteConnectorHosts) throws JsonNodeException {
+        for (Object o : remoteConnectorHosts.asList()) {
+            if (o instanceof Map) {
+                Map<String, Object> info = (Map<String, Object>) o;
                 try {
                     RemoteFrameworkConnectionInfo rfi = ConnectorUtil.getRemoteFrameworkConnectionInfo(info);
                     String name = (String) info.get("name");
@@ -109,15 +119,37 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                             remoteFrameworkConnectionInfo.put(name, rfi);
                             factory.getRemoteManager(rfi);
                         } catch (Exception e) {
-                            TRACE.error("Remote ConnectorServer: {} initialization failed.",rfi,e);
+                            TRACE.error("Remote ConnectorServer: {} initialization failed.", rfi, e);
                         }
+                    } else {
+                        TRACE.error("RemoteFrameworkConnectionInfo has no name");
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                } catch (IllegalArgumentException e) {
+                    TRACE.error("RemoteFrameworkConnectionInfo can not be read", e);
                 }
             }
         }
-        TRACE.info("Component is activated.");
+    }
+
+    protected void initialiseLocalManager(ConnectorInfoManagerFactory factory, String connectorsArea) {
+        if (null != connectorsArea) {
+            TRACE.info("Using connectors from [" + connectorsArea + "]");
+            File dir = new File(connectorsArea);
+            if (!dir.exists()) {
+                String absolutePath = dir.getAbsolutePath();
+                TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
+            } else {
+                try {
+                    URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
+                    factory.getLocalManager(bundleUrls);
+                } catch (MalformedURLException e) {
+                    TRACE.error("How can this happen?", e);
+                }
+
+            }
+        } else {
+            throw new ComponentException("connectors directory MUST be configured");
+        }
     }
 
     @Deactivate
@@ -131,6 +163,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
         TRACE.info("Component is deactivated.");
     }
 
+//    @Modified
+//    protected void update(ComponentContext context) {
+//    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference) {
         ConnectorInfoManager connectorInfoManager = null;
@@ -154,17 +193,82 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
         return connectorInfo;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<ConnectorInfo> getConnectorInfo() {
+    public List<ConnectorInfo> getAllConnectorInfo() {
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
         ConnectorInfoManager connectorInfoManager = factory.getLocalManager(connectorURLs);
+
         List<ConnectorInfo> result = new ArrayList<ConnectorInfo>(connectorInfoManager.getConnectorInfos());
-        for (RemoteFrameworkConnectionInfo info : remoteFrameworkConnectionInfo.values()) {
-            ConnectorInfoManager rcim = factory.getRemoteManager(info);
-            result.addAll(rcim.getConnectorInfos());
+
+        for (RemoteFrameworkConnectionInfo entry : remoteFrameworkConnectionInfo.values()) {
+            try {
+                ConnectorInfoManager remoteConnectorInfoManager = factory.getRemoteManager(entry);
+                result.addAll(remoteConnectorInfoManager.getConnectorInfos());
+            } catch (Exception e) {
+                TRACE.error("Remote Connector Server is not available for {}", entry, e);
+            }
         }
         return Collections.unmodifiableList(result);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws org.identityconnectors.framework.common.exceptions.ConnectorException
+     *          if OpenICF failed to create new
+     *          connector facade
+     */
+    @Override
+    public void testConnector(APIConfiguration configuration) {
+        ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
+        ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
+        if (null != facade) {
+            TestApiOp operation = (TestApiOp) facade.getOperation(TestApiOp.class);
+            if (null != operation) {
+                operation.test();
+            }
+        }
+        throw new UnsupportedOperationException("ConnectorFacade can not be initialised");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Map<String, Object> createSystemConfiguration(APIConfiguration configuration, boolean validate) {
+        ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
+        ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
+        if (null != facade) {
+            Map<String, Object> jsonConfiguration = new LinkedHashMap<String, Object>();
+            APIConfigurationImpl impl = (APIConfigurationImpl) configuration;
+            AbstractConnectorInfo connectorInfo = impl.getConnectorInfo();
+            ConnectorReference connectorReference = null;
+            if (connectorInfo instanceof RemoteConnectorInfoImpl) {
+                RemoteConnectorInfoImpl remoteInfo = (RemoteConnectorInfoImpl) connectorInfo;
+                for (Map.Entry<String, RemoteFrameworkConnectionInfo> entry : remoteFrameworkConnectionInfo.entrySet()) {
+                    if (entry.getValue().equals(remoteInfo.getRemoteConnectionInfo())) {
+                        connectorReference = new ConnectorReference(connectorInfo.getConnectorKey(), entry.getKey());
+                        break;
+                    }
+                }
+
+            } else {
+                connectorReference = new ConnectorReference(connectorInfo.getConnectorKey());
+            }
+            ConnectorUtil.setConnectorReference(connectorReference, jsonConfiguration);
+            ConnectorUtil.createSystemConfigurationFromAPIConfiguration(configuration, jsonConfiguration);
+            if (validate && facade.getSupportedOperations().contains(TestApiOp.class)) {
+                facade.test();
+            }
+            if (facade.getSupportedOperations().contains(SchemaApiOp.class)) {
+                ConnectorUtil.setObjectAndOperationConfiguration(facade.schema(), jsonConfiguration);
+            }
+            return jsonConfiguration;
+        }
+        throw new UnsupportedOperationException("ConnectorFacade can not be initialised");
     }
 
     private URL[] getConnectorURLs(URL... resourceURLs) {
@@ -265,21 +369,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
         return files;
     }
 
-    private Map<String,Object> getConfiguration(Dictionary properties) {
-        Object config = properties.get("jsonconfig");
-        TRACE.debug("JSON Configuration is: {}",config);
-        Map<String,Object> result = null;
-        if (config instanceof String) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                result = mapper.readValue((String) config, Map.class);
-            } catch (IOException e) {
-                TRACE.error("JSON configuration can not be read.",e);
-            }
-        }
-        if (null == result) {
-            throw new ComponentException("Required JSON Configuration is missing.");
-        }
-        return result;
+    private JsonNode getConfiguration(ComponentContext componentContext) {
+        EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+        return new JsonNode(enhancedConfig.getConfiguration(componentContext));
     }
 }
