@@ -38,11 +38,12 @@
     </scm>
     <modules>
         <module>openidm-core</module>
-        <module>openidm-repo</module>
-        <module>openidm-repo-orientdb</module>
-        <module>openidm-zip</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>
+        <module>openidm-repo</module>
+        <module>openidm-repo-orientdb</module>
+        <module>openidm-util</module>
+        <module>openidm-zip</module>
         <!--module>openidm-prov</module-->
     </modules>
     <dependencyManagement>
