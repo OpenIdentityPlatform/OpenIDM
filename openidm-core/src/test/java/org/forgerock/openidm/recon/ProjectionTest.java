@@ -20,15 +20,18 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
 
-import org.forgerock.json.fluent.JsonNodeException;
 
+import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
-
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.forgerock.openidm.sync.impl.MapEntry;
 import org.forgerock.openidm.sync.impl.Projection;
 
+import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonPathException;
+
+import org.forgerock.openidm.script.ScriptException;
 
 /**
  *
@@ -55,7 +58,13 @@ public class ProjectionTest {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put("sourcePath", "$.property");
         props.put("targetPath", "$.property");
-        props.put("script", "");
+
+        Map<String, Object> scriptMap = new HashMap<String, Object>();
+        scriptMap.put("type","text/javascrip");
+        scriptMap.put("source", "println(sourceValue)" );
+        scriptMap.put("sharedScope", true);
+
+        props.put("script", scriptMap);
 
         properties.add(props);
         map.put("propertyMappings", properties);
@@ -69,16 +78,16 @@ public class ProjectionTest {
         System.out.println(mapEntry);
     }
 
-//    @Test
-//    public void simpleProjectionTest() {
-//        try {
-//            projector.projectValues(sourceObject, mapEntry);
-//        } catch (JsonPathException e) {
-//            e.printStackTrace();
-//        } catch (JsonNodeException e) {
-//            e.printStackTrace();
-//        } catch (ScriptException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @Test
+    public void simpleProjectionTest() {
+        try {
+            projector.projectValues(sourceObject, mapEntry);
+        } catch (JsonPathException e) {
+            e.printStackTrace();
+        } catch (JsonNodeException e) {
+            e.printStackTrace();
+        } catch (ScriptException e) {
+            e.printStackTrace();
+        }
+    }
 }
