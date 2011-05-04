@@ -22,12 +22,12 @@ import org.forgerock.openidm.sync.impl.ObjectSynchronizationException;
 
 /**
  * An interface for notifying that the state of a {@code source object} has changed, which results in synchronizing
- * {@code source object} fields to {@code target objects}, through defined {@code mappings} .
+ * {@code sourceObject} fields to {@code targetObjects}, through defined {@code mappings} .
  * <p/>
- * All {@code mappings} that have been defined for the given {@code source object} will be evaluated and applied to
+ * All {@code mappings} that have been defined for the given {@code sourceObject} will be evaluated and applied to
  * {@code target objects}, ordered first by synchrony and then by definition in configuration.
  * <p/>
- * Object identifiers are {@link String}'s in the form of uri's e.g.
+ * Object identifiers are {@link org.forgerock.openidm.script.Script}'s in the form of uri's e.g.
  * <p/>
  * /{context_root}/{object_set}}/{object...}/{_id}
  */
@@ -60,7 +60,7 @@ public interface ObjectSynchronizer {
      *
      * @param id       is the source identifier of the object being updated and must not be {@code null}
      * @param oldValue is the former state of the {@code sourceObject} and must not be {@code null}
-     * @param newValue is the to be state of the {@source object} and must not be {@code null}
+     * @param newValue is the to be state of the {@code sourceObject} and must not be {@code null}
      * @throws ObjectSynchronizationException if an underlying exception occurs
      */
     public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)

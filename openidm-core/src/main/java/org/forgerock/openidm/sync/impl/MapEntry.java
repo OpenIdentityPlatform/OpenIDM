@@ -31,7 +31,7 @@ import org.forgerock.json.fluent.JsonNodeException;
  * <p/>
  * If the {@code qualifier} is missing from configuration then the mapping is not qualified.
  * </br>
- * If the {@code namedQuery} is missing from configuration then all attributes for {@sourceObject} and
+ * If the {@code namedQuery} is missing from configuration then all attributes for {@code sourceObject} and
  * {@code targetObject} will be pulled back without applying additional query parameters.
  */
 public class MapEntry {
@@ -70,7 +70,7 @@ public class MapEntry {
      * {@link PropertyEntry}'s.
      *
      * @param propertyMappings
-     * @return
+     * @return propertyEntries
      * @throws JsonNodeException if there is a parsing error or a required property is missing
      */
     private List<PropertyEntry> buildEntriesList(List propertyMappings) throws JsonNodeException {
@@ -84,7 +84,7 @@ public class MapEntry {
             entry.setSourcePath(node.get("sourcePath").required().asString());
             //entry.setTargetPath(node.get("targetObject").required().asString());
             entry.setTargetPath(node.get("targetPath").required().asString());
-            entry.setScript(node.get("script").asString());
+            entry.setScript(node.get("script").asMap());
             propertyEntries.add(entry);
         }
         return propertyEntries;
@@ -156,7 +156,6 @@ public class MapEntry {
     /**
      * Set the synchrony of this mapping, either "synchronous" or "asynchronous"
      *
-     * @return
      */
     public void setSynchrony(String synchrony) {
         this.synchrony = synchrony;
@@ -164,7 +163,7 @@ public class MapEntry {
 
     /**
      * Get the qualifier that will be applied for this mapping. The Qualifier must
-     * pass for the mapping to be appied.
+     * pass for the mapping to be applied.
      *
      * @return qualifier
      */
@@ -185,7 +184,7 @@ public class MapEntry {
      * Get the namedQuery for this mapping, if it exists will be applied to sourceObject
      * and targetObject systems when listing or querying for objects.
      *
-     * @return
+     * @return namedQuery
      */
     public String getNamedQuery() {
         return namedQuery;

@@ -16,15 +16,17 @@
 
 package org.forgerock.openidm.sync.impl;
 
+import java.util.Map;
+
 /**
  * A bean like wrapper for {@code propertyMappings} json object entries in the
- * {@code objectSynchronization} {@mappings} configuration.
+ * {@code objectSynchronization} {@code mappings} configuration.
  */
 public class PropertyEntry {
 
     private String sourcePath;
     private String targetPath;
-    private String script;
+    private Map<String, Object> script;
 
     /**
      * Get the sourcePath identifier for this entry.
@@ -65,9 +67,9 @@ public class PropertyEntry {
     /**
      * Get the script identifier for this entry.
      *
-     * @return
+     * @return script 
      */
-    public String getScript() {
+    public Map<String, Object> getScript() {
         return script;
     }
 
@@ -76,7 +78,7 @@ public class PropertyEntry {
      *
      * @param script
      */
-    public void setScript(String script) {
+    public void setScript(Map<String,Object> script) {
         this.script = script;
     }
 
