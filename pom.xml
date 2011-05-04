@@ -44,6 +44,7 @@
         <module>openidm-repo-orientdb</module>
         <module>openidm-util</module>
         <module>openidm-zip</module>
+        <module>openidm-scheduler</module>
         <!--module>openidm-prov</module-->
     </modules>
     <dependencyManagement>
