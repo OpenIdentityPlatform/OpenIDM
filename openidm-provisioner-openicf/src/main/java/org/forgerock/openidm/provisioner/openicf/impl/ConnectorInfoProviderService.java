@@ -64,34 +64,36 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     @Activate
     protected void activate(ComponentContext context) {
         TRACE.trace("Activating Service with configuration {}", context.getProperties());
+        JsonNode configuration = getConfiguration(context);
 
         // Create a single instance of ConnectorInfoManagerFactory
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
-
-        //Initialise Local ConnectorInfoManager
         String connectorsArea = context.getBundleContext().getProperty(BUNDLES_CONFIGURATION_LOCATION);
-        JsonNode configuration = getConfiguration(context);
-        String connectorLocation = DEFAULT_CONNECTORS_LOCATION;
         try {
-            connectorLocation = configuration.get(PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL).asString();
+            // String connectorLocation = DEFAULT_CONNECTORS_LOCATION;
+            String connectorLocation = configuration.get(PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL).asString();
+
+            if (StringUtil.isBlank(connectorLocation)) {
+                connectorLocation = DEFAULT_CONNECTORS_LOCATION;
+            }
+            // Only run the configuration changes if the connectorsArea is set.
+            if (connectorsArea == null) {
+                TRACE.info("System property [{}] is not defined.", BUNDLES_CONFIGURATION_LOCATION);
+                TRACE.info("Using default connectors location [{}].", connectorLocation);
+                connectorsArea = connectorLocation;
+            } else {
+                try {
+                    connectorsArea = new URI(connectorsArea).resolve(connectorLocation + "/").toString();
+                } catch (URISyntaxException e) {
+                    TRACE.error("Invalid connectorsArea {}", connectorsArea, e);
+                }
+            }
         } catch (JsonNodeException e) {
             TRACE.error("Invalid configuration {}", configuration.getValue(), e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
 
-        // Only run the configuration changes if the connectorsArea is set.
-        if (connectorsArea == null) {
-            TRACE.info("System property [{}] is not defined.", BUNDLES_CONFIGURATION_LOCATION);
-            TRACE.info("Using default connectors location [{}].", connectorLocation);
-            connectorsArea = connectorLocation;
-        } else {
-            try {
-                connectorsArea = new URI(connectorsArea).resolve(connectorLocation + "/").toString();
-            } catch (URISyntaxException e) {
-                TRACE.error("Invalid connectorsArea {}", connectorsArea, e);
-            }
-        }
-
+        // Initialise Local ConnectorInfoManager
         initialiseLocalManager(factory, connectorsArea);
 
         JsonNode remoteConnectorHosts = null;
@@ -132,14 +134,17 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     }
 
     protected void initialiseLocalManager(ConnectorInfoManagerFactory factory, String connectorsArea) {
+        System.out.println("MAKMARCI: Debug CI Bug: connectorsArea=" + connectorsArea);
         if (null != connectorsArea) {
             TRACE.info("Using connectors from [" + connectorsArea + "]");
             File dir = new File(connectorsArea);
             if (!dir.exists()) {
                 String absolutePath = dir.getAbsolutePath();
+                System.out.println("MAKMARCI: Debug CI Bug: non existing absolutePath=" + absolutePath);
                 TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
             } else {
                 try {
+                    System.out.println("MAKMARCI: Debug CI Bug: absolutePath=" + dir.getAbsoluteFile().toURI().toURL());
                     URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
                     factory.getLocalManager(bundleUrls);
                 } catch (MalformedURLException e) {
@@ -176,7 +181,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
         ConnectorInfo connectorInfo = null;
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
         if (ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER.equals(connectorReference.getConnectorHost())) {
-            connectorInfoManager = factory.getLocalManager(connectorURLs);
+            connectorInfoManager = factory.getLocalManager(getConnectorURLs());
         } else {
             RemoteFrameworkConnectionInfo rfci = remoteFrameworkConnectionInfo.get(connectorReference.getConnectorHost());
             if (null != rfci) {
@@ -303,7 +308,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                                 urls.add(new URL(bundleDirUrl, fname));
                             }
                         }
-                    } else if ("jar".equals(bundleDirUrl.getProtocol())) {
+                    } else if (("jar".equals(bundleDirUrl.getProtocol())) || ("wsjar".equals(bundleDirUrl.getProtocol()))){
                         urls = getJarFileListing(bundleDirUrl, "^META-INF/" + DEFAULT_CONNECTORS_LOCATION + "/(.*).jar$");
 
                     } else {
