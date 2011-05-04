@@ -52,15 +52,9 @@ public class OperationHelperImplTest {
 
     private OperationHelperBuilder builder;
 
-    private String multipleBooleans = "{\"query\": {\"OR\": [{ \"AND\": [ { \"EQUALS\": { \"field\" : \"firstname\" } }, { \"STARTSWITH\": {\"field\" : \"lastname\", \"values\": [ \"R\" ]} } ] }, { \"LESSTHAN\": { \"field\" : \"age\" } } ] } }";
+    private String multipleBooleans = "{\"OR\": [{ \"AND\": [ { \"Equals\": { \"field\" : \"firstname\" } }, { \"StartsWith\": {\"field\" : \"lastname\", \"values\": [ \"R\" ]} } ] }, { \"LessThan\": { \"field\" : \"age\" } } ] }";
 
-    private String nonChainedString = "{ \"query\": { \"EQUALS\": { \"field\" : \"firstname\", \"values\" : [ \"Jørgen\" ] } } }";
-
-    private String orString = "{ \"query\": { \"OR\": [ { \"EQUALS\": { \"field\" : \"firstname\", \"values\" : [ \"Jørgen\" ] } },  { \"STARTSWITH\": { \"field\" : \"lastname\", \"values\" : [ \"Ring\" ] } }] } }";
-
-    private String threeChainedAnds = "{ \"query\": { \"AND\": [ { \"EQUALS\": { \"field\" : \"address\" } }, { \"ENDSWITH\": { \"field\" : \"test\" } }, { \"LESSTHAN\": { \"field\" : \"age\" } } ] } }";
-
-    private String superChained = "{ \"query\": { \"AND\": [ { \"EQUALS\": { \"field\" : \"address\", \"values\": [ \"Oslo\" ] } }, { \"ENDSWITH\": { \"field\" : \"test\", \"values\" : [ \"tull\" ] } }, { \"OR\": [ { \"ENDSWITH\": { \"field\" : \"lastname\", \"values\" : [ \"en\" ] } }, { \"ENDSWITH\": { \"field\" : \"lastname\", \"values\" : [ \"on\" ] } } ] } ] } }";
+    private String superChained = "{ \"AND\": [ { \"Equals\": { \"field\" : \"address\", \"values\": [ \"Oslo\" ] } }, { \"EndsWith\": { \"field\" : \"test\", \"values\" : [ \"tull\" ] } }, { \"OR\": [ { \"EndsWith\": { \"field\" : \"lastname\", \"values\" : [ \"en\" ] } }, { \"EndsWith\": { \"field\" : \"lastname\", \"values\" : [ \"on\" ] } } ] } ] }";
 
     @BeforeTest
     public void beforeTest() throws Exception {
@@ -78,6 +72,7 @@ public class OperationHelperImplTest {
     @Test
     public void testBuild() throws Exception {
         OperationHelper helper = builder.build("account", null);
+
         ObjectMapper mapper = new ObjectMapper();
         Filter filter = helper.build(mapper.readValue(superChained, Map.class), null);
         Assert.assertNotNull(filter);

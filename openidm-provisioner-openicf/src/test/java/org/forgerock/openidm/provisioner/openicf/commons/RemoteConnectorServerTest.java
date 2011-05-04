@@ -25,7 +25,7 @@ public class RemoteConnectorServerTest {
     private static ConnectorServer _server;
 
 
-    @BeforeTest
+    //@BeforeTest
     public void beforeTest() throws Exception {
         URL libDir = RemoteConnectorServerTest.class.getResource("/connectorServer/lib/");
         Assert.assertNotNull(libDir);
@@ -34,7 +34,7 @@ public class RemoteConnectorServerTest {
         run(bundleDir.getPath(), libDir.getPath());
     }
 
-    @AfterTest
+    //@AfterTest
     public void afterTest() {
         stop();
     }
@@ -50,7 +50,12 @@ public class RemoteConnectorServerTest {
         }
 
         _server = ConnectorServer.newInstance();
-        _server.setPort(8759);
+        String openicfServerPort = System.getProperty("openicfServerPort");
+        int port =  8759;
+        if (openicfServerPort instanceof String) {
+            //port = Integer.parseInt(openicfServerPort);
+        }
+        _server.setPort(port);
         _server.setBundleURLs(getJarFiles(new File(bundleDirStr)));
         if (libDirStr != null) {
             _server.setBundleParentClassLoader(buildLibClassLoader(new File(libDirStr)));

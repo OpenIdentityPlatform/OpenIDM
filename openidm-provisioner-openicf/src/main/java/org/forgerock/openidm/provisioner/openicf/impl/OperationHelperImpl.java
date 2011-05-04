@@ -99,8 +99,7 @@ public class OperationHelperImpl implements OperationHelper {
 
     @Override
     public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception {
-        Map<String, Object> rootNode = (Map<String, Object>) query.get(getKey(query));
-        Operator operator = createOperator(rootNode, params);
+        Operator operator = createOperator(query, params);
         return operator.createFilter();
     }
 
@@ -124,8 +123,8 @@ public class OperationHelperImpl implements OperationHelper {
     public void resetUid(Uid uid, Map<String, Object> target) {
         Object oldId = target.get("_id");
         if (oldId instanceof String) {
-            Id newId = new Id((String) oldId, uid.getUidValue());
-            target.put("_id", newId.toString());
+            Id newId = new Id((String) oldId);
+            target.put("_id", newId.resolveLocalId(uid.getUidValue()).toString());
         } else {
             target.put("_id", "/" + type + "/" + uid.getUidValue());
         }

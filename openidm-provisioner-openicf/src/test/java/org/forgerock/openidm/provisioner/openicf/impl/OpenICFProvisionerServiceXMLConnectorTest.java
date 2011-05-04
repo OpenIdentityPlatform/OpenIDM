@@ -41,9 +41,11 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
@@ -55,28 +57,12 @@ import static org.fest.assertions.Assertions.assertThat;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class OpenICFProvisionerServiceXMLConnectorTest {
+public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisionerServiceTestBase {
 
-    private TestLocalConnectorInfoProviderStub connectorInfoProvider = new TestLocalConnectorInfoProviderStub();
-    private Dictionary properties = null;
-    private ProvisionerService service = null;
     private List<String> objectIDs = new ArrayList<String>();
 
 
-    @BeforeTest
-    public void BeforeTest() throws Exception {
-        String configurationFile = "/config/" + OpenICFProvisionerServiceXMLConnectorTest.class.getCanonicalName() + ".json";
-
-        InputStream inputStream = TestLocalConnectorInfoProviderStub.class.getResourceAsStream(configurationFile);
-        Assert.assertNotNull(inputStream, "Missing Configuration File at: " + configurationFile);
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] temp = new byte[1024];
-        int read;
-        while ((read = inputStream.read(temp)) > 0) {
-            buffer.write(temp, 0, read);
-        }
-
-        String config = new String(buffer.toByteArray());
+    protected String updateRuntimeConfiguration(String config) throws Exception {
         URL xmlRoot = OpenICFProvisionerServiceXMLConnectorTest.class.getResource("/xml/");
 
         URI xsdIcfFilePath = xmlRoot.toURI().resolve("resource-schema-1.xsd");
@@ -86,39 +72,19 @@ public class OpenICFProvisionerServiceXMLConnectorTest {
         config = config.replaceFirst("XSDICFFILEPATH", xsdIcfFilePath.getPath());
         config = config.replaceFirst("XSDFILEPATH", xsdFilePath.getPath());
         config = config.replaceFirst("XMLFILEPATH", xmlFilePath.getPath());
-
-        properties = new Hashtable<String, Object>(3);
-        properties.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, config);
-        //Answer to the Ultimate Question of Life, the Universe, and Everything (42)
-        properties.put(ComponentConstants.COMPONENT_ID, 42);
-        properties.put(ComponentConstants.COMPONENT_NAME, OpenICFProvisionerServiceXMLConnectorTest.class.getCanonicalName());
-
-        service = new OpenICFProvisionerService();
-
-        Method bind = OpenICFProvisionerService.class.getDeclaredMethod("bind", ConnectorInfoProvider.class);
-        Assert.assertNotNull(bind);
-        bind.invoke(service, connectorInfoProvider);
-        Method activate = OpenICFProvisionerService.class.getDeclaredMethod("activate", ComponentContext.class);
-        Assert.assertNotNull(activate);
-
-        ComponentContext context = mock(ComponentContext.class);
-        //stubbing
-        when(context.getProperties()).thenReturn(properties);
-        activate.invoke(service, context);
-
+        return config;
     }
-
 
     @Test
     public void testGetSystemIdentifier() throws Exception {
-        Assert.assertNotNull(service.getSystemIdentifier());
-        Assert.assertTrue(service.getSystemIdentifier().is(new URI("system/XML/")));
+        Assert.assertNotNull(getService().getSystemIdentifier());
+        Assert.assertTrue(getService().getSystemIdentifier().is(new URI("system/XML/")));
 
     }
 
     @Test
     public void testGetStatus() throws Exception {
-        JsonNode status = new JsonNode(service.getStatus());
+        JsonNode status = new JsonNode(getService().getStatus());
         status.expect(Map.class).get("name").required().asString().equals("XML");
         assertThat(status.asMap()).as("OK MUST be true").includes(MapAssert.entry("ok", true));
         assertThat(status.asMap()).includes(MapAssert.entry(ComponentConstants.COMPONENT_ID, 42));
@@ -131,8 +97,8 @@ public class OpenICFProvisionerServiceXMLConnectorTest {
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, Object>> testInput = mapper.readValue(inputStream, List.class);
         for (Map<String, Object> object : testInput) {
-            String id = "/system/xml/account/";
-            service.create(id, object);
+            String id = "system/xml/account/";
+            getService().create(id, object);
             assertThat((String) object.get("_id")).as("Result object must contain the new id").matches(".*/account/(.*?)");
             String newID = (String) object.get("_id");
             objectIDs.add(newID);
@@ -142,19 +108,20 @@ public class OpenICFProvisionerServiceXMLConnectorTest {
     @Test(dependsOnMethods = {"testCreate"})
     public void testRead() throws Exception {
         for (String id : objectIDs) {
-            Map<String, Object> connectorObject = service.read("/system/xml" + id);
+            Map<String, Object> connectorObject = getService().read("system/xml" + id);
             Assert.assertNotNull(connectorObject);
         }
     }
 
-    @Test
+    @Test(dependsOnMethods = {"testCreate"})
     public void testUpdate() throws Exception {
 
     }
 
-    @Test
+    @Test(dependsOnMethods = {"testCreate"})
     public void testDelete() throws Exception {
-
+        getService().delete("system/xml" + objectIDs.get(0), null);
+        objectIDs.remove(0);
     }
 
     @Test
@@ -162,14 +129,27 @@ public class OpenICFProvisionerServiceXMLConnectorTest {
 
     }
 
-    //@Test(dependsOnMethods = {"testCreate"})
+    @Test(dependsOnMethods = {"testCreate"})
     public void testQuery() throws Exception {
         InputStream inputStream = OpenICFProvisionerServiceXMLConnectorTest.class.getResourceAsStream("/test/queryConnectorObjects.json");
         Assert.assertNotNull(inputStream);
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, Object>> testInput = mapper.readValue(inputStream, List.class);
         for (Map<String, Object> object : testInput) {
-            Map<String, Object> result = service.query("/system/xml/account/something", null);
+            Map<String, Object> result = getService().query("system/xml/account/", object);
+            Assert.assertNotNull(result);
+        }
+    }
+
+    @Test(dependsOnMethods = {"testCreate"})
+    public void testQueryAll() throws Exception {
+        Map<String, Object> result = getService().query("system/xml/account/", null);
+        Assert.assertNotNull(result);
+        Object resultObject = result.get("result");
+        if (resultObject instanceof List) {
+            assertThat((List) resultObject).isNotEmpty();
+        } else {
+            Assert.fail("Result must be instance of List");
         }
     }
 }

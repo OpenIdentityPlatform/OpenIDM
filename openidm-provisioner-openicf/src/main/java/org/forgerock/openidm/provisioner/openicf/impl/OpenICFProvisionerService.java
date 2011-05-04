@@ -33,10 +33,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonPath;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
@@ -51,6 +48,7 @@ import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.operations.*;
+import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -198,6 +196,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, object);
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
+            } catch (AlreadyExistsException e) {
+                TRACE.error("System object {}already exists", id, e);
+                throw new ConflictException("System object {" + id + "}already exists");
             } catch (Exception e) {
                 //OperationTimeoutException
                 TRACE.error("Error at Creating of {}", id, e);
@@ -281,6 +282,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
 
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), connectorObject.getAttributes(), operationOptionsBuilder.build());
+                helper.resetUid(uid, object);
             } catch (Exception e) {
                 TRACE.error("Error at Creating of {}", id, e);
                 throw new ObjectSetException(e);
@@ -309,11 +311,10 @@ public class OpenICFProvisionerService implements ProvisionerService {
 
         if (helper.isOperationPermitted(DeleteApiOp.class)) {
             try {
-                ConnectorObject connectorObject = helper.build(DeleteApiOp.class, complexId.getLocalId(), null);
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, connectorObject, null);
-                getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(connectorObject.getObjectClass(), connectorObject.getUid(), operationOptionsBuilder.build());
+                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, (ConnectorObject) null, null);
+                getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());
             } catch (Exception e) {
-                TRACE.error("Error at Creating of {}", id, e);
+                TRACE.error("Error deleting of {}", id, e);
                 throw new ObjectSetException(e);
             }
         }
@@ -358,19 +359,22 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
-
+        Map<String, Object> result = new HashMap<String, Object>();
         if (helper.isOperationPermitted(SearchApiOp.class)) {
             try {
-                ConnectorObject connectorObject = helper.build(SearchApiOp.class, id, null);
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, connectorObject, null);
-                Filter filter = helper.build((Map<String, Object>) params.get("query"), (Map<String, Object>) params.get("params"));
-                getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(connectorObject.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
+                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, (ConnectorObject) null, null);
+                Filter filter = null;
+                if (null != params) {
+                    filter = helper.build((Map<String, Object>) params.get("query"), (Map<String, Object>) params.get("params"));
+                }
+                getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
+                result.put("result", helper.getQueryResult());
             } catch (Exception e) {
                 TRACE.error("Error at Creating of {}", id, e);
                 throw new ObjectSetException(e);
             }
         }
-        return null;
+        return result;
     }
 
     private JsonNode getConfiguration(ComponentContext componentContext) {
@@ -381,15 +385,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
     private ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
-    }
-
-    private boolean isOperationPermitted(OperationOptionInfoHelper operation, String operationName) throws ForbiddenException {
-        if (null == operation) {
-            return true;
-        } else if (operation.isDenied() && OperationOptionInfoHelper.OnDenyAction.DO_NOTHING.equals(operation.getOnDeny())) {
-            return false;
-        }
-        throw new ForbiddenException("Operation " + operationName + " is denied");
     }
 
     protected List<Map<String, Object>> doSyncronization(ConnectorFacade connector, Object syncToken, OperationHelper helper) {

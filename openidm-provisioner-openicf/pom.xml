@@ -99,15 +99,14 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <bundles.configuration.location>${project.build.testOutputDirectory}/connectorServer/
-                        </bundles.configuration.location>
+                        <bundles.configuration.location>${project.build.testOutputDirectory}/connectorServer/</bundles.configuration.location>
+                        <openicfServerPort>${openicf.port}</openicfServerPort>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.7.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
@@ -181,6 +180,26 @@
                             </artifactItems>
                             <outputDirectory>${project.build.testOutputDirectory}/connectorServer/lib</outputDirectory>
                             <stripVersion>true</stripVersion>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Remote Connector Sertver Test -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>openicf.port</portName>
+                            </portNames>
                         </configuration>
                     </execution>
                 </executions>
