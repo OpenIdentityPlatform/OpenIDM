@@ -66,7 +66,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  * Repository service implementation using OrientDB
  * @author aegloff
  */
-@Component(name = "org.forgerock.repo.orientdb", immediate=true)
+@Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true)
 @Service(value = RepositoryService.class) 
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
@@ -387,8 +387,7 @@ public class OrientDBRepoService implements RepositoryService {
     private String getObjectType(String id) {
         String type = null;
         int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1 && id.startsWith("/")) {
-            int secondLastSlashPos = id.lastIndexOf("/", lastSlashPos - 1);
+        if (lastSlashPos > -1) {
             int startPos = 0;
             // This should not be necessary as relative URI should not start with slash
             if (id.startsWith("/")) {
