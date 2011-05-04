@@ -331,10 +331,11 @@ public class OrientDBRepoService implements RepositoryService {
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO: replace with common utility
         String type = fullId; 
+        // This should not be necessary as relative URI should not start with slash
         if (fullId != null && fullId.startsWith("/")) {
             type = fullId.substring(1);
-            logger.trace("Full id: {} Extracted type: {}", fullId, type);
         }
+        logger.trace("Full id: {} Extracted type: {}", fullId, type);
         
         Map<String, Object> result = new HashMap<String, Object>();
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
@@ -388,7 +389,12 @@ public class OrientDBRepoService implements RepositoryService {
         int lastSlashPos = id.lastIndexOf("/");
         if (lastSlashPos > -1 && id.startsWith("/")) {
             int secondLastSlashPos = id.lastIndexOf("/", lastSlashPos - 1);
-            type = id.substring(1, lastSlashPos);
+            int startPos = 0;
+            // This should not be necessary as relative URI should not start with slash
+            if (id.startsWith("/")) {
+                startPos = 1;
+            }
+            type = id.substring(startPos, lastSlashPos);
             logger.trace("Full id: {} Extracted type: {}", id, type);
         }
         return type;

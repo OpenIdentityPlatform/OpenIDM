@@ -74,7 +74,7 @@ public class RepoServiceFunctionalTest {
     @SuppressWarnings("unchecked")
     public void createAndRead() throws ObjectSetException {
         String uuid = "acf01ec0-66e0-11e0-ae3e-0800200c9a66";
-        String id = "/managed/user/" + uuid;
+        String id = "managed/user/" + uuid;
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Johnathan");
         obj.put("lastname", "Wombat");
@@ -135,7 +135,7 @@ public class RepoServiceFunctionalTest {
     @SuppressWarnings("unchecked")
     public void duplicateCreate() throws ObjectSetException {
         String uuid = "ccf01ec0-66e0-11e0-ae3e-0800200c9a68";
-        String id = "/managed/user/" + uuid;
+        String id = "managed/user/" + uuid;
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Beta");
         
@@ -154,7 +154,7 @@ public class RepoServiceFunctionalTest {
     @SuppressWarnings("unchecked")
     public void updateCurrentObject() throws ObjectSetException {
         String uuid = "bcf01ec0-66e0-11e0-ae3e-0800200c9a67";
-        String id = "/managed/user/" + uuid;
+        String id = "managed/user/" + uuid;
         
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Adam");
@@ -220,7 +220,7 @@ public class RepoServiceFunctionalTest {
     public void updateChangedObject() throws ObjectSetException {
         // check it fails to update an object that has changed since retrieval
         String uuid = "ddddddc0-66e0-11e0-ae3e-0800200ddddd";
-        String id = "/managed/user/" + uuid;
+        String id = "managed/user/" + uuid;
         
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Clo");
@@ -256,7 +256,7 @@ public class RepoServiceFunctionalTest {
     @SuppressWarnings("unchecked")
     public void deleteCurrentObject() throws ObjectSetException {
         String uuid = "aaa01ec0-66e0-11e0-ae3e-0800200c9aaa";
-        String id = "/managed/user/" + uuid;
+        String id = "managed/user/" + uuid;
         
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Cesar");
@@ -285,7 +285,7 @@ public class RepoServiceFunctionalTest {
     @Test(groups = {"repo"}, expectedExceptions = NotFoundException.class)
     @SuppressWarnings("unchecked")
     public void deleteMissingObject() throws ObjectSetException {
-        repo.delete("/managed/user/some-fake-id", "0");
+        repo.delete("managed/user/some-fake-id", "0");
         assertTrue(false, "Delete of unknown ID must fail, but did not.");
     }
     
@@ -294,7 +294,7 @@ public class RepoServiceFunctionalTest {
     public void deleteChangedObject() throws ObjectSetException {
         // check it rejects deleting changed object
         String uuid = "bbb01ec0-66e0-11e0-ae3e-0800200c9bbb";
-        String id = "/managed/user/" + uuid;
+        String id = "managed/user/" + uuid;
         
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Cesar");
@@ -346,31 +346,31 @@ public class RepoServiceFunctionalTest {
         userEx.put("firstname", "Cloe");
         userEx.put("lastname", "Egli");
         userEx.put("test", "inlinequery");
-        repo.create("/managed/user/" + queryUuid1, userEx);
+        repo.create("managed/user/" + queryUuid1, userEx);
         userEx.clear();
         
         userEx.put("firstname", "Andi");
         userEx.put("lastname", "Egloff");
         userEx.put("test", "inlinequery");
-        repo.create("/managed/user/" + queryUuid2, userEx);
+        repo.create("managed/user/" + queryUuid2, userEx);
         userEx.clear();
         
         userEx.put("firstname", "Dorothy");
         userEx.put("lastname", "Smorothy");
         userEx.put("test", "inlinequery");
-        repo.create("/managed/user/" + queryUuid3, userEx);
+        repo.create("managed/user/" + queryUuid3, userEx);
         userEx.clear();
         
         userEx.put("firstname", "Zoe");
         userEx.put("lastname", "Egloff");
         userEx.put("test", "inlinequery");
-        repo.create("/managed/user/" + queryUuid4, userEx);
+        repo.create("managed/user/" + queryUuid4, userEx);
         userEx.clear();
 
         userEx.put("firstname", "Cloe");
         userEx.put("lastname", "Eglolof");
         userEx.put("test", "inlinequery");
-        repo.create("/managed/user/" + queryUuid5, userEx);
+        repo.create("managed/user/" + queryUuid5, userEx);
         userEx.clear();
     }
 
@@ -380,7 +380,7 @@ public class RepoServiceFunctionalTest {
         Map params = new HashMap();
         //params.put("firstname", "Zebra");
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = 'inlinequery'");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -398,7 +398,7 @@ public class RepoServiceFunctionalTest {
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = ${querytype} ");
         // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
         //params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -417,7 +417,7 @@ public class RepoServiceFunctionalTest {
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -435,7 +435,7 @@ public class RepoServiceFunctionalTest {
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname} and test = ${querytype} ");
         // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
         //params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -451,7 +451,7 @@ public class RepoServiceFunctionalTest {
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from ${_resource} where lastname like '${lastname}%' and test = '${querytype}'");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -465,7 +465,7 @@ public class RepoServiceFunctionalTest {
     public void configuredQuery() throws ObjectSetException {
         Map params = new HashMap();
         params.put(QueryConstants.QUERY_ID, "query-without-token");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -481,7 +481,7 @@ public class RepoServiceFunctionalTest {
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
         params.put(QueryConstants.QUERY_ID, "query-with-where-token");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -498,7 +498,7 @@ public class RepoServiceFunctionalTest {
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
         params.put(QueryConstants.QUERY_ID, "query-with-from-token");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
         assertThat(resultSet).hasSize(3); 
@@ -512,7 +512,7 @@ public class RepoServiceFunctionalTest {
     public void invalidQueryId() throws ObjectSetException {
         Map params = new HashMap();
         params.put(QueryConstants.QUERY_ID, "unknown-query-id");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         assertTrue(false, "Query with unknown ID should have failed but did not.");
     }
@@ -523,7 +523,7 @@ public class RepoServiceFunctionalTest {
         // Unknown OrientDB document class
         Map params = new HashMap();
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from unknown");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         assertTrue(false, "Query with unknown OrientDB document class should have failed but did not.");
     }
@@ -534,7 +534,7 @@ public class RepoServiceFunctionalTest {
         // Syntax error in query definition
         Map params = new HashMap();
         params.put(QueryConstants.QUERY_EXPRESSION, "Sselect * Ffrom unknown");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         assertTrue(false, "Query with malformed query should have failed but did not.");
     }
@@ -545,7 +545,7 @@ public class RepoServiceFunctionalTest {
         // Syntax error in query definition
         Map params = new HashMap();
         params.put(QueryConstants.QUERY_EXPRESSION, "select * from ${_resource} where lastname = ${undefined-token");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         assertTrue(false, "Query with undefined token should have failed but did not.");
     }
@@ -556,7 +556,7 @@ public class RepoServiceFunctionalTest {
         Map params = new HashMap();
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
-        Map result = repo.query("/managed/user", params); 
+        Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         assertTrue(false, "Query with undefined token should have failed but did not.");
     }

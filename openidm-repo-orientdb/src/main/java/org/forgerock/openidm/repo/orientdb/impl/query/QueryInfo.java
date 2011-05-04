@@ -48,23 +48,30 @@ final class QueryInfo {
         this.preparedQuery = preparedQuery;
         this.queryString = queryString;
     }
-//    public QueryInfo(String queryString) {
-//        usePrepared = false;
-//        this.queryString = queryString;
-//    }
     
+    /**
+     * @return whether queries should attempt to use the prepared query representation.
+     */
     public boolean isUsePrepared() {
         return usePrepared;
     }
-    
+    /**
+     * @param prep whether queries should attempt to use the prepared query representation.
+     */
     public void setUsePrepared(boolean prep) {
         this.usePrepared = prep;
     }
     
+    /**
+     * @return an optional prepared query representation
+     */
     public OSQLSynchQuery<ODocument> getPreparedQuery() {
         return preparedQuery;
     }
     
+    /**
+     * @return the query in string form with optional OpenIDM tokens
+     */
     public String getQueryString() {
         return queryString;
     }
