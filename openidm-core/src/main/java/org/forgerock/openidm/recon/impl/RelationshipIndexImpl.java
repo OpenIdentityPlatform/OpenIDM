@@ -57,7 +57,7 @@ public class RelationshipIndexImpl {
     }
 
     /**
-     * Construct an instance, with the specified {@link RepositoryService} and log for tracing.
+     * Construct an instance, with the specified {@link org.forgerock.openidm.repo.RepositoryService} and log for tracing.
      *
      * @param repositoryService
      */
@@ -96,12 +96,12 @@ public class RelationshipIndexImpl {
     }
 
     /**
-     * Given a {@sourceObject} and a{@code targetObject} update the link between them with the given
+     * Given a {@code sourceObject} and a{@code targetObject} update the link between them with the given
      * {@link Situation}.
      *
      * @param sourceObject to link in the {@link RelationshipIndexImpl}
      * @param targetObject to link in the {@link RelationshipIndexImpl}
-     * @param situation    that indicates the relationship between {@sourceObject} and {@cocde targetObject}
+     * @param situation    that indicates the relationship between {@code sourceObject} and {@code targetObject}
      * @throws ReconciliationException if there was an error in creating the link
      */
     public void updateLinkedSituation(Map<String, Object> sourceObject, Map<String, Object> targetObject, Situation situation)
@@ -118,7 +118,7 @@ public class RelationshipIndexImpl {
      * @param sourceObject for the query
      * @param targetObject for the query
      * @return relationship record for the {@code sourceObject} and {@code targetObject}
-     * @throws LinkException if there was an error in querying the {@link RepositoryService} other exceptions
+     * @throws LinkException if there was an error in querying the {@link org.forgerock.openidm.repo.RepositoryService} other exceptions
      *                       are wrapped and re-thrown
      */
     protected Map<String, Object> queryRepositoryForLink(String queryName, Map<String, Object> sourceObject,
@@ -135,7 +135,7 @@ public class RelationshipIndexImpl {
     }
 
     /**
-     * Set the {@link RepositoryService} that this relationship index will be using.
+     * Set the {@link org.forgerock.openidm.repo.RepositoryService} that this relationship index will be using.
      *
      * @param repositoryService
      */

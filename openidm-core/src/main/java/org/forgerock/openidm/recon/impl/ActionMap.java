@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.forgerock.openidm.action.Action;
 
 /**
- * A utility class to map {@link org.forgerock.openidm.action.Action}s returned from {@scripts} that were executed
+ * A utility class to map {@link org.forgerock.openidm.action.Action}s returned from {@code scripts} that were executed
  * for a given {@link Situation} .
  */
 public class ActionMap {
@@ -41,7 +41,8 @@ public class ActionMap {
     private ActionFactory actionFactory = new ActionFactoryImpl();
 
     /**
-     * Construct a {@link Script} string result to an {@link Action} mapping, for
+     * Construct a {@link org.forgerock.openidm.script.Script} string result to an
+     * {@link org.forgerock.openidm.action.Action} mapping, for
      * actions that should be fired determined by the resulting {@link Situation}.
      *
      * @param actionMappingConfig
@@ -71,9 +72,10 @@ public class ActionMap {
     }
 
     /**
-     * For the given {@link Script} result, return the {@link Action} that needs to be executed.
+     * For the given {@link org.forgerock.openidm.script.Script} result, return the
+     * {@link org.forgerock.openidm.action.Action} that needs to be executed.
      *
-     * @param scriptResultKey for the {@link Action} that needs to be applied.
+     * @param scriptResultKey for the {@link org.forgerock.openidm.action.Action} that needs to be applied.
      * @return anAction to execute
      */
     public Action getActionFor(String scriptResultKey) {

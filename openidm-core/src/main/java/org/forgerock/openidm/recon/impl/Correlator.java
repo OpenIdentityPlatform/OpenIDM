@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * The correlator runs a configured script i.e. the correlation rule that evaluates
- * whether the {@code sourceObject} and {@targetObject} match. A {@code scope} object
+ * whether the {@code sourceObject} and {@code targetObject} match. A {@code scope} object
  * is handed off to the script consists of:
  * </p>
  * <p/>

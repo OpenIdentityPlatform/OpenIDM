@@ -21,7 +21,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
 /**
- * A bean like wrapper for reconciliation {@policies} defined in json configuration.
+ * A bean like wrapper for reconciliation {@code policies} defined in json configuration.
  * </p>
  * The following default values are applied if values are missing from configuration.
  * </p>
@@ -212,7 +212,7 @@ public class ReconciliationPolicyEntry {
     /**
      * Get the script that should run after every reconciled object.
      *
-     * @return
+     * @return perObjectScript
      */
     public String getPerObjectScript() {
         return perObjectScript;
@@ -268,7 +268,7 @@ public class ReconciliationPolicyEntry {
      * to only those attributes required to correlate. This needs to be a {@code named
      * query}, and must not be a native inline query.
      *
-     * @return
+     * @return correleationQuery
      */
     public String getCorrelationQuery() {
         return correlationQuery;
@@ -324,7 +324,7 @@ public class ReconciliationPolicyEntry {
     /**
      * Get the configured action map for this policy configuration.
      *
-     * @return actionMap that maps script string results to {@Action}s
+     * @return actionMap that maps script string results to {@link org.forgerock.openidm.action.Action}s
      */
     public ActionMap getActionMap() {
         return actionMap;

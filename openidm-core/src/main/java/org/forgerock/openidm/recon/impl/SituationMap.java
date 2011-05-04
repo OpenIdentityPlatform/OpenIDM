@@ -35,7 +35,7 @@ public class SituationMap {
     private Map<Situation, String> situationsToActionsMap;
 
     /**
-     * Construct a {@link Situation} to {@link Script} mapping, with the given
+     * Construct a {@link Situation} to {@link org.forgerock.openidm.script.Script} mapping, with the given
      * json configuration.
      *
      * @param situationConfig json structure
