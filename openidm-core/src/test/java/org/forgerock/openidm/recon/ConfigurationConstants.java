@@ -101,12 +101,20 @@ public class ConfigurationConstants {
                 "                    {\n" +
                 "                        \"sourcePath\" : \"source_property_path\",\n" +
                 "                        \"targetPath\" : \"target_property_path\" ,\n" +
-                "                        \"script\" : \"script ref or def\"\n" +
+                "                        \"script\" : {\n" +
+                "    \"type\": \"text/javascript\",\n" +
+                "    \"source\": \"println(sourcevalue)\",\n" +
+                "    \"sharedScope\": true \n" +
+                "}\n" +
                 "                    },\n" +
                 "                    {\n" +
                 "                        \"sourcePath\" : \"source_property_path\",\n" +
                 "                        \"targetPath\" : \"target_property_path\",\n" +
-                "                        \"script\" : \"script ref or def\"\n" +
+                "                        \"script\" : {\n" +
+                "    \"type\": \"text/javascript\",\n" +
+                "    \"source\": \"println(sourcevalue)\",\n" +
+                "    \"sharedScope\": true \n" +
+                "}\n" +
                 "                    }\n" +
                 "                ]\n" +
                 "\n" +

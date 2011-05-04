@@ -45,6 +45,7 @@ public class ProjectionTest {
 
     @BeforeClass
     private void setup() {
+        Map<String, Object> mappings = new HashMap<String, Object>();
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("name", "");
         map.put("sourceObject", "");
@@ -68,6 +69,8 @@ public class ProjectionTest {
 
         properties.add(props);
         map.put("propertyMappings", properties);
+
+
 
         try {
             mapEntry = new MapEntry(map);
