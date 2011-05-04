@@ -71,6 +71,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     // The key in the OSGi configuration dictionary holding the complete JSON configuration string
     public final static String JSON_CONFIG_PROPERTY = "jsonconfig";
+    public final static String SERVICE_FACTORY_PID = "config.factory-pid";
     
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
     
@@ -243,11 +244,13 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         	old.remove( DirectoryWatcher.FILENAME );
         	old.remove( Constants.SERVICE_PID );
         	old.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+        	old.remove( SERVICE_FACTORY_PID );
         }
 
         if( !ht.equals( old ) )
         {
             ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
+            ht.put(SERVICE_FACTORY_PID, pid[1]);
             if (config.getBundleLocation() != null)
             {
                 config.setBundleLocation(null);
@@ -313,7 +316,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         Configuration oldConfiguration = findExistingConfiguration(fileName);
         if (oldConfiguration != null)
         {
-            logger.info("Updating configuration from " + pid + (factoryPid == null ? "" : "-" + factoryPid) + ".json");
+            logger.debug("Updating configuration from " + pid + (factoryPid == null ? "" : "-" + factoryPid) + ".json");
             return oldConfiguration;
         }
         else
