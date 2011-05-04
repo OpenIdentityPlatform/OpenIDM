@@ -154,10 +154,17 @@ public class AttributeInfoHelper {
     }
 
     public static Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
-        if (attributeInfo.isMultiValued()) {
-            return AttributeBuilder.build(attributeInfo.getName(), getMultiValue(source, attributeInfo.getType()));
+        Attribute attribute = null;
+        if (null == source) {
+            attribute = AttributeBuilder.build(attributeInfo.getName());
+        } else {
+            if (attributeInfo.isMultiValued()) {
+                attribute = AttributeBuilder.build(attributeInfo.getName(), getMultiValue(source, attributeInfo.getType()));
+            } else {
+                attribute = AttributeBuilder.build(attributeInfo.getName(), getSingleValue(source, attributeInfo.getType()));
+            }
         }
-        return AttributeBuilder.build(attributeInfo.getName(), getSingleValue(source, attributeInfo.getType()));
+        return attribute;
     }
 
     public Object build(Attribute source) throws IOException {

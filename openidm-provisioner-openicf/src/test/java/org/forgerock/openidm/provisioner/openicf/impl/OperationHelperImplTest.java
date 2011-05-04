@@ -65,7 +65,7 @@ public class OperationHelperImplTest {
         JsonNode jsonConfiguration = new JsonNode(mapper.readValue(inputStream, Map.class));
 
         APIConfiguration config = new APIConfigurationImpl();
-        builder = new OperationHelperBuilder(jsonConfiguration, config);
+        builder = new OperationHelperBuilder("xml",jsonConfiguration, config);
     }
 
 

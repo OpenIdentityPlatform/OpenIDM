@@ -146,7 +146,7 @@ public class ConnectorUtilTest {
         Assert.assertFalse(systemIdentifier.is(new URI("http://openidm.forgerock.org/openidm/system/LDAP_None/user/CA2B382A-6FFB-11E0-80B7-902C4824019B")));
         Assert.assertFalse(systemIdentifier.is(new URI("system/LDAP_None/")));
 
-        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(jsonConfiguration, runtimeAPIConfiguration);
+        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(((SimpleSystemIdentifier)systemIdentifier).getName(), jsonConfiguration, runtimeAPIConfiguration);
 
         OperationHelper helper = operationHelperBuilder.build("__ACCOUNT__", null);
         Assert.assertEquals(helper.getObjectClass().getObjectClassValue(), "__ACCOUNT__");
@@ -154,7 +154,7 @@ public class ConnectorUtilTest {
 
     @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__")
     public void testUnsupportedObjectType() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
-        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(jsonConfiguration, runtimeAPIConfiguration);
+        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test",jsonConfiguration, runtimeAPIConfiguration);
         OperationHelper helper = operationHelperBuilder.build("__NONE__", null);
     }
 

@@ -199,7 +199,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     @Override
     public List<ConnectorInfo> getAllConnectorInfo() {
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
-        ConnectorInfoManager connectorInfoManager = factory.getLocalManager(connectorURLs);
+        ConnectorInfoManager connectorInfoManager = factory.getLocalManager(getConnectorURLs());
 
         List<ConnectorInfo> result = new ArrayList<ConnectorInfo>(connectorInfoManager.getConnectorInfos());
 
@@ -273,12 +273,15 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
 
     private URL[] getConnectorURLs(URL... resourceURLs) {
         if (null == connectorURLs) {
-            Set<URL> _bundleURLs = new HashSet<URL>(10);
+            Set<URL> _bundleURLs = new HashSet<URL>();
             //URL[] resourceURLs = ClasspathUrlFinder.findResourceBases(BUNDLES_REL_PATH);
             for (int j = 0; j < resourceURLs.length; j++) {
                 try {
                     //URL bundleDirUrl = new URL(resourceURLs[j], BUNDLES_REL_PATH);
                     URL bundleDirUrl = resourceURLs[j];
+                    //TODO Remove this line
+                    System.out.println("MAKMARCI: Debug CI Bug: " + bundleDirUrl);
+
                     TRACE.info("Make sure the URL {} end with \"/\"", bundleDirUrl);
                     Vector<URL> urls = null;
                     if ("file".equals(bundleDirUrl.getProtocol())) {

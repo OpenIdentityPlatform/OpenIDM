@@ -56,13 +56,13 @@ public class OperationHelperImpl implements OperationHelper {
     private ObjectClassInfoHelper objectClassInfoHelper;
     private ConnectorObjectOptions connectorObjectOptions;
     private List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-    private String type;
+    private Id systemObjectSetId;
 
-    public OperationHelperImpl(APIConfiguration configuration, String type, ObjectClassInfoHelper objectClassInfoHelper, ConnectorObjectOptions connectorObjectOptions) {
+    public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper, ConnectorObjectOptions connectorObjectOptions) {
         this.configuration = configuration;
         this.objectClassInfoHelper = objectClassInfoHelper;
         this.connectorObjectOptions = connectorObjectOptions;
-        this.type = type;
+        this.systemObjectSetId = systemObjectSetId;
     }
 
     @Override
@@ -116,17 +116,21 @@ public class OperationHelperImpl implements OperationHelper {
 
     @Override
     public Map<String, Object> build(ConnectorObject source) throws Exception {
-        return objectClassInfoHelper.build(source);
+        Map<String, Object> result = objectClassInfoHelper.build(source);
+        resetUid(source.getUid(), result);
+        return result;
     }
 
     @Override
     public void resetUid(Uid uid, Map<String, Object> target) {
-        Object oldId = target.get("_id");
-        if (oldId instanceof String) {
-            Id newId = new Id((String) oldId);
-            target.put("_id", newId.resolveLocalId(uid.getUidValue()).toString());
-        } else {
-            target.put("_id", "/" + type + "/" + uid.getUidValue());
+        if (null != uid && null != target) {
+            Object oldId = target.get("_id");
+            if (oldId instanceof String) {
+                Id newId = new Id((String) oldId);
+                target.put("_id", newId.resolveLocalId(uid).toString());
+            } else {
+                target.put("_id", systemObjectSetId.resolveLocalId(uid).toString());
+            }
         }
     }
 
@@ -197,7 +201,7 @@ public class OperationHelperImpl implements OperationHelper {
         }
     }
 
-        private Operator createOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
+    private Operator createOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
 
         String nodeName = getKey(node);
 
@@ -212,8 +216,8 @@ public class OperationHelperImpl implements OperationHelper {
             }
 
             for (Object part : parts) {
-                    Operator op = createOperator((Map<String, Object>) part, params);
-                    booleanOperator.addOperator(op);
+                Operator op = createOperator((Map<String, Object>) part, params);
+                booleanOperator.addOperator(op);
             }
 
             return booleanOperator;
@@ -242,7 +246,7 @@ public class OperationHelperImpl implements OperationHelper {
             values = (List<String>) params.get(field);
         }
 
-        Operator operator = OperatorFactory.createFunctionalOperator(operatorName,   objectClassInfoHelper.build( field, values));
+        Operator operator = OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values));
 
         return operator;
     }

@@ -27,6 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.identityconnectors.common.Assertions;
+import org.identityconnectors.framework.common.objects.Uid;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -70,37 +71,36 @@ public class Id {
     private String objectType;
     private String localId = null;
 
-    private static enum STRING_TOKENS {SYSTEM, SYSTEM_NAME, OBJECT_TYPE, LOCAL_ID}
+    public Id(String systemName, String objectType) {
+        baseURI = URI.create("");
+        this.systemName = Assertions.blankChecked(systemName, "systemName");
+        this.objectType = Assertions.blankChecked(objectType, "objectType");
+    }
 
     public Id(String id) {
         int index = Assertions.blankChecked(id, "id").indexOf(SYSTEM_BASE);
         if (index > -1) {
             try {
                 if (0 == index) {
-                    baseURI = new URI("");
+                    baseURI = URI.create("");
                 } else {
                     String baseURIString = id.substring(0, index);
                     URL baseContext = new URL(baseURIString);
                     baseURI = baseContext.toURI();
                 }
                 String identifiers = id.substring(index);
-                StringTokenizer stringTokenizer = new StringTokenizer(identifiers, "/", false);
-                if (2 < stringTokenizer.countTokens() && stringTokenizer.countTokens() < 5) {
-                    int tokenIndex = 0;
-                    while (stringTokenizer.hasMoreTokens()) {
-                        String value = java.net.URLDecoder.decode(stringTokenizer.nextToken(), CHARACTER_ENCODING_UTF_8);
-                        switch (tokenIndex) {
-                            case 1:
-                                systemName = value;
-                                break;
-                            case 2:
-                                objectType = value;
-                                break;
-                            case 3:
-                                localId = value;
-                                break;
-                        }
-                        tokenIndex++;
+                String[] segments = identifiers.split("\\/");
+                if (2 < segments.length && segments.length < 5) {
+                    // fix length to 4
+                    switch (segments.length > 3 ? 4 : segments.length) {
+                        case 4:
+                            localId = java.net.URLDecoder.decode(segments[3], CHARACTER_ENCODING_UTF_8);
+                        case 3:
+                            objectType = java.net.URLDecoder.decode(segments[2], CHARACTER_ENCODING_UTF_8);
+                        case 2:
+                            systemName = java.net.URLDecoder.decode(segments[1], CHARACTER_ENCODING_UTF_8);
+                        case 1:
+                            boolean isSystemId = "system".equals(segments[0]) ? true : false;
                     }
                 } else {
                     throw new IllegalArgumentException("Invalid number of tokens in ID " + id);
@@ -128,11 +128,11 @@ public class Id {
     }
 
 
-    public URI resolveLocalId(String newLocalId) {
+    public URI resolveLocalId(Uid uid) {
         try {
             URI id = getObjectSetId();
-            if (null != newLocalId) {
-                id = id.resolve(URLEncoder.encode(newLocalId, CHARACTER_ENCODING_UTF_8));
+            if (null != uid) {
+                id = id.resolve(URLEncoder.encode(uid.getUidValue(), CHARACTER_ENCODING_UTF_8));
             }
             return id;
         } catch (UnsupportedEncodingException e) {

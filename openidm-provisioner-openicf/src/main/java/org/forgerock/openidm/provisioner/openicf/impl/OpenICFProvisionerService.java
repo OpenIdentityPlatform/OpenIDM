@@ -111,8 +111,8 @@ public class OpenICFProvisionerService implements ProvisionerService {
             throw new ComponentException("ConnectorInfo can not retrieved for " + connectorReference);
         }
         try {
-            operationHelperBuilder = new OperationHelperBuilder(jsonConfiguration, connectorInfo.createDefaultAPIConfiguration());
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
+            operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration, connectorInfo.createDefaultAPIConfiguration());
         } catch (Exception e) {
             TRACE.error("Invalid configuration", e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
@@ -281,7 +281,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 ConnectorObject connectorObject = helper.build(UpdateApiOp.class, complexId.getLocalId(), object);
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
 
-                Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), connectorObject.getAttributes(), operationOptionsBuilder.build());
+                Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
             } catch (Exception e) {
                 TRACE.error("Error at Creating of {}", id, e);

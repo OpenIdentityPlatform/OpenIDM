@@ -108,19 +108,38 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
     @Test(dependsOnMethods = {"testCreate"})
     public void testRead() throws Exception {
         for (String id : objectIDs) {
-            Map<String, Object> connectorObject = getService().read("system/xml" + id);
+            Map<String, Object> connectorObject = getService().read(id);
             Assert.assertNotNull(connectorObject);
+            assertThat(connectorObject).includes(MapAssert.entry("_id", id));
         }
     }
 
     @Test(dependsOnMethods = {"testCreate"})
     public void testUpdate() throws Exception {
+        for (String id : objectIDs) {
+            Map<String, Object> updates = new HashMap<String, Object>(5);
+            updates.put("__PASSWORD__", "TestPassw0rd");
+            updates.put("__GROUPS__", Arrays.asList("TestGroup1", "TestGroup2"));
+            updates.put("__DESCRIPTION__", "Test Description");
+            updates.put("firstname", "Darth");
+            updates.put("lastname-first-letter", null);
+            getService().update(id, null, updates);
+            Map<String, Object> connectorObject = getService().read(id);
+            assertThat(connectorObject).excludes(MapAssert.entry("__PASSWORD__", "TestPassw0rd"));
+            assertThat(connectorObject).includes(MapAssert.entry("__GROUPS__", Arrays.asList("TestGroup1", "TestGroup2")));
+            assertThat(connectorObject).includes(MapAssert.entry("__DESCRIPTION__", "Test Description"));
+            assertThat(connectorObject).includes(MapAssert.entry("firstname", "Darth"));
+            //assertThat(connectorObject).includes(MapAssert.entry("lastname-first-letter", null));
+            assertThat(connectorObject).includes(MapAssert.entry("_id", id));
 
+            //assertThat(connectorObject.keySet()).excludes("__PASSWORD__", "secret-pin", "jpegPhoto", "yearly-wage");
+            Assert.assertNotNull(connectorObject);
+        }
     }
 
     @Test(dependsOnMethods = {"testCreate"})
     public void testDelete() throws Exception {
-        getService().delete("system/xml" + objectIDs.get(0), null);
+        getService().delete(objectIDs.get(0), null);
         objectIDs.remove(0);
     }
 

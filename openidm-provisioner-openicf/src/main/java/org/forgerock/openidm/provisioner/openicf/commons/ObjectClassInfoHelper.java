@@ -103,11 +103,11 @@ public class ObjectClassInfoHelper {
 
         ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
         builder.setObjectClass(objectClass);
-
+        builder.setUid(nameValue);
+        builder.setName(nameValue);
+        Set<String> keySet = source.keySet();
         if (CreateApiOp.class.isAssignableFrom(operation)) {
-            builder.setUid(nameValue);
-            builder.setName(nameValue);
-            Set<String> keySet = source.keySet();
+
             for (AttributeInfoHelper attributeInfo : attributes) {
                 if (attributeInfo.getAttributeInfo().isCreateable()) {
                     if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
@@ -122,9 +122,8 @@ public class ObjectClassInfoHelper {
                 }
             }
         } else if (UpdateApiOp.class.isAssignableFrom(operation)) {
-            builder.setUid(nameValue);
             for (AttributeInfoHelper attributeInfo : attributes) {
-                if (Uid.NAME.equals(attributeInfo.getName())) {
+                if (Uid.NAME.equals(attributeInfo.getName()) || !keySet.contains(attributeInfo.getName())) {
                     continue;
                 }
                 if (attributeInfo.getAttributeInfo().isUpdateable()) {
@@ -133,7 +132,6 @@ public class ObjectClassInfoHelper {
                 }
             }
         } else {
-            builder.setUid(nameValue);
             for (AttributeInfoHelper attributeInfo : attributes) {
                 if (Uid.NAME.equals(attributeInfo.getName())) {
                     continue;
@@ -173,10 +171,6 @@ public class ObjectClassInfoHelper {
         }
         result.put("object", build(source.getObject()));
         return result;
-    }
-
-    public void resetUid(Uid uid, Map<String, Object> target) {
-
     }
 
     public Attribute build(String attributeName, Object source) throws Exception {

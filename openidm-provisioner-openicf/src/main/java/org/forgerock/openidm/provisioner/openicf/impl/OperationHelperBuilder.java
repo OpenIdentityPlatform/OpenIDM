@@ -32,7 +32,9 @@ import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
+import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
+import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
@@ -49,18 +51,20 @@ public class OperationHelperBuilder {
     private APIConfigurationImpl runtimeAPIConfiguration;
     private Map<String, ObjectClassInfoHelper> supportedObjectTypes;
     private Map<String, ConnectorObjectOptions> operationOptionHelpers;
+    private String systemName;
 
-    public OperationHelperBuilder(JsonNode jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws SchemaException, JsonNodeException {
+    public OperationHelperBuilder(String system, JsonNode jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws SchemaException, JsonNodeException {
         runtimeAPIConfiguration = (APIConfigurationImpl) defaultAPIConfiguration;
         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, defaultAPIConfiguration);
         supportedObjectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
         operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
+        this.systemName = Assertions.blankChecked(system,"systemName");
     }
 
-    public OperationHelper build(String type, Map<String, Object> object) throws ObjectSetException {
-        ObjectClassInfoHelper objectClassInfoHelper = supportedObjectTypes.get(type);
+    public OperationHelper build(String objectType, Map<String, Object> object) throws ObjectSetException {
+        ObjectClassInfoHelper objectClassInfoHelper = supportedObjectTypes.get(objectType);
         if (null == objectClassInfoHelper) {
-            throw new ObjectSetException("Unsupported object type: " + type);
+            throw new ObjectSetException("Unsupported object type: " + objectType);
         }
         APIConfiguration _configuration = getRuntimeAPIConfiguration();
 
@@ -69,7 +73,8 @@ public class OperationHelperBuilder {
 //            ConnectorUtil.configureDefaultAPIConfiguration(null, _configuration);
 //        }
 
-        return new OperationHelperImpl(_configuration, type, objectClassInfoHelper, operationOptionHelpers.get(type));
+
+        return new OperationHelperImpl(_configuration, new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType));
     }
 
 
