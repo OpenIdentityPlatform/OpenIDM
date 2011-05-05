@@ -20,7 +20,7 @@ import java.util.Map;
 
 /**
  * An interface that needs to be implemented for each defined Action that can be
- * executed for a given {@link org.forgerock.openidm.recon.impl.Situation}. Scripts return Action strings that are
+ * executed for a given {@link org.forgerock.openidm.recon.Situation}. Scripts return Action strings that are
  * mapped using {@link org.forgerock.openidm.recon.impl.ActionMap}
  */
 public interface Action {
