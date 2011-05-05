@@ -47,14 +47,12 @@
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
-        <!-- build cycle
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
             <version>2.0.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-        -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
