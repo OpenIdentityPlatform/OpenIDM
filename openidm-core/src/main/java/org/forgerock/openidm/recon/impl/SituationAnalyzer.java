@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.recon.impl;
 
+import org.forgerock.openidm.recon.Situation;
+
 import java.util.Map;
 
 /**
