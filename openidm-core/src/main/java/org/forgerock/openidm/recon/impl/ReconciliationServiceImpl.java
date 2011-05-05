@@ -30,6 +30,8 @@ import org.apache.felix.scr.annotations.Deactivate;
 
 import org.forgerock.json.fluent.JsonNodeException;
 
+import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.recon.ReconciliationService;
 
 /**
@@ -37,13 +39,13 @@ import org.forgerock.openidm.recon.ReconciliationService;
  * as on OSGi service.
  */
 
-@Component(name = "reconciliation", immediate = true)
+@Component(name = "org.forgerock.openidm.reconciliation", immediate = true)
 @Service(value = ReconciliationService.class)
 @Properties({
         @Property(name = "service.description", value = "Default Reconciliation Engine"),
         @Property(name = "service.vendor", value = "ForgeRock AS")
 })
-public class ReconciliationServiceImpl implements ReconciliationService {
+public class ReconciliationServiceImpl implements ReconciliationService, ScheduledService {
 
     final static Logger logger = LoggerFactory.getLogger(ReconciliationServiceImpl.class);
 
@@ -114,6 +116,29 @@ public class ReconciliationServiceImpl implements ReconciliationService {
     @Override
     public void cancelReconciliation(String reconciliationConfigurationName) throws ReconciliationException {
 
+    }
+    
+    /**
+     * Invoked by the scheduler service when the configured schedule triggers.
+     * 
+     * @param context Context information passed by the scheduler service
+     * @throws ExecutionException if execution of the scheduled work failed. 
+     *         Implementations can also throw RuntimeExceptions which will get logged.
+     */
+    public void execute(Map<String, Object> context) throws ExecutionException {
+        String reconConfigName = (String) context.get(CONFIGURED_INVOKE_CONTEXT);
+        if (reconConfigName == null || reconConfigName.trim().length() == 0) {
+            throw new ExecutionException("The scheduled reconciliation configuration " + context
+                    + " needs to contain the reconciliation configuration name in the invoke context property,"
+                    + " but invoke context is empty.");
+        }
+        logger.info("Scheduled reconciliation {} starting ", reconConfigName);
+        try {
+            startReconciliation(reconConfigName);
+        } catch (Exception ex) {
+            logger.warn("Reconciliation for " + reconConfigName + " and scheduled for " 
+                    + context.get(SCHEDULED_FIRE_TIME) + " failed. ", ex);
+        }
     }
 
     /**
