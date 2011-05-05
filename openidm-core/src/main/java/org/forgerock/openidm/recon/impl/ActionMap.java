@@ -29,7 +29,7 @@ import org.forgerock.openidm.action.Action;
 
 /**
  * A utility class to map {@link org.forgerock.openidm.action.Action}s returned from {@code scripts} that were executed
- * for a given {@link Situation} .
+ * for a given {@link org.forgerock.openidm.recon.Situation} .
  */
 public class ActionMap {
 
@@ -43,7 +43,7 @@ public class ActionMap {
     /**
      * Construct a {@link org.forgerock.openidm.script.Script} string result to an
      * {@link org.forgerock.openidm.action.Action} mapping, for
-     * actions that should be fired determined by the resulting {@link Situation}.
+     * actions that should be fired determined by the resulting {@link org.forgerock.openidm.recon.Situation}.
      *
      * @param actionMappingConfig
      */
