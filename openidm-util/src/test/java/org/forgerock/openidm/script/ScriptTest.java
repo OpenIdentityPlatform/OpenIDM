@@ -58,7 +58,7 @@ public class ScriptTest {
         assertThat(script.exec(scope)).isEqualTo(3);
     }
 
-    @Test(expectedExceptions=ScriptException.class)
+    @Test(expectedExceptions=JsonNodeException.class)
     public void UnknownScriptTest() throws JsonNodeException, ScriptException {
         JsonNode config = new JsonNode(new HashMap<String, Object>());
         config.put("type", "definitely/unknown");

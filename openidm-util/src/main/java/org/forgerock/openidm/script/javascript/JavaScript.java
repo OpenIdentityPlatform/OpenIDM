@@ -22,6 +22,7 @@ import java.util.Map;
 
 // Mozilla Rhino
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -29,6 +30,7 @@ import org.mozilla.javascript.ScriptableObject;
 // ForgeRock OpenIDM Core
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
+import org.forgerock.openidm.script.ScriptThrownException;
 
 /**
  * A JavaScript script.
@@ -123,7 +125,12 @@ public class JavaScript implements Script {
             return Converter.convert(script.exec(context, inner));
         }
         catch (RhinoException re) {
-            throw new ScriptException(re.getMessage());
+            if (re instanceof JavaScriptException) { // thrown by the script itself
+                throw new ScriptThrownException(Converter.convert(((JavaScriptException)re).getValue()));
+            }
+            else { // some other runtime exception encountered
+                throw new ScriptException(re.getMessage());
+            }
         }   
         finally {
             Context.exit();

@@ -41,11 +41,16 @@ import org.forgerock.openidm.script.ScriptFactory;
 public class JavaScriptFactory implements ScriptFactory {
 
     @Override
-    public Script newInstance(JsonNode config) throws JsonNodeException, ScriptException {
+    public Script newInstance(JsonNode config) throws JsonNodeException {
         String type = config.get("type").asString();
         if (type != null && type.equalsIgnoreCase("text/javascript")) {
-            return new JavaScript(config.get("source").required().asString(),
-             config.get("sharedScope").defaultTo(true).asBoolean());
+            try {
+                return new JavaScript(config.get("source").required().asString(),
+                 config.get("sharedScope").defaultTo(true).asBoolean());
+            }
+            catch (ScriptException se) { // re-cast to show exact node of failure 
+                throw new JsonNodeException(config.get("source"), se);
+            }
         }
         return null;
     }

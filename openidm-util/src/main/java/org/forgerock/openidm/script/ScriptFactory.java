@@ -40,8 +40,7 @@ public interface ScriptFactory {
      *
      * @param config the configuration node for the script; must be a map.
      * @return a new script instance, or {@code null} if the factory could not create it.
-     * @throws JsonNodeException if the configuration object is malformed for the script type.
-     * @throws ScriptException if the script in the configuration object is malformed.
+     * @throws JsonNodeException if the configuration object or script is malformed.
      */
-    Script newInstance(JsonNode config) throws JsonNodeException, ScriptException;
+    Script newInstance(JsonNode config) throws JsonNodeException;
 }

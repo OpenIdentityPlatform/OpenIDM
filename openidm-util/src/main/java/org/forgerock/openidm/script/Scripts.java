@@ -39,16 +39,16 @@ public class Scripts {
      *
      * @param config configuration object for script.
      * @return a new script instance, or {@code null} if the factory could not create it.
-     * @throws JsonNodeException if the configuration object is malformed.
-     * @throws ScriptException if script could not be created or the script is malformed.
+     * @throws JsonNodeException if the script configuration object or source is malformed.
      */
-    public static Script newInstance(JsonNode config) throws JsonNodeException, ScriptException {
+    public static Script newInstance(JsonNode config) throws JsonNodeException {
         for (ScriptFactory factory : FACTORIES) {
             Script script = factory.newInstance(config);
             if (script != null) {
                 return script;
             }
         }
-        throw new ScriptException("no factory for script"); // no matching factory
+        JsonNode name = config.get("name");
+        throw new JsonNodeException(name, "script type '" + name.asString() + " unsupported"); // no matching factory
     }
 }
