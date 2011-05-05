@@ -34,6 +34,7 @@ import org.forgerock.openidm.repo.RepositoryService;//hand routed TODO need to r
 //import org.forgerock.openidm.provisioner.ProvisionerService; //hand routed TODO need to remove in the future
 
 import org.forgerock.openidm.sync.ObjectSynchronizer;
+import org.forgerock.openidm.sync.ObjectSynchronizationException;
 
 /**
  * A default implementation for the {@link org.forgerock.openidm.sync.ObjectSynchronizer} interface implemented

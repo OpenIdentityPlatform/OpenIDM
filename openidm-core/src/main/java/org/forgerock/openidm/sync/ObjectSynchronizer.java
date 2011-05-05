@@ -18,8 +18,6 @@ package org.forgerock.openidm.sync;
 
 import java.util.Map;
 
-import org.forgerock.openidm.sync.impl.ObjectSynchronizationException;
-
 /**
  * An interface for notifying that the state of a {@code source object} has changed, which results in synchronizing
  * {@code sourceObject} fields to {@code targetObjects}, through defined {@code mappings} .
@@ -73,7 +71,7 @@ public interface ObjectSynchronizer {
      *
      * @param id          is the identifier of the object that has been deleted and must not be {@code null}
      * @param objectValue is the former state of the {@code source object}
-     * @throws org.forgerock.openidm.sync.impl.ObjectSynchronizationException
+     * @throws ObjectSynchronizationException
      *          if an underlying exception occurs
      */
     public void onDelete(String id, Map<String, Object> objectValue) throws ObjectSynchronizationException;
@@ -82,7 +80,7 @@ public interface ObjectSynchronizer {
      * Notifies that the {@code sourceObject} has been deleted, without having the {@code oldValue}
      *
      * @param id is the identifier of the object that has been deleted and must not be {@code null}
-     * @throws org.forgerock.openidm.sync.impl.ObjectSynchronizationException
+     * @throws ObjectSynchronizationException
      *          if an underlying exception occurs
      */
     public void onDelete(String id) throws ObjectSynchronizationException;

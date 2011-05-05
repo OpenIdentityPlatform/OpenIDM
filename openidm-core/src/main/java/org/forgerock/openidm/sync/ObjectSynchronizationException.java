@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.sync.impl;
+package org.forgerock.openidm.sync;
 
 /**
  * An exception that may be thrown when attempting object synchronization. Typically there will be a wrapped
