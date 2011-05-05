@@ -19,6 +19,7 @@ package org.forgerock.openidm.recon.impl;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.forgerock.openidm.recon.Situation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
