@@ -15,7 +15,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.QueryConstants;
 
-import org.forgerock.openidm.provisioner.ProvisionerService;
+import org.forgerock.openidm.objset.ObjectSet;
+//import org.forgerock.openidm.provisioner.ProvisionerService;
 
 import org.forgerock.openidm.objset.ObjectSetException;
 
@@ -44,10 +45,10 @@ public class ReconciliationEngine {
             policy = ReferencePolicy.STATIC)
     private RepositoryService repositoryService;
 
-    @Reference(name = "ProvisionerService", referenceInterface = ProvisionerService.class,
+    @Reference(name = "ProvisionerService", referenceInterface = ObjectSet.class,
             bind = "bindProvisionerService", unbind = "unbindProvisionerService",
             cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
-    private ProvisionerService provisionerService;
+    private ObjectSet provisionerService;
 
     private ReconciliationConfigurationEntry configurationEntry;
 
@@ -119,7 +120,7 @@ public class ReconciliationEngine {
     /**
      * TODO What else needs to be done in the case of a bind
      */
-    protected void bindProvisionerService(ProvisionerService provisionerService) {
+    protected void bindProvisionerService(ObjectSet provisionerService) {
         logger.debug("ProvisionerService was bound");
         this.provisionerService = provisionerService;
     }
@@ -127,7 +128,7 @@ public class ReconciliationEngine {
     /**
      * TODO What else needs to be done in the case of an unbind, it really can't function if null
      */
-    protected void unbindProvisionerService(ProvisionerService provisionerService) {
+    protected void unbindProvisionerService(ObjectSet provisionerService) {
         logger.debug("ProvisionerService was unbound");
         this.provisionerService = provisionerService;
     }
