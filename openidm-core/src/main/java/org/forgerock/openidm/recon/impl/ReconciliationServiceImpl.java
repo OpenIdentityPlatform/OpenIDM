@@ -40,7 +40,7 @@ import org.forgerock.openidm.recon.ReconciliationService;
  */
 
 @Component(name = "org.forgerock.openidm.reconciliation", immediate = true)
-@Service(value = ReconciliationService.class)
+@Service
 @Properties({
         @Property(name = "service.description", value = "Default Reconciliation Engine"),
         @Property(name = "service.vendor", value = "ForgeRock AS")
