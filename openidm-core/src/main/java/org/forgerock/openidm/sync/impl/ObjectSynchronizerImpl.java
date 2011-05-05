@@ -19,23 +19,20 @@ package org.forgerock.openidm.sync.impl;
 import java.util.Map;
 import java.util.Collection;
 
+import org.apache.felix.scr.annotations.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.osgi.framework.Constants;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 
 import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.repo.RepositoryService;//hand routed TODO need to remove in the future
+import org.forgerock.openidm.provisioner.ProvisionerService; //hand routed TODO need to remove in the future
+
 import org.forgerock.openidm.sync.ObjectSynchronizer;
 
 /**
@@ -52,7 +49,15 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
 
     final static Logger logger = LoggerFactory.getLogger(ObjectSynchronizerImpl.class);
 
+    @Reference(name = "RepositoryService", referenceInterface = RepositoryService.class,
+            bind = "bindRepositoryService", unbind = "unbindRepositoryService",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
     private RepositoryService repositoryService;
+
+    @Reference(name = "ProvisionerService", referenceInterface = ProvisionerService.class,
+            bind = "bindProvisionerService", unbind = "unbindProvisionerService",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
+    private ProvisionerService provisionerService;
 
     // TODO fix, this is hand routing for now
     private ObjectSet managedObjects;
@@ -64,17 +69,12 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
     public ObjectSynchronizerImpl() {
     }
 
-//    TODO constructor with routing service layer
-//    public ObjectSynchronizerImpl() {
-//    }
-
     @Override
     public void onCreate(String id, Map<String, Object> newValue) throws ObjectSynchronizationException {
         try {
 
             processSynchronousMappings(id, newValue);
             processAsynchronousMappings(id, newValue);
-
 
             Collection<MapEntry> asynchronousEntries =
                     mappingConfiguration.getAsynchronousEntriesFor(id);
@@ -110,7 +110,8 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
     }
 
     @Override
-    public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue) throws ObjectSynchronizationException {
+    public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
+            throws ObjectSynchronizationException {
         try {
             repositoryService.update(id, null, newValue);
         } catch (ObjectSetException e) {
@@ -163,7 +164,6 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
         }
     }
 
-
     @Activate
     private void activate(Map<String, Object> configuration) throws ObjectSynchronizationException {
         logger.debug("{} was activated with: {}",
@@ -184,13 +184,45 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
                 new Object[]{ObjectSynchronizerImpl.class.getName(), configuration});
     }
 
+
     /**
-     * Set the {@link RepositoryService} that this {@link ObjectSynchronizer} will
-     * be using.
+     * TODO What else needs to be done in the case of a bind
+     * Bind the {@link RepositoryService} in use.
      *
-     * @param repositoryService to load and store objects
+     * @param repositoryService to use
      */
-    public void setRepositoryService(RepositoryService repositoryService) {
+    protected void bindRepositoryService(RepositoryService repositoryService) {
+        logger.debug("RepositoryService was bound");
         this.repositoryService = repositoryService;
     }
+
+    /**
+     * TODO What else needs to be done in the case of an unbind, it really can't function if null
+     * Unbind the {@link RepositoryService} in use, this will leave recon in an unusable state
+     */
+    protected void unbindRepositoryService(RepositoryService repositoryService) {
+        logger.debug("RepositoryService was unbound");
+        this.repositoryService = null;
+    }
+
+    /**
+     * TODO What else needs to be done in the case of a bind
+     * Bind the {@link ProvisionerService} in use.
+     *
+     * @param provisionerService to use
+     */
+    protected void bindProvisionerService(ProvisionerService provisionerService) {
+        logger.debug("ProvisionerService was bound");
+        this.provisionerService = provisionerService;
+    }
+
+    /**
+     * TODO What else needs to be done in the case of an unbind, it really can't function if null
+     * Unbind the {@link ProvisionerService} this will leave recon in an unusable state
+     */
+    protected void unbindProvisionerService(ProvisionerService provisionerService) {
+        logger.debug("ProvisionerService was unbound");
+        this.provisionerService = provisionerService;
+    }
+
 }
