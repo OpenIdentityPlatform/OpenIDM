@@ -89,7 +89,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     }
 
     protected void unbind(ConnectorInfoProvider connectorInfoProvider) {
-        connectorInfoProvider = null;
+        this.connectorInfoProvider = null;
         TRACE.info("ConnectorInfoProvider is unbound.");
     }
 

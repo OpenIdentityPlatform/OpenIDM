@@ -842,8 +842,7 @@ public class ConnectorUtil {
                 }
             } else if (targetClazz.equals(java.io.File.class)) {
                 if (sourceClass == String.class) {
-                    File file = new File((String) source);
-                    result = targetClazz.cast(file);
+                    result = (T) new File((String) source);
                     coerced = true;
                 }
             } else if (targetClazz.equals(float.class) || targetClazz.equals(Float.class)) {

@@ -59,7 +59,7 @@ public class OperationHelperImplTest {
     @BeforeTest
     public void beforeTest() throws Exception {
         String configurationFile = "/config/" + OpenICFProvisionerServiceXMLConnectorTest.class.getCanonicalName() + ".json";
-        InputStream inputStream = TestLocalConnectorInfoProviderStub.class.getResourceAsStream(configurationFile);
+        InputStream inputStream = OperationHelperImplTest.class.getResourceAsStream(configurationFile);
         Assert.assertNotNull(inputStream, "Missing Configuration File at: " + configurationFile);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonConfiguration = new JsonNode(mapper.readValue(inputStream, Map.class));

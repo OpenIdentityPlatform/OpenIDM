@@ -144,11 +144,11 @@ public class ConnectorInfoProviderServiceTest {
         URL xmlRoot = OpenICFProvisionerServiceXMLConnectorTest.class.getResource("/xml/");
         Assert.assertNotNull(xmlRoot);
         URI xsdIcfFilePath = xmlRoot.toURI().resolve("resource-schema-1.xsd");
-        configuration.getConfigurationProperties().setPropertyValue("xsdIcfFilePath", xsdIcfFilePath.getPath());
+        configuration.getConfigurationProperties().setPropertyValue("xsdIcfFilePath", new File(xsdIcfFilePath));
         URI xsdFilePath = xmlRoot.toURI().resolve("ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd");
-        configuration.getConfigurationProperties().setPropertyValue("xsdFilePath", xsdFilePath.getPath());
+        configuration.getConfigurationProperties().setPropertyValue("xsdFilePath", new File(xsdFilePath));
         URI xmlFilePath = xmlRoot.toURI().resolve("data.xml");
-        configuration.getConfigurationProperties().setPropertyValue("xmlFilePath", xmlFilePath.getPath());
+        configuration.getConfigurationProperties().setPropertyValue("xmlFilePath", new File(xmlFilePath));
 
         try {
             ObjectMapper mapper = new ObjectMapper();

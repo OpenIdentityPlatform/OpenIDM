@@ -41,6 +41,6 @@ public class TestLocalConnectorInfoProviderStub extends ConnectorInfoProviderSer
         URL connectorsURL = TestLocalConnectorInfoProviderStub.class.getResource("/connectorServer/connectors/");
         assert null != connectorsURL;
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
-        initialiseLocalManager(factory,connectorsURL.getPath());
+        initialiseLocalManager(factory, connectorsURL.getPath());
     }
 }

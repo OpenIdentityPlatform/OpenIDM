@@ -22,14 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.osgi.service.component.ComponentContext;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.*;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -134,23 +129,26 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     }
 
     protected void initialiseLocalManager(ConnectorInfoManagerFactory factory, String connectorsArea) {
-        System.out.println("MAKMARCI: Debug CI Bug: connectorsArea=" + connectorsArea);
         if (null != connectorsArea) {
-            TRACE.info("Using connectors from [" + connectorsArea + "]");
-            File dir = new File(connectorsArea);
-            if (!dir.exists()) {
-                String absolutePath = dir.getAbsolutePath();
-                System.out.println("MAKMARCI: Debug CI Bug: non existing absolutePath=" + absolutePath);
-                TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
-            } else {
-                try {
-                    System.out.println("MAKMARCI: Debug CI Bug: absolutePath=" + dir.getAbsoluteFile().toURI().toURL());
-                    URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
-                    factory.getLocalManager(bundleUrls);
-                } catch (MalformedURLException e) {
-                    TRACE.error("How can this happen?", e);
-                }
+            try {
+                String connectorsDir = URLDecoder.decode(connectorsArea, "UTF-8");
+                TRACE.info("Using connectors from [" + connectorsDir + "]");
+                File dir = new File(connectorsDir);
+                if (!dir.exists()) {
+                    String absolutePath = dir.getAbsolutePath();
+                    TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
+                } else {
+                    try {
+                        URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
+                        factory.getLocalManager(bundleUrls);
+                    } catch (MalformedURLException e) {
+                        TRACE.error("How can this happen?", e);
+                    }
 
+                }
+            } catch (UnsupportedEncodingException e) {
+                // Should never happen.
+                throw new UndeclaredThrowableException(e);
             }
         } else {
             throw new ComponentException("connectors directory MUST be configured");
@@ -284,13 +282,11 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                 try {
                     //URL bundleDirUrl = new URL(resourceURLs[j], BUNDLES_REL_PATH);
                     URL bundleDirUrl = resourceURLs[j];
-                    //TODO Remove this line
-                    System.out.println("MAKMARCI: Debug CI Bug: " + bundleDirUrl);
 
                     TRACE.info("Make sure the URL {} end with \"/\"", bundleDirUrl);
                     Vector<URL> urls = null;
                     if ("file".equals(bundleDirUrl.getProtocol())) {
-                        File file = new File(bundleDirUrl.getFile());
+                        File file = new File(bundleDirUrl.toURI());
                         if (file.isDirectory()) {
                             FileFilter filter = new FileFilter() {
 
@@ -308,7 +304,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                                 urls.add(new URL(bundleDirUrl, fname));
                             }
                         }
-                    } else if (("jar".equals(bundleDirUrl.getProtocol())) || ("wsjar".equals(bundleDirUrl.getProtocol()))){
+                    } else if (("jar".equals(bundleDirUrl.getProtocol())) || ("wsjar".equals(bundleDirUrl.getProtocol()))) {
                         urls = getJarFileListing(bundleDirUrl, "^META-INF/" + DEFAULT_CONNECTORS_LOCATION + "/(.*).jar$");
 
                     } else {
@@ -323,6 +319,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                 } catch (IOException ex) {
                     //TODO Add Message
                     TRACE.error("XXX", ex);
+                } catch (URISyntaxException e) {
+                    TRACE.error("URL instance does not comply with RFC 2396", e);
                 }
             }
             if (TRACE.isDebugEnabled()) {
