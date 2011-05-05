@@ -16,8 +16,8 @@
 
 package org.forgerock.openidm.sync.impl;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Collection;
 
 import org.slf4j.Logger;
@@ -33,7 +33,9 @@ import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.script.ScriptException;
 
 /**
- * Project values by applying transformation scripts on managed objects.
+ * Project values by applying transformation scripts on managed objects. {@code targetObject} properties
+ * are transformed via {@link org.forgerock.openidm.script.Script} as defined by
+ * {@link org.forgerock.openidm.sync.impl.PropertyEntry}
  */
 public class Projection {
 
@@ -61,9 +63,9 @@ public class Projection {
         Script script = Scripts.newInstance(scriptObject);
         Map<String, Object> scopeObject = new HashMap<String, Object>();
         scopeObject.put("sourceValue", propertyValue);
-        script.exec(scopeObject);
-        Object targetValue = scopeObject.get("targetValue");
-        return targetValue;
+        //script.exec(scopeObject);
+        //Object targetValue = scopeObject.get("targetValue");
+        return script.exec(scopeObject);
     }
 
 }
