@@ -102,6 +102,14 @@ public class ReconciliationConfiguration {
         return reconciliationNameToEntryMap.values();
     }
 
+    public ReconciliationConfigurationEntry getReconciliationConfigurationEntry(String configurationName) {
+        return reconciliationNameToEntryMap.get(configurationName);
+    }
+
+    public ReconciliationPolicyEntry getReconciliationPolicyEntry(String policyName) {
+        return reconciliationNamePolicyMap.get(policyName);
+    }
+
     /**
      * Get all {@link ReconciliationPolicyEntry}'s that have been defined.
      *
