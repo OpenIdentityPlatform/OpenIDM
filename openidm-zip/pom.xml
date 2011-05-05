@@ -128,6 +128,30 @@
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <!-- OpenICF Connectors -->
+        <dependency>
+            <groupId>org.forgerock.openicf.bundles.file</groupId>
+            <artifactId>xml</artifactId>
+            <version>1.1.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jaxen</groupId>
+                    <artifactId>jaxen</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.sf.saxon</groupId>
+                    <artifactId>saxonhe</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.xsom</groupId>
+                    <artifactId>xsom</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>relaxngDatatype</artifactId>
+                    <groupId>relaxngDatatype</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
     <build>
         <finalName>openidm-${project.version}</finalName>

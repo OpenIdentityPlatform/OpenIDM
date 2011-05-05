@@ -33,21 +33,31 @@
             <outputDirectory>/openidm/bundle</outputDirectory>
             <scope>runtime</scope>
             <excludes>
-                 <exclude>org.apache.felix:org.apache.felix.main</exclude>
-                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
-                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
-                 <exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
-                 <exclude>org.osgi:**</exclude>
-                 <exclude>com.orientechnologies:**</exclude>
-                 <exclude>javax.persistence:persistence-api</exclude>
-                 <exclude>javax.transaction:jta</exclude>
+                <exclude>org.apache.felix:org.apache.felix.main</exclude>
+                <exclude>org.apache.felix:org.apache.felix.framework</exclude>
+                <exclude>org.apache.felix:org.osgi.foundation</exclude>
+                <exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
+                <exclude>org.osgi:**</exclude>
+                <exclude>com.orientechnologies:**</exclude>
+                <exclude>javax.persistence:persistence-api</exclude>
+                <exclude>javax.transaction:jta</exclude>
+                <exclude>org.forgerock.openicf.bundles.*</exclude>
+                <exclude>org.forgerock.openicf.connectors.*</exclude>
             </excludes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/connectors</outputDirectory>
+            <includes>
+                <include>org.forgerock.openicf.bundles.*</include>
+                <include>org.forgerock.openicf.bundles.*</include>
+            </includes>
         </dependencySet>
         <dependencySet>
             <unpack>false</unpack>
             <outputFileNameMapping>felix.jar</outputFileNameMapping>
             <includes>
-                 <include>org.apache.felix:org.apache.felix.main</include>
+                <include>org.apache.felix:org.apache.felix.main</include>
             </includes>
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>
