@@ -23,6 +23,7 @@ import java.util.ArrayList;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
+
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.forgerock.openidm.sync.impl.MapEntry;
@@ -61,8 +62,8 @@ public class ProjectionTest {
         props.put("targetPath", "$.property");
 
         Map<String, Object> scriptMap = new HashMap<String, Object>();
-        scriptMap.put("type","text/javascrip");
-        scriptMap.put("source", "println(sourceValue)" );
+        scriptMap.put("type", "text/javascript");
+        scriptMap.put("source", "targetValue = sourceValue");
         scriptMap.put("sharedScope", true);
 
         props.put("script", scriptMap);
@@ -71,20 +72,18 @@ public class ProjectionTest {
         map.put("propertyMappings", properties);
 
 
-
         try {
             mapEntry = new MapEntry(map);
         } catch (JsonNodeException e) {
             System.out.println("mapEntry build error: " + e.getLocalizedMessage());
         }
-
-        System.out.println(mapEntry);
     }
 
     @Test
     public void simpleProjectionTest() {
         try {
-            projector.projectValues(sourceObject, mapEntry);
+            Map<String, Object> result = projector.projectValues(sourceObject, mapEntry);
+            System.out.println(result);
         } catch (JsonPathException e) {
             e.printStackTrace();
         } catch (JsonNodeException e) {
