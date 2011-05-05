@@ -145,4 +145,15 @@ public class ReconciliationConfigurationEntryTest {
         }
     }
 
+    @Test
+    public void nameMappingExists() {
+        assertThat(reconciliationConfiguration.getReconciliationConfigurationEntry("a policy configuration name")).isNotNull();
+    }
+
+    @Test
+    public void policyMappingExists() {
+        assertThat(reconciliationConfiguration.getReconciliationPolicyEntry("a policy name")).isNotNull();
+    }
+
+
 }
