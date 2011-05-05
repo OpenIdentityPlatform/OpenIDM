@@ -28,6 +28,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 
+import org.forgerock.json.fluent.JsonNodeException;
+
 import org.forgerock.openidm.recon.ReconciliationService;
 
 /**
@@ -35,8 +37,8 @@ import org.forgerock.openidm.recon.ReconciliationService;
  * as on OSGi service.
  */
 
-@Component(name = "reconciliation-engine", immediate = true)
-@Service(value = ReconciliationServiceImpl.class)
+@Component(name = "reconciliation", immediate = true)
+@Service(value = ReconciliationService.class)
 @Properties({
         @Property(name = "service.description", value = "Default Reconciliation Engine"),
         @Property(name = "service.vendor", value = "ForgeRock AS")
@@ -45,12 +47,21 @@ public class ReconciliationServiceImpl implements ReconciliationService {
 
     final static Logger logger = LoggerFactory.getLogger(ReconciliationServiceImpl.class);
 
-    private RelationshipIndexImpl relationshipIndex;
+    private ReconciliationConfiguration reconciliationConfiguration;
+
+    public ReconciliationServiceImpl() {
+    }
 
 
     /**
      * Begin reconciliation specified by the given reconciliation configuration name. If
-     * the specified reconciliation in already running, then subsequent calls will be ignored.
+     * the specified reconciliation in already running, then subsequent calls will be ignored. TODO ensure this
+     * <p/>
+     * If the specified reconciliation configuration name is not found a {@link ReconciliationException} will
+     * be thrown.
+     * <p/>
+     * If the specified reconciliation configuration is disabled then a {@link ReconciliationException} will
+     * be thrown.
      *
      * @param reconciliationConfigurationName
      *         of the configured reconciliation process to start
@@ -58,6 +69,20 @@ public class ReconciliationServiceImpl implements ReconciliationService {
      */
     @Override
     public void startReconciliation(String reconciliationConfigurationName) throws ReconciliationException {
+        ReconciliationConfigurationEntry reconEntry =
+                reconciliationConfiguration.getReconciliationConfigurationEntry(reconciliationConfigurationName);
+        if (reconEntry == null) {
+            logger.error("Named reconciliation configuration was not found: {}", reconciliationConfigurationName);
+            throw new ReconciliationException("Named recnociliation configuraiton was not found");
+        }
+        if (!reconEntry.isEnabled()) {
+            logger.error("Reconciliation was called for a disabled configuration: {} ", reconEntry.getName());
+            throw new ReconciliationException("ReconciliationConfigurationEntry is disabled");
+        }
+        ReconciliationPolicyEntry policyEntry =
+                reconciliationConfiguration.getReconciliationPolicyEntry(reconEntry.getPolicyName());
+        ReconciliationEngine engine = new ReconciliationEngine(reconEntry);
+        engine.reconcile();
 
     }
 
@@ -101,6 +126,12 @@ public class ReconciliationServiceImpl implements ReconciliationService {
     private void activate(Map<String, Object> configuration) throws ReconciliationException {
         logger.debug("{} was activated with: {}", new
                 Object[]{ReconciliationServiceImpl.class.getName(), configuration});
+        try {
+            reconciliationConfiguration = new ReconciliationConfiguration(configuration);
+        } catch (JsonNodeException e) {
+            logger.error("Failed to load reconciliation configuration");
+            throw new ReconciliationException(e);
+        }
     }
 
     /**
