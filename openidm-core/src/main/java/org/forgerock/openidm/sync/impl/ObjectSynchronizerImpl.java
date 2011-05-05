@@ -31,7 +31,7 @@ import org.forgerock.openidm.objset.ObjectSetException;
 
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.repo.RepositoryService;//hand routed TODO need to remove in the future
-import org.forgerock.openidm.provisioner.ProvisionerService; //hand routed TODO need to remove in the future
+//import org.forgerock.openidm.provisioner.ProvisionerService; //hand routed TODO need to remove in the future
 
 import org.forgerock.openidm.sync.ObjectSynchronizer;
 
@@ -54,10 +54,10 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
             cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
     private RepositoryService repositoryService;
 
-    @Reference(name = "ProvisionerService", referenceInterface = ProvisionerService.class,
-            bind = "bindProvisionerService", unbind = "unbindProvisionerService",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
-    private ProvisionerService provisionerService;
+//    @Reference(name = "ProvisionerService", referenceInterface = ProvisionerService.class,
+//            bind = "bindProvisionerService", unbind = "unbindProvisionerService",
+//            cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
+//    private ProvisionerService provisionerService;
 
     // TODO fix, this is hand routing for now
     private ObjectSet managedObjects;
@@ -211,18 +211,18 @@ public class ObjectSynchronizerImpl implements ObjectSynchronizer {
      *
      * @param provisionerService to use
      */
-    protected void bindProvisionerService(ProvisionerService provisionerService) {
-        logger.debug("ProvisionerService was bound");
-        this.provisionerService = provisionerService;
-    }
+//    protected void bindProvisionerService(ProvisionerService provisionerService) {
+//        logger.debug("ProvisionerService was bound");
+//        this.provisionerService = provisionerService;
+//    }
 
     /**
      * TODO What else needs to be done in the case of an unbind, it really can't function if null
      * Unbind the {@link ProvisionerService} this will leave recon in an unusable state
      */
-    protected void unbindProvisionerService(ProvisionerService provisionerService) {
-        logger.debug("ProvisionerService was unbound");
-        this.provisionerService = provisionerService;
-    }
+//    protected void unbindProvisionerService(ProvisionerService provisionerService) {
+//        logger.debug("ProvisionerService was unbound");
+//        this.provisionerService = provisionerService;
+//    }
 
 }
