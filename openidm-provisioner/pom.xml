@@ -15,7 +15,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
+            <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
