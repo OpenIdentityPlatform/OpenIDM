@@ -67,7 +67,7 @@ public class PropertyEntry {
     /**
      * Get the script identifier for this entry.
      *
-     * @return script 
+     * @return script
      */
     public Map<String, Object> getScript() {
         return script;
@@ -78,7 +78,7 @@ public class PropertyEntry {
      *
      * @param script
      */
-    public void setScript(Map<String,Object> script) {
+    public void setScript(Map<String, Object> script) {
         this.script = script;
     }
 
