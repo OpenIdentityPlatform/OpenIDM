@@ -155,7 +155,6 @@ public class MapEntry {
 
     /**
      * Set the synchrony of this mapping, either "synchronous" or "asynchronous"
-     *
      */
     public void setSynchrony(String synchrony) {
         this.synchrony = synchrony;
