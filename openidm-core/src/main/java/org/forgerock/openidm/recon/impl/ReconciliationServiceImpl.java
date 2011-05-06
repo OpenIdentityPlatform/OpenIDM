@@ -82,7 +82,7 @@ public class ReconciliationServiceImpl implements ReconciliationService, Schedul
         }
         if (reconEntry == null) {
             logger.warn("Named reconciliation configuration was not found: {}", reconciliationConfigurationName);
-            throw new ReconciliationException("Named recnociliation configuraiton was not found: " + reconciliationConfigurationName);
+            throw new ReconciliationException("Named reconciliation configuraiton was not found: " + reconciliationConfigurationName);
         }
         if (!reconEntry.isEnabled()) {
             logger.warn("Reconciliation was called for a disabled configuration: {} ", reconEntry.getName());
