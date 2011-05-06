@@ -39,6 +39,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -66,7 +67,7 @@ import org.quartz.Scheduler;
  * Scheduler service using Quartz
  * @author aegloff
  */
-@Component(name = "org.forgerock.scheduler", immediate=true, configurationFactory=true)
+@Component(name = "org.forgerock.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE, configurationFactory=true)
 @Service(value = SchedulerService.class, serviceFactory=false) 
 @Properties({
     @Property(name = "service.description", value = "Scheduler Service using Quartz"),
@@ -182,7 +183,8 @@ public class SchedulerService  {
 
         if (invokeService == null || invokeService.trim().length() == 0) {
             throw new InvalidException("Invalid scheduler configuration, the " 
-                    + SCHEDULE_INVOKE_SERVICE + " property needs to be set but is empty.");
+                    + SCHEDULE_INVOKE_SERVICE + " property needs to be set but is empty. "
+                    + "Complete config:" + config);
         } else {
             // service PIDs fragments are prefixed with openidm qualifier
             if (!invokeService.contains(".")) {
