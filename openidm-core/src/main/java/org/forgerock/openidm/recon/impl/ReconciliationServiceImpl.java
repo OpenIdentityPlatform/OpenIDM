@@ -30,16 +30,21 @@ import org.apache.felix.scr.annotations.Deactivate;
 
 import org.forgerock.json.fluent.JsonNodeException;
 
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.scheduler.ScheduledService;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.recon.ReconciliationService;
+
+import org.osgi.service.component.ComponentContext;
 
 /**
  * An default implementation for the {@link org.forgerock.openidm.recon.ReconciliationService} interface implemented
  * as on OSGi service.
  */
 
-@Component(name = "org.forgerock.openidm.reconciliation", immediate = true)
+@Component(name = "org.forgerock.openidm.reconciliation", immediate = false)
 @Service
 @Properties({
         @Property(name = "service.description", value = "Default Reconciliation Engine"),
@@ -71,21 +76,22 @@ public class ReconciliationServiceImpl implements ReconciliationService, Schedul
      */
     @Override
     public void startReconciliation(String reconciliationConfigurationName) throws ReconciliationException {
-        ReconciliationConfigurationEntry reconEntry =
-                reconciliationConfiguration.getReconciliationConfigurationEntry(reconciliationConfigurationName);
+        ReconciliationConfigurationEntry reconEntry = null;
+        if (reconciliationConfiguration != null) {
+            reconciliationConfiguration.getReconciliationConfigurationEntry(reconciliationConfigurationName);
+        }
         if (reconEntry == null) {
-            logger.error("Named reconciliation configuration was not found: {}", reconciliationConfigurationName);
-            throw new ReconciliationException("Named recnociliation configuraiton was not found");
+            logger.warn("Named reconciliation configuration was not found: {}", reconciliationConfigurationName);
+            throw new ReconciliationException("Named recnociliation configuraiton was not found: " + reconciliationConfigurationName);
         }
         if (!reconEntry.isEnabled()) {
-            logger.error("Reconciliation was called for a disabled configuration: {} ", reconEntry.getName());
-            throw new ReconciliationException("ReconciliationConfigurationEntry is disabled");
+            logger.warn("Reconciliation was called for a disabled configuration: {} ", reconEntry.getName());
+            throw new ReconciliationException("ReconciliationConfigurationEntry is disabled for " + reconEntry.getName());
         }
         ReconciliationPolicyEntry policyEntry =
                 reconciliationConfiguration.getReconciliationPolicyEntry(reconEntry.getPolicyName());
         ReconciliationEngine engine = new ReconciliationEngine(reconEntry);
         engine.reconcile();
-
     }
 
     /**
@@ -148,11 +154,14 @@ public class ReconciliationServiceImpl implements ReconciliationService, Schedul
      * @throws ReconciliationException upon an underlying error
      */
     @Activate
-    private void activate(Map<String, Object> configuration) throws ReconciliationException {
-        logger.debug("{} was activated with: {}", new
-                Object[]{ReconciliationServiceImpl.class.getName(), configuration});
+    private void activate(ComponentContext compContext) throws ReconciliationException {
+        logger.debug("Activated with: {}", compContext.getProperties());
         try {
-            reconciliationConfiguration = new ReconciliationConfiguration(configuration);
+            EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+            Map<String, Object> configuration = enhancedConfig.getConfiguration(compContext);
+            if (configuration != null && configuration.size() > 0) {
+                reconciliationConfiguration = new ReconciliationConfiguration(configuration);
+            }
         } catch (JsonNodeException e) {
             logger.error("Failed to load reconciliation configuration");
             throw new ReconciliationException(e);

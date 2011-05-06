@@ -64,10 +64,12 @@ public class ReconciliationConfiguration {
         Map<String, ReconciliationConfigurationEntry> map = new HashMap<String, ReconciliationConfigurationEntry>();
         JsonNode node = new JsonNode(reconciliationConfigurationMap);
         List reconciliationConfigurations = node.get("reconciliation-configurations").asList();
-        Iterator<Map> it = reconciliationConfigurations.iterator();
-        while (it.hasNext()) {
-            ReconciliationConfigurationEntry entry = new ReconciliationConfigurationEntry(it.next());
-            map.put(entry.getName(), entry);
+        if (reconciliationConfigurations != null) {
+            Iterator<Map> it = reconciliationConfigurations.iterator();
+            while (it.hasNext()) {
+                ReconciliationConfigurationEntry entry = new ReconciliationConfigurationEntry(it.next());
+                map.put(entry.getName(), entry);
+            }
         }
         return map;
     }
