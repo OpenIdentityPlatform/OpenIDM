@@ -55,7 +55,8 @@ import org.slf4j.LoggerFactory;
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service")
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
+        @Property(name = "openidm.router.prefix", value = "system") // internal object set router
 })
 public class SystemObjectSetService implements ObjectSet {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);

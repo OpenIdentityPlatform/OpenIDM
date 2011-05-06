@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 
 // OSGi Framework
-import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
 // Apache Felix Maven SCR Plugin
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
@@ -52,12 +52,16 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
  *
  * @author Paul C. Bryan
  */
-@Component(name="org.forgerock.openidm.managed", immediate=true)
-@Service
+@Component(
+    name="org.forgerock.openidm.managed",
+    policy=ConfigurationPolicy.REQUIRE
+)
 @Properties({
-    @Property(name=Constants.SERVICE_DESCRIPTION, value="OpenIDM managed objects service"),
-    @Property(name=Constants.SERVICE_VENDOR, value="ForgeRock AS")
+    @Property(name="service.description", value="OpenIDM managed objects service"),
+    @Property(name="service.vendor", value="ForgeRock AS"),
+    @Property(name="openidm.router.prefix", value="managed") // internal object set router
 })
+@Service
 public class ManagedObjectService extends ObjectSetRouter {
 
     /** Repository service. */
