@@ -45,13 +45,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Sample Class Doc
+ * SystemObjectSetService implement the {@link ObjectSet}.
  *
  * @author $author$
  * @version $Revision$ $Date$
- * @since 1.0.0
  */
-@Component(name = "org.forgerock.openidm.provisioner.SystemObjectSetService", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service", immediate = true)
+@Component(name = "org.forgerock.openidm.provisioner", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service", immediate = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
@@ -113,9 +112,8 @@ public class SystemObjectSetService implements ObjectSet {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object or object set is forbidden.
      */
-    @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        locateService(id).create(id,object);
+        locateService(id).create(id, object);
     }
 
     /**
@@ -132,7 +130,6 @@ public class SystemObjectSetService implements ObjectSet {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object is forbidden.
      */
-    @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
         return locateService(id).read(id);
     }
@@ -155,9 +152,8 @@ public class SystemObjectSetService implements ObjectSet {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
-    @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        locateService(id).update(id,rev,object);
+        locateService(id).update(id, rev, object);
     }
 
     /**
@@ -174,9 +170,8 @@ public class SystemObjectSetService implements ObjectSet {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
-    @Override
     public void delete(String id, String rev) throws ObjectSetException {
-        locateService(id).delete(id,rev);
+        locateService(id).delete(id, rev);
     }
 
     /**
@@ -194,7 +189,6 @@ public class SystemObjectSetService implements ObjectSet {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
-    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         locateService(id).patch(id, rev, patch);
     }
@@ -213,7 +207,6 @@ public class SystemObjectSetService implements ObjectSet {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object or specified query is forbidden.
      */
-    @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         return locateService(id).query(id, params);
     }

@@ -9,7 +9,7 @@
    "hasId" : "true",
    "connectorRef" :
       {
-         "bundleName" : "org.forgerock.openicf.bundles.file.xml",
+         "bundleName" : "org.forgerock.openicf.connectors.file.xml",
          "bundleVersion" : "1.1.0.0-SNAPSHOT",
          "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
       },

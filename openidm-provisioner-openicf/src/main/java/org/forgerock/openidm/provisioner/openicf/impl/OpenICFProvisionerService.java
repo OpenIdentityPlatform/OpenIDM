@@ -52,6 +52,7 @@ import org.identityconnectors.framework.common.exceptions.AlreadyExistsException
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.identityconnectors.framework.spi.operations.TestOp;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
@@ -66,7 +67,7 @@ import java.util.*;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = "org.forgerock.openidm.provisioner.openicf.ProvisionerService", policy = ConfigurationPolicy.REQUIRE,
+@Component(name = "org.forgerock.openidm.provisioner.openicf", policy = ConfigurationPolicy.REQUIRE,
         description = "OpenIDM System Object Set Service")
 @Service
 @Properties({
@@ -105,7 +106,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
             connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
         } catch (Exception e) {
             TRACE.error("Invalid configuration", e);
-            throw new ComponentException("Invalid configuration, service can not be started", e);
+            throw new ComponentException("Invalid configuration, connectorInfo can not be retrieved.", e);
         }
         if (null == connectorInfo) {
             throw new ComponentException("ConnectorInfo can not retrieved for " + connectorReference);
@@ -115,17 +116,31 @@ public class OpenICFProvisionerService implements ProvisionerService {
             operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration, connectorInfo.createDefaultAPIConfiguration());
         } catch (Exception e) {
             TRACE.error("Invalid configuration", e);
-            throw new ComponentException("Invalid configuration, service can not be started", e);
+            throw new ComponentException("Invalid configuration, service can not be started.", e);
         }
-        TRACE.info("Component is activated.");
+
+        try {
+            ConnectorFacade facade = getConnectorFacade(operationHelperBuilder.getRuntimeAPIConfiguration());
+            if (facade.getSupportedOperations().contains(TestApiOp.class)) {
+                facade.test();
+                TRACE.debug("Test of {} succeeded!", systemIdentifier);
+            } else {
+                TRACE.debug("Test is not supported.");
+            }
+        } catch (Exception e) {
+            TRACE.error("Test of {} failed.", systemIdentifier, e);
+            throw new ComponentException("Connector test failed.", e);
+        }
+
+        TRACE.info("OpenICFProvisionerService component with {} is activated.", systemIdentifier);
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        TRACE.info("Component {} is deactivated.", systemIdentifier);
         this.context = null;
         this.systemIdentifier = null;
         this.operationHelperBuilder = null;
-        TRACE.info("Component is deactivated.");
     }
 
     /**
@@ -135,7 +150,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *
      * @return
      */
-    @Override
     public SystemIdentifier getSystemIdentifier() {
         return systemIdentifier;
     }
@@ -152,7 +166,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *
      * @return
      */
-    @Override
     public Map<String, Object> getStatus() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         try {
@@ -185,7 +198,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object or object set is forbidden.
      */
-    @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
@@ -221,7 +233,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object is forbidden.
      */
-    @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
@@ -271,7 +282,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
-    @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
@@ -304,7 +314,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
-    @Override
     public void delete(String id, String rev) throws ObjectSetException {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
@@ -335,7 +344,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
-    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -355,7 +363,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *                                  if access to the object or specified query is forbidden.
      * @throws IllegalArgumentException
      */
-    @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);

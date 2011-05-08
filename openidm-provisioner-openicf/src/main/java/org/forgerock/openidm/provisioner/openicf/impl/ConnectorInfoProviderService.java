@@ -35,7 +35,7 @@ import java.util.jar.JarInputStream;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = "org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService", policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
+@Component(name = "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider", policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
@@ -67,7 +67,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
         try {
             // String connectorLocation = DEFAULT_CONNECTORS_LOCATION;
             String connectorLocation = configuration.get(PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL).asString();
-
             if (StringUtil.isBlank(connectorLocation)) {
                 connectorLocation = DEFAULT_CONNECTORS_LOCATION;
             }
@@ -139,6 +138,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                     TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
                 } else {
                     try {
+                        TRACE.debug("Looking for connectors in {} directory.",dir.getAbsoluteFile().toURI().toURL());
                         URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
                         factory.getLocalManager(bundleUrls);
                     } catch (MalformedURLException e) {
@@ -173,7 +173,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     /**
      * {@inheritDoc}
      */
-    @Override
     public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference) {
         ConnectorInfoManager connectorInfoManager = null;
         ConnectorInfo connectorInfo = null;
@@ -199,7 +198,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     /**
      * {@inheritDoc}
      */
-    @Override
     public List<ConnectorInfo> getAllConnectorInfo() {
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
         ConnectorInfoManager connectorInfoManager = factory.getLocalManager(getConnectorURLs());
@@ -224,7 +222,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
      *          if OpenICF failed to create new
      *          connector facade
      */
-    @Override
     public void testConnector(APIConfiguration configuration) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
@@ -240,7 +237,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<String, Object> createSystemConfiguration(APIConfiguration configuration, boolean validate) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
@@ -283,14 +279,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                     //URL bundleDirUrl = new URL(resourceURLs[j], BUNDLES_REL_PATH);
                     URL bundleDirUrl = resourceURLs[j];
 
-                    TRACE.info("Make sure the URL {} end with \"/\"", bundleDirUrl);
+                    TRACE.debug("Make sure the URL {} end with \"/\"", bundleDirUrl);
                     Vector<URL> urls = null;
                     if ("file".equals(bundleDirUrl.getProtocol())) {
                         File file = new File(bundleDirUrl.toURI());
                         if (file.isDirectory()) {
                             FileFilter filter = new FileFilter() {
 
-                                @Override
                                 public boolean accept(File f) {
                                     return (f.isDirectory()) || (f.getName().endsWith(".jar"));
                                 }

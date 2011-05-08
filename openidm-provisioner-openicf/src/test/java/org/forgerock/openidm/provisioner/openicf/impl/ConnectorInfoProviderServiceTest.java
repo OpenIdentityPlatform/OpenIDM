@@ -132,7 +132,7 @@ public class ConnectorInfoProviderServiceTest {
     @Test
     public void testCreateSystemConfiguration() throws URISyntaxException {
         ConnectorInfo xmlConnectorInfo = null;
-        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.bundles.file.xml", "1.1.0.0-SNAPSHOT", "com.forgerock.openicf.xml.XMLConnector");
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.file.xml", "1.1.0.0-SNAPSHOT", "com.forgerock.openicf.xml.XMLConnector");
         for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
             if (key.equals(info.getConnectorKey())) {
                 xmlConnectorInfo = info;

@@ -41,7 +41,6 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     /* (non-Javadoc)
      * @see org.forgerock.openidm.config.impl.EnhancedConfig#getConfiguration(org.osgi.service.component.ComponentContext)
      */
-    @Override
     public Map<String, Object> getConfiguration(ComponentContext compContext) throws InvalidException { 
         Dictionary dict = null;
         if (compContext != null) {
@@ -53,7 +52,6 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     /* (non-Javadoc)
      * @see org.forgerock.openidm.config.impl.EnhancedConfig#getConfiguration(java.util.Dictionary)
      */
-    @Override
     public  Map<String, Object> getConfiguration(Dictionary<String, Object> dict) throws InvalidException {
         Map<String, Object> parsedConfig = new HashMap<String, Object>();
         

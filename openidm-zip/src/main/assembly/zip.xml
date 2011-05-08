@@ -49,7 +49,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.bundles.*</include>
+                <include>org.forgerock.openicf.connectors.*</include>
                 <include>org.forgerock.openicf.bundles.*</include>
             </includes>
         </dependencySet>

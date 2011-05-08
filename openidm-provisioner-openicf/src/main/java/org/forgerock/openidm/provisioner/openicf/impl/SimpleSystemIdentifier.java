@@ -34,6 +34,11 @@ import java.net.URI;
 import java.util.regex.Pattern;
 
 /**
+ * SimpleSystemIdentifier class helps to match the id against the name of the
+ * system configuration.
+ * <p/>
+ * Matching id pattern: system/{@code name}/*
+ *
  * @author $author$
  * @version $Revision$ $Date$
  */
@@ -50,7 +55,6 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     /**
      * {@inheritDoc}
      */
-    @Override
     public boolean is(SystemIdentifier other) {
         return equals(other);
     }
@@ -58,7 +62,6 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     /**
      * {@inheritDoc}
      */
-    @Override
     public boolean is(URI uri) {
         return pattern.matcher(uri.toString()).matches();
     }
@@ -82,5 +85,10 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     @Override
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return "SystemIdentifier{ uri='system/" + name + "/'}";
     }
 }
