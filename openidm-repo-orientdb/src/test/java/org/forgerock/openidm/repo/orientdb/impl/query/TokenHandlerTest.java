@@ -28,6 +28,7 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +64,21 @@ public class TokenHandlerTest {
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
         assertEquals(result, "select * from managed/user where firstname = 'John' and lastname like 'D%'");
     }
+    
+    @Test(dependsOnMethods = {"initTokenHandler"})
+    public void replaceTokensWithListValues() throws BadRequestException {
+        String queryString = "select ${_fields} from ${_resource} where firstname = '${firstname}' and lastname like '${lastname}%'";
+
+        List fieldList = Arrays.asList(new String[] {"firstname", "lastname", "email"});
+        
+        Map params = new HashMap();
+        params.put("_fields", fieldList);
+        params.put("_resource", "managed/user");
+        params.put("firstname", "John");
+        params.put("lastname", "D");
+        String result = tokenHandler.replaceTokensWithValues(queryString, params);
+        assertEquals(result, "select firstname,lastname,email from managed/user where firstname = 'John' and lastname like 'D%'");
+    }    
 
     @Test(dependsOnMethods = {"initTokenHandler"}, expectedExceptions = BadRequestException.class )
     public void valueReplaceMissingToken() throws BadRequestException {

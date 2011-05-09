@@ -80,7 +80,7 @@ public class Queries {
         if (queryExpression != null) {
             foundQueryInfo = resolveInlineQuery(type, params, database);
         } else {
-            String queryId = (String) params.get(QueryConstants.QUERY_ID); // todo: check if present
+            String queryId = (String) params.get(QueryConstants.QUERY_ID);
             if (queryId == null) {
                 throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
                         + " to identify/define a query must be passed in the parameters. " + params);

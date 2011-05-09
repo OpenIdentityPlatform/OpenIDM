@@ -1,5 +1,6 @@
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,11 +22,11 @@ public class TokenHandler {
      * passed in map, where the token-name must be the key in the map
      * 
      * @param queryString the query with tokens
-     * @param params the parameters to replace the tokens
+     * @param params the parameters to replace the tokens. Values can be String or List.
      * @return the query with all tokens replace with their found values
      * @throws BadRequestException if token in the query is not in the passed parameters
      */
-    String replaceTokensWithValues(String queryString, Map<String, String> params) 
+    String replaceTokensWithValues(String queryString, Map<String, Object> params) 
             throws BadRequestException {
         java.util.regex.Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buffer = new StringBuffer();
@@ -35,7 +36,20 @@ public class TokenHandler {
                 // fail with an exception if token not found
                 throw new BadRequestException("Missing entry in params passed to query for token " + tokenKey);
             } else {
-                String replacement = params.get(tokenKey);
+                Object replacement = params.get(tokenKey);
+                if (replacement instanceof List) {
+                    StringBuffer commaSeparated = new StringBuffer();
+                    boolean first = true;
+                    for (Object entry : ((List) replacement)) {
+                        if (!first) {
+                            commaSeparated.append(",");
+                        } else {
+                            first = false;
+                        }
+                        commaSeparated.append(entry.toString());
+                    }
+                    replacement = commaSeparated.toString();
+                }
                 if (replacement == null) {
                     replacement = "";
                 }
