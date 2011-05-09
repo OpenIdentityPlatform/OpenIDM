@@ -134,13 +134,13 @@ public class EmbeddedOServerService {
         storage1.path = "memory:temp";
         storage1.userName = "admin";
         storage1.userPassword = "admin";
-        storage1.loadOnStartup = true;
+        storage1.loadOnStartup = false;
         OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
         storage2.name = "openidm";
         storage2.path = "local:./db/openidm";
         storage2.userName = "admin";
         storage2.userPassword = "admin";
-        storage2.loadOnStartup = true;
+        storage2.loadOnStartup = false;
         configuration.storages = new OServerStorageConfiguration[] {
                 storage1,
                 storage2

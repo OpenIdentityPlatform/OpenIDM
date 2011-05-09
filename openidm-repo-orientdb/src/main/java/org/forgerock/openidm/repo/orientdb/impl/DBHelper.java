@@ -25,6 +25,11 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.config.InvalidException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,16 +60,19 @@ public class DBHelper {
      * @param maxSize the orientdb pool maximum size
      * @return the initialized pool
      */
-    public static ODatabaseDocumentPool initPool(String dbURL, String user, String password, int minSize, int maxSize) {
+    public static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
+            int minSize, int maxSize, JsonNode completeConfig) throws InvalidException {
         logger.trace("Initializing DB Pool");
         
         // Enable transaction log
-// disabled until appears in orientdb snapshot        OGlobalConfiguration.TX_USE_LOG.setValue(true);
+        OGlobalConfiguration.TX_USE_LOG.setValue(true);
         
         // Immediate disk sync for commit 
-// disabled until appears in orientdb snapshot        OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
+        OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
+
+        System.out.println("completeConfig" + completeConfig);
         
-        checkDB(dbURL, user, password);
+        checkDB(dbURL, user, password, completeConfig);
         
         ODatabaseDocumentPool pool = new ODatabaseDocumentPool(); //ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this, is it safe?
         pool.setup(minSize, maxSize);
@@ -93,7 +101,7 @@ public class DBHelper {
     /**
      * Ensures the DB is present in the expected form.
      */
-    private static void checkDB(String dbURL, String user, String password) {
+    private static void checkDB(String dbURL, String user, String password, JsonNode completeConfig) throws InvalidException{
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
         ODatabaseDocumentTx db = null;
         try {
@@ -102,9 +110,15 @@ public class DBHelper {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
             } else { 
-                logger.info("DB does not exist, creating {}", dbURL);
-                db.create(); 	       
-                populateSample(db);
+                JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+                if (dbStructure == null) {
+                    logger.warn("No database exists, and no database structure defined in the configuration to populate one.");
+                    throw new InvalidException("No database exists, and no database structure defined in the configuration to populate one.");
+                } else {
+                    logger.info("DB does not exist, creating {}", dbURL);
+                    db.create(); 	       
+                    populateSample(db, completeConfig);
+                }
             } 
         } finally {
             if (db != null) {
@@ -113,12 +127,58 @@ public class DBHelper {
         }
     }
 
-    // TODO: This is temporary until we have the mechanisms in place to laod default schema and test data
-    private static void populateSample(ODatabaseDocumentTx db) {
-        OSchema schema = db.getMetadata().getSchema();
-        OClass user = schema.createClass("managed/user", OStorage.CLUSTER_TYPE.PHYSICAL); 
-        OProperty prop = user.createProperty("_openidm_id", OType.STRING);
-        prop.createIndex(INDEX_TYPE.UNIQUE);
-        schema.save(); 
+    // TODO: Review the initialization mechanism
+    private static void populateSample(ODatabaseDocumentTx db, JsonNode completeConfig) throws InvalidException {
+        
+        JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+        if (dbStructure == null) {
+            logger.warn("No database structure defined in the configuration." + completeConfig);
+        } else {
+            JsonNode orientDBClasses = dbStructure.get(OrientDBRepoService.CONFIG_ORIENTDB_CLASS);
+            OSchema schema = db.getMetadata().getSchema();
+            logger.info("Setting up database");
+            if (orientDBClasses != null) {
+                for (Object key : orientDBClasses.keys()) {
+                    String orientClassName = (String) key;
+                    JsonNode orientClassConfig = (JsonNode) orientDBClasses.get(orientClassName);
+                   
+                    logger.info("Creating OrientDB class {}", orientClassName);
+                    OClass orientClass = schema.createClass(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL); 
+                    
+                    JsonNode indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
+                    for (JsonNode index : indexes) {
+                        String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
+                        String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
+                        String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
+                        
+                        logger.info("Creating index on property {} of type {} with index type {} on {} for OrientDB class ", 
+                                new Object[] {propertyName, propertyType, indexType, orientClassName});
+            
+                        OType orientPropertyType = null;
+                        try {
+                            orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+                        } catch (IllegalArgumentException ex) {
+                            throw new InvalidException("Invalid property type '" + propertyType + "' in configuration on property "
+                                    + propertyName + " with index type " + indexType + " on " 
+                                    + orientClassName + " valid values: " + OType.values() 
+                                    + " failure message: " + ex.getMessage(), ex);
+                        }
+                        
+                        try {
+                            OProperty.INDEX_TYPE orientIndexType = OProperty.INDEX_TYPE.valueOf(indexType.toUpperCase());
+                            
+                            OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
+                            prop.createIndex(orientIndexType);
+                        } catch (IllegalArgumentException ex) {
+                            throw new InvalidException("Invalid index type '" + indexType + "' in configuration on property "
+                                    + propertyName + " of type " + propertyType + " on " 
+                                    + orientClassName + " valid values: " + OProperty.INDEX_TYPE.values() 
+                                    + " failure message: " + ex.getMessage(), ex);
+                        }
+                    }
+                }
+            }
+            schema.save(); 
+        }
     }
 }

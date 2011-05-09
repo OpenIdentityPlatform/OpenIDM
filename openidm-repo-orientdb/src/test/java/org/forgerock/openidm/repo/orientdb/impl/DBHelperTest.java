@@ -23,9 +23,13 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 
+import org.forgerock.json.fluent.JsonNode;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
 import static org.fest.assertions.Assertions.assertThat;
@@ -38,9 +42,11 @@ public class DBHelperTest {
         String dbURL = "local:./target/testdb";
         String user = "admin";
         String password = "admin";
+        Map map = new HashMap();
+        JsonNode completeConfig = new JsonNode(map);
         int minSize = 5;
         int maxSize = 20;
-        ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize);
+        ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize, completeConfig);
         assertNotNull(pool);
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
         assertNotNull(db);

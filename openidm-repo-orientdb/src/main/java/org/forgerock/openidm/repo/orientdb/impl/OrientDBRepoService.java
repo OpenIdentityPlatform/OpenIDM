@@ -34,12 +34,15 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.BadRequestException;
@@ -66,7 +69,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  * Repository service implementation using OrientDB
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true)
+@Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true, policy=ConfigurationPolicy.REQUIRE)
 @Service(value = RepositoryService.class) 
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
@@ -77,12 +80,19 @@ public class OrientDBRepoService implements RepositoryService {
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
 
     // Keys in the JSON configuration
-    final static String CONFIG_QUERIES = "queries";
+    public final static String CONFIG_QUERIES = "queries";
+    public final static String CONFIG_DB_URL = "dburl";
+    public final static String CONFIG_DB_STRUCTURE = "db-structure";
+    public final static String CONFIG_ORIENTDB_CLASS = "orientdb-class";
+    public final static String CONFIG_INDEX = "index";
+    public final static String CONFIG_PROPERTY_NAME = "propertyName";
+    public final static String CONFIG_PROPERTY_TYPE = "propertyType";
+    public final static String CONFIG_INDEX_TYPE = "indexType";
     
     ODatabaseDocumentPool pool;
 
+    String dbURL; 
     // TODO make configurable
-    String dbURL = "local:./db/openidm"; 
     String user = "admin";
     String password = "admin";
     int poolMinSize = 5; 
@@ -92,6 +102,7 @@ public class OrientDBRepoService implements RepositoryService {
     PredefinedQueries predefinedQueries = new PredefinedQueries();
     Queries queries = new Queries();
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+
     
     /**
      * Gets an object from the repository by identifier. The returned object is not validated 
@@ -423,14 +434,23 @@ public class OrientDBRepoService implements RepositoryService {
 
     @Activate
     void activate(ComponentContext compContext) { 
-        logger.debug("Activating Service with configuration {}", compContext);
-        
-        Map<String, Object> config = enhancedConfig.getConfiguration(compContext);
-        Map<String, String> queryMap = (Map<String, String>) config.get(CONFIG_QUERIES);
-        queries.setConfiguredQueries(queryMap);
+        logger.debug("Activating Service with configuration {}", compContext.getProperties());
+        JsonNode config = null;
+        try {
+            config = enhancedConfig.getConfigurationAsJson(compContext);
+    
+            dbURL = config.get(CONFIG_DB_URL).defaultTo("local:./db/openidm").asString();
+
+            Map map = config.get(CONFIG_QUERIES).asMap();
+            Map<String, String> queryMap = (Map<String, String>) map;
+            queries.setConfiguredQueries(queryMap);
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid, can not start OrientDB repository.", ex);
+            throw ex;
+        }
 
         try {
-            pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize);
+            pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize, config);
             logger.info("Repository started.");
         } catch (RuntimeException ex) {
             logger.warn("Initializing database pool failed", ex);
