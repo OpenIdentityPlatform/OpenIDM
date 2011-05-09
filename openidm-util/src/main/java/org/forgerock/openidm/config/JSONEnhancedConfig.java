@@ -58,6 +58,22 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     /**
      * {@inheritdoc}
      */
+    public JsonNode getConfigurationAsJson(ComponentContext compContext) throws InvalidException {
+        Map conf = getConfiguration(compContext);
+        JsonNode node = null;
+        try {
+            node = new JsonNode(conf);
+        } catch (JsonNodeException ex) {
+            throw new InvalidException("Component configuration for " 
+                    + compContext.getProperties().get(Constants.SERVICE_PID) 
+                    + " is invalid: " + ex.getMessage(), ex);
+        }
+        return node;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
     public  Map<String, Object> getConfiguration(Dictionary<String, Object> dict) throws InvalidException {
         Map<String, Object> parsedConfig = new HashMap<String, Object>();
         
