@@ -62,10 +62,28 @@ public class RepoServiceFunctionalTest {
     public void activateService() {
         // TODO: Run in embedded felix?
         repo = new OrientDBRepoService();
-        ((OrientDBRepoService)repo).dbURL = "local:./target/testdb";
+        //((OrientDBRepoService)repo).dbURL = "local:./target/testdb";
+        String dbURL = "local:./target/testdb";
         
         mockContext = mock(ComponentContext.class);
-        Dictionary config = getQueryConfig();
+        
+        Dictionary config = new java.util.Hashtable();
+        config.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, 
+                "{" 
+                + "    \"" + OrientDBRepoService.CONFIG_DB_URL + "\" : \"" + dbURL + "\"," 
+                + getQueryConfig() + ","
+                + "    \"db-structure\" : {"
+                + "        \"orientdb-class\" : {"
+                + "            \"managed/user\" : {"
+                + "                \"index\" : ["
+                + "                     {\"propertyName\" : \"_openidm_id\", \"propertyType\" : \"string\", \"indexType\" : \"unique\"}"
+                + "                ]"
+                + "            }" 
+                + "        }"
+                + "    }"
+                + "}");
+        
+        //Dictionary config = getQueryConfig();
         when(mockContext.getProperties()).thenReturn(config);
         ((OrientDBRepoService)repo).activate(mockContext);
     }
@@ -325,19 +343,16 @@ public class RepoServiceFunctionalTest {
     String queryUuid5 = "inlinequery-66e0-11e0-ae3e-0800200c9bb5";
     
     @SuppressWarnings("unchecked")
-    public Dictionary getQueryConfig() {
-        Dictionary config = new java.util.Hashtable();
-        config.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, 
-                "{" +
+    public String getQueryConfig() {
+        String queries = 
                 "    \"" + OrientDBRepoService.CONFIG_QUERIES + "\" : {" +
                 "        \"query-without-token\" : \"select * from managed/user where lastname like 'Eglo%' and test = 'inlinequery'\"," +
                 "        \"query-with-where-token\" : \"select * from managed/user where lastname like 'Eglo%' and test = ${querytype}\"," +
                 "        \"query-with-from-token\" : \"select * from ${_resource} where lastname like '${lastname}%' and test = '${querytype}'\"" +
-                "    }" +
-                "}");
-        
-        return config;
+                "    }";
+        return queries;
     }
+
     
     @Test(groups = {"repo"})
     @SuppressWarnings("unchecked")
