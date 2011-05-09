@@ -81,9 +81,9 @@ public class OrientDBRepoService implements RepositoryService {
 
     // Keys in the JSON configuration
     public final static String CONFIG_QUERIES = "queries";
-    public final static String CONFIG_DB_URL = "dburl";
-    public final static String CONFIG_DB_STRUCTURE = "db-structure";
-    public final static String CONFIG_ORIENTDB_CLASS = "orientdb-class";
+    public final static String CONFIG_DB_URL = "dbUrl";
+    public final static String CONFIG_DB_STRUCTURE = "dbStructure";
+    public final static String CONFIG_ORIENTDB_CLASS = "orientdbClass";
     public final static String CONFIG_INDEX = "index";
     public final static String CONFIG_PROPERTY_NAME = "propertyName";
     public final static String CONFIG_PROPERTY_TYPE = "propertyType";
