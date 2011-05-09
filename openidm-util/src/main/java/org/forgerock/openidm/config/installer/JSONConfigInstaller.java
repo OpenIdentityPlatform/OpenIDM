@@ -209,59 +209,75 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     @SuppressWarnings("unchecked")
     boolean setConfig(final File f) throws Exception
     {
-        final Hashtable ht = new Hashtable();
-        final InputStream in = new BufferedInputStream(new FileInputStream(f));
-        try
-        {
-            if (f.getName().endsWith( ".json")) {
-                
-                StringBuffer fileBuf = new StringBuffer(1024);
-                BufferedReader reader = new BufferedReader(new FileReader(f));
-                try {
-                    char[] buf = new char[1024];
-                    int numRead = 0;
-                    while((numRead = reader.read(buf)) != -1){
-                        fileBuf.append(buf, 0, numRead);
-                    }
-                } finally {
-                    reader.close();
-                }
-
-                ht.put(JSON_CONFIG_PROPERTY, fileBuf.toString());
-            }
-        }
-        finally
-        {
-            in.close();
-        }
-
-        String pid[] = parsePid(f.getName());
-        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
-
-        Dictionary props = config.getProperties();
-        Hashtable old = props != null ? new Hashtable(new DictionaryAsMap(props)) : null;
-        if (old != null) {
-        	old.remove( DirectoryWatcher.FILENAME );
-        	old.remove( Constants.SERVICE_PID );
-        	old.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        	old.remove( SERVICE_FACTORY_PID );
-        }
-
-        if( !ht.equals( old ) )
-        {
-            ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
-            ht.put(SERVICE_FACTORY_PID, pid[1]);
-            if (config.getBundleLocation() != null)
+        boolean updated = false;
+        try {
+            logger.debug("Loading configuration from {}", f);
+            final Hashtable ht = new Hashtable();
+            final InputStream in = new BufferedInputStream(new FileInputStream(f));
+            try
             {
-                config.setBundleLocation(null);
+                if (f.getName().endsWith( ".json")) {
+                    
+                    StringBuffer fileBuf = new StringBuffer(1024);
+                    BufferedReader reader = new BufferedReader(new FileReader(f));
+                    try {
+                        char[] buf = new char[1024];
+                        int numRead = 0;
+                        while((numRead = reader.read(buf)) != -1){
+                            fileBuf.append(buf, 0, numRead);
+                        }
+                    } finally {
+                        reader.close();
+                    }
+    
+                    ht.put(JSON_CONFIG_PROPERTY, fileBuf.toString());
+                }
             }
-            config.update(ht);
-            return true;
+            finally
+            {
+                in.close();
+            }
+    
+            String pid[] = parsePid(f.getName());
+            Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
+    
+            Dictionary props = config.getProperties();
+            Hashtable old = props != null ? new Hashtable(new DictionaryAsMap(props)) : null;
+            if (old != null) {
+            	old.remove( DirectoryWatcher.FILENAME );
+            	old.remove( Constants.SERVICE_PID );
+            	old.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+            	old.remove( SERVICE_FACTORY_PID );
+            }
+    
+            if( !ht.equals( old ) )
+            {
+                ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
+                if (pid != null && pid[1] != null) {
+                    ht.put(SERVICE_FACTORY_PID, pid[1]);
+                }
+                if (config.getBundleLocation() != null)
+                {
+                    config.setBundleLocation(null);
+                }
+                if (pid[1] == null) {
+                    logger.info("Loaded changed configuration for {} from {}", pid[0], f.getName());
+                } else {
+                    logger.info("Loaded changed configuration for {} {} from {}", 
+                            new Object[] {pid[0], pid[1], f.getName()});
+                }
+                config.update(ht);
+                updated = true;
+            }
+            else
+            {
+                logger.debug("File contents of configuration for {} from {} has not changed.", pid[1], f);
+                updated = false;
+            }
+        } catch (Exception ex) {
+            logger.warn("Loading configuration file " + f + " failed ", ex);
         }
-        else
-        {
-            return false;
-        }
+        return updated;
     }
 
     /**

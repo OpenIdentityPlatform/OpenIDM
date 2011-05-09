@@ -21,10 +21,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
+
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * A utility to handle enhanced configuration, including nested lists and maps to 
@@ -38,8 +44,8 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     
     private ObjectMapper mapper = new ObjectMapper();
 
-    /* (non-Javadoc)
-     * @see org.forgerock.openidm.config.impl.EnhancedConfig#getConfiguration(org.osgi.service.component.ComponentContext)
+    /**
+     *  {@inheritdoc}
      */
     public Map<String, Object> getConfiguration(ComponentContext compContext) throws InvalidException { 
         Dictionary dict = null;
@@ -49,8 +55,8 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         return getConfiguration(dict);
     }
     
-    /* (non-Javadoc)
-     * @see org.forgerock.openidm.config.impl.EnhancedConfig#getConfiguration(java.util.Dictionary)
+    /**
+     * {@inheritdoc}
      */
     public  Map<String, Object> getConfiguration(Dictionary<String, Object> dict) throws InvalidException {
         Map<String, Object> parsedConfig = new HashMap<String, Object>();

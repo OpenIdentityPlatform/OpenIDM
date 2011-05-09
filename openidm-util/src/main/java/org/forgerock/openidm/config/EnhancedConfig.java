@@ -19,6 +19,9 @@ package org.forgerock.openidm.config;
 import java.util.Dictionary;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonNodeException;
+
 import org.osgi.service.component.ComponentContext;
 
 public interface EnhancedConfig {
@@ -31,6 +34,16 @@ public interface EnhancedConfig {
      * @throws InvalidConfiguration
      */
     public Map<String, Object> getConfiguration(ComponentContext compContext)
+            throws InvalidException;
+    
+    /**
+     * Gets the extended Configuration which allows for nested Maps and Lists
+     * 
+     * @param compContext The component context with the configuration to retrieve
+     * @return the enhanced configuration with nested maps, list allowed
+     * @throws InvalidConfiguration
+     */
+    public JsonNode getConfigurationAsJson(ComponentContext compContext)
             throws InvalidException;
 
     /**
