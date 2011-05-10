@@ -26,16 +26,7 @@ import java.util.Map;
  * The {@link routes} map associates routing prefixes with object sets to route to. Any
  * request where the prefix itself is the identifier or where it begins the identifier
  * and is separated by a slash {@code /} character will be routed to the associated object
- * set.
- * <p>
- * When a call is routed to an associated object set, its routing prefix is stripped from the
- * call and from the {@code _id} property of any object that is passed to it. At the end of
- * the call, the {@code _id} property routing prefix is restored.
- * <p>
- * For example, if a routing prefix is {@code "account"} is associated with a
- * {@code AccountObjectSet} object, and a call is performed with an {@code id} of
- * {@code "account/jsmith"}, the call to the {@code AccountObjectSet} method will contain
- * an {@code id} of {@code "jsmith"}.
+ * The {@code _id} property should not be fully qualified, and is not modified during routing.
  * <p>
  * If an object set cannot be routed to for a call, then a {@link NotFoundException} is
  * thrown.
@@ -72,7 +63,6 @@ public class ObjectSetRouter implements ObjectSet {
         for (String key : routes.keySet()) {
             if (id.equals(key)) {
                 result[0] = key;
-                return result; // operation on object set itself
             }
             else if (id.startsWith(key + '/')) {
                 result[0] = key;
@@ -87,64 +77,22 @@ public class ObjectSetRouter implements ObjectSet {
         return result;
     }
 
-    /**
-     * Inserts the routing prefix in the {@code _id} property in the object, if it exists.
-     *
-     * @param object the object to modify the {@code _id} property in.
-     * @param route the routing prefix to insert in the {@code _id} property.
-     */
-    private void insertRoute(Map<String, Object> object, String route) {
-        if (object.containsKey("_id")) {
-            Object _id = object.get("_id");
-            if (_id instanceof String) { // ignore unknown _id type
-                object.put("_id", route + '/' + (String)_id);
-            }
-        }
-    }
-
-    /**
-     * Sets the {@code _id} property in the object, if it exists.
-     *
-     * @param object the object to set the {@code _id} property in.
-     * @param id the value to set in the {@code _id} property.
-     */
-    private void setObjectId(Map<String, Object> object, String id) {
-        if (object.containsKey("_id")) {
-            object.put("_id", id); // intentionally ignores whatever value may be there
-        }
-    }
-
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         String[] split = split(id, true); // throws NotFoundException
-        setObjectId(object, split[1]); // set id without prefix
         routes.get(split[0]).create(split[1], object);
-        insertRoute(object, split[0]); // restore prefix
     }
 
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
         String[] split = split(id, true); // throws NotFoundException
-        Map<String, Object> object = routes.get(split[0]).read(split[1]);
-        insertRoute(object, split[0]); // restore prefix
-        return object;
+        return routes.get(split[0]).read(split[1]);
     }
 
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         String[] split = split(id, true); // throws NotFoundException
-        if (object.containsKey("_id")) {
-            Object _id = object.get("_id");
-            if (_id instanceof String) {
-                String[] _split = split((String)_id, false); // do not throw NotFoundException
-                if (!split[0].equals(_split[0])) { // trying to move to a different set
-                    throw new BadRequestException("update cannot move object to a different set");
-                }
-                setObjectId(object, _split[1]); // set id without prefix
-            }
-        }
         routes.get(split[0]).update(split[1], rev, object);
-        insertRoute(object, split[0]); // restore prefix
     }
 
     @Override

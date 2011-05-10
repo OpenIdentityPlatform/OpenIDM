@@ -60,9 +60,9 @@ class ManagedObjectProperty {
      */
     public ManagedObjectProperty(JsonNode config) throws JsonNodeException {
         name = config.get("name").required().asString();
-        onRetrieve = ManagedObjectSet.newScript(config.get("onRetrieve"));
-        onStore = ManagedObjectSet.newScript(config.get("onStore"));
-        onValidate = ManagedObjectSet.newScript(config.get("onValidate"));
+        onRetrieve = Scripts.newInstance(config.get("onRetrieve"));
+        onStore = Scripts.newInstance(config.get("onStore"));
+        onValidate = Scripts.newInstance(config.get("onValidate"));
     }
 
     /**

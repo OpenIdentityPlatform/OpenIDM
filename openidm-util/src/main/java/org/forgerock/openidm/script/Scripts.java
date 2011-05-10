@@ -38,10 +38,13 @@ public class Scripts {
      * Returns a new script object for the provided script configuration object.
      *
      * @param config configuration object for script.
-     * @return a new script instance, or {@code null} if the factory could not create it.
+     * @return a new script instance, or {@code null} if {@code config} is {@code null}.
      * @throws JsonNodeException if the script configuration object or source is malformed.
      */
     public static Script newInstance(JsonNode config) throws JsonNodeException {
+        if (config == null) {
+            return null;
+        }
         for (ScriptFactory factory : FACTORIES) {
             Script script = factory.newInstance(config);
             if (script != null) {

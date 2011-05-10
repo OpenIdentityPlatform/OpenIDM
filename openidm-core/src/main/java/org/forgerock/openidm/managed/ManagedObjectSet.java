@@ -19,8 +19,19 @@ package org.forgerock.openidm.managed;
 // Java Standard Edition
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+// OSGi Framework
+import org.osgi.framework.ServiceReference;
+
+// Apache Felix Maven SCR Plugin
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 
 // JSON-Fluent library
 import org.forgerock.json.fluent.JsonNode;
@@ -36,6 +47,8 @@ import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.script.ScriptThrownException;
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.SynchronizationListener;
 
 /**
  * Provides access to a set of managed objects of a given type.
@@ -43,6 +56,8 @@ import org.forgerock.openidm.script.ScriptThrownException;
  * @author Paul C. Bryan
  */
 class ManagedObjectSet implements ObjectSet {
+
+    private static final String LISTENER_REFERENCE = "Reference_ManagedObjectSet_SynchronizationListener"; 
 
     /** Name of the managed object type. */
     private String name;
@@ -77,15 +92,22 @@ class ManagedObjectSet implements ObjectSet {
     /** The managed objects service that instantiated this managed object set. */
     private ManagedObjectService service;
 
-    /**
-     * Creates a new instance of a script.
-     *
-     * @param config the script configuration object to instantiate the script with.
-     * @return the new script object, or {@code null} if configuration was {@code null}. 
-     * @throws JsonNodeException if the script configuration object or source is malformed.
-     */
-    static Script newScript(JsonNode config) throws JsonNodeException {
-        return (config == null ? null : Scripts.newInstance(config));
+    /** TODO: Description. */
+    @Reference(
+        name=LISTENER_REFERENCE,
+        referenceInterface=SynchronizationListener.class,
+        bind="bindListener",
+        unbind="unbindListener",
+        cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
+        policy=ReferencePolicy.DYNAMIC,
+        strategy=ReferenceStrategy.EVENT
+    )
+    protected final HashSet<SynchronizationListener> listeners = new HashSet<SynchronizationListener>();
+    protected void bindListener(SynchronizationListener listener) {
+        listeners.add(listener);
+    }
+    protected void unbindListener(SynchronizationListener listener) {
+        listeners.remove(listener);
     }
 
     /**
@@ -98,11 +120,11 @@ class ManagedObjectSet implements ObjectSet {
         this.service = service;
         name = config.get("name").required().asString();
         schema = config.get("schema").expect(Map.class); // TODO: parse into json-schema object
-        onCreate = newScript(config.get("onCreate"));
-        onRead = newScript(config.get("onRead"));
-        onUpdate = newScript(config.get("onUpdate"));
-        onDelete = newScript(config.get("onDelete"));
-        onValidate = newScript(config.get("onValidate"));
+        onCreate = Scripts.newInstance(config.get("onCreate"));
+        onRead = Scripts.newInstance(config.get("onRead"));
+        onUpdate = Scripts.newInstance(config.get("onUpdate"));
+        onDelete = Scripts.newInstance(config.get("onDelete"));
+        onValidate = Scripts.newInstance(config.get("onValidate"));
         for (JsonNode node : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(node));
         }
@@ -117,8 +139,21 @@ class ManagedObjectSet implements ObjectSet {
      */
     private String repoId(String id) {
         // TODO: make this configurable as not every repository will likely adhere to the same scheme
-        return "managed/" + name + "/" + id;
+        return "managed/" + name + '/' + id;
     }
+
+    /**
+     * TODO: Description.
+     *
+     * @param id TODO.
+     * @return TODO.
+     */
+    private String routeId(String id) {
+// TODO: Hack alert. There should be a better way to know the fully qualified identifier
+// of a managed object.
+        return "managed/" + name + '/' + id; // yes same as repoId—for now
+    }
+
 
     /**
      * Executes a script if it exists, populating an {@code "object"} property in the root
@@ -179,7 +214,7 @@ class ManagedObjectSet implements ObjectSet {
             property.onValidate(object);
         }
         execScript(onValidate, object);
-        // TODO: schema validation here (w. optimization)
+        // TODO: schema validation here (w. optimizations)
         for (ManagedObjectProperty property : properties) {
             property.onStore(object);
         }
@@ -190,7 +225,23 @@ class ManagedObjectSet implements ObjectSet {
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         execScript(onCreate, object);
         onStore(object);
+        if (object.containsKey("_id")) { // trigger assigned an identifier
+            id = object.get("_id").toString(); // override requested id
+        }
+        if (id == null) { // default is to assign a UUID identifier
+            id = UUID.randomUUID().toString();
+            object.put("_id", id);
+        }
         service.getRepository().create(repoId(id), object);
+        try {
+            for (SynchronizationListener listener : listeners) {
+                listener.onCreate(routeId(id), object);
+            }
+        }
+        catch (SynchronizationException se) {
+// TODO: invert action to provide undo-like functionality
+            throw new InternalServerErrorException(se);
+        }
     }
 
     @Override
@@ -203,8 +254,8 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        Map<String, Object> oldObject = service.getRepository().read(repoId(id));
         if (onUpdate != null) {
-            Map<String, Object> oldObject = service.getRepository().read(id);
             HashMap<String, Object> scope = new HashMap<String, Object>();
             scope.put("oldObject", oldObject);
             scope.put("newObject", object);
@@ -220,6 +271,15 @@ class ManagedObjectSet implements ObjectSet {
         }
         onStore(object);
         service.getRepository().update(repoId(id), rev, object);
+        try {
+            for (SynchronizationListener listener : listeners) {
+                listener.onUpdate(routeId(id), oldObject, object);
+            }
+        }
+        catch (SynchronizationException se) {
+// TODO: invert action to provide undo-like functionality
+            throw new InternalServerErrorException(se);
+        }
     }
 
     @Override
@@ -229,6 +289,15 @@ class ManagedObjectSet implements ObjectSet {
             execScript(onDelete, object);
         }
         service.getRepository().delete(repoId(id), rev);
+        try {
+            for (SynchronizationListener listener : listeners) {
+                listener.onDelete(routeId(id));
+            }
+        }
+        catch (SynchronizationException se) {
+// TODO: invert action to provide undo-like functionality
+            throw new InternalServerErrorException(se);
+        }
     }
 
     @Override
@@ -238,7 +307,6 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        // TODO: yikes, how will triggers redact this?! 
         throw new InternalServerErrorException("query not yet implemented");
     }
 

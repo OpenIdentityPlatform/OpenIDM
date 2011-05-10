@@ -67,61 +67,27 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 public class ObjectSetRouterService extends ObjectSetRouter {
 
     /** TODO: Description. */
-    private static final String REFERENCE_NAME = "openidm.router.reference";
-
-    /** Dummy variable to hold the annocation */
-    @Reference(
-        name=REFERENCE_NAME,
-        referenceInterface=ObjectSet.class,
-        bind = "bind",
-        unbind = "unbind",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC,
-        strategy = ReferenceStrategy.EVENT
-    )
-    private String _dummy;
+    private static final String REFERENCE_NAME = "reference_ObjectSetRouterService_ObjectSet";
 
     /** TODO: Description. */
     private ComponentContext context;
 
-    /**
-     * TODO: Description.
-     *
-     * @param context TODO.
-     */
-    @Activate
-    protected void activate(ComponentContext context) {
-        this.context = context;
-    }
-
-    /**
-     * TODO: Description.
-     *
-     * @param context TODO.
-     */
-    @Deactivate
-    protected void deactivate(ComponentContext context) {
-        this.context = null;
-        routes.clear();
-    }
-
-    /**
-     * TODO: Description.
-     *
-     * @param reference TODO.
-     */
+    @Reference(
+        name=REFERENCE_NAME,
+        referenceInterface=ObjectSet.class,
+        bind="bind",
+        unbind="unbind",
+        cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
+        policy=ReferencePolicy.DYNAMIC,
+        strategy=ReferenceStrategy.EVENT
+    )
+    protected int _dummy; // whiteboard pattern
     protected void bind(ServiceReference reference) {
         Object prefix = reference.getProperty("openidm.router.prefix");
         if (prefix != null && prefix instanceof String) { // service is specified as internally routable
             routes.put((String)prefix, (ObjectSet)context.locateService(REFERENCE_NAME, reference));
         }
     }
-
-    /**
-     * TODO: Description.
-     *
-     * @param reference TODO.
-     */
     protected void unbind(ServiceReference reference) {
         ObjectSet toRemove = (ObjectSet)context.locateService(REFERENCE_NAME, reference);
         for (Iterator<ObjectSet> i = routes.values().iterator(); i.hasNext();) {
@@ -129,5 +95,14 @@ public class ObjectSetRouterService extends ObjectSetRouter {
                 i.remove();
             }
         }
+    }
+    @Activate
+    protected void activate(ComponentContext context) {
+        this.context = context;
+    }
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+        this.context = null;
+        routes.clear();
     }
 }
