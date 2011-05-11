@@ -209,7 +209,7 @@ public class AuditServiceImpl implements AuditService {
                 if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
                     auditLogger = new CSVAuditLogger();
                 } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                    //auditLogger = new RepoAuditLogger();
+                    auditLogger = new RepoAuditLogger();
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }

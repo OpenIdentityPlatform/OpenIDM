@@ -122,6 +122,7 @@ public class RepoAuditLogger implements AuditLogger {
                     serviceTracker.open();
                     int timeout = 10000;
                     repo = (RepositoryService) serviceTracker.waitForService(timeout);
+System.out.println("!!! Repo service found: " + repo);
                     serviceTracker.close();
                 } catch (Exception ex) {
                     throw new InternalServerErrorException("Repository audit logger failure to obtain the repo service." 
