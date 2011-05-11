@@ -111,7 +111,6 @@ public class CSVAuditLogger implements AuditLogger {
      */
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         String type = getObjectType(fullId);
-        String lineSep = System.getProperty("line.separator");
         
         // TODO: optimize buffered, cached writing
         FileWriter fileWriter = null;
