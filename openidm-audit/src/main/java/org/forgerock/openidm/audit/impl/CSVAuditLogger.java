@@ -64,6 +64,7 @@ public class CSVAuditLogger implements AuditLogger {
     public final static String CONFIG_LOG_LOCATION = "location";
     
     File auditLogDir;
+    Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
 
     public void setConfig(Map config) throws InvalidException {
         String location = null;
@@ -78,7 +79,16 @@ public class CSVAuditLogger implements AuditLogger {
     }
     
     public void cleanup() {
-        
+        for (Map.Entry<String, FileWriter> entry : fileWriters.entrySet()) {
+            try {
+                FileWriter fileWriter = entry.getValue();
+                if (fileWriter != null) {
+                    fileWriter.close();
+                }
+            } catch (Exception ex) {
+                logger.info("File writer close reported failure ", ex);
+            } 
+        }
     }
     
     /**
@@ -105,17 +115,20 @@ public class CSVAuditLogger implements AuditLogger {
             fieldOrder.addAll(obj.keySet());
             
             File auditFile = new File(auditLogDir, type + ".csv");
+            // Create header if creating a new file
             if (!auditFile.exists()) {
                 synchronized (this) {
-                    boolean created = auditFile.createNewFile();
-                    fileWriter = new FileWriter(auditFile, true);
-                    if (created) {                        
-                        writeHeaders(fieldOrder, fileWriter, lineSep);
+                    File auditTmpFile = new File(auditLogDir, type + ".tmp");
+                    boolean created = auditTmpFile.createNewFile();
+                    if (created) {
+                        FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
+                        writeHeaders(fieldOrder, tmpFileWriter, lineSep);
+                        tmpFileWriter.close();
+                        auditTmpFile.renameTo(auditFile);
                     }
                 }
-            } else {
-                fileWriter = new FileWriter(auditFile, true);
             }
+            fileWriter = getWriter(type, auditFile);
 
             String key = null;
             Iterator iter = fieldOrder.iterator();
@@ -137,7 +150,7 @@ public class CSVAuditLogger implements AuditLogger {
             fileWriter.append(lineSep);
         } catch (Exception ex) {
             throw new BadRequestException(ex);
-        } finally {
+        } /* finally {
             try {
                 if (fileWriter != null) {
                     fileWriter.close();
@@ -145,7 +158,7 @@ public class CSVAuditLogger implements AuditLogger {
             } catch (Exception ex) {
                 // Quietly try the close
             } 
-        }
+        }*/
     }
     
     private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter, String lineSep) 
@@ -164,6 +177,18 @@ public class CSVAuditLogger implements AuditLogger {
         fileWriter.append(lineSep);
     }
 
+    private FileWriter getWriter(String type, File auditFile) throws IOException {
+        // TODO: optimize synchronization strategy
+        synchronized(fileWriters) {
+            FileWriter existingWriter = fileWriters.get(type);
+            if (existingWriter == null) {
+                existingWriter = new FileWriter(auditFile, true);
+                fileWriters.put(type, existingWriter);
+            }
+            return existingWriter;
+        }
+    }
+    
     
     /**
      * Audit service does not support changing audit entries.
