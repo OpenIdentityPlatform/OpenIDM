@@ -80,7 +80,7 @@ public class CSVAuditLogger implements AuditLogger {
             }
             recordDelim += System.getProperty("line.separator");
         } catch (Exception ex) {
-            throw new InvalidException("Configuration CVS file location must be a directory and '" + location 
+            throw new InvalidException("Configured CSV file location must be a directory and '" + location 
                     + "' is invalid " + ex.getMessage(), ex);
         }
     }
@@ -106,6 +106,16 @@ public class CSVAuditLogger implements AuditLogger {
         return new HashMap();
     }
 
+    /**
+     * Currently not supported.
+     * 
+     * {@inheritdoc}
+     */
+    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
+        // TODO
+        return new HashMap();
+    }
+    
     /**
      * {@inheritdoc}
      */
@@ -207,16 +217,6 @@ public class CSVAuditLogger implements AuditLogger {
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Currently not supported.
-     * 
-     * {@inheritdoc}
-     */
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO
-        return new HashMap();
     }
     
     // TODO: replace with common utility to handle ID, this is temporary
