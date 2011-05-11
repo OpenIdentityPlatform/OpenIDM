@@ -44,6 +44,12 @@ import java.util.Map;
  */
 public interface ObjectSet {
 
+    /** The {@code _id} property. */
+    public static final String ID = "_id";
+
+    /** The {@code _rev} property. */
+    public static final String REV = "_rev";
+
     /**
      * Creates a new object in the object set.
      * <p>
