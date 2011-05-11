@@ -62,8 +62,10 @@ public class CSVAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(CSVAuditLogger.class);
 
     public final static String CONFIG_LOG_LOCATION = "location";
+    public final static String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
     
     File auditLogDir;
+    String recordDelim;
     Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
 
     public void setConfig(Map config) throws InvalidException {
@@ -72,6 +74,11 @@ public class CSVAuditLogger implements AuditLogger {
             location = (String) config.get(CONFIG_LOG_LOCATION);
             auditLogDir = new File(location);
             auditLogDir.mkdirs();
+            recordDelim = (String) config.get(CONFIG_LOG_RECORD_DELIM);
+            if (recordDelim == null) {
+                recordDelim = "";
+            }
+            recordDelim += System.getProperty("line.separator");
         } catch (Exception ex) {
             throw new InvalidException("Configuration CVS file location must be a directory and '" + location 
                     + "' is invalid " + ex.getMessage(), ex);
@@ -147,18 +154,10 @@ public class CSVAuditLogger implements AuditLogger {
                     fileWriter.append(",");
                 }
             }
-            fileWriter.append(lineSep);
+            fileWriter.append(recordDelim);
         } catch (Exception ex) {
             throw new BadRequestException(ex);
-        } /* finally {
-            try {
-                if (fileWriter != null) {
-                    fileWriter.close();
-                }
-            } catch (Exception ex) {
-                // Quietly try the close
-            } 
-        }*/
+        } 
     }
     
     private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter, String lineSep) 
