@@ -52,6 +52,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-audit</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-schema</artifactId>
         </dependency>
