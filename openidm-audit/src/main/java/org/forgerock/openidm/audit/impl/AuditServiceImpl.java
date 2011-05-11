@@ -174,49 +174,6 @@ public class AuditServiceImpl implements AuditService {
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO
         return new HashMap();
-        /*
-        // TODO: replace with common utility
-        String type = fullId; 
-        // This should not be necessary as relative URI should not start with slash
-        if (fullId != null && fullId.startsWith("/")) {
-            type = fullId.substring(1);
-        }
-        logger.trace("Full id: {} Extracted type: {}", fullId, type);
-        
-        Map<String, Object> result = new HashMap<String, Object>();
-        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-        try {
-            List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
-            result.put(QueryConstants.QUERY_RESULT, docs);
-            long start = System.currentTimeMillis();
-            List<ODocument> queryResult = queries.query(type, params, db); 
-            long end = System.currentTimeMillis();
-            if (queryResult != null) {
-                long convStart = System.currentTimeMillis();
-                for (ODocument entry : queryResult) {
-                    Map<String, Object> convertedEntry = DocumentUtil.toMap(entry);
-                    docs.add(convertedEntry);
-                }
-                long convEnd = System.currentTimeMillis();
-                result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
-            }
-            result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end-start));
-            
-            if (logger.isDebugEnabled()) {
-                logger.debug("Query result contains {} records, took {} ms and took {} ms to convert result.",
-                        new Object[] {((Map) result.get(QueryConstants.QUERY_RESULT)).size(),
-                        result.get(QueryConstants.STATISTICS_QUERY_TIME),
-                        result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
-            }
-        } finally {
-            if (db != null) {
-                db.close();
-                pool.release(db);
-            }
-        }
-        
-        return result;
-        */
     }
     
     // TODO: replace with common utility to handle ID, this is temporary
@@ -252,13 +209,13 @@ public class AuditServiceImpl implements AuditService {
                 if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
                     auditLogger = new CSVAuditLogger();
                 } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                    auditLogger = new RepoAuditLogger();
+                    //auditLogger = new RepoAuditLogger();
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }
-                auditLogger.setConfig(entry, compContext.getBundleContext());
-                logger.info("Audit configured to log to {}", logType);
                 if (auditLogger != null) {
+                    auditLogger.setConfig(entry, compContext.getBundleContext());
+                    logger.info("Audit configured to log to {}", logType);
                     auditLoggers.add(auditLogger);
                 }
             }

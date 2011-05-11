@@ -139,7 +139,7 @@ public class CSVAuditLogger implements AuditLogger {
                     boolean created = auditTmpFile.createNewFile();
                     if (created) {
                         FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
-                        writeHeaders(fieldOrder, tmpFileWriter, lineSep);
+                        writeHeaders(fieldOrder, tmpFileWriter);
                         tmpFileWriter.close();
                         auditTmpFile.renameTo(auditFile);
                     }
@@ -170,7 +170,7 @@ public class CSVAuditLogger implements AuditLogger {
         } 
     }
     
-    private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter, String lineSep) 
+    private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter) 
             throws IOException {
         Iterator iter = fieldOrder.iterator();
         while(iter.hasNext()) {
@@ -183,7 +183,7 @@ public class CSVAuditLogger implements AuditLogger {
                 fileWriter.append(",");
             }
         }
-        fileWriter.append(lineSep);
+        fileWriter.append(recordDelim);
     }
 
     private FileWriter getWriter(String type, File auditFile) throws IOException {
