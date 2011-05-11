@@ -121,7 +121,9 @@ public class CSVAuditLogger implements AuditLogger {
      * {@inheritdoc}
      */
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        String type = getObjectType(fullId);
+        // TODO: replace ID handling utility
+        String[] split = AuditServiceImpl.splitFirstLevel(fullId);
+        String type = split[0];
         
         // TODO: optimize buffered, cached writing
         FileWriter fileWriter = null;
@@ -198,7 +200,6 @@ public class CSVAuditLogger implements AuditLogger {
         }
     }
     
-    
     /**
      * Audit service does not support changing audit entries.
      */
@@ -218,21 +219,5 @@ public class CSVAuditLogger implements AuditLogger {
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         throw new UnsupportedOperationException();
-    }
-    
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getObjectType(String id) {
-        String type = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            int startPos = 0;
-            // This should not be necessary as relative URI should not start with slash
-            if (id.startsWith("/")) {
-                startPos = 1;
-            }
-            type = id.substring(startPos, lastSlashPos);
-            logger.trace("Full id: {} Extracted type: {}", id, type);
-        }
-        return type;
     }
 }

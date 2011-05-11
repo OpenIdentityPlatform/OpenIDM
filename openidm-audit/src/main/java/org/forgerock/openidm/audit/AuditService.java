@@ -30,4 +30,5 @@ import org.forgerock.openidm.objset.ObjectSet;
  * @author aegloff
  */
 public interface AuditService extends ObjectSet {
+    public final static String ROUTER_PREFIX = "audit";
 }

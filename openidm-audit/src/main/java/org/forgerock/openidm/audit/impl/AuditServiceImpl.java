@@ -24,12 +24,11 @@
 package org.forgerock.openidm.audit.impl;
 
 import java.util.ArrayList;
-//import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-//import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,11 +69,12 @@ import org.forgerock.openidm.repo.RepositoryService;
 @Service
 @Properties({
     @Property(name = "service.description", value = "Audit Service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS")
+    @Property(name = "service.vendor", value = "ForgeRock AS"),
+    @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX)
 })
 public class AuditServiceImpl implements AuditService {
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
-
+    
     // Keys in the JSON configuration
     public final static String CONFIG_LOG_TO = "logTo";
     public final static String CONFIG_LOG_TYPE = "logType";
@@ -116,7 +116,21 @@ public class AuditServiceImpl implements AuditService {
      * @throws PreconditionFailedException if an object with the same ID already exists.
      */
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        String id = stripFirstLevel(fullId);
+        String[] withoutAuditLevel = splitFirstLevel(fullId);
+        String remainingPath = withoutAuditLevel[1];
+        String[] splitTypeAndId =  splitFirstLevel(remainingPath);
+        String type = splitTypeAndId[0];
+        String localId = splitTypeAndId[1];
+ 
+        // Generate an ID if there is none
+        if (localId == null) {
+            localId = UUID.randomUUID().toString();
+            // TODO: where is the global constant for _id
+            obj.put("_id", localId);
+            logger.info("Assigned id " + localId);
+        }
+        String id = type + "/" + localId;
+        
         logger.debug("Create audit entry for {} with {}", id, obj);
         for (AuditLogger auditLogger : auditLoggers) {
             auditLogger.create(id, obj);
@@ -176,21 +190,19 @@ public class AuditServiceImpl implements AuditService {
         return new HashMap();
     }
     
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getLocalId(String id) {
-        String localId = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            localId = id.substring(id.lastIndexOf("/") + 1);
-        }
-        logger.trace("Full id: {} Extracted local id: {}", id, localId);
-        return localId;
-    }
     
-    // strip off log/ in the beginning of the id 
-    private String stripFirstLevel(String id) {
+    // TODO: replace with common utility to handle ID, this is temporary
+    // Assumes single level type
+    static String[] splitFirstLevel(String id) {
+        String firstLevel = id;
+        String rest = null;
         int firstSlashPos = id.indexOf("/");
-        return id.substring(firstSlashPos + 1);
+        if (firstSlashPos > -1) {
+            firstLevel = id.substring(0, firstSlashPos);
+            rest = id.substring(firstSlashPos + 1);
+        }
+        logger.trace("Extracted first level: {} rest: {}", firstLevel, rest);
+        return new String[] { firstLevel, rest };
     }
     
     @Activate
@@ -209,7 +221,7 @@ public class AuditServiceImpl implements AuditService {
                 if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
                     auditLogger = new CSVAuditLogger();
                 } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                    //auditLogger = new RepoAuditLogger();
+                    auditLogger = new RepoAuditLogger();
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }

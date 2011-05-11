@@ -45,6 +45,7 @@ import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.repo.RepositoryService;
 
 /**
@@ -57,9 +58,10 @@ public class RepoAuditLogger implements AuditLogger {
     BundleContext ctx;
     RepositoryService repo;
     
-    String fullIdPrefix = "log/";
+    String fullIdPrefix = AuditService.ROUTER_PREFIX + "/";
     
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
+        this.ctx = ctx;
     }
     
     public void cleanup() {
@@ -114,14 +116,16 @@ public class RepoAuditLogger implements AuditLogger {
         }
     }
 
-    private RepositoryService getRepoService() throws InternalServerErrorException {
+    private RepositoryService getRepoService() throws ServiceUnavailableException, InternalServerErrorException {
         if (repo == null) {
             if (ctx != null) {
                 try {
                     ServiceTracker serviceTracker = new ServiceTracker(ctx, RepositoryService.class.getName(), null);
                     serviceTracker.open();
                     int timeout = 10000;
+                    logger.debug("Look for repository service for {} ms", Integer.valueOf(timeout));
                     repo = (RepositoryService) serviceTracker.waitForService(timeout);
+                    logger.debug("Repository service found: {}", repo);
                     serviceTracker.close();
                 } catch (Exception ex) {
                     throw new InternalServerErrorException("Repository audit logger failure to obtain the repo service." 
@@ -130,7 +134,7 @@ public class RepoAuditLogger implements AuditLogger {
             }
         }
         if (repo == null) {
-            throw new InternalServerErrorException("Repository audit logger could not find the repository service.");
+            throw new ServiceUnavailableException("Repository audit logger could not find the repository service.");
         }
         return repo;
     }
