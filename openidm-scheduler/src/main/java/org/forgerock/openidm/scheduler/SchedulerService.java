@@ -67,7 +67,7 @@ import org.quartz.Scheduler;
  * Scheduler service using Quartz
  * @author aegloff
  */
-@Component(name = "org.forgerock.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE, configurationFactory=true)
+@Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE, configurationFactory=true)
 @Service(value = SchedulerService.class, serviceFactory=false) 
 @Properties({
     @Property(name = "service.description", value = "Scheduler Service using Quartz"),
