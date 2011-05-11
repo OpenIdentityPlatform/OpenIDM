@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.osgi.framework.BundleContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class CSVAuditLogger implements AuditLogger {
     String recordDelim;
     Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
 
-    public void setConfig(Map config) throws InvalidException {
+    public void setConfig(Map config, BundleContext ctx) throws InvalidException {
         String location = null;
         try {
             location = (String) config.get(CONFIG_LOG_LOCATION);

@@ -251,14 +251,13 @@ public class AuditServiceImpl implements AuditService {
                 AuditLogger auditLogger = null;
                 if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
                     auditLogger = new CSVAuditLogger();
-                    auditLogger.setConfig(entry);
-                    logger.info("Audit configured to log to CSV");
                 } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                 //   auditLogger = new RepoAuditLogger(entry);
-                    logger.info("Audit configured to log to Repository");
+                    auditLogger = new RepoAuditLogger();
                 } else {
                     throw new InvalidException("Configured audit logType is unknown: " + logType);
                 }
+                auditLogger.setConfig(entry, compContext.getBundleContext());
+                logger.info("Audit configured to log to {}", logType);
                 if (auditLogger != null) {
                     auditLoggers.add(auditLogger);
                 }

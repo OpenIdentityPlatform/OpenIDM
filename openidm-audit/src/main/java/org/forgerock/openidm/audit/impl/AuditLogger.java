@@ -24,7 +24,10 @@
 package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
+
 import org.forgerock.openidm.objset.ObjectSet;
+
+import org.osgi.framework.BundleContext;
 
 /**
  * OpenIDM audit logger
@@ -37,7 +40,7 @@ public interface AuditLogger extends ObjectSet {
      * map 
      * @param config the configuration
      */
-    void setConfig(Map config);
+    void setConfig(Map config, BundleContext ctx);
     
     /**
      * Cleanup called when auditlogger no longer needed
