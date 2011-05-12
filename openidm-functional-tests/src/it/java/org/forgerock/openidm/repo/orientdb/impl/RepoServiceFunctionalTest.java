@@ -39,6 +39,7 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.RepositoryService; 
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
+import org.forgerock.testutil.osgi.ContainerUtil;
 
 import static org.mockito.Mockito.*;
 
@@ -54,38 +55,22 @@ import static org.fest.assertions.Assertions.assertThat;
 import static org.fest.assertions.MapAssert.entry;
 
 public class RepoServiceFunctionalTest {
-
+    
+    // Utility for integration testing with embedded OSGi container
+    ContainerUtil containerUtil;
     RepositoryService repo;
-    ComponentContext mockContext;
     
     @BeforeClass
     public void activateService() {
-        // TODO: Run in embedded felix?
-        repo = new OrientDBRepoService();
-        //((OrientDBRepoService)repo).dbURL = "local:./target/testdb";
-        String dbURL = "local:./target/testdb";
-        
-        mockContext = mock(ComponentContext.class);
-        
-        Dictionary config = new java.util.Hashtable();
-        config.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, 
-                "{" 
-                + "    \"" + OrientDBRepoService.CONFIG_DB_URL + "\" : \"" + dbURL + "\"," 
-                + getQueryConfig() + ","
-                + "    \"dbStructure\" : {"
-                + "        \"orientdbClass\" : {"
-                + "            \"managed/user\" : {"
-                + "                \"index\" : ["
-                + "                     {\"propertyName\" : \"_openidm_id\", \"propertyType\" : \"string\", \"indexType\" : \"unique\"}"
-                + "                ]"
-                + "            }" 
-                + "        }"
-                + "    }"
-                + "}");
-        
-        //Dictionary config = getQueryConfig();
-        when(mockContext.getProperties()).thenReturn(config);
-        ((OrientDBRepoService)repo).activate(mockContext);
+        // Starts and installs all package bundles
+        containerUtil = ContainerUtil.startContainer();
+        // Waits for the service to appear
+        repo = (RepositoryService) containerUtil.getService(RepositoryService.class);
+    }
+    
+    @AfterClass
+    public void cleanup() {
+        containerUtil.stop();
     }
      
     @Test(groups = {"repo"})
@@ -114,14 +99,16 @@ public class RepoServiceFunctionalTest {
         obj.put("addresses", addresses);
         
         repo.create(id, obj);
+        String revAfterCreate = (String) obj.get(DocumentUtil.TAG_REV);
         assertThat(obj).includes(
-                entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"));
+                entry(DocumentUtil.TAG_ID, uuid));
+                // Disabled check whilst OrientDB version not stable at 0
+                // , entry(DocumentUtil.TAG_REV, "0"));
         
         Map<String, Object> result = repo.read(id);
         assertThat(result).includes(
                 entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"),      // Doc version starts at 0
+                entry(DocumentUtil.TAG_REV, revAfterCreate),
                 entry("firstname", "Johnathan"), 
                 entry("lastname", "Wombat"), 
                 entry("age", 100),
@@ -159,8 +146,9 @@ public class RepoServiceFunctionalTest {
         
         repo.create(id, obj);
         assertThat(obj).includes(
-                entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"));
+                entry(DocumentUtil.TAG_ID, uuid));
+                // Disabled check whilst OrientDB version not stable at 0
+                //, entry(DocumentUtil.TAG_REV, "0"));
         
         repo.create(id, obj); // Must detect duplicate
         assertTrue(false, "Create with duplicate IDs must fail, but did not for id " + id 
@@ -189,9 +177,11 @@ public class RepoServiceFunctionalTest {
         obj.put("addresses", addresses);
         
         repo.create(id, obj);
+        String revAfterCreate = (String) obj.get(DocumentUtil.TAG_REV);
         assertThat(obj).includes(
-                entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"));
+                entry(DocumentUtil.TAG_ID, uuid));
+                // Disabled check whilst OrientDB version not stable at 0
+                //, entry(DocumentUtil.TAG_REV, "0"));
         
         Map<String, Object> objToUpdate = repo.read(id);
         objToUpdate.remove("firstname");
@@ -207,9 +197,13 @@ public class RepoServiceFunctionalTest {
         
         Map<String, Object> result = repo.read(id);
         
+        long rev = Long.valueOf(revAfterCreate).longValue();
+        long expectedRev = ++rev;
+        String expectedRevStr = "" + rev;
+        
         assertThat(result).includes(
                 entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "1"),
+                entry(DocumentUtil.TAG_REV, expectedRevStr),
                 entry("lastname", "Adler")); 
         
         assertThat(result).excludes(entry("firstname", "Adam"));
@@ -251,8 +245,9 @@ public class RepoServiceFunctionalTest {
         
         repo.create(id, obj);
         assertThat(obj).includes(
-                entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"));
+                entry(DocumentUtil.TAG_ID, uuid));
+            // Disabled check whilst OrientDB version not stable at 0
+            //, entry(DocumentUtil.TAG_REV, "0"));
         
         Map<String, Object> objToUpdate1 = repo.read(id);
         String originalRev = (String) objToUpdate1.get(DocumentUtil.TAG_REV);
@@ -279,14 +274,16 @@ public class RepoServiceFunctionalTest {
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Cesar");
         repo.create(id, obj);
+        String revAfterCreate = (String) obj.get(DocumentUtil.TAG_REV);
         assertThat(obj).includes(
-                entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"));
+                entry(DocumentUtil.TAG_ID, uuid));
+            // Disabled check whilst OrientDB version not stable at 0
+            //, entry(DocumentUtil.TAG_REV, "0"));
         
         Map<String, Object> objToDelete = repo.read(id);
         assertThat(objToDelete).includes(
             entry(DocumentUtil.TAG_ID, uuid),
-            entry(DocumentUtil.TAG_REV, "0"),
+            entry(DocumentUtil.TAG_REV, revAfterCreate),
             entry("firstname", "Cesar")); 
         
         repo.delete(id, (String) objToDelete.get(DocumentUtil.TAG_REV));
@@ -317,16 +314,22 @@ public class RepoServiceFunctionalTest {
         Map<String, Object> obj = new java.util.HashMap<String, Object>();
         obj.put("firstname", "Cesar");
         repo.create(id, obj);
+        String revAfterCreate = (String) obj.get(DocumentUtil.TAG_REV);
         assertThat(obj).includes(
-                entry(DocumentUtil.TAG_ID, uuid),
-                entry(DocumentUtil.TAG_REV, "0"));
+                entry(DocumentUtil.TAG_ID, uuid));
+            // Disabled check whilst OrientDB version not stable at 0
+            //, entry(DocumentUtil.TAG_REV, "0"));
         obj.put("lastname", "Added");
-        repo.update(id, "0", obj); // Change the object to increase the revision
+        repo.update(id, revAfterCreate, obj); // Change the object to increase the revision
+        
+        long rev = Long.valueOf(revAfterCreate).longValue();
+        long expectedRev = ++rev;
+        String expectedRevStr = "" + rev;
         
         Map<String, Object> objToDelete = repo.read(id);
         assertThat(objToDelete).includes(
             entry(DocumentUtil.TAG_ID, uuid),
-            entry(DocumentUtil.TAG_REV, "1"),
+            entry(DocumentUtil.TAG_REV, expectedRevStr),
             entry("firstname", "Cesar"),
             entry("lastname", "Added")); 
         
@@ -334,25 +337,14 @@ public class RepoServiceFunctionalTest {
         assertTrue(false, "Delete of changed object must fail, but did not.");
     }
     
-    // Test Queries
-
+    // Test Query support    
+    
+    // IDs for test Queries
     String queryUuid1 = "inlinequery-66e0-11e0-ae3e-0800200c9bb1";
     String queryUuid2 = "inlinequery-66e0-11e0-ae3e-0800200c9bb2";
     String queryUuid3 = "inlinequery-66e0-11e0-ae3e-0800200c9bb3";
     String queryUuid4 = "inlinequery-66e0-11e0-ae3e-0800200c9bb4";
     String queryUuid5 = "inlinequery-66e0-11e0-ae3e-0800200c9bb5";
-    
-    @SuppressWarnings("unchecked")
-    public String getQueryConfig() {
-        String queries = 
-                "    \"" + OrientDBRepoService.CONFIG_QUERIES + "\" : {" +
-                "        \"query-without-token\" : \"select * from managed/user where lastname like 'Eglo%' and test = 'inlinequery'\"," +
-                "        \"query-with-where-token\" : \"select * from managed/user where lastname like 'Eglo%' and test = ${querytype}\"," +
-                "        \"query-with-from-token\" : \"select * from ${_resource} where lastname like '${lastname}%' and test = '${querytype}'\"" +
-                "    }";
-        return queries;
-    }
-
     
     @Test(groups = {"repo"})
     @SuppressWarnings("unchecked")
@@ -474,6 +466,23 @@ public class RepoServiceFunctionalTest {
         assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
         assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
     }
+    
+    @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
+    @SuppressWarnings("unchecked")
+    public void inlineQueryWithWhereNameToken() throws ObjectSetException {
+        Map params = new HashMap();
+        params.put("lastname", "Eglo");
+        params.put("wherefield", "lastname");
+        params.put("querytype", "inlinequery");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from ${_resource} where ${wherefield} like '${lastname}%' and test = '${querytype}'");
+        Map result = repo.query("managed/user", params); 
+        List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
+        
+        assertThat(resultSet).hasSize(3); 
+        assertThat((Map)resultSet.get(0)).includes(entry(DocumentUtil.TAG_ID, queryUuid2));
+        assertThat((Map)resultSet.get(1)).includes(entry(DocumentUtil.TAG_ID, queryUuid4));
+        assertThat((Map)resultSet.get(2)).includes(entry(DocumentUtil.TAG_ID, queryUuid5));
+    }    
 
     @Test(groups = {"repo"}, dependsOnMethods = {"populateQueryData"})
     @SuppressWarnings("unchecked")
@@ -576,14 +585,8 @@ public class RepoServiceFunctionalTest {
         assertTrue(false, "Query with undefined token should have failed but did not.");
     }
     
-    // Test ideas: 
-    // - nested doc query
-    // - fields token substitution when supported
-    
-    @AfterClass
-    public void deactivateService() {
-        if (repo != null) {
-            ((OrientDBRepoService)repo).deactivate(mockContext);
-        }
-    }
+    -    // Test ideas: 
+    -    // - nested doc query
+    -    // - fields token substitution when supported
+
 }
