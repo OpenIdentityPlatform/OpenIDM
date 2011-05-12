@@ -65,7 +65,7 @@ public class RepoServiceFunctionalTest {
         // Starts and installs all package bundles
         containerUtil = ContainerUtil.startContainer();
         // Waits for the service to appear
-        repo = (RepositoryService) containerUtil.getService(RepositoryService.class);
+        repo = (RepositoryService) containerUtil.getService(RepositoryService.class, "(db.type=OrientDB)");
     }
     
     @AfterClass

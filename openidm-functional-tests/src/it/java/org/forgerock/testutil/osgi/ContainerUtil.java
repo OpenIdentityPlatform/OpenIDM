@@ -31,18 +31,12 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.ServiceReference;
-//import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
 
 import org.ops4j.pax.exam.Option;
-//import org.ops4j.pax.exam.TestAddress;
 import org.ops4j.pax.exam.TestContainer;
 import org.ops4j.pax.exam.nat.internal.NativeTestContainer;
-//import org.ops4j.pax.exam.TestTarget;
-//import org.ops4j.pax.exam.TestProbeBuilder;
-//import org.ops4j.pax.exam.TestProbeProvider;
-//import org.ops4j.pax.exam.spi.container.PlumbingContext;
 
 import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.LibraryOptions.*;
@@ -55,16 +49,141 @@ public class ContainerUtil  {
     final static Logger logger = LoggerFactory.getLogger(ContainerUtil.class);
     
     Framework framework;
+    // How long to wait for services to get registered
+    int defaultTimeout;
     
-    public ContainerUtil(Framework framework) {
+    private ContainerUtil(Framework framework) {
         this.framework = framework;
+        this.defaultTimeout = 10000;
     }
+    
     
     /**
      * Start a test container will all the bundles prepared in the 
      * expanded openidm package in target/openidm-pkg
      */
     public static ContainerUtil startContainer() {
+        Framework aFramework = startFramework();
+        return new ContainerUtil(aFramework);
+    }
+
+    /**
+     * Change the default timeout to wait for services to get registered/become active
+     * @param defaultTimeout timeout in milliseconds
+     */
+    public void setLookupTimeout(int defaultTimeout) {
+        this.defaultTimeout = defaultTimeout;
+    }
+    
+    /**
+     * Wait for a service registered with the passed interface and filter (until timeout expires)
+     * 
+     * Note: the returned service is a java dynamic proxy and can accept Java system classes as arguments to methods
+     * 
+     * Throws a runtime exception is the service did not get registered in the timeout time frame.
+     * 
+     * @param interfaceClass the Interface of the service to be looked up in teh OSGi service registry
+     * @param extensionFilter the OSGi filter extension, to be added to the filter on the interface class passed,
+     *        or null if no additional filter 
+     *        The filter extension will get added to the following filter
+     *        (&(objectClass=<interfaceClass name>) <filterExtension>)";
+     * @param timeout a timeout in milliseconds to override the default timeout for this service lookup
+     * 
+     * @return the service if found within the timeout period
+     */
+    public Object getService(Class interfaceClass, String extensionFilter, int timeout) {
+        // wait for service 
+        if (framework == null) {
+            throw new RuntimeException("Can not get service when no framework handle obtained.");
+        }
+        Object realService = waitForServiceToStart(framework.getBundleContext(), 
+                interfaceClass.getName(), timeout, extensionFilter);
+
+        // Proxy it as it to bridge classloaders
+        Object proxiedService = SimpleProxy.newInstance(realService, interfaceClass);
+        return proxiedService;
+    }
+    
+    /**
+     * Wait for a service registered with the passed interface and filter 
+     * (until default lookup timeout expires)
+     * @see #getService(Class, String, int)
+     */
+    public Object getService(Class interfaceClass, String extensionFilter) {
+        return getService(interfaceClass, extensionFilter, defaultTimeout);
+    }
+
+    /**
+     * Wait for a service registered with the passed interface 
+     * (until default lookup timeout expires)
+     * @see #getService(Class, String, int)
+     */
+    public Object getService(Class interfaceClass) {
+        return getService(interfaceClass, null);
+    }
+    
+    /**
+     * Stop the test container
+     */
+    public void stop() {
+        try {
+            if (framework != null) {
+                framework.stop();
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to close framework " + ex.getMessage());
+        }
+    }
+
+    private Object waitForServiceToStart(BundleContext ctx, String serviceName, int timeout, String extensionFilter) {
+        String expectedService = serviceName;
+        ServiceTracker serviceTracker = null;
+        Object foundService = null;
+       
+        System.out.println(expectedService);
+        String fullFilterStr = "(" + Constants.OBJECTCLASS + "=" + expectedService + ")";
+        if (extensionFilter != null) {
+            fullFilterStr = "(&(" + Constants.OBJECTCLASS + "=" + expectedService + ")" + extensionFilter + ")";
+        }
+        logger.info("Full filter string: " + fullFilterStr);
+        try {
+            Filter filter = ctx.createFilter(fullFilterStr);
+            serviceTracker = new ServiceTracker(ctx, filter, null);
+            serviceTracker.open();
+
+            logger.debug("Waiting for {}", expectedService);
+            foundService = serviceTracker.waitForService(timeout);
+        } catch (Exception ex) {
+            logger.info("Failed to wait for and find service " + expectedService + " with full filter: " 
+                    + fullFilterStr + " " + ex.getMessage());
+            throw new RuntimeException("Failed to wait for and find service " + expectedService + " with full filter: " 
+                    + fullFilterStr + " " + ex.getMessage(), ex);
+        }
+
+        if (foundService == null) {
+            ServiceReference[] refs = null;
+            try {
+                refs = ctx.getServiceReferences(null, null);
+            } catch (Exception ex) {
+                // Ignore as this is just additional debug info we tried to obtain
+            }
+            logger.info("Expected service " + expectedService + " with filterExtension " + extensionFilter +  
+                    " never got registered. All existing service references: " + java.util.Arrays.asList(refs));
+            throw new RuntimeException("Expected service " + extensionFilter + " with filterExtension " + extensionFilter 
+                    +  " never got registered. full filter used: " + fullFilterStr + " . All existing service references: " 
+                    + java.util.Arrays.asList(refs));
+        } else {
+            logger.debug("Expected service " + expectedService + " with filterExtension " + extensionFilter + " detected.") ;
+        }
+        serviceTracker.close();
+        
+        return foundService;
+    }
+    
+    /**
+     * Start the embedded OSGi framework
+     */
+    private static Framework startFramework() {        
         Option[] options = new Option[]{
             systemProperty("felix.fileinstall.dir").value("./target/openidm-pkg/openidm/bundle,./src/it/resources/conf"),
             systemProperty("felix.fileinstall.filter").value("^((?!fileinstall).)*$"),
@@ -98,79 +217,8 @@ public class ContainerUtil  {
                 throw new RuntimeException("Failed to get access to the framework " + ex.getMessage());
             }
         }
-        return new ContainerUtil(aFramework);
+        return aFramework;
     }
-    
-    /**
-     * Wait for a service registered with the passed interface (until default timeout expires)
-     * 
-     * Note: the returned service is a java dynamic proxy and can accept Java system classes as arguments to methods
-     * 
-     * Throws a runtime exception is the service did not get registered in the timeout time frame.
-     * 
-     * @param the Interface of the service to be looked up in teh OSGi service registry
-     * 
-     * @return the service if found within the timeout period
-     */
-    public Object getService(Class interfaceClass) {
-        // wait for service 
-        if (framework == null) {
-            throw new RuntimeException("Can not get service when no framework handle obtained.");
-        }
-        Object realService = waitForServiceToStart(framework.getBundleContext(), interfaceClass.getName(), 10000);
-
-        // Proxy it as it to bridge classloaders
-        Object proxiedService = SimpleProxy.newInstance(realService, interfaceClass);
-        return proxiedService;
-    }
-    
-    /**
-     * Stop the test container
-     */
-    public void stop() {
-        try {
-            if (framework != null) {
-                framework.stop();
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to close framework " + ex.getMessage());
-        }
-    }
-
-    private Object waitForServiceToStart(BundleContext ctx, String serviceName, int timeout) {
-        String expectedService = serviceName;
-        ServiceTracker serviceTracker = null;
-        Object foundService = null;
-        try {
-            Filter filter = ctx.createFilter("(objectClass=" + expectedService + ")");
-
-            serviceTracker = new ServiceTracker(ctx, filter, null);
-            serviceTracker.open();
-
-            logger.debug("Waiting for {}", expectedService);
-            foundService = serviceTracker.waitForService(timeout);
-        } catch (Exception ex) {
-            logger.info("Failed to wait for and find service " + expectedService + " " + ex.getMessage());
-            throw new RuntimeException("Failed to wait for and find service " + expectedService + " " + ex.getMessage(), ex);
-        }
-
-        if (foundService == null) {
-            ServiceReference[] refs = null;
-            try {
-                refs = ctx.getServiceReferences(null, null);
-            } catch (Exception ex) {
-                // Ignore as this is just additional debug info we tried to obtain
-            }
-            logger.info("Expected service " + expectedService + " never got registered. All existing service references: " + java.util.Arrays.asList(refs));
-            throw new RuntimeException("Expected service " + expectedService + " never got registered. All existing service references: " + java.util.Arrays.asList(refs));
-        } else {
-            logger.debug("Expected service " + expectedService + " detected.") ;
-        }
-        serviceTracker.close();
-        
-        return foundService;
-    }
-    
 }
 
 
