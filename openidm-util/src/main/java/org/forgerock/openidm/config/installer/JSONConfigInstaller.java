@@ -72,6 +72,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     // The key in the OSGi configuration dictionary holding the complete JSON configuration string
     public final static String JSON_CONFIG_PROPERTY = "jsonconfig";
     public final static String SERVICE_FACTORY_PID = "config.factory-pid";
+    public final static String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
     
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
     
@@ -312,6 +313,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         {
             String factoryPid = pid.substring(n + 1);
             pid = pid.substring(0, n);
+            pid = qualifyPid(pid);
+            logger.info("Configuring service PID {} factory PID {}", pid, factoryPid);
             return new String[]
                 {
                     pid, factoryPid
@@ -319,11 +322,28 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
         else
         {
+            pid = qualifyPid(pid);
             return new String[]
                 {
                     pid, null
                 };
         }
+    }
+    
+    /**
+     * Prefixes unqualified PIDs with the default RDN qualifier
+     * I.e. file names can be unqualified and will be prefixed
+     * with the default. 
+     * Configuring services with PIDs that are not qualified 
+     * by org. or com. is currently not supported.
+     */
+    String qualifyPid(String fileNamePid) {
+        String qualifiedPid = fileNamePid;
+        // Prefix unqualified pid names with the default.
+        if (!(fileNamePid.startsWith("org.") || fileNamePid.startsWith("com."))) {
+            qualifiedPid = DEFAULT_SERVICE_RDN_PREFIX + fileNamePid;
+        }
+        return qualifiedPid;
     }
 
     Configuration getConfiguration(String fileName, String pid, String factoryPid)
