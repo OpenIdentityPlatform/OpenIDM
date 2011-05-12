@@ -585,8 +585,8 @@ public class RepoServiceFunctionalTest {
         assertTrue(false, "Query with undefined token should have failed but did not.");
     }
     
-    -    // Test ideas: 
-    -    // - nested doc query
-    -    // - fields token substitution when supported
+    // Test ideas: 
+    // - nested doc query
+    // - fields token substitution when supported
 
 }
