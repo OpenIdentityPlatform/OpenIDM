@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class JSONEnhancedConfig implements EnhancedConfig {
 
-    final static Logger logger = LoggerFactory.getLogger(EnhancedConfig.class);
+    final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
     
     private ObjectMapper mapper = new ObjectMapper();
 
