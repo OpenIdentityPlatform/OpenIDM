@@ -91,7 +91,7 @@ public class ContainerUtil  {
      * 
      * @return the service if found within the timeout period
      */
-    public Object getService(Class interfaceClass, String extensionFilter, int timeout) {
+    public <T extends Object> T getService(Class<T> interfaceClass, String extensionFilter, int timeout) {
         // wait for service 
         if (framework == null) {
             throw new RuntimeException("Can not get service when no framework handle obtained.");
@@ -100,7 +100,7 @@ public class ContainerUtil  {
                 interfaceClass.getName(), timeout, extensionFilter);
 
         // Proxy it as it to bridge classloaders
-        Object proxiedService = SimpleProxy.newInstance(realService, interfaceClass);
+        T proxiedService = (T) SimpleProxy.newInstance(realService, interfaceClass);
         return proxiedService;
     }
     
@@ -109,7 +109,7 @@ public class ContainerUtil  {
      * (until default lookup timeout expires)
      * @see #getService(Class, String, int)
      */
-    public Object getService(Class interfaceClass, String extensionFilter) {
+    public <T extends Object> T getService(Class<T> interfaceClass, String extensionFilter) {
         return getService(interfaceClass, extensionFilter, defaultTimeout);
     }
 
@@ -118,8 +118,8 @@ public class ContainerUtil  {
      * (until default lookup timeout expires)
      * @see #getService(Class, String, int)
      */
-    public Object getService(Class interfaceClass) {
-    //public <T extends Object> getService(T.class interfaceClass) {
+    //public Object getService(Class interfaceClass) {
+    public <T extends Object> T getService(Class<T> interfaceClass) {
         return getService(interfaceClass, null);
     }
     
