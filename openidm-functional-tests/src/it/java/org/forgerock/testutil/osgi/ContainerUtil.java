@@ -118,7 +118,8 @@ public class ContainerUtil  {
      * (until default lookup timeout expires)
      * @see #getService(Class, String, int)
      */
-    public Object getService(Class interfaceClass) {
+    //public Object getService(Class interfaceClass) {
+    public <T extends Object> getService(T.class interfaceClass) {
         return getService(interfaceClass, null);
     }
     
