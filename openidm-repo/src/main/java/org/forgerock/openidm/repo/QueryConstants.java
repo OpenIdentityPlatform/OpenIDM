@@ -79,6 +79,7 @@ public final class QueryConstants {
      * Query output key.
      * 
      * Key for query result meta-data, indicating how long the query took in ms
+     * Value format is Long.
      */
     public final static String STATISTICS_QUERY_TIME = "query-time-ms";
     
@@ -86,6 +87,7 @@ public final class QueryConstants {
      * Query output key.
      * 
      * Key for query result meta-data, indicating how long the conversion of the results records took in ms
+     * Value format is Long.
      */
     public final static String STATISTICS_CONVERSION_TIME = "conversion-time-ms";
     
