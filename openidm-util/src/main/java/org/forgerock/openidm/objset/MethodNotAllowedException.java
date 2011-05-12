@@ -22,34 +22,34 @@ package org.forgerock.openidm.objset;
  *
  * @author aegloff
  */
-public class MethodNotAllowed extends ObjectSetException {
+public class MethodNotAllowedException extends ObjectSetException {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public MethodNotAllowed() {
+    public MethodNotAllowedException() {
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
-    public MethodNotAllowed(String message) {
+    public MethodNotAllowedException(String message) {
         super(message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
-    public MethodNotAllowed(Throwable cause) {
+    public MethodNotAllowedException(Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
-    public MethodNotAllowed(String message, Throwable cause) {
+    public MethodNotAllowedException(String message, Throwable cause) {
         super(message, cause);
     }
 }

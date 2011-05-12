@@ -20,6 +20,7 @@ package org.forgerock.openidm.sync;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 // OSGi Framework
 import org.osgi.service.component.ComponentContext;
@@ -45,7 +46,8 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.router.ObjectSetRouterService;
 import org.forgerock.openidm.repo.RepositoryService; 
-
+import org.forgerock.openidm.scheduler.ExecutionException;
+import org.forgerock.openidm.scheduler.ScheduledService;
 
 /**
  * TODO: Description.
@@ -61,9 +63,9 @@ import org.forgerock.openidm.repo.RepositoryService;
     @Property(name="service.vendor", value="ForgeRock AS")
 })
 @Service
-public class SynchronizationService implements SynchronizationListener {
+public class SynchronizationService implements SynchronizationListener, ScheduledService {
 
-    /** TODO: Description. */
+    /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private final ArrayList<ObjectMapping> mappings = new ArrayList<ObjectMapping>();
 
     /** TODO: Description. */
@@ -126,6 +128,21 @@ public class SynchronizationService implements SynchronizationListener {
     /**
      * TODO: Description.
      *
+     * @param name TODO.
+     * @return TODO.
+     */
+    ObjectMapping getMapping(String name) throws SynchronizationException {
+        for (ObjectMapping mapping : mappings) {
+            if (mapping.getName().equals(name)) {
+                return mapping;
+            }
+        }
+        throw new SynchronizationException("no such mapping: " + name);
+    }
+
+    /**
+     * TODO: Description.
+     *
      * @throws SynchronizationException TODO.
      */
     ObjectSetRouterService getRouter() throws SynchronizationException {
@@ -174,5 +191,33 @@ public class SynchronizationService implements SynchronizationListener {
         for (ObjectMapping mapping : mappings) {
             mapping.onDelete(id);
         }
+    }
+
+    @Override
+    public void execute(Map<String, Object> context) throws ExecutionException {
+        try {
+            JsonNode node = new JsonNode(context);
+            if ("reconcile".equals(node.get("action").asString())) { // "action": "reconcile"
+                reconcile(node.get("mapping").asString()); // "mapping": string (mapping name)
+            }
+        }
+        catch (JsonNodeException jne) {
+            throw new ExecutionException(jne);
+        }
+        catch (SynchronizationException se) {
+            throw new ExecutionException(se);
+        }
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @param mapping TODO.
+     * @throws SynchronizationException TODO.
+     */
+    public String reconcile(String mapping) throws SynchronizationException {
+        String reconId = UUID.randomUUID().toString();
+        getMapping(mapping).recon(reconId); // throws SynchronizationException
+        return reconId;
     }
 }

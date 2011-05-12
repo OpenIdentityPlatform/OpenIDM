@@ -40,7 +40,7 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.MethodNotAllowed;
+import org.forgerock.openidm.objset.MethodNotAllowedException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -144,20 +144,20 @@ public class RepoAuditLogger implements AuditLogger {
      * Audit service does not support changing audit entries.
      */
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new MethodNotAllowed("Not allowed on audit service");
+        throw new MethodNotAllowedException("Not allowed on audit service");
     }
 
     /**
      * Audit service currently does not support deleting audit entries.
      */ 
     public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new MethodNotAllowed("Not allowed on audit service");
+        throw new MethodNotAllowedException("Not allowed on audit service");
     }
 
     /**
      * Audit service does not support changing audit entries.
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new MethodNotAllowed("Not allowed on audit service");
+        throw new MethodNotAllowedException("Not allowed on audit service");
     }
 }

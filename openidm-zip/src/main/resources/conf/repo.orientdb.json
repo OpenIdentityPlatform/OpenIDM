@@ -7,7 +7,9 @@
         "query-all-ids" : "select _openidm_id from ${_resource}", 
         "query-all" : "select ${fields} from ${_resource}", 
         "query-by-native-ids" : "select ${fields} from ${native-ids}",
-        "query-by-ids-experiment" : "select ${fields} from ${_resource} where _openidm_id = ${id1} or _openidm_id = ${id2}"
+        "query-by-ids-experiment" : "select ${fields} from ${_resource} where _openidm_id = ${id1} or _openidm_id = ${id2}",
+        "links-for-sourceId": "SELECT * FROM ${_resource} WHERE sourceId = ${sourceId}",
+        "links-for-targetId": "SELECT * FROM ${_resource} WHERE targetId = ${targetId}"  
     },
     "dbStructure" : {
         "orientdbClass" : {

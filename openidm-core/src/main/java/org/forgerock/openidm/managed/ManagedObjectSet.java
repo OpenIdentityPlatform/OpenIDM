@@ -138,7 +138,7 @@ class ManagedObjectSet implements ObjectSet {
      * @return the fully-qualified repository object identifier.
      */
     private String repoId(String id) {
-        // TODO: make this configurable as not every repository will likely adhere to the same scheme
+// TODO: make this configurable as not every repository will likely adhere to the same scheme
         return "managed/" + name + '/' + id;
     }
 
@@ -214,7 +214,7 @@ class ManagedObjectSet implements ObjectSet {
             property.onValidate(object);
         }
         execScript(onValidate, object);
-        // TODO: schema validation here (w. optimizations)
+// TODO: schema validation here (w. optimizations)
         for (ManagedObjectProperty property : properties) {
             property.onStore(object);
         }

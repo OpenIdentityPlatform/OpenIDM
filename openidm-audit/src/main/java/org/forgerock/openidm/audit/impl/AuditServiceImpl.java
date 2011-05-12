@@ -51,7 +51,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.MethodNotAllowed;
+import org.forgerock.openidm.objset.MethodNotAllowedException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -141,7 +141,7 @@ public class AuditServiceImpl implements AuditService {
      * Audit service does not support changing audit entries.
      */
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new MethodNotAllowed("Not allowed on audit service");
+        throw new MethodNotAllowedException("Not allowed on audit service");
     }
 
     /**
@@ -157,14 +157,14 @@ public class AuditServiceImpl implements AuditService {
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */ 
     public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new MethodNotAllowed("Not allowed on audit service");
+        throw new MethodNotAllowedException("Not allowed on audit service");
     }
 
     /**
      * Audit service does not support changing audit entries.
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new MethodNotAllowed("Not allowed on audit service");
+        throw new MethodNotAllowedException("Not allowed on audit service");
     }
 
     /**
