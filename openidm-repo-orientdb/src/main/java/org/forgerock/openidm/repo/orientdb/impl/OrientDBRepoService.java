@@ -176,6 +176,10 @@ public class OrientDBRepoService implements RepositoryService {
             ODocument newDoc = DocumentUtil.toDocument(obj, null, db, type);
             logger.trace("Created doc for id: {} to save {}", fullId, newDoc);
             newDoc.save();
+            
+            // Work-around until OrientDB fixes the case where the actual rev is different than reported 
+            newDoc.reload();
+            
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("create for id: {} doc: {}", fullId, newDoc);
         } catch (OIndexException ex) {
