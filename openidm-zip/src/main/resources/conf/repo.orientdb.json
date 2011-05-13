@@ -15,7 +15,7 @@
         "orientdbClass" : {
             "managed/user" : {
                 "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType: "unique" }
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
                 ]
             },
             "links/systemXmlAccounts_managedUser" : {
