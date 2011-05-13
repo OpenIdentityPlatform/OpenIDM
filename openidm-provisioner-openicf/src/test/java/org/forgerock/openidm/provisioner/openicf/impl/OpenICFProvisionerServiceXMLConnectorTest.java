@@ -100,9 +100,9 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         for (Map<String, Object> object : testInput) {
             String id = "system/xml/account/";
             getService().create(id, object);
-            assertThat((String) object.get("_id")).as("Result object must contain the new id").matches(".*/account/(.*?)");
+            assertThat((String) object.get("_id")).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
             String newID = (String) object.get("_id");
-            objectIDs.add(newID);
+            objectIDs.add(id+newID);
         }
     }
 
@@ -111,7 +111,8 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         for (String id : objectIDs) {
             Map<String, Object> connectorObject = getService().read(id);
             Assert.assertNotNull(connectorObject);
-            assertThat(connectorObject).includes(MapAssert.entry("_id", id));
+            assertThat((String) connectorObject.get("_id")).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            //assertThat(connectorObject).includes(MapAssert.entry("_id", id));
         }
     }
 
@@ -131,7 +132,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
             assertThat(connectorObject).includes(MapAssert.entry("__DESCRIPTION__", "Test Description"));
             assertThat(connectorObject).includes(MapAssert.entry("firstname", "Darth"));
             //assertThat(connectorObject).includes(MapAssert.entry("lastname-first-letter", null));
-            assertThat(connectorObject).includes(MapAssert.entry("_id", id));
+            assertThat((String) connectorObject.get("_id")).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
 
             //assertThat(connectorObject.keySet()).excludes("__PASSWORD__", "secret-pin", "jpegPhoto", "yearly-wage");
             Assert.assertNotNull(connectorObject);

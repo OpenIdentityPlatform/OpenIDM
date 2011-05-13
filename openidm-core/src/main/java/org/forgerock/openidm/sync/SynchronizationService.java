@@ -17,12 +17,15 @@
 package org.forgerock.openidm.sync;
 
 // Java Standard Edition
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 // OSGi Framework
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -45,7 +48,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 // ForgeRock OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.router.ObjectSetRouterService;
-import org.forgerock.openidm.repo.RepositoryService; 
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
 
@@ -55,53 +58,67 @@ import org.forgerock.openidm.scheduler.ScheduledService;
  * @author Paul C. Bryan
  */
 @Component(
-    name="org.forgerock.openidm.sync",
-    policy=ConfigurationPolicy.REQUIRE
+        name = "org.forgerock.openidm.sync",
+        policy = ConfigurationPolicy.REQUIRE,
+        immediate = true
 )
 @Properties({
-    @Property(name="service.description", value="OpenIDM object synchronization service"),
-    @Property(name="service.vendor", value="ForgeRock AS")
+        @Property(name = "service.description", value = "OpenIDM object synchronization service"),
+        @Property(name = "service.vendor", value = "ForgeRock AS")
 })
 @Service
 public class SynchronizationService implements SynchronizationListener, ScheduledService {
 
-    /** Object mappings. Order of mappings evaluated during synchronization is significant. */
+    /**
+     * Object mappings. Order of mappings evaluated during synchronization is significant.
+     */
     private final ArrayList<ObjectMapping> mappings = new ArrayList<ObjectMapping>();
 
-    /** TODO: Description. */
+    /**
+     * TODO: Description.
+     */
     private ComponentContext context;
 
-    /** Repository service. */
+    /**
+     * Repository service.
+     */
     @Reference(
-        name="Reference_SynchronizationService_RepositoryService",
-        referenceInterface=RepositoryService.class,
-        bind="bindRepository",
-        unbind="unbindRepository",
-        cardinality=ReferenceCardinality.MANDATORY_UNARY,
-        policy=ReferencePolicy.STATIC
+            name = "Reference_SynchronizationService_RepositoryService",
+            referenceInterface = RepositoryService.class,
+            bind = "bindRepository",
+            unbind = "unbindRepository",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC
     )
     private RepositoryService repository;
+
     protected void bindRepository(RepositoryService repository) {
         this.repository = repository;
     }
+
     protected void unbindRepository(RepositoryService repository) {
         this.repository = null;
     }
 
-    /** Object set router service. */
+    /**
+     * Object set router service.
+     */
     @Reference(
-        name="Reference_SynchronizationService_ObjectSetRouterService",
-        referenceInterface=ObjectSetRouterService.class,
-        bind="bindRouter",
-        unbind="unbindRouter",
-        cardinality=ReferenceCardinality.MANDATORY_UNARY,
-        policy=ReferencePolicy.STATIC
+            name = "Reference_SynchronizationService_ObjectSetRouterService",
+            referenceInterface = ObjectSet.class,
+            bind = "bindRouter",
+            unbind = "unbindRouter",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC,
+            target = "(service.pid=org.forgerock.openidm.router)"
     )
-    private ObjectSetRouterService router;
-    protected void bindRouter(ObjectSetRouterService router) {
+    private ObjectSet router;
+
+    protected void bindRouter(ObjectSet router) {
         this.router = router;
     }
-    protected void unbindRouter(ObjectSetRouterService router) {
+
+    protected void unbindRouter(ObjectSet router) {
         this.router = null;
     }
 
@@ -113,8 +130,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
             for (JsonNode node : config.get("mappings").expect(List.class)) {
                 mappings.add(new ObjectMapping(this, node)); // throws JsonNodeException
             }
-        }
-        catch (JsonNodeException jne) {
+        } catch (JsonNodeException jne) {
             throw new ComponentException("Configuration error", jne);
         }
     }
@@ -145,7 +161,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      *
      * @throws SynchronizationException TODO.
      */
-    ObjectSetRouterService getRouter() throws SynchronizationException {
+    ObjectSet getRouter() throws SynchronizationException {
         if (router == null) {
             throw new SynchronizationException("no object set router");
         }
@@ -170,7 +186,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
             mapping.onCreate(id, object);
         }
     }
-    
+
     @Override
     public void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
@@ -180,7 +196,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     @Override
     public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
-    throws SynchronizationException {
+            throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             mapping.onUpdate(id, oldValue, newValue);
         }
@@ -200,11 +216,9 @@ public class SynchronizationService implements SynchronizationListener, Schedule
             if ("reconcile".equals(node.get("action").asString())) { // "action": "reconcile"
                 reconcile(node.get("mapping").asString()); // "mapping": string (mapping name)
             }
-        }
-        catch (JsonNodeException jne) {
+        } catch (JsonNodeException jne) {
             throw new ExecutionException(jne);
-        }
-        catch (SynchronizationException se) {
+        } catch (SynchronizationException se) {
             throw new ExecutionException(se);
         }
     }

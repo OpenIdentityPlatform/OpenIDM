@@ -124,13 +124,14 @@ public class OperationHelperImpl implements OperationHelper {
     @Override
     public void resetUid(Uid uid, Map<String, Object> target) {
         if (null != uid && null != target) {
-            Object oldId = target.get("_id");
-            if (oldId instanceof String) {
-                Id newId = new Id((String) oldId);
-                target.put("_id", newId.resolveLocalId(uid).toString());
-            } else {
-                target.put("_id", systemObjectSetId.resolveLocalId(uid).toString());
-            }
+            target.put("_id", uid.getUidValue());
+//            Object oldId = target.get("_id");
+//            if (oldId instanceof String) {
+//                Id newId = new Id((String) oldId);
+//                target.put("_id", newId.resolveLocalId(uid).toString());
+//            } else {
+//                target.put("_id", systemObjectSetId.resolveLocalId(uid).toString());
+//            }
         }
     }
 

@@ -1,0 +1,10 @@
+{
+   "type" : "cron",
+   "schedule" : "0 0/5 * * * ?",
+   "invokeService" : "org.forgerock.openidm.sync",
+   "invokeContext" :
+      {
+         "action" : "reconcile",
+         "mapping" : "Initial load from XML file"
+      }
+}

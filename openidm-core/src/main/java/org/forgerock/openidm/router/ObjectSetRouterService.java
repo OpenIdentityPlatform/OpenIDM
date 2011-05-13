@@ -17,38 +17,19 @@
 package org.forgerock.openidm.router;
 
 // Java Standard Edition
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
-// OSGi Framework
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-
-// Apache Felix Maven SCR Plugin
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
-
-// JSON-Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
-
-// ForgeRock OpenIDM
+import org.apache.felix.scr.annotations.*;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetRouter;
-import org.forgerock.openidm.objset.ServiceUnavailableException;
-import org.forgerock.openidm.repo.RepositoryService; 
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+
+import java.util.Iterator;
+
+// OSGi Framework
+// Apache Felix Maven SCR Plugin
+// JSON-Fluent library
+// ForgeRock OpenIDM
 
 /**
  * Provides internal routing for a top-level object set.
