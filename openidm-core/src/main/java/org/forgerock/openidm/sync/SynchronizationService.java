@@ -137,8 +137,8 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        this.context = null;
         mappings.clear();
+        this.context = null;
     }
 
     /**

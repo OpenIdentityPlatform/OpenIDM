@@ -42,7 +42,7 @@ public class Scripts {
      * @throws JsonNodeException if the script configuration object or source is malformed.
      */
     public static Script newInstance(JsonNode config) throws JsonNodeException {
-        if (config == null) {
+        if (config == null || config.isNull()) {
             return null;
         }
         for (ScriptFactory factory : FACTORIES) {
@@ -51,7 +51,7 @@ public class Scripts {
                 return script;
             }
         }
-        JsonNode name = config.get("name");
-        throw new JsonNodeException(name, "script type '" + name.asString() + " unsupported"); // no matching factory
+        JsonNode type = config.get("type");
+        throw new JsonNodeException(type, "script type " + type.asString() + " unsupported"); // no matching factory
     }
 }
