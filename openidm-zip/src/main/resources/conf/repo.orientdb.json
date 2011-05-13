@@ -15,14 +15,23 @@
         "orientdbClass" : {
             "managed/user" : {
                 "index" : [
-                    {"propertyName" : "_openidm_id", "propertyType" : "string", "indexType" : "unique"}
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType: "unique" }
                 ]
             },
-            "links/account-mapping" : {
+            "links/systemXmlAccounts_managedUser" : {
                 "index" : [
-                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
+                    { "propertyName": "sourceId", "propertyType": "string", "indexType": "unique" },
+                    { "propertyName": "targetId", "propertyType": "string", "indexType": "unique" },
+                    { "propertyName": "reconId", "propertyType": "string", "indexType": "notunique" }
+                ]
+            },
+            "links/managedUser_systemXmlTargetAccounts" : {
+                "index" : [
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
+                    { "propertyName": "sourceId", "propertyType": "string", "indexType": "unique" },
+                    { "propertyName": "targetId", "propertyType": "string", "indexType": "unique" },
+                    { "propertyName": "reconId", "propertyType": "string", "indexType": "notunique" }
                 ]
             }
         }

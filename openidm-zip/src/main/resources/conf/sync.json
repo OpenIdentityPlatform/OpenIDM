@@ -1,49 +1,26 @@
 {
-   "mappings" :
-      [
-         {
-            "name" : "Initial load from XML file",
+    "mappings" : [
+        {
+            "name" : "systemXmlAccounts_managedUser",
             "source" : "system/xml/accounts",
             "target" : "managed/user",
-            "targetCorrelation" :
-               {
-                  "query" :
-                     {
-                        "type" : "text/javascript",
-                        "source" : "'SELECT * FROM user WHERE name = ' + source.get(name)"
-                     },
-                  "filter" :
-                     {
-                        "type" : "text/javascript",
-                        "source" : "result"
-                     }
-               },
-            "properties" :
-               [
-                  {
-                     "source" : "name",
-                     "target" : "name"
-                  },
-                  {
-                     "source" : "lastname",
-                     "target" : "lastname"
-                  },
-                  {
-                     "source" : "firstname",
-                     "target" : "firstname"
-                  },
-                  {
-                     "source" : "email",
-                     "target" : "email"
-                  }
-               ],
-            "policies" :
-               [
-                  {
-                     "situation" : "ABSENT",
-                     "action" : "CREATE"
-                  }
-               ]
-         }
-      ]
+            "properties" : [
+                { "source" : "$.name", "target" : "$.name" },
+                { "source" : "$.lastname", "target" : "$.lastname" },
+                { "source" : "$.firstname", "target" : "$.firstname" },
+                { "source" : "$.email", "target" : "$.email" }
+            ]
+        },
+        {
+            "name": "managedUser_systemXmlTargetAccounts",
+            "source": "managed/user",
+            "target": "system/xmlTarget/accounts",
+            "properties": [
+                { "source" : "$.name", "target" : "$.name" },
+                { "source" : "$.lastname", "target" : "$.lastname" },
+                { "source" : "$.firstname", "target" : "$.firstname" },
+                { "source" : "$.email", "target" : "$.email" }
+            ]
+        }
+    ]
 }
