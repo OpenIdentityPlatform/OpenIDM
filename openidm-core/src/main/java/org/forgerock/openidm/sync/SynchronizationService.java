@@ -58,13 +58,13 @@ import org.forgerock.openidm.scheduler.ScheduledService;
  * @author Paul C. Bryan
  */
 @Component(
-        name = "org.forgerock.openidm.sync",
-        policy = ConfigurationPolicy.REQUIRE,
-        immediate = true
+    name = "org.forgerock.openidm.sync",
+    policy = ConfigurationPolicy.REQUIRE,
+    immediate = true
 )
 @Properties({
-        @Property(name = "service.description", value = "OpenIDM object synchronization service"),
-        @Property(name = "service.vendor", value = "ForgeRock AS")
+    @Property(name = "service.description", value = "OpenIDM object synchronization service"),
+    @Property(name = "service.vendor", value = "ForgeRock AS")
 })
 @Service
 public class SynchronizationService implements SynchronizationListener, ScheduledService {
@@ -83,12 +83,12 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      * Repository service.
      */
     @Reference(
-            name = "Reference_SynchronizationService_RepositoryService",
-            referenceInterface = RepositoryService.class,
-            bind = "bindRepository",
-            unbind = "unbindRepository",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC
+        name = "Reference_SynchronizationService_RepositoryService",
+        referenceInterface = RepositoryService.class,
+        bind = "bindRepository",
+        unbind = "unbindRepository",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC
     )
     private RepositoryService repository;
 
@@ -104,13 +104,13 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      * Object set router service.
      */
     @Reference(
-            name = "Reference_SynchronizationService_ObjectSetRouterService",
-            referenceInterface = ObjectSet.class,
-            bind = "bindRouter",
-            unbind = "unbindRouter",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC,
-            target = "(service.pid=org.forgerock.openidm.router)"
+        name = "Reference_SynchronizationService_ObjectSetRouterService",
+        referenceInterface = ObjectSet.class,
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC,
+        target = "(service.pid=org.forgerock.openidm.router)"
     )
     private ObjectSet router;
 
@@ -196,7 +196,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     @Override
     public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
-            throws SynchronizationException {
+    throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             mapping.onUpdate(id, oldValue, newValue);
         }
@@ -216,9 +216,11 @@ public class SynchronizationService implements SynchronizationListener, Schedule
             if ("reconcile".equals(node.get("action").asString())) { // "action": "reconcile"
                 reconcile(node.get("mapping").asString()); // "mapping": string (mapping name)
             }
-        } catch (JsonNodeException jne) {
+        }
+        catch (JsonNodeException jne) {
             throw new ExecutionException(jne);
-        } catch (SynchronizationException se) {
+        }
+        catch (SynchronizationException se) {
             throw new ExecutionException(se);
         }
     }
