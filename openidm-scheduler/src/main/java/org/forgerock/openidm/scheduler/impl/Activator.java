@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.Scheduler;
 
 /**
@@ -65,9 +66,22 @@ public class Activator implements BundleActivator {
      
      private void initScheduler(BundleContext context) throws SchedulerException {
          try {
+             
+             // Quartz tries to be too smart about classloading, 
+             // but relies on the thread context classloader to load classload helpers
+             // That is not a good idea in OSGi, 
+             // hence, hand it the OSGi classloader for the ClassLoadHelper we want it to find
+             ClassLoader original = Thread.currentThread().getContextClassLoader();
+             Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());
+             
              SchedulerFactory sf = new StdSchedulerFactory(); 
              //sf.initialize(properties);
              scheduler = sf.getScheduler();
+
+             // Set back to the original thread context classloader
+             Thread.currentThread().setContextClassLoader(original);
+             
+             // Start processing schedules
              scheduler.start();
          } catch (SchedulerException ex) {
              logger.warn("Failure in initializing the scheduler facility " + ex.getMessage(), ex);
