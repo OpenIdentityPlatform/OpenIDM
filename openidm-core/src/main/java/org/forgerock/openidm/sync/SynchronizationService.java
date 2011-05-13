@@ -212,9 +212,9 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     @Override
     public void execute(Map<String, Object> context) throws ExecutionException {
         try {
-            JsonNode node = new JsonNode(context);
-            if ("reconcile".equals(node.get("action").asString())) { // "action": "reconcile"
-                reconcile(node.get("mapping").asString()); // "mapping": string (mapping name)
+            JsonNode params = new JsonNode(context).get(CONFIGURED_INVOKE_CONTEXT);
+            if ("reconcile".equals(params.get("action").asString())) { // "action": "reconcile"
+                reconcile(params.get("mapping").asString()); // "mapping": string (mapping name)
             }
         }
         catch (JsonNodeException jne) {
