@@ -117,9 +117,13 @@ public class AuditServiceImpl implements AuditService {
      * @throws PreconditionFailedException if an object with the same ID already exists.
      */
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        String[] withoutAuditLevel = splitFirstLevel(fullId);
-        String remainingPath = withoutAuditLevel[1];
-        String[] splitTypeAndId =  splitFirstLevel(remainingPath);
+        // Work-around until router id strategy in sync
+        if (fullId.startsWith(ROUTER_PREFIX)) {
+            String[] withoutAuditLevel = splitFirstLevel(fullId);
+            fullId = withoutAuditLevel[1];
+        }
+        
+        String[] splitTypeAndId =  splitFirstLevel(fullId);
         String type = splitTypeAndId[0];
         String localId = splitTypeAndId[1];
  
