@@ -147,10 +147,12 @@ class ManagedObjectSet implements ObjectSet {
     }
 
     /**
-     * TODO: Description.
+     * Generates a fully-qualified object identifier for the managed object. This is the
+     * identifier used to access the managed object with the internal router. Currently
+     * hard-codes the identifer.
      *
-     * @param id TODO.
-     * @return TODO.
+     * @param id the local managed object identifier to qualify.
+     * @return the fully-qualified managed object identifier.
      */
 // TODO: Just happen to be using repoId because it's the same. There should be a better
 // way to know the fully qualified identifier of a managed object.
