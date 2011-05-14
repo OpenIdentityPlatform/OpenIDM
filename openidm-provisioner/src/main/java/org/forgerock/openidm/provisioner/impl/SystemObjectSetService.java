@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.*;
+import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
@@ -64,7 +65,7 @@ public class SystemObjectSetService implements ObjectSet {
     @Reference(name = PROVISIONER_SERVICE_REFERENCE_NAME, referenceInterface = ProvisionerService.class, bind = "bind",
             unbind = "unbind", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             strategy = ReferenceStrategy.EVENT)
-    private Map<SystemIdentifier, ServiceReference> provisionerServices = new HashMap<SystemIdentifier, ServiceReference>();
+    private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
 
     private ComponentContext context = null;
 
@@ -81,21 +82,22 @@ public class SystemObjectSetService implements ObjectSet {
     }
 
 
-    protected void bind(ServiceReference provisionerServiceReference) {
-        ProvisionerService service = locateService(provisionerServiceReference);
-        provisionerServices.put(service.getSystemIdentifier(), provisionerServiceReference);
-        TRACE.info("ProvisionerService {} is bound.", provisionerServiceReference.getProperty(ComponentConstants.COMPONENT_ID));
+    protected void bind(ProvisionerService service, Map properties) {
+        provisionerServices.put(service.getSystemIdentifier(), service);
+        TRACE.info("ProvisionerService {} is bound with system identifier {}.", 
+                properties.get(ComponentConstants.COMPONENT_ID),
+                service.getSystemIdentifier());
     }
 
-    protected void unbind(ServiceReference provisionerServiceReference) {
+    protected void unbind(ProvisionerService service, Map properties) {
         SystemIdentifier id = null;
-        for (Map.Entry<SystemIdentifier, ServiceReference> entry : provisionerServices.entrySet()) {
-            if (provisionerServiceReference.equals(entry.getValue())) {
+        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+            if (service.equals(entry.getValue())) {
                 provisionerServices.remove(entry.getKey());
                 break;
             }
         }
-        TRACE.info("ProvisionerService {} is unbound.", provisionerServiceReference.getProperty(ComponentConstants.COMPONENT_ID));
+        TRACE.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
     }
 
     /**
@@ -113,6 +115,9 @@ public class SystemObjectSetService implements ObjectSet {
      *          if access to the object or object set is forbidden.
      */
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
+        // Work-around to ensure id starts with system/
+        id = ensureQualified(id);
+        
         locateService(id).create(id, object);
     }
 
@@ -131,6 +136,9 @@ public class SystemObjectSetService implements ObjectSet {
      *          if access to the object is forbidden.
      */
     public Map<String, Object> read(String id) throws ObjectSetException {
+        // Work-around to ensure id starts with system/
+        id = ensureQualified(id);
+        
         return locateService(id).read(id);
     }
 
@@ -153,6 +161,9 @@ public class SystemObjectSetService implements ObjectSet {
      *          if version did not match the existing object in the set.
      */
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        // Work-around to ensure id starts with system/
+        id = ensureQualified(id);
+        
         locateService(id).update(id, rev, object);
     }
 
@@ -171,6 +182,9 @@ public class SystemObjectSetService implements ObjectSet {
      *          if version did not match the existing object in the set.
      */
     public void delete(String id, String rev) throws ObjectSetException {
+        // Work-around to ensure id starts with system/
+        id = ensureQualified(id);
+        
         locateService(id).delete(id, rev);
     }
 
@@ -190,6 +204,9 @@ public class SystemObjectSetService implements ObjectSet {
      *          if version did not match the existing object in the set.
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+        // Work-around to ensure id starts with system/
+        id = ensureQualified(id);
+        
         locateService(id).patch(id, rev, patch);
     }
 
@@ -208,28 +225,37 @@ public class SystemObjectSetService implements ObjectSet {
      *          if access to the object or specified query is forbidden.
      */
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
+        // Work-around to ensure id starts with system/
+        id = ensureQualified(id);
+        
         return locateService(id).query(id, params);
     }
 
+    // TODO: temporary - ensure qualified with system/ 
+    // Remove once router and system object approach in sync
+    private String ensureQualified(String id) {
+        if (!id.startsWith("system/")) {
+            return "system/" + id;
+        } else {
+            return id;
+        }
+    }
+    
 
     private ProvisionerService locateService(String id) throws ObjectSetException {
         try {
             //@TODO use the proper API to get the system name
             URI baseContext = new URI(id);
 
-            for (Map.Entry<SystemIdentifier, ServiceReference> entry : provisionerServices.entrySet()) {
+            for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
                 if (entry.getKey().is(baseContext)) {
-                    return locateService(entry.getValue());
+                    return entry.getValue(); 
                 }
             }
         } catch (URISyntaxException e) {
             TRACE.error("Invalid ID: {}", id, e);
+            throw new BadRequestException("Invalid ID in request: + " + id + " " + e.getMessage(), e);
         }
         throw new ObjectSetException("System: " + id + " is not available.");
-    }
-
-    private ProvisionerService locateService(ServiceReference reference) {
-        Object service = context.locateService(PROVISIONER_SERVICE_REFERENCE_NAME, reference);
-        return (ProvisionerService) service;
     }
 }
