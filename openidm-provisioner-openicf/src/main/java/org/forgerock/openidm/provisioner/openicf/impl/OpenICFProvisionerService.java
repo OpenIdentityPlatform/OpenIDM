@@ -292,6 +292,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
 
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
+                object.put("_id", uid.getUidValue());
                 helper.resetUid(uid, object);
             } catch (Exception e) {
                 TRACE.error("Error at Creating of {}", id, e);
@@ -391,7 +392,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
                 result.put("result", helper.getQueryResult());
             } catch (Exception e) {
-                TRACE.error("Error at Creating of {}", id, e);
+                TRACE.error("Error executing query of {}", id, e);
                 throw new ObjectSetException(e);
             }
         }

@@ -117,7 +117,7 @@ public class OperationHelperImpl implements OperationHelper {
     @Override
     public Map<String, Object> build(ConnectorObject source) throws Exception {
         Map<String, Object> result = objectClassInfoHelper.build(source);
-        resetUid(source.getUid(), result);
+        //resetUid(source.getUid(), result);
         return result;
     }
 

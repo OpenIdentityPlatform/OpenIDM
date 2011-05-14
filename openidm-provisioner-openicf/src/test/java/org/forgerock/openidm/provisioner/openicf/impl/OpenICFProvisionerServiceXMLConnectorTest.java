@@ -164,7 +164,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
 
     @Test(dependsOnMethods = {"testCreate"})
     public void testQueryAll() throws Exception {
-        Map<String, Object> result = getService().query("system/xml/account/", null);
+        Map<String, Object> result = getService().query("system/xml/account", null);
         Assert.assertNotNull(result);
         Object resultObject = result.get("result");
         if (resultObject instanceof List) {

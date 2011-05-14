@@ -155,6 +155,7 @@ public class ObjectClassInfoHelper {
                 result.put(attributeInfo.getName(), attributeInfo.build(attribute));
             }
         }
+        result.put("_id",source.getUid().getUidValue());
         return result;
 
 

@@ -46,10 +46,12 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
 
     private String name;
     private Pattern pattern;
+    private Pattern patternShort;
 
     public SimpleSystemIdentifier(JsonNode configuration) throws JsonNodeException {
         name = configuration.get("name").expect(String.class).asString();
         pattern = Pattern.compile(".*system/" + name + "/.*");
+        patternShort = Pattern.compile(".*" + name + "/.*");
     }
 
     /**
@@ -63,7 +65,8 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
      * {@inheritDoc}
      */
     public boolean is(URI uri) {
-        return pattern.matcher(uri.toString()).matches();
+        String decodedID = uri.toString();
+        return patternShort.matcher(decodedID).matches() || pattern.matcher(decodedID).matches();
     }
 
     public String getName() {
