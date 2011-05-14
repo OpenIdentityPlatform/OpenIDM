@@ -237,6 +237,7 @@ class ObjectMapping implements SynchronizationListener {
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
+            LOGGER.debug("failed to read target object", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -259,6 +260,7 @@ class ObjectMapping implements SynchronizationListener {
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
+            LOGGER.debug("failed to create target object", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -272,11 +274,12 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void updateTargetObject(JsonNode target) throws SynchronizationException {
         try {
-            service.getRouter().update(target.get("_id").required().asString(),
+            service.getRouter().update(targetObjectSet + '/' + target.get("_id").required().asString(),
              target.get("_rev").asString(), target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
+            LOGGER.debug("failed to update target object", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -298,6 +301,7 @@ class ObjectMapping implements SynchronizationListener {
             } catch (NotFoundException nfe) {
                 // forgiving delete
             } catch (ObjectSetException ose) {
+                LOGGER.debug("failed to delete target object", ose);
                 throw new SynchronizationException(ose);
             }
         }
@@ -718,7 +722,7 @@ class ObjectMapping implements SynchronizationListener {
                 linkObject.getLinkForTarget(targetId);
             }
             if (reconId != null && reconId.equals(linkObject.reconId)) {
-                situation = null; // optimization: already handled in previous phase; ignore
+                return; // optimization: already handled in previous phase; ignore it
             } else if (linkObject._id == null || linkObject.sourceId == null) {
                 situation = Situation.UNQUALIFIED;
             } else {
