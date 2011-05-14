@@ -307,7 +307,7 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new InternalServerErrorException("query not yet implemented");
+        return service.getRepository().query(id, params);
     }
 
     /**
