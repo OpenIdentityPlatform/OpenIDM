@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright © 2011 ForgeRock AS. All rights reserved.
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  ~
+  ~ $Id$
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>openidm-project</artifactId>
+        <groupId>org.forgerock.openidm</groupId>
+        <version>2.0.0-SNAPSHOT</version>
+    </parent>
+    <groupId>org.forgerock.openidm</groupId>
+    <artifactId>openidm-webapp</artifactId>
+    <packaging>war</packaging>
+    <version>2.0.0-SNAPSHOT</version>
+    <name>OpenIDM Webapp - (Embedded Felix)</name>
+    <properties>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
+        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
+    </properties>
+    <!-- http://heapdump.wordpress.com/2010/12/25/felix-and-websphere-7/ -->
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.proxy</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.bridge</artifactId>
+            <version>2.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.webconsole</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- OpenIDM Dependencies -->
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-core</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo-orientdb</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-provisioner</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-provisioner-openicf</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-scheduler</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-audit</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-schema</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-fluent</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Core OSGi -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.main</artifactId>
+            <version>RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.shell</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.shell.tui</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.log</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.fileinstall</artifactId>
+            <version>3.1.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <version>1.4.0</version>
+            <scope>provided</scope>
+        </dependency-->
+        <!-- Declarative Services support -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <!-- Jetty based web container - ->
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-service</artifactId>
+            <version>RELEASE</version>
+        </dependency-->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Quartz based scheduler OSGi bundle.
+             This version wraps the original jar which is not a bundle -->
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- OpenICF -->
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>connector-framework</artifactId>
+            <version>1.1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>connector-framework-internal</artifactId>
+            <version>1.1.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.forgerock.openicf.framework</groupId>
+                    <artifactId>connector-test-common</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.7.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- OpenICF Connectors -->
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors.file</groupId>
+            <artifactId>xml</artifactId>
+            <version>1.1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>
+                                ${project.build.directory}/bundles
+                            </directory>
+                            <targetPath>WEB-INF/bundles</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>
+                                ${project.build.directory}/connectors
+                            </directory>
+                            <targetPath>WEB-INF/connectors</targetPath>
+                        </resource>
+                        <resource>
+                            <directory>.</directory>
+                            <targetPath>META-INF</targetPath>
+                            <includes>
+                                <include>LICENSE</include>
+                                <include>NOTICE</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-bundles</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <!--includeGroupIds>
+                                org.forgerock.commons,
+                                org.forgerock.openidm
+                            </includeGroupIds-->
+                            <includeArtifactIds>
+                                commons-codec,
+                                connector-framework,
+                                connector-framework-internal,
+                                groovy-all,
+                                jackson-core-asl,
+                                jackson-mapper-asl,
+                                json-fluent,
+                                json-schema,
+                                openidm-audit,
+                                openidm-core,
+                                openidm-provisioner,
+                                openidm-provisioner-openicf,
+                                openidm-repo,
+                                openidm-repo-orientdb,
+                                openidm-scheduler,
+                                openidm-util,
+                                org.apache.felix.configadmin,
+                                org.apache.felix.fileinstall,
+                                org.apache.felix.http.bridge,
+                                org.apache.felix.http.proxy,
+                                org.apache.felix.log,
+                                org.apache.felix.scr,
+                                org.apache.felix.shell,
+                                org.apache.felix.shell.tui,
+                                org.apache.felix.webconsole,
+                                org.apache.servicemix.bundles.rhino,
+                                org.apache.servicemix.bundles.quartz,
+                                org.osgi.compendium,
+                                org.restlet,
+                                org.restlet.ext.jackson,
+                                org.restlet.ext.servlet,
+                                slf4j-api,
+                                slf4j-jdk14
+                            </includeArtifactIds>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>
+                                ${project.build.directory}/bundles
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-connectors</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>
+                                org.forgerock.openicf.connectors.file
+                            </includeGroupIds>
+                            <outputDirectory>
+                                ${project.build.directory}/connectors
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <version>6.1.10</version>
+                <configuration>
+                    <contextPath>/</contextPath>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

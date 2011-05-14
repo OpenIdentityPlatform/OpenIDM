@@ -114,6 +114,12 @@
                 <module>openidm-functional-tests</module>
             </modules>
         </profile>
+        <profile>
+            <id>openidm-webapp</id>
+            <modules>
+                <module>openidm-webapp</module>
+            </modules>
+        </profile>
     </profiles>
     <build>
         <pluginManagement>
