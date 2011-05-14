@@ -170,7 +170,7 @@ class Link {
         if (targetId != null) {
             JsonNode query = new JsonNode(new HashMap<String, Object>());
             query.put(QueryConstants.QUERY_ID, "links-for-targetId");
-            query.put("targetId", "targetId");
+            query.put("targetId", targetId);
             getLink(query);
         }
     }

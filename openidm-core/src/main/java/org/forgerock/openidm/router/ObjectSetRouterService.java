@@ -110,8 +110,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
                 }
             }
             routes = refreshed;
-        }
-        else {
+        } else {
             routes.clear();
         }
     }

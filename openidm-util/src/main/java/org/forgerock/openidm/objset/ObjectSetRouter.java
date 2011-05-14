@@ -54,11 +54,10 @@ public class ObjectSetRouter implements ObjectSet {
      * is {@code null}, then the request is against routed the objet set itself.
      *
      * @param id the identifier to be split.
-     * @param exception if {@code true} throws exception if no route could be found.
      * @return an array with two elements: prefix and identifier.
-     * @throws NotFoundException if {@code exception} is true and no route could be found.
+     * @throws NotFoundException if no route could be found.
      */
-    private String[] split(String id, boolean exception) throws NotFoundException {
+    private String[] split(String id) throws NotFoundException {
         String[] result = new String[2];
         for (String key : routes.keySet()) {
             if (id.equals(key)) {
@@ -71,7 +70,7 @@ public class ObjectSetRouter implements ObjectSet {
                 }
             }
         }
-        if (exception && result[0] == null) {
+        if (result[0] == null) {
             throw new NotFoundException();
         }
         return result;
@@ -79,37 +78,37 @@ public class ObjectSetRouter implements ObjectSet {
 
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        String[] split = split(id, true); // throws NotFoundException
+        String[] split = split(id); // throws NotFoundException
         routes.get(split[0]).create(split[1], object);
     }
 
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
-        String[] split = split(id, true); // throws NotFoundException
+        String[] split = split(id); // throws NotFoundException
         return routes.get(split[0]).read(split[1]);
     }
 
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        String[] split = split(id, true); // throws NotFoundException
+        String[] split = split(id); // throws NotFoundException
         routes.get(split[0]).update(split[1], rev, object);
     }
 
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
-        String[] split = split(id, true); // throws NotFoundException
+        String[] split = split(id); // throws NotFoundException
         routes.get(split[0]).delete(split[1], rev);
     }
 
     @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        String[] split = split(id, true); // throws NotFoundException
+        String[] split = split(id); // throws NotFoundException
         routes.get(split[0]).patch(split[1], rev, patch);
     }
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        String[] split = split(id, true); // throws NotFoundException
+        String[] split = split(id); // throws NotFoundException
         return routes.get(split[0]).query(split[1], params);
     }
 }

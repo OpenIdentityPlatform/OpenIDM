@@ -30,6 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // JSON-Fluent library
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
@@ -52,6 +56,9 @@ class ObjectMapping implements SynchronizationListener {
 
     /** TODO: Description. */
     private enum Status { SUCCESS, FAILURE }
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
 
     /** TODO: Description. */
     private String name;
@@ -110,6 +117,7 @@ class ObjectMapping implements SynchronizationListener {
         }
         onCreateScript = Scripts.newInstance(config.get("onCreate"));
         onUpdateScript = Scripts.newInstance(config.get("onUpdate"));
+        LOGGER.debug("Created object mapping: {}", name + ": " + sourceObjectSet + "->" + targetObjectSet);
     }
 
     /**
@@ -138,8 +146,7 @@ class ObjectMapping implements SynchronizationListener {
         String[] split = new String[2];
         if (sourceId.equals(sourceObjectSet)) {
             split[0] = sourceObjectSet;
-        }
-        else if (sourceId.startsWith(sourceObjectSet + '/')) {
+        } else if (sourceId.startsWith(sourceObjectSet + '/')) {
             split[0] = sourceObjectSet;
             if (sourceId.length() > sourceObjectSet.length() + 1) {
                 split[1] = sourceId.substring(sourceObjectSet.length() + 1); // skip the slash
@@ -152,8 +159,7 @@ class ObjectMapping implements SynchronizationListener {
                 JsonNode source = readObject(sourceObjectSet, split[1]);
                 op = new SourceSyncOperation();
                 op.sourceObject = source;
-            }
-            catch (SynchronizationException se) {
+            } catch (SynchronizationException se) {
                 // failure to read source object is ignored
             }
         }
@@ -170,8 +176,7 @@ class ObjectMapping implements SynchronizationListener {
     private Map<String, Object> queryTargetObjectSet(Map<String, Object> query) throws SynchronizationException {
         try {
             return service.getRouter().query(targetObjectSet, query);
-        }
-        catch (ObjectSetException ose) {
+        } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
     }
@@ -182,6 +187,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param objectSet TODO.
      * @return TODO.
      */
+// TODO: Codify query-all-ids in ObjectSet or provide per-ObjectSet query for all IDs.
     private Iterable<String> queryAllIds(final String objectSet) throws SynchronizationException {
         return new Iterable<String>() {
             JsonNode list;
@@ -191,11 +197,9 @@ class ObjectMapping implements SynchronizationListener {
                 try {
                     list = new JsonNode(service.getRouter().query(objectSet, query)).
                      get(QueryConstants.QUERY_RESULT).required().expect(List.class);
-                }
-                catch (JsonNodeException jne) {
+                } catch (JsonNodeException jne) {
                     throw new SynchronizationException(jne);
-                }
-                catch (ObjectSetException ose) {
+                } catch (ObjectSetException ose) {
                     throw new SynchronizationException(ose);
                 }
             }
@@ -230,11 +234,9 @@ class ObjectMapping implements SynchronizationListener {
         }
         try {
             return new JsonNode(service.getRouter().read(objectSet + '/' + id));
-        }
-        catch (NotFoundException nfe) { // target not found results in null
+        } catch (NotFoundException nfe) { // target not found results in null
             return null;
-        }
-        catch (ObjectSetException ose) {
+        } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
     }
@@ -254,11 +256,9 @@ class ObjectMapping implements SynchronizationListener {
         }
         try {
             service.getRouter().create(sb.toString(), target.asMap());
-        }
-        catch (JsonNodeException jne) {
+        } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
-        }
-        catch (ObjectSetException ose) {
+        } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
     }
@@ -274,11 +274,9 @@ class ObjectMapping implements SynchronizationListener {
         try {
             service.getRouter().update(target.get("_id").required().asString(),
              target.get("_rev").asString(), target.asMap());
-        }
-        catch (JsonNodeException jne) {
+        } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
-        }
-        catch (ObjectSetException ose) {
+        } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
     }
@@ -295,14 +293,11 @@ class ObjectMapping implements SynchronizationListener {
             try {
                 service.getRouter().delete(targetObjectSet + '/' + target.get("_id").asString(),
                  target.get("_rev").asString());
-            }
-            catch (JsonNodeException jne) {
+            } catch (JsonNodeException jne) {
                 throw new SynchronizationException(jne);
-            }
-            catch (NotFoundException nfe) {
+            } catch (NotFoundException nfe) {
                 // forgiving delete
-            }
-            catch (ObjectSetException ose) {
+            } catch (ObjectSetException ose) {
                 throw new SynchronizationException(ose);
             }
         }
@@ -364,8 +359,7 @@ class ObjectMapping implements SynchronizationListener {
             op.reconId = reconId;
             try {
                 op.sync();
-            }
-            catch (SynchronizationException se) {
+            } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                 }
@@ -382,8 +376,7 @@ class ObjectMapping implements SynchronizationListener {
             op.reconId = reconId;
             try {
                 op.sync();
-            }
-            catch (SynchronizationException se) {
+            } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                 }
@@ -404,8 +397,7 @@ class ObjectMapping implements SynchronizationListener {
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
             getRepository().create("audit/recon", entry.toJsonNode().asMap());
-        }
-        catch (ObjectSetException ose) {
+        } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
     }
@@ -478,7 +470,7 @@ class ObjectMapping implements SynchronizationListener {
                     applyMappings(sourceObject, targetObject); // apply property mappings to target
                     execScript(onCreateScript);
                     createTargetObject(targetObject);
-                    // fall through to link the newly created target
+                    // falls through to link the newly created target
                 case LINK:
                     if (targetObject == null) {
                         throw new SynchronizationException("no target object to link");
@@ -490,7 +482,7 @@ class ObjectMapping implements SynchronizationListener {
                     if (action == Action.CREATE) {
                         break; // already created; no need to update again
                     }
-                    // fall through to update the linked target
+                    // falls through to update the linked target
                 case IGNORE:
                     if (sourceObject != null && targetObject != null) {
                         applyMappings(sourceObject, targetObject);
@@ -509,7 +501,7 @@ class ObjectMapping implements SynchronizationListener {
                         deleteTargetObject(targetObject);
                         targetObject = null;
                     }
-                    // fall through to unlink the deleted target
+                    // falls through to unlink the deleted target
                 case UNLINK:
                     if (linkObject._id != null) { // forgiving; does nothing if no link exists
                         linkObject.delete();
@@ -542,12 +534,10 @@ class ObjectMapping implements SynchronizationListener {
                             throw new SynchronizationException("expecting boolean value from validSource");
                         }
                         result = (Boolean)o;
-                    }
-                    catch (ScriptException se) {
+                    } catch (ScriptException se) {
                         throw new SynchronizationException(se);
                     }
-                }
-                else { // no script means true
+                } else { // no script means true
                     result = true;
                 }
             }
@@ -572,12 +562,10 @@ class ObjectMapping implements SynchronizationListener {
                             throw new SynchronizationException("expecting boolean value from validTarget");
                         }
                         result = (Boolean)o;
-                    }
-                    catch (ScriptException se) {
+                    } catch (ScriptException se) {
                         throw new SynchronizationException(se);
                     }
-                }
-                else { // no script means true
+                } else { // no script means true
                     result = true;
                 }
             }
@@ -598,8 +586,7 @@ class ObjectMapping implements SynchronizationListener {
                 scope.put("situation", situation.toString());
                 try {
                     script.exec(scope);
-                }
-                catch (ScriptException se) {
+                } catch (ScriptException se) {
                     throw new SynchronizationException(se);
                 }
             }
@@ -636,8 +623,7 @@ class ObjectMapping implements SynchronizationListener {
                 if (linkObject._id != null) { // source object linked to target
                     if (targetObject != null) {
                         situation = Situation.CONFIRMED;
-                    }
-                    else {
+                    } else {
                         situation = Situation.MISSING;
                     }
                 }
@@ -646,11 +632,9 @@ class ObjectMapping implements SynchronizationListener {
                     if (targets.size() == 1) {
                         targetObject = readObject(targetObjectSet, targets.get(0));
                         situation = Situation.FOUND;
-                    }
-                    else if (targets.size() == 0) {
+                    } else if (targets.size() == 0) {
                         situation = Situation.ABSENT;
-                    }
-                    else {
+                    } else {
                         situation = Situation.AMBIGUOUS;
                     }
                 }
@@ -658,8 +642,7 @@ class ObjectMapping implements SynchronizationListener {
             else { // mapping does not qualify for target
                 if (linkObject._id != null) {
                     situation = Situation.UNQUALIFIED;
-                }
-                else {
+                } else {
                     situation = null; // TODO: provide a situation for this?
                 }
             }
@@ -691,8 +674,7 @@ class ObjectMapping implements SynchronizationListener {
                     for (Object value : (Iterable)filtered) {
                         results.add(value.toString());
                     }
-                }
-                catch (ScriptException se) {
+                } catch (ScriptException se) {
                     throw new SynchronizationException(se);
                 }
             }
@@ -729,16 +711,13 @@ class ObjectMapping implements SynchronizationListener {
             }
             if (reconId != null && reconId.equals(linkObject.reconId)) {
                 situation = null; // optimization: already handled in previous phase; ignore
-            }
-            else if (linkObject._id == null || linkObject.sourceId == null) {
+            } else if (linkObject._id == null || linkObject.sourceId == null) {
                 situation = Situation.UNQUALIFIED;
-            }
-            else {
+            } else {
                 sourceObject = readObject(sourceObjectSet, linkObject.sourceId);
                 if (sourceObject == null || !isSourceValid()) {
                     situation = Situation.UNQUALIFIED;
-                }
-                else { // proper link
+                } else { // proper link
                     situation = Situation.CONFIRMED;
                 }
             }

@@ -220,11 +220,9 @@ public class SynchronizationService implements SynchronizationListener, Schedule
                 throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
                         + "valid action(s) are: 'reconcile'");
             }
-        }
-        catch (JsonNodeException jne) {
+        } catch (JsonNodeException jne) {
             throw new ExecutionException(jne);
-        }
-        catch (SynchronizationException se) {
+        } catch (SynchronizationException se) {
             throw new ExecutionException(se);
         }
     }

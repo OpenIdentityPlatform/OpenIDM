@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // OSGi Framework
 import org.osgi.framework.ServiceReference;
 
@@ -57,7 +61,8 @@ import org.forgerock.openidm.sync.SynchronizationListener;
  */
 class ManagedObjectSet implements ObjectSet {
 
-    private static final String LISTENER_REFERENCE = "Reference_ManagedObjectSet_SynchronizationListener"; 
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(ManagedObjectSet.class);
 
     /** Name of the managed object type. */
     private String name;
@@ -94,7 +99,7 @@ class ManagedObjectSet implements ObjectSet {
 
     /** TODO: Description. */
     @Reference(
-        name=LISTENER_REFERENCE,
+        name="Reference_ManagedObjectSet_SynchronizationListener",
         referenceInterface=SynchronizationListener.class,
         bind="bindListener",
         unbind="unbindListener",
@@ -128,6 +133,7 @@ class ManagedObjectSet implements ObjectSet {
         for (JsonNode node : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(node));
         }
+        LOGGER.debug("Created managed object set: {}", name);
     }
 
     /**
@@ -228,6 +234,7 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
+        LOGGER.debug("Create name={} id={}", name, id);
         execScript(onCreate, object);
         onStore(object);
         if (object.containsKey("_id")) { // trigger assigned an identifier
@@ -251,6 +258,7 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
+        LOGGER.debug("Read name={} id={}", name, id);
         Map<String, Object> object = service.getRepository().read(repoId(id));
         onRetrieve(object);
         execScript(onRead, object);
@@ -259,6 +267,7 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        LOGGER.debug("Update {} ", "name=" + name + " id=" + id + " rev=" + rev);
         Map<String, Object> oldObject = service.getRepository().read(repoId(id));
         if (onUpdate != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
@@ -289,6 +298,7 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
+        LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
         if (onDelete != null) {
             Map<String, Object> object = service.getRepository().read(repoId(id));
             execScript(onDelete, object);
@@ -312,7 +322,9 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
+        LOGGER.debug("Query name={} id={}", name, id);
         return service.getRepository().query(repoId(id), params);
+// TODO: provide trigger to filter query results?
     }
 
     /**
