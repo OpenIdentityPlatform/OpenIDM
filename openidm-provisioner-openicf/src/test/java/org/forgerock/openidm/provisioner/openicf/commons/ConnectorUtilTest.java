@@ -152,7 +152,7 @@ public class ConnectorUtilTest {
         Assert.assertEquals(helper.getObjectClass().getObjectClassValue(), "__ACCOUNT__");
     }
 
-    @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__")
+    @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__.*")
     public void testUnsupportedObjectType() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test",jsonConfiguration, runtimeAPIConfiguration);
         OperationHelper helper = operationHelperBuilder.build("__NONE__", null);

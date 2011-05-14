@@ -64,7 +64,8 @@ public class OperationHelperBuilder {
     public OperationHelper build(String objectType, Map<String, Object> object) throws ObjectSetException {
         ObjectClassInfoHelper objectClassInfoHelper = supportedObjectTypes.get(objectType);
         if (null == objectClassInfoHelper) {
-            throw new ObjectSetException("Unsupported object type: " + objectType);
+            throw new ObjectSetException("Unsupported object type: " + objectType 
+                    + " not in supported types" + supportedObjectTypes.keySet());
         }
         APIConfiguration _configuration = getRuntimeAPIConfiguration();
 
