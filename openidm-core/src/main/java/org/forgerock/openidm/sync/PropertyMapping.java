@@ -83,7 +83,7 @@ class PropertyMapping {
      */
     public void apply(JsonNode source, JsonNode target) throws SynchronizationException {
         try {
-            Object result = this.source.get(source);
+            Object result = this.source.get(source).getValue();
             if (script != null) {
                 HashMap<String, Object> scope = new HashMap<String, Object>();
                 scope.put("source", result);
