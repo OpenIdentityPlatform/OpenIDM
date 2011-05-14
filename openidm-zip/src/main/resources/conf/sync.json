@@ -2,7 +2,7 @@
     "mappings" : [
         {
             "name" : "systemXmlAccounts_managedUser",
-            "source" : "system/xml/accounts",
+            "source" : "system/xml/account",
             "target" : "managed/user",
             "properties" : [
                 { "source" : "$.name", "target" : "$.name" },
@@ -14,7 +14,7 @@
         {
             "name": "managedUser_systemXmlTargetAccounts",
             "source": "managed/user",
-            "target": "system/xmlTarget/accounts",
+            "target": "system/xmlTarget/account",
             "properties": [
                 { "source" : "$.name", "target" : "$.name" },
                 { "source" : "$.lastname", "target" : "$.lastname" },
