@@ -137,9 +137,13 @@ class ManagedObjectSet implements ObjectSet {
      * @param id the local managed object identifier to qualify.
      * @return the fully-qualified repository object identifier.
      */
+// TODO: Make this configurable as not every repository will likely adhere to the same scheme.
     private String repoId(String id) {
-// TODO: make this configurable as not every repository will likely adhere to the same scheme
-        return "managed/" + name + '/' + id;
+        StringBuilder sb = new StringBuilder("managed/").append(name);
+        if (id != null) {
+            sb.append('/').append(id);
+        }
+        return sb.toString();
     }
 
     /**
@@ -148,12 +152,11 @@ class ManagedObjectSet implements ObjectSet {
      * @param id TODO.
      * @return TODO.
      */
+// TODO: Just happen to be using repoId because it's the same. There should be a better
+// way to know the fully qualified identifier of a managed object.
     private String routeId(String id) {
-// TODO: Hack alert. There should be a better way to know the fully qualified identifier
-// of a managed object.
-        return "managed/" + name + '/' + id; // yes same as repoId—for now
+        return repoId(id);
     }
-
 
     /**
      * Executes a script if it exists, populating an {@code "object"} property in the root
@@ -307,7 +310,7 @@ class ManagedObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        return service.getRepository().query(id, params);
+        return service.getRepository().query(repoId(id), params);
     }
 
     /**
