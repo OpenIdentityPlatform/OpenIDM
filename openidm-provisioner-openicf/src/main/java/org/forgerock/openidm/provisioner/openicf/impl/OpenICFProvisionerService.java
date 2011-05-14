@@ -372,7 +372,21 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, (ConnectorObject) null, null);
                 Filter filter = null;
                 if (null != params) {
-                    filter = helper.build((Map<String, Object>) params.get("query"), (Map<String, Object>) params.get("params"));
+                    Map<String, Object> query = (Map<String, Object>) params.get("query");
+                    String queryId = (String) params.get("_query-id");
+                    if (query != null) {
+                        filter = helper.build(query, (Map<String, Object>) params.get("params"));
+                    } else if (queryId != null) {
+                        if (queryId.equals("query-all-ids")) {
+                            // TODO: optimize query for ids, for now default to query all
+                        } else {
+                            // Unknown query id
+                            throw new BadRequestException("Unknown query id: " + queryId);
+                        }
+                    } else {
+                        // Neither a query expression or query id defined,
+                        // default to query all
+                    }
                 }
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
                 result.put("result", helper.getQueryResult());
