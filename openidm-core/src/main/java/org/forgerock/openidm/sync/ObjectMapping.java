@@ -373,7 +373,7 @@ class ObjectMapping implements SynchronizationListener {
                 }
                 entry.message = throwable.getMessage();
             }
-            if (op.action != null) {
+            if (entry.status == Status.FAILURE || op.action != null) {
                 logReconEntry(entry);
             }
         }
@@ -394,7 +394,7 @@ class ObjectMapping implements SynchronizationListener {
                 }
                 entry.message = throwable.getMessage();
             }
-            if (op.action != null) {
+            if (entry.status == Status.FAILURE || op.action != null) {
                 logReconEntry(entry);
             }
         }
@@ -498,7 +498,7 @@ class ObjectMapping implements SynchronizationListener {
                 case IGNORE:
                     if (sourceObject != null && targetObject != null) {
                         applyMappings(sourceObject, targetObject);
-// TODO: detect nothing updated in order to avoid potential cyclic updates
+// TODO: detect nothing updated in order to avoid unnecessary updates and potential cyclic updates
                         execScript(onUpdateScript);
                         updateTargetObject(targetObject);
                     }

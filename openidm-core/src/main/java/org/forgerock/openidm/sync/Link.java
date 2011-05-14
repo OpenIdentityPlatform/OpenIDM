@@ -95,10 +95,7 @@ class Link {
             }
         }
         catch (JsonNodeException jne) {
-            throw new SynchronizationException("malformed response", jne);
-        }
-        catch (NotFoundException nfe) {
-            // link not found yields empty value
+            throw new SynchronizationException("malformed link query response", jne);
         }
         catch (ObjectSetException ose) {
             throw new SynchronizationException("link query failed", ose);
