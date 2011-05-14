@@ -213,8 +213,12 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     public void execute(Map<String, Object> context) throws ExecutionException {
         try {
             JsonNode params = new JsonNode(context).get(CONFIGURED_INVOKE_CONTEXT);
-            if ("reconcile".equals(params.get("action").asString())) { // "action": "reconcile"
+            String action = params.get("action").asString();
+            if ("reconcile".equals(action)) { // "action": "reconcile"
                 reconcile(params.get("mapping").asString()); // "mapping": string (mapping name)
+            } else {
+                throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
+                        + "valid action(s) are: 'reconcile'");
             }
         }
         catch (JsonNodeException jne) {
