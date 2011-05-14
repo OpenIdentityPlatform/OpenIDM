@@ -137,7 +137,15 @@ public class AuditServiceImpl implements AuditService {
         
         logger.debug("Create audit entry for {} with {}", id, obj);
         for (AuditLogger auditLogger : auditLoggers) {
-            auditLogger.create(id, obj);
+            try {
+                auditLogger.create(id, obj);
+            } catch (ObjectSetException ex) {
+                logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
+                throw ex;
+            } catch (RuntimeException ex) {
+                logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
+                throw ex;
+            } 
         }
     }
     
