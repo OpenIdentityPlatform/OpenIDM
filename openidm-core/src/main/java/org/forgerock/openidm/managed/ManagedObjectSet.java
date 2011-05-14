@@ -133,7 +133,7 @@ class ManagedObjectSet implements ObjectSet {
         for (JsonNode node : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(node));
         }
-        LOGGER.debug("Created managed object set: {}", name);
+        LOGGER.debug("Instantiated managed object set: {}", name);
     }
 
     /**

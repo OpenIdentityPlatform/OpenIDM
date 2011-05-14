@@ -21,6 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // JSON-Fluent library
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
@@ -36,6 +40,9 @@ import org.forgerock.openidm.repo.QueryConstants;
  * @author Paul C. Bryan
  */
 class Link {
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(Link.class);
 
     /** TODO: Description. */
     private final ObjectMapping mapping;
@@ -186,6 +193,7 @@ class Link {
             mapping.getRepository().create(linkId(_id), toJsonNode().asMap());
         }
         catch (ObjectSetException ose) {
+            LOGGER.debug("failed to create link", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -201,6 +209,7 @@ class Link {
                 mapping.getRepository().delete(linkId(_id), _rev);
             }
             catch (ObjectSetException ose) {
+                LOGGER.debug("failed to delete link", ose);
                 throw new SynchronizationException(ose);
             }
             clear();
@@ -220,6 +229,7 @@ class Link {
             mapping.getRepository().update(linkId(_id), _rev, toJsonNode().asMap());
         }
         catch (ObjectSetException ose) {
+            LOGGER.debug("failed to update link", ose);
             throw new SynchronizationException(ose);
         }
     }

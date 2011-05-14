@@ -117,7 +117,7 @@ class ObjectMapping implements SynchronizationListener {
         }
         onCreateScript = Scripts.newInstance(config.get("onCreate"));
         onUpdateScript = Scripts.newInstance(config.get("onUpdate"));
-        LOGGER.debug("Created object mapping: {}", name + ": " + sourceObjectSet + "->" + targetObjectSet);
+        LOGGER.debug("Instantiated object mapping: {}", name + ": " + sourceObjectSet + "->" + targetObjectSet);
     }
 
     /**
@@ -363,7 +363,11 @@ class ObjectMapping implements SynchronizationListener {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                 }
-                entry.message = se.getMessage();
+                Throwable throwable = se;
+                while (throwable.getCause() != null) { // want message associated with original cause
+                    throwable = throwable.getCause();
+                }
+                entry.message = throwable.getMessage();
             }
             if (op.action != null) {
                 logReconEntry(entry);
@@ -380,7 +384,11 @@ class ObjectMapping implements SynchronizationListener {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
                 }
-                entry.message = se.getMessage();
+                Throwable throwable = se;
+                while (throwable.getCause() != null) { // want message associated with original cause
+                    throwable = throwable.getCause();
+                }
+                entry.message = throwable.getMessage();
             }
             if (op.action != null) {
                 logReconEntry(entry);
