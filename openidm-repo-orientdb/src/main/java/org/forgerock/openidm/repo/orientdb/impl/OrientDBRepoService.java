@@ -373,7 +373,7 @@ public class OrientDBRepoService implements RepositoryService {
             
             if (logger.isDebugEnabled()) {
                 logger.debug("Query result contains {} records, took {} ms and took {} ms to convert result.",
-                        new Object[] {((Map) result.get(QueryConstants.QUERY_RESULT)).size(),
+                        new Object[] {((List) result.get(QueryConstants.QUERY_RESULT)).size(),
                         result.get(QueryConstants.STATISTICS_QUERY_TIME),
                         result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
             }
