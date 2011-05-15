@@ -47,18 +47,15 @@ import org.forgerock.openidm.objset.ObjectSetRouter;
  * @author Paul C. Bryan
  */
 @Component(
-    name="org.forgerock.openidm.router",
-    policy=ConfigurationPolicy.IGNORE
+    name = "org.forgerock.openidm.router",
+    policy = ConfigurationPolicy.IGNORE
 )
 @Properties({
-    @Property(name="service.description", value="OpenIDM internal object set router"),
-    @Property(name="service.vendor", value="ForgeRock AS")
+    @Property(name = "service.description", value = "OpenIDM internal object set router"),
+    @Property(name = "service.vendor", value = "ForgeRock AS")
 })
 @Service
 public class ObjectSetRouterService extends ObjectSetRouter {
-
-    /** TODO: Description. */
-    private static final String REFERENCE_NAME = "reference_ObjectSetRouterService_ObjectSet";
 
     /** TODO: Description. */
     private static final String PREFIX_PROPERTY = "openidm.router.prefix";
@@ -67,13 +64,13 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     private ComponentContext context;
 
     @Reference(
-        name=REFERENCE_NAME,
-        referenceInterface=ObjectSet.class,
-        bind="bind",
-        unbind="unbind",
-        cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy=ReferencePolicy.DYNAMIC,
-        strategy=ReferenceStrategy.EVENT
+        name = "reference_ObjectSetRouterService_ObjectSet",
+        referenceInterface = ObjectSet.class,
+        bind = "bind",
+        unbind = "unbind",
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+        policy = ReferencePolicy.DYNAMIC,
+        strategy = ReferenceStrategy.EVENT
     )
     protected int _dummy; // whiteboard pattern
     protected synchronized void bind(ObjectSet route, Map<String, Object> properties) {

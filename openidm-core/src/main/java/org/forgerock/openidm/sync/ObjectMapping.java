@@ -455,7 +455,7 @@ class ObjectMapping implements SynchronizationListener {
                 for (Policy policy : policies) {
                     if (situation == policy.getSituation()) {
                         action = policy.getAction();
-// TODO: consider limiting what actions can be returned for the given situation
+// TODO: Consider limiting what actions can be returned for the given situation.
                         break;
                     }
                 }
@@ -498,7 +498,7 @@ class ObjectMapping implements SynchronizationListener {
                 case IGNORE:
                     if (sourceObject != null && targetObject != null) {
                         applyMappings(sourceObject, targetObject);
-// TODO: detect nothing updated in order to avoid unnecessary updates and potential cyclic updates
+// TODO: Detect nothing updated to avoid unnecessary updates and potential cyclic updates.
                         execScript(onUpdateScript);
                         updateTargetObject(targetObject);
                     }
@@ -703,7 +703,7 @@ class ObjectMapping implements SynchronizationListener {
         public void sync() throws SynchronizationException {
             assessSituation();
             determineAction();
-// TODO: option here to just report what action would be performed
+// TODO: Option here to just report what action would be performed?
             performAction();
         }
 

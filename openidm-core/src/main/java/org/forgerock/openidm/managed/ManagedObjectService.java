@@ -52,13 +52,13 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
  * @author Paul C. Bryan
  */
 @Component(
-    name="org.forgerock.openidm.managed",
-    policy=ConfigurationPolicy.REQUIRE
+    name = "org.forgerock.openidm.managed",
+    policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
-    @Property(name="service.description", value="OpenIDM managed objects service"),
-    @Property(name="service.vendor", value="ForgeRock AS"),
-    @Property(name="openidm.router.prefix", value="managed") // internal object set router
+    @Property(name = "service.description", value = "OpenIDM managed objects service"),
+    @Property(name = "service.vendor", value = "ForgeRock AS"),
+    @Property(name = "openidm.router.prefix", value = "managed") // internal object set router
 })
 @Service
 public class ManagedObjectService extends ObjectSetRouter {
