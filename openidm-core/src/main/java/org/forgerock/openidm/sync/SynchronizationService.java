@@ -17,15 +17,12 @@
 package org.forgerock.openidm.sync;
 
 // Java Standard Edition
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 // OSGi Framework
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -47,8 +44,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.router.ObjectSetRouterService;
-import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
 
@@ -80,28 +76,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     private ComponentContext context;
 
     /**
-     * Repository service.
-     */
-    @Reference(
-        name = "Reference_SynchronizationService_RepositoryService",
-        referenceInterface = RepositoryService.class,
-        bind = "bindRepository",
-        unbind = "unbindRepository",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC
-    )
-    private RepositoryService repository;
-
-    protected void bindRepository(RepositoryService repository) {
-        this.repository = repository;
-    }
-
-    protected void unbindRepository(RepositoryService repository) {
-        this.repository = null;
-    }
-
-    /**
-     * Object set router service.
+     * Internal object set router service.
      */
     @Reference(
         name = "Reference_SynchronizationService_ObjectSetRouterService",
@@ -113,11 +88,9 @@ public class SynchronizationService implements SynchronizationListener, Schedule
         target = "(service.pid=org.forgerock.openidm.router)"
     )
     private ObjectSet router;
-
     protected void bindRouter(ObjectSet router) {
         this.router = router;
     }
-
     protected void unbindRouter(ObjectSet router) {
         this.router = null;
     }
@@ -163,21 +136,9 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      */
     ObjectSet getRouter() throws SynchronizationException {
         if (router == null) {
-            throw new SynchronizationException("no object set router");
+            throw new SynchronizationException("not bound to internal router");
         }
         return router;
-    }
-
-    /**
-     * TODO: Description.
-     *
-     * @throws SynchronizationException TODO.
-     */
-    RepositoryService getRepository() throws SynchronizationException {
-        if (repository == null) {
-            throw new SynchronizationException("no repository");
-        }
-        return repository;
     }
 
     @Override

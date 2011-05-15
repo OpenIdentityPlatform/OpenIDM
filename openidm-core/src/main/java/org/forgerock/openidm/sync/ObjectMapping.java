@@ -40,9 +40,9 @@ import org.forgerock.json.fluent.JsonNodeException;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService; 
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
@@ -132,8 +132,8 @@ class ObjectMapping implements SynchronizationListener {
      *
      * @throws SynchronizationException TODO.
      */
-    RepositoryService getRepository() throws SynchronizationException {
-        return service.getRepository();
+    ObjectSet getRouter() throws SynchronizationException {
+        return service.getRouter();
     }
 
     /**
@@ -175,7 +175,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private Map<String, Object> queryTargetObjectSet(Map<String, Object> query) throws SynchronizationException {
         try {
-            return service.getRouter().query(targetObjectSet, query);
+            return getRouter().query(targetObjectSet, query);
         } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
@@ -195,7 +195,7 @@ class ObjectMapping implements SynchronizationListener {
                 HashMap<String, Object> query = new HashMap<String, Object>();
                 query.put(QueryConstants.QUERY_ID, "query-all-ids");
                 try {
-                    list = new JsonNode(service.getRouter().query(objectSet, query)).
+                    list = new JsonNode(getRouter().query(objectSet, query)).
                      get(QueryConstants.QUERY_RESULT).required().expect(List.class);
                 } catch (JsonNodeException jne) {
                     throw new SynchronizationException(jne);
@@ -233,7 +233,7 @@ class ObjectMapping implements SynchronizationListener {
             throw new NullPointerException();
         }
         try {
-            return new JsonNode(service.getRouter().read(objectSet + '/' + id));
+            return new JsonNode(getRouter().read(objectSet + '/' + id));
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
@@ -256,7 +256,7 @@ class ObjectMapping implements SynchronizationListener {
             sb.append('/').append(target.get("_id").asString());
         }
         try {
-            service.getRouter().create(sb.toString(), target.asMap());
+            getRouter().create(sb.toString(), target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
@@ -274,7 +274,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void updateTargetObject(JsonNode target) throws SynchronizationException {
         try {
-            service.getRouter().update(targetObjectSet + '/' + target.get("_id").required().asString(),
+            getRouter().update(targetObjectSet + '/' + target.get("_id").required().asString(),
              target.get("_rev").asString(), target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
@@ -294,7 +294,7 @@ class ObjectMapping implements SynchronizationListener {
     private void deleteTargetObject(JsonNode target) throws SynchronizationException {
         if (target.get("_id").isString()) { // forgiving delete
             try {
-                service.getRouter().delete(targetObjectSet + '/' + target.get("_id").asString(),
+                getRouter().delete(targetObjectSet + '/' + target.get("_id").asString(),
                  target.get("_rev").asString());
             } catch (JsonNodeException jne) {
                 throw new SynchronizationException(jne);
@@ -408,7 +408,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
-            service.getRouter().create("audit/recon", entry.toJsonNode().asMap());
+            getRouter().create("audit/recon", entry.toJsonNode().asMap());
         } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }

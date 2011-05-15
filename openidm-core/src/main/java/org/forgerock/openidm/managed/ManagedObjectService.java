@@ -44,7 +44,6 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
-import org.forgerock.openidm.repo.RepositoryService; 
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 
 /**
@@ -64,37 +63,28 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 @Service
 public class ManagedObjectService extends ObjectSetRouter {
 
-    /** Repository service. */
+    /**
+     * Internal object set router service.
+     */
     @Reference(
-        name="RepositoryServiceReference",
-        referenceInterface=RepositoryService.class,
-        bind="bind",
-        unbind="unbind",
-        cardinality=ReferenceCardinality.MANDATORY_UNARY,
-        policy=ReferencePolicy.STATIC
+        name = "Reference_SynchronizationService_ObjectSetRouterService",
+        referenceInterface = ObjectSet.class,
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC,
+        target = "(service.pid=org.forgerock.openidm.router)"
     )
-    private RepositoryService repository;
+    private ObjectSet router;
+    protected void bindRouter(ObjectSet router) {
+        this.router = router;
+    }
+    protected void unbindRouter(ObjectSet router) {
+        this.router = null;
+    }
 
     /** TODO: Description. */
     private ComponentContext context;
-
-    /**
-     * TODO: Description.
-     *
-     * @param repository TODO.
-     */
-    protected void bind(RepositoryService repository) {
-        this.repository = repository;
-    }
-
-    /**
-     * TODO: Description.
-     *
-     * @param repository TODO.
-     */
-    protected void unbind(RepositoryService repository) {
-        this.repository = null;
-    }
 
     /**
      * TODO: Description.
@@ -132,13 +122,13 @@ public class ManagedObjectService extends ObjectSetRouter {
     }
 
     /**
-     * Returns the repository for which operations will be applied. If there is no
-     * repository, throws {@link ServiceUnavailableException}.
+     * Returns the internal object set for which operations will be applied. If there is no
+     * router, throws {@link ServiceUnavailableException}.
      */
-    ObjectSet getRepository() throws ServiceUnavailableException {
-        if (repository == null) {
-            throw new ServiceUnavailableException("not bound to repository");
+    ObjectSet getRouter() throws ServiceUnavailableException {
+        if (router == null) {
+            throw new ServiceUnavailableException("not bound to internal router");
         }
-        return repository;
+        return router;
     }
 }

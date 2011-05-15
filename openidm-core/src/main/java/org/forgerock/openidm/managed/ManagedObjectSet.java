@@ -137,14 +137,13 @@ class ManagedObjectSet implements ObjectSet {
     }
 
     /**
-     * Generates a fully-qualified object identifier for the repository. Currently,
-     * hard-codes the identifier.
+     * Generates a fully-qualified object identifier for the managed object.
      *
      * @param id the local managed object identifier to qualify.
-     * @return the fully-qualified repository object identifier.
+     * @return the fully-qualified managed object identifier.
      */
-// TODO: Make this configurable as not every repository will likely adhere to the same scheme.
-    private String repoId(String id) {
+// TODO: consider moving this logic somewhere else
+    private String managedId(String id) {
         StringBuilder sb = new StringBuilder("managed/").append(name);
         if (id != null) {
             sb.append('/').append(id);
@@ -153,17 +152,13 @@ class ManagedObjectSet implements ObjectSet {
     }
 
     /**
-     * Generates a fully-qualified object identifier for the managed object. This is the
-     * identifier used to access the managed object with the internal router. Currently
-     * hard-codes the identifer.
+     * Generates a fully-qualified object identifier for the repository.
      *
      * @param id the local managed object identifier to qualify.
-     * @return the fully-qualified managed object identifier.
+     * @return the fully-qualified repository object identifier.
      */
-// TODO: Just happen to be using repoId because it's the same. There should be a better
-// way to know the fully qualified identifier of a managed object.
-    private String routeId(String id) {
-        return repoId(id);
+    private String repoId(String id) {
+        return "repo/" + managedId(id);
     }
 
     /**
@@ -244,10 +239,10 @@ class ManagedObjectSet implements ObjectSet {
             id = UUID.randomUUID().toString();
             object.put("_id", id);
         }
-        service.getRepository().create(repoId(id), object);
+        service.getRouter().create(repoId(id), object);
         try {
             for (SynchronizationListener listener : listeners) {
-                listener.onCreate(routeId(id), object);
+                listener.onCreate(managedId(id), object);
             }
         }
         catch (SynchronizationException se) {
@@ -259,7 +254,7 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
         LOGGER.debug("Read name={} id={}", name, id);
-        Map<String, Object> object = service.getRepository().read(repoId(id));
+        Map<String, Object> object = service.getRouter().read(repoId(id));
         onRetrieve(object);
         execScript(onRead, object);
         return object;
@@ -268,7 +263,7 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Update {} ", "name=" + name + " id=" + id + " rev=" + rev);
-        Map<String, Object> oldObject = service.getRepository().read(repoId(id));
+        Map<String, Object> oldObject = service.getRouter().read(repoId(id));
         if (onUpdate != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
             scope.put("oldObject", oldObject);
@@ -284,10 +279,10 @@ class ManagedObjectSet implements ObjectSet {
             }
         }
         onStore(object);
-        service.getRepository().update(repoId(id), rev, object);
+        service.getRouter().update(repoId(id), rev, object);
         try {
             for (SynchronizationListener listener : listeners) {
-                listener.onUpdate(routeId(id), oldObject, object);
+                listener.onUpdate(managedId(id), oldObject, object);
             }
         }
         catch (SynchronizationException se) {
@@ -300,13 +295,13 @@ class ManagedObjectSet implements ObjectSet {
     public void delete(String id, String rev) throws ObjectSetException {
         LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
         if (onDelete != null) {
-            Map<String, Object> object = service.getRepository().read(repoId(id));
+            Map<String, Object> object = service.getRouter().read(repoId(id));
             execScript(onDelete, object);
         }
-        service.getRepository().delete(repoId(id), rev);
+        service.getRouter().delete(repoId(id), rev);
         try {
             for (SynchronizationListener listener : listeners) {
-                listener.onDelete(routeId(id));
+                listener.onDelete(managedId(id));
             }
         }
         catch (SynchronizationException se) {
@@ -323,7 +318,7 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         LOGGER.debug("Query name={} id={}", name, id);
-        return service.getRepository().query(repoId(id), params);
+        return service.getRouter().query(repoId(id), params);
 // TODO: provide trigger to filter query results?
     }
 

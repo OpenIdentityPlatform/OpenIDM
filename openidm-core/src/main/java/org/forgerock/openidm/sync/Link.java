@@ -70,7 +70,7 @@ class Link {
      * TODO: Description.
      */
     private String linkId(String id) {
-        StringBuilder sb = new StringBuilder("link/").append(mapping.getName());
+        StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getName());
         if (id != null) {
             sb.append('/').append(id);
         }
@@ -85,7 +85,7 @@ class Link {
      */
     private void getLink(JsonNode query) throws SynchronizationException {
         try {
-            JsonNode results = new JsonNode(mapping.getRepository().query(linkId(null),
+            JsonNode results = new JsonNode(mapping.getRouter().query(linkId(null),
              query.asMap())).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
             if (results.size() == 1) {
                 fromJsonNode(results.get(0));
@@ -187,7 +187,7 @@ class Link {
     void create() throws SynchronizationException {
         _id = UUID.randomUUID().toString(); // client-assigned identifier
         try {
-            mapping.getRepository().create(linkId(_id), toJsonNode().asMap());
+            mapping.getRouter().create(linkId(_id), toJsonNode().asMap());
         }
         catch (ObjectSetException ose) {
             LOGGER.debug("failed to create link", ose);
@@ -203,7 +203,7 @@ class Link {
     void delete() throws SynchronizationException {
         if (_id != null) { // forgiving delete
             try {
-                mapping.getRepository().delete(linkId(_id), _rev);
+                mapping.getRouter().delete(linkId(_id), _rev);
             }
             catch (ObjectSetException ose) {
                 LOGGER.debug("failed to delete link", ose);
@@ -223,7 +223,7 @@ class Link {
             throw new SynchronizationException("attempt to update non-existent link");
         }
         try {
-            mapping.getRepository().update(linkId(_id), _rev, toJsonNode().asMap());
+            mapping.getRouter().update(linkId(_id), _rev, toJsonNode().asMap());
         }
         catch (ObjectSetException ose) {
             LOGGER.debug("failed to update link", ose);

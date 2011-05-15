@@ -17,12 +17,11 @@
 package org.forgerock.openidm.router;
 
 // Java Standard Edition
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 // OSGi Framework
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 
 // Apache Felix Maven SCR Plugin
@@ -62,7 +61,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     private static final String REFERENCE_NAME = "reference_ObjectSetRouterService_ObjectSet";
 
     /** TODO: Description. */
-    private final HashSet<ServiceReference> references = new HashSet<ServiceReference>();
+    private static final String PREFIX_PROPERTY = "openidm.router.prefix";
 
     /** TODO: Description. */
     private ComponentContext context;
@@ -77,41 +76,25 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         strategy=ReferenceStrategy.EVENT
     )
     protected int _dummy; // whiteboard pattern
-    protected synchronized void bind(ServiceReference reference) {
-        references.add(reference);
-        refresh();
+    protected synchronized void bind(ObjectSet route, Map<String, Object> properties) {
+        Object prefix = properties.get(PREFIX_PROPERTY);
+        if (prefix != null && prefix instanceof String) { // service is specified as internally routable
+            routes.put((String)prefix, route);
+        }
     }
-    protected synchronized void unbind(ServiceReference reference) {
-        references.remove(reference);
-        refresh();
+    protected synchronized void unbind(ObjectSet route, Map<String, Object> properties) {
+        Object prefix = properties.get(PREFIX_PROPERTY);
+        if (prefix != null && prefix instanceof String) { // service is specified as internally routable
+            routes.remove((String)prefix);
+        }
     }
 
     @Activate
     protected synchronized void activate(ComponentContext context) {
         this.context = context;
-        refresh();
     }
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
         this.context = null;
-        refresh();
-    }
-
-    /**
-     * TODO: Description.
-     */
-    private void refresh() {
-        if (context != null) {
-            HashMap<String, ObjectSet> refreshed = new HashMap<String, ObjectSet>();
-            for (ServiceReference reference : references) {
-                Object prefix = reference.getProperty("openidm.router.prefix");
-                if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-                    refreshed.put((String)prefix, (ObjectSet)context.locateService(REFERENCE_NAME, reference));
-                }
-            }
-            routes = refreshed;
-        } else {
-            routes.clear();
-        }
     }
 }
