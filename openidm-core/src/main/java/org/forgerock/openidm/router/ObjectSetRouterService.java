@@ -48,7 +48,8 @@ import org.forgerock.openidm.objset.ObjectSetRouter;
  */
 @Component(
     name = "org.forgerock.openidm.router",
-    policy = ConfigurationPolicy.IGNORE
+    policy = ConfigurationPolicy.IGNORE,
+    immediate = true
 )
 @Properties({
     @Property(name = "service.description", value = "OpenIDM internal object set router"),
