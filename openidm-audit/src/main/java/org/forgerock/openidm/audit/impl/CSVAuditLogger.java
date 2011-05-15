@@ -168,6 +168,7 @@ public class CSVAuditLogger implements AuditLogger {
                 }
             }
             fileWriter.append(recordDelim);
+            fileWriter.flush();
         } catch (Exception ex) {
             throw new BadRequestException(ex);
         } 
