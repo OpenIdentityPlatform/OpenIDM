@@ -74,6 +74,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
+    @Property(name = "openidm.router.prefix", value = "repo"),
     @Property(name = "db.type", value = "OrientDB")
 })
 public class OrientDBRepoService implements RepositoryService {
