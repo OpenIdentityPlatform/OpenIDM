@@ -71,7 +71,7 @@ public class ObjectSetRouter implements ObjectSet {
             }
         }
         if (result[0] == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("no route for " + id);
         }
         return result;
     }
