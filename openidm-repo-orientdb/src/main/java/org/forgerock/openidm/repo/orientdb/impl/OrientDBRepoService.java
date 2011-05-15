@@ -70,7 +70,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  * @author aegloff
  */
 @Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true, policy=ConfigurationPolicy.REQUIRE)
-@Service(value = RepositoryService.class) 
+@Service
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
