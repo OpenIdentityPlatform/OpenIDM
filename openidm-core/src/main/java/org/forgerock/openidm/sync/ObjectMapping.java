@@ -408,7 +408,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
-            getRepository().create("audit/recon", entry.toJsonNode().asMap());
+            service.getRouter().create("audit/recon", entry.toJsonNode().asMap());
         } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
