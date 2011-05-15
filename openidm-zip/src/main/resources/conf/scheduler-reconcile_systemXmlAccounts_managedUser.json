@@ -1,6 +1,6 @@
 {
     "type": "cron",
-    "schedule": "0 0/5 * * * ?",
+    "schedule": "0 0/1 * * * ?",
     "invokeService": "org.forgerock.openidm.sync",
     "invokeContext": {
         "action": "reconcile",
