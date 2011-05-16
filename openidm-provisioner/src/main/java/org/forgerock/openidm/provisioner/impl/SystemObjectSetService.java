@@ -26,18 +26,18 @@ package org.forgerock.openidm.provisioner.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
@@ -52,20 +52,27 @@ import org.slf4j.LoggerFactory;
  * @version $Revision$ $Date$
  */
 @Component(name = "org.forgerock.openidm.provisioner", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
-@Service
+@Service(value = {ObjectSet.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
         @Property(name = "openidm.router.prefix", value = "system") // internal object set router
 })
-public class SystemObjectSetService implements ObjectSet {
+public class SystemObjectSetService implements ObjectSet, SynchronizationListener {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
     public static final String PROVISIONER_SERVICE_REFERENCE_NAME = "ProvisionerServiceReference";
+    public static final String SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME = "SynchronizationListenerServiceReference";
 
     @Reference(name = PROVISIONER_SERVICE_REFERENCE_NAME, referenceInterface = ProvisionerService.class, bind = "bind",
             unbind = "unbind", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
+
+    @Reference(name = SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, referenceInterface = SynchronizationListener.class,
+            bind = "bindSynchronizationListener", unbind = "unbindSynchronizationListener",
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT)
+    private Set<ServiceReference> synchronizationListeners = new HashSet<ServiceReference>(1);
 
     private ComponentContext context = null;
 
@@ -84,7 +91,7 @@ public class SystemObjectSetService implements ObjectSet {
 
     protected void bind(ProvisionerService service, Map properties) {
         provisionerServices.put(service.getSystemIdentifier(), service);
-        TRACE.info("ProvisionerService {} is bound with system identifier {}.", 
+        TRACE.info("ProvisionerService {} is bound with system identifier {}.",
                 properties.get(ComponentConstants.COMPONENT_ID),
                 service.getSystemIdentifier());
     }
@@ -98,6 +105,24 @@ public class SystemObjectSetService implements ObjectSet {
             }
         }
         TRACE.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
+    }
+
+    // Handle SynchronizationListener Service References
+
+    protected void bindSynchronizationListener(ServiceReference service) {
+        Object prefix = service.getProperty("openidm.router.prefix");
+        if (prefix instanceof String && "system".equalsIgnoreCase((String) prefix)) {
+            //Ignore self registration!!!
+            return;
+        }
+        synchronizationListeners.add(service);
+        TRACE.info("SynchronizationListener {} is bound.",
+                service.getProperty(ComponentConstants.COMPONENT_ID));
+    }
+
+    protected void unbindSynchronizationListener(ServiceReference service) {
+        synchronizationListeners.remove(service);
+        TRACE.info("SynchronizationListener {} is unbound.", service.getProperty(ComponentConstants.COMPONENT_ID));
     }
 
     /**
@@ -117,8 +142,14 @@ public class SystemObjectSetService implements ObjectSet {
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-        
+
         locateService(id).create(id, object);
+        try {
+            onCreate(id, object);
+        } catch (SynchronizationException e) {
+            //TODO What to do with this exception
+            throw new ObjectSetException(e);
+        }
     }
 
     /**
@@ -138,7 +169,7 @@ public class SystemObjectSetService implements ObjectSet {
     public Map<String, Object> read(String id) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-        
+
         return locateService(id).read(id);
     }
 
@@ -163,8 +194,17 @@ public class SystemObjectSetService implements ObjectSet {
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-        
-        locateService(id).update(id, rev, object);
+        ProvisionerService service = locateService(id);
+
+        Map<String, Object> oldValue = service.read(id);
+        service.update(id, rev, object);
+
+        try {
+            onUpdate(id, oldValue, object);
+        } catch (SynchronizationException e) {
+            //TODO What to do with this exception
+            throw new ObjectSetException(e);
+        }
     }
 
     /**
@@ -184,8 +224,15 @@ public class SystemObjectSetService implements ObjectSet {
     public void delete(String id, String rev) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-        
+
         locateService(id).delete(id, rev);
+
+        try {
+            onDelete(id);
+        } catch (SynchronizationException e) {
+            //TODO What to do with this exception
+            throw new ObjectSetException(e);
+        }
     }
 
     /**
@@ -206,8 +253,20 @@ public class SystemObjectSetService implements ObjectSet {
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-        
-        locateService(id).patch(id, rev, patch);
+
+        ProvisionerService service = locateService(id);
+
+        Map<String, Object> oldValue = service.read(id);
+        service.patch(id, rev, patch);
+
+        try {
+            onUpdate(id, oldValue, service.read(id));
+        } catch (SynchronizationException e) {
+            //TODO What to do with this exception
+            throw new ObjectSetException(e);
+        }
+
+
     }
 
     /**
@@ -227,11 +286,76 @@ public class SystemObjectSetService implements ObjectSet {
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-        
+
         return locateService(id).query(id, params);
     }
 
-    // TODO: temporary - ensure qualified with system/ 
+
+    /**
+     * Called when a source object has been created.
+     *
+     * @param id     the fully-qualified identifier of the object that was created.
+     * @param object the value of the object that was created.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
+     *          if an exception occurs processing the notification.
+     */
+    public void onCreate(String id, Map<String, Object> object) throws SynchronizationException {
+        for (ServiceReference serviceReference : synchronizationListeners) {
+            SynchronizationListener service = (SynchronizationListener) context.locateService
+                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
+            service.onCreate(id, object);
+        }
+    }
+
+    /**
+     * Called when a source object has been updated.
+     *
+     * @param id       the fully-qualified identifier of the object that was updated.
+     * @param newValue the new value of the object after the update.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
+     *          if an exception occurs processing the notification.
+     */
+    public void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException {
+        for (ServiceReference serviceReference : synchronizationListeners) {
+            SynchronizationListener service = (SynchronizationListener) context.locateService
+                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
+            service.onUpdate(id, newValue);
+        }
+    }
+
+    /**
+     * Called when a source object has been updated.
+     *
+     * @param id       the fully-qualified identifier of the object that was updated.
+     * @param oldValue the old value of the object prior to the update.
+     * @param newValue the new value of the object after the update.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
+     *          if an exception occurs processing the notification.
+     */
+    public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue) throws SynchronizationException {
+        for (ServiceReference serviceReference : synchronizationListeners) {
+            SynchronizationListener service = (SynchronizationListener) context.locateService
+                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
+            service.onUpdate(id, oldValue, newValue);
+        }
+    }
+
+    /**
+     * Called when a source object has been deleted.
+     *
+     * @param id the fully-qualified identifier of the object that was deleted.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
+     *          if an exception occurs processing the notification.
+     */
+    public void onDelete(String id) throws SynchronizationException {
+        for (ServiceReference serviceReference : synchronizationListeners) {
+            SynchronizationListener service = (SynchronizationListener) context.locateService
+                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
+            service.onDelete(id);
+        }
+    }
+
+    // TODO: temporary - ensure qualified with system/
     // Remove once router and system object approach in sync
     private String ensureQualified(String id) {
         if (!id.startsWith("system/")) {
@@ -240,7 +364,7 @@ public class SystemObjectSetService implements ObjectSet {
             return id;
         }
     }
-    
+
 
     private ProvisionerService locateService(String id) throws ObjectSetException {
         try {
@@ -249,7 +373,7 @@ public class SystemObjectSetService implements ObjectSet {
 
             for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
                 if (entry.getKey().is(baseContext)) {
-                    return entry.getValue(); 
+                    return entry.getValue();
                 }
             }
         } catch (URISyntaxException e) {
