@@ -40,6 +40,7 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -117,14 +118,14 @@ public class OperationHelperImpl implements OperationHelper {
     @Override
     public Map<String, Object> build(ConnectorObject source) throws Exception {
         Map<String, Object> result = objectClassInfoHelper.build(source);
-        //resetUid(source.getUid(), result);
+        resetUid(source.getUid(), result);
         return result;
     }
 
     @Override
     public void resetUid(Uid uid, Map<String, Object> target) {
         if (null != uid && null != target) {
-            target.put("_id", uid.getUidValue());
+            target.put("_id", Id.escapeUid(uid));
 //            Object oldId = target.get("_id");
 //            if (oldId instanceof String) {
 //                Id newId = new Id((String) oldId);
@@ -135,16 +136,27 @@ public class OperationHelperImpl implements OperationHelper {
         }
     }
 
+    /**
+     * Generate the fully qualified id from unqualified object {@link org.identityconnectors.framework.common.objects.Uid}
+     * <p/>
+     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
+     *
+     * @param uid original un escaped unique identifier of the object
+     * @return
+     */
+    @Override
+    public URI resolveQualifiedId(Uid uid) {
+        if (null != uid) {
+            return systemObjectSetId.resolveLocalId(uid);
+        } else {
+            return systemObjectSetId.getId();
+        }
+    }
+
     @Override
     public ResultsHandler getResultsHandler() {
         resultList.clear();
         return new ConnectorObjectResultsHandler();
-    }
-
-    @Override
-    public SyncResultsHandler getSyncResultsHandler() {
-        resultList.clear();
-        return new SyncDeltaResultsHandler();
     }
 
     @Override
@@ -175,32 +187,6 @@ public class OperationHelperImpl implements OperationHelper {
         }
     }
 
-    private class SyncDeltaResultsHandler implements SyncResultsHandler {
-        /**
-         * Called to handle a delta in the stream. The Connector framework will call
-         * this method multiple times, once for each result.
-         * Although this method is callback, the framework will invoke it synchronously.
-         * Thus, the framework guarantees that once an application's call to
-         * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)}  SyncApiOp#sync()} returns,
-         * the framework will no longer call this method
-         * to handle results from that <code>sync()</code> operation.
-         *
-         * @param delta The change
-         * @return True iff the application wants to continue processing more
-         *         results.
-         * @throws RuntimeException If the application encounters an exception. This will stop
-         *                          iteration and the exception will propagate to
-         *                          the application.
-         */
-        @Override
-        public boolean handle(SyncDelta delta) {
-            try {
-                return resultList.add(objectClassInfoHelper.build(delta));
-            } catch (IOException e) {
-                throw new IllegalArgumentException(e);
-            }
-        }
-    }
 
     private Operator createOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
 

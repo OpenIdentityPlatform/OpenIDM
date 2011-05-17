@@ -27,11 +27,13 @@
 package org.forgerock.openidm.provisioner.openicf;
 
 import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -89,14 +91,20 @@ public interface OperationHelper {
     public void resetUid(Uid uid, Map<String, Object> target);
 
     /**
+     * Generate the fully qualified id from unqualified object {@link Uid}
+     * <p/>
+     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
+     *
+     * @param uid original un escaped unique identifier of the object
+     * @return
+     */
+    public URI resolveQualifiedId(Uid uid);
+
+
+    /**
      * @return new instance of {@link ResultsHandler}
      */
     public ResultsHandler getResultsHandler();
-
-    /**
-     * @return new instance of {@link SyncResultsHandler}
-     */
-    public SyncResultsHandler getSyncResultsHandler();
 
     public List<Map<String, Object>> getQueryResult();
 

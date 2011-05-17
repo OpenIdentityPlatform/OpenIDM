@@ -36,6 +36,8 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
+import org.forgerock.openidm.scheduler.ExecutionException;
+import org.forgerock.openidm.scheduler.ScheduledService;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
@@ -52,13 +54,13 @@ import org.slf4j.LoggerFactory;
  * @version $Revision$ $Date$
  */
 @Component(name = "org.forgerock.openidm.provisioner", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
-@Service(value = {ObjectSet.class})
+@Service(value = {ObjectSet.class, ScheduledService.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
         @Property(name = "openidm.router.prefix", value = "system") // internal object set router
 })
-public class SystemObjectSetService implements ObjectSet, SynchronizationListener {
+public class SystemObjectSetService implements ObjectSet, SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
     public static final String PROVISIONER_SERVICE_REFERENCE_NAME = "ProvisionerServiceReference";
     public static final String SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME = "SynchronizationListenerServiceReference";
@@ -352,6 +354,35 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             SynchronizationListener service = (SynchronizationListener) context.locateService
                     (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
             service.onDelete(id);
+        }
+    }
+
+    /**
+     * Invoked by the scheduler when the scheduler triggers.
+     *
+     * @param schedulerContext Context information passed by the scheduler service
+     * @throws org.forgerock.openidm.scheduler.ExecutionException
+     *          if execution of the scheduled work failed.
+     *          Implementations can also throw RuntimeExceptions which will get logged.
+     */
+    @Override
+    public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
+        Object action = schedulerContext.get("action");
+        Object targetSystem = schedulerContext.get("targetSystem");
+        if ("activeSync".equals(action)) {
+            if (targetSystem instanceof String) {
+                String id = ensureQualified((String) targetSystem);
+                try {
+                    ProvisionerService service = locateService(id);
+                    //TODO: temporary - add proper execute method to the ProvisionerService
+                    if (service instanceof ScheduledService) {
+                        schedulerContext.put("source", id);
+                        ((ScheduledService) service).execute(schedulerContext);
+                    }
+                } catch (ObjectSetException e) {
+                    throw new ExecutionException(e);
+                }
+            }
         }
     }
 

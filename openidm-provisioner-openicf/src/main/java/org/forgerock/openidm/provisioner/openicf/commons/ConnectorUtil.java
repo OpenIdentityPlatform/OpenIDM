@@ -119,6 +119,7 @@ public class ConnectorUtil {
     public static final String OPENICF_CONNECTOR_REF = "connectorRef";
     public static final String OPENICF_OBJECT_TYPES = "objectTypes";
     public static final String OPENICF_OPERATION_OPTIONS = "operationOptions";
+    public static final String OPENICF_SYNC_TOKEN = "syncToken";
 
     static {
         operationMap.put(OperationType.CREATE, CreateApiOp.class);
@@ -654,6 +655,54 @@ public class ConnectorUtil {
         return schema;
     }
 
+
+    /**
+     * Create a new {@link SyncToken} from the input.
+     * <p/>
+     * The source object:
+     * {@code
+     * {
+     * "syncToken" : "1305555929000",
+     * "nativeType" : "JAVA_TYPE_LONG"
+     * }}
+     *
+     * @param token
+     * @return
+     * @throws JsonNodeException        if {@code syncToken} is null or {@code nativeType} is not String
+     * @throws IllegalArgumentException if the value of {@code syncToken} can not be converted to expected type.
+     */
+    public static SyncToken convertToSyncToken(JsonNode token) {
+        JsonNode nativeType = token.get(OPENICF_NATIVE_TYPE);
+        JsonNode tokenValue = token.get(OPENICF_SYNC_TOKEN).required();
+        SyncToken result = null;
+        if (null != nativeType) {
+            result = new SyncToken(tokenValue.getValue());
+        } else {
+            result = new SyncToken(coercedTypeCasting(tokenValue.getValue(), findClassForName(nativeType.asString())));
+        }
+        return result;
+    }
+
+    /**
+     * Create a new Map from the given {@link SyncToken}.
+     * <p/>
+     * The target object:
+     * {@code
+     * {
+     * "syncToken" : "1305555929000",
+     * "nativeType" : "JAVA_TYPE_LONG"
+     * }}
+     *
+     * @param token
+     * @return
+     * @throws IllegalArgumentException if the value of {@code token} can not be converted to simple Java type.
+     */
+    public static Map<String, Object> convertFromSyncToken(SyncToken token) {
+        Map<String, Object> result = new HashMap<String, Object>(2);
+        result.put(OPENICF_NATIVE_TYPE, findNameForClass(token.getValue().getClass()));
+        result.put(OPENICF_SYNC_TOKEN, coercedTypeCasting(token.getValue(), Object.class));
+        return result;
+    }
 
     public static String normalizeConnectorName(String connectorName) {
         String name = null;

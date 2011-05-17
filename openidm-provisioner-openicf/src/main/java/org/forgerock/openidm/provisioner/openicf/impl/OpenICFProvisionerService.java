@@ -28,9 +28,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonPath;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.*;
@@ -41,26 +39,27 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.Id;
-import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.script.ConnectorScript;
+import org.forgerock.openidm.scheduler.ExecutionException;
+import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.sync.SynchronizationListener;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.operations.*;
-import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
+import org.identityconnectors.framework.common.exceptions.*;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
-import org.identityconnectors.framework.spi.operations.TestOp;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -69,19 +68,27 @@ import java.util.*;
  */
 @Component(name = "org.forgerock.openidm.provisioner.openicf", policy = ConfigurationPolicy.REQUIRE,
         description = "OpenIDM System Object Set Service")
-@Service
+@Service(value = {ProvisionerService.class, ScheduledService.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service")
 })
-public class OpenICFProvisionerService implements ProvisionerService {
+public class OpenICFProvisionerService implements ProvisionerService, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(OpenICFProvisionerService.class);
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
+    public static final String SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME = "SynchronizationListenerServiceReference";
+
 
     @Reference(name = "ConnectorInfoProviderServiceReference", referenceInterface = ConnectorInfoProvider.class, bind = "bind", unbind = "unbind", cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
     private ConnectorInfoProvider connectorInfoProvider = null;
+
+    @Reference(name = SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, referenceInterface = SynchronizationListener.class,
+            bind = "bindSynchronizationListener", unbind = "unbindSynchronizationListener",
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT)
+    private Set<ServiceReference> synchronizationListeners = new HashSet<ServiceReference>(1);
 
     protected void bind(ConnectorInfoProvider connectorInfoProvider) {
         TRACE.info("ConnectorInfoProvider is bound.");
@@ -92,6 +99,24 @@ public class OpenICFProvisionerService implements ProvisionerService {
     protected void unbind(ConnectorInfoProvider connectorInfoProvider) {
         this.connectorInfoProvider = null;
         TRACE.info("ConnectorInfoProvider is unbound.");
+    }
+
+    // Handle SynchronizationListener Service References
+
+    protected void bindSynchronizationListener(ServiceReference service) {
+        Object prefix = service.getProperty("openidm.router.prefix");
+        if (prefix instanceof String && "system".equalsIgnoreCase((String) prefix)) {
+            //Ignore self registration!!!
+            return;
+        }
+        synchronizationListeners.add(service);
+        TRACE.info("SynchronizationListener {} is bound.",
+                service.getProperty(ComponentConstants.COMPONENT_ID));
+    }
+
+    protected void unbindSynchronizationListener(ServiceReference service) {
+        synchronizationListeners.remove(service);
+        TRACE.info("SynchronizationListener {} is unbound.", service.getProperty(ComponentConstants.COMPONENT_ID));
     }
 
     @Activate
@@ -199,6 +224,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *          if access to the object or object set is forbidden.
      */
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
+        String METHOD = "create";
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
 
@@ -209,11 +235,46 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
             } catch (AlreadyExistsException e) {
-                TRACE.error("System object {}already exists", id, e);
-                throw new ConflictException("System object {" + id + "}already exists");
+                TRACE.error("System object {} already exists", id, e);
+                throw new ConflictException(e);
+            } catch (ConfigurationException e) {
+                TRACE.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectionBrokenException e) {
+                TRACE.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectionFailedException e) {
+                TRACE.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectorIOException e) {
+                TRACE.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (OperationTimeoutException e) {
+                TRACE.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (PasswordExpiredException e) {
+                TRACE.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (InvalidPasswordException e) {
+                TRACE.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (UnknownUidException e) {
+                TRACE.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new NotFoundException(e);
+            } catch (InvalidCredentialException e) {
+                TRACE.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (PermissionDeniedException e) {
+                TRACE.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                throw new ForbiddenException(e);
+            } catch (ConnectorSecurityException e) {
+                TRACE.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectorException e) {
+                TRACE.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
             } catch (Exception e) {
-                //OperationTimeoutException
-                TRACE.error("Error at Creating of {}", id, e);
+                TRACE.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
                 throw new ObjectSetException(e);
             }
         }
@@ -234,6 +295,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *          if access to the object is forbidden.
      */
     public Map<String, Object> read(String id) throws ObjectSetException {
+        String METHOD = "read";
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
         try {
@@ -257,8 +319,47 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     }
                 }
             }
+        } catch (AlreadyExistsException e) {
+            TRACE.error("System object {} already exists", id, e);
+            throw new ConflictException(e);
+        } catch (ConfigurationException e) {
+            TRACE.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new InternalServerErrorException(e);
+        } catch (ConnectionBrokenException e) {
+            TRACE.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new ServiceUnavailableException(e);
+        } catch (ConnectionFailedException e) {
+            TRACE.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+            throw new ServiceUnavailableException(e);
+        } catch (ConnectorIOException e) {
+            TRACE.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new ServiceUnavailableException(e);
+        } catch (OperationTimeoutException e) {
+            TRACE.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+            throw new ServiceUnavailableException(e);
+        } catch (PasswordExpiredException e) {
+            TRACE.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new InternalServerErrorException(e);
+        } catch (InvalidPasswordException e) {
+            TRACE.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+            throw new InternalServerErrorException(e);
+        } catch (UnknownUidException e) {
+            TRACE.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new NotFoundException(e);
+        } catch (InvalidCredentialException e) {
+            TRACE.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+            throw new InternalServerErrorException(e);
+        } catch (PermissionDeniedException e) {
+            TRACE.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+            throw new ForbiddenException(e);
+        } catch (ConnectorSecurityException e) {
+            TRACE.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new InternalServerErrorException(e);
+        } catch (ConnectorException e) {
+            TRACE.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+            throw new InternalServerErrorException(e);
         } catch (Exception e) {
-            TRACE.error("Error at Reading of {}", id, e);
+            TRACE.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
             throw new ObjectSetException(e);
         }
         throw new NotFoundException();
@@ -283,6 +384,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *          if version did not match the existing object in the set.
      */
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        String METHOD = "update";
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
 
@@ -294,8 +396,47 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 object.put("_id", uid.getUidValue());
                 helper.resetUid(uid, object);
+            } catch (AlreadyExistsException e) {
+                TRACE.error("System object {} already exists", id, e);
+                throw new ConflictException(e);
+            } catch (ConfigurationException e) {
+                TRACE.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectionBrokenException e) {
+                TRACE.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectionFailedException e) {
+                TRACE.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectorIOException e) {
+                TRACE.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (OperationTimeoutException e) {
+                TRACE.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (PasswordExpiredException e) {
+                TRACE.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (InvalidPasswordException e) {
+                TRACE.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (UnknownUidException e) {
+                TRACE.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new NotFoundException(e);
+            } catch (InvalidCredentialException e) {
+                TRACE.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (PermissionDeniedException e) {
+                TRACE.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                throw new ForbiddenException(e);
+            } catch (ConnectorSecurityException e) {
+                TRACE.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectorException e) {
+                TRACE.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
             } catch (Exception e) {
-                TRACE.error("Error at Creating of {}", id, e);
+                TRACE.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
                 throw new ObjectSetException(e);
             }
         }
@@ -316,6 +457,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *          if version did not match the existing object in the set.
      */
     public void delete(String id, String rev) throws ObjectSetException {
+        String METHOD = "delete";
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
 
@@ -323,8 +465,47 @@ public class OpenICFProvisionerService implements ProvisionerService {
             try {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, (ConnectorObject) null, null);
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());
+            } catch (AlreadyExistsException e) {
+                TRACE.error("System object {} already exists", id, e);
+                throw new ConflictException(e);
+            } catch (ConfigurationException e) {
+                TRACE.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectionBrokenException e) {
+                TRACE.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectionFailedException e) {
+                TRACE.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectorIOException e) {
+                TRACE.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (OperationTimeoutException e) {
+                TRACE.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (PasswordExpiredException e) {
+                TRACE.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (InvalidPasswordException e) {
+                TRACE.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (UnknownUidException e) {
+                TRACE.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new NotFoundException(e);
+            } catch (InvalidCredentialException e) {
+                TRACE.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (PermissionDeniedException e) {
+                TRACE.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                throw new ForbiddenException(e);
+            } catch (ConnectorSecurityException e) {
+                TRACE.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectorException e) {
+                TRACE.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
             } catch (Exception e) {
-                TRACE.error("Error deleting of {}", id, e);
+                TRACE.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
                 throw new ObjectSetException(e);
             }
         }
@@ -365,6 +546,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws IllegalArgumentException
      */
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
+        String METHOD = "query";
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
         Map<String, Object> result = new HashMap<String, Object>();
@@ -391,13 +573,185 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 }
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
                 result.put("result", helper.getQueryResult());
+            } catch (AlreadyExistsException e) {
+                TRACE.error("System object {} already exists", id, e);
+                throw new ConflictException(e);
+            } catch (ConfigurationException e) {
+                TRACE.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectionBrokenException e) {
+                TRACE.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectionFailedException e) {
+                TRACE.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectorIOException e) {
+                TRACE.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (OperationTimeoutException e) {
+                TRACE.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (PasswordExpiredException e) {
+                TRACE.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (InvalidPasswordException e) {
+                TRACE.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (UnknownUidException e) {
+                TRACE.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new NotFoundException(e);
+            } catch (InvalidCredentialException e) {
+                TRACE.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (PermissionDeniedException e) {
+                TRACE.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                throw new ForbiddenException(e);
+            } catch (ConnectorSecurityException e) {
+                TRACE.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectorException e) {
+                TRACE.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
             } catch (Exception e) {
-                TRACE.error("Error executing query of {}", id, e);
+                TRACE.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
                 throw new ObjectSetException(e);
             }
         }
         return result;
     }
+
+
+    /**
+     * This instance and this method can not be scheduled. The call MUST go through the
+     * {@code org.forgerock.openidm.provisioner}
+     * <p/>
+     * Invoked by the scheduler when the scheduler triggers.
+     * <p/>
+     * Synchronisation object:
+     * {@code
+     * {
+     * "connectorData" :
+     * {
+     * "syncToken" : "1305555929000",
+     * "nativeType" : "JAVA_TYPE_LONG"
+     * },
+     * "synchronizationStatus" :
+     * {
+     * "errorStatus" : null,
+     * "lastKnownServer" : "localServer",
+     * "lastModDate" : "2011-05-16T14:47:58.587Z",
+     * "lastModNum" : 668,
+     * "lastPollDate" : "2011-05-16T14:47:52.875Z",
+     * "lastStartTime" : "2011-05-16T14:29:07.863Z",
+     * "progressMessage" : "SUCCEEDED"
+     * }
+     * }}
+     *
+     * @param schedulerContext Context information passed by the scheduler service
+     * @throws org.forgerock.openidm.scheduler.ExecutionException
+     *          if execution of the scheduled work failed.
+     *          Implementations can also throw RuntimeExceptions which will get logged.
+     */
+    public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
+        Object source = schedulerContext.get("source");
+        if (!(source instanceof String)) {
+            throw new ExecutionException("Required property 'source' is missing. " +
+                    "Source must point to the system/{systemName}/{objectType}");
+        }
+        Id sourceSet = new Id((String) source);
+        Object connectorData = schedulerContext.get("connectorData");
+        SyncToken token = null;
+        if (connectorData instanceof Map) {
+            token = ConnectorUtil.convertToSyncToken(new JsonNode(connectorData));
+        } else if (null != connectorData) {
+            throw new ExecutionException("Illegal connectorData property. Value must be Map");
+        }
+
+        try {
+            final OperationHelper helper = operationHelperBuilder.build(sourceSet.getObjectType(), schedulerContext);
+            if (helper.isOperationPermitted(SyncApiOp.class)) {
+                ConnectorFacade connector = getConnectorFacade(helper.getRuntimeAPIConfiguration());
+                SyncApiOp operation = (SyncApiOp) connector.getOperation(SyncApiOp.class);
+                if (null == operation) {
+                    throw new UnsupportedOperationException();
+                }
+                if (null == token) {
+                    //Save token
+                    token = operation.getLatestSyncToken(helper.getObjectClass());
+                } else {
+                    final Set<SynchronizationListener> services = new HashSet<SynchronizationListener>(0);
+                    final SyncToken[] lastToken = new SyncToken[1];
+                    for (ServiceReference serviceReference : synchronizationListeners) {
+                        services.add((SynchronizationListener) context.locateService
+                                (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference));
+                    }
+
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, schedulerContext);
+                    try {
+                        operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
+                            /**
+                             * Called to handle a delta in the stream. The Connector framework will call
+                             * this method multiple times, once for each result.
+                             * Although this method is callback, the framework will invoke it synchronously.
+                             * Thus, the framework guarantees that once an application's call to
+                             * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)}  SyncApiOp#sync()} returns,
+                             * the framework will no longer call this method
+                             * to handle results from that <code>sync()</code> operation.
+                             *
+                             * @param syncDelta The change
+                             * @return True iff the application wants to continue processing more
+                             *         results.
+                             * @throws RuntimeException If the application encounters an exception. This will stop
+                             *                          iteration and the exception will propagate to
+                             *                          the application.
+                             */
+                            @Override
+                            public boolean handle(SyncDelta syncDelta) {
+                                try {
+                                    Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
+                                    switch (syncDelta.getDeltaType()) {
+                                        case CREATE_OR_UPDATE:
+                                            if (null != syncDelta.getPreviousUid()) {
+                                                deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid()));
+                                            }
+                                            for (SynchronizationListener serviceInstance : services) {
+                                                serviceInstance.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), deltaObject);
+                                            }
+                                            break;
+                                        case DELETE:
+                                            for (SynchronizationListener serviceInstance : services) {
+                                                serviceInstance.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).getPath());
+                                            }
+                                            break;
+                                    }
+                                } catch (Exception e) {
+                                    throw new ConnectorException("Failed to build sync object", e);
+                                } finally {
+                                    lastToken[0] = syncDelta.getToken();
+                                }
+                                return true;
+                            }
+                        }, operationOptionsBuilder.build());
+                    } finally {
+                        //Save Token
+                        token = lastToken[0];
+                    }
+                }
+                //TODO Save the  new SyncToken token
+                if (null != token) {
+                    schedulerContext.put("connectorData", ConnectorUtil.convertFromSyncToken(token));
+                }
+            }
+
+        } catch (ObjectSetException e) {
+            TRACE.error("Failed to get OperationHelper", e);
+            throw new ExecutionException(e);
+        } catch (Exception e) {
+            throw new ExecutionException(e);
+        }
+
+    }
+
 
     private JsonNode getConfiguration(ComponentContext componentContext) {
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
@@ -409,29 +763,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
     }
 
-    protected List<Map<String, Object>> doSyncronization(ConnectorFacade connector, Object syncToken, OperationHelper helper) {
-        final Collection<SyncDelta> result = new HashSet<SyncDelta>();
-        SyncApiOp operation = (SyncApiOp) connector.getOperation(SyncApiOp.class);
-        if (null == operation) {
-            throw new UnsupportedOperationException();
-        }
-        //TODO get the persisted token
-        SyncToken token = null;
-        OperationOptionsBuilder operationOptionsBuilder = null;//helper.getOperationOptionsBuilder(SyncApiOp.class, null, null);
-        if (null == syncToken) {
-            token = operation.getLatestSyncToken(helper.getObjectClass());
-            List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>(1);
-            Map<String, Object> lastToken = new HashMap<String, Object>(1);
-            resultList.add(lastToken);
-            //@TODO Token serialization problem.
-            lastToken.put("token", token.getValue());
-            return resultList;
-        } else {
-            token = new SyncToken(syncToken);
-        }
-        operation.sync(helper.getObjectClass(), token, helper.getSyncResultsHandler(), operationOptionsBuilder.build());
-        return helper.getQueryResult();
-    }
 
     /**
      * @param connector

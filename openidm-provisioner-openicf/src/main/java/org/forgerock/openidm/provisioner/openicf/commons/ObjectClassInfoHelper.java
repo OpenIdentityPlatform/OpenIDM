@@ -155,24 +155,24 @@ public class ObjectClassInfoHelper {
                 result.put(attributeInfo.getName(), attributeInfo.build(attribute));
             }
         }
-        result.put("_id",source.getUid().getUidValue());
+        result.put("_id",Id.escapeUid(source.getUid()));
         return result;
 
 
     }
 
-    public Map<String, Object> build(SyncDelta source) throws IOException {
-        Map<String, Object> result = new LinkedHashMap<String, Object>(5);
-        //@TODO Token serialization problem.
-        result.put("token", source.getToken().getValue());
-        result.put("deltaType", source.getDeltaType().name());
-        result.put("_id", source.getUid().getUidValue());
-        if (null != source.getPreviousUid()) {
-            result.put("_previousid", source.getPreviousUid().getUidValue());
-        }
-        result.put("object", build(source.getObject()));
-        return result;
-    }
+//    public Map<String, Object> build(SyncDelta source) throws IOException {
+//        Map<String, Object> result = new LinkedHashMap<String, Object>(5);
+//        //@TODO Token serialization problem.
+//        result.put("token", source.getToken().getValue());
+//        result.put("deltaType", source.getDeltaType().name());
+//        result.put("_id", source.getUid().getUidValue());
+//        if (null != source.getPreviousUid()) {
+//            result.put("_previousid", source.getPreviousUid().getUidValue());
+//        }
+//        result.put("object", build(source.getObject()));
+//        return result;
+//    }
 
     public Attribute build(String attributeName, Object source) throws Exception {
         for (AttributeInfoHelper attributeInfoHelper : attributes) {

@@ -166,4 +166,22 @@ public class Id {
         }
         return id.toString();
     }
+
+    /**
+     * Safely escapes the {@link Uid} value
+     *
+     * @param uid
+     * @return
+     * @throws IllegalArgumentException if the {@code uid} is blank
+     * @throws NullPointerException     if the {@code uid} is null
+     */
+    public static String escapeUid(Uid uid) {
+        Assertions.nullCheck(uid, "uid");
+        try {
+            return URLEncoder.encode(Assertions.blankChecked(uid.getUidValue(), "uid"), CHARACTER_ENCODING_UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
+        }
+    }
 }
