@@ -26,6 +26,10 @@ package org.forgerock.openidm.scheduler;
 import java.util.Map;
 import java.util.HashMap;
 
+import javax.naming.Context;
+
+import org.forgerock.openidm.context.InvokeContext;
+
 import org.osgi.util.tracker.ServiceTracker;
 
 import org.slf4j.Logger;
@@ -66,6 +70,8 @@ public class SchedulerServiceJob implements Job {
         Map scheduledServiceContext = new HashMap();
         scheduledServiceContext.putAll(data);
         scheduledServiceContext.remove(SchedulerService.SERVICE_TRACKER);
+        scheduledServiceContext.put(ScheduledService.INVOKER_NAME, "Scheduled " +
+                context.getJobDetail().getName() + "-" + context.getScheduledFireTime());
         scheduledServiceContext.put(ScheduledService.SCHEDULED_FIRE_TIME, context.getScheduledFireTime());
         scheduledServiceContext.put(ScheduledService.ACTUAL_FIRE_TIME, context.getFireTime());
         scheduledServiceContext.put(ScheduledService.NEXT_FIRE_TIME, context.getNextFireTime());
@@ -76,12 +82,23 @@ public class SchedulerServiceJob implements Job {
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
             try {
-                logger.debug("Scheduled service found, invoking.");
+                logger.info("Scheduled service found, invoking.");
+                setInvokeContext(scheduledServiceContext);
                 scheduledService.execute(scheduledServiceContext);
-                logger.debug("Scheduled service invoke completed sucessfully.");
+                logger.info("Scheduled service invoke completed sucessfully.");
             } catch (Exception ex) {
                 logger.warn("Scheduled service invokation reported failure: " + ex.getMessage(), ex);
+            } finally {
+                unsetInvokeContext();
             }
         }
+    }
+    
+    private void setInvokeContext(Map scheduledServiceContext) {
+        InvokeContext.getContext().putRequester((String) scheduledServiceContext.get(ScheduledService.INVOKER_NAME));
+    }
+    
+    private void unsetInvokeContext() {
+        InvokeContext.getContext().removeRequester();
     }
 }
