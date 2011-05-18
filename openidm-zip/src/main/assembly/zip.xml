@@ -26,6 +26,10 @@
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/orientstudio/orientdb-1.0rc2-SNAPSHOT/www</directory>
+            <outputDirectory>/openidm/src/site</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
@@ -41,7 +45,6 @@
                 <exclude>com.orientechnologies:**</exclude>
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
-                <exclude>org.forgerock.openicf.bundles.*</exclude>
                 <exclude>org.forgerock.openicf.connectors.*</exclude>
             </excludes>
         </dependencySet>
@@ -50,7 +53,6 @@
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
                 <include>org.forgerock.openicf.connectors.*</include>
-                <include>org.forgerock.openicf.bundles.*</include>
             </includes>
         </dependencySet>
         <dependencySet>

@@ -67,7 +67,7 @@ import java.util.*;
  * @version $Revision$ $Date$
  */
 @Component(name = "org.forgerock.openidm.provisioner.openicf", policy = ConfigurationPolicy.REQUIRE,
-        description = "OpenIDM System Object Set Service")
+        description = "OpenIDM System Object Set Service", immediate = true)
 @Service(value = {ProvisionerService.class, ScheduledService.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
