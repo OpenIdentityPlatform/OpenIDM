@@ -356,7 +356,7 @@ class ObjectMapping implements SynchronizationListener {
     public void recon(String reconId) throws SynchronizationException {
         InvokeContext.getContext().pushActivityId(reconId);
         try {
-            performRecon(reconId);
+            doRecon(reconId);
         } finally {
             InvokeContext.getContext().popActivityId();
         }
@@ -365,7 +365,7 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TEMPORARY. Future version will have this break-down into discrete units of work.
      */
-    public void performRecon(String reconId) throws SynchronizationException {
+    private void doRecon(String reconId) throws SynchronizationException {
         for (String sourceId : queryAllIds(sourceObjectSet)) {
             SourceSyncOperation op = new SourceSyncOperation();
             ReconEntry entry = new ReconEntry(op, sourceObjectSet + '/' + sourceId);

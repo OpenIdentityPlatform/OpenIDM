@@ -111,7 +111,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
         try {
             Map<String, Object> object = objectSet.read(id);
             Status status = conditions.getStatus(getMethod(), true, getTag(object), null);
-            if (status.isError()) { // precondition failed
+            if (status != null && status.isError()) { // precondition failed
                 throw new ResourceException(status);
             }
             return object;
@@ -128,7 +128,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
      */
     private Tag getTag(Map<String, Object> map) {
         Object rev = (map != null ? map.get("_rev") : null);
-        return (rev != null && rev instanceof String ? new Tag((String)rev) : null);
+        return (rev != null && rev instanceof String ? new Tag((String)rev, false) : null);
     }
 
     /**
@@ -186,10 +186,11 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     private Representation cuResponse(Map<String, Object> object) throws InternalServerErrorException {
         HashMap<String, Object> map = new HashMap<String, Object>();
         Object id = object.get("_id");
-        if (id == null || !(id instanceof String)) {
+        if (id != null && !(id instanceof String)) {
             throw new InternalServerErrorException("Object did not return a valid _id property");
         }
-        map.put("_id", (String)id);
+// TODO: Should a successful update to the _id property result in a redirect to the new resource?
+        map.put("_id", (id != null ? (String)id : this.id));
         Object rev = object.get("_rev");
         if (rev != null && !(rev instanceof String)) {
             throw new InternalServerErrorException("Object returned invalid _rev property");
@@ -199,7 +200,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
         }
         Representation result = jacksonRepresentation(map);
         if (rev != null) {
-            result.setTag(new Tag((String)rev)); // set ETag
+            result.setTag(new Tag((String)rev, false)); // set ETag
         }
         return result;
     }
@@ -243,9 +244,9 @@ public class ObjectSetServerResource extends ExtendedServerResource {
 // TODO: Design more useful error output format? Perhaps standardize in its own class?
             entity.put("error", status != null ? status.getName() : "Unclassified");
             entity.put("description", status != null ? status.getDescription() : re.getMessage());
+            setStatus(status);
             getResponse().setEntity(jacksonRepresentation(entity));
         }
-        super.doCatch(throwable);
     }
 
     @Override

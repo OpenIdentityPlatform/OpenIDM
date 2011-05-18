@@ -20,6 +20,7 @@ package org.forgerock.openidm.restlet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 // Java Servlet
 import javax.servlet.ServletException;
@@ -49,6 +50,7 @@ import org.restlet.ext.servlet.ServletAdapter;
 
 // ForgeRock OpenIDM Core
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.context.InvokeContext;
 
 /**
  * TODO: Description.
@@ -160,6 +162,11 @@ public class Servlet extends HttpServlet {
         if (adapter == null) {
             throw new ServletException("No adapter to handle request");
         }
-        adapter.service(req, res);
+        InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
+        try {
+            adapter.service(req, res);
+        } finally {
+            InvokeContext.getContext().popActivityId();
+        }
     }
 }

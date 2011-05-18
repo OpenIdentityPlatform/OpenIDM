@@ -38,10 +38,10 @@ import org.forgerock.openidm.script.Scripts;
 class PropertyMapping {
 
     /** TODO: Description. */
-    private final JsonPath source;
+    private final JsonPath sourcePath;
 
     /** TODO: Description. */
-    private final JsonPath target;
+    private final JsonPath targetPath;
 
     /** TODO: Description. */
     private final Script script;
@@ -69,8 +69,8 @@ class PropertyMapping {
      * @throws JsonNodeException TODO>
      */
     public PropertyMapping(JsonNode config) throws JsonNodeException {
-        source = asPath(config, "source");
-        target = asPath(config, "target");
+        sourcePath = asPath(config, "source");
+        targetPath = asPath(config, "target");
         script = Scripts.newInstance(config.get("script"));
     }
 
@@ -81,15 +81,19 @@ class PropertyMapping {
      * @param target TODO.
      * @throws MappingException TODO.
      */
-    public void apply(JsonNode source, JsonNode target) throws SynchronizationException {
+    public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
         try {
-            Object result = this.source.get(source).getValue();
+            JsonNode node = sourcePath.get(sourceObject);
+            if (node == null) {
+                throw new SynchronizationException("expecting " + sourcePath.toString() + " source property");
+            }
+            Object result = node.getValue();
             if (script != null) {
                 HashMap<String, Object> scope = new HashMap<String, Object>();
                 scope.put("source", result);
                 result = script.exec(scope); // script yields transformation result
             }
-            this.target.put(target, result);
+            targetPath.put(targetObject, result);
         } 
         catch (JsonNodeException jne) { // malformed JSON node for path
             throw new SynchronizationException(jne);
