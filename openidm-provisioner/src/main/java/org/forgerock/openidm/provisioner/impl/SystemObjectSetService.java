@@ -30,6 +30,7 @@ import java.util.*;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
+import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -76,6 +77,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             strategy = ReferenceStrategy.EVENT)
     private Set<ServiceReference> synchronizationListeners = new HashSet<ServiceReference>(1);
 
+    @Reference(referenceInterface = ObjectSet.class,
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC,
+            target = "(service.pid=org.forgerock.openidm.router)")
+    private ObjectSet router;
+    
     private ComponentContext context = null;
 
     @Activate
@@ -146,6 +153,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         id = ensureQualified(id);
 
         locateService(id).create(id, object);
+        ActivityLog.log(getRouter(), ActivityLog.ACTION_CREATE, "", id, null, object, ActivityLog.STATUS_SUCCESS);
         try {
             onCreate(id, object);
         } catch (SynchronizationException e) {
@@ -171,8 +179,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
     public Map<String, Object> read(String id) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-
-        return locateService(id).read(id);
+        Map<String, Object> object = locateService(id).read(id);
+        ActivityLog.log(getRouter(), ActivityLog.ACTION_READ, "", id, object, null, ActivityLog.STATUS_SUCCESS);
+        return object;
     }
 
     /**
@@ -200,7 +209,8 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         Map<String, Object> oldValue = service.read(id);
         service.update(id, rev, object);
-
+        ActivityLog.log(getRouter(), ActivityLog.ACTION_UPDATE, "", id, oldValue, object, ActivityLog.STATUS_SUCCESS);
+        
         try {
             onUpdate(id, oldValue, object);
         } catch (SynchronizationException e) {
@@ -226,8 +236,11 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
     public void delete(String id, String rev) throws ObjectSetException {
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
-
+        ProvisionerService service = locateService(id);
+        Map<String, Object> oldValue = service.read(id);
+        
         locateService(id).delete(id, rev);
+        ActivityLog.log(getRouter(), ActivityLog.ACTION_DELETE, "", id, oldValue, null, ActivityLog.STATUS_SUCCESS);
 
         try {
             onDelete(id);
@@ -260,9 +273,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         Map<String, Object> oldValue = service.read(id);
         service.patch(id, rev, patch);
+        
+        Map<String, Object> newValue = service.read(id);
+        ActivityLog.log(getRouter(), ActivityLog.ACTION_UPDATE, "", id, oldValue, newValue, ActivityLog.STATUS_SUCCESS);
 
         try {
-            onUpdate(id, oldValue, service.read(id));
+            onUpdate(id, oldValue, newValue);
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -289,7 +305,10 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
 
-        return locateService(id).query(id, params);
+        Map<String, Object> result = locateService(id).query(id, params);        
+        ActivityLog.log(getRouter(), ActivityLog.ACTION_QUERY, "Query parameters " + params, id, result, null, ActivityLog.STATUS_SUCCESS);
+        
+        return result;
     }
 
 
@@ -356,7 +375,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             service.onDelete(id);
         }
     }
-
+    
     /**
      * Invoked by the scheduler when the scheduler triggers.
      *
@@ -386,6 +405,10 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         }
     }
 
+    private ObjectSet getRouter() {
+        return router;
+    }
+    
     // TODO: temporary - ensure qualified with system/
     // Remove once router and system object approach in sync
     private String ensureQualified(String id) {
@@ -395,7 +418,6 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             return id;
         }
     }
-
 
     private ProvisionerService locateService(String id) throws ObjectSetException {
         try {
