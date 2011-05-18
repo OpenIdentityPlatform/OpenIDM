@@ -39,6 +39,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
 // ForgeRock OpenIDM
+import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -352,10 +353,19 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    public void recon(String reconId) throws SynchronizationException {
+        InvokeContext.getContext().pushActivityId(reconId);
+        try {
+            performRecon(reconId);
+        } finally {
+            InvokeContext.getContext().popActivityId();
+        }
+    }
+    
     /**
      * TEMPORARY. Future version will have this break-down into discrete units of work.
      */
-    public void recon(String reconId) throws SynchronizationException {
+    public void performRecon(String reconId) throws SynchronizationException {
         for (String sourceId : queryAllIds(sourceObjectSet)) {
             SourceSyncOperation op = new SourceSyncOperation();
             ReconEntry entry = new ReconEntry(op, sourceObjectSet + '/' + sourceId);

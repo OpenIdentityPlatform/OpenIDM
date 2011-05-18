@@ -42,6 +42,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
 // ForgeRock OpenIDM
+import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.ObjectSet;
@@ -240,6 +241,7 @@ class ManagedObjectSet implements ObjectSet {
             object.put("_id", id);
         }
         service.getRouter().create(repoId(id), object);
+        ActivityLog.log(service.getRouter(), ActivityLog.ACTION_CREATE, "", managedId(id), null, object, "SUCCESS");
         try {
             for (SynchronizationListener listener : listeners) {
                 listener.onCreate(managedId(id), object);
@@ -257,6 +259,7 @@ class ManagedObjectSet implements ObjectSet {
         Map<String, Object> object = service.getRouter().read(repoId(id));
         onRetrieve(object);
         execScript(onRead, object);
+        ActivityLog.log(service.getRouter(), ActivityLog.ACTION_READ, "", managedId(id), object, null, "SUCCESS");
         return object;
     }
 
@@ -264,6 +267,10 @@ class ManagedObjectSet implements ObjectSet {
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Update {} ", "name=" + name + " id=" + id + " rev=" + rev);
         Map<String, Object> oldObject = service.getRouter().read(repoId(id));
+        if (object.equals(oldObject)) {
+            // Object hasn't changed, do not update 
+            return;
+        }
         if (onUpdate != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
             scope.put("oldObject", oldObject);
@@ -280,6 +287,7 @@ class ManagedObjectSet implements ObjectSet {
         }
         onStore(object);
         service.getRouter().update(repoId(id), rev, object);
+        ActivityLog.log(service.getRouter(), ActivityLog.ACTION_UPDATE, "", managedId(id), oldObject, object, "SUCCESS");
         try {
             for (SynchronizationListener listener : listeners) {
                 listener.onUpdate(managedId(id), oldObject, object);
@@ -294,11 +302,12 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
         LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
+        Map<String, Object> object = service.getRouter().read(repoId(id));;
         if (onDelete != null) {
-            Map<String, Object> object = service.getRouter().read(repoId(id));
             execScript(onDelete, object);
         }
         service.getRouter().delete(repoId(id), rev);
+        ActivityLog.log(service.getRouter(), ActivityLog.ACTION_DELETE, "", managedId(id), object, null, "SUCCESS");
         try {
             for (SynchronizationListener listener : listeners) {
                 listener.onDelete(managedId(id));
@@ -318,7 +327,9 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         LOGGER.debug("Query name={} id={}", name, id);
-        return service.getRouter().query(repoId(id), params);
+        Map<String, Object> result = service.getRouter().query(repoId(id), params);
+        ActivityLog.log(service.getRouter(), ActivityLog.ACTION_QUERY, "Query parameters " + params, managedId(id), result, null, "SUCCESS");
+        return result;
 // TODO: provide trigger to filter query results?
     }
 
