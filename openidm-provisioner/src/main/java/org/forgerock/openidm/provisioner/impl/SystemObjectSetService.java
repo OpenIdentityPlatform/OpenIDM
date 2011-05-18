@@ -30,7 +30,9 @@ import java.util.*;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
+import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -153,7 +155,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         id = ensureQualified(id);
 
         locateService(id).create(id, object);
-        ActivityLog.log(getRouter(), ActivityLog.ACTION_CREATE, "", id, null, object, ActivityLog.STATUS_SUCCESS);
+        ActivityLog.log(getRouter(), Action.CREATE, "", id, null, object, Status.SUCCESS);
         try {
             onCreate(id, object);
         } catch (SynchronizationException e) {
@@ -180,7 +182,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
         Map<String, Object> object = locateService(id).read(id);
-        ActivityLog.log(getRouter(), ActivityLog.ACTION_READ, "", id, object, null, ActivityLog.STATUS_SUCCESS);
+        ActivityLog.log(getRouter(), Action.READ, "", id, object, null, Status.SUCCESS);
         return object;
     }
 
@@ -209,7 +211,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         Map<String, Object> oldValue = service.read(id);
         service.update(id, rev, object);
-        ActivityLog.log(getRouter(), ActivityLog.ACTION_UPDATE, "", id, oldValue, object, ActivityLog.STATUS_SUCCESS);
+        ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, object, Status.SUCCESS);
         
         try {
             onUpdate(id, oldValue, object);
@@ -240,7 +242,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         Map<String, Object> oldValue = service.read(id);
         
         locateService(id).delete(id, rev);
-        ActivityLog.log(getRouter(), ActivityLog.ACTION_DELETE, "", id, oldValue, null, ActivityLog.STATUS_SUCCESS);
+        ActivityLog.log(getRouter(), Action.DELETE, "", id, oldValue, null, Status.SUCCESS);
 
         try {
             onDelete(id);
@@ -275,7 +277,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         service.patch(id, rev, patch);
         
         Map<String, Object> newValue = service.read(id);
-        ActivityLog.log(getRouter(), ActivityLog.ACTION_UPDATE, "", id, oldValue, newValue, ActivityLog.STATUS_SUCCESS);
+        ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, newValue, Status.SUCCESS);
 
         try {
             onUpdate(id, oldValue, newValue);
@@ -306,7 +308,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         id = ensureQualified(id);
 
         Map<String, Object> result = locateService(id).query(id, params);        
-        ActivityLog.log(getRouter(), ActivityLog.ACTION_QUERY, "Query parameters " + params, id, result, null, ActivityLog.STATUS_SUCCESS);
+        ActivityLog.log(getRouter(), Action.QUERY, "Query parameters " + params, id, result, null, Status.SUCCESS);
         
         return result;
     }
