@@ -28,12 +28,12 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
+            <artifactId>openidm-audit</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-repo-orientdb</artifactId>
+            <artifactId>openidm-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -48,21 +48,18 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-scheduler</artifactId>
+            <artifactId>openidm-repo-orientdb</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-audit</artifactId>
+            <artifactId>openidm-restlet</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-schema</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-fluent</artifactId>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-scheduler</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!-- Core OSGi -->
         <dependency>
@@ -111,12 +108,30 @@
             <artifactId>org.apache.felix.scr</artifactId>
             <version>1.6.0</version>
         </dependency>
-        <!-- Jetty based web container -->
+
+        <!-- Jetty-based web container and whiteboard -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-service</artifactId>
-            <version>RELEASE</version>
+            <artifactId>pax-web-jetty-bundle</artifactId>
+            <version>1.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-whiteboard</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+<!--
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.jetty</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.http.whiteboard</artifactId>
+            <version>2.0.4</version>
+        </dependency>
+-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

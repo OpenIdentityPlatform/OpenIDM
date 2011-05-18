@@ -79,7 +79,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      * Internal object set router service.
      */
     @Reference(
-        name = "Reference_SynchronizationService_ObjectSetRouterService",
+        name = "ref_SynchronizationService_ObjectSetRouterService",
         referenceInterface = ObjectSet.class,
         bind = "bindRouter",
         unbind = "unbindRouter",

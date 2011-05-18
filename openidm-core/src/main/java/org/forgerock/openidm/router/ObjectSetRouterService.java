@@ -65,7 +65,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     private ComponentContext context;
 
     @Reference(
-        name = "reference_ObjectSetRouterService_ObjectSet",
+        name = "ref_ObjectSetRouterService_ObjectSet",
         referenceInterface = ObjectSet.class,
         bind = "bind",
         unbind = "unbind",

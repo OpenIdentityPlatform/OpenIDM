@@ -18,7 +18,9 @@ package org.forgerock.openidm.managed;
 
 // Java Standard Edition
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 // OSGi Framework
 import org.osgi.service.component.ComponentContext;
@@ -34,6 +36,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
 // JSON-Fluent library
@@ -45,6 +48,7 @@ import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.sync.SynchronizationListener;
 
 /**
  * Provides access to managed objects.
@@ -58,7 +62,8 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 @Properties({
     @Property(name = "service.description", value = "OpenIDM managed objects service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "managed") // internal object set router
+    @Property(name = "openidm.router.prefix", value = "managed"),
+    @Property(name = "openidm.restlet.path", value = "/managed")
 })
 @Service
 public class ManagedObjectService extends ObjectSetRouter {
@@ -67,7 +72,7 @@ public class ManagedObjectService extends ObjectSetRouter {
      * Internal object set router service.
      */
     @Reference(
-        name = "Reference_SynchronizationService_ObjectSetRouterService",
+        name = "ref_ManagedObjectService_ObjectSetRouterService",
         referenceInterface = ObjectSet.class,
         bind = "bindRouter",
         unbind = "unbindRouter",
@@ -81,6 +86,24 @@ public class ManagedObjectService extends ObjectSetRouter {
     }
     protected void unbindRouter(ObjectSet router) {
         this.router = null;
+    }
+
+    /** TODO: Description. */
+    @Reference(
+        name="ref_ManagedObjectService_SynchronizationListener",
+        referenceInterface=SynchronizationListener.class,
+        bind="bindListener",
+        unbind="unbindListener",
+        cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
+        policy=ReferencePolicy.DYNAMIC,
+        strategy=ReferenceStrategy.EVENT
+    )
+    protected final HashSet<SynchronizationListener> listeners = new HashSet<SynchronizationListener>();
+    protected void bindListener(SynchronizationListener listener) {
+        listeners.add(listener);
+    }
+    protected void unbindListener(SynchronizationListener listener) {
+        listeners.remove(listener);
     }
 
     /** TODO: Description. */
@@ -130,5 +153,12 @@ public class ManagedObjectService extends ObjectSetRouter {
             throw new ServiceUnavailableException("not bound to internal router");
         }
         return router;
+    }
+
+    /**
+     * TODO: Description.
+     */
+    Set<SynchronizationListener> getListeners() {
+        return listeners;
     }
 }

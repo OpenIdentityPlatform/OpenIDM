@@ -37,14 +37,15 @@
         <url>http://sources.forgerock.org/browse/idm/trunk</url>
     </scm>
     <modules>
+        <module>openidm-audit</module>
         <module>openidm-core</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>
         <module>openidm-repo</module>
         <module>openidm-repo-orientdb</module>
+        <module>openidm-restlet</module>
         <module>openidm-scheduler</module>
         <module>openidm-util</module>
-        <module>openidm-audit</module>
         <module>openidm-zip</module>
     </modules>
     <dependencyManagement>
@@ -141,7 +142,6 @@
                         <author>false</author>
                         <links>
                             <link>http://java.sun.com/javase/6/docs/api/</link>
-                            <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
                         </links>
                     </configuration>
                     <executions>

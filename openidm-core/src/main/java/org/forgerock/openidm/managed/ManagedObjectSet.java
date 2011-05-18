@@ -19,7 +19,6 @@ package org.forgerock.openidm.managed;
 // Java Standard Edition
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -30,12 +29,6 @@ import org.slf4j.LoggerFactory;
 
 // OSGi Framework
 import org.osgi.framework.ServiceReference;
-
-// Apache Felix Maven SCR Plugin
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
 
 // JSON-Fluent library
 import org.forgerock.json.fluent.JsonNode;
@@ -99,24 +92,6 @@ class ManagedObjectSet implements ObjectSet {
 
     /** The managed objects service that instantiated this managed object set. */
     private ManagedObjectService service;
-
-    /** TODO: Description. */
-    @Reference(
-        name="Reference_ManagedObjectSet_SynchronizationListener",
-        referenceInterface=SynchronizationListener.class,
-        bind="bindListener",
-        unbind="unbindListener",
-        cardinality=ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy=ReferencePolicy.DYNAMIC,
-        strategy=ReferenceStrategy.EVENT
-    )
-    protected final HashSet<SynchronizationListener> listeners = new HashSet<SynchronizationListener>();
-    protected void bindListener(SynchronizationListener listener) {
-        listeners.add(listener);
-    }
-    protected void unbindListener(SynchronizationListener listener) {
-        listeners.remove(listener);
-    }
 
     /**
      * Constructs a new managed object set.
@@ -245,7 +220,7 @@ class ManagedObjectSet implements ObjectSet {
         service.getRouter().create(repoId(id), object);
         ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, object, Status.SUCCESS);
         try {
-            for (SynchronizationListener listener : listeners) {
+            for (SynchronizationListener listener : service.getListeners()) {
                 listener.onCreate(managedId(id), object);
             }
         }
@@ -258,6 +233,9 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
         LOGGER.debug("Read name={} id={}", name, id);
+        if (id == null) {
+            throw new ForbiddenException("cannot read entire set");
+        }
         Map<String, Object> object = service.getRouter().read(repoId(id));
         onRetrieve(object);
         execScript(onRead, object);
@@ -268,6 +246,9 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Update {} ", "name=" + name + " id=" + id + " rev=" + rev);
+        if (id == null) {
+            throw new ForbiddenException("cannot update entire set");
+        }
         Map<String, Object> oldObject = service.getRouter().read(repoId(id));
         if (object.equals(oldObject)) {
             // Object hasn't changed, do not update 
@@ -291,7 +272,7 @@ class ManagedObjectSet implements ObjectSet {
         service.getRouter().update(repoId(id), rev, object);
         ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), oldObject, object, Status.SUCCESS);
         try {
-            for (SynchronizationListener listener : listeners) {
+            for (SynchronizationListener listener : service.getListeners()) {
                 listener.onUpdate(managedId(id), oldObject, object);
             }
         }
@@ -304,6 +285,9 @@ class ManagedObjectSet implements ObjectSet {
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
         LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
+        if (id == null) {
+            throw new ForbiddenException("cannot delete entire set");
+        }
         Map<String, Object> object = service.getRouter().read(repoId(id));;
         if (onDelete != null) {
             execScript(onDelete, object);
@@ -311,7 +295,7 @@ class ManagedObjectSet implements ObjectSet {
         service.getRouter().delete(repoId(id), rev);
         ActivityLog.log(service.getRouter(), Action.DELETE, "", managedId(id), object, null, Status.SUCCESS);
         try {
-            for (SynchronizationListener listener : listeners) {
+            for (SynchronizationListener listener : service.getListeners()) {
                 listener.onDelete(managedId(id));
             }
         }
