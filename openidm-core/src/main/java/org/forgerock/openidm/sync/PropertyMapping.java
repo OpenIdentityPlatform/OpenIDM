@@ -61,16 +61,15 @@ class PropertyMapping {
         if (required) {
             node.required();
         }
-        try {
-            JsonPath path = null;
-            if (node != null && !node.isNull()) {
-                path = new JsonPath(node.asString());
+        JsonPath result = null;
+        if (!node.isNull()) {
+            try {
+                result = new JsonPath(node.asString());
+            } catch (JsonPathException jpe) {
+                throw new JsonNodeException(node, jpe);
             }
-            return path;
         }
-        catch (JsonPathException jpe) {
-            throw new JsonNodeException(node, jpe);
-        }
+        return result;
     }
 
     /**
@@ -111,11 +110,9 @@ class PropertyMapping {
                 result = defaultValue; // default null if not specified
             }
             targetPath.put(targetObject, result);
-        } 
-        catch (JsonNodeException jne) { // malformed JSON node for path
+        } catch (JsonNodeException jne) { // malformed JSON node for path
             throw new SynchronizationException(jne);
-        }
-        catch (ScriptException se) { // script threw an exception
+        } catch (ScriptException se) { // script threw an exception
             throw new SynchronizationException(se);
         }
     }
