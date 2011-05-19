@@ -19,7 +19,8 @@
                 { "source" : "$.name", "target" : "$.name" },
                 { "source" : "$.lastname", "target" : "$.lastname" },
                 { "source" : "$.firstname", "target" : "$.firstname" },
-                { "source" : "$.email", "target" : "$.email" }
+                { "source" : "$.email", "target" : "$.email" },
+                { "default" : "defaultpwd", "target" : "$.__PASSWORD__" }
             ]
         }
     ]
