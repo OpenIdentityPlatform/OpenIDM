@@ -62,7 +62,11 @@ class PropertyMapping {
             node.required();
         }
         try {
-            return new JsonPath(node.asString());
+            JsonPath path = null;
+            if (node != null && !node.isNull()) {
+                path = new JsonPath(node.asString());
+            }
+            return path;
         }
         catch (JsonPathException jpe) {
             throw new JsonNodeException(node, jpe);
