@@ -311,9 +311,6 @@ public class ObjectSetServerResource extends ExtendedServerResource {
 
     @Override 
     public Representation post(Representation entity) throws ResourceException {
-        if (id != null) { // temporarily, POST not allowed on individual objects
-            throw new ResourceException(Status.CLIENT_ERROR_FORBIDDEN);
-        }
         Form query = getQuery();
         String action = query.getFirstValue("action");
         if (action == null) {
