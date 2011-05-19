@@ -126,7 +126,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
                 return mapping;
             }
         }
-        throw new SynchronizationException("no such mapping: " + name);
+        throw new SynchronizationException("No such mapping: " + name);
     }
 
     /**
@@ -136,7 +136,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      */
     ObjectSet getRouter() throws SynchronizationException {
         if (router == null) {
-            throw new SynchronizationException("not bound to internal router");
+            throw new SynchronizationException("Not bound to internal router");
         }
         return router;
     }

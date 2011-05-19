@@ -38,24 +38,31 @@ import org.forgerock.openidm.script.Scripts;
 class PropertyMapping {
 
     /** TODO: Description. */
-    private final JsonPath sourcePath;
-
-    /** TODO: Description. */
     private final JsonPath targetPath;
 
     /** TODO: Description. */
+    private final JsonPath sourcePath;
+
+    /** TODO: Description. */
     private final Script script;
+
+    /** TODO: Description. */
+    private final Object defaultValue;
 
     /**
      * TODO: Description.
      *
      * @param config TODO.
      * @param property TODO.
+     * @param required TODO.
      */
-    private static JsonPath asPath(JsonNode config, String property) throws JsonNodeException {
+    private static JsonPath asPath(JsonNode config, String property, boolean required) throws JsonNodeException {
         JsonNode node = config.get(property);
+        if (required) {
+            node.required();
+        }
         try {
-            return new JsonPath(node.required().asString());
+            return new JsonPath(node.asString());
         }
         catch (JsonPathException jpe) {
             throw new JsonNodeException(node, jpe);
@@ -69,9 +76,10 @@ class PropertyMapping {
      * @throws JsonNodeException TODO>
      */
     public PropertyMapping(JsonNode config) throws JsonNodeException {
-        sourcePath = asPath(config, "source");
-        targetPath = asPath(config, "target");
+        targetPath = asPath(config, "target", true);
+        sourcePath = asPath(config, "source", false);
         script = Scripts.newInstance(config.get("script"));
+        defaultValue = config.get("default").getValue();
     }
 
     /**
@@ -83,15 +91,20 @@ class PropertyMapping {
      */
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
         try {
-            JsonNode node = sourcePath.get(sourceObject);
-            if (node == null) {
-                throw new SynchronizationException("expecting " + sourcePath.toString() + " source property");
+            Object result = null;
+            if (sourcePath != null) { // optional
+                JsonNode node = sourcePath.get(sourceObject);
+                if (node != null) { // source property value found
+                    result = node.getValue();
+                }
             }
-            Object result = node.getValue();
-            if (script != null) {
+            if (script != null) { // optional
                 HashMap<String, Object> scope = new HashMap<String, Object>();
                 scope.put("source", result);
                 result = script.exec(scope); // script yields transformation result
+            }
+            if (result == null) {
+                result = defaultValue; // default null if not specified
             }
             targetPath.put(targetObject, result);
         } 
