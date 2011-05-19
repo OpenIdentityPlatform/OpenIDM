@@ -25,6 +25,17 @@
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
+            <excludes>
+                <exclude>**/*.sh</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <outputDirectory>/openidm</outputDirectory>
+            <fileMode>754</fileMode>
+            <includes>
+                <include>**/*.sh</include>
+            </includes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/orientstudio/orientdb-1.0rc2-SNAPSHOT/www</directory>

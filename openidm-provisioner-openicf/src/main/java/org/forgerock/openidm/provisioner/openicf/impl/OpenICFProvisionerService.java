@@ -562,6 +562,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ScheduledS
                     } else if (queryId != null) {
                         if (queryId.equals("query-all-ids")) {
                             // TODO: optimize query for ids, for now default to query all
+                            operationOptionsBuilder.setAttributesToGet(Uid.NAME);
                         } else {
                             // Unknown query id
                             throw new BadRequestException("Unknown query id: " + queryId);
@@ -689,49 +690,49 @@ public class OpenICFProvisionerService implements ProvisionerService, ScheduledS
                     OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, schedulerContext);
                     try {
                         operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
-                            /**
-                             * Called to handle a delta in the stream. The Connector framework will call
-                             * this method multiple times, once for each result.
-                             * Although this method is callback, the framework will invoke it synchronously.
-                             * Thus, the framework guarantees that once an application's call to
-                             * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)}  SyncApiOp#sync()} returns,
-                             * the framework will no longer call this method
-                             * to handle results from that <code>sync()</code> operation.
-                             *
-                             * @param syncDelta The change
-                             * @return True iff the application wants to continue processing more
-                             *         results.
-                             * @throws RuntimeException If the application encounters an exception. This will stop
-                             *                          iteration and the exception will propagate to
-                             *                          the application.
-                             */
-                            @Override
-                            public boolean handle(SyncDelta syncDelta) {
-                                try {
-                                    Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
-                                    switch (syncDelta.getDeltaType()) {
-                                        case CREATE_OR_UPDATE:
-                                            if (null != syncDelta.getPreviousUid()) {
-                                                deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid()));
+                                    /**
+                                     * Called to handle a delta in the stream. The Connector framework will call
+                                     * this method multiple times, once for each result.
+                                     * Although this method is callback, the framework will invoke it synchronously.
+                                     * Thus, the framework guarantees that once an application's call to
+                                     * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)}  SyncApiOp#sync()} returns,
+                                     * the framework will no longer call this method
+                                     * to handle results from that <code>sync()</code> operation.
+                                     *
+                                     * @param syncDelta The change
+                                     * @return True iff the application wants to continue processing more
+                                     *         results.
+                                     * @throws RuntimeException If the application encounters an exception. This will stop
+                                     *                          iteration and the exception will propagate to
+                                     *                          the application.
+                                     */
+                                    @Override
+                                    public boolean handle(SyncDelta syncDelta) {
+                                        try {
+                                            Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
+                                            switch (syncDelta.getDeltaType()) {
+                                                case CREATE_OR_UPDATE:
+                                                    if (null != syncDelta.getPreviousUid()) {
+                                                        deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid()));
+                                                    }
+                                                    for (SynchronizationListener serviceInstance : services) {
+                                                        serviceInstance.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), deltaObject);
+                                                    }
+                                                    break;
+                                                case DELETE:
+                                                    for (SynchronizationListener serviceInstance : services) {
+                                                        serviceInstance.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).getPath());
+                                                    }
+                                                    break;
                                             }
-                                            for (SynchronizationListener serviceInstance : services) {
-                                                serviceInstance.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), deltaObject);
-                                            }
-                                            break;
-                                        case DELETE:
-                                            for (SynchronizationListener serviceInstance : services) {
-                                                serviceInstance.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).getPath());
-                                            }
-                                            break;
+                                        } catch (Exception e) {
+                                            throw new ConnectorException("Failed to build sync object", e);
+                                        } finally {
+                                            lastToken[0] = syncDelta.getToken();
+                                        }
+                                        return true;
                                     }
-                                } catch (Exception e) {
-                                    throw new ConnectorException("Failed to build sync object", e);
-                                } finally {
-                                    lastToken[0] = syncDelta.getToken();
-                                }
-                                return true;
-                            }
-                        }, operationOptionsBuilder.build());
+                                }, operationOptionsBuilder.build());
                     } finally {
                         //Save Token
                         token = lastToken[0];

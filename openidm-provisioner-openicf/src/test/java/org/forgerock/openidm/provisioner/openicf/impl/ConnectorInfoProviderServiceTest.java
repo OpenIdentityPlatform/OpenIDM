@@ -27,22 +27,20 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
+import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelperTest;
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
-import org.osgi.framework.*;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -51,8 +49,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
-import static org.mockito.Mockito.*;
 import static org.fest.assertions.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author $author$
@@ -186,5 +185,45 @@ public class ConnectorInfoProviderServiceTest {
         public void deactivate(ComponentContext context) {
             super.deactivate(context);
         }
+    }
+
+    /**
+     * This test generates a new LDAP configuration file. It requires access to a running LDAP server.
+     *
+     * @throws URISyntaxException
+     */
+    @Test(enabled = false)
+    public void testCreateLDAPSystemConfiguration() throws Exception {
+        ConnectorInfo connectorInfo = null;
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.ldap.ldap", "1.1.0.0-SNAPSHOT", "org.identityconnectors.ldap.LdapConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                connectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(connectorInfo);
+        APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+
+        Map<String, Object> configMap = new HashMap<String, Object>();
+        configMap.put("port", 1389);
+        configMap.put("host", "localhost");
+        configMap.put("baseContexts", "dc=example,dc=com");
+        configMap.put("principal", "cn=Directory Manager");
+        configMap.put("credentials", new GuardedString("Passw0rd".toCharArray()));
+        configMap.put("accountObjectClasses", Arrays.asList(
+                "top",
+                "person",
+                "organizationalPerson",
+                "inetOrgPerson"
+        ));
+
+        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+
+        ObjectMapper mapper = new ObjectMapper();
+        URL root = ObjectClassInfoHelperTest.class.getResource("/");
+        mapper.writeValue(new File((new URL(root, "LDAPConnector_configuration.json")).toURI()),
+                testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+
     }
 }
