@@ -368,7 +368,8 @@ class ObjectMapping implements SynchronizationListener {
     private void doRecon(String reconId) throws SynchronizationException {
         for (String sourceId : queryAllIds(sourceObjectSet)) {
             SourceSyncOperation op = new SourceSyncOperation();
-            ReconEntry entry = new ReconEntry(op, sourceObjectSet + '/' + sourceId);
+            ReconEntry entry = new ReconEntry(op);
+            entry.sourceId = sourceObjectSet + '/' + sourceId;
             op.sourceObject = readObject(sourceObjectSet, sourceId);
             op.reconId = reconId;
             try {
@@ -384,12 +385,15 @@ class ObjectMapping implements SynchronizationListener {
                 entry.message = throwable.getMessage();
             }
             if (entry.status == Status.FAILURE || op.action != null) {
+                entry.reconciling = "source";
+                entry.targetId = qualifiedId(targetObjectSet, op.targetObject);
                 logReconEntry(entry);
             }
         }
         for (String targetId : queryAllIds(targetObjectSet)) {
             TargetSyncOperation op = new TargetSyncOperation();
-            ReconEntry entry = new ReconEntry(op, targetObjectSet + '/' + targetId);
+            ReconEntry entry = new ReconEntry(op);
+            entry.targetId = targetObjectSet + '/' + targetId;
             op.targetObject = readObject(targetObjectSet, targetId);
             op.reconId = reconId;
             try {
@@ -405,12 +409,24 @@ class ObjectMapping implements SynchronizationListener {
                 entry.message = throwable.getMessage();
             }
             if (entry.status == Status.FAILURE || op.action != null) {
+                entry.reconciling = "target";
+                entry.sourceId = qualifiedId(sourceObjectSet, op.sourceObject);
                 logReconEntry(entry);
             }
         }
 // TODO: cleanup orphan link objects (no matching source or target) here 
     }
 
+    /**
+     * Qualified Id if the object is not null, null if the object is null
+     */
+    private String qualifiedId(String objSet, JsonNode obj) {
+        if (obj == null) {
+            return null;
+        }
+        return objSet + '/' + obj.get("_id").getValue();
+    }
+    
     /**
      * TODO: Description.
      *
@@ -758,14 +774,22 @@ class ObjectMapping implements SynchronizationListener {
         public Status status = ObjectMapping.Status.SUCCESS;
 
         /** TODO: Description. */
-        public String objectId;
+        //public String objectId;
+        
+        /** TODO: Description. */
+        public String sourceId;
+        
+        /** TODO: Description. */
+        public String targetId;
+        
+        /** TODO: Description. */
+        public String reconciling;
 
         /** TODO: Description. */
         public String message;
 
-        public ReconEntry(SyncOperation op, String objectId) {
+        public ReconEntry(SyncOperation op) {
             this.op = op;
-            this.objectId = objectId;
         }
 
         /**
@@ -776,7 +800,9 @@ class ObjectMapping implements SynchronizationListener {
         private JsonNode toJsonNode() {
             JsonNode node = new JsonNode(new HashMap<String, Object>());
             node.put("reconId", op.reconId);
-            node.put("objectId", objectId);
+            node.put("reconciling", reconciling);
+            node.put("sourceObjectId", sourceId);
+            node.put("targetObjectId", targetId);
             node.put("situation", (op.situation == null ? null : op.situation.toString()));
             node.put("action", (op.action == null ? null : op.action.toString()));
             node.put("status", status);
