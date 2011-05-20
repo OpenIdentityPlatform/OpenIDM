@@ -44,6 +44,7 @@ import org.apache.felix.scr.annotations.Modified;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
+import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
@@ -84,6 +85,8 @@ public class AuditServiceImpl implements AuditService {
     
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
+    Map<String, List<Enum>> filters;
+    
     List<AuditLogger> auditLoggers;
     
     /**
@@ -128,6 +131,15 @@ public class AuditServiceImpl implements AuditService {
         String type = splitTypeAndId[0];
         String localId = splitTypeAndId[1];
 
+        // Filter
+        List<Enum> actionFilter = filters.get(type);
+        if (actionFilter != null) {
+            // TODO: make filters that can operate on a variety of conditions
+            if (!actionFilter.contains(obj.get("action"))) {
+                return;
+            }
+        }
+        
         // Generate an ID if there is none
         if (localId == null) {
             localId = UUID.randomUUID().toString();
@@ -224,25 +236,8 @@ public class AuditServiceImpl implements AuditService {
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             System.out.println("Audit service config: " + config);
-            auditLoggers = new ArrayList();
-            List logTo = config.get(CONFIG_LOG_TO).asList();
-            for (Map entry : (List<Map>)logTo) {
-                String logType = (String) entry.get(CONFIG_LOG_TYPE);
-                // TDDO: make pluggable
-                AuditLogger auditLogger = null;
-                if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
-                    auditLogger = new CSVAuditLogger();
-                } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                    auditLogger = new RepoAuditLogger();
-                } else {
-                    throw new InvalidException("Configured audit logType is unknown: " + logType);
-                }
-                if (auditLogger != null) {
-                    auditLogger.setConfig(entry, compContext.getBundleContext());
-                    logger.info("Audit configured to log to {}", logType);
-                    auditLoggers.add(auditLogger);
-                }
-            }
+            auditLoggers = getAuditLoggers(config, compContext);
+            filters = getFilters(config);
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
@@ -250,6 +245,50 @@ public class AuditServiceImpl implements AuditService {
         logger.info("Audit service started.");
     }
 
+    Map<String, List<Enum>> getFilters(JsonNode config) {
+        Map<String, List<Enum>> configFilters = new HashMap<String, List<Enum>>();
+        
+        for (Map.Entry<String, Object> eventType : config.get("eventTypes").asMap().entrySet()) {
+            String eventTypeName = eventType.getKey();
+            JsonNode eventTypeNode = new JsonNode(eventType.getValue());
+            JsonNode filterActions = eventTypeNode.get("filter").get("actions");
+            // TODO: proper filter mechanism
+            if (!filterActions.isNull()) {
+                List<Enum> filter = new ArrayList<Enum>();
+                for (JsonNode action : filterActions) {
+                    Enum actionEnum = action.asEnum(Action.class);
+                    filter.add(actionEnum);
+                }
+                configFilters.put(eventTypeName, filter);
+            }
+        }
+        return configFilters;
+    }
+    
+    List getAuditLoggers(JsonNode config, ComponentContext compContext) {
+        List configuredLoggers = new ArrayList();
+        List logTo = config.get(CONFIG_LOG_TO).asList();
+        for (Map entry : (List<Map>)logTo) {
+            String logType = (String) entry.get(CONFIG_LOG_TYPE);
+            // TDDO: make pluggable
+            AuditLogger auditLogger = null;
+            if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
+                auditLogger = new CSVAuditLogger();
+            } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
+                auditLogger = new RepoAuditLogger();
+            } else {
+                throw new InvalidException("Configured audit logType is unknown: " + logType);
+            }
+            if (auditLogger != null) {
+                auditLogger.setConfig(entry, compContext.getBundleContext());
+                logger.info("Audit configured to log to {}", logType);
+                configuredLoggers.add(auditLogger);
+            }
+        }
+        return configuredLoggers;
+    }
+    
+    
     /* Currently rely on deactivate/activate to be called by DS if config changes instead
     @Modified
     void modified(ComponentContext compContext) {
