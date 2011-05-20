@@ -763,7 +763,7 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * TODO: Description.
+     * TEMPORARY.
      */
     private class ReconEntry {
 
