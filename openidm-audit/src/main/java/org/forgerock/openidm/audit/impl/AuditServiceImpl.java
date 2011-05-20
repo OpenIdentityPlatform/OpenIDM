@@ -235,9 +235,9 @@ public class AuditServiceImpl implements AuditService {
         JsonNode config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
-            System.out.println("Audit service config: " + config);
             auditLoggers = getAuditLoggers(config, compContext);
             filters = getFilters(config);
+            logger.debug("Audit service filters enabled: {}", filters);
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
@@ -248,7 +248,11 @@ public class AuditServiceImpl implements AuditService {
     Map<String, List<Enum>> getFilters(JsonNode config) {
         Map<String, List<Enum>> configFilters = new HashMap<String, List<Enum>>();
         
-        for (Map.Entry<String, Object> eventType : config.get("eventTypes").asMap().entrySet()) {
+        Map<String, Object> eventTypes = config.get("eventTypes").asMap();
+        if (eventTypes == null) {
+            return configFilters;
+        }
+        for (Map.Entry<String, Object> eventType : eventTypes.entrySet()) {
             String eventTypeName = eventType.getKey();
             JsonNode eventTypeNode = new JsonNode(eventType.getValue());
             JsonNode filterActions = eventTypeNode.get("filter").get("actions");
