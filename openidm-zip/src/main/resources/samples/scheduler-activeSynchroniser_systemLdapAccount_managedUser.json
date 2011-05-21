@@ -1,0 +1,9 @@
+{
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "org.forgerock.openidm.provisioner",
+    "invokeContext": {
+        "action": "activeSync",
+        "source" : "system/ldap/__ACCOUNT__"
+    }
+}

@@ -30,13 +30,12 @@ import java.util.*;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.scheduler.ExecutionException;
@@ -84,7 +83,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             policy = ReferencePolicy.STATIC,
             target = "(service.pid=org.forgerock.openidm.router)")
     private ObjectSet router;
-    
+
     private ComponentContext context = null;
 
     @Activate
@@ -214,7 +213,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         Map<String, Object> oldValue = service.read(id);
         service.update(id, rev, object);
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, object, Status.SUCCESS);
-        
+
         try {
             onUpdate(id, oldValue, object);
         } catch (SynchronizationException e) {
@@ -242,7 +241,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         id = ensureQualified(id);
         ProvisionerService service = locateService(id);
         Map<String, Object> oldValue = service.read(id);
-        
+
         locateService(id).delete(id, rev);
         ActivityLog.log(getRouter(), Action.DELETE, "", id, oldValue, null, Status.SUCCESS);
 
@@ -277,7 +276,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         Map<String, Object> oldValue = service.read(id);
         service.patch(id, rev, patch);
-        
+
         Map<String, Object> newValue = service.read(id);
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, newValue, Status.SUCCESS);
 
@@ -309,9 +308,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         // Work-around to ensure id starts with system/
         id = ensureQualified(id);
 
-        Map<String, Object> result = locateService(id).query(id, params);        
+        Map<String, Object> result = locateService(id).query(id, params);
         ActivityLog.log(getRouter(), Action.QUERY, "Query parameters " + params, id, result, null, Status.SUCCESS);
-        
+
         return result;
     }
 
@@ -379,7 +378,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             service.onDelete(id);
         }
     }
-    
+
     /**
      * Invoked by the scheduler when the scheduler triggers.
      *
@@ -390,29 +389,46 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      */
     @Override
     public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
-        Object action = schedulerContext.get("action");
-        Object targetSystem = schedulerContext.get("targetSystem");
-        if ("activeSync".equals(action)) {
-            if (targetSystem instanceof String) {
-                String id = ensureQualified((String) targetSystem);
+        try {
+            JsonNode params = new JsonNode(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
+            String action = params.get("action").asString();
+            if ("activeSync".equals(action)) {
+                String id = ensureQualified(params.get("source").asString());
+                String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.replace("/", "").toUpperCase();
                 try {
-                    ProvisionerService service = locateService(id);
-                    //TODO: temporary - add proper execute method to the ProvisionerService
-                    if (service instanceof ScheduledService) {
-                        schedulerContext.put("source", id);
-                        ((ScheduledService) service).execute(schedulerContext);
+                    try {
+                        Map<String, Object> previousStage = getRouter().read(previousStageId);
+                        Object rev = previousStage.get("_rev");
+                        getRouter().update(previousStageId, (String) rev, locateService(id).activeSynchronise(getLocalId(id), previousStage != null ? new JsonNode(previousStage) : null, this).asMap());
+                    } catch (NotFoundException e) {
+                        TRACE.info("PooledSyncStage object {} is not found. First execution.");
+                        getRouter().create(previousStageId, locateService(id).activeSynchronise(getLocalId(id), null, this).asMap());
                     }
                 } catch (ObjectSetException e) {
                     throw new ExecutionException(e);
                 }
             }
+        } catch (JsonNodeException jne) {
+            throw new ExecutionException(jne);
         }
     }
 
     private ObjectSet getRouter() {
         return router;
     }
-    
+
+
+    // TODO: replace with common utility to handle ID, this is temporary
+    private String getLocalId(String id) {
+        String localId = null;
+        int lastSlashPos = id.lastIndexOf("/");
+        if (lastSlashPos > -1) {
+            localId = id.substring(id.lastIndexOf("/") + 1);
+        }
+        TRACE.trace("Full id: {} Extracted local id: {}", id, localId);
+        return localId;
+    }
+
     // TODO: temporary - ensure qualified with system/
     // Remove once router and system object approach in sync
     private String ensureQualified(String id) {

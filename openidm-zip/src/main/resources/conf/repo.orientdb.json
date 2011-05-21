@@ -27,6 +27,16 @@
                 "index" : [
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
                 ]
+            },
+            "link/systemLdapAccount_managedUser" : {
+                "index" : [
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
+                ]
+            },
+            "synchronisation/pooledSyncStage" : {
+                "index" : [
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
+                ]
             }
         }
     }    

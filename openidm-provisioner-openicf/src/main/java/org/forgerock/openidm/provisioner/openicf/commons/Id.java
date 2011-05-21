@@ -162,7 +162,7 @@ public class Id {
     public String toString() {
         URI id = baseURI.resolve(SYSTEM_BASE).resolve(systemName).resolve(objectType);
         if (null != localId) {
-            return id.toString() + "/ " + localId;
+            return id.toString() + "/" + localId;
         }
         return id.toString();
     }

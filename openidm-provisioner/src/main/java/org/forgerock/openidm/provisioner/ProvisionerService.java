@@ -26,7 +26,9 @@
 
 package org.forgerock.openidm.provisioner;
 
+import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.sync.SynchronizationListener;
 
 import java.util.Map;
 
@@ -40,6 +42,7 @@ public interface ProvisionerService extends ObjectSet {
      * Gets the unique {@link SystemIdentifier} of this instance.
      * <p/>
      * The service which refers to this service instance can distinguish between multiple instances by this value.
+     *
      * @return
      */
     public SystemIdentifier getSystemIdentifier();
@@ -48,7 +51,26 @@ public interface ProvisionerService extends ObjectSet {
      * Gets a brief stats report about the current status of this service instance.
      * </p/>
      * TODO Provide a sample object
+     *
      * @return
      */
     public Map<String, Object> getStatus();
+
+    /**
+     * Synchronise the changes from the end system for the given {@code objectType}.
+     * <p/>
+     * OpenIDM takes active role in the synchronisation process by asking the end system to get all changed object.
+     * Not all system is capable to fulfill this kind of request but if the end system is capable then the implementation
+     * send each changes to the {@link SynchronizationListener} and when it finished it return a new <b>stage</b> object.
+     * <p/>
+     * The {@code previousStage} object is the previously returned value of this method.
+     * Unhandled exception will result not to update the stage object in repository.
+     * <p/>
+     * All exceptions must be handled to save the the new stage object.
+     *
+     * @param previousStage           The previously returned object. If null then it's the first execution.
+     * @param synchronizationListener The listener to send the changes to.
+     * @return The new updated stage object. This will be the {@code previousStage} at next call.
+     */
+    public JsonNode activeSynchronise(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener);
 }

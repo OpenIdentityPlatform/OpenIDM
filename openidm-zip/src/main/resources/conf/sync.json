@@ -22,6 +22,33 @@
                 { "source" : "$.email", "target" : "$.email" },
                 { "default" : "defaultpwd", "target" : "$.__PASSWORD__" }
             ]
+        },
+        {
+            "name" : "systemLdapAccount_managedUser",
+            "source" : "system/ldap/__ACCOUNT__",
+            "target" : "managed/user",
+            "properties" : [
+                { "source" : "$.__NAME__", "target" : "$.distinguishedName" },
+                { "source" : "$.uid", "target" : "$.name" },
+                { "source" : "$.givenName", "target" : "$.firstname" },
+                { "source" : "$.sn", "target" : "$.lastname" },
+                { "source" : "$.description", "target" : "$.description" },
+                { "source" : "$.employeeNumber", "target" : "$.employeeNumber" },
+                { "source" : "$.homePhone", "target" : "$.homePhone" },
+                { "source" : "$.initials", "target" : "$.initials" },
+                { "source" : "$.l", "target" : "$.location" },
+                { "source" : "$.mobile", "target" : "$.mobile" },
+                { "source" : "$.pager", "target" : "$.pager" },
+                { "source" : "$.mail", "target" : "$.email" },
+                { "source" : "$.postalAddress", "target" : "$.postalAddress" },
+                { "source" : "$.postalCode", "target" : "$.postalCode" },
+                { "source" : "$.st", "target" : "$.state" },
+                { "source" : "$.street", "target" : "$.street" },
+                { "source" : "$.telephoneNumber", "target" : "$.telephoneNumber" },
+                { "source" : "$.employeeType", "target" : "$.employeeType" },
+                { "source" : "$.departmentNumber", "target" : "$.departmentNumber" },
+                { "source" : "$.seeAlso", "target" : "$.seeAlso" }
+            ]
         }
     ]
 }

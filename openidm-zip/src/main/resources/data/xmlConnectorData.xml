@@ -39,7 +39,7 @@
       <icf:__GROUPS__>TestGroup1</icf:__GROUPS__>
       <icf:__GROUPS__>TestGroup2</icf:__GROUPS__>
       <ri:lastname-first-letter/>
-      <icf:__NAME__>105a2dc4-f6de-4777-8688-33b2da3a5cd7</icf:__NAME__>
+      <icf:__NAME__>DDOE</icf:__NAME__>
       <icf:__PASSWORD__>TestPassw0rd</icf:__PASSWORD__>
    </ri:__ACCOUNT__>
    <ri:__ACCOUNT__>
@@ -79,7 +79,7 @@
       <icf:__GROUPS__>TestGroup1</icf:__GROUPS__>
       <icf:__GROUPS__>TestGroup2</icf:__GROUPS__>
       <ri:lastname-first-letter/>
-      <icf:__NAME__>2feed300-b0ec-44c0-a0fe-814bdcebf6e2</icf:__NAME__>
+      <icf:__NAME__>VDART</icf:__NAME__>
       <icf:__PASSWORD__>TestPassw0rd</icf:__PASSWORD__>
    </ri:__ACCOUNT__>
 </icf:OpenICFContainer>

@@ -29,29 +29,15 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.fest.assertions.MapAssert;
 import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.openidm.config.installer.JSONConfigInstaller;
-import org.forgerock.openidm.provisioner.ProvisionerService;
-import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.osgi.service.component.ComponentConstants;
-import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.*;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.fest.assertions.Assertions.assertThat;
 
 /**
