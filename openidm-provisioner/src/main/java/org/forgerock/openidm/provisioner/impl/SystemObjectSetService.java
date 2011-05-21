@@ -155,7 +155,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         id = ensureQualified(id);
 
         locateService(id).create(id, object);
-        ActivityLog.log(getRouter(), Action.CREATE, "", id, null, object, Status.SUCCESS);
+        // Append the system created local identifier
+        String newId = id + "/" + (String) object.get("_id");
+        ActivityLog.log(getRouter(), Action.CREATE, "", newId, null, object, Status.SUCCESS);
         try {
             onCreate(id, object);
         } catch (SynchronizationException e) {
