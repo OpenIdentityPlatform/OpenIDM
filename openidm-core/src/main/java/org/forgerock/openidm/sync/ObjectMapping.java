@@ -619,8 +619,8 @@ class ObjectMapping implements SynchronizationListener {
         private void execScript(Script script) throws SynchronizationException {
             if (script != null) {
                 HashMap<String, Object> scope = new HashMap<String, Object>();
-                scope.put("source", sourceObject);
-                scope.put("target", targetObject);
+                scope.put("source", sourceObject.asMap());
+                scope.put("target", targetObject.asMap());
                 scope.put("situation", situation.toString());
                 try {
                     script.exec(scope);
