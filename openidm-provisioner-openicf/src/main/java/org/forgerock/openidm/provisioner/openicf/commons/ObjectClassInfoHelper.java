@@ -56,7 +56,7 @@ public class ObjectClassInfoHelper {
         Map<String, Object> properties = (Map<String, Object>) schema.get(Constants.PROPERTIES);
         attributes = new HashSet<AttributeInfoHelper>(properties.size());
         for (Map.Entry<String, Object> e : properties.entrySet()) {
-            AttributeInfoHelper helper = new AttributeInfoHelper(e.getKey(), (Map<String, Object>) e.getValue());
+            AttributeInfoHelper helper = new AttributeInfoHelper(e.getKey(), false, (Map<String, Object>) e.getValue());
             if (helper.getAttributeInfo().getName().equals(Name.NAME)) {
                 nameAttribute = e.getKey();
             }

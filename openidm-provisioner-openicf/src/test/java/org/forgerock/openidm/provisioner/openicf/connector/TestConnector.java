@@ -255,6 +255,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
         schemaBuilder.defineOperationOption("_OperationOption-double", double.class);
         schemaBuilder.defineOperationOption("_OperationOption-Double", Double.class);
         schemaBuilder.defineOperationOption("_OperationOption-File", File.class);
+        schemaBuilder.defineOperationOption("_OperationOption-FileArray", File[].class);
         schemaBuilder.defineOperationOption("_OperationOption-float", float.class);
         schemaBuilder.defineOperationOption("_OperationOption-Float", Float.class);
         schemaBuilder.defineOperationOption("_OperationOption-GuardedByteArray", GuardedByteArray.class);
@@ -267,6 +268,7 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
         schemaBuilder.defineOperationOption("_OperationOption-QualifiedUid", QualifiedUid.class);
         schemaBuilder.defineOperationOption("_OperationOption-Script", Script.class);
         schemaBuilder.defineOperationOption("_OperationOption-String", String.class);
+        schemaBuilder.defineOperationOption("_OperationOption-StringArray", String[].class);
         schemaBuilder.defineOperationOption("_OperationOption-Uid ", Uid.class);
         schemaBuilder.defineOperationOption("_OperationOption-URI", URI.class);
 

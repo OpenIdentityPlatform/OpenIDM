@@ -40,7 +40,7 @@ public class AttributeInfoHelper {
     private final AttributeInfo attributeInfo;
     private final Object defaultValue;
 
-    public AttributeInfoHelper(String name, Map<String, Object> schema) throws SchemaException {
+    public AttributeInfoHelper(String name, boolean isOperationalOption, Map<String, Object> schema) throws SchemaException {
         this.name = name;
 
         //type
@@ -84,36 +84,42 @@ public class AttributeInfoHelper {
             defaultValue = def;
         }
 
-        AttributeInfoBuilder builder = new AttributeInfoBuilder(nativeName, nativeType);
-        builder.setMultiValued(Collection.class.isAssignableFrom(type));
+        if (!isOperationalOption) {
 
-        //flags
-        Object flagsObject = schema.get(ConnectorUtil.OPENICF_FLAGS);
-        if (flagsObject instanceof List) {
-            flags = new HashSet<AttributeFlag>(((List) flagsObject).size());
-            for (String flagString : (List<String>) flagsObject) {
-                AttributeFlag flag = AttributeFlag.findByKey(flagString);
-                if (null != flag) {
-                    if (AttributeFlag.NOT_CREATABLE.equals(flag)) {
-                        builder.setCreateable(false);
-                    } else if (AttributeFlag.NOT_UPDATEABLE.equals(flag)) {
-                        builder.setUpdateable(false);
-                    } else if (AttributeFlag.NOT_READABLE.equals(flag)) {
-                        builder.setReadable(false);
-                    } else if (AttributeFlag.NOT_RETURNED_BY_DEFAULT.equals(flag)) {
-                        builder.setReturnedByDefault(false);
-                    } else {
-                        flags.add(flag);
+            AttributeInfoBuilder builder = new AttributeInfoBuilder(nativeName, nativeType);
+            builder.setMultiValued(Collection.class.isAssignableFrom(type));
+
+            //flags
+            Object flagsObject = schema.get(ConnectorUtil.OPENICF_FLAGS);
+            if (flagsObject instanceof List) {
+                flags = new HashSet<AttributeFlag>(((List) flagsObject).size());
+                for (String flagString : (List<String>) flagsObject) {
+                    AttributeFlag flag = AttributeFlag.findByKey(flagString);
+                    if (null != flag) {
+                        if (AttributeFlag.NOT_CREATABLE.equals(flag)) {
+                            builder.setCreateable(false);
+                        } else if (AttributeFlag.NOT_UPDATEABLE.equals(flag)) {
+                            builder.setUpdateable(false);
+                        } else if (AttributeFlag.NOT_READABLE.equals(flag)) {
+                            builder.setReadable(false);
+                        } else if (AttributeFlag.NOT_RETURNED_BY_DEFAULT.equals(flag)) {
+                            builder.setReturnedByDefault(false);
+                        } else {
+                            flags.add(flag);
+                        }
                     }
                 }
+            } else {
+                flags = Collections.emptySet();
             }
-        } else {
-            flags = Collections.emptySet();
-        }
 
-        //required
-        builder.setRequired((null != schema.get(Constants.REQUIRED)) ? (Boolean) schema.get(Constants.REQUIRED) : false);
-        attributeInfo = builder.build();
+            //required
+            builder.setRequired((null != schema.get(Constants.REQUIRED)) ? (Boolean) schema.get(Constants.REQUIRED) : false);
+            attributeInfo = builder.build();
+        } else {
+            flags = null;
+            attributeInfo = null;
+        }
     }
 
 

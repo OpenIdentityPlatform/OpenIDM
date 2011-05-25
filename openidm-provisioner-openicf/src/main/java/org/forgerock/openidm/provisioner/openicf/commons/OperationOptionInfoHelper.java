@@ -31,13 +31,17 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.identityconnectors.framework.api.operations.APIOperation;
+import org.identityconnectors.framework.common.objects.AttributeInfo;
+import org.identityconnectors.framework.common.objects.ObjectClassInfo;
+import org.identityconnectors.framework.common.objects.OperationOptionInfo;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+
+import static org.forgerock.json.schema.validator.Constants.*;
+import static org.forgerock.json.schema.validator.Constants.PROPERTIES;
+import static org.forgerock.json.schema.validator.Constants.TYPE_OBJECT;
 
 /**
  * @author $author$
@@ -59,6 +63,9 @@ public class OperationOptionInfoHelper {
     private OnDenyAction onDeny;
     private final Set<AttributeInfoHelper> attributes;
 
+    public OperationOptionInfoHelper() {
+        attributes = Collections.emptySet();
+    }
 
     public OperationOptionInfoHelper(JsonNode configuration) throws JsonNodeException, SchemaException {
         denied = configuration.get(OPERATION_OPTION_DENIED).defaultTo(false).asBoolean();
@@ -68,7 +75,7 @@ public class OperationOptionInfoHelper {
         if (operationOptionInfo.isMap()) {
             attributes = new HashSet<AttributeInfoHelper>();
             for (Map.Entry<String, Object> entry : operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class).asMap().entrySet()) {
-                attributes.add(new AttributeInfoHelper(entry.getKey(), (Map<String, Object>) entry.getValue()));
+                attributes.add(new AttributeInfoHelper(entry.getKey(), true, (Map<String, Object>) entry.getValue()));
             }
         } else {
             attributes = Collections.emptySet();
@@ -83,7 +90,7 @@ public class OperationOptionInfoHelper {
         JsonNode operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
             for (Map.Entry<String, Object> entry : operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class).asMap().entrySet()) {
-                attributes.add(new AttributeInfoHelper(entry.getKey(), (Map<String, Object>) entry.getValue()));
+                attributes.add(new AttributeInfoHelper(entry.getKey(), true, (Map<String, Object>) entry.getValue()));
             }
         }
     }
@@ -110,4 +117,27 @@ public class OperationOptionInfoHelper {
         return builder;
     }
 
+    public static Map<String, Object> build(Set<OperationOptionInfo> operationOptionInfoSet) {
+        return build(operationOptionInfoSet, false, OnDenyAction.DO_NOTHING);
+    }
+
+    public static Map<String, Object> build(Set<OperationOptionInfo> operationOptionInfoSet, boolean denied, OnDenyAction onDeny) {
+        Map<String, Object> operationOptionInfoHelper = new LinkedHashMap<String, Object>(12);
+        operationOptionInfoHelper.put(OPERATION_OPTION_DENIED, denied);
+        operationOptionInfoHelper.put(OPERATION_OPTION_ON_DENY, onDeny.name());
+        if (null != operationOptionInfoSet) {
+            Map<String, Object> schema = new LinkedHashMap<String, Object>();
+            operationOptionInfoHelper.put(OPERATION_OPTION_OPERATION_OPTION_INFO, schema);
+            schema.put(SCHEMA, JSON_SCHEMA_DRAFT03);
+            schema.put(ID, "FIX_ME");
+            schema.put(TYPE, TYPE_OBJECT);
+
+            Map<String, Object> properties = new LinkedHashMap<String, Object>(operationOptionInfoSet.size());
+            schema.put(PROPERTIES, properties);
+            for (OperationOptionInfo ooi : operationOptionInfoSet) {
+                properties.put(ooi.getName(), ConnectorUtil.getOperationOptionInfoMap(ooi));
+            }
+        }
+        return operationOptionInfoHelper;
+    }
 }

@@ -28,19 +28,23 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.forgerock.openidm.provisioner.openicf.impl.ConnectorObjectOptions;
 import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperBuilder;
+import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperImpl;
 import org.forgerock.openidm.provisioner.openicf.impl.SimpleSystemIdentifier;
 import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorKey;
+import org.identityconnectors.framework.api.operations.*;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.Schema;
@@ -130,6 +134,33 @@ public class ConnectorUtilTest {
         }
     }
 
+    @Test
+    public void testOperationalSchema() throws Exception {
+        InputStream inputStream = ConnectorUtilTest.class.getResourceAsStream("/config/SystemSchemaConfiguration.json");
+        Assert.assertNotNull(inputStream);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode configuration = new JsonNode(mapper.readValue(inputStream, Map.class));
+        Map<String, ConnectorObjectOptions> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
+        OperationHelper helper = new OperationHelperImpl(null, null, null, operationOptionHelpers.get("__ACCOUNT__"));
+        Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class),"Create - ALLOWED");
+        Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class),"Sync - DENIED");
+        boolean authenticated = true;
+        try {
+            helper.isOperationPermitted(AuthenticationApiOp.class);
+        } catch (ForbiddenException e){
+            authenticated = false;
+        }
+        Assert.assertFalse(authenticated,"Authentication - DENIED(Exception)");
+        boolean operationSupported = true;
+        try {
+            helper.isOperationPermitted(ScriptOnResourceApiOp.class);
+        } catch (ForbiddenException e){
+            operationSupported = false;
+        }
+        //Assert.assertFalse(operationSupported,"ScriptOnResource - NotSupported(Exception)");
+        Assert.assertFalse(helper.isOperationPermitted(SearchApiOp.class),"Search - DENIED");
+    }
+
 
     @Test
     public void testAPIConfiguration() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
@@ -146,7 +177,7 @@ public class ConnectorUtilTest {
         Assert.assertFalse(systemIdentifier.is(new URI("http://openidm.forgerock.org/openidm/system/LDAP_None/user/CA2B382A-6FFB-11E0-80B7-902C4824019B")));
         Assert.assertFalse(systemIdentifier.is(new URI("system/LDAP_None/")));
 
-        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(((SimpleSystemIdentifier)systemIdentifier).getName(), jsonConfiguration, runtimeAPIConfiguration);
+        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(((SimpleSystemIdentifier) systemIdentifier).getName(), jsonConfiguration, runtimeAPIConfiguration);
 
         OperationHelper helper = operationHelperBuilder.build("__ACCOUNT__", null);
         Assert.assertEquals(helper.getObjectClass().getObjectClassValue(), "__ACCOUNT__");
@@ -154,14 +185,14 @@ public class ConnectorUtilTest {
 
     @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__.*")
     public void testUnsupportedObjectType() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
-        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test",jsonConfiguration, runtimeAPIConfiguration);
+        OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test", jsonConfiguration, runtimeAPIConfiguration);
         OperationHelper helper = operationHelperBuilder.build("__NONE__", null);
     }
 
     @Test
     public void testCoercedTypeCasting() throws Exception {
         BigInteger bigInteger = ConnectorUtil.coercedTypeCasting(new Integer(20), BigInteger.class);
-        Assert.assertEquals(bigInteger.intValue(),20);
+        Assert.assertEquals(bigInteger.intValue(), 20);
     }
 
     public APIConfiguration getRuntimeAPIConfiguration() {

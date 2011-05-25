@@ -42,8 +42,13 @@ public class ConnectorObjectOptions {
     private OperationOptionInfoHelper defaultOperationOptionInfoHelper;
     private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
 
+    public ConnectorObjectOptions(Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations) {
+        this.defaultOperationOptionInfoHelper = new OperationOptionInfoHelper();
+        this.operations = operations;
+    }
+
     public ConnectorObjectOptions(OperationOptionInfoHelper defaultOperationOptionInfoHelper, Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations) {
-        this.defaultOperationOptionInfoHelper = defaultOperationOptionInfoHelper;
+        this.defaultOperationOptionInfoHelper = (null != defaultOperationOptionInfoHelper) ? defaultOperationOptionInfoHelper : new OperationOptionInfoHelper();
         this.operations = operations;
     }
 
