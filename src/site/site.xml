@@ -47,12 +47,13 @@
    <item name="Welcome" href="index.html" />
    <item name="News" href="news.html" />
    <item name="Join" href="https://idp.forgerock.org/openam/UI/Login?service=register" />
-   <item name="Downloads" alt="Coming soon" href="TODO" />
+   <item name="Downloads" alt="Coming soon" href="downloads.html" />
    <item name="FAQ" href="faq.html" />
-   <item name="Mailing List" href="https://lists.forgerock.org/mailman/listinfo/openidm" />
+   <item name="Mailing List" href="mail-lists.html" />
    <item name="Support" href="http://forgerock.com/subscriptions.html" />
    <item name="Partners" href="http://forgerock.com/partners.html" />
    <item name="Wiki" href="http://wikis.forgerock.org/openidm/" />
+   <item name="Modules" href="modules.html" />
   </menu>
   
   <menu name="Core Documentation">
@@ -81,6 +82,10 @@
     <item name="RTF Format" href="./doc/OpenIDM-Dev-Guide.rtf" />
    </item>
    <!-- <item name="Javadoc" href="index.html" alt="TODO" /> -->
+  </menu>
+
+  <menu name="Tutorial">
+   <item name="Synchronisation" href="tutorials/tutorial02/index.html" />
   </menu>
 
   <!-- TODO: Add QA pages -->
