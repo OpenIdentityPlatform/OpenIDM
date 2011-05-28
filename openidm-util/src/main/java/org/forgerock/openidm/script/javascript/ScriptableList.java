@@ -184,9 +184,9 @@ class ScriptableList implements Scriptable, Wrapper {
 
     @Override
     public Scriptable getPrototype() {
-        if (prototype == null) { // default if not explicitly set
+/*        if (prototype == null) { // default if not explicitly set
             return ScriptableObject.getClassPrototype(getParentScope(), "Array");
-        }
+        } FIXME */
         return prototype;
     }
 
