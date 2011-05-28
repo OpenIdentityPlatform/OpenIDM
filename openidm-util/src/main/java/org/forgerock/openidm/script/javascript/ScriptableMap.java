@@ -130,9 +130,9 @@ class ScriptableMap implements Scriptable, Wrapper {
 
     @Override
     public Scriptable getPrototype() {
-        if (prototype == null) { // default if not explicitly set
-            return ScriptableObject.getClassPrototype(getParentScope(), "Object");
-        }
+/*        if (prototype == null) { // default if not explicitly set
+            return ScriptableObject.getClassPrototype(prototype, "Object");
+        } FIXME */ 
         return prototype;
     }
 

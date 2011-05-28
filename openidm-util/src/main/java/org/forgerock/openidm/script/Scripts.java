@@ -23,6 +23,9 @@ import java.util.ServiceLoader;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
+// TODO: migrate to OSGi whiteboard pattern
+import org.forgerock.openidm.script.javascript.JavaScriptFactory;
+
 /**
  * Instantiates script objects using registered script factory implementations.
  *
@@ -31,8 +34,8 @@ import org.forgerock.json.fluent.JsonNodeException;
  */
 public class Scripts {
 
-    /** Service loader instance for script factories. */
-    private static final ServiceLoader<ScriptFactory> FACTORIES = ServiceLoader.load(ScriptFactory.class);
+    /** TEMPORARY. */
+    private static final ScriptFactory JS_FACTORY = new JavaScriptFactory();
 
     /**
      * Returns a new script object for the provided script configuration object.
@@ -45,11 +48,9 @@ public class Scripts {
         if (config == null || config.isNull()) {
             return null;
         }
-        for (ScriptFactory factory : FACTORIES) {
-            Script script = factory.newInstance(config);
-            if (script != null) {
-                return script;
-            }
+        Script script = JS_FACTORY.newInstance(config); // until OSGi support provided
+        if (script != null) {
+            return script;
         }
         JsonNode type = config.get("type");
         throw new JsonNodeException(type, "script type " + type.asString() + " unsupported"); // no matching factory
