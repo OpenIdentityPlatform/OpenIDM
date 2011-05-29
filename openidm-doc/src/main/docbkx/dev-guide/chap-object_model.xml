@@ -23,51 +23,17 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<book xml:id='install-guide'
- xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+<chapter xml:id='chap-object_model'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <info>
-  <title>OpenIDM <?eval ${project.version}?> Installation Guide</title>
-  <copyright>
-   <year>2011</year>
-   <holder>ForgeRock AS</holder>
-  </copyright>
-  <authorgroup>
-   <author>
-    <personname>
-     <firstname>Mark</firstname><surname>Craig</surname>
-    </personname>
-   </author>
-   <author>
-    <personname>
-     <firstname>Paul</firstname><surname>Bryan</surname>
-    </personname>
-   </author>
-   <author>
-    <personname>
-     <firstname>Andi</firstname><surname>Egloff</surname>
-    </personname>
-   </author>
-   <author>
-    <personname>
-     <firstname>Laszlo</firstname><surname>Hordos</surname>
-    </personname>
-   </author>
-  </authorgroup>
-  <xinclude:include href="../legal.xml" />
-  <pubdate><?eval ${maven.build.timestamp}?></pubdate>
- </info>
+    <title>Object model</title>
+    <para>Artifacts handled by OpenIDM are Java object representations of the JavaScript object model as defined by JSON. This supports interoperability and potential integration with a vast number of applications, services and programming languages. As OpenIDM is a Java-based product, these representations are instances of classes: Map, List, String, Number, Boolean and null (known in this documentation by the initialism: MLSNBN). OpenIDM can serialize/deserialize these structures to/from JSON as required.</para>
+    <para/>
+    <para>OpenIDM exposes a set of triggers and functions that system administrators can define in JavaScript (with the ability to expand into other scripting and programming languages in the future), which can natively read and modify these JSON-based object model structures.</para>
+    <para/>
+</chapter>
 
- <toc />
- 
- <xinclude:include href="preface.xml" />
- 
- <xinclude:include href='chap-install.xml' />
- <xinclude:include href='chap-uninstall.xml' />
-
- <index />
- <?dbhtml-include href="../ga.html"?>
-</book>
