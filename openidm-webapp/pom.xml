@@ -37,6 +37,7 @@
     <packaging>war</packaging>
     <version>2.0.0-SNAPSHOT</version>
     <name>OpenIDM Webapp - (Embedded Felix)</name>
+    <description>Sample web application with embedded OpenIDM. It shows how to embedded the OpenIDM into any legacy web application.</description>
     <properties>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
@@ -57,7 +58,6 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>3.2.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -73,7 +73,6 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole</artifactId>
-            <version>RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <!-- OpenIDM Dependencies -->
@@ -103,6 +102,12 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-restlet</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
@@ -127,36 +132,30 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.main</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.shell</artifactId>
-            <version>RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.shell.tui</artifactId>
-            <version>RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
-            <version>RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.log</artifactId>
-            <version>RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
-            <version>3.1.10</version>
             <scope>provided</scope>
         </dependency>
         <!--dependency>
@@ -169,7 +168,6 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
-            <version>1.6.0</version>
         </dependency>
         <!-- Jetty based web container - ->
         <dependency>
@@ -193,7 +191,6 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-            <version>RELEASE</version>
             <scope>provided</scope>
         </dependency>
         <!-- OpenICF -->
@@ -290,6 +287,7 @@
                                 openidm-provisioner-openicf,
                                 openidm-repo,
                                 openidm-repo-orientdb,
+                                openidm-restlet,
                                 openidm-scheduler,
                                 openidm-util,
                                 org.apache.felix.configadmin,
