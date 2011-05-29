@@ -12016,12 +12016,7 @@
                         },
                      "description" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "nativeName" : "description",
                            "nativeType" : "string"
                         },
@@ -12076,17 +12071,6 @@
                            "nativeType" : "string"
                         },
                      "uid" :
-                        {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
-                           "nativeName" : "uid",
-                           "nativeType" : "string"
-                        },
-                     "__NAME__" :
                         {
                            "type" : "string",
                            "required" : true,
@@ -12222,12 +12206,7 @@
                         },
                      "st" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "nativeName" : "st",
                            "nativeType" : "string"
                         },
@@ -12287,23 +12266,13 @@
                         },
                      "initials" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "nativeName" : "initials",
                            "nativeType" : "string"
                         },
                      "sn" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "required" : true,
                            "nativeName" : "sn",
                            "nativeType" : "string"
@@ -12387,12 +12356,7 @@
                         },
                      "givenName" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "nativeName" : "givenName",
                            "nativeType" : "string"
                         },
@@ -12409,12 +12373,7 @@
                         },
                      "cn" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "required" : true,
                            "nativeName" : "cn",
                            "nativeType" : "string"
@@ -12432,12 +12391,7 @@
                         },
                      "telephoneNumber" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "string"
-                              },
+                           "type" : "string",
                            "nativeName" : "telephoneNumber",
                            "nativeType" : "string"
                         },

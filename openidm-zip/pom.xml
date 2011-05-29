@@ -65,60 +65,51 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.main</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.shell</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.shell.tui</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.log</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
-            <version>3.1.10</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <version>1.4.0</version>
         </dependency>
         <!-- Declarative Services support -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
-            <version>1.6.0</version>
         </dependency>
 
         <!-- Jetty-based web container and whiteboard -->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jetty-bundle</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-extender-whiteboard</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
@@ -152,14 +143,13 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors.file</groupId>
             <artifactId>xml</artifactId>
             <version>1.1.0.0-SNAPSHOT</version>
-            <exclusions>
+            <!--exclusions>
                 <exclusion>
                     <groupId>jaxen</groupId>
                     <artifactId>jaxen</artifactId>
@@ -176,18 +166,18 @@
                     <artifactId>relaxngDatatype</artifactId>
                     <groupId>relaxngDatatype</groupId>
                 </exclusion>
-            </exclusions>
+            </exclusions-->
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.connectors.ldap</groupId>
             <artifactId>ldap</artifactId>
             <version>1.1.0.0-SNAPSHOT</version>
-            <exclusions>
+            <!--exclusions>
                 <exclusion>
                     <groupId>com.sun</groupId>
                     <artifactId>ldapbp</artifactId>
                 </exclusion>
-            </exclusions>
+            </exclusions-->
         </dependency>
     </dependencies>
     <build>

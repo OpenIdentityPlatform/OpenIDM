@@ -23,13 +23,12 @@
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-util</artifactId>
-    <name>OpenIDM utility classes</name>
+    <name>OpenIDM Utility Classes</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
-            <version>RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -38,7 +37,7 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-            <version>1.7R2_1</version>
+            <version>1.7R2_2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -83,28 +82,6 @@
                 </includes>
             </resource>
         </resources>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <configuration>
-                        <author>false</author>
-                        <links>
-                            <link>http://java.sun.com/javase/6/docs/api/</link>
-                        </links>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>attach-javadocs</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

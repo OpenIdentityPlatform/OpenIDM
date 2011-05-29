@@ -56,39 +56,33 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
-            <version>1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.0</version>
             <scope>test</scope>
         </dependency> 
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.8.5</version>
             <scope>test</scope> 
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
             <scope>test</scope>
         </dependency>
         <!-- OSGi R4 frameworks -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
         <!-- Bundle installer to install all other bundles -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
-            <version>3.1.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -109,21 +103,30 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                    <executions>                        <execution>
-                            <goals>                                <goal>testCompile</goal> 
-                            </goals>                        </execution> 
-                </executions>            </plugin>
-            <plugin>                <groupId>org.apache.maven.plugins</groupId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>testCompile</goal> 
+                            </goals>
+                        </execution> 
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId> 
-                <executions>                    <execution> 
+                <executions>
+                    <execution> 
                         <phase>integration-test</phase> 
-                        <goals>                            <goal>test</goal> 
-                        </goals>                    </execution> 
+                        <goals>
+                            <goal>test</goal> 
+                        </goals>
+                    </execution> 
                 </executions>
             </plugin>            
             <plugin>
                 <groupId>org.ops4j.pax.exam</groupId>
                 <artifactId>maven-paxexam-plugin</artifactId>
+                <version>1.2.4</version>
                 <executions>
                     <execution>
                         <id>generate-config</id>
@@ -137,7 +140,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.2</version>
                 <executions>
                     <execution>
                         <id>prepare</id>
