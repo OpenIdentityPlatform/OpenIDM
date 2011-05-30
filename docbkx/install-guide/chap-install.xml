@@ -35,6 +35,122 @@
  <para>This chapter covers tasks required to install OpenIDM services, and to
  ensure they run properly.</para>
  
- <!-- TODO -->
+ <section>
+  <title>Before You Run OpenIDM</title>
+  
+  <para>This chapter covers covers what you need to consider before you run
+  OpenIDM in your production environment.</para>
+  
+  <section>
+   <title>Java Environment</title>
+   
+   <para>OpenIDM requires requires Oracle Java SE JDK 6, update 24 or
+   later.</para>
+   
+   <para>OpenJDK is not supported at this time.</para>
+  </section>
+  
+  <section>
+   <title>Application Container</title>
+  
+   <para>OpenIDM services run in an application container, by default provided
+   through OSGi. Jetty provides the default application container, listening
+   on port 8080 when you start OpenIDM services.</para>
+  </section>
+ </section>
+ 
+ <procedure>
+  <title>To Install &amp; Run OpenIDM Services</title>
+  
+  <step>
+   <para>Make sure you have the correct version of Java installed.</para>
+   <screen width='80'>$ java -version
+java version "1.6.0_24"
+Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
+Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
+  </step>
+  <step>
+   <!-- TODO: Update this step when we have a downloads page to stable versions. -->
+   <para>Download <link
+   xinclude:href='http://builds.forgerock.org/job/OpenIDM/lastSuccessfulBuild/artifact/openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip'
+   >openidm-2.0.0-SNAPSHOT.zip</link>.</para>
+  </step>
+  <step>
+   <para>Unpack the contents of the .zip file into the install location.</para>
+   <screen width='80'>$ cd /path/to
+$ unzip ~/Downloads/openidm-zip-2.0.0.zip 
+Archive:  /Users/mark/Downloads/openidm-zip-2.0.0.zip
+   creating: openidm/
+   creating: openidm/bundle/
+  inflating: openidm/bundle/openidm-audit-2.0.0-SNAPSHOT.jar  
+  inflating: openidm/bundle/openidm-repo-2.0.0-SNAPSHOT.jar  
+...
+  inflating: openidm/src/site/index.htm  
+$ </screen>
+  </step>
+  <step performance="optional">
+  <para>If you want OpenIDM services on a port different from 8080, edit
+  the <literal>org.osgi.service.http.port</literal> property in
+  <filename>openidm/conf/config.properties</filename>.</para></step>
+  <step>
+   <para>Start OpenIDM services.</para>
+   <screen width='80'>$ cd openidm/
+$ ./start.sh 
+Do you want to start in debug mode: [y]n
+
+Listening for transport dt_socket at address: 5005
+...
+-&gt;</screen>
+   <para>You can enter commands at the resulting <literal>-&gt;</literal> prompt
+   such as <literal>help</literal> for usage, or <literal>ps</literal> to view
+   the bundles installed.</para>
+  </step>
+  <step>
+   <para>Start the administration console.</para>
+   <itemizedlist>
+    <para>Defaults are as follows.</para>
+    <listitem>
+     <para>Console URL: <link
+     xinclude:href='http://localhost:8080/system/console'
+     >http://localhost:8080/system/console</link>.</para>
+    </listitem>
+    <listitem>
+     <para>Username: <literal>admin</literal></para>
+    </listitem>
+    <listitem>
+     <para>Password: <literal>admin</literal></para>
+    </listitem>
+   </itemizedlist>
+  </step>
+ </procedure> 
+ 
+ <procedure>
+  <title>To Stop OpenIDM Services</title>
+  
+  <step>
+   <para>Change to the directory where OpenIDM software is installed.</para>
+   <screen width='80'>$ cd /path/to/openidm/</screen>
+  </step>
+  <step>
+   <para>Run the script to start OpenIDM services.</para>
+   <screen width='80'>$ ./start.sh</screen>
+   <para>On Windows, the script to use is <filename>start.bat</filename>.</para>
+  </step>
+ </procedure>
+ 
+  <procedure>
+  <title>To Stop OpenIDM Services</title>
+  
+  <step>
+   <para>Access the administration console.</para>
+   <para>The default URL is <link
+   xinclude:href='http://localhost:8080/system/console'
+   >http://localhost:8080/system/console</link>.</para>
+  </step>
+  <step>
+   <para>Under the Shell tab, enter <literal>shutdown</literal> at the
+   <literal>-&gt;</literal> prompt.</para>
+  </step>
+ </procedure>
 </chapter>
 
