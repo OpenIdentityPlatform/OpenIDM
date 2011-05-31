@@ -130,6 +130,7 @@ public class ConnectorUtil {
         operationMap.put(OperationType.SCRIPT_ON_CONNECTOR, ScriptOnConnectorApiOp.class);
         operationMap.put(OperationType.SCRIPT_ON_RESOURCE, ScriptOnResourceApiOp.class);
         operationMap.put(OperationType.GET, GetApiOp.class);
+        operationMap.put(OperationType.RESOLVEUSERNAME, ResolveUsernameApiOp.class);
         operationMap.put(OperationType.AUTHENTICATE, AuthenticationApiOp.class);
         operationMap.put(OperationType.SEARCH, SearchApiOp.class);
         operationMap.put(OperationType.VALIDATE, ValidateApiOp.class);
@@ -313,7 +314,9 @@ public class ConnectorUtil {
         for (Map.Entry<OperationType, Class<? extends APIOperation>> e : operationMap.entrySet()) {
             JsonNode value = source.get(e.getKey().name());
             try {
-                target.setTimeout(e.getValue(), coercedTypeCasting(value.asNumber(), int.class));
+                if (!value.isNull()) {
+                    target.setTimeout(e.getValue(), coercedTypeCasting(value.asNumber(), int.class));
+                }
             } catch (IllegalArgumentException e1) {
                 TRACE.error("Type casting exception of {} from {} to int", new Object[]{value.getValue(), value.getValue().getClass().getCanonicalName()}, e);
             }
@@ -475,11 +478,23 @@ public class ConnectorUtil {
      */
     public static RemoteFrameworkConnectionInfo getRemoteFrameworkConnectionInfo(Map<String, Object> info) {
         String _host = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_HOST), String.class);
-        int _port = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_PORT), int.class);
+        int _port = 8759;
+        Object port = info.get(OPENICF_PORT);
+        if (null != port) {
+            _port = ConnectorUtil.coercedTypeCasting(port, int.class);
+        }
         GuardedString _key = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_KEY), GuardedString.class);
-        boolean _useSSL = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_USE_SSL), boolean.class);
+        boolean _useSSL = false;
+        Object useSSL = info.get(OPENICF_USE_SSL);
+        if (null != useSSL) {
+            _useSSL = ConnectorUtil.coercedTypeCasting(useSSL, boolean.class);
+        }
         //List<TrustManager> _trustManagers;
-        int _timeout = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_TIMEOUT), int.class);
+        int _timeout = 0;
+        Object timeout = info.get(OPENICF_TIMEOUT);
+        if (null != timeout) {
+            _timeout = ConnectorUtil.coercedTypeCasting(timeout, int.class);
+        }
         return new RemoteFrameworkConnectionInfo(_host, _port, _key, _useSSL, null, _timeout);
 
     }

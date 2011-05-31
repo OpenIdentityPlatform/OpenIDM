@@ -48,7 +48,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
 
     //Public Constants
     public static final String DEFAULT_CONNECTORS_LOCATION = "connectors";
-    public static final String PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL = "org.forgerock.openicf.connectorURL";
+    public static final String PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL = "connectorsLocation";
 
     //Private
     private static final String BUNDLES_CONFIGURATION_LOCATION = "bundles.configuration.location";

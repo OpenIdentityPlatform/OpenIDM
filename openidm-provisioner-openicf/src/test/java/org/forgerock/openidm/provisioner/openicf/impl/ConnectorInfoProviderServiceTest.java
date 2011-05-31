@@ -226,4 +226,46 @@ public class ConnectorInfoProviderServiceTest {
                 testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
 
     }
+
+    /**
+     * This test generates a new AD configuration file. It requires access to a running AD server.
+     *
+     * @throws URISyntaxException
+     */
+    @Test(enabled = false)
+    public void testCreateADSystemConfiguration() throws Exception {
+        ConnectorInfo connectorInfo = null;
+        ConnectorKey key = new ConnectorKey("ActiveDirectory.Connector", "1.0.0.5570", "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                connectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(connectorInfo);
+        APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+
+        Map<String, Object> configMap = new HashMap<String, Object>();
+        configMap.put("DirectoryAdminName", "EXAMPLE\\Administrator");
+        configMap.put("DirectoryAdminPassword", new GuardedString("Passw0rd".toCharArray()));
+
+        //configMap.put("ObjectClass", "User");
+        configMap.put("Container", "dc=example,dc=com");
+        configMap.put("CreateHomeDirectory", true);
+        configMap.put("LDAPHostName", "127.0.0.1");
+        configMap.put("SearchChildDomains", false);
+        configMap.put("DomainName", "example");
+        //configMap.put("SyncGlobalCatalogServer", "");
+        //configMap.put("SyncDomainController", "");
+        //configMap.put("SearchContext", "");
+
+
+        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+
+        ObjectMapper mapper = new ObjectMapper();
+        URL root = ObjectClassInfoHelperTest.class.getResource("/");
+        mapper.writeValue(new File((new URL(root, "ADConnector_configuration.json")).toURI()),
+                testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+
+    }
 }

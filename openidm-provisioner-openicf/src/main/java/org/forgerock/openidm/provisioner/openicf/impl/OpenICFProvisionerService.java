@@ -645,7 +645,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *                                       if the  {@code previousStage} is not Map.
      * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonNode)} or any exception happed inside the connector.
      */
-    @Override
     public JsonNode activeSynchronise(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener) {
         JsonNode stage = previousStage != null ? previousStage.copy() : new JsonNode(new LinkedHashMap<String, Object>());
         JsonNode connectorData = stage.get("connectorData");
@@ -691,7 +690,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
                                      *                          iteration and the exception will propagate to
                                      *                          the application.
                                      */
-                                    @Override
                                     public boolean handle(SyncDelta syncDelta) {
                                         try {
                                             Map<String, Object> deltaObject = helper.build(syncDelta.getObject());

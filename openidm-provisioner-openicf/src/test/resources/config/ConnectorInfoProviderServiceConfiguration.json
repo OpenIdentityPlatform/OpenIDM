@@ -1,5 +1,5 @@
 {
-    "org.forgerock.openicf.connectorURL" : "connectors",
+    "connectorsLocation" : "connectors",
     "remoteConnectorServers" : [
         {
             "_id"           : "52C4DFD72085",
