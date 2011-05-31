@@ -55,7 +55,7 @@ public class OperationOptionInfoHelper {
     public static final String OPERATION_OPTION_OPERATION_OPTION_INFO = "operationOptionInfo";
 
     public static enum OnDenyAction {
-        THROW_ERROR,
+        THROW_EXCEPTION,
         DO_NOTHING
     }
 

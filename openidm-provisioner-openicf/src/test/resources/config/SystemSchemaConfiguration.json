@@ -409,7 +409,7 @@
          "AUTHENTICATE" :
             {
                "denied" : true,
-               "onDeny" : "THROW_ERROR",
+               "onDeny" : "THROW_EXCEPTION",
                "objectFeatures" :
                   {
                      "__ACCOUNT__" :
@@ -545,7 +545,7 @@
          "SEARCH" :
             {
                "denied" : true,
-               "onDeny" : "THROW_ERROR",
+               "onDeny" : "THROW_EXCEPTION",
                "objectFeatures" :
                   {
                       "__ACCOUNT__" :

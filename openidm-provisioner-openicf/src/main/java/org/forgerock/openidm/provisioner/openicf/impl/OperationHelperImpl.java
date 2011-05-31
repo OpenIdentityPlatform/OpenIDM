@@ -66,12 +66,12 @@ public class OperationHelperImpl implements OperationHelper {
         this.systemObjectSetId = systemObjectSetId;
     }
 
-    @Override
+
     public APIConfiguration getRuntimeAPIConfiguration() {
         return configuration;
     }
 
-    @Override
+
     public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ForbiddenException {
         if (null == connectorObjectOptions) {
             return true;
@@ -85,7 +85,7 @@ public class OperationHelperImpl implements OperationHelper {
         throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is denied");
     }
 
-    @Override
+
     public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, Map<String, Object> source) throws Exception {
         if (null != connectorObjectOptions) {
             return connectorObjectOptions.find(operation).build(source, objectClassInfoHelper);
@@ -93,36 +93,36 @@ public class OperationHelperImpl implements OperationHelper {
         return new OperationOptionsBuilder();
     }
 
-    @Override
+
     public ObjectClass getObjectClass() {
         return objectClassInfoHelper.getObjectClass();
     }
 
-    @Override
+
     public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception {
         Operator operator = createOperator(query, params);
         return operator.createFilter();
     }
 
-    @Override
+
     public ConnectorObject build(Class<? extends APIOperation> operation, Map<String, Object> source) throws Exception {
         return objectClassInfoHelper.build(operation, null, source);
     }
 
-    @Override
+
     public ConnectorObject build(Class<? extends APIOperation> operation, String id, Map<String, Object> source) throws Exception {
         //TODO do something with ID
         return objectClassInfoHelper.build(operation, id, source);
     }
 
-    @Override
+
     public Map<String, Object> build(ConnectorObject source) throws Exception {
         Map<String, Object> result = objectClassInfoHelper.build(source);
         resetUid(source.getUid(), result);
         return result;
     }
 
-    @Override
+
     public void resetUid(Uid uid, Map<String, Object> target) {
         if (null != uid && null != target) {
             target.put("_id", Id.escapeUid(uid));
@@ -144,7 +144,7 @@ public class OperationHelperImpl implements OperationHelper {
      * @param uid original un escaped unique identifier of the object
      * @return
      */
-    @Override
+
     public URI resolveQualifiedId(Uid uid) {
         if (null != uid) {
             return systemObjectSetId.resolveLocalId(uid);
@@ -153,13 +153,13 @@ public class OperationHelperImpl implements OperationHelper {
         }
     }
 
-    @Override
+
     public ResultsHandler getResultsHandler() {
         resultList.clear();
         return new ConnectorObjectResultsHandler();
     }
 
-    @Override
+
     public List<Map<String, Object>> getQueryResult() {
         return resultList;
     }
@@ -177,7 +177,6 @@ public class OperationHelperImpl implements OperationHelper {
          *                          that wraps any native exception (or that describes any other problem
          *                          during execution) that is serious enough to stop the iteration.
          */
-        @Override
         public boolean handle(ConnectorObject obj) {
             try {
                 return resultList.add(objectClassInfoHelper.build(obj));

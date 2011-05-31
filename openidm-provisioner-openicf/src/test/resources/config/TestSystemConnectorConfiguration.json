@@ -389,7 +389,7 @@
                },
                "group":{
                   "denied":true,
-                  "onDeny":"THROW_ERROR"
+                  "onDeny":"THROW_EXCEPTION"
                }
             }
          },
@@ -401,7 +401,7 @@
                },
                "group":{
                   "denied":true,
-                  "onDeny":"THROW_ERROR"
+                  "onDeny":"THROW_EXCEPTION"
                }
             }
          },

@@ -90,6 +90,11 @@ public enum OperationType {
     GET("get"),
 
     /**
+     * ResolveUsernameApiOp.class
+     */
+    RESOLVEUSERNAME("resolveusername"),
+
+    /**
      * AuthenticationApiOp.class
      */
     AUTHENTICATE("authenticate"),

@@ -27,7 +27,6 @@
 package org.forgerock.openidm.provisioner.openicf;
 
 import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
@@ -67,7 +66,7 @@ public interface OperationHelper {
      *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#DO_NOTHING}
      *         returns false else true
      * @throws ForbiddenException if {@code denied} is true and the {@code onDeny} equals
-     *                            {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#THROW_ERROR}
+     *                            {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#THROW_EXCEPTION}
      */
     public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ForbiddenException;
 
