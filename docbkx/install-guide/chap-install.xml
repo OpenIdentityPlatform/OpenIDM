@@ -58,10 +58,9 @@
    on port 8080 when you start OpenIDM services.</para>
   </section>
  </section>
- 
+ <section>
+  <title>Install &amp; Run OpenIDM Services</title>
  <procedure>
-  <title>To Install &amp; Run OpenIDM Services</title>
-  
   <step>
    <para>Make sure you have the correct version of Java installed.</para>
    <screen width='80'>$ java -version
@@ -72,7 +71,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
   <step>
    <!-- TODO: Update this step when we have a downloads page to stable versions. -->
    <para>Download <link
-   xinclude:href='http://builds.forgerock.org/job/OpenIDM/lastSuccessfulBuild/artifact/openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip'
+   xlink:href='http://builds.forgerock.org/job/OpenIDM%202.x/lastSuccessfulBuild/artifact/openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip'
    >openidm-2.0.0-SNAPSHOT.zip</link>.</para>
   </step>
   <step>
@@ -111,7 +110,7 @@ Listening for transport dt_socket at address: 5005
     <para>Defaults are as follows.</para>
     <listitem>
      <para>Console URL: <link
-     xinclude:href='http://localhost:8080/system/console'
+     xlink:href='http://localhost:8080/system/console'
      >http://localhost:8080/system/console</link>.</para>
     </listitem>
     <listitem>
@@ -121,11 +120,17 @@ Listening for transport dt_socket at address: 5005
      <para>Password: <literal>admin</literal></para>
     </listitem>
    </itemizedlist>
+  </step>	
+  <step>
+   <para>Access REST interface and list all users.</para>
+    <para>URL: <link
+      xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+      >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link></para>
   </step>
  </procedure> 
  
  <procedure>
-  <title>To Stop OpenIDM Services</title>
+  <title>To Start OpenIDM Services</title>
   
   <step>
    <para>Change to the directory where OpenIDM software is installed.</para>
@@ -144,13 +149,15 @@ Listening for transport dt_socket at address: 5005
   <step>
    <para>Access the administration console.</para>
    <para>The default URL is <link
-   xinclude:href='http://localhost:8080/system/console'
+   xlink:href='http://localhost:8080/system/console'
    >http://localhost:8080/system/console</link>.</para>
   </step>
   <step>
    <para>Under the Shell tab, enter <literal>shutdown</literal> at the
    <literal>-&gt;</literal> prompt.</para>
   </step>
- </procedure>
+  </procedure>
+  
+ </section>
 </chapter>
 
