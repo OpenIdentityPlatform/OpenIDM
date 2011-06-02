@@ -62,7 +62,9 @@
   <title>Install &amp; Run OpenIDM Services</title>
  <procedure>
   <step>
-   <para>Make sure you have the correct version of Java installed.</para>
+   <para>Make sure you have the correct version of Java installed and the <code>path</code> variable
+     point to <code>JAVA_HOME/bin</code>. The start script does not detects the <emphasis
+      role="bold">java</emphasis> at this moment. </para>
    <screen width='80'>$ java -version
 java version "1.6.0_24"
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
@@ -93,9 +95,23 @@ $ </screen>
   <filename>openidm/conf/config.properties</filename>.</para></step>
   <step>
    <para>Start OpenIDM services.</para>
-   <screen width='80'>$ cd openidm/
-$ ./start.sh 
+   <screen width='80'>
+    <userinput><command>cd</command> <replaceable>openidm</replaceable></userinput>
+    <userinput><command>./start.sh</command></userinput>  
 Do you want to start in debug mode: [y]n
+
+Listening for transport dt_socket at address: 5005
+...
+-&gt;</screen>
+    <para>Windows</para>
+   
+    <screen  width='80'>
+     <userinput><command>cd</command> <replaceable>openidm</replaceable></userinput>
+     <userinput><command>run.bat</command></userinput>    
+Start in debug mode [1] default
+Start in normal mode [2]
+Show help [3]
+choose a number(1-3):
 
 Listening for transport dt_socket at address: 5005
 ...
@@ -139,7 +155,7 @@ Listening for transport dt_socket at address: 5005
   <step>
    <para>Run the script to start OpenIDM services.</para>
    <screen width='80'>$ ./start.sh</screen>
-   <para>On Windows, the script to use is <filename>start.bat</filename>.</para>
+   <para>On Windows, the script to use is <filename>run.bat</filename>.</para>
   </step>
  </procedure>
  
