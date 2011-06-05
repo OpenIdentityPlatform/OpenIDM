@@ -32,25 +32,25 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency> 
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -77,6 +77,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Bundle installer to install all other bundles -->

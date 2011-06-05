@@ -29,37 +29,37 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-restlet</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <!-- Core OSGi -->
         <dependency>
@@ -133,55 +133,27 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.6.1</version>
-        </dependency>
         <!-- Quartz based scheduler OSGi bundle. 
              This version wraps the original jar which is not a bundle -->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
         </dependency>
+
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors.file</groupId>
             <artifactId>xml</artifactId>
             <version>1.1.0.0-SNAPSHOT</version>
-            <!--exclusions>
-                <exclusion>
-                    <groupId>jaxen</groupId>
-                    <artifactId>jaxen</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>net.sf.saxon</groupId>
-                    <artifactId>saxonhe</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.xsom</groupId>
-                    <artifactId>xsom</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>relaxngDatatype</artifactId>
-                    <groupId>relaxngDatatype</groupId>
-                </exclusion>
-            </exclusions-->
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.connectors.ldap</groupId>
             <artifactId>ldap</artifactId>
             <version>1.1.0.0-SNAPSHOT</version>
-            <!--exclusions>
-                <exclusion>
-                    <groupId>com.sun</groupId>
-                    <artifactId>ldapbp</artifactId>
-                </exclusion>
-            </exclusions-->
         </dependency>
     </dependencies>
     <build>
-        <finalName>openidm-${project.version}</finalName>
+        <finalName>openidm-${openidm.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -233,4 +205,85 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>jdk-logger</id>
+            <activation>
+                <property>
+                    <name>!logger</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                    <version>1.6.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>log4j-logger</id>
+            <activation>
+                <property>
+                    <name>logger</name>
+                    <value>log4j</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                    <version>1.6.1</version>
+                </dependency>
+                <!-- https://issues.apache.org/bugzilla/show_bug.cgi?id=50800 -->
+                <dependency>
+                    <groupId>org.apache.log4j</groupId>
+                    <artifactId>com.springsource.org.apache.log4j</artifactId>
+                    <version>1.2.16</version>
+                </dependency>
+                <dependency>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>com.springsource.javax.mail</artifactId>
+                    <version>1.4.1</version>
+                </dependency>
+                <!-- JCL Support -->
+                <dependency>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                    <version>1.6.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>pax-logger</id>
+            <activation>
+                <property>
+                    <name>logger</name>
+                    <value>log4j</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.ops4j.pax.logging</groupId>
+                    <artifactId>pax-logging-api</artifactId>
+                    <version>1.6.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.ops4j.pax.logging</groupId>
+                    <artifactId>pax-logging-service</artifactId>
+                    <version>1.6.2</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.log4j</groupId>
+                    <artifactId>com.springsource.org.apache.log4j</artifactId>
+                    <version>1.2.16</version>
+                </dependency>
+                <dependency>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>com.springsource.javax.mail</artifactId>
+                    <version>1.4.1</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

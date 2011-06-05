@@ -29,13 +29,14 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency> 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
@@ -48,14 +49,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>META-INF/**/*</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>            
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -65,8 +58,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <instructions>
                         <Export-Package>org.forgerock.openidm.repo</Export-Package>
                         <Import-Package>*</Import-Package>
-                        <!--<Private-Package>org.forgerock.openidm.repo.impl.*</Private-Package>-->
-                        <!--<Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>-->
                     </instructions>
                 </configuration>
             </plugin>

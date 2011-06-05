@@ -15,12 +15,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
@@ -46,17 +46,21 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-fluent</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -66,8 +70,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
+
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
@@ -122,11 +126,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!--Embed-Dependency>orientdb*;orient*;persistence-api;scope=compile</Embed-Dependency>
-                        <<Export-Package>org.forgerock.openidm.provisioner.openicf</Export-Package>-->
                         <Import-Package>!org.testng.annotations,!com_cenqua_clover,*</Import-Package>
                         <Private-Package>org.forgerock.openidm.provisioner.openicf.impl.*</Private-Package>
-                        <!--Bundle-Activator>org.forgerock.openidm.provisioner.openicf.impl.Activator</Bundle-Activator-->
                     </instructions>
                 </configuration>
             </plugin>

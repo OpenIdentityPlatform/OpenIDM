@@ -30,6 +30,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
@@ -172,10 +173,10 @@ public class ConnectorUtilTest {
         Assert.assertEquals(key.getConnectorName(), "org.identityconnectors.ldap.LdapConnector");
 
         SystemIdentifier systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
-        Assert.assertTrue(systemIdentifier.is(new URI("http://openidm.forgerock.org/openidm/system/LDAP_Central/user/CA2B382A-6FFB-11E0-80B7-902C4824019B")));
-        Assert.assertTrue(systemIdentifier.is(new URI("system/LDAP_Central/")));
-        Assert.assertFalse(systemIdentifier.is(new URI("http://openidm.forgerock.org/openidm/system/LDAP_None/user/CA2B382A-6FFB-11E0-80B7-902C4824019B")));
-        Assert.assertFalse(systemIdentifier.is(new URI("system/LDAP_None/")));
+        Assert.assertTrue(systemIdentifier.is(new Id("http://openidm.forgerock.org/openidm/system/LDAP_Central/user/CA2B382A-6FFB-11E0-80B7-902C4824019B")));
+        Assert.assertTrue(systemIdentifier.is(new Id("system/LDAP_Central/account/")));
+        Assert.assertFalse(systemIdentifier.is(new Id("http://openidm.forgerock.org/openidm/system/LDAP_None/user/CA2B382A-6FFB-11E0-80B7-902C4824019B")));
+        Assert.assertFalse(systemIdentifier.is(new Id("system/LDAP_None/account")));
 
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(((SimpleSystemIdentifier) systemIdentifier).getName(), jsonConfiguration, runtimeAPIConfiguration);
 

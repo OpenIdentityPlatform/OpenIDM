@@ -28,6 +28,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 
 import java.net.URI;
@@ -45,13 +46,9 @@ import java.util.regex.Pattern;
 public class SimpleSystemIdentifier implements SystemIdentifier {
 
     private String name;
-    private Pattern pattern;
-    private Pattern patternShort;
 
     public SimpleSystemIdentifier(JsonNode configuration) throws JsonNodeException {
-        name = configuration.get("name").expect(String.class).asString();
-        pattern = Pattern.compile(".*system/" + name + "/.*");
-        patternShort = Pattern.compile(".*" + name + "/.*");
+        name = configuration.get("name").required().expect(String.class).asString();
     }
 
     /**
@@ -64,9 +61,8 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
     /**
      * {@inheritDoc}
      */
-    public boolean is(URI uri) {
-        String decodedID = uri.toString();
-        return patternShort.matcher(decodedID).matches() || pattern.matcher(decodedID).matches();
+    public boolean is(Id uri) {
+        return name.equals(uri.getSystemName());
     }
 
     public String getName() {

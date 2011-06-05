@@ -170,6 +170,12 @@
         <docbkx-out>${basedir}/target/docbkx</docbkx-out>
         <site-out>${basedir}/target/site</site-out>
         <siteDistributionURL>scp://openidm.forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
+
+        <!-- version management -->
+        <openidm.version>2.0.0-SNAPSHOT</openidm.version>
+        <slf4j.version>1.6.1</slf4j.version>
+        <log4j.version>1.2.16</log4j.version>
+        <orientdb.version>1.0rc1-SNAPSHOT</orientdb.version>
     </properties>
 
     <modules>
@@ -298,11 +304,22 @@
 
             <!-- Quartz based scheduler OSGi bundle.
              This version wraps the original jar which is not a bundle -->
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-            <version>1.8.4_2</version>
-        </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+                <version>1.8.4_2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-core-asl</artifactId>
+                <version>1.7.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>1.7.4</version>
+            </dependency>
             <!-- Test Dependencies -->
             <dependency>
                 <groupId>org.easytesting</groupId>
