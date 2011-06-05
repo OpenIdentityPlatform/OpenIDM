@@ -38,7 +38,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
-import org.forgerock.openidm.provisioner.openicf.commons.Id;
+import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.script.ConnectorScript;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -696,7 +696,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                                             switch (syncDelta.getDeltaType()) {
                                                 case CREATE_OR_UPDATE:
                                                     if (null != syncDelta.getPreviousUid()) {
-                                                        deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid()));
+                                                        deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                                     }
                                                     synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), deltaObject);
                                                     break;

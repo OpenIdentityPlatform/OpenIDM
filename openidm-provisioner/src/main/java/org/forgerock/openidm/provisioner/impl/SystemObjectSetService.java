@@ -26,6 +26,7 @@ package org.forgerock.openidm.provisioner.impl;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.scr.annotations.*;
@@ -36,6 +37,7 @@ import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.objset.*;
+import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.scheduler.ExecutionException;
@@ -150,13 +152,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if access to the object or object set is forbidden.
      */
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        // Work-around to ensure id starts with system/
-        id = ensureQualified(id);
+        Id identifier = new Id(id);
 
-        locateService(id).create(id, object);
+        locateService(identifier).create(id, object);
         // Append the system created local identifier
-        String newId = id + "/" + (String) object.get("_id");
-        ActivityLog.log(getRouter(), Action.CREATE, "", newId, null, object, Status.SUCCESS);
+        URI newId = identifier.resolveLocalId((String) object.get("_id"));
+        ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
         try {
             onCreate(id, object);
         } catch (SynchronizationException e) {
@@ -180,9 +181,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if access to the object is forbidden.
      */
     public Map<String, Object> read(String id) throws ObjectSetException {
-        // Work-around to ensure id starts with system/
-        id = ensureQualified(id);
-        Map<String, Object> object = locateService(id).read(id);
+        Id identifier = new Id(id);
+
+        Map<String, Object> object = locateService(identifier.expectObjectId()).read(id);
         ActivityLog.log(getRouter(), Action.READ, "", id, object, null, Status.SUCCESS);
         return object;
     }
@@ -206,9 +207,8 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if version did not match the existing object in the set.
      */
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        // Work-around to ensure id starts with system/
-        id = ensureQualified(id);
-        ProvisionerService service = locateService(id);
+        Id identifier = new Id(id);
+        ProvisionerService service = locateService(identifier.expectObjectId());
 
         Map<String, Object> oldValue = service.read(id);
         service.update(id, rev, object);
@@ -237,12 +237,11 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if version did not match the existing object in the set.
      */
     public void delete(String id, String rev) throws ObjectSetException {
-        // Work-around to ensure id starts with system/
-        id = ensureQualified(id);
-        ProvisionerService service = locateService(id);
+        Id identifier = new Id(id);
+        ProvisionerService service = locateService(identifier.expectObjectId());
         Map<String, Object> oldValue = service.read(id);
 
-        locateService(id).delete(id, rev);
+        service.delete(id, rev);
         ActivityLog.log(getRouter(), Action.DELETE, "", id, oldValue, null, Status.SUCCESS);
 
         try {
@@ -269,10 +268,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if version did not match the existing object in the set.
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        // Work-around to ensure id starts with system/
-        id = ensureQualified(id);
+        Id identifier = new Id(id);
 
-        ProvisionerService service = locateService(id);
+        ProvisionerService service = locateService(identifier.expectObjectId());
 
         Map<String, Object> oldValue = service.read(id);
         service.patch(id, rev, patch);
@@ -305,10 +303,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if access to the object or specified query is forbidden.
      */
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        // Work-around to ensure id starts with system/
-        id = ensureQualified(id);
+        Id identifier = new Id(id);
 
-        Map<String, Object> result = locateService(id).query(id, params);
+        Map<String, Object> result = locateService(identifier).query(id, params);
         ActivityLog.log(getRouter(), Action.QUERY, "Query parameters " + params, id, result, null, Status.SUCCESS);
 
         return result;
@@ -324,6 +321,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onCreate(String id, Map<String, Object> object) throws SynchronizationException {
+        if (synchronizationListeners.isEmpty()) {
+            throw new SynchronizationException("No Available SynchronizationListener");
+        }
         for (ServiceReference serviceReference : synchronizationListeners) {
             SynchronizationListener service = (SynchronizationListener) context.locateService
                     (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
@@ -340,6 +340,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException {
+        if (synchronizationListeners.isEmpty()) {
+            throw new SynchronizationException("No Available SynchronizationListener");
+        }
         for (ServiceReference serviceReference : synchronizationListeners) {
             SynchronizationListener service = (SynchronizationListener) context.locateService
                     (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
@@ -357,6 +360,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue) throws SynchronizationException {
+        if (synchronizationListeners.isEmpty()) {
+            throw new SynchronizationException("No Available SynchronizationListener");
+        }
         for (ServiceReference serviceReference : synchronizationListeners) {
             SynchronizationListener service = (SynchronizationListener) context.locateService
                     (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
@@ -372,6 +378,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onDelete(String id) throws SynchronizationException {
+        if (synchronizationListeners.isEmpty()) {
+            throw new SynchronizationException("No Available SynchronizationListener");
+        }
         for (ServiceReference serviceReference : synchronizationListeners) {
             SynchronizationListener service = (SynchronizationListener) context.locateService
                     (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
@@ -387,22 +396,21 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if execution of the scheduled work failed.
      *          Implementations can also throw RuntimeExceptions which will get logged.
      */
-    @Override
     public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
         try {
             JsonNode params = new JsonNode(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
             if ("activeSync".equals(action)) {
-                String id = ensureQualified(params.get("source").asString());
-                String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.replace("/", "").toUpperCase();
+                Id id = new Id(params.get("source").asString());
+                String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
                 try {
                     try {
                         Map<String, Object> previousStage = getRouter().read(previousStageId);
                         Object rev = previousStage.get("_rev");
-                        getRouter().update(previousStageId, (String) rev, locateService(id).activeSynchronise(getLocalId(id), previousStage != null ? new JsonNode(previousStage) : null, this).asMap());
+                        getRouter().update(previousStageId, (String) rev, locateService(id).activeSynchronise(id.getObjectType(), previousStage != null ? new JsonNode(previousStage) : null, this).asMap());
                     } catch (NotFoundException e) {
                         TRACE.info("PooledSyncStage object {} is not found. First execution.");
-                        getRouter().create(previousStageId, locateService(id).activeSynchronise(getLocalId(id), null, this).asMap());
+                        getRouter().create(previousStageId, locateService(id).activeSynchronise(id.getObjectType(), null, this).asMap());
                     }
                 } catch (ObjectSetException e) {
                     throw new ExecutionException(e);
@@ -410,6 +418,8 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             }
         } catch (JsonNodeException jne) {
             throw new ExecutionException(jne);
+        } catch (ObjectSetException e) {
+            throw new ExecutionException(e);
         }
     }
 
@@ -417,41 +427,11 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         return router;
     }
 
-
-    // TODO: replace with common utility to handle ID, this is temporary
-    private String getLocalId(String id) {
-        String localId = null;
-        int lastSlashPos = id.lastIndexOf("/");
-        if (lastSlashPos > -1) {
-            localId = id.substring(id.lastIndexOf("/") + 1);
-        }
-        TRACE.trace("Full id: {} Extracted local id: {}", id, localId);
-        return localId;
-    }
-
-    // TODO: temporary - ensure qualified with system/
-    // Remove once router and system object approach in sync
-    private String ensureQualified(String id) {
-        if (!id.startsWith("system/")) {
-            return "system/" + id;
-        } else {
-            return id;
-        }
-    }
-
-    private ProvisionerService locateService(String id) throws ObjectSetException {
-        try {
-            //@TODO use the proper API to get the system name
-            URI baseContext = new URI(id);
-
-            for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
-                if (entry.getKey().is(baseContext)) {
-                    return entry.getValue();
-                }
+    private ProvisionerService locateService(Id id) throws ObjectSetException {
+        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
+            if (entry.getKey().is(id)) {
+                return entry.getValue();
             }
-        } catch (URISyntaxException e) {
-            TRACE.error("Invalid ID: {}", id, e);
-            throw new BadRequestException("Invalid ID in request: + " + id + " " + e.getMessage(), e);
         }
         throw new ObjectSetException("System: " + id + " is not available.");
     }

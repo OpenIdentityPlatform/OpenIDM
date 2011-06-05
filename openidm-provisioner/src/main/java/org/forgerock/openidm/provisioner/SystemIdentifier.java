@@ -48,8 +48,8 @@ public interface SystemIdentifier {
      * Checks the {@code uri} and return true if the {@link ProvisionerService} instance is responsible to handle
      * the request.
      *
-     * @param uri
+     * @param id
      * @return
      */
-    public boolean is(URI uri);
+    public boolean is(Id id);
 }

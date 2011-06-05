@@ -27,8 +27,8 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
-import org.forgerock.openidm.provisioner.openicf.commons.Id;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
@@ -125,7 +125,7 @@ public class OperationHelperImpl implements OperationHelper {
 
     public void resetUid(Uid uid, Map<String, Object> target) {
         if (null != uid && null != target) {
-            target.put("_id", Id.escapeUid(uid));
+            target.put("_id", Id.escapeUid(uid.getUidValue()));
 //            Object oldId = target.get("_id");
 //            if (oldId instanceof String) {
 //                Id newId = new Id((String) oldId);
@@ -147,7 +147,7 @@ public class OperationHelperImpl implements OperationHelper {
 
     public URI resolveQualifiedId(Uid uid) {
         if (null != uid) {
-            return systemObjectSetId.resolveLocalId(uid);
+            return systemObjectSetId.resolveLocalId(uid.getUidValue());
         } else {
             return systemObjectSetId.getId();
         }

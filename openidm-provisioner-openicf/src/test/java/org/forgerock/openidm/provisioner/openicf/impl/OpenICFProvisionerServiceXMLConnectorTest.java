@@ -29,6 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.fest.assertions.MapAssert;
 import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.provisioner.Id;
 import org.osgi.service.component.ComponentConstants;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -65,7 +66,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
     @Test
     public void testGetSystemIdentifier() throws Exception {
         Assert.assertNotNull(getService().getSystemIdentifier());
-        Assert.assertTrue(getService().getSystemIdentifier().is(new URI("system/XML/")));
+        Assert.assertTrue(getService().getSystemIdentifier().is(new Id("system/XML/account")));
 
     }
 

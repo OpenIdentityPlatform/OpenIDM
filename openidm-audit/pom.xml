@@ -26,37 +26,37 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <name>OpenIDM audit module</name>
     <packaging>bundle</packaging>
     <dependencies>
-<!--
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
--->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <scope>compile</scope>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <scope>compile</scope>
         </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
@@ -69,14 +69,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>META-INF/**/*</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -96,11 +88,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <!--<Embed-Dependency></Embed-Dependency>-->
-                        <!--<Export-Package>org.forgerock.openidm.repo.orientdb</Export-Package>-->
                         <Import-Package>*</Import-Package>
                         <Private-Package>org.forgerock.openidm.audit.impl.*</Private-Package>
-                        <!--<Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>-->
                     </instructions>
                 </configuration>
             </plugin>

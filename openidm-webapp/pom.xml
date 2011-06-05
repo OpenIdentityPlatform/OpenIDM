@@ -79,43 +79,43 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-restlet</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
-            <version>${project.version}</version>
+            <version>${openidm.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
