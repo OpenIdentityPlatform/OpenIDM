@@ -39,7 +39,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.Id;
-import org.forgerock.openidm.provisioner.openicf.script.ConnectorScript;
+import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
