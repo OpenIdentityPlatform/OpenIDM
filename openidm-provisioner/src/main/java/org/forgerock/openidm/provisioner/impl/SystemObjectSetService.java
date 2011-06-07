@@ -25,8 +25,6 @@
 package org.forgerock.openidm.provisioner.impl;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.*;
 
 import org.apache.felix.scr.annotations.*;
