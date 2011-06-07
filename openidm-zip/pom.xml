@@ -229,6 +229,18 @@
                     <value>log4j</value>
                 </property>
             </activation>
+            <repositories>
+                <repository>
+                    <id>com.springsource.repository.bundles.release</id>
+                    <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+                    <url>http://repository.springsource.com/maven/bundles/release</url>
+                </repository>
+                <repository>
+                    <id>com.springsource.repository.bundles.external</id>
+                    <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+                    <url>http://repository.springsource.com/maven/bundles/external</url>
+                </repository>
+            </repositories>
             <dependencies>
                 <dependency>
                     <groupId>org.slf4j</groupId>
@@ -259,9 +271,21 @@
             <activation>
                 <property>
                     <name>logger</name>
-                    <value>log4j</value>
+                    <value>pax</value>
                 </property>
             </activation>
+            <repositories>
+                <repository>
+                    <id>com.springsource.repository.bundles.release</id>
+                    <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+                    <url>http://repository.springsource.com/maven/bundles/release</url>
+                </repository>
+                <repository>
+                    <id>com.springsource.repository.bundles.external</id>
+                    <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+                    <url>http://repository.springsource.com/maven/bundles/external</url>
+                </repository>
+            </repositories>
             <dependencies>
                 <dependency>
                     <groupId>org.ops4j.pax.logging</groupId>

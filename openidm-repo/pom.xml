@@ -56,7 +56,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.repo</Export-Package>
+                        <Export-Package>org.forgerock.openidm.repo;version="${openidm.version}"</Export-Package>
                         <Import-Package>*</Import-Package>
                     </instructions>
                 </configuration>

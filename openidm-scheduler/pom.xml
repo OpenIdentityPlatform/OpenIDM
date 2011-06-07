@@ -34,10 +34,16 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jta</artifactId>
+                    <groupId>javax.transaction</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -95,6 +101,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Bundle-Activator>org.forgerock.openidm.scheduler.impl.Activator</Bundle-Activator>
+                        <Private-Package>org.forgerock.openidm.scheduler.impl.*</Private-Package>
+                        <Export-Package>!org.forgerock.openidm.scheduler.impl.*,
+                        org.forgerock.openidm.scheduler.*;version="${openidm.version}"
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

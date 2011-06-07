@@ -23,32 +23,22 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.RepositoryService; 
 import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
 import org.forgerock.testutil.osgi.ContainerUtil;
 
-import static org.mockito.Mockito.*;
 
-import org.osgi.service.component.ComponentContext;
 
 import org.testng.annotations.*;
 
-import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.impl.ODocument;
 
 import static org.testng.Assert.*;
 import static org.fest.assertions.Assertions.assertThat;

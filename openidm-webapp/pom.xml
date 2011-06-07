@@ -78,56 +78,30 @@
         <!-- OpenIDM Dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
             <version>${openidm.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-provisioner</artifactId>
-            <version>${openidm.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
             <version>${openidm.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-restlet</artifactId>
             <version>${openidm.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
             <version>${openidm.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
             <version>${openidm.version}</version>
-            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-schema</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-fluent</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -158,66 +132,25 @@
             <artifactId>org.apache.felix.fileinstall</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!--dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <version>1.4.0</version>
-            <scope>provided</scope>
-        </dependency-->
         <!-- Declarative Services support -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
         </dependency>
+
         <!-- Jetty based web container - ->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-service</artifactId>
             <version>RELEASE</version>
         </dependency-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.6.1</version>
-            <scope>provided</scope>
         </dependency>
-        <!-- Quartz based scheduler OSGi bundle.
-             This version wraps the original jar which is not a bundle -->
-        <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- OpenICF -->
-        <dependency>
-            <groupId>org.forgerock.openicf.framework</groupId>
-            <artifactId>connector-framework</artifactId>
-            <version>1.1.0.0-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openicf.framework</groupId>
-            <artifactId>connector-framework-internal</artifactId>
-            <version>1.1.0.0-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.forgerock.openicf.framework</groupId>
-                    <artifactId>connector-test-common</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
-            <version>1.7.10</version>
-            <scope>provided</scope>
-        </dependency>
+
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors.file</groupId>
@@ -231,9 +164,20 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.1.1</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <packagingIncludes>
+                        WEB-INF/lib/org.apache.felix.framework*.jar,
+                        WEB-INF/lib/org.apache.felix.main*.jar,
+                        WEB-INF/lib/org.apache.felix.http.proxy*.jar,
+                        WEB-INF/bundles/*,
+                        WEB-INF/classes/*,
+                        WEB-INF/conf/*,
+                        WEB-INF/connectors/*,
+                        WEB-INF/data/*,
+                        WEB-INF/*,
+                        *
+                    </packagingIncludes>
                     <webResources>
                         <resource>
                             <directory>
@@ -274,6 +218,7 @@
                             </includeGroupIds-->
                             <includeArtifactIds>
                                 commons-codec,
+                                commons-lang,
                                 connector-framework,
                                 connector-framework-internal,
                                 groovy-all,

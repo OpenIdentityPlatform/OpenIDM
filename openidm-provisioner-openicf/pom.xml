@@ -48,7 +48,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
@@ -128,6 +128,7 @@
                     <instructions>
                         <Import-Package>!org.testng.annotations,!com_cenqua_clover,*</Import-Package>
                         <Private-Package>org.forgerock.openidm.provisioner.openicf.impl.*</Private-Package>
+                        <Export-Package>!org.forgerock.openidm.provisioner.openicf.impl.*,org.forgerock.openidm.provisioner.openicf.*;version="${openidm.version}"</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

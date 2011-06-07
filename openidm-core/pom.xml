@@ -36,7 +36,7 @@
             <artifactId>openidm-provisioner</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-                <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
             <version>${openidm.version}</version>
@@ -68,10 +68,10 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
+            <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
@@ -115,6 +115,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
+                        <Export-Package>org.forgerock.openidm.*;version=${openidm.version}</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
