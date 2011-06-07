@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-sample'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+
+<title>OpeniDM Sample</title>
+
+ <para>In the current distribution of OpenIDM the sample is configured and enabled by default. This 
+ chapter provides an overview of the sample and how it is configured.
+ </para>
+
+ <section>
+ <title>Before You Begin</title>
+ <para>
+ Install OpenIDM as instructed in Chapter 1.
+ </para>
+ <para>
+ If you would like to query the internal noSQL database (OrientDB), you will
+ need to download
+ <link xlink:href='http://code.google.com/p/orient/wiki/Download'>OrientDB 1.0rc2</link>.
+ Once downloaded and unzipped you will find the shell console in the bin directory.
+ You may start it and then connect to the running OpenIDM with the connect command
+ as follows:
+ <screen width='80'>
+$ /path/to/orientdb-1.0rc2-SNAPSHOT/bin/console.sh
+>
+> connect remote:localhost/openidm admin admin
+
+Connecting to database [remote:localhost/openidm] with user 'admin'...OK
+
+> 
+ </screen>
+         <para>
+         After connecting to the database you can run commands like: 
+         <step>info to show you the classes and records. 
+         </step>
+         <step>select * from managed/user to see all the users in the OpenIDM repository.
+         </step>
+         <step>select * from audit/activity to see all the activity audit records
+         </step>
+         <step>select * from audit/recon to see all the recon audit records 
+         </step>
+         </para>
+         </para>
+        </section>
+
+         <section>
+          <title>Overview</title>
+          <para> 
+          This sample consists of two XML flat file connectors, one configured as the 
+          authoritative source
+          and the other configured as the target. A reconciliation task is configured to run
+          every 60 seconds syncronizing between the source and the target. 
+          </para>
+          <para>
+          A descriptive overview of the sample:
+          </para>
+          <step>
+          OpenIDM regularly scans for any schedular configuration files in the conf directory.
+          </step>
+          <step>
+          A scheduled recon from the source to the target connector is found and scheduled
+          to run every 60 seconds per the  
+          <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.
+          </step>
+          <step>
+          The recon service reads in the mappings and any special actions for the source and target
+          users from <filename>conf/sync.json</filename>.
+          </step>
+          <step>
+          Recon runs and queries all users in the source and creates, deletes, or modifies the users in the
+          local OpenIDM repository according to the sync mappings. 
+          </step>
+          <step>
+          Recon then syncronizes all users in the local repository to the target according to the sync
+          mappings.
+          </step>
+          <step>
+          All operations are written to the audit logs in both the internal database and to flat
+          files under the openidm/audit directory.
+          </step>
+         </section>
+
+         <section>
+          <title>Some Key Points About the Sample</title>
+          <para>
+          In the sample, the source users are first created in  the local repository
+          and then syncronized out to the target connectors. This is done as part of the
+          sample to show how local users may be managed through the REST APIs. It is however 
+          not required to have any users in the local repository.
+          Sync and Recon may be done directly between connectors without managed objects (users)
+          in the local repository.
+          </para>
+          <para>
+          This sample has only one source and one target, you may have as many
+          sources and targets as required for your deployment.
+          </para>
+          <para>
+          At this time sync and recon may only be started through the scheduler. 
+          You will soon be able to start a reconciliation or syncronization using  the
+          REST interfaces. 
+          </para>
+         </section>
+
+         <section>
+          <title>Understanding the Sample Configuration Files</title>
+          <section>
+          <title>Connector Configuration Files</title>
+          <para>
+          <filename>conf/provisioner.openicf-xml.json</filename>
+          </para>
+          <para>
+          Configuration file for the source XML file connector. In this sample
+          this connector instance is acting as the authoritative source for users.  If you
+          view the configuration file you will see xmlFilePath is set to 
+          <filename>data/xmlConnectorData.xml</filename> which contains all the users
+          in XML format.
+          </para>
+          <para>
+          <filename>conf/provisioner.openicf-xmlTarget.json</filename>
+          </para>
+          <para>
+          Configuration file for the XML file connector acting as the target.
+          This is a second instance of the XML connector with the xmlFilePath set
+          to <filename>data/xmlTargetConnectorData.xml</filename>. When OpenIDM
+          syncs users to this target they will be written out to this XML file.
+          </para>
+          <para>
+          For details on the OpenICF connector configuration files please refer
+          to section ABC in the Admin Guide.
+          </para>
+         </section>
+         <section>
+          <title>Scheduler Configuration File</title>
+          <para>
+          <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
+          </para>
+<screen width='80'>
+{
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "org.forgerock.openidm.sync",
+    "invokeContext": {
+        "action": "reconcile",
+        "mapping": "systemXmlAccounts_managedUser"
+    }
+}
+  </screen>
+          <para>
+          This scheduler entry will start a reconcile of the mapping named 
+          systemXmlAccounts_managedUser every minute. The details of the named mapping may 
+          be found in sync.json below.
+          </para>
+          <para>
+          For details on Scheduler configuration please refer to ABC.
+          </para>
+         </section>
+         <section>
+          <title>Sync and Recon Configuration Files</title>
+          <para>
+          <filename>conf/sync.json</filename>
+          </para>
+          <screen width='80'>
+          "mappings" : [
+                {
+                    "name" : "systemXmlAccounts_managedUser",
+                    "source" : "system/xml/account",
+                    "target" : "managed/user",
+                    "validTarget": {
+                        "type": "text/javascript",
+                        "source": "object.employeeType == 'external'"
+                    },
+                    "properties" : [
+                        { "source" : "$.name", "target" : "$.name" },
+                        { "source" : "$.lastname", "target" : "$.lastname" },
+                        { "source" : "$.firstname", "target" : "$.firstname" },
+                        { "source" : "$.email", "target" : "$.email" },
+                        { "default" : "external", "target" : "$.employeeType " }
+                    ]
+                },
+                {
+                    "name": "managedUser_systemXmlTargetAccounts",
+                    "source": "managed/user",
+                    "target": "system/xmlTarget/account",
+                    "properties": [
+                        { "source" : "$.name", "target" : "$.name" },
+                        { "source" : "$.lastname", "target" : "$.lastname" },
+                        { "source" : "$.firstname", "target" : "$.firstname" },
+                        { "source" : "$.email", "target" : "$.email" },
+                        { "default" : "defaultpwd", "target" : "$.IGNORE__PASSWORD__" }
+                    ],
+                    "onCreate" : {
+                        "type": "text/javascript",
+                        "source": "target.__PASSWORD__ = 'defaultpwd'"
+                    }
+                },
+          </screen>
+          <para>
+          From the Scheduler entry above, the systemXmlAccounts_managedUser is
+          the mapping named for the reconciliation. This
+          entry in conf/sync.json defines the syncronization mappings between
+          the XML file connector(source) and the local repository(target). 
+          </para>
+          <note>
+          A source or target path starting with
+          managed, such as managed/user, always refers to an object in the 
+          OpenIDM local repository, whereas a path starting with 
+          system, such as system/xml/account, refers to a connector object. In
+          this case the source XML file connector.  
+          </note>
+          <para>
+          In the second mapping the source is the
+          local repository and the target is the second instance of the XML file connector. This second mapping
+          is what instructs OpenIDM to syncronize from the local repository to the target XML
+          connector. 
+          </para>
+          <para>
+          You may have noticed the use of inline JavaScript in the mappings.  The validTarget script
+          in the first mapping is used to ensure only users with the employeeType = external
+          are considered part of the reconciliation.  The onCreate script in the second mapping
+          is used to set a default passwd for the user when created in the target XML connector.
+          For more details on scripting please refer to section ABC in the Admin Guide.
+          </para>
+          <para>
+          For details on syncronization, reconciliation, and sync.json please refer to ABC.
+          </para>
+         </section>
+         </section>
+
+         <section>
+          <title>Viewing the Sample</title>
+          <para>
+          At this point you should a have good understanding of what is happening with the sample. 
+          If you have not already started OpenIDM you should start it now.  Please note
+          logging is turned on by default so there will be lots of debugging messages at the console. 
+          After about a minute you should see the scheduled reconciliation messages scroll by the 
+          screen.  We can now take a look at the local repository using the REST commands. Try 
+          the following command to get all users from the local repository:
+          </para>
+          <para>
+          <link
+              xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+              >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+          </link>
+          </para>
+          <para>
+          You should see the IDs of the two users created during reconcililation. Now try a 
+          RESTful get of one of the users by copy and pasting one of the _ids from the set
+          of users returned above and appending it to the following:
+          </para>
+          <para>
+          <link
+              xlink:href="http://localhost:8080/openidm/managed/user/"
+              >http://localhost:8080/openidm/managed/user/</link>
+          </para>
+          <para>
+          If you have installed the OrientDB console you may now connect to the database and query
+          the users and audit logs as described in Before You Begin in Chapter 1. 
+          </para>
+          <para>
+          You may also view the flat file audit logs for all activity and reconciliation. The logs
+          are located in the openidm/audit directory and are in CSV format.
+          </para>
+          <para>
+          To verify the users were created in the XML target connector look in the 
+          openidm/data directory.  You will see a new xml file named xmlTargetConnectorData.xml
+          which now contains the users from the source xmlConnectorData.xml.
+          </para>
+         </section>
+
+         <section>
+          <title>Adding and Deleting Users</title>
+          <para>
+          To see the reconciliation in action you can add a user to the 
+          source connector data file. During the next reconciliation OpenIDM
+          will see the new user in the source connector, create it in the
+          local repository and then sync it to the target XML connector.
+          To add a user copy the following into
+          </para>
+          <filename>data/xmlConnectorData.xml</filename>:
+         <screen width='80'>
+&lt;ri:__ACCOUNT__&gt;
+   &lt;icf:__UID__&gt;12345&lt;/icf:__UID__&gt;
+   &lt;icf:__NAME__&gt;Daffy Duck&lt;/icf:__NAME__&gt;
+   &lt;icf:__PASSWORD__&gt;123456789&lt;/icf:__PASSWORD__&gt;
+   &lt;ri:email&gt;daffy.duck@forgerock.com&lt;/ri:email&gt;
+   &lt;ri:lastname&gt;Duck&lt;/ri:lastname&gt;
+   &lt;ri:firstname&gt;Daffy&lt;/ri:firstname&gt;
+&lt;/ri:__ACCOUNT__&gt;
+         </screen>
+         <para>
+         Once the next reconciliation has run you can use the REST APIs to 
+         query the local repository to see the new user.
+         </para>
+         <para>
+          <link
+              xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+              >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+          </link>
+         </para>
+         <para>
+         Verify the user was synced to the target XML connector by 
+         looking for the user Donald Duck in <filename>data/xmlTargetConnector.xml</filename>.
+         </para>
+         <para>
+         Next let's take a look at the recon audit log found in
+          <filename>openidm/audit/recon.csv</filename> to 
+         understand what took place during the reconciliation. This formatted excerpt 
+         from the log covers four recon runs:
+         </para>
+         <para>
+         <screen width='100'>
+"id","action", "recon", "reconId","situation", "sourceObjectId", "status",  "targetObjectId";
+
+"1", "CREATE", "source", "5d15",   "ABSENT",    "system/xml/105", "SUCCESS", "managed/user/d445";
+"2", "CREATE"  "source", "5d15",   "ABSENT",    "system/xml/2fe", "SUCCESS", "managed/user/c783";
+"3", "IGNORE", "source", "1987",   "CONFIRMED", "system/xml/105", "SUCCESS", "managed/user/d445";
+"4", "IGNORE", "source", "1987",   "CONFIRMED", "system/xml/2fe", "SUCCESS", "managed/user/c783";
+"5", "IGNORE", "source", "27e3",   "CONFIRMED", "system/xml/105", "SUCCESS", "managed/user/d445";
+"6", "IGNORE", "source", "27e3",   "CONFIRMED", "system/xml/2fe", "SUCCESS", "managed/user/c783";
+"7", "CREATE", "source", "66b1",   "ABSENT",    "system/xml/206", "SUCCESS", "managed/user/e543";
+"8", "IGNORE", "source", "66b1",   "CONFIRMED", "system/xml/105", "SUCCESS", "managed/user/d445";
+"9", "IGNORE", "source", "66b1",   "CONFIRMED", "system/xml/2fe", "SUCCESS", "managed/user/c783";
+...
+         </screen>
+         </para>
+         <para>
+         The important fields in the audit log are the source (sourceObjectId) and 
+         target(targetObjectId), the 
+         situation, and the action. The recon process of each object in the source results
+         in a situation that leads to an action on the target object. 
+         </para>
+         <para>
+         In the first recon run (records 1-2) neither source object exists in the target 
+         resulting in an ABSENT situation and an action to CREATE the 
+         objects in the target. 
+         </para>
+         <para>
+         In the second and third recon runs (records 3-6), the situation for both objects 
+         is CONFIRMED with no action taken (IGNORE) since they exist in both the 
+         source and target. 
+         </para>
+         <para>
+         The last recon run happened (records 7-9) after we added a user to the source
+         XML.  This resulted in another ABSENT situation and a CREATE action of the
+         new user while the other two users were CONFIRMED with no action taken.
+         </para>
+         <para>
+         It is important to note the action taken based on an object's situation is 
+         configured in <filename>conf/sync.json</filename>. The list of all possible
+         situations and actions may be found in section ABC of the Admin Guide.
+         </para>
+         <para>
+         It is also important to note that a more exhaustive audit log of all operations
+         may be found in audit/activity.csv.
+         </para>
+ </section>
+
+</chapter>
+
