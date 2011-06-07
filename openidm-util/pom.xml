@@ -103,7 +103,16 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>org.forgerock.openidm.*;version=${openidm.version}</Export-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.audit.util;version=${openidm.version},
+                            org.forgerock.openidm.config;version=${openidm.version},
+                            org.forgerock.openidm.config.installer;version=${openidm.version},
+                            org.forgerock.openidm.context;version=${openidm.version},
+                            org.forgerock.openidm.objset;version=${openidm.version},
+                            org.forgerock.openidm.script;version=${openidm.version},
+                            org.forgerock.openidm.script.javascript;version=${openidm.version},
+                            org.forgerock.openidm.sync;version=${openidm.version}
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

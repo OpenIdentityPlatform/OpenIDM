@@ -22,8 +22,9 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  * $Id$
  */
-package org.forgerock.openidm.provisioner.openicf.script;
+package org.forgerock.openidm.provisioner.openicf.impl.script;
 
+import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.operations.ScriptOnConnectorApiOp;
 import org.identityconnectors.framework.api.operations.ScriptOnResourceApiOp;

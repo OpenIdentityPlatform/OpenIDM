@@ -115,7 +115,11 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>org.forgerock.openidm.*;version=${openidm.version}</Export-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.managed;version=${openidm.version},
+                            org.forgerock.openidm.router;version=${openidm.version},
+                            org.forgerock.openidm.sync;version=${openidm.version}
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
