@@ -222,16 +222,22 @@ $ curl http://localhost:8080/openidm/managed/user/joe
 $
 </screen>
   </step>
+
  </procedure> 
- 
-  <procedure>
+
+<procedure>
   <title>Stop the OpenIDM Services</title>
-  <para>To stop the OpenIDM services enter the shutdown command in the shell</para>
+
+  <step performance='optional'>
+   <para>To stop the OpenIDM services enter the shutdown command in the shell</para>
 <screen width='80'>
 -&gt; shutdown
-... 
+...
 $
 </screen>
+  </step>
+
+   <step>
    <para>Or start the Felix console
    <link
      xlink:href='http://localhost:8080/system/console'
@@ -240,8 +246,8 @@ $
    Please note this will stop the servlet container so the console
    will no longer be accessible.
    </para>
-  
-  </procedure>
-  
+ </step>
+ </procedure>
+
 </chapter>
 
