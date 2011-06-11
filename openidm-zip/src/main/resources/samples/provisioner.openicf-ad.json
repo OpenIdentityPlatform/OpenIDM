@@ -44,7 +44,7 @@
          "ObjectClass" : "User",
          "Container" : "dc=example,dc=com",
          "CreateHomeDirectory" : true,
-         "LDAPHostName" : "192.168.40.135",
+         "LDAPHostName" : "127.0.0.1",
          "SearchChildDomains" : false,
          "DomainName" : "example",
          "SyncGlobalCatalogServer" : null,
@@ -162,17 +162,6 @@
                         {
                            "type" : "string",
                            "nativeName" : "__SHORT_NAME__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "objectClass" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "objectClass",
                            "nativeType" : "string",
                            "flags" :
                               [
@@ -344,17 +333,6 @@
                         {
                            "type" : "string",
                            "nativeName" : "__SHORT_NAME__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "objectClass" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "objectClass",
                            "nativeType" : "string",
                            "flags" :
                               [
@@ -559,7 +537,12 @@
                         },
                      "__GROUPS__" :
                         {
-                           "type" : "string",
+                           "type" : "array",
+                           "items" :
+                              {
+                                 "type" : "string",
+                                 "nativeType" : "string"
+                              },
                            "nativeName" : "__GROUPS__",
                            "nativeType" : "string"
                         },

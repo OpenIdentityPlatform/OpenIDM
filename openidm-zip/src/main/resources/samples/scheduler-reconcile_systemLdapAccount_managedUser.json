@@ -1,7 +1,7 @@
 {
     "type": "cron",
     "schedule": "0 0/1 * * * ?",
-    "invokeService": "org.forgerock.openidm.sync",
+    "invokeService": "sync",
     "invokeContext": {
         "action": "reconcile",
         "mapping": "systemLdapAccount_managedUser"

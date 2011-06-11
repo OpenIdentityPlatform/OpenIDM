@@ -154,7 +154,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         locateService(identifier).create(id, object);
         // Append the system created local identifier
-        URI newId = identifier.resolveLocalId((String) object.get("_id"));
+        URI newId = identifier.resolveLocalId((String) object.get("_id")).getId();
         ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
         try {
             onCreate(id, object);

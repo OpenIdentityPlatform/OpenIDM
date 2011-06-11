@@ -33,9 +33,9 @@ public class IdTest {
     public void testResolveLocalId() throws Exception {
         Id actual = new Id("system/xml/account/");
         URI expected = new URI("xml/account/simple");
-        Assert.assertEquals(actual.resolveLocalId("simple"), expected);
+        Assert.assertEquals(actual.resolveLocalId("simple").getId(), expected);
         expected = new URI("xml/account/http%3a%2f%2fopenidm.forgerock.org%2fopenidm%2fmanaged%2fuser%2f480ab4b0-764f-11e0-a1f0-0800200c9a66");
-        Assert.assertEquals(actual.resolveLocalId("http://openidm.forgerock.org/openidm/managed/user/480ab4b0-764f-11e0-a1f0-0800200c9a66"), expected);
+        Assert.assertEquals(actual.resolveLocalId("http://openidm.forgerock.org/openidm/managed/user/480ab4b0-764f-11e0-a1f0-0800200c9a66").getId(), expected);
     }
 
     @Test(expectedExceptions = ObjectSetException.class)

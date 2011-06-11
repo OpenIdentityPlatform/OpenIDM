@@ -175,7 +175,7 @@
         <openidm.version>2.0.0-SNAPSHOT</openidm.version>
         <slf4j.version>1.6.1</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
-        <orientdb.version>1.0rc1-SNAPSHOT</orientdb.version>
+        <orientdb.version>1.0rc1</orientdb.version>
     </properties>
 
     <modules>
@@ -313,12 +313,12 @@
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
-                <version>1.7.4</version>
+                <version>1.8.1</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.7.4</version>
+                <version>1.8.1</version>
             </dependency>
             <!-- Test Dependencies -->
             <dependency>

@@ -27,6 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
@@ -40,6 +41,7 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,9 +149,14 @@ public class OperationHelperImpl implements OperationHelper {
 
     public URI resolveQualifiedId(Uid uid) {
         if (null != uid) {
-            return systemObjectSetId.resolveLocalId(uid.getUidValue());
+            try {
+                return systemObjectSetId.resolveLocalId(uid.getUidValue()).getQualifiedId();
+            } catch (ObjectSetException e) {
+                // Should never happen in a copy constructor.
+                throw new UndeclaredThrowableException(e);
+            }
         } else {
-            return systemObjectSetId.getId();
+            return systemObjectSetId.getQualifiedId();
         }
     }
 

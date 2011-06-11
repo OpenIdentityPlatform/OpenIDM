@@ -60,7 +60,7 @@ public class FrameworkService {
 
     public void start() {
         try {
-            doStart(this.context.getRealPath("/WEB-INF/bundles/"), this.context.getRealPath("/WEB-INF/cache/"));
+            doStart(this.context.getRealPath("/WEB-INF/bundle/"), this.context.getRealPath("/WEB-INF/felix-cache/"));
         } catch (Exception e) {
             log("Failed to start framework", e);
         }

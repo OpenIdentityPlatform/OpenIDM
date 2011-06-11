@@ -94,6 +94,27 @@ public class Id {
         this.objectType = objectType;
     }
 
+    public Id(String systemName, String objectType, String localId) throws ObjectSetException {
+        if (StringUtils.isBlank(systemName)) {
+            throw new ObjectSetException("System name can not be blank");
+        }
+        if (StringUtils.isBlank(objectType)) {
+            throw new ObjectSetException("Object type can not be blank");
+        }
+        if (StringUtils.isBlank(localId)) {
+            throw new ObjectSetException("Object id can not be blank");
+        }
+        try {
+            this.baseURI = new URI("");
+        } catch (URISyntaxException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
+        }
+        this.systemName = systemName;
+        this.objectType = objectType;
+        this.localId = localId;
+    }
+
     public Id(String id) throws ObjectSetException {
         if (StringUtils.isBlank(id)) {
             throw new ObjectSetException("Id can not be blank");
@@ -148,16 +169,11 @@ public class Id {
         return this;
     }
 
-    public URI resolveLocalId(String uid) {
-        try {
-            URI id = getObjectSetId();
-            if (null != uid) {
-                id = id.resolve(URLEncoder.encode(uid, CHARACTER_ENCODING_UTF_8));
-            }
-            return id;
-        } catch (UnsupportedEncodingException e) {
-            // Should never happen.
-            throw new UndeclaredThrowableException(e);
+    public Id resolveLocalId(String uid) throws ObjectSetException {
+        if (null == uid) {
+            return new Id(systemName, objectType);
+        } else {
+            return new Id(systemName, objectType, uid);
         }
     }
 
@@ -174,17 +190,32 @@ public class Id {
         }
     }
 
+    public URI getQualifiedId() {
+        try {
+            URI id = getObjectSetId();
+            if (null != localId) {
+                id = id.resolve(URLEncoder.encode(localId, CHARACTER_ENCODING_UTF_8));
+            }
+            return baseURI.resolve(SYSTEM_BASE).resolve(id);
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+
+
     private URI getObjectSetId() throws UnsupportedEncodingException {
         return baseURI.resolve(URLEncoder.encode(systemName, CHARACTER_ENCODING_UTF_8) + "/").resolve(URLEncoder.encode(objectType, CHARACTER_ENCODING_UTF_8) + "/");
     }
 
     @Override
     public String toString() {
-        URI id = baseURI.resolve(systemName).resolve(objectType);
+        StringBuffer sb = new StringBuffer(SYSTEM_BASE);
+        sb.append(systemName).append("/").append(objectType);
         if (null != localId) {
-            return id.toString() + "/" + localId;
+            sb.append("/").append(localId);
         }
-        return id.toString();
+        return sb.toString();
     }
 
     /**
