@@ -133,12 +133,20 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                 String connectorsDir = URLDecoder.decode(connectorsArea, "UTF-8");
                 TRACE.info("Using connectors from [" + connectorsDir + "]");
                 File dir = new File(connectorsDir);
+                //This is a fix to support absolute path on OSX
+                if (!dir.exists()) {
+                    String absolutePath = dir.getAbsolutePath();
+                    if (!absolutePath.endsWith(File.separator)) {
+                        dir = new File(absolutePath.concat(File.separator));
+                    }
+                }
+
                 if (!dir.exists()) {
                     String absolutePath = dir.getAbsolutePath();
                     TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
                 } else {
                     try {
-                        TRACE.debug("Looking for connectors in {} directory.",dir.getAbsoluteFile().toURI().toURL());
+                        TRACE.debug("Looking for connectors in {} directory.", dir.getAbsoluteFile().toURI().toURL());
                         URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
                         factory.getLocalManager(bundleUrls);
                     } catch (MalformedURLException e) {

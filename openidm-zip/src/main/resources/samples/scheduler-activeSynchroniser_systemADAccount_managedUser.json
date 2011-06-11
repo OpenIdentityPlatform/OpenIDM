@@ -4,6 +4,6 @@
     "invokeService": "provisioner",
     "invokeContext": {
         "action": "activeSync",
-        "source" : "system/ldap/__ACCOUNT__"
+        "source" : "system/ad/account"
     }
 }
