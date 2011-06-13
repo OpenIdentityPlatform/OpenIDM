@@ -150,10 +150,31 @@
             <artifactId>org.apache.felix.scr</artifactId>
         </dependency>
 
+        <!-- Pax Web 1.0.3 war and whiteboard -->
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-api</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-spi</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-war</artifactId>
+            <version>1.0.3</version>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
             <version>1.6.1</version>
         </dependency>
 
@@ -202,8 +223,8 @@
                             <includeArtifactIds>
                                 commons-codec,
                                 commons-lang,
-                                connector-framework,
                                 connector-framework-internal,
+                                connector-framework,
                                 groovy-all,
                                 jackson-core-asl,
                                 jackson-mapper-asl,
@@ -211,13 +232,16 @@
                                 json-schema,
                                 openidm-audit,
                                 openidm-core,
-                                openidm-provisioner,
                                 openidm-provisioner-openicf,
-                                openidm-repo,
+                                openidm-provisioner,
                                 openidm-repo-orientdb,
+                                openidm-repo,
                                 openidm-restlet,
                                 openidm-scheduler,
                                 openidm-util,
+                                ops4j-base-util-collections,
+                                ops4j-base-lang,
+                                ops4j-base-util-xml,
                                 org.apache.felix.configadmin,
                                 org.apache.felix.fileinstall,
                                 org.apache.felix.http.bridge,
@@ -228,12 +252,20 @@
                                 org.apache.felix.shell,
                                 org.apache.felix.shell.tui,
                                 org.apache.felix.webconsole,
-                                org.apache.servicemix.bundles.rhino,
                                 org.apache.servicemix.bundles.quartz,
+                                org.apache.servicemix.bundles.rhino,
                                 org.restlet,
                                 org.restlet.ext.jackson,
                                 org.restlet.ext.servlet,
+                                pax-swissbox-core,
+                                pax-swissbox-extender,
+                                pax-swissbox-lifecycle,
+                                pax-swissbox-tracker,
+                                pax-web-api,
+                                pax-web-extender-war,
+                                pax-web-spi,
                                 slf4j-api,
+                                jcl-over-slf4j,
                                 slf4j-jdk14
                             </includeArtifactIds>
                             <stripVersion>true</stripVersion>
