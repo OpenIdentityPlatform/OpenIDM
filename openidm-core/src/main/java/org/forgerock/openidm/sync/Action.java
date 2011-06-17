@@ -38,9 +38,9 @@ enum Action {
     /** The linked target object should be unlinked. */
     UNLINK,
 
-    /** No change to the link or target object state should be made. */
-    IGNORE,
-
     /** The link situation is flagged as an exception. */
-    EXCEPTION
+    EXCEPTION,
+
+    /** No change to the link or target object state should be made. */
+    IGNORE
 }
