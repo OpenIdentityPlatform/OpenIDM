@@ -31,7 +31,7 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
 
-<title>OpeniDM Sample</title>
+<title>OpenIDM Sample</title>
 
  <para>In the current distribution of OpenIDM the sample is configured and enabled by default. This 
  chapter provides an overview of the sample and how it is configured.
@@ -155,7 +155,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           </para>
           <para>
           For details on the OpenICF connector configuration files please refer
-          to section ABC in the Admin Guide.
+          to the 
+          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-provisioning'>Provisioning Chapter in the Admin Guide</link>
           </para>
          </section>
          <section>
@@ -180,7 +181,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           be found in sync.json below.
           </para>
           <para>
-          For details on Scheduler configuration please refer to ABC.
+          For details on the scheduler configuration please refer to the
+          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-scheduling'>Scheduling Chapter in the Admin Guide.</link>
           </para>
          </section>
          <section>
@@ -244,13 +246,15 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           </para>
           <para>
           You may have noticed the use of inline JavaScript in the mappings.  The validTarget script
-          in the first mapping is used to ensure only users with the employeeType = external
+          in the first mapping is used to ensure only users with the employeeType external
           are considered part of the reconciliation.  The onCreate script in the second mapping
           is used to set a default passwd for the user when created in the target XML connector.
-          For more details on scripting please refer to section ABC in the Admin Guide.
+          For more details on scripting please refer to the 
+          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-scripting'>Scripting Chapter in the Admin Guide.</link>
           </para>
           <para>
-          For details on syncronization, reconciliation, and sync.json please refer to ABC.
+          For details on syncronization, reconciliation, and sync.json please refer to the
+          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-synchronization'>Syncronization Chapter in the Admin Guide</link>
           </para>
          </section>
          </section>
@@ -376,11 +380,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
          <para>
          It is important to note the action taken based on an object's situation is 
          configured in <filename>conf/sync.json</filename>. The list of all possible
-         situations and actions may be found in section ABC of the Admin Guide.
+         situations and actions may be found in the 
+         <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-synchronization'>Syncronization Chapter in the Admin Guide</link> 
          </para>
          <para>
-         It is also important to note that a more exhaustive audit log of all operations
-         may be found in audit/activity.csv.
+         For more details on auditing please refer to the
+         <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-auditing'>Auditing Chapter in the Admin Guide</link>
          </para>
  </section>
 
