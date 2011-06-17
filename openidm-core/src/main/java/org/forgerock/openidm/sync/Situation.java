@@ -26,16 +26,16 @@ enum Situation {
     /**
      * The mapping qualifies for a target object and there is an existing link to a target
      * object. Detected during source object changes and reconciliation.
-     * Default action: {@code IGNORE}.
+     * Default action: {@code UPDATE}.
      */
-    CONFIRMED(Action.IGNORE),
+    CONFIRMED(Action.UPDATE),
 
     /**
      * The mapping qualifies for a target object, there is no link to a target object, and
      * there is a single correlated target object to link. Detected during source object
-     * changes and reconciliation. Default action: {@code LINK}.
+     * changes and reconciliation. Default action: {@code UPDATE}.
      */
-    FOUND(Action.LINK),
+    FOUND(Action.UPDATE),
 
     /** The mapping qualifies for a target object, there is no link to a target object, and
      * there is no correlated target object to link. Detected during source object changes
