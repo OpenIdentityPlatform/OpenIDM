@@ -324,23 +324,25 @@
             <title>Actions</title>
             <para/>
             <para>"CREATE"</para>
-            <para>A target object is projected, created and linked.</para>
+            <para>A target object should be created and linked.</para>
             <para/>
-            <para>"LINK"</para>
-            <para>A correlated target object is linked and updated.</para>
-            <para/>
-            <para>"UNLINK"</para>
-            <para>A linked target object is unlinked and updated.</para>
+            <para>"UPDATE"</para>
+            <para>A target object should be linked and updated.</para>
             <para/>
             <para>"DELETE"</para>
-            <para>The linked target object is unlinked and deleted.</para>
+            <para>The target object should be deleted and unlinked.</para>
             <para/>
-            <para>"IGNORE"</para>
-            <para>No change to existing link state is made. If there is no linked target object to update as a result, no updates are applied.</para>
+            <para>"LINK"</para>
+            <para>The correlated target object should be linked.</para>
+            <para/>
+            <para>"UNLINK"</para>
+            <para>The linked target object should be unlinked.</para>
             <para/>
             <para>"EXCEPTION"</para>
-            <para>The condition is flagged as an exception. This aborts any change event. In reconciliation, the condition is reported as exceptional.</para>
+            <para>The link situation is flagged as an exception.</para>
             <para/>
+            <para>"IGNORE"</para>
+            <para>No change to the link or target object state should be made.</para>
         </sect2>
         <sect2>
             <title>script object</title>
