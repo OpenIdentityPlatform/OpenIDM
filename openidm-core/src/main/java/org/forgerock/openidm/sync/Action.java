@@ -26,16 +26,19 @@ enum Action {
     /** A target object should be created and linked. */
     CREATE,
 
-    /** The correlated target object should be linked and updated. */
-    LINK,
+    /** A target object should be linked and updated. */
+    UPDATE,
 
     /** The target object should be deleted and unlinked. */
     DELETE,
 
-    /** The target object should be unlinked. */
+    /** The correlated target object should be linked. */
+    LINK,
+
+    /** The linked target object should be unlinked. */
     UNLINK,
 
-    /** No change to the existing link state should be made. */
+    /** No change to the link or target object state should be made. */
     IGNORE,
 
     /** The link situation is flagged as an exception. */

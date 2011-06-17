@@ -509,19 +509,21 @@ class ObjectMapping implements SynchronizationListener {
                     execScript(onCreateScript);
                     createTargetObject(targetObject);
                     // falls through to link the newly created target
+                case UPDATE:
                 case LINK:
                     if (targetObject == null) {
                         throw new SynchronizationException("no target object to link");
                     }
-                    linkObject.sourceId = sourceObject.get("_id").required().asString();
-                    linkObject.targetId = targetObject.get("_id").required().asString();
-                    linkObject.reconId = reconId;
-                    linkObject.create();
-                    if (action == Action.CREATE) {
-                        break; // already created; no need to update again
+                    if (linkObject._id == null) {
+                        linkObject.sourceId = sourceObject.get("_id").required().asString();
+                        linkObject.targetId = targetObject.get("_id").required().asString();
+                        linkObject.reconId = reconId;
+                        linkObject.create();
                     }
-                    // falls through to update the linked target
-                case IGNORE:
+// TODO: Detect change of source id, and update link accordingly.
+                    if (action == Action.CREATE || action == Action.LINK) {
+                        break; // do not update
+                    }
                     if (sourceObject != null && targetObject != null) {
                         applyMappings(sourceObject, targetObject);
 // TODO: Detect nothing updated to avoid unnecessary updates and potential cyclic updates.
