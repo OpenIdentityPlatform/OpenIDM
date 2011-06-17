@@ -43,11 +43,6 @@
    throughout the life cycle of an OpenIDM release used in your
    organization.</para>
    
-  <para>This guide starts by introducing the OpenIDM administrative
-   interfaces and tools, and by showing how to manage OpenIDM services.
-   This guide continues by showing how to configure the principle
-   features of OpenIDM.</para>
-   
   <para>You do not need to be an OpenIDM wizard to learn something from
    this guide, though a background in access management and maintaining
    web application software can help. You do need some background in

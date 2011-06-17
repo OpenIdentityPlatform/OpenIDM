@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-rest'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+    <title>REST API</title>
+    <sect1>
+        <title>Introduction</title>
+        <para/>
+        <para>A managed object in OpenIDM is an object represents the identity-related data managed by OpenIDM. Managed objects are stored by OpenIDM in its data store. All managed objects are JSON-based data structures.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Schema</title>
+        <para/>
+        <para>Managed objects have an associated schema to enforce a specific data structure. Schema is specified using the JSON Schema specification. This is currently an Internet Draft, with implementations in multiple programming languages. As this specification evolves, OpenIDM's implementation will evolve in parallel.</para>
+        <sect2>
+            <title>Reserved properties</title>
+            <para>Top-level properties in a managed object that begins with an underscore _ are reserved by OpenIDM for internal use, and are not an explicitly part of its schema. Internal properties are read-only, and are ignored when provided by the REST API client.The following properties exist for all managed objects in OpenIDM:</para>
+            <variablelist>
+                <varlistentry>
+                    <term>_id</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>The unique identifier for the object. This value forms a part of the managed object's URI.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>_rev</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>The revision of the object. This is the same value that is exposed as the object's ETag via the REST API. The content of this attribute is not defined. No consumer should make any assumptions of its content beyond equivalence comparison. This attribute may be provided by the underlying data store.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>_schema_id</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>The a reference to the schema object that the managed object is associated with.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>_schema_rev</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>The revision of the schema that was used for validation when the object was last stored.</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </sect2>
+        <sect2>
+            <title>Schema validation</title>
+            <para/>
+            <para>Schema validation is performed unequivocally whenever an object is stored, and conditionally whenever an object is retrieved from the data store and exhibits a _schema_rev value that differs from the _rev of the schema that the OpenIDM instance currently has for that managed object type. Whenever a schema validation is performed, the _schema_rev of the object is updated to contain the _rev value of the current schema.</para>
+            <para/>
+            <para>PB: While the _schema_rev optimization above reduces schema validation overhead for object retrieval, there's still the issue of object and property validation triggers. One way to solve this could be to qualify these as schema validation and bake them into the computed ETag for the schema. I kinda like this solution, but should be discussed.</para>
+        </sect2>
+        <sect2>
+            <title>Derived properties</title>
+            <para/>
+            <para>Properties can be defined to be strictly derived from other properties within the object. This allows computed and composite values to be created in the object. Whenever an object undergoes a change, all derived properties are recomputed. The value of derived properties are stored in the data store, and are not recomputed upon retrieval.</para>
+            <para/>
+            <para>PB: Mechanism for defining a derived property will likely be through a JavaScript trigger.</para>
+            <para/>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Data consistency</title>
+        <para/>
+        <para>Single-object operations shall be consistent within the scope of the operation performed, limited by capabilities of the underlying data store. Bulk operations shall not have any consistency guarantees. There are no plans to expose any transactional semantics in the managed object access API.</para>
+        <para/>
+        <para>All access through the REST API uses the ETag and associated conditional headers: If-Match, If-None-Match. In operations that modify model objects, conditional headers are mandatory.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Triggers</title>
+        <para/>
+        <para>Triggers are user-definable functions that validate and/or modify object or property state.</para>
+        <sect2>
+            <title>State triggers</title>
+            <para/>
+            <para>Managed objects are resource-oriented. A set of triggers is defined to intercept the supported request methods on managed objects. Such triggers are intended to perform authorization, redact and/or modify objects before the action is performed. The object being operated on is in scope for each trigger, meaning that it the object is retrieved by the data store before the trigger is fired.</para>
+            <para/>
+            <para>If retrieval of the object fails, the failure occurs before any trigger is called. Triggers are executed before any optimistic concurrency mechanisms are invoked. The reason for this is to prevent a potential attacker from getting information about an object (including its presence in the data store) before authorization is applied.</para>
+            <para/>
+            <para>PB: Status codes and internationalization considerations are still TBD.</para>
+            <para/>
+            <para>onCreate</para>
+            <para>Called upon a request to create a new object. Throwing an exception causes the create to fail.</para>
+            <para/>
+            <para>onRead</para>
+            <para>Called upon a request to retrieve a whole object or portion of an object. Throwing an exception causes the object to not be included in the result. This method is also called when lists of objects are retrieved via requests to its container object; in this case, only the requested properties are included in the object. Allows for uniform access control for retrieval of objects, regardless of the method in which they were requested.</para>
+            <para/>
+            <para>onUpdate</para>
+            <para>Called upon a request to store an object. The "old" and "new" objects are in-scope for the trigger. The "old" object represents a complete object as retrieved from the data store. The trigger can elect to change "new" object properties. If as a result of the trigger the object's "old" and "new" values are identical (i.e. update is reverted), the update ends prematurely, though successfully. Throwing an exception causes the update to fail.</para>
+            <para/>
+            <para>onDelete</para>
+            <para>Called upon a request to delete an object. Throwing an exception causes the deletion to fail.</para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>Object storage triggers</title>
+            <para/>
+            <para>An object-scoped trigger applies to an entire object. Unless otherwise specified, the object itself is in scope for the trigger.</para>
+            <para/>
+            <para>validate</para>
+            <para>Validates an object after its retrieval and prior to its storage into the data store. Throws an exception in the event of a validation failure. i18n TBD.</para>
+            <para/>
+            <para>onRetrieval</para>
+            <para>Called when an object is retrieved from the data store. Typically used to transform an object after it has been retrieved (e.g. decryption, JIT data conversion).</para>
+            <para/>
+            <para>onStorage</para>
+            <para>Called just prior to when an object is stored into the data store. Typically used to transform an object just prior to its storage (e.g. encryption).</para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>Property storage triggers</title>
+            <para/>
+            <para>A property-scoped trigger applies to a specific property within an object. Only the property itself is in scope for the trigger—no other properties in the object should be accessed during execution of the trigger. Unless otherwise specified, the order of execution of property-scoped triggers is intentionally left undefined.</para>
+            <para/>
+            <para>validate</para>
+            <para>Validates a given property value after its retrieval from and prior to its storage into the data store. Throws an exception in the event of a validation failure. i18n of validation error TBD.</para>
+            <para/>
+            <para>onRetrieval</para>
+            <para>Called after an object is retrieved from the data store. Typically used to transforms a given property after its object's retrieval. </para>
+            <para/>
+            <para>onStorage</para>
+            <para>Called prior to when an object is stored into the data store.Typically used to transform a given property prior to its object's storage.</para>
+        </sect2>
+        <sect2>
+            <title>Storage trigger sequences</title>
+            <para/>
+            <para>The triggers are executed in the following orders.</para>
+            <sect3>
+                <title>Object retrieval sequence</title>
+                <para/>
+                <orderedlist>
+                    <listitem>
+                        <para>retrieve the raw object from the data store</para>
+                    </listitem>
+                    <listitem>
+                        <para>call object onRetrieval trigger</para>
+                    </listitem>
+                    <listitem>
+                        <para>per-property within the object (order undefined):</para>
+                    </listitem>
+                    <listitem>
+                        <para>call property onRetrieval trigger</para>
+                    </listitem>
+                    <listitem>
+                        <para>perform schema validation if _schema_rev doesn't match (see schema validation section above)</para>
+                    </listitem>
+                    <listitem>
+                        <para>call object validate trigger ← PB: overhead we may be able to avoid; see note in schema validation section</para>
+                    </listitem>
+                    <listitem>
+                        <para>per-property within the object (order undefined):</para>
+                    </listitem>
+                    <listitem>
+                        <para>call property validate trigger ← PB: overhead we may be able to avoid; see note in schema validation section</para>
+                    </listitem>
+                </orderedlist>
+            </sect3>
+            <sect3>
+                <title>Object storage sequence</title>
+                <para/>
+                <orderedlist>
+                    <listitem>
+                        <para>per-property within the object (order undefined):</para>
+                    </listitem>
+                    <listitem>
+                        <para>call property validate trigger</para>
+                    </listitem>
+                    <listitem>
+                        <para>call object validate trigger</para>
+                    </listitem>
+                    <listitem>
+                        <para>perform schema validation (see schema validation section above)</para>
+                    </listitem>
+                    <listitem>
+                        <para>per-property trigger within the object (order undefined):</para>
+                    </listitem>
+                    <listitem>
+                        <para>call property onStorage trigger</para>
+                    </listitem>
+                    <listitem>
+                        <para>call object onStorage trigger</para>
+                    </listitem>
+                    <listitem>
+                        <para>store the object with any resulting changes to the data store</para>
+                    </listitem>
+                </orderedlist>
+                <para/>
+            </sect3>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>Encryption</title>
+        <para/>
+        <para>Sensitive object properties can be encrypted prior to storage, typically through the property onStorage trigger. The trigger will have access to configuration data, which can include arbitrary customer-defined attributes, such as symmetric encryption key. Such attributes can be decrypted during retrieval from the data store through the property onRetrieval trigger.</para>
+        <para/>
+    </sect1>
+    <sect1>
+        <title>Configuration</title>
+        <para>Configuration of managed objects is provided through an array of :</para>
+        <sect2>
+            <title>Usage</title>
+            <para/>
+            <para>
+                <code><![CDATA[
+  {
+    "objects": [ managed-object-config object, … ]
+  }]]>
+                </code>
+            </para>
+        </sect2>
+        <sect2>
+            <title>Properties</title>
+            <variablelist>
+                <varlistentry>
+                    <term>objects</term>
+                    <listitem>
+                        <para>array of managed-object-config objects, required</para>
+                        <para>Specifies the objects that the managed object service manages.</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </sect2>
+        <sect2>
+            <title>managed-object-config object</title>
+            <para/>
+            <para>Specifies the configuration of each managed object.</para>
+            <sect3>
+                <title>Usage</title>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+{
+  "name": string,
+  "schema": json-schema object,
+  "onCreate": script object,
+  "onRead": script object,
+  "onUpdate": script object,
+  "onDelete": script object,
+  "onValidate": script object,
+  "onRetrieve": script object,
+  "onStore": script object,
+  "properties": [ property-configuration object, … ]
+}]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>Properties</title>
+                <variablelist>
+                    <varlistentry>
+                        <term>name</term>
+                        <listitem>
+                            <para>string, required</para>
+                            <para>The name of the managed object. Used to identify the managed object in URIs and identifiers. </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>schema</term>
+                        <listitem>
+                            <para>json-schema object, optional</para>
+                            <para>The schema to use to validate the structure and content of the managed object. The schema-object format is specified by the JSON Schema specification.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onCreate</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when the creation of an object is being requested. The object to be created is provided in the root scope as an object property. The script may change the object. If an exception is thrown, the create will abort with an exception.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onRead</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when the read of an object is being requested. The object being read is provided in the root scope as an object property. The script may change the object. If an exception is thrown, the read will abort with an exception.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onUpdate</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when an update to an object is requested. The old value of the object being updated is provided in the root scope as an oldObject property. The new value of the object being updated is provided in the root scope as a newObject property. The script may change the newObject. If an exception is thrown, the update will abort with an exception.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onDelete</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when the deletion of an object is being requested. The object being deleted is provided in the root scope as an object property. If an exception is thrown, the deletion will abort with an exception.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onValidate</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when the object requires validation. The object to be validated is provided in the root scope as an object property. If an exception is thrown, the validation will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onRetrieve</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger once an object is retrieved from the repository. The object that was retrieved is provided in the root scope as an object property. The script may change the object. If an exception is thrown, then object retrieval will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onStore</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when an object is about to be stored in the repository. The object to be stored is provided in the root scope as an object property. The script may change the object. If an exception is thrown, then object storage will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>properties</term>
+                        <listitem>
+                            <para>array of property-config objects, optional</para>
+                            <para>A list of property specifications.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </sect3>
+        </sect2>
+        <sect2>
+            <title>script object</title>
+            <para/>
+            <sect3>
+                <title>Usage</title>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+{
+  "type": "text/javascript",
+  "source": string
+}]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>Properties</title>
+                <variablelist>
+                    <varlistentry>
+                        <term>type</term>
+                        <listitem>
+                            <para>string, required</para>
+                            <para>Specifies the type of script to be executed. Presently, only "text/javascript" is supported.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>source</term>
+                        <listitem>
+                            <para>string, required</para>
+                            <para>Specifies the source code of the script to be executed.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </sect3>
+        </sect2>
+        <sect2>
+            <title>property-config object</title>
+            <para/>
+            <sect3>
+                <title>Usage</title>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+{
+  "name": string,
+  "onValidate": script object,
+  "onRetrieve": script object,
+  "onStore": script object
+}]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para/>
+            </sect3>
+            <sect3>
+                <title>Properties</title>
+                <variablelist>
+                    <varlistentry>
+                        <term>name</term>
+                        <listitem>
+                            <para>string, required</para>
+                            <para>The name of the property being configured.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onValidate</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger when the property requires validation. The property to be validated is provided in the root scope as the property property. If an exception is thrown, the validation will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onRetrieve</term>
+                        <listitem>
+                            <para>script object, optional</para>
+                            <para>A script object to trigger once a property is retrieved from the repository. The property that was retrieved is provided in the root scope as the property property. The script may change the property value. If an exception is thrown, then object retrieval will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>onStore</term>
+                        <listitem>
+                            <para>scrip object, optional</para>
+                            <para>A script object to trigger when a property is about to be stored in the repository. The property to be stored is provided in the root scope as the property property. The script may change the property value. If an exception is thrown, then object storage will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </sect3>
+        </sect2>
+    </sect1>
+    <sect1>
+        <title>REST API</title>
+        <sect2>
+            <title>Introduction</title>
+            <para/>
+            <para>Access to managed objects is provided through a REST API.</para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>URI scheme</title>
+            <para/>
+            <para>The URI scheme for accessing a managed object follows the convention, assuming the OpenIDM web application was deployed at /openidm: </para>
+            <para/>
+            <para>/openidm/managed/{type}/{id}</para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>Object identifier</title>
+            <para/>
+            <para>Each managed object has an identifier (expressed as {id} in the URI scheme), which is used to address it via the REST API. The REST API allows for the client-generated and server-generated identifiers, via PUT and POST methods. The default sever-generated identifier type is a UUID. Object identifiers that begin with underscore _ are reserved for future use. </para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>Content negotiation</title>
+            <para/>
+            <para>The REST API will fully support negotiation of content representation through the Accept HTTP header. While various media types will be supported in future releases, initially the content type supported is JSON; omitting content-negotiation will be equivalent to including the following header: </para>
+            <para/>
+            <para>Accept: application/json</para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>Conditional operations</title>
+            <para/>
+            <para>The REST API fully supports conditional operations through the use of the ETag, If-Match and If-None-Match HTTP headers. The use of HTTP conditional operations is the basis of OpenIDM's optimistic concurrency control system. Clients should make requests conditional in order to prevent inadvertent modification of the wrong version of an object.</para>
+            <para/>
+        </sect2>
+        <sect2>
+            <title>Supported methods</title>
+            <para/>
+            <para>The managed object API uses standard HTTP methods to access managed objects. </para>
+            <para/>
+            <sect3>
+                <title>GET</title>
+                <para/>
+                <para>Retrieves a managed object in OpenIDM. </para>
+                <para/>
+                <para>Request </para>
+                <para>
+                    <code><![CDATA[
+GET /openidm/managed/user/bdd793f8 HTTP/1.1
+...]]>
+                    </code>
+                </para>
+                <para/>
+                <para>Response </para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 123
+ETag: "7769ac1c6493"
+…
+
+[JSON representation of the managed object]]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>HEAD</title>
+                <para/>
+                <para>Returns metainformation about a managed object in OpenIDM. </para>
+                <para/>
+                <para>Request </para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HEAD /openidm/managed/user/bdd793f8 HTTP/1.1
+…]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para/>
+                <para>Response </para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 123
+ETag: "7769ac1c6493"]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>PUT</title>
+                <para/>
+                <para>Creates or updates a managed object. PUT is the preferred method of creating managed objects. </para>
+                <para>Creating a new object</para>
+                <para/>
+                <para>Request </para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+PUT /openidm/managed/user/5752c0fd9509 HTTP/1.1
+Content-Type: application/json
+Content-Length: 123
+If-None-Match: *
+…
+
+[JSON representation of the managed object to create]]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response </para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Length: 45
+ETag: "238693bd8dae"
+…
+
+[JSON representation containing metadata (underscore-prefixed) properties]]]>
+                        </code>
+                    </literallayout>
+                </example>
+
+                <para>Updating an existing object</para>
+                <para/>
+                <para>Request</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+PUT /openidm/managed/user/5752c0fd9509 HTTP/1.1
+Content-Type: application/json
+Content-Length: 123
+If-Match: "238693bd8dae"
+…
+
+[JSON representation of managed object to update]]]>
+                        </code>
+                    </literallayout>
+                </example>
+
+                <para>Response (success)</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 204 No Content
+ETag: "c3b7232fc0b3"
+…]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response (version conflict) </para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+Content-Length: 89
+…
+
+[JSON representation of error]]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>POST</title>
+                <para/>
+                <para>The POST method allows arbitrary actions to be performed on managed objects. The action query parameter defines the action to be performed.</para>
+                <para>Creating a new object</para>
+                <para/>
+                <para>The create action is used to create a managed object. Because POST is neither safe nor idempotent, PUT is the preferred method of creating managed objects. The response contains the server-generated _id of the newly created managed object.</para>
+                <para/>
+                <para>Request</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+POST /openidm/managed/user?action=create HTTP/1.1
+Content-Type: application/json
+Content-Length: 123
+…
+
+[JSON representation of the managed object to create]]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Length: 45
+ETag: "238693bd8dae"
+…
+
+[JSON representation containing metadata (underscore-prefixed) properties]]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>DELETE</title>
+                <para/>
+                <para>Deletes a managed object.</para>
+                <para/>
+                <para>Request</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+DELETE /openidm/managed/user/c3471805b60f
+If-Match: "238693bd8dae"
+…]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response (success)</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 204 No Content
+…]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response (version conflict)</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+Content-Length: 89
+…
+
+[JSON representation of error]]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+            <sect3>
+                <title>PATCH</title>
+                <para/>
+                <para>Performs a partial modification of a managed object.</para>
+                <para/>
+                <para>Request</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+PATCH /openidm/managed/user/5752c0fd9509 HTTP/1.1
+Content-Type: application/patch+json
+Content-Length: 456
+If-Match: "238693bd8dae"
+…
+
+[JSON representation of patch document to apply]]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response (success)</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 204 No Content
+ETag: "c3b7232fc0b3"
+…]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>Response (version conflict)</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+Content-Length: 89
+…
+
+[JSON representation of error]]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para>X-HTTP-Method-Override</para>
+                <para/>
+                <para>If an HTTP client or server container does not support a particular method, a request can be submitted via POST with the X-HTTP-Method-Override header set to the intended method.</para>
+                <para/>
+                <para>Request</para>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+POST /openidm/managed/user/5752c0fd9509 HTTP/1.1
+X-HTTP-Method-Override: PATCH
+Content-Type: application/patch+json
+Content-Length: 456
+If-Match: "238693bd8dae"
+…
+
+[JSON representation of patch document to apply]]]>
+                        </code>
+                    </literallayout>
+                </example>
+            </sect3>
+        </sect2>
+    </sect1>
+
+</chapter>
+

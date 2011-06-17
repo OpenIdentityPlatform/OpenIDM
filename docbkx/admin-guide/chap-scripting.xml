@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter version="5.0"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+         xml:id="chap-scripting" xml:lang="en"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xinclude="http://www.w3.org/2001/XInclude"
+         xmlns:ns="http://docbook.org/ns/docbook">
+  <title>Scripting</title>
+
+  <para>Scripting provides for custom logic between source and target
+  mappings. </para>
+
+  <para></para>
+
+  <sect1>
+    <title>Configuration</title>
+
+    <para>Scripts are defined as part of the mappings 
+    </para>
+
+    <sect2>
+      <title>script object</title>
+      <sect3>
+        <title>Usage</title>
+
+        <example>
+          <literallayout class="monospaced">
+                        <code>
+{
+  "type": "text/javascript",
+  "source": string
+}
+                        </code>
+                    </literallayout>
+        </example>
+      </sect3>
+
+      <sect3>
+        <title>Properties</title>
+
+        <variablelist>
+          <varlistentry>
+            <term>type</term>
+
+            <listitem>
+              <para>string, required</para>
+
+              <para>Specifies the type of script to be executed. Presently,
+              only "text/javascript" is supported.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term>source</term>
+
+            <listitem>
+              <para>string, required</para>
+
+              <para>Specifies the source code of the script to be
+              executed.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </sect3>
+    </sect2>
+    <sect2>
+    <title>Examples</title>
+
+        <sect3>
+        <para>Returns true if the employeeType is equal to external, otherwise returns false. This script 
+        would be used during a reconciliation to establish whether the source object should be a part
+        of the reconiciliation or ignored.
+        </para>
+        <screen width='80'>
+
+"validTarget": {
+   "type": "text/javascript",
+   "source": "object.employeeType == 'external'"
+},
+        </screen>
+        </sect3>
+
+        <sect3>
+        <para>During the creation of a target object the attribute __PASSWORD__ is set to the value "defaultpwd"
+        </para>
+        <screen width='80'>
+
+"onCreate" : {
+    "type": "text/javascript",
+    "source": "target.__PASSWORD__ = 'defaultpwd'"
+}
+
+        </screen>
+        </sect3>
+
+    </sect2>
+  </sect1>
+</chapter>
