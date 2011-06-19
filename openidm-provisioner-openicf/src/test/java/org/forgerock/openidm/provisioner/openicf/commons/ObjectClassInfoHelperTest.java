@@ -24,15 +24,20 @@
  */
 package org.forgerock.openidm.provisioner.openicf.commons;
 
-import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.identityconnectors.framework.api.operations.UpdateApiOp;
+import org.identityconnectors.framework.common.objects.ConnectorObject;
 import org.identityconnectors.framework.common.objects.ObjectClassInfo;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -54,6 +59,25 @@ public class ObjectClassInfoHelperTest {
 
     }
 
+
+    @Test
+    public void testOperationalSchema() throws Exception {
+        InputStream inputStream = ObjectClassInfoHelperTest.class.getResourceAsStream("/config/SystemSchemaConfiguration.json");
+        Assert.assertNotNull(inputStream);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode configuration = new JsonNode(mapper.readValue(inputStream, Map.class));
+
+        ObjectClassInfoHelper helper = new ObjectClassInfoHelper(configuration.get("objectTypes").get("__ACCOUNT__").asMap());
+        Map<String, Object> source = new HashMap<String, Object>();
+        source.put("_id", "ID_NAME");
+        source.put("__NAME__", "NAME_NAME");
+
+        ConnectorObject co = helper.build(UpdateApiOp.class, "rename", source);
+        Assert.assertEquals(co.getName().getNameValue(), "rename");
+
+        co = helper.build(UpdateApiOp.class, null, source);
+        Assert.assertEquals(co.getName().getNameValue(), "ID_NAME");
+    }
 
 
 }

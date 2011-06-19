@@ -157,6 +157,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
             } catch (UnsupportedEncodingException e) {
                 // Should never happen.
                 throw new UndeclaredThrowableException(e);
+            } catch (Throwable t) {
+                TRACE.error("LocalManager initialisation for {} failed.", connectorsArea, t);
+                throw new ComponentException("LocalManager initialisation failed.", t);
             }
         } else {
             throw new ComponentException("connectors directory MUST be configured");

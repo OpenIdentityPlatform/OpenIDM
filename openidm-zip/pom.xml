@@ -140,6 +140,12 @@
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
         </dependency>
 
+        <!-- OpenICF -->
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>icfl-over-slf4j</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors.file</groupId>

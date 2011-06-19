@@ -27,6 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -58,10 +59,7 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author $author$
@@ -129,7 +127,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
             } else {
                 TRACE.debug("Test is not supported.");
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             TRACE.error("Test of {} failed.", systemIdentifier, e);
             throw new ComponentException("Connector test failed.", e);
         }
@@ -369,11 +367,26 @@ public class OpenICFProvisionerService implements ProvisionerService {
 
         if (helper.isOperationPermitted(UpdateApiOp.class)) {
             try {
-                ConnectorObject connectorObject = helper.build(UpdateApiOp.class, complexId.getLocalId(), object);
+                Object newName = object.get("_name");
+                ConnectorObject connectorObject = null;
+                Set<Attribute> attributeSet = null;
+                if (newName instanceof String) {
+                    //This is a rename
+                    connectorObject = helper.build(UpdateApiOp.class, (String) newName, object);
+                    attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
+                } else {
+                    connectorObject = helper.build(UpdateApiOp.class, complexId.getLocalId(), object);
+                    attributeSet = new HashSet<Attribute>();
+                    for (Attribute attribute: connectorObject.getAttributes()) {
+                        if (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) {
+                            continue;
+                        }
+                        attributeSet.add(attribute);
+                    }
+                }
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
 
-                Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
-                //object.put("_id", uid.getUidValue());
+                Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), attributeSet, operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
             } catch (AlreadyExistsException e) {
                 TRACE.error("System object {} already exists", id, e);
