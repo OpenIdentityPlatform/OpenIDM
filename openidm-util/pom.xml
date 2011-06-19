@@ -50,6 +50,7 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

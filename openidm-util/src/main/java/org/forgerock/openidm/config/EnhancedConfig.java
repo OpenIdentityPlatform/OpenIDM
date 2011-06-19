@@ -31,7 +31,7 @@ public interface EnhancedConfig {
      * 
      * @param compContext The component context with the configuration to retrieve
      * @return the enhanced configuration with nested maps, list allowed
-     * @throws InvalidConfiguration
+     * @throws InvalidException
      */
     public Map<String, Object> getConfiguration(ComponentContext compContext)
             throws InvalidException;
@@ -41,7 +41,7 @@ public interface EnhancedConfig {
      * 
      * @param compContext The component context with the configuration to retrieve
      * @return the enhanced configuration with nested maps, list allowed
-     * @throws InvalidConfiguration
+     * @throws InvalidException
      */
     public JsonNode getConfigurationAsJson(ComponentContext compContext)
             throws InvalidException;
@@ -51,7 +51,7 @@ public interface EnhancedConfig {
      * 
      * @param dict The standard OSGi configuration properties dictionary
      * @return the enhanced configuration with nested maps, list allowed
-     * @throws InvalidConfiguration
+     * @throws InvalidException
      */
     public Map<String, Object> getConfiguration(Dictionary<String, Object> dict)
             throws InvalidException;

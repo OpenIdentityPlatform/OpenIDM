@@ -108,13 +108,12 @@ public class ObjectClassInfoHelper {
         builder.setName(nameValue);
         Set<String> keySet = source.keySet();
         if (CreateApiOp.class.isAssignableFrom(operation)) {
-
             for (AttributeInfoHelper attributeInfo : attributes) {
+                if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                        !keySet.contains(attributeInfo.getName())) {
+                    continue;
+                }
                 if (attributeInfo.getAttributeInfo().isCreateable()) {
-                    if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
-                            !keySet.contains(attributeInfo.getName())) {
-                        continue;
-                    }
                     Object v = source.get(attributeInfo.getName());
                     if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
                         throw new IllegalArgumentException("Required value is null");
@@ -124,7 +123,8 @@ public class ObjectClassInfoHelper {
             }
         } else if (UpdateApiOp.class.isAssignableFrom(operation)) {
             for (AttributeInfoHelper attributeInfo : attributes) {
-                if (Uid.NAME.equals(attributeInfo.getName()) || !keySet.contains(attributeInfo.getName())) {
+                if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                        !keySet.contains(attributeInfo.getName())) {
                     continue;
                 }
                 if (attributeInfo.getAttributeInfo().isUpdateable()) {
@@ -134,12 +134,12 @@ public class ObjectClassInfoHelper {
             }
         } else {
             for (AttributeInfoHelper attributeInfo : attributes) {
-                if (Uid.NAME.equals(attributeInfo.getName())) {
+                 if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                        !keySet.contains(attributeInfo.getName())) {
                     continue;
                 }
                 Object v = source.get(attributeInfo.getName());
                 builder.addAttribute(attributeInfo.build(v));
-
             }
         }
         return builder.build();
@@ -158,8 +158,6 @@ public class ObjectClassInfoHelper {
         }
         result.put("_id", Id.escapeUid(source.getUid().getUidValue()));
         return result;
-
-
     }
 
     public Attribute build(String attributeName, Object source) throws Exception {
