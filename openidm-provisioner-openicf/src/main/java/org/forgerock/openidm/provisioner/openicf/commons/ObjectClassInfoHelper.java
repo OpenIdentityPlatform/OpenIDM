@@ -34,6 +34,9 @@ import org.identityconnectors.framework.api.operations.UpdateApiOp;
 import org.identityconnectors.framework.common.objects.*;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.Attributes;
 
@@ -74,11 +77,6 @@ public class ObjectClassInfoHelper {
         return objectClass;
     }
 
-
-//    public Set<AttributeInfoHelper> getAttributes(Class<? extends APIOperation> operation) {
-//        return Collections.unmodifiableSet(attributes);
-//    }
-
     /**
      * @param operation
      * @param name
@@ -87,19 +85,22 @@ public class ObjectClassInfoHelper {
      * @throws PreconditionFailedException if ID value can not be determined from the {@code source}
      */
     public ConnectorObject build(Class<? extends APIOperation> operation, String name, Map<String, Object> source) throws Exception {
-        String nameValue = null;
+        String nameValue = name;
 
-        if (null != name) {
-            nameValue = name;
-        } else if (null != source.get("_id")) {
-            Id id = new Id((String) source.get("_id"));
-            nameValue = id.getLocalId();
-        } else if (null != source.get(nameAttribute)) {
-            nameValue = source.get(nameAttribute).toString();
+        if (null == nameValue) {
+            Object o = source.get("_id");
+            if (null == o) {
+                o = source.get(nameAttribute);
+            }
+            if (o instanceof String) {
+                nameValue = (String) o;
+            }
         }
 
         if (null == nameValue) {
-            throw new PreconditionFailedException("Required localId attribute is missing");
+            throw new PreconditionFailedException("Required NAME attribute is missing");
+        } else {
+            nameValue = Id.escapeUid(nameValue);
         }
 
         ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
@@ -134,7 +135,7 @@ public class ObjectClassInfoHelper {
             }
         } else {
             for (AttributeInfoHelper attributeInfo : attributes) {
-                 if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
+                if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
                         !keySet.contains(attributeInfo.getName())) {
                     continue;
                 }
