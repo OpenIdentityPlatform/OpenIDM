@@ -61,7 +61,7 @@ public class ObjectClassInfoHelperTest {
 
 
     @Test
-    public void testOperationalSchema() throws Exception {
+    public void testConnectorObjectName() throws Exception {
         InputStream inputStream = ObjectClassInfoHelperTest.class.getResourceAsStream("/config/SystemSchemaConfiguration.json");
         Assert.assertNotNull(inputStream);
         ObjectMapper mapper = new ObjectMapper();
