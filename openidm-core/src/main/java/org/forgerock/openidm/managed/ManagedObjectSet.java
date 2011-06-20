@@ -317,7 +317,11 @@ class ManagedObjectSet implements ObjectSet {
         ActivityLog.log(service.getRouter(), Action.QUERY, "Query parameters " + params, 
                 managedId(id), result, null, Status.SUCCESS);
         return result;
-// TODO: provide trigger to filter query results?
+    }
+
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        throw new ForbiddenException("action not yet supported on managed objects");
     }
 
     /**

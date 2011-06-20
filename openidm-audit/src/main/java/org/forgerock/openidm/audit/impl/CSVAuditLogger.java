@@ -103,6 +103,7 @@ public class CSVAuditLogger implements AuditLogger {
     /**
      * {@inheritdoc}
      */
+    @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         // TODO
         return new HashMap();
@@ -113,6 +114,7 @@ public class CSVAuditLogger implements AuditLogger {
      * 
      * {@inheritdoc}
      */
+    @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO
         return new HashMap();
@@ -121,6 +123,7 @@ public class CSVAuditLogger implements AuditLogger {
     /**
      * {@inheritdoc}
      */
+    @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         // TODO: replace ID handling utility
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
@@ -205,13 +208,15 @@ public class CSVAuditLogger implements AuditLogger {
     /**
      * Audit service does not support changing audit entries.
      */
+    @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
 
     /**
      * Audit service currently does not support deleting audit entries.
-     */ 
+     */
+    @Override
     public void delete(String fullId, String rev) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
@@ -219,7 +224,16 @@ public class CSVAuditLogger implements AuditLogger {
     /**
      * Audit service does not support changing audit entries.
      */
+    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+        throw new MethodNotAllowedException("Not allowed on audit service");
+    }
+
+    /**
+     * Audit service does not support actions on audit entries.
+     */
+    @Override
+    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
 }

@@ -71,6 +71,7 @@ public class RepoAuditLogger implements AuditLogger {
     /**
      * {@inheritdoc}
      */
+    @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         RepositoryService svc = getRepoService();
         Map<String, Object> result = null;
@@ -88,6 +89,7 @@ public class RepoAuditLogger implements AuditLogger {
     /**
      * {@inheritdoc}
      */
+    @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         RepositoryService svc = getRepoService();
         Map<String, Object> result = null;
@@ -105,6 +107,7 @@ public class RepoAuditLogger implements AuditLogger {
     /**
      * {@inheritdoc}
      */
+    @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         RepositoryService svc = getRepoService();
         try {
@@ -143,6 +146,7 @@ public class RepoAuditLogger implements AuditLogger {
     /**
      * Audit service does not support changing audit entries.
      */
+    @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
@@ -150,6 +154,7 @@ public class RepoAuditLogger implements AuditLogger {
     /**
      * Audit service currently does not support deleting audit entries.
      */ 
+    @Override
     public void delete(String fullId, String rev) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
@@ -157,7 +162,16 @@ public class RepoAuditLogger implements AuditLogger {
     /**
      * Audit service does not support changing audit entries.
      */
+    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+        throw new MethodNotAllowedException("Not allowed on audit service");
+    }
+
+    /**
+     * Audit service does not support actions on audit entries.
+     */
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
 }

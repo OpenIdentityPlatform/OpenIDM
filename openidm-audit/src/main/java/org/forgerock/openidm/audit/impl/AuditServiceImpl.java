@@ -102,6 +102,7 @@ public class AuditServiceImpl implements AuditService {
      * @throws BadRequestException if the passed identifier is invalid
      * @return the requested object.
      */
+    @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         // TODO
         return new HashMap();
@@ -119,6 +120,7 @@ public class AuditServiceImpl implements AuditService {
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
      */
+    @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         logger.debug("Audit create called for {} with {}", fullId, obj);        
         // Work-around until router id strategy in sync
@@ -165,6 +167,7 @@ public class AuditServiceImpl implements AuditService {
     /**
      * Audit service does not support changing audit entries.
      */
+    @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
@@ -180,7 +183,8 @@ public class AuditServiceImpl implements AuditService {
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */ 
+     */
+    @Override
     public void delete(String fullId, String rev) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
@@ -188,6 +192,7 @@ public class AuditServiceImpl implements AuditService {
     /**
      * Audit service does not support changing audit entries.
      */
+    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         throw new MethodNotAllowedException("Not allowed on audit service");
     }
@@ -210,11 +215,20 @@ public class AuditServiceImpl implements AuditService {
      * configured, a query expression that is invalid, or missing query substitution tokens.
      * @throws ForbiddenException if access to the object or specified query is forbidden.
      */
+    @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO
         return new HashMap();
     }
-    
+
+    /**
+     * Audit service does not support actions on audit entries.
+     */
+    @Override
+    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
+        throw new MethodNotAllowedException("Not allowed on audit service");
+    }
+
     // TODO: replace with common utility to handle ID, this is temporary
     // Assumes single level type
     static String[] splitFirstLevel(String id) {

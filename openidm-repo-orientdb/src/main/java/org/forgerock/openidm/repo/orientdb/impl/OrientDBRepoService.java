@@ -118,6 +118,7 @@ public class OrientDBRepoService implements RepositoryService {
      * @throws BadRequestException if the passed identifier is invalid
      * @return the requested object.
      */
+    @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
@@ -159,6 +160,7 @@ public class OrientDBRepoService implements RepositoryService {
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
      */
+    @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
@@ -223,6 +225,7 @@ public class OrientDBRepoService implements RepositoryService {
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws BadRequestException if the passed identifier is invalid
      */
+    @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
         
         String localId = getLocalId(fullId);
@@ -271,7 +274,8 @@ public class OrientDBRepoService implements RepositoryService {
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */ 
+     */
+    @Override
     public void delete(String fullId, String rev) throws ObjectSetException {
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
@@ -322,6 +326,7 @@ public class OrientDBRepoService implements RepositoryService {
      * @throws NotFoundException if the specified object could not be found. 
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
+    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         throw new UnsupportedOperationException();
     }
@@ -344,6 +349,7 @@ public class OrientDBRepoService implements RepositoryService {
      * configured, a query expression that is invalid, or missing query substitution tokens.
      * @throws ForbiddenException if access to the object or specified query is forbidden.
      */
+    @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO: replace with common utility
         String type = fullId; 
@@ -387,7 +393,12 @@ public class OrientDBRepoService implements RepositoryService {
         
         return result;
     }
-    
+
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        throw new UnsupportedOperationException();
+    }
+
     // TODO: replace with common utility to handle ID, this is temporary
     private String getLocalId(String id) {
         String localId = null;

@@ -21,23 +21,24 @@ import java.util.List; // for Javadoc
 import java.util.Map;
 
 /**
- * An interface that provides access methods on a set of objects. Objects are JSON object
- * structures composed of the basic Java types: {@link Map}, {@link List}, {@link String},
- * {@link Number}, {@link Boolean}.
+ * An interface that provides uniform access methods on a set of objects. This interface
+ * supports JSON-based structures that are composed of basic Java types: {@link Map}
+ * (JSON object), {@link List} (JSON array), {@link String}, {@link Number}, {@link Boolean}.
  * <p>
- * Implementations define their own object identifier taxonomy. By convention, identifiers
- * should follow a URI relative path pattern. Identifiers are provided through the
- * {@code id} parameter in methods, and in the {@code _id} property within objects. In the
- * case where {@code id} parameter is {@code null}, the operation is being requested on the
- * object set itself.
+ * Object identifiers are provided through the {@code id} parameter in methods, and in the
+ * {@code _id} property within objects. In the case where {@code id} parameter is {@code null},
+ * an operation is being requested on the entire object set.
  * <p>
- * Implementations can elect for objects in the set to be optimistically concurrent; if so,
- * an object's version is provided through the {@code rev} parameter in methods, and in
- * the {@code _rev} property within objects. Consumers of this interface should provide object
- * version in the {@code rev} parameters if the {@code read} method yields objects that
- * contain the {@code _rev} property.  
+ * If an object set is hierarchically organized, levels of hierarchy should be separated in
+ * the {@code id} parameter using the {@code "/"} character. By convention, the {@code _id}
+ * property value should be a leaf-level identifier (unqualified).
  * <p>
- * Implementations can define other reserved object property names with an underscore
+ * Implementations can elect to support optimistic concurrency. If so, an object's version is
+ * provided through the {@code rev} parameter in methods, and in the {@code _rev} property
+ * within objects. Consumers of this interface should provide object version in the {@code rev}
+ * parameters if the {@code read} method yields objects that contain the {@code _rev} property.  
+ * <p>
+ * Implementations can reserve their own addition object property names with an underscore
  * {@code _} prefix.
  *
  * @author Paul C. Bryan
@@ -53,13 +54,12 @@ public interface ObjectSet {
     /**
      * Creates a new object in the object set.
      * <p>
-     * This method sets the {@code _id} property to the assigned identifier for the object,
-     * and the {@code _rev} property to the revised object version if optimistic concurrency
+     * On completion, this method sets the {@code _id} property to the assigned identifier for
+     * the object, and the {@code _rev} property to object version if optimistic concurrency
      * is supported.
      *
-     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param id the requested identifier to use, or {@code null} if a server-generated identifier is requested.
      * @param object the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolve. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      */
     void create(String id, Map<String, Object> object) throws ObjectSetException;
@@ -67,9 +67,10 @@ public interface ObjectSet {
     /**
      * Reads an object from the object set.
      * <p>
-     * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} if optimistic concurrency is supported. If optimistic
-     * concurrency is not supported, then {@code _rev} must be absent or {@code null}.
+     * The returned object will contain metadata properties, including relative object
+     * identifier {@code _id}. If optimistic concurrency is supported, the object version
+     * {@code _rev} will be set in the returned object. If optimistic concurrency is not
+     * supported, then {@code _rev} must be {@code null} or absent.
      *
      * @param id the identifier of the object to retrieve from the object set.
      * @throws NotFoundException if the specified object could not be found. 
@@ -103,7 +104,7 @@ public interface ObjectSet {
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */ 
+     */
     void delete(String id, String rev) throws ObjectSetException;
 
     /**
@@ -112,7 +113,7 @@ public interface ObjectSet {
      * @param id the identifier of the object to be patched.
      * @param rev the version of the object to patch or {@code null} if not provided.
      * @param patch the partial change to apply to the object.
-     * @throws ConflictException if patch could not be applied object state or if version is required.
+     * @throws ConflictException if patch could not be applied for the given object state or if version is required.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws PreconditionFailedException if version did not match the existing object in the set.
@@ -120,16 +121,34 @@ public interface ObjectSet {
     void patch(String id, String rev, Patch patch) throws ObjectSetException;
 
     /**
-     * Performs a query on the specified object and returns the associated results.
+     * Performs a query on the specified object and returns the associated result. The
+     * execution of a query should not incur side effects.
      * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
+     * The query result is a JSON object structure composed of basic Java types; its overall
+     * structure is defined by the implementation.
      *
      * @param id identifies the object to query.
      * @param params the parameters of the query to perform.
-     * @return the query results object.
+     * @return the query result object.
      * @throws NotFoundException if the specified object could not be found. 
-     * @throws ForbiddenException if access to the object or specified query is forbidden.
+     * @throws ForbiddenException if access to the object or the specified query is forbidden.
      */
     Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException;
+
+    /**
+     * Performs an action on the specified object and returns the associated result. The
+     * execution of an action may incur side effects.
+     * <p>
+     * Actions are parametric; a set of named parameters is provided as the action criteria.
+     * The action result is a JSON object structure composed of basic Java types; its overall
+     * structure is defined by the implementation.
+     *
+     * @param id identifies the object to perform the action on.
+     * @param params the parameters of the action to perform.
+     * @return the action result object.
+     * @throws NotFoundException if the specified object could not be found. 
+     * @throws ForbiddenException if access to the object or the specified action is forbidden.
+     */
+    Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException;
 }
