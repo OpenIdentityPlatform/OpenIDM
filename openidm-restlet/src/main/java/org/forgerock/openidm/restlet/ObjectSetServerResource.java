@@ -276,9 +276,9 @@ public class ObjectSetServerResource extends ExtendedServerResource {
                 if (conditions.hasSome()) { // queries with conditions are invalid
                     throw new ResourceException(Status.CLIENT_ERROR_PRECONDITION_FAILED);
                 }
-                HashMap<String, Object> map = new HashMap<String, Object>();
-                map.putAll(query.getValuesMap()); // copy values to cope with generics
-                result = jacksonRepresentation(objectSet.query(id, map));
+                HashMap<String, Object> params = new HashMap<String, Object>();
+                params.putAll(query.getValuesMap()); // copy values to cope with generics
+                result = jacksonRepresentation(objectSet.query(id, params));
             }
             return result;
         } catch (ObjectSetException ose) {
@@ -311,20 +311,21 @@ public class ObjectSetServerResource extends ExtendedServerResource {
 
     @Override 
     public Representation post(Representation entity) throws ResourceException {
+        Representation result;
         Form query = getQuery();
         String action = query.getFirstValue("action");
-        if (action == null) {
-            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Expecting query parameter: action");
-        }
-        if (!action.equals("create")) {
-            throw new ResourceException(Status.CLIENT_ERROR_BAD_REQUEST, "Unknown action: "  + action);
-        }
         try {
-            Map<String, Object> object = entityObject(entity);
-            return create(object);
+            if ("create".equals(action)) {
+                result = create(entityObject(entity));
+            } else {
+                HashMap<String, Object> params = new HashMap<String, Object>();
+                params.putAll(query.getValuesMap()); // copy values to cope with generics
+                result = jacksonRepresentation(objectSet.action(id, params));
+            }
         } catch (ObjectSetException ose) {
             throw new ResourceException(ose);
         }
+        return result;
     }
 
     @Override
