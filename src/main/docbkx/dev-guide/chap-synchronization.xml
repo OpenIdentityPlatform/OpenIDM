@@ -78,7 +78,7 @@
   "target": string,
   "validSource": script object,
   "validTarget": script object,
-  "targetCorrelation": target-correlation object,
+  "correlationQuery": script object,
   "properties": [ property object, … ],
   "policies": [ policy object, … ],
   "onCreate": script object,
@@ -127,10 +127,10 @@
                         </listitem>
                     </varlistentry>
                     <varlistentry>
-                        <term>targetCorrelation</term>
+                        <term>correlationQuery</term>
                         <listitem>
-                            <para>target-correlation object, optional</para>
-                            <para>A script that builds a query object and script that filters the result when a source object has no linked target. See the correlation object section below.</para>
+                            <para>script object, optional</para>
+                            <para>A script that yields a query object to query the target object set when a source object has no linked target. The source object is provided in the "source" property in the script scope.</para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
@@ -159,44 +159,6 @@
                         <listitem>
                             <para>script object, optional</para>
                             <para>A script to execute when a target object is to be updated, after property mappings have been applied. In the root scope, the source object is provided in the "source" property, projected target object in the "target" property, link situation that led to the update operation in "situation". If the script throws an exception, then target object update is aborted.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>target-correlation object </title>
-            <para/>
-            <para>Provides the mechanism to locate an existing target object to link to a source object when a link between the two is qualified. Can provide more than one candidate, which will result in the "AMBIGUOUS" situation, documented below. </para>
-            <sect3>
-                <title>Usage</title>
-
-                <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
-{
-  "query": script object,
-  "filter": script object
-}]]>
-                        </code>
-                    </literallayout>
-                </example>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>query</term>
-                        <listitem>
-                            <para>script object, required</para>
-                            <para>A script that builds the query that will be performed on the target object set. The format of the query and the result are at defined by the target object set. In the root scope, the source object is provided in the "source" property. </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>filter</term>
-                        <listitem>
-                            <para>script object, required</para>
-                            <para>Filters the executed query result, yielding an array of target object identifiers. The query result is provided in the "result" property in the root scope.</para>
                         </listitem>
                     </varlistentry>
                 </variablelist>

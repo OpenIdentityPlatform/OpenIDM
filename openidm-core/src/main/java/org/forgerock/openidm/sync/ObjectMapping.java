@@ -77,7 +77,7 @@ class ObjectMapping implements SynchronizationListener {
     private Script validTarget;
 
     /** TODO: Description. */
-    private TargetCorrelation targetCorrelation;
+    private Script correlationQuery;
 
     /** TODO: Description. */
     private ArrayList<PropertyMapping> properties = new ArrayList<PropertyMapping>();
@@ -107,9 +107,7 @@ class ObjectMapping implements SynchronizationListener {
         targetObjectSet = config.get("target").required().asString();
         validSource = Scripts.newInstance(config.get("validSource"));
         validTarget = Scripts.newInstance(config.get("validTarget"));
-        if (config.isDefined("targetCorrelation")) {
-            targetCorrelation = new TargetCorrelation(config.get("targetCorrelation"));
-        }
+        correlationQuery = Scripts.newInstance(config.get("correlationQuery"));
         for (JsonNode node : config.get("properties").expect(List.class)) {
             properties.add(new PropertyMapping(node));
         }
@@ -522,7 +520,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
 // TODO: Detect change of source id, and update link accordingly.
                     if (action == Action.CREATE || action == Action.LINK) {
-                        break; // do not update
+                        break; // do not update target
                     }
                     if (sourceObject != null && targetObject != null) {
                         applyMappings(sourceObject, targetObject);
@@ -535,7 +533,7 @@ class ObjectMapping implements SynchronizationListener {
                         linkObject.update();
                     }
                          
-                    break; // terminate LINK and IGNORE
+                    break; // terminate UPDATE
                 case DELETE:
                     if (targetObject != null) { // forgiving; does nothing if no target
                         deleteTargetObject(targetObject);
@@ -668,11 +666,12 @@ class ObjectMapping implements SynchronizationListener {
                     }
                 }
                 else { // source object not linked to target
-                    List<String> targets = correlateTarget();
-                    if (targets.size() == 1) {
-                        targetObject = readObject(targetObjectSet, targets.get(0));
+                    JsonNode results = correlateTarget();
+                    if (results.size() == 1) {
+                        targetObject = readObject(targetObjectSet,
+                         results.get((Integer)0).required().get("_id").required().asString());
                         situation = Situation.FOUND;
-                    } else if (targets.size() == 0) {
+                    } else if (results.size() == 0) {
                         situation = Situation.ABSENT;
                     } else {
                         situation = Situation.AMBIGUOUS;
@@ -694,31 +693,22 @@ class ObjectMapping implements SynchronizationListener {
          * @return TODO.
          * @throws SynchronizationException TODO.
          */
-        private List<String> correlateTarget() throws SynchronizationException {
-            ArrayList<String> results = new ArrayList<String>();
-            if (targetCorrelation != null) {
+        private JsonNode correlateTarget() throws SynchronizationException {
+            JsonNode result = null;
+            if (correlationQuery != null) {
                 HashMap<String, Object> queryScope = new HashMap<String, Object>();
-                queryScope.put("source", sourceObject);
+                queryScope.put("source", sourceObject.asMap());
                 try {
-                    Object query = targetCorrelation.getQuery().exec(queryScope);
+                    Object query = correlationQuery.exec(queryScope);
                     if (query == null || !(query instanceof Map)) {
-                        throw new SynchronizationException("expected targetCorrelation query to yield a Map");
+                        throw new SynchronizationException("expected correlationQuery script to yield a Map");
                     }
-                    Map<String, Object> queryResult = queryTargetObjectSet((Map)query);
-                    HashMap<String, Object> filterScope = new HashMap<String, Object>();
-                    filterScope.put("result", queryResult);
-                    Object filtered = targetCorrelation.getFilter().exec(filterScope);
-                    if (filtered == null || !(filtered instanceof Iterable)) {
-                        throw new SynchronizationException("expected targetCorrelation filter to yield a List");
-                    }
-                    for (Object value : (Iterable)filtered) {
-                        results.add(value.toString());
-                    }
+                    result = new JsonNode(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {
                     throw new SynchronizationException(se);
                 }
             }
-            return results;
+            return result;
         }
     }
 
@@ -775,9 +765,6 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public Status status = ObjectMapping.Status.SUCCESS;
 
-        /** TODO: Description. */
-        //public String objectId;
-        
         /** TODO: Description. */
         public String sourceId;
         
