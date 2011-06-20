@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.script.javascript;
 
+// Java Standard Edition
+import java.io.File;
+
 // JSON-Fluent
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
@@ -44,12 +47,21 @@ public class JavaScriptFactory implements ScriptFactory {
     public Script newInstance(JsonNode config) throws JsonNodeException {
         String type = config.get("type").asString();
         if (type != null && type.equalsIgnoreCase("text/javascript")) {
-            try {
-                return new JavaScript(config.get("source").required().asString(),
-                 config.get("sharedScope").defaultTo(true).asBoolean());
-            }
-            catch (ScriptException se) { // re-cast to show exact node of failure 
-                throw new JsonNodeException(config.get("source"), se);
+            boolean sharedScope = config.get("sharedScope").defaultTo(true).asBoolean();
+            if (config.isDefined("source")) {
+                try {
+                    return new JavaScript(config.get("source").asString(), sharedScope);
+                } catch (ScriptException se) { // re-cast to show exact node of failure 
+                    throw new JsonNodeException(config.get("source"), se);
+                }
+            } else if (config.isDefined("file")) { // TEMPORARY
+                try {
+                    return new JavaScript(new File(config.get("file").asString()), sharedScope);
+                } catch (ScriptException se) { // re-cast to show exact node of failure 
+                    throw new JsonNodeException(config.get("file"), se);
+                }
+            } else {
+                throw new JsonNodeException(config, "expected 'source' or 'file' property");
             }
         }
         return null;
