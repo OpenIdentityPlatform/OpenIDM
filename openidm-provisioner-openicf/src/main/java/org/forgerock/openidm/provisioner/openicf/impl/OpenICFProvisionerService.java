@@ -198,6 +198,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object or object set is forbidden.
      */
+    @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         String METHOD = "create";
         Id complexId = new Id(id);
@@ -269,6 +270,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object is forbidden.
      */
+    @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
         String METHOD = "read";
         Id complexId = new Id(id);
@@ -360,6 +362,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
+    @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         String METHOD = "update";
         Id complexId = new Id(id);
@@ -448,6 +451,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
+    @Override
     public void delete(String id, String rev) throws ObjectSetException {
         String METHOD = "delete";
         Id complexId = new Id(id);
@@ -518,6 +522,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
+    @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -537,6 +542,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *                                  if access to the object or specified query is forbidden.
      * @throws IllegalArgumentException
      */
+    @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         String METHOD = "query";
         Id complexId = new Id(id);
@@ -613,6 +619,10 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return result;
     }
 
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        throw new ForbiddenException("Action not yet supported on OpenICF objects");
+    }
 
     /**
      * This instance and this method can not be scheduled. The call MUST go through the

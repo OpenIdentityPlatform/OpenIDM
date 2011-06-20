@@ -149,6 +149,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object or object set is forbidden.
      */
+    @Override // ObjectSet
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         Id identifier = new Id(id);
 
@@ -178,6 +179,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object is forbidden.
      */
+    @Override // ObjectSet
     public Map<String, Object> read(String id) throws ObjectSetException {
         Id identifier = new Id(id);
 
@@ -204,6 +206,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
+    @Override // ObjectSet
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         Id identifier = new Id(id);
         ProvisionerService service = locateService(identifier.expectObjectId());
@@ -234,6 +237,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
+    @Override // ObjectSet
     public void delete(String id, String rev) throws ObjectSetException {
         Id identifier = new Id(id);
         ProvisionerService service = locateService(identifier.expectObjectId());
@@ -265,6 +269,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.objset.PreconditionFailedException
      *          if version did not match the existing object in the set.
      */
+    @Override // ObjectSet
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
         Id identifier = new Id(id);
 
@@ -300,6 +305,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.objset.ForbiddenException
      *          if access to the object or specified query is forbidden.
      */
+    @Override // ObjectSet
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         Id identifier = new Id(id);
 
@@ -309,6 +315,10 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         return result;
     }
 
+    @Override // ObjectSet
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        throw new ConflictException("action not implemented yet");
+    }
 
     /**
      * Called when a source object has been created.

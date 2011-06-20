@@ -111,4 +111,10 @@ public class ObjectSetRouter implements ObjectSet {
         String[] split = split(id); // throws NotFoundException
         return routes.get(split[0]).query(split[1], params);
     }
+
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        String[] split = split(id); // throws NotFoundException
+        return routes.get(split[0]).action(split[1], params);
+    }
 }
