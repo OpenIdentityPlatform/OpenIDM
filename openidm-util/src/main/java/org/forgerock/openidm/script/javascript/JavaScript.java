@@ -17,6 +17,9 @@
 package org.forgerock.openidm.script.javascript;
 
 // Java Standard Edition
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +90,42 @@ public class JavaScript implements Script {
         }
         finally {
             Context.exit();
+        }
+    }
+
+    /**
+     * TEMPORARY
+     */
+    public JavaScript(File file) throws ScriptException {
+        this(file, true);
+    }
+
+    /**
+     * TEMPORARY
+     */
+    public JavaScript(File file, boolean sharedScope) throws ScriptException {
+        FileReader reader = null;
+        try {
+            reader = new FileReader(file);
+            this.sharedScope = sharedScope;
+            Context cx = Context.enter();
+            try {
+                script = cx.compileReader(reader, file.getPath(), 1, null);
+            } catch (RhinoException re) {
+                throw new ScriptException(re);
+            } finally {
+                Context.exit();
+            }
+        } catch (IOException ioe) {
+            throw new ScriptException(ioe);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    // meaningless exception
+                }
+            }
         }
     }
 
