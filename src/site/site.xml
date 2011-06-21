@@ -57,35 +57,11 @@
   </menu>
   
   <menu name="Core Documentation">
-   <item name="Release Notes" href="docs.html" collapse="true">
-    <item name="EPUB Format" href="./doc/OpenIDM-Release-Notes.epub"/>
-    <item name="HTML Format" href="./doc/release-notes/OpenIDM-Release-Notes.html"/>
-    <item name="PDF Format" href="./doc/OpenIDM-Release-Notes.pdf" />
-    <item name="RTF Format" href="./doc/OpenIDM-Release-Notes.rtf" />
-   </item>
-   <item name="Installation Guide" href="docs.html" collapse="true">
-    <item name="EPUB Format" href="./doc/OpenIDM-Install-Guide.epub"/>
-    <item name="HTML Format" href="./doc/install-guide/OpenIDM-Install-Guide.html" />
-    <item name="PDF Format" href="./doc/OpenIDM-Install-Guide.pdf" />
-    <item name="RTF Format" href="./doc/OpenIDM-Install-Guide.rtf" />
-   </item>
-   <item name="Administration Guide" href="docs.html" collapse="true">
-    <item name="EPUB Format" href="./doc/OpenIDM-Admin-Guide.epub" />
-    <item name="HTML Format" href="./doc/admin-guide/OpenIDM-Admin-Guide.html" />
-    <item name="PDF Format" href="./doc/OpenIDM-Admin-Guide.pdf" />
-    <item name="RTF Format" href="./doc/OpenIDM-Admin-Guide.rtf" />
-   </item>
-   <item name="Developer Guide" href="docs.html" collapse="true">
-    <item name="EPUB Format" href="./doc/OpenIDM-Dev-Guide.epub" />
-    <item name="HTML Format" href="./doc/dev-guide/OpenIDM-Dev-Guide.html" />
-    <item name="PDF Format" href="./doc/OpenIDM-Dev-Guide.pdf" />
-    <item name="RTF Format" href="./doc/OpenIDM-Dev-Guide.rtf" />
-   </item>
-   <!-- <item name="Javadoc" href="index.html" alt="TODO" /> -->
-  </menu>
-
-  <menu name="Tutorial">
-   <item name="Synchronisation" href="tutorials/tutorial02/index.html" />
+  <item name="All Formats" href="docs.html" />
+  <item name="Release Notes" href="./doc/release-notes/OpenIDM-Release-Notes.html" />
+  <item name="Installation Guide" href="./doc/install-guide/OpenIDM-Install-Guide.html" />
+  <item name="Administration Guide" href="./doc/admin-guide/OpenIDM-Admin-Guide.html" />
+  <item name="Developer Guide" href="./doc/dev-guide/OpenIDM-Dev-Guide.html" />
   </menu>
 
   <!-- TODO: Add QA pages -->
