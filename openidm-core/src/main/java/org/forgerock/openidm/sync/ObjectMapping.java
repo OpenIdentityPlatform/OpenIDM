@@ -667,7 +667,9 @@ class ObjectMapping implements SynchronizationListener {
                 }
                 else { // source object not linked to target
                     JsonNode results = correlateTarget();
-                    if (results.size() == 1) {
+                    if (results == null) { // no correlationQuery defined
+                        situation = Situation.ABSENT;
+                    } else if (results.size() == 1) {
                         targetObject = readObject(targetObjectSet,
                          results.get((Integer)0).required().get("_id").required().asString());
                         situation = Situation.FOUND;
