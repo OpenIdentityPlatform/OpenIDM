@@ -57,6 +57,7 @@ import org.forgerock.openidm.sync.SynchronizationListener;
  */
 @Component(
     name = "org.forgerock.openidm.managed",
+    immediate = true,
     policy = ConfigurationPolicy.REQUIRE
 )
 @Properties({
