@@ -73,14 +73,9 @@
   </partintro>
   
   <xinclude:include href='chap-api-overview.xml' />
-  <xinclude:include href='chap-auditing.xml' />
   <xinclude:include href='chap-distributed_task.xml' />
-  <xinclude:include href='chap-managed_objects.xml' />
   <xinclude:include href='chap-object_model.xml' />
   <xinclude:include href='chap-repository.xml' />
-  <xinclude:include href='chap-provisioning.xml' />
-  <xinclude:include href='chap-scheduling.xml' />
-  <xinclude:include href='chap-synchronization.xml' />
   <xinclude:include href='chap-terminology.xml' />
   <xinclude:include href='chap-best-practices.xml' />
  </part>
