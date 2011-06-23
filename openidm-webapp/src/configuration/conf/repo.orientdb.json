@@ -1,5 +1,5 @@
 {
-    "dbUrl" : "local:./db/openidm",
+    "dbUrl" : "local:${java.io.tmpdir}/openidm/db",
     "user" : "admin",
     "poolMinSize" : 5,
     "poolMaxSize" : 20,

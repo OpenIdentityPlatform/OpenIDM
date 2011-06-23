@@ -41,9 +41,7 @@
     <properties>
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
-        <netbeans.hint.deploy.server>Tomcat60</netbeans.hint.deploy.server>
     </properties>
-    <!-- http://heapdump.wordpress.com/2010/12/25/felix-and-websphere-7/ -->
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -58,6 +56,12 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.servlet</artifactId>
+                    <groupId>org.apache.felix</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -150,7 +154,7 @@
             <artifactId>org.apache.felix.scr</artifactId>
         </dependency>
 
-        <!-- Pax Web 1.0.3 war and whiteboard -->
+        <!-- Pax Web 1.0.3 war and whiteboard - ->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-api</artifactId>
@@ -166,11 +170,16 @@
             <artifactId>pax-web-extender-war</artifactId>
             <version>1.0.3</version>
         </dependency>
-
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.6.1</version>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-whiteboard</artifactId>
+            <version>1.0.3</version>
+        </dependency-->
+        
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>0.9.29</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -178,6 +187,13 @@
             <version>1.6.1</version>
         </dependency>
 
+        <!-- OpenICF Logger -->
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>icfl-over-slf4j</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors.file</groupId>
@@ -187,6 +203,11 @@
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>src/configuration</directory>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -200,6 +221,10 @@
                         WEB-INF/lib/org.osgi.compendium*.jar,
                         WEB-INF/lib/org.osgi.foundation*.jar,
                         WEB-INF/lib/org.osgi.core*.jar,
+                        WEB-INF/lib/slf4j-api*.jar,
+                        WEB-INF/lib/jcl-over-slf4j*.jar,
+                        WEB-INF/lib/logback-core*.jar,
+                        WEB-INF/lib/logback-classic*.jar,
                         WEB-INF/bundle/*,
                         WEB-INF/classes/**/*,
                         WEB-INF/conf/*,
@@ -208,6 +233,16 @@
                         WEB-INF/*,
                         *
                     </packagingIncludes>
+                    <webResources>
+                        <resource>
+                            <directory>src/configuration</directory>
+                            <targetPath>WEB-INF</targetPath>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>**/*.json</include>
+                            </includes>
+                        </resource>
+                    </webResources>
                 </configuration>
             </plugin>
             <plugin>
@@ -226,6 +261,7 @@
                                 connector-framework-internal,
                                 connector-framework,
                                 groovy-all,
+                                icfl-over-slf4j,
                                 jackson-core-asl,
                                 jackson-mapper-asl,
                                 json-fluent,
@@ -239,13 +275,9 @@
                                 openidm-restlet,
                                 openidm-scheduler,
                                 openidm-util,
-                                ops4j-base-util-collections,
-                                ops4j-base-lang,
-                                ops4j-base-util-xml,
                                 org.apache.felix.configadmin,
                                 org.apache.felix.fileinstall,
                                 org.apache.felix.http.bridge,
-                                org.apache.felix.http.proxy,
                                 org.apache.felix.http.whiteboard,
                                 org.apache.felix.log,
                                 org.apache.felix.scr,
@@ -256,17 +288,18 @@
                                 org.apache.servicemix.bundles.rhino,
                                 org.restlet,
                                 org.restlet.ext.jackson,
-                                org.restlet.ext.servlet,
+                                org.restlet.ext.servlet
+                                <!--,ops4j-base-util-collections,
+                                ops4j-base-lang,
+                                ops4j-base-util-xml,
                                 pax-swissbox-core,
                                 pax-swissbox-extender,
                                 pax-swissbox-lifecycle,
                                 pax-swissbox-tracker,
                                 pax-web-api,
                                 pax-web-extender-war,
-                                pax-web-spi,
-                                slf4j-api,
-                                jcl-over-slf4j,
-                                slf4j-jdk14
+                                pax-web-extender-whiteboard,
+                                pax-web-spi-->
                             </includeArtifactIds>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>
@@ -296,6 +329,15 @@
                 <version>6.1.10</version>
                 <configuration>
                     <contextPath>/</contextPath>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>java.security.manager</name>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>java.security.policy</name>
+                            <value>${basedir}/src/java.policy</value>
+                        </systemProperty>
+                    </systemProperties>
                 </configuration>
             </plugin>
         </plugins>
