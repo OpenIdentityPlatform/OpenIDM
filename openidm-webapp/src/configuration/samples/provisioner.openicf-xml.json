@@ -40,9 +40,9 @@
       },
    "configurationProperties" :
       {
-         "xsdIcfFilePath" : "data/resource-schema-1.xsd",
-         "xsdFilePath" : "data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd",
-         "xmlFilePath" : "data/xmlConnectorData.xml"
+         "xsdIcfFilePath" : "${java.io.tmpdir}/openidm/data/resource-schema-1.xsd",
+         "xsdFilePath" : "${java.io.tmpdir}/openidm/data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd",
+         "xmlFilePath" : "${java.io.tmpdir}/openidm/data/xmlConnectorData.xml"
       },
    "objectTypes" :
       {
