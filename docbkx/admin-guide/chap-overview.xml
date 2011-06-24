@@ -63,9 +63,10 @@
       <para>OSGi is a module system and service platform for the Java
       programming language that implements a complete and dynamic component
       model. For a good introduction please refer to
-      http://www.osgi.org/About/WhyOSGi. While the OpenIDM services should be
-      able to run in any OSGi container, it is currently running in Apache
-      Felix. http://felix.apache.org/site/index.html</para>
+      <link xlink:href="http://www.osgi.org/About/WhyOSGi"></link>. 
+      While the OpenIDM services should be
+      able to run in any OSGi container, it is currently running in
+      <link xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>.</para>
     </sect4>
 
     <section>
@@ -86,7 +87,9 @@
     <section>
       <title>Scheduler</title>
       <para>The schedular is a cron like scheduling component implemented
-      using the Quartz library. http://www.quartz-scheduler.org/ It is
+      using the 
+      <link xlink:href="http://www.quartz-scheduler.org">Quartz library</link>. 
+      It is
       typically used to schedule regular syncronizations and
       reconciliations.
       </para>
@@ -147,6 +150,8 @@
       JSON-based object model structures. In the future OpenIDM may support
       other scripting and programming languages.</para>
 
+      </section>
+      <section>
       <title>Managed Objects</title>
 
       <para>A managed object is an object that represents the identity-related
@@ -154,9 +159,9 @@
       data structures stored by OpenIDM in it's pluggable repository. While
       the default configuration of managed objects is that of a user, any
       object may be defined through configuration.</para>
-    </section>
+      </section>
 
-    <section>
+      <section>
       <title>System Objects</title>
 
       <para>System objects are a pluggable representation of objects on

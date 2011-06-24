@@ -33,34 +33,8 @@
 
  <para>OpenIDM issues are tracked at <link
  xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM'
- >https://bugster.forgerock.org/jira/browse/OPENIDM</link>. This chapter
- covers the status of key issues and limitations at release
- <?eval ${project.version}?>.</para>
-
- <section>
-  <title>Fixes Since Last Release</title>
-
-  <para>The following issues were fixed since the previous release.</para>
-  
-  <para>TODO: build the list of fixes based on
-  https://bugster.forgerock.org/jira/browse/OPENIDM</para>
- </section>
- 
- <section>
-  <title>Limitations</title>
-  
-  <para>TODO</para>
- </section>
- 
- <section>
-  <title>Known Issues At Release <?eval ${project.version}?></title>
-
-  <para>The following known issues remained open at the time
-  release <?eval ${project.version}?> became available.</para>
-  
-  <para>TODO: build the known issues list based on
-  https://bugster.forgerock.org/jira/browse/OPENIDM</para>
- </section>
+ >https://bugster.forgerock.org/jira/browse/OPENIDM</link>.
+ </para>
 
 </chapter>
 

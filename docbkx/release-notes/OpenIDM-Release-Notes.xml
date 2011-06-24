@@ -49,8 +49,6 @@
  <toc />
 
  <xinclude:include href='chap-whats-new.xml' />
- <xinclude:include href='chap-before-you-install.xml' />
- <xinclude:include href='chap-compatibility.xml' />
  <xinclude:include href='chap-issues.xml' />
 
  <index />
