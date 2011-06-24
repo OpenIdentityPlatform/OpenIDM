@@ -31,14 +31,32 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>What's New in OpenIDM <?eval ${project.version}?></title>
 
- <para>OpenIDM <?eval ${project.version}?> fixes a number of issues, and
- provides the following additional features.</para>
+ <para>OpenIDM <?eval ${project.version}?> provides the following features:</para>
  
  <itemizedlist>
+  <listitem><para>OSGi based runtime</para></listitem>
+  <listitem><para>Embedded OrientDB as the managed object(virtual) store</para></listitem>
+  <listitem><para>Embedded Jetty servlet container</para></listitem>
+  <listitem><para>REST and Java interfaces for CRUD</para></listitem>
+  <listitem><para>Schedular based reconciliation and synchronization</para></listitem>
   <listitem>
-   <para>TODO</para>
+    <para>Integration with the 
+        <link xlink:href='http://openicf.forgerock.org'>Open Identity Connector Framework (OpenICF)</link>
+    </para>
   </listitem>
  </itemizedlist>
+
+ <para>For installation instructions and a sample to get familiar with the features
+ please refer to the 
+ <link 
+ xlink:href='../install-guide/OpenIDM-Install-Guide.html' >installation guide.
+ </link>
+ </para>
+ <para>For an architectural overview and details on configuration please refer to the
+ <link 
+ xlink:href='../admin-guide/OpenIDM-Admin-Guide.html' >administration guide.
+ </link>
+ </para>
  
 </chapter>
 
