@@ -25,7 +25,7 @@
     <artifactId>openidm-project</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>OpenIDM Project</name>
+    <name>OpenIDM project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution. Experience shows that the most important features of an identity management product are: high flexibility in Business Process handling and compliance with open standards and interfaces. A highly flexible user interface combined with a very robust workflow engine make OpenIDM ready for any Identity Management project.</description>
     <inceptionYear>2011</inceptionYear>
     <url>http://openidm.forgerock.org</url>

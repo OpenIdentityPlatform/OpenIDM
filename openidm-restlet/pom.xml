@@ -23,7 +23,7 @@
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-restlet</artifactId>
-    <name>OpenIDM Restlet Integration</name>
+    <name>OpenIDM Restlet integration</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
