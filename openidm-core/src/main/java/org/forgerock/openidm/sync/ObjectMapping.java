@@ -139,30 +139,21 @@ class ObjectMapping implements SynchronizationListener {
      * TODO: Description.
      *
      * @param id fully-qualified source object identifier.
-     * @return operation to perform for the given source object identifier.
+     * @param object TODO.
+     * @throws SynchronizationException TODO.
      */
-    private SourceSyncOperation newSyncOperation(String sourceId) {
-        String[] split = new String[2];
-        if (sourceId.equals(sourceObjectSet)) {
-            split[0] = sourceObjectSet;
-        } else if (sourceId.startsWith(sourceObjectSet + '/')) {
-            split[0] = sourceObjectSet;
-            if (sourceId.length() > sourceObjectSet.length() + 1) {
-                split[1] = sourceId.substring(sourceObjectSet.length() + 1); // skip the slash
-            }
-        }
+    private void doSourceSync(String id, Map<String, Object> value) throws SynchronizationException {
+        if (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1) {
+            String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
-        SourceSyncOperation op = null;
-        if (split[0] != null) { // operation is against source object set
-            try {
-                JsonNode source = readObject(sourceObjectSet, split[1]);
-                op = new SourceSyncOperation();
-                op.sourceObject = source;
-            } catch (SynchronizationException se) {
-                // failure to read source object is ignored
+            SourceSyncOperation op = new SourceSyncOperation();
+            op.sourceId = localId;
+            if (value != null) {
+                op.sourceObject = new JsonNode(value);
+                op.sourceObject.put("_id", localId); // unqualified
             }
+            op.sync();
         }
-        return op;
     }
 
     /**
@@ -320,11 +311,7 @@ class ObjectMapping implements SynchronizationListener {
 
     @Override
     public void onCreate(String id, Map<String, Object> object) throws SynchronizationException {
-        SyncOperation op = newSyncOperation(id); // synchronous for now
-        if (op != null) {
-            op.sourceObject = new JsonNode(object);
-            op.sync();
-        }
+        doSourceSync(id, object); // synchronous for now
     }
     
     @Override
@@ -335,20 +322,13 @@ class ObjectMapping implements SynchronizationListener {
     @Override
     public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
     throws SynchronizationException {
-        SyncOperation op = newSyncOperation(id); // synchronous for now
-        if (op != null) {
 // TODO: accommodate oldValue when asynchronous operations are supported
-            op.sourceObject = new JsonNode(newValue);
-            op.sync();
-        }
+        doSourceSync(id, newValue); // synchronous for now
     }
 
     @Override
     public void onDelete(String id) throws SynchronizationException {
-        SyncOperation op = newSyncOperation(id); // synchronous for now
-        if (op != null) {
-            op.sync();
-        }
+        doSourceSync(id, null); // synchronous for now
     }
 
     public void recon(String reconId) throws SynchronizationException {
@@ -366,10 +346,11 @@ class ObjectMapping implements SynchronizationListener {
     private void doRecon(String reconId) throws SynchronizationException {
         for (String sourceId : queryAllIds(sourceObjectSet)) {
             SourceSyncOperation op = new SourceSyncOperation();
-            ReconEntry entry = new ReconEntry(op);
-            entry.sourceId = sourceObjectSet + '/' + sourceId;
+            op.sourceId = sourceId;
             op.sourceObject = readObject(sourceObjectSet, sourceId);
             op.reconId = reconId;
+            ReconEntry entry = new ReconEntry(op);
+            entry.sourceId = sourceObjectSet + '/' + sourceId;
             try {
                 op.sync();
             } catch (SynchronizationException se) {
@@ -636,6 +617,9 @@ class ObjectMapping implements SynchronizationListener {
      */
     private class SourceSyncOperation extends SyncOperation {
 
+        /** TODO: Description. */
+        public String sourceId;
+
         @Override
         public void sync() throws SynchronizationException {
             assessSituation();
@@ -650,7 +634,6 @@ class ObjectMapping implements SynchronizationListener {
          */
         private void assessSituation() throws SynchronizationException {
             situation = null;
-            String sourceId = (sourceObject != null ? sourceObject.get("_id").asString() : null);
             if (sourceId != null) {
                 linkObject.getLinkForSource(sourceId);
             }

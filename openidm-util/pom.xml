@@ -23,7 +23,7 @@
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-util</artifactId>
-    <name>OpenIDM Utility Classes</name>
+    <name>OpenIDM utility classes</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
