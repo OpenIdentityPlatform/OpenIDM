@@ -85,7 +85,7 @@ public class AuditServiceImpl implements AuditService {
     
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-    Map<String, List<Enum>> filters;
+    Map<String, List<String>> filters;
     
     List<AuditLogger> auditLoggers;
     
@@ -134,7 +134,7 @@ public class AuditServiceImpl implements AuditService {
         String localId = splitTypeAndId[1];
 
         // Filter
-        List<Enum> actionFilter = filters.get(type);
+        List<String> actionFilter = filters.get(type);
         if (actionFilter != null) {
             // TODO: make filters that can operate on a variety of conditions
             if (!actionFilter.contains(obj.get("action"))) {
@@ -259,8 +259,8 @@ public class AuditServiceImpl implements AuditService {
         logger.info("Audit service started.");
     }
 
-    Map<String, List<Enum>> getFilters(JsonNode config) {
-        Map<String, List<Enum>> configFilters = new HashMap<String, List<Enum>>();
+    Map<String, List<String>> getFilters(JsonNode config) {
+        Map<String, List<String>> configFilters = new HashMap<String, List<String>>();
         
         Map<String, Object> eventTypes = config.get("eventTypes").asMap();
         if (eventTypes == null) {
@@ -272,10 +272,10 @@ public class AuditServiceImpl implements AuditService {
             JsonNode filterActions = eventTypeNode.get("filter").get("actions");
             // TODO: proper filter mechanism
             if (!filterActions.isNull()) {
-                List<Enum> filter = new ArrayList<Enum>();
+                List<String> filter = new ArrayList<String>();
                 for (JsonNode action : filterActions) {
                     Enum actionEnum = action.asEnum(Action.class);
-                    filter.add(actionEnum);
+                    filter.add(actionEnum.toString());
                 }
                 configFilters.put(eventTypeName, filter);
             }
