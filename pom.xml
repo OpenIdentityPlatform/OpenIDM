@@ -185,6 +185,7 @@
         <module>openidm-provisioner-openicf</module>
         <module>openidm-repo</module>
         <module>openidm-repo-orientdb</module>
+        <module>openidm-repo-jdbc</module>
         <module>openidm-restlet</module>
         <module>openidm-scheduler</module>
         <module>openidm-util</module>
