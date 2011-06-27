@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.audit.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +31,9 @@ import org.slf4j.LoggerFactory;
 
 public class ActivityLog {
     final static Logger logger = LoggerFactory.getLogger(ActivityLog.class);
+    
+    // TODO: replace with proper formatter
+    final static SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     
     public static void log(ObjectSet router, Action action, String message, String objectId, 
             Map before, Map after, Status status) throws ObjectSetException { 
@@ -51,8 +56,8 @@ public class ActivityLog {
             }
             
             Map activity = new HashMap();
-            activity.put("timestamp", new java.util.Date()); // TODO: handle date properly for JSON
-            activity.put("action", action);
+            activity.put("timestamp", isoFormatter.format(new Date())); 
+            activity.put("action", action == null ? null : action.toString());
             activity.put("message", message);
             activity.put("objectId", objectId);
             activity.put("rev", rev);
@@ -64,7 +69,7 @@ public class ActivityLog {
             activity.put("before", before);
             //activity.put("diffApplied", null);
             activity.put("after", after); // how can we know for system objects?
-            activity.put("status", status);
+            activity.put("status", status == null ? null : status.toString());
             router.create("audit/activity", activity);
         } catch (ObjectSetException ex) {
             logger.warn("Failed to write activity log {}", ex);
