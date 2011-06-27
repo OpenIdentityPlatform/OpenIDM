@@ -24,7 +24,9 @@
 package org.forgerock.openidm.sync;
 
 // Java Standard Edition
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -356,14 +358,21 @@ class ObjectMapping implements SynchronizationListener {
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
+                    LOGGER.info("Unexpected failure during source reconciliation " + reconId, se);
                 }
+
                 Throwable throwable = se;
                 while (throwable.getCause() != null) { // want message associated with original cause
                     throwable = throwable.getCause();
                 }
-                entry.message = throwable.getMessage();
+                if (se != throwable) {
+                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+                } else {
+                    entry.message = throwable.getMessage();
+                }
             }
             if (entry.status == Status.FAILURE || op.action != null) {
+                entry.timestamp = new Date();
                 entry.reconciling = "source";
                 entry.targetId = qualifiedId(targetObjectSet, op.targetObject);
                 logReconEntry(entry);
@@ -380,14 +389,20 @@ class ObjectMapping implements SynchronizationListener {
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
+                    LOGGER.info("Unexpected failure during target reconciliation " + reconId, se);
                 }
                 Throwable throwable = se;
                 while (throwable.getCause() != null) { // want message associated with original cause
                     throwable = throwable.getCause();
                 }
-                entry.message = throwable.getMessage();
+                if (se != throwable) {
+                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+                } else {
+                    entry.message = throwable.getMessage();
+                }
             }
             if (entry.status == Status.FAILURE || op.action != null) {
+                entry.timestamp = new Date();
                 entry.reconciling = "target";
                 entry.sourceId = qualifiedId(sourceObjectSet, op.sourceObject);
                 logReconEntry(entry);
@@ -746,6 +761,9 @@ class ObjectMapping implements SynchronizationListener {
 
         /** TODO: Description. */
         public final SyncOperation op;
+        
+        /** TODO: Description. */
+        public Date timestamp;
 
         /** TODO: Description. */
         public Status status = ObjectMapping.Status.SUCCESS;
@@ -762,6 +780,9 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public String message;
 
+        // TODO: replace with proper formatter
+        SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        
         public ReconEntry(SyncOperation op) {
             this.op = op;
         }
@@ -777,9 +798,10 @@ class ObjectMapping implements SynchronizationListener {
             node.put("reconciling", reconciling);
             node.put("sourceObjectId", sourceId);
             node.put("targetObjectId", targetId);
+            node.put("timestamp", isoFormatter.format(timestamp));
             node.put("situation", (op.situation == null ? null : op.situation.toString()));
             node.put("action", (op.action == null ? null : op.action.toString()));
-            node.put("status", status);
+            node.put("status", (status == null ? null : status.toString()));
             node.put("message", message);
             return node;
         }
