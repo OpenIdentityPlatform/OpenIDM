@@ -208,7 +208,7 @@ public class GenericTableQueries {
      * @param queries the complete list of configured queries, mapping from query id to the 
      * query details
      */
-    public void setConfiguredQueries(String mainTableName, String propTableName, JsonNode queriesConfig) {
+    public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
         queries = new HashMap<String, QueryInfo>();
         for (Object key : queriesConfig.keys()) {
             String queryName = (String) key;
@@ -217,6 +217,7 @@ public class GenericTableQueries {
             Map<String, String> replacements = new HashMap<String, String>();
             replacements.put("_mainTable", mainTableName);
             replacements.put("_propTable", propTableName);
+            replacements.put("_dbSchema", dbSchemaName);
             
             TokenHandler tokenHandler = new TokenHandler();
             // Replace the table name tokens.

@@ -5,10 +5,11 @@
     "user" : "root",
     "password" : "",
     "queries" : {
+        "dbSchema" : "openidm",
         "genericTables" : {
-            "query-all-ids" : "SELECT openidmid from ${_mainTable} WHERE type = ${_resource}",
-            "links-for-sourceId" : "SELECT fullobject from ${_mainTable}, ${_propTable} WHERE type = ${_mainTable}_type AND openidmid = ${_mainTable}_openidmid AND propkey='$.sourceId' AND propvalue = ${sourceId}",
-            "links-for-targetId" : "SELECT fullobject from ${_mainTable}, ${_propTable} WHERE type = ${_mainTable}_type AND openidmid = ${_mainTable}_openidmid AND propkey='$.targetId' AND propvalue = ${targetId}"
+            "query-all-ids" : "SELECT openidmid FROM ${_dbSchema}.${_mainTable} WHERE type = ${_resource}",
+            "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_dbSchema}.${_propTable} WHERE type = ${_mainTable}_type AND openidmid = ${_mainTable}_openidmid AND propkey='$.sourceId' AND propvalue = ${sourceId}",
+            "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_propTable} WHERE type = ${_mainTable}_type AND openidmid = ${_mainTable}_openidmid AND propkey='$.targetId' AND propvalue = ${targetId}"
         }
     },
     "resourceMapping" : {

@@ -84,6 +84,7 @@ public class GenericTableHandler implements TableHandler {
 
     String mainTableName;
     String propTableName;
+    String dbSchemaName;
     
     ObjectMapper mapper = new ObjectMapper();
     GenericTableQueries queries;
@@ -95,20 +96,21 @@ public class GenericTableHandler implements TableHandler {
     String propCreateQueryStr;
     String propDeleteQueryStr;
     
-    public GenericTableHandler(String mainTableName, String propTableName, JsonNode queriesConfig) {
+    public GenericTableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
+        this.dbSchemaName = dbSchemaName;
         
         queries = new GenericTableQueries();
-        queries.setConfiguredQueries(mainTableName, propTableName, queriesConfig);
+        queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig);
 
-        readQueryStr = "SELECT rev, fullobject FROM " + mainTableName + " WHERE type = ? AND openidmid  = ?";
-        createQueryStr = "INSERT INTO " + mainTableName + " (type, openidmid, rev, fullobject) VALUES (?,?,?,?)";
-        updateQueryStr = "UPDATE " + mainTableName + " SET rev = ? , fullobject = ? WHERE type = ? AND openidmid = ?";
-        deleteQueryStr = "DELETE FROM " + mainTableName + " WHERE type = ? AND openidmid = ? AND rev = ?";
+        readQueryStr = "SELECT rev, fullobject FROM " + dbSchemaName + "." + mainTableName + " WHERE type = ? AND openidmid  = ?";
+        createQueryStr = "INSERT INTO " + dbSchemaName + "." + mainTableName + " (type, openidmid, rev, fullobject) VALUES (?,?,?,?)";
+        updateQueryStr = "UPDATE " + dbSchemaName + "." + mainTableName + " SET rev = ? , fullobject = ? WHERE type = ? AND openidmid = ?";
+        deleteQueryStr = "DELETE FROM " + dbSchemaName + "." + mainTableName + " WHERE type = ? AND openidmid = ? AND rev = ?";
 
-        propCreateQueryStr = "INSERT INTO " + propTableName + " ( " + mainTableName + "_type, " + mainTableName + "_openidmid, propkey, proptype, propvalue) VALUES (?,?,?,?,?)";
-        propDeleteQueryStr = "DELETE FROM " + propTableName + " WHERE " + mainTableName + "_type = ? AND " + mainTableName + "_openidmid = ?";
+        propCreateQueryStr = "INSERT INTO " + dbSchemaName + "." + propTableName + " ( " + mainTableName + "_type, " + mainTableName + "_openidmid, propkey, proptype, propvalue) VALUES (?,?,?,?,?)";
+        propDeleteQueryStr = "DELETE FROM " + dbSchemaName + "." + propTableName + " WHERE " + mainTableName + "_type = ? AND " + mainTableName + "_openidmid = ?";
     }
     
     /* (non-Javadoc)
