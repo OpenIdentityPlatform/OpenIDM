@@ -47,7 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Configured and add-hoc query support on OrientDB
+ * Configured and add-hoc query support on tables in generic (non-object specific) layout
  * 
  * Queries can contain tokens of the format ${token-name}
  * 
@@ -97,32 +97,34 @@ public class GenericTableQueries {
      */
     public List<Map<String, Object>> query(final String type, Map<String, Object> params, Connection con) 
             throws BadRequestException, InternalServerErrorException {
+        
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();;
-        //QueryInfo foundQueryInfo = null;
         params.put(QueryConstants.RESOURCE_NAME, type); 
         
-            //String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);
-            //if (queryExpression != null) {
-            //    foundQueryInfo = resolveInlineQuery(type, params, database);
-            //} else {
-                String queryId = (String) params.get(QueryConstants.QUERY_ID);
-                if (queryId == null) {
-                    throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
-                            + " to identify/define a query must be passed in the parameters. " + params);
-                }
-                PreparedStatement foundQuery = null;
-                try {
-                    foundQuery = getQuery(con, queryId, type, params); //configuredQueries.get(queryId);
-                } catch (SQLException ex) {
-                    throw new InternalServerErrorException("DB reported failure preparing query: " 
-                            + (foundQuery == null ? "null" : foundQuery.toString()) + " with params: " + params + " error code: " + ex.getErrorCode() 
-                            + " sqlstate: " + ex.getSQLState() + " message: " + ex.getMessage(), ex);
-                }
-                if (foundQuery == null) {
-                    throw new BadRequestException("The passed query identifier " + queryId 
-                            + " does not match any configured queries on the OrientDB repository service.");
-                }
-            //}
+        //TODO: support QUERY_EXPRESSION
+        //String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);
+        //if (queryExpression != null) {
+        //    foundQueryInfo = resolveInlineQuery(type, params, database);
+        //} else {
+        
+        String queryId = (String) params.get(QueryConstants.QUERY_ID);
+        if (queryId == null) {
+            throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
+                    + " to identify/define a query must be passed in the parameters. " + params);
+        }
+        PreparedStatement foundQuery = null;
+        try {
+            foundQuery = getQuery(con, queryId, type, params); //configuredQueries.get(queryId);
+        } catch (SQLException ex) {
+            throw new InternalServerErrorException("DB reported failure preparing query: " 
+                    + (foundQuery == null ? "null" : foundQuery.toString()) + " with params: " + params + " error code: " + ex.getErrorCode() 
+                    + " sqlstate: " + ex.getSQLState() + " message: " + ex.getMessage(), ex);
+        }
+        if (foundQuery == null) {
+            throw new BadRequestException("The passed query identifier " + queryId 
+                    + " does not match any configured queries on the OrientDB repository service.");
+        }
+        
         try {
             ResultSet rs = foundQuery.executeQuery();
             ResultSetMetaData rsMetaData = rs.getMetaData();
@@ -134,9 +136,10 @@ public class GenericTableQueries {
                     String objString = rs.getString("fullobject");
                     ObjectMapper mapper = new ObjectMapper();
                     Map<String, Object> obj = (Map<String, Object>) mapper.readValue(objString, Map.class);
-                    //obj.put("_rev", rev);
-        // TODO: remove data logging            
-        logger.debug("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  
+
+                    // TODO: remove data logging            
+                    logger.debug("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  
+                    
                     result.add(obj);
                 } else {
                     Map<String, Object> obj = new HashMap<String, Object>();
@@ -158,75 +161,6 @@ public class GenericTableQueries {
                     + foundQuery.toString() + " with params: " + params + " message: " + ex.getMessage(), ex);
         }
         return result;
-/*
-        List<ODocument> result = null;
-        QueryInfo foundQueryInfo = null;
-        params.put(QueryConstants.RESOURCE_NAME, type); 
-        
-        String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);
-        if (queryExpression != null) {
-            foundQueryInfo = resolveInlineQuery(type, params, database);
-        } else {
-            String queryId = (String) params.get(QueryConstants.QUERY_ID);
-            if (queryId == null) {
-                throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
-                        + " to identify/define a query must be passed in the parameters. " + params);
-            }
-            foundQueryInfo = configuredQueries.get(queryId);
-            if (foundQueryInfo == null) {
-                throw new BadRequestException("The passed query identifier " + queryId 
-                        + " does not match any configured queries on the OrientDB repository service.");
-            }
-        }
-        
-        if (foundQueryInfo != null) {
-            OSQLSynchQuery<ODocument> query = null;
-            boolean tryPrepared = foundQueryInfo.isUsePrepared();
-            if (tryPrepared) {
-                // Try to use the prepared statement, which supports token substitution of where clause
-                query = foundQueryInfo.getPreparedQuery();                
-                logger.debug("Prepared query {} ", query);
-            } else {
-                // Substitute tokens manually, which supports replacing any part of the query
-                String queryString = foundQueryInfo.getQueryString();
-                query = resolveQuery(queryString, params);
-                logger.debug("Manual token substitution for {} resulted in {}", queryString, query);
-            }
-
-            // TODO: Simplify the below
-            try {
-                logger.debug("Evaluate query {}", query);
-                result = database.command(query).execute(params);
-            } catch (OQueryParsingException firstTryEx) {
-                if (tryPrepared) {
-                    // Prepared query is invalid, fall back onto add-hoc resolved query
-                    try {
-                        String queryString = foundQueryInfo.getQueryString();
-                        query = resolveQuery(queryString, params);
-                        logger.debug("Prepared version not valid, manual token substitution for {} resulted in {}",
-                                queryString, query);
-                        result = database.command(query).execute(params);
-                        // Disable use of the prepared statement as manually resolved works
-                        logger.debug("Manual substition valid, mark not to use prepared statement");
-                        foundQueryInfo.setUsePrepared(false);
-                    } catch (OQueryParsingException secondTryEx) {
-                        // TODO: consider differentiating between bad configuration and bad request
-                        throw new BadRequestException("Failed to resolve and parse the query " 
-                                + foundQueryInfo.getQueryString() + " with params: " + params, secondTryEx);
-                    }
-                } else {
-                    // TODO: consider differentiating between bad configuration and bad request
-                    throw new BadRequestException("Failed to resolve and parse the query " 
-                            + foundQueryInfo.getQueryString() + " with params: " + params, firstTryEx);
-                }
-            } catch (IllegalArgumentException ex) {
-                // TODO: consider differentiating between bad configuration and bad request
-                throw new BadRequestException("Query is invalid: " 
-                        + foundQueryInfo.getQueryString() + " " + ex.getMessage(), ex);
-            }
-        }
-        return result;
-*/
     }
     
     boolean hasColumn (ResultSetMetaData rsMetaData, String columnName) throws SQLException {
@@ -248,7 +182,7 @@ public class GenericTableQueries {
         
         String queryStr = info.getQueryString();
         List<String> tokenNames = info.getTokenNames();
-        PreparedStatement statement = getPreparedStatement(con, queryStr); //con.prepareStatement(queryStr);
+        PreparedStatement statement = getPreparedStatement(con, queryStr); 
         int count = 1; // DB column count starts at 1
         for (String tokenName : tokenNames) {
             Object objValue =  params.get(tokenName);
@@ -259,41 +193,8 @@ public class GenericTableQueries {
             statement.setString(count, value);
             count++;
         }
-logger.info("Prepared statement: {}", statement);
+        logger.debug("Prepared statement: {}", statement);
 
-/*        
-        
-        // TODO: replace with table handler
-        String mainTableName = "genericobjects";
-        String propTableName = "genericobjectproperties";
-        if (type.startsWith("managed/")) {
-            mainTableName = "managedobjects";
-            propTableName = "managedobjectproperties";
-        }
-        PreparedStatement statement = null;
-        if (queryId.equals("query-all-ids")) {
-            // TODO: generic mechanism, proper prepared statement caching
-            
-            // TODO: don't parse full object just to get ID
-            String queryStr = "SELECT openidmid from " + mainTableName + " WHERE type = ?";
-            statement = con.prepareStatement(queryStr);
-            statement.setString(1, type);
-        } else if (queryId.equals("links-for-sourceId")) {
-            String queryStr = "SELECT fullobject from " + mainTableName + ", " + propTableName + " WHERE type = " + mainTableName + "_type AND openidmid = " + mainTableName + "_openidmid AND propkey='$.sourceId' AND propvalue = ?";
-            
-            //openidm_id, sourceId, targetId, reconId
-            //select object.object_uri, fullobject from object, objectproperties where propkey="$.firstname" AND propvalue = "Andreas" AND object.object_uri='managed/user/9' AND object.object_uri = objectproperties.object_uri; 
-            statement = con.prepareStatement(queryStr);
-            statement.setString(1, (String) params.get("sourceId"));
-        } else if (queryId.equals("links-for-targetId")) {
-            String queryStr = "SELECT fullobject from " + mainTableName + ", " + propTableName + " WHERE type = " + mainTableName + "_type AND openidmid = " + mainTableName + "_openidmid AND propkey='$.targetId' AND propvalue = ?";
-            statement = con.prepareStatement(queryStr);
-            statement.setString(1, (String) params.get("targetId"));
-        }
-        //"query-all-ids" : "select _openidm_id from ${_resource}", 
-        //"links-for-sourceId": "SELECT * FROM ${_resource} WHERE sourceId = '${sourceId}'",
-        //"links-for-targetId": "SELECT * FROM ${_resource} WHERE targetId = '${targetId}'" 
-*/        
         return statement;
     }
     
@@ -305,7 +206,7 @@ logger.info("Prepared statement: {}", statement);
      * query execution time.
      * 
      * @param queries the complete list of configured queries, mapping from query id to the 
-     * query expression which may optionally contain tokens in the form ${token-name}.
+     * query details
      */
     public void setConfiguredQueries(String mainTableName, String propTableName, JsonNode queriesConfig) {
         queries = new HashMap<String, QueryInfo>();
