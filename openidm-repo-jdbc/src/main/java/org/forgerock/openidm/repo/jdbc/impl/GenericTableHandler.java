@@ -105,15 +105,10 @@ public class GenericTableHandler implements TableHandler {
         readQueryStr = "SELECT rev, fullobject FROM " + mainTableName + " WHERE type = ? AND openidmid  = ?";
         createQueryStr = "INSERT INTO " + mainTableName + " (type, openidmid, rev, fullobject) VALUES (?,?,?,?)";
         updateQueryStr = "UPDATE " + mainTableName + " SET rev = ? , fullobject = ? WHERE type = ? AND openidmid = ?";
-        deleteQueryStr = "DELETE FROM " + mainTableName + " where type = ? AND openidmid = ? AND rev = ?";
+        deleteQueryStr = "DELETE FROM " + mainTableName + " WHERE type = ? AND openidmid = ? AND rev = ?";
 
         propCreateQueryStr = "INSERT INTO " + propTableName + " ( " + mainTableName + "_type, " + mainTableName + "_openidmid, propkey, proptype, propvalue) VALUES (?,?,?,?,?)";
-        propDeleteQueryStr = "DELETE FROM " + propTableName + " where " + mainTableName + "_type = ? AND " + mainTableName + "_openidmid = ?";
-    }
-    
-    @Override
-    public String toString() {
-        return "Generic handler mapped to [" + mainTableName + ", " + propTableName + "]"; 
+        propDeleteQueryStr = "DELETE FROM " + propTableName + " WHERE " + mainTableName + "_type = ? AND " + mainTableName + "_openidmid = ?";
     }
     
     /* (non-Javadoc)
@@ -320,5 +315,9 @@ public class GenericTableHandler implements TableHandler {
                 throws ObjectSetException {
         return queries.query(type, params, connection); 
     } 
-
+    
+    @Override
+    public String toString() {
+        return "Generic handler mapped to [" + mainTableName + ", " + propTableName + "]"; 
+    }
 }

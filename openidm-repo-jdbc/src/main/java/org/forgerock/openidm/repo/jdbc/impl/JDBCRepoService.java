@@ -445,6 +445,12 @@ public class JDBCRepoService implements RepositoryService {
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             
+            String enabled = config.get("enabled").asString();
+            if ("false".equals(enabled)) {
+                logger.debug("JDBC repository not enabled");
+                throw new RuntimeException("JDBC repository not enabled.");
+            }
+            
             // Data Source configuration
             jndiName = config.get(CONFIG_JNDI_NAME).asString();
             if (jndiName != null && jndiName.trim().length() > 0) {
@@ -457,7 +463,7 @@ public class JDBCRepoService implements RepositoryService {
                     logger.warn("Getting JNDI initial context failed: " + ex.getMessage(), ex);
                 }
                 if (ctx == null) {
-                    throw new InvalidException("Current platform context not currently support lookup of repository DB via JNDI. " 
+                    throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. " 
                             + " Configure DB initialization via direct " + CONFIG_DB_DRIVER + " configuration instead.");
                 }
                 
@@ -467,7 +473,7 @@ public class JDBCRepoService implements RepositoryService {
                 // Get DB Connection via Driver Manager
                 dbDriver = config.get(CONFIG_DB_DRIVER).asString();
                 if (dbDriver == null || dbDriver.trim().length() == 0) {
-                    throw new RuntimeException("Either a JNDI name (" + CONFIG_JNDI_NAME + "), " +
+                    throw new InvalidException("Either a JNDI name (" + CONFIG_JNDI_NAME + "), " +
                             "or a DB driver lookup (" + CONFIG_DB_DRIVER + ") needs to be configured to connect to a DB.");
                 }
                 dbUrl = config.get(CONFIG_DB_URL).required().asString();
