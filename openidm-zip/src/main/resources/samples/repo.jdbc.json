@@ -1,5 +1,4 @@
 {
-    "enabled" : "false",
     "jndiName" : "",
     "dbDriver" : "com.mysql.jdbc.Driver",
     "dbUrl" : "jdbc:mysql://localhost:3306/openidm",
