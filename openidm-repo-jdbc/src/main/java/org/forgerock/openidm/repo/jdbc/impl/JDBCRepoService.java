@@ -490,12 +490,13 @@ public class JDBCRepoService implements RepositoryService {
             }
             
             // Table Handling configuration
+            String dbSchemaName = config.get("queries").get("dbSchema").defaultTo("openidm").asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
             tableHandlers = new HashMap<String, TableHandler>();
             JsonNode defaultMapping = config.get("resourceMapping").get("default");
             String defaultMainTable = defaultMapping.get("mainTable").defaultTo("genericobjects").asString();
             String defaultPropTable = defaultMapping.get("propertiesTable").defaultTo("genericobjectproperties").asString();
-            defaultTableHandler = new GenericTableHandler(defaultMainTable, defaultPropTable, genericQueries);
+            defaultTableHandler = new GenericTableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
             logger.info("Using default table handler: {}", defaultTableHandler);
             
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
@@ -510,6 +511,7 @@ public class JDBCRepoService implements RepositoryService {
                     TableHandler handler = new GenericTableHandler(
                             value.get("mainTable").required().asString(), 
                             value.get("propertiesTable").required().asString(),
+                            dbSchemaName,
                             genericQueries);
                     tableHandlers.put(key, handler);
                     logger.info("For pattern {} added handler: {}", key, handler);
