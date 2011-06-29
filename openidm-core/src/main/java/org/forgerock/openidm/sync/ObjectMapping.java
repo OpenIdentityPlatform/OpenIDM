@@ -589,7 +589,7 @@ class ObjectMapping implements SynchronizationListener {
             if (targetObject != null) { // must have a target object to qualify
                 if (validTarget != null) {
                     HashMap<String, Object> scope = new HashMap<String, Object>();
-                    scope.put("target", targetObject);
+                    scope.put("target", targetObject.asMap());
                     try {
                         Object o = validTarget.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
