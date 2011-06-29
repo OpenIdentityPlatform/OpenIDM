@@ -177,7 +177,7 @@ public class GenericTableHandler implements TableHandler {
         PreparedStatement propCreateStatement = queries.getPreparedStatement(connection, propCreateQueryStr);
         
         for (JsonNode entry : node) {
-            String propkey = entry.getPath().toString();
+            String propkey = entry.getPointer().toString();
             if (entry.isMap() || entry.isList()) {
                 writeNodeProperties(fullId, type, localId, entry, connection);
             } else {

@@ -210,9 +210,8 @@ public class GenericTableQueries {
      */
     public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
         queries = new HashMap<String, QueryInfo>();
-        for (Object key : queriesConfig.keys()) {
-            String queryName = (String) key;
-            String rawQuery = queriesConfig.get(key).required().asString();
+        for (String queryName : queriesConfig.keys()) {
+            String rawQuery = queriesConfig.get(queryName).required().asString();
             
             Map<String, String> replacements = new HashMap<String, String>();
             replacements.put("_mainTable", mainTableName);

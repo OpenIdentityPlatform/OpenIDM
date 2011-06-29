@@ -501,9 +501,8 @@ public class JDBCRepoService implements RepositoryService {
             
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
             if (!genericMapping.isNull()) {
-                for (Object keyObj : genericMapping.keys()) {
-                    JsonNode value = genericMapping.get(keyObj);
-                    String key = (String) keyObj;
+                for (String key : genericMapping.keys()) {
+                    JsonNode value = genericMapping.get(key);
                     if (key.endsWith("/*")) {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
