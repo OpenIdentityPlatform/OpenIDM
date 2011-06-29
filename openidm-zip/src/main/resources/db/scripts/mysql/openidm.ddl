@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `proptype` VARCHAR(32) DEFAULT NULL ,
   `propvalue` TEXT DEFAULT NULL ,
   INDEX `fk_genericobjects` (`genericobjects_type`, `genericobjects_openidmid`) ,
+  PRIMARY KEY (`genericobjects_type`, `genericobjects_openidmid`, `propkey`) ,
   CONSTRAINT `fk_genericobjects`
     FOREIGN KEY (`genericobjects_type`, `genericobjects_openidmid`)
     REFERENCES `openidm`.`genericobjects` (`type`, `openidmid`)
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `proptype` VARCHAR(32) DEFAULT NULL ,
   `propvalue` TEXT DEFAULT NULL ,
   INDEX `fk_managedobjects` (`managedobjects_type`, `managedobjects_openidmid`) ,
+  PRIMARY KEY (`managedobjects_type`, `managedobjects_openidmid`, `propkey`) ,
   CONSTRAINT `fk_managedobjects`
     FOREIGN KEY (`managedobjects_type`, `managedobjects_openidmid`)
     REFERENCES `openidm`.`managedobjects` (`type`, `openidmid`)
@@ -58,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `proptype` VARCHAR(32) DEFAULT NULL ,
   `propvalue` TEXT DEFAULT NULL ,
   INDEX `fk_configobjects` (`configobjects_type`, `configobjects_openidmid`) ,
+  PRIMARY KEY (`configobjects_type`, `configobjects_openidmid`, `propkey`) ,
   CONSTRAINT `fk_configobjects`
     FOREIGN KEY (`configobjects_type`, `configobjects_openidmid`)
     REFERENCES `openidm`.`configobjects` (`type`, `openidmid`)
@@ -71,7 +74,9 @@ CREATE TABLE IF NOT EXISTS `openidm`.`links` (
     `sourceid` VARCHAR(38), 
     `targetid` VARCHAR(38), 
     `reconid` VARCHAR(36),
-    PRIMARY KEY (`type`, `openidmid`) ) 
+    PRIMARY KEY (`type`, `openidmid`) ,
+    UNIQUE INDEX `sourceidx` (`type` ASC, `openidmid` ASC, `sourceid` ASC) ,
+    INDEX `targetidx` (`type` ASC, `openidmid` ASC, `targetid` ASC) )
 ENGINE = InnoDB;
 
 CREATE TABLE IF NOT EXISTS `openidm`.`auditrecon` (
