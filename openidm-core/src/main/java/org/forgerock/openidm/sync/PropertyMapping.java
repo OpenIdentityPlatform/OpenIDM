@@ -20,10 +20,10 @@ package org.forgerock.openidm.sync;
 import java.util.HashMap;
 
 // JSON-Fluent library
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.json.fluent.JsonPath;
-import org.forgerock.json.fluent.JsonPathException;
+import org.forgerock.json.fluent.JsonPointer;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.script.Script;
@@ -38,10 +38,10 @@ import org.forgerock.openidm.script.Scripts;
 class PropertyMapping {
 
     /** TODO: Description. */
-    private final JsonPath targetPath;
+    private final JsonPointer targetPointer;
 
     /** TODO: Description. */
-    private final JsonPath sourcePath;
+    private final JsonPointer sourcePointer;
 
     /** TODO: Description. */
     private final Script script;
@@ -56,17 +56,17 @@ class PropertyMapping {
      * @param property TODO.
      * @param required TODO.
      */
-    private static JsonPath asPath(JsonNode config, String property, boolean required) throws JsonNodeException {
+    private static JsonPointer asPointer(JsonNode config, String property, boolean required) throws JsonNodeException {
         JsonNode node = config.get(property);
         if (required) {
             node.required();
         }
-        JsonPath result = null;
+        JsonPointer result = null;
         if (!node.isNull()) {
             try {
-                result = new JsonPath(node.asString());
-            } catch (JsonPathException jpe) {
-                throw new JsonNodeException(node, jpe);
+                result = new JsonPointer(node.asString());
+            } catch (JsonException je) {
+                throw new JsonNodeException(node, je);
             }
         }
         return result;
@@ -79,8 +79,8 @@ class PropertyMapping {
      * @throws JsonNodeException TODO>
      */
     public PropertyMapping(JsonNode config) throws JsonNodeException {
-        targetPath = asPath(config, "target", true);
-        sourcePath = asPath(config, "source", false);
+        targetPointer = asPointer(config, "target", true);
+        sourcePointer = asPointer(config, "source", false);
         script = Scripts.newInstance(config.get("script"));
         defaultValue = config.get("default").getValue();
     }
@@ -95,8 +95,8 @@ class PropertyMapping {
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
         try {
             Object result = null;
-            if (sourcePath != null) { // optional
-                JsonNode node = sourcePath.get(sourceObject);
+            if (sourcePointer != null) { // optional
+                JsonNode node = sourceObject.get(sourcePointer);
                 if (node != null) { // source property value found
                     result = node.getValue();
                 }
@@ -109,8 +109,8 @@ class PropertyMapping {
             if (result == null) {
                 result = defaultValue; // default null if not specified
             }
-            targetPath.put(targetObject, result);
-        } catch (JsonNodeException jne) { // malformed JSON node for path
+            targetObject.put(targetPointer, result);
+        } catch (JsonNodeException jne) { // malformed JSON node for pointer
             throw new SynchronizationException(jne);
         } catch (ScriptException se) { // script threw an exception
             throw new SynchronizationException(se);
