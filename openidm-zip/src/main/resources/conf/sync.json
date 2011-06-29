@@ -13,7 +13,7 @@
                 { "source" : "lastname", "target" : "lastname" },
                 { "source" : "firstname", "target" : "firstname" },
                 { "source" : "email", "target" : "email" },
-                { "default" : "external", "target" : "employeeType " }
+                { "default" : "external", "target" : "employeeType" }
             ]
         },
         {
