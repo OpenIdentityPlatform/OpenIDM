@@ -19,7 +19,7 @@ package org.forgerock.openidm.sync;
 // Java Standard Edition
 import java.util.HashMap;
 
-// JSON-Fluent library
+// JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
@@ -52,24 +52,34 @@ class PropertyMapping {
     /**
      * TODO: Description.
      *
-     * @param config TODO.
-     * @param property TODO.
-     * @param required TODO.
+     * @param node TODO.
+     * @param pointer TODO.
+     * @param value TODO.
+     * @throws SynchronizationException TODO.
      */
-    private static JsonPointer asPointer(JsonNode config, String property, boolean required) throws JsonNodeException {
-        JsonNode node = config.get(property);
-        if (required) {
-            node.required();
+    private static void put(JsonNode targetObject, JsonPointer pointer, Object value) throws SynchronizationException {
+        String[] tokens = pointer.toArray();
+        if (tokens.length == 0) {
+            throw new SynchronizationException("cannot replace root object");
         }
-        JsonPointer result = null;
-        if (!node.isNull()) {
-            try {
-                result = new JsonPointer(node.asString());
-            } catch (JsonException je) {
-                throw new JsonNodeException(node, je);
+        JsonNode node = targetObject;
+        for (int n = 0; n < tokens.length - 1; n++) {
+            JsonNode child = node.get(tokens[n]);
+            if (child.isNull() && !node.isDefined(tokens[n])) { 
+                try {
+                    node.put(tokens[n], new HashMap());
+                } catch (JsonNodeException jne) {
+                    throw new SynchronizationException(jne);
+                }
+                child = node.get(tokens[n]);
             }
+            node = child;
         }
-        return result;
+        try {
+            node.put(tokens[tokens.length - 1], value);
+        } catch (JsonNodeException jne) {
+            throw new SynchronizationException(jne);
+        }
     }
 
     /**
@@ -79,8 +89,8 @@ class PropertyMapping {
      * @throws JsonNodeException TODO>
      */
     public PropertyMapping(JsonNode config) throws JsonNodeException {
-        targetPointer = asPointer(config, "target", true);
-        sourcePointer = asPointer(config, "source", false);
+        targetPointer = config.get("target").required().asPointer();
+        sourcePointer = config.get("source").asPointer(); // optional
         script = Scripts.newInstance(config.get("script"));
         defaultValue = config.get("default").getValue();
     }
@@ -93,27 +103,25 @@ class PropertyMapping {
      * @throws MappingException TODO.
      */
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
-        try {
-            Object result = null;
-            if (sourcePointer != null) { // optional
-                JsonNode node = sourceObject.get(sourcePointer);
-                if (node != null) { // source property value found
-                    result = node.getValue();
-                }
+        Object result = null;
+        if (sourcePointer != null) { // optional
+            JsonNode node = sourceObject.get(sourcePointer);
+            if (node != null) { // source property value found
+                result = node.getValue();
             }
-            if (script != null) { // optional
-                HashMap<String, Object> scope = new HashMap<String, Object>();
-                scope.put("source", result);
-                result = script.exec(scope); // script yields transformation result
-            }
-            if (result == null) {
-                result = defaultValue; // default null if not specified
-            }
-            targetObject.put(targetPointer, result);
-        } catch (JsonNodeException jne) { // malformed JSON node for pointer
-            throw new SynchronizationException(jne);
-        } catch (ScriptException se) { // script threw an exception
-            throw new SynchronizationException(se);
         }
+        if (script != null) { // optional
+            HashMap<String, Object> scope = new HashMap<String, Object>();
+            scope.put("source", result);
+            try {
+                result = script.exec(scope); // script yields transformation result
+            } catch (ScriptException se) {
+                throw new SynchronizationException(se);
+            }
+        }
+        if (result == null) {
+            result = defaultValue; // default null if not specified
+        }
+        put(targetObject, targetPointer, result);
     }
 }

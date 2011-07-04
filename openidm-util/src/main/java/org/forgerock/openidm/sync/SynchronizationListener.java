@@ -19,6 +19,9 @@ package org.forgerock.openidm.sync;
 // Java Standard Edition
 import java.util.Map;
 
+// JSON Fluent library
+import org.forgerock.json.fluent.JsonNode;
+
 /**
  * Interface for implementations that wish to receive notifications of object changes,
  * for the purpose of performing synchronization.
@@ -35,29 +38,20 @@ public interface SynchronizationListener {
      * Called when a source object has been created.
      *
      * @param id the fully-qualified identifier of the object that was created.
-     * @param object the value of the object that was created.
+     * @param value the value of the created object.
      * @throws SynchronizationException if an exception occurs processing the notification.
      */
-    void onCreate(String id, Map<String, Object> object) throws SynchronizationException;
+    void onCreate(String id, JsonNode value) throws SynchronizationException;
 
     /**
      * Called when a source object has been updated.
      *
      * @param id the fully-qualified identifier of the object that was updated.
-     * @param newValue the new value of the object after the update.
+     * @param oldValue the value of the object prior to the update, or {@code null} if not known.
+     * @param newValue the value of the object after the update.
      * @throws SynchronizationException if an exception occurs processing the notification.
      */
-    void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException;
-
-    /**
-     * Called when a source object has been updated.
-     *
-     * @param id the fully-qualified identifier of the object that was updated.
-     * @param oldValue the old value of the object prior to the update.
-     * @param newValue the new value of the object after the update.
-     * @throws SynchronizationException if an exception occurs processing the notification.
-     */
-    void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
+    void onUpdate(String id, JsonNode oldValue, JsonNode newValue)
     throws SynchronizationException;
 
     /**

@@ -221,7 +221,7 @@ class ManagedObjectSet implements ObjectSet {
         ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, object, Status.SUCCESS);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onCreate(managedId(id), object);
+                listener.onCreate(managedId(id), new JsonNode(object));
             }
         }
         catch (SynchronizationException se) {
@@ -273,7 +273,7 @@ class ManagedObjectSet implements ObjectSet {
         ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), oldObject, object, Status.SUCCESS);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onUpdate(managedId(id), oldObject, object);
+                listener.onUpdate(managedId(id), new JsonNode(oldObject), new JsonNode(object));
             }
         }
         catch (SynchronizationException se) {
