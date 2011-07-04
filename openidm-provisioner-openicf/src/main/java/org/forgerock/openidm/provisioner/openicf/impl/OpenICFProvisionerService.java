@@ -721,7 +721,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                                                     if (null != syncDelta.getPreviousUid()) {
                                                         deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                                     }
-                                                    synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), deltaObject);
+                                                    synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), null, new JsonNode(deltaObject));
                                                     break;
                                                 case DELETE:
                                                     synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).getPath());

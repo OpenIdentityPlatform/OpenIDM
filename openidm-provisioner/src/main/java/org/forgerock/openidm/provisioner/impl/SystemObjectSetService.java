@@ -158,7 +158,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         URI newId = identifier.resolveLocalId((String) object.get("_id")).getId();
         ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
         try {
-            onCreate(id, object);
+            onCreate(id, new JsonNode(object));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -216,7 +216,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, object, Status.SUCCESS);
 
         try {
-            onUpdate(id, oldValue, object);
+            onUpdate(id, new JsonNode(oldValue), new JsonNode(object));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -282,7 +282,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, newValue, Status.SUCCESS);
 
         try {
-            onUpdate(id, oldValue, newValue);
+            onUpdate(id, new JsonNode(oldValue), new JsonNode(newValue));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -324,37 +324,18 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * Called when a source object has been created.
      *
      * @param id     the fully-qualified identifier of the object that was created.
-     * @param object the value of the object that was created.
+     * @param value the value of the object that was created.
      * @throws org.forgerock.openidm.sync.SynchronizationException
      *          if an exception occurs processing the notification.
      */
-    public void onCreate(String id, Map<String, Object> object) throws SynchronizationException {
+    public void onCreate(String id, JsonNode value) throws SynchronizationException {
         if (synchronizationListeners.isEmpty()) {
             throw new SynchronizationException("No Available SynchronizationListener");
         }
         for (ServiceReference serviceReference : synchronizationListeners) {
             SynchronizationListener service = (SynchronizationListener) context.locateService
                     (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
-            service.onCreate(id, object);
-        }
-    }
-
-    /**
-     * Called when a source object has been updated.
-     *
-     * @param id       the fully-qualified identifier of the object that was updated.
-     * @param newValue the new value of the object after the update.
-     * @throws org.forgerock.openidm.sync.SynchronizationException
-     *          if an exception occurs processing the notification.
-     */
-    public void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException {
-        if (synchronizationListeners.isEmpty()) {
-            throw new SynchronizationException("No Available SynchronizationListener");
-        }
-        for (ServiceReference serviceReference : synchronizationListeners) {
-            SynchronizationListener service = (SynchronizationListener) context.locateService
-                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
-            service.onUpdate(id, newValue);
+            service.onCreate(id, value);
         }
     }
 
@@ -367,7 +348,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.sync.SynchronizationException
      *          if an exception occurs processing the notification.
      */
-    public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue) throws SynchronizationException {
+    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
         if (synchronizationListeners.isEmpty()) {
             throw new SynchronizationException("No Available SynchronizationListener");
         }

@@ -65,19 +65,13 @@ import org.forgerock.openidm.scheduler.ScheduledService;
 @Service
 public class SynchronizationService implements SynchronizationListener, ScheduledService {
 
-    /**
-     * Object mappings. Order of mappings evaluated during synchronization is significant.
-     */
+    /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private final ArrayList<ObjectMapping> mappings = new ArrayList<ObjectMapping>();
 
-    /**
-     * TODO: Description.
-     */
+    /** TODO: Description. */
     private ComponentContext context;
 
-    /**
-     * Internal object set router service.
-     */
+    /** Internal object set router service. */
     @Reference(
         name = "ref_SynchronizationService_ObjectSetRouterService",
         referenceInterface = ObjectSet.class,
@@ -142,21 +136,14 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     }
 
     @Override
-    public void onCreate(String id, Map<String, Object> object) throws SynchronizationException {
+    public void onCreate(String id, JsonNode object) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             mapping.onCreate(id, object);
         }
     }
 
     @Override
-    public void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException {
-        for (ObjectMapping mapping : mappings) {
-            mapping.onUpdate(id, newValue);
-        }
-    }
-
-    @Override
-    public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
+    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue)
     throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             mapping.onUpdate(id, oldValue, newValue);

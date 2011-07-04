@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 // JSON-Fluent library
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonPatch;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.context.InvokeContext;
@@ -144,14 +145,14 @@ class ObjectMapping implements SynchronizationListener {
      * @param object TODO.
      * @throws SynchronizationException TODO.
      */
-    private void doSourceSync(String id, Map<String, Object> value) throws SynchronizationException {
+    private void doSourceSync(String id, JsonNode value) throws SynchronizationException {
         if (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1) {
             String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
             SourceSyncOperation op = new SourceSyncOperation();
             op.sourceId = localId;
             if (value != null) {
-                op.sourceObject = new JsonNode(value);
+                op.sourceObject = value;
                 op.sourceObject.put("_id", localId); // unqualified
             }
             op.sync();
@@ -312,20 +313,16 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     @Override
-    public void onCreate(String id, Map<String, Object> object) throws SynchronizationException {
-        doSourceSync(id, object); // synchronous for now
+    public void onCreate(String id, JsonNode value) throws SynchronizationException {
+        doSourceSync(id, value); // synchronous for now
     }
     
     @Override
-    public void onUpdate(String id, Map<String, Object> newValue) throws SynchronizationException {
-        onUpdate(id, null, newValue);
-    }
-
-    @Override
-    public void onUpdate(String id, Map<String, Object> oldValue, Map<String, Object> newValue)
-    throws SynchronizationException {
-// TODO: accommodate oldValue when asynchronous operations are supported
-        doSourceSync(id, newValue); // synchronous for now
+    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
+// TODO: use old value to project incremental diff without fetch of source
+        if (oldValue == null || JsonPatch.diff(new JsonNode(oldValue), new JsonNode(newValue)).size() > 0) {
+            doSourceSync(id, newValue); // synchronous for now
+        }
     }
 
     @Override
@@ -520,9 +517,11 @@ class ObjectMapping implements SynchronizationListener {
                     }
                     if (sourceObject != null && targetObject != null) {
                         applyMappings(sourceObject, targetObject);
-// TODO: Detect nothing updated to avoid unnecessary updates and potential cyclic updates.
+                        JsonNode oldTarget = targetObject.copy();
                         execScript(onUpdateScript);
-                        updateTargetObject(targetObject);
+                        if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
+                            updateTargetObject(targetObject);
+                        }
                     }
                     if (linkObject._id != null && reconId != null) { // note reconId in link
                         linkObject.reconId = reconId;
