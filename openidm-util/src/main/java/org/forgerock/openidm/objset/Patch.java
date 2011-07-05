@@ -20,8 +20,8 @@ package org.forgerock.openidm.objset;
 import java.util.Map;
 
 /**
- * The interface that provides the ability to apply partial changes to objects. Implementations
- * interpret a specific patch document representation.
+ * The interface that provides the ability to apply partial changes to objects.
+ * Implementations interpret a specific patch document representation.
  *
  * @author Paul C. Bryan
  */
@@ -33,5 +33,5 @@ public interface Patch {
      * @param object the object to apply the partial change to.
      * @throws ConflictException if the patch could not be applied, given the state of the resource.
      */
-    void patch(Map<String, Object> object) throws ConflictException;
+    void apply(Map<String, Object> object) throws ConflictException;
 }
