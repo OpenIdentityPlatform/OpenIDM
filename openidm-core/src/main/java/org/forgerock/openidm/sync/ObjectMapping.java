@@ -523,11 +523,10 @@ class ObjectMapping implements SynchronizationListener {
                             updateTargetObject(targetObject);
                         }
                     }
-                    if (linkObject._id != null && reconId != null) { // note reconId in link
-                        linkObject.reconId = reconId;
+                    if (linkObject._id != null && reconId != null && !reconId.equals(linkObject.reconId)) {
+                        linkObject.reconId = reconId; // note changed reconId in link
                         linkObject.update();
                     }
-                         
                     break; // terminate UPDATE
                 case DELETE:
                     if (targetObject != null) { // forgiving; does nothing if no target
