@@ -516,15 +516,15 @@ class ObjectMapping implements SynchronizationListener {
                         break; // do not update target
                     }
                     if (sourceObject != null && targetObject != null) {
-                        applyMappings(sourceObject, targetObject);
                         JsonNode oldTarget = targetObject.copy();
+                        applyMappings(sourceObject, targetObject);
                         execScript(onUpdateScript);
                         if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
                             updateTargetObject(targetObject);
                         }
                     }
                     if (linkObject._id != null && reconId != null && !reconId.equals(linkObject.reconId)) {
-                        linkObject.reconId = reconId; // note changed reconId in link
+                        linkObject.reconId = reconId; // note changed reconId in link (optimization)
                         linkObject.update();
                     }
                     break; // terminate UPDATE
