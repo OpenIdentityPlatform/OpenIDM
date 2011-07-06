@@ -7,9 +7,14 @@
     "queries" : {
         "dbSchema" : "openidm",
         "genericTables" : {
-            "query-all-ids" : "SELECT openidmid FROM ${_dbSchema}.${_mainTable} WHERE type = ${_resource}",
-            "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_dbSchema}.${_propTable} WHERE type = ${_mainTable}_type AND openidmid = ${_mainTable}_openidmid AND propkey='$.sourceId' AND propvalue = ${sourceId}",
-            "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_propTable} WHERE type = ${_mainTable}_type AND openidmid = ${_mainTable}_openidmid AND propkey='$.targetId' AND propvalue = ${targetId}"
+            "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_mainTable} INNER JOIN objecttypes ON objecttypes_id = objecttypes.id WHERE objecttype = ${_resource}",
+            "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_dbSchema}.${_propTable} WHERE ${_mainTable}.id = ${_mainTable}_id AND propkey='/sourceId' AND propvalue = ${sourceId} AND objecttypes_id = (SELECT id FROM objecttypes WHERE objecttype = ${_resource})",
+           "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_dbSchema}.${_propTable} WHERE ${_mainTable}.id = ${_mainTable}_id AND propkey='/targetId' AND propvalue = ${targetId} AND objecttypes_id = (SELECT id FROM objecttypes WHERE objecttype = ${_resource})"
+        },
+        "explicitTables" : {
+            "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
+            "links-for-sourceId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE sourceid = ${sourceId}",
+            "links-for-targetId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE targetid = ${targetId}"
         }
     },
     "resourceMapping" : {
@@ -24,9 +29,9 @@
             }
         },
         "explicitMapping" : {
-            "link/*" : {
+            "xlink/*" : {
                 "table" : "links",
-                "objToColumn" : {
+                "objectToColumn" : {
                     "_type" : "type",
                     "_id" : "openidmid",
                     "sourceId" : "sourceid",
@@ -37,18 +42,18 @@
             "audit/activity" : {
                 "table" : "auditactivity",
                 "objectToColumn" : {
-                    "_id" : "openidmid",
-                    "timestamp" : ["timestamp", "DATE"],
-                    "action" : "action",  
+                    "_id" : "objectid",
+                    "timestamp" : "activitydate",
+                    "action" : "activity",  
                     "message" : "message", 
-                    "objectId" : "objectid",
-                    "rev" : "rev", 
+                    "objectId" : "subjectid",
+                    "rev" : "subjectrev", 
                     "rootActionId" : "rootactionid", 
                     "parentActionId" : "parentactionid", 
                     "requester" : "requester", 
                     "approver" : "approver",
-                    "before" : "before",
-                    "after" : "after",
+                    "before" : "subjectbefore",
+                    "after" : "subjectafter",
                     "status" : "status"
                 }
             }
