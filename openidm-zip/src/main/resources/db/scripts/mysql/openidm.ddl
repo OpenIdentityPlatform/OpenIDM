@@ -103,8 +103,8 @@ CREATE TABLE IF NOT EXISTS `openidm`.`auditactivity` (
     `parentactionid` VARCHAR(512),
     `requester` TEXT,
     `approver` TEXT,
-    `before` MEDIUMTEXT,
-    `after` MEDIUMTEXT,
+    `objectbefore` MEDIUMTEXT,
+    `objectafter` MEDIUMTEXT,
     `status` VARCHAR(7) ) 
 ENGINE = InnoDB;
 

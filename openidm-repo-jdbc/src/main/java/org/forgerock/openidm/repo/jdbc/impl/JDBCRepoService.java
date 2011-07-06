@@ -199,6 +199,7 @@ public class JDBCRepoService implements RepositoryService {
         } catch (java.io.IOException ex) {  
             throw new InternalServerErrorException("Conversion of object to create failed", ex);
         } catch (RuntimeException ex) {  
+ex.printStackTrace();
             throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {
@@ -492,6 +493,7 @@ public class JDBCRepoService implements RepositoryService {
             // Table Handling configuration
             String dbSchemaName = config.get("queries").get("dbSchema").defaultTo("openidm").asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
+            
             tableHandlers = new HashMap<String, TableHandler>();
             JsonNode defaultMapping = config.get("resourceMapping").get("default");
             String defaultMainTable = defaultMapping.get("mainTable").defaultTo("genericobjects").asString();
@@ -512,6 +514,26 @@ public class JDBCRepoService implements RepositoryService {
                             value.get("propertiesTable").required().asString(),
                             dbSchemaName,
                             genericQueries);
+                    tableHandlers.put(key, handler);
+                    logger.info("For pattern {} added handler: {}", key, handler);
+                }
+            }
+            
+            JsonNode explicitQueries = config.get("queries").get("explicitTables");
+            JsonNode explicitMapping = config.get("resourceMapping").get("explicitMapping");
+            if (!explicitMapping.isNull()) {
+                for (Object keyObj : explicitMapping.keys()) {
+                    JsonNode value = explicitMapping.get((String) keyObj);
+                    String key = (String) keyObj;
+                    if (key.endsWith("/*")) {
+                        // For matching purposes strip the wildcard at the end
+                        key = key.substring(0, key.length() - 1);
+                    }
+                    TableHandler handler = new MappedTableHandler(
+                            value.get("table").required().asString(), 
+                            value.get("objectToColumn").required().asMap(),
+                            dbSchemaName,
+                            explicitQueries);
                     tableHandlers.put(key, handler);
                     logger.info("For pattern {} added handler: {}", key, handler);
                 }

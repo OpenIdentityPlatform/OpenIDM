@@ -46,10 +46,11 @@ public interface TableHandler {
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
+     * @throws InternalServerErrorException if the creation failed because of a (possibly transient) failure
      */
     public abstract void create(String fullId, String type, String localId,
             Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException;
+            throws SQLException, IOException, InternalServerErrorException;
 
     /**
      * Updates the specified object in the object set. 
@@ -71,7 +72,8 @@ public interface TableHandler {
      */
     public abstract void update(String fullId, String type, String localId,
             String rev, Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException;
+            throws SQLException, IOException, PreconditionFailedException, 
+                    NotFoundException, InternalServerErrorException;
 
     /**
      * Deletes the specified object from the object set.

@@ -6,7 +6,7 @@
             "target" : "managed/user",
             "validTarget": {
                 "type": "text/javascript",
-                "source": "object.employeeType == 'external'"
+                "source": "target.employeeType == 'external'"
             },
             "properties" : [
                 { "source" : "name", "target" : "name" },
@@ -38,7 +38,7 @@
             "target" : "managed/user",
             "validTarget": {
                 "type": "text/javascript",
-                "source": "object.employeeType == 'internal'"
+                "source": "target.employeeType == 'internal'"
             },
             "policies" : [
                 {
