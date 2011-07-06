@@ -14,6 +14,8 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
+// TODO: Extend from something like FieldMap to handle the Java ↔ JSON translations.
+
 package org.forgerock.openidm.sync;
 
 // Java Standard Edition
@@ -62,6 +64,11 @@ class Link {
     /** TODO: Description. */
     public String reconId;
 
+    /**
+     * TODO: Description.
+     *
+     * @param mapping TODO.
+     */
     public Link(ObjectMapping mapping) {
         this.mapping = mapping;
     }
@@ -109,7 +116,7 @@ class Link {
      */
     private void fromJsonNode(JsonNode node) throws JsonNodeException {
         _id = node.get("_id").required().asString();
-        _rev = node.get("_rev").asString();
+        _rev = node.get("_rev").asString(); // optional
         sourceId = node.get("sourceId").required().asString();
         targetId = node.get("targetId").required().asString();
         reconId = node.get("reconId").asString(); // optional
@@ -124,9 +131,7 @@ class Link {
         JsonNode node = new JsonNode(new HashMap<String, Object>());
         node.put("sourceId", sourceId);
         node.put("targetId", targetId);
-        if (reconId != null) {
-            node.put("reconId", reconId);
-        }
+        node.put("reconId", reconId);
         return node;
     }
 
@@ -186,13 +191,15 @@ class Link {
      */
     void create() throws SynchronizationException {
         _id = UUID.randomUUID().toString(); // client-assigned identifier
+        JsonNode node = toJsonNode();
         try {
-            mapping.getRouter().create(linkId(_id), toJsonNode().asMap());
-        }
-        catch (ObjectSetException ose) {
+            mapping.getRouter().create(linkId(_id), node.asMap());
+        } catch (ObjectSetException ose) {
             LOGGER.debug("failed to create link", ose);
             throw new SynchronizationException(ose);
         }
+        this._id = node.get("_id").required().asString();
+        this._rev = node.get("_rev").asString(); // optional
     }
 
     /**
@@ -222,12 +229,14 @@ class Link {
         if (_id == null) {
             throw new SynchronizationException("attempt to update non-existent link");
         }
+        JsonNode node = toJsonNode();
         try {
-            mapping.getRouter().update(linkId(_id), _rev, toJsonNode().asMap());
+            mapping.getRouter().update(linkId(_id), _rev, node.asMap());
         }
         catch (ObjectSetException ose) {
             LOGGER.debug("failed to update link", ose);
             throw new SynchronizationException(ose);
         }
+        this._rev = node.get("_rev").asString(); // optional
     }
 }
