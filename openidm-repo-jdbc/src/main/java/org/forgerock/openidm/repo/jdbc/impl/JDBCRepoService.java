@@ -137,9 +137,10 @@ public class JDBCRepoService implements RepositoryService {
             throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
         }
                 
+        Connection connection = null;
         Map<String, Object> result = null;
         try {
-            Connection connection = getConnection();
+            connection = getConnection();
             TableHandler handler = getTableHandler(type);
             result = handler.read(fullId, type, localId, connection);
 
@@ -148,6 +149,14 @@ public class JDBCRepoService implements RepositoryService {
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
         } catch (IOException ex) {  
             throw new InternalServerErrorException("Conversion of read object failed", ex);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();  
+                } catch (SQLException ex) {
+                    logger.warn("Failure during connection close ", ex);
+                }
+            }
         }
         
         return result;
@@ -184,10 +193,10 @@ public class JDBCRepoService implements RepositoryService {
             getTableHandler(type).create(fullId, type, localId, obj, connection);
 
             connection.commit();
-            logger.info("Commited created object for id: {}", fullId);
-            connection.close();
+            logger.debug("Commited created object for id: {}", fullId);
 
         } catch (SQLException ex) {
+            rollback(connection);
             // TODO: detect duplicate inserts with appropriate exception rather than generic
             
             //if (isCauseIndexException()) {
@@ -196,10 +205,11 @@ public class JDBCRepoService implements RepositoryService {
             //} else {
             throw new InternalServerErrorException("Creating object failed " + ex.getMessage(), ex);
             //}
-        } catch (java.io.IOException ex) {  
+        } catch (java.io.IOException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Conversion of object to create failed", ex);
-        } catch (RuntimeException ex) {  
-ex.printStackTrace();
+        } catch (RuntimeException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {
@@ -211,7 +221,7 @@ ex.printStackTrace();
             }
         }
     }
-
+    
     /**
      * Updates the specified object in the object set. 
      * <p>
@@ -247,12 +257,15 @@ ex.printStackTrace();
             getTableHandler(type).update(fullId, type, localId, rev, obj, connection);
 
             connection.commit();
-            connection.close();
+            logger.debug("Commited updated object for id: {}", fullId);
         } catch (SQLException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Updating object failed " + ex.getMessage(), ex);
         } catch (java.io.IOException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Conversion of object to update failed", ex);
         } catch (RuntimeException ex) {  
+            rollback(connection);
             throw new InternalServerErrorException("Updating object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {
@@ -287,14 +300,20 @@ ex.printStackTrace();
         Connection connection = null;
         try {
             connection = getConnection();
+            connection.setAutoCommit(false);
             
             getTableHandler(type).delete(fullId, type, localId, rev, connection);
 
+            connection.commit();
+            logger.debug("Commited deleted object for id: {}", fullId);
         } catch (IOException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
         } catch (SQLException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
-        } catch (RuntimeException ex) {  
+        } catch (RuntimeException ex) {
+            rollback(connection);
             throw new InternalServerErrorException("Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {
@@ -386,6 +405,18 @@ ex.printStackTrace();
         throw new UnsupportedOperationException("JDBC repository does not support action");
     }
     
+    // Utility method to cleanly roll back including logging
+    private void rollback(Connection connection) {
+        if (connection != null) {
+            try {
+                logger.debug("Rolling back transaction.");
+                connection.rollback();
+            } catch(SQLException ex) {
+                logger.warn("Rolling back transaction reported failure ", ex);
+            }
+        }
+    }
+    
     // TODO: replace with common utility to handle ID, this is temporary
     private String getLocalId(String id) {
         String localId = null;
@@ -430,7 +461,7 @@ ex.printStackTrace();
             for (String key : tableHandlers.keySet()) {
                 if (type.startsWith(key)) {
                     handler = tableHandlers.get(key);
-                    logger.info("Use table handler configured for {} for type {} ", key, type);
+                    logger.debug("Use table handler configured for {} for type {} ", key, type);
                 }
             }
             // For future lookups remember the handler determined for this specific type
@@ -499,7 +530,7 @@ ex.printStackTrace();
             String defaultMainTable = defaultMapping.get("mainTable").defaultTo("genericobjects").asString();
             String defaultPropTable = defaultMapping.get("propertiesTable").defaultTo("genericobjectproperties").asString();
             defaultTableHandler = new GenericTableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
-            logger.info("Using default table handler: {}", defaultTableHandler);
+            logger.debug("Using default table handler: {}", defaultTableHandler);
             
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
             if (!genericMapping.isNull()) {
@@ -515,7 +546,7 @@ ex.printStackTrace();
                             dbSchemaName,
                             genericQueries);
                     tableHandlers.put(key, handler);
-                    logger.info("For pattern {} added handler: {}", key, handler);
+                    logger.debug("For pattern {} added handler: {}", key, handler);
                 }
             }
             
@@ -535,7 +566,7 @@ ex.printStackTrace();
                             dbSchemaName,
                             explicitQueries);
                     tableHandlers.put(key, handler);
-                    logger.info("For pattern {} added handler: {}", key, handler);
+                    logger.debug("For pattern {} added handler: {}", key, handler);
                 }
             }
             
