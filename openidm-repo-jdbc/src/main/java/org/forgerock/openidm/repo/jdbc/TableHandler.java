@@ -29,11 +29,12 @@ public interface TableHandler {
      * @throws NotFoundException if the specified object could not be found. 
      * @throws SQLException if a DB failure was reported
      * @throws IOException if a failure to convert the JSON model was reported
+     * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      * @return the requested object.
      */
     public abstract Map<String, Object> read(String fullId, String type,
-            String localId, Connection connection) throws NotFoundException,
-            SQLException, IOException;
+            String localId, Connection connection) 
+            throws SQLException, IOException, ObjectSetException;
 
     /**
      * Creates a new object in the object set.
@@ -46,11 +47,11 @@ public interface TableHandler {
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
-     * @throws InternalServerErrorException if the creation failed because of a (possibly transient) failure
+     * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      */
     public abstract void create(String fullId, String type, String localId,
             Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException, InternalServerErrorException;
+            throws SQLException, IOException, ObjectSetException;
 
     /**
      * Updates the specified object in the object set. 
@@ -69,11 +70,11 @@ public interface TableHandler {
      * @throws NotFoundException if the specified object could not be found. 
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws BadRequestException if the passed identifier is invalid
+     * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      */
     public abstract void update(String fullId, String type, String localId,
             String rev, Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException, PreconditionFailedException, 
-                    NotFoundException, InternalServerErrorException;
+            throws SQLException, IOException, ObjectSetException;
 
     /**
      * Deletes the specified object from the object set.
@@ -84,11 +85,11 @@ public interface TableHandler {
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
+     * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      */
     public abstract void delete(String fullId, String type, String localId,
             String rev, Connection connection)
-            throws PreconditionFailedException, InternalServerErrorException,
-            NotFoundException, SQLException, IOException;
+            throws SQLException, IOException, ObjectSetException;
 
     /**
      * Performs the query on the specified object and returns the associated results.
@@ -107,8 +108,9 @@ public interface TableHandler {
      * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
      * configured, a query expression that is invalid, or missing query substitution tokens.
      * @throws ForbiddenException if access to the object or specified query is forbidden.
+     * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      */
     
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
-                throws ObjectSetException , SQLException;
+                throws SQLException, ObjectSetException;
 }

@@ -7,9 +7,9 @@
     "queries" : {
         "dbSchema" : "openidm",
         "genericTables" : {
-            "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_mainTable} INNER JOIN objecttypes ON objecttypes_id = objecttypes.id WHERE objecttype = ${_resource}",
-            "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_dbSchema}.${_propTable} WHERE ${_mainTable}.id = ${_mainTable}_id AND propkey='/sourceId' AND propvalue = ${sourceId} AND objecttypes_id = (SELECT id FROM objecttypes WHERE objecttype = ${_resource})",
-           "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable}, ${_dbSchema}.${_propTable} WHERE ${_mainTable}.id = ${_mainTable}_id AND propkey='/targetId' AND propvalue = ${targetId} AND objecttypes_id = (SELECT id FROM objecttypes WHERE objecttype = ${_resource})"
+            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "links-for-sourceId" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj, ${_dbSchema}.${_propTable} prop WHERE obj.id = prop.${_mainTable}_id AND prop.propkey='/sourceId' AND prop.propvalue = ${sourceId} AND obj.objecttypes_id = (SELECT objtype.id FROM objecttypes objtype WHERE objtype.objecttype = ${_resource})",
+           "links-for-targetId" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj, ${_dbSchema}.${_propTable} prop WHERE obj.id = prop.${_mainTable}_id AND prop.propkey='/targetId' AND prop.propvalue = ${targetId} AND obj.objecttypes_id = (SELECT objtype.id FROM objecttypes objtype WHERE objtype.objecttype = ${_resource})"
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
@@ -55,6 +55,21 @@
                     "before" : "subjectbefore",
                     "after" : "subjectafter",
                     "status" : "status"
+                }
+            },
+            "audit/recon" : {
+                "table" : "auditrecon",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",  
+                    "message" : "message", 
+                    "reconciling" : "reconciling",
+                    "reconId" : "reconid",
+                    "situation" : "situation",
+                    "sourceObjectId" : "sourceobjectid",
+                    "status" : "status",
+                    "targetObjectId" : "targetobjectid",
+                    "timestamp" : "activitydate"
                 }
             }
         }
