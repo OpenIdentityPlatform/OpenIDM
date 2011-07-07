@@ -115,7 +115,7 @@ public class GenericTableHandler implements TableHandler {
         readForUpdateQueryStr = "SELECT obj.* FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid  = ? FOR UPDATE";
         readQueryStr = "SELECT obj.rev, obj.fullobject FROM " + dbSchemaName + ".objecttypes objtype, " + dbSchemaName + "." + mainTableName + " obj WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?";
         createQueryStr = "INSERT INTO " + dbSchemaName + "." + mainTableName + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?)";
-        updateQueryStr = "UPDATE " + dbSchemaName + "." + mainTableName + " obj SET obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?"; 
+        updateQueryStr = "UPDATE " + dbSchemaName + "." + mainTableName + " obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?"; 
         deleteQueryStr = "DELETE obj FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?";
 
         // Object properties table
@@ -320,10 +320,6 @@ public class GenericTableHandler implements TableHandler {
         ++revInt;
         String newRev = Integer.toString(revInt);
         obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
-     
-        // TODO: should we support rename/updating id?
-        obj.put("_id", localId); // Save the id in the object
-        String objString = mapper.writeValueAsString(obj);
         
         ResultSet rs = readForUpdate(fullId, type, localId, connection); 
         String existingRev = rs.getString("rev");
@@ -337,10 +333,21 @@ public class GenericTableHandler implements TableHandler {
         PreparedStatement updateStatement = queries.getPreparedStatement(connection, updateQueryStr);
         PreparedStatement deletePropStatement = queries.getPreparedStatement(connection, propDeleteQueryStr);
 
-        logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[] {updateStatement, fullId, newRev, objString, dbId});
-        updateStatement.setString(1, newRev);
-        updateStatement.setString(2, objString);
-        updateStatement.setLong(3, dbId);
+        // Support changing object identifier
+        String newLocalId = (String) obj.get("_id");
+        if (newLocalId != null && !localId.equals(newLocalId)) {
+            logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
+        } else {
+            newLocalId = localId; // If it hasn't changed, use the existing ID
+            obj.put("_id", newLocalId); // Ensure the ID is saved in the object
+        }
+        String objString = mapper.writeValueAsString(obj);
+        
+        logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[] {updateStatement, fullId, newLocalId, newRev, objString, dbId});
+        updateStatement.setString(1, newLocalId);
+        updateStatement.setString(2, newRev);
+        updateStatement.setString(3, objString);
+        updateStatement.setLong(4, dbId);
         logger.debug("Update statement: {}", updateStatement);
         int updateCount = updateStatement.executeUpdate();
         logger.trace("Updated rows: {} for {}", updateCount, fullId);
