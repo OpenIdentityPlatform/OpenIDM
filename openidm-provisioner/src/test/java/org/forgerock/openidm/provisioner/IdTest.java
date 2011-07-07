@@ -20,22 +20,35 @@ public class IdTest {
         Assert.assertEquals(id.getObjectType(), "account");
         Assert.assertNull(id.getLocalId());
 
-//        idString = "http://openidm.forgerock.org/openidm/system/xml/account/af352880-73e0-11e0-a1f0-0800200c9a66";
-//        id = new Id(idString);
         idString = "system/xml/account/af352880-73e0-11e0-a1f0-0800200c9a66";
         id = new Id(idString);
         Assert.assertEquals(id.getSystemName(), "xml");
         Assert.assertEquals(id.getObjectType(), "account");
         Assert.assertEquals(id.getLocalId(), "af352880-73e0-11e0-a1f0-0800200c9a66");
+
+        idString = "system/Active Directory/User type/<GUID=500ac9a4c732df45bde6e5dbc784de04>";
+        id = new Id(idString);
+        Assert.assertEquals(id.getSystemName(), "Active Directory");
+        Assert.assertEquals(id.getObjectType(), "User type");
+        Assert.assertEquals(id.getLocalId(), "<GUID=500ac9a4c732df45bde6e5dbc784de04>");
+
+        idString = "system/Active+Directory/User+type/%3CGUID%3D500ac9a4c732df45bde6e5dbc784de04%3E";
+
+        Assert.assertEquals(id.getQualifiedId().toString(),idString);
+
+        id = new Id(idString);
+        Assert.assertEquals(id.getSystemName(), "Active Directory");
+        Assert.assertEquals(id.getObjectType(), "User type");
+        Assert.assertEquals(id.getLocalId(), "<GUID=500ac9a4c732df45bde6e5dbc784de04>");
     }
 
     @Test
     public void testResolveLocalId() throws Exception {
         Id actual = new Id("system/xml/account/");
-        URI expected = new URI("xml/account/simple");
-        Assert.assertEquals(actual.resolveLocalId("simple").getId(), expected);
-        expected = new URI("xml/account/http%3a%2f%2fopenidm.forgerock.org%2fopenidm%2fmanaged%2fuser%2f480ab4b0-764f-11e0-a1f0-0800200c9a66");
-        Assert.assertEquals(actual.resolveLocalId("http://openidm.forgerock.org/openidm/managed/user/480ab4b0-764f-11e0-a1f0-0800200c9a66").getId(), expected);
+        String expected = "xml/account/simple";
+        Assert.assertEquals(actual.resolveLocalId("simple").getId().toString(), expected);
+        expected = "xml/account/http%3A%2F%2Fopenidm.forgerock.org%2Fopenidm%2Fmanaged%2Fuser%2F480ab4b0-764f-11e0-a1f0-0800200c9a66";
+        Assert.assertEquals(actual.resolveLocalId("http://openidm.forgerock.org/openidm/managed/user/480ab4b0-764f-11e0-a1f0-0800200c9a66").getId().toString(), expected);
     }
 
     @Test(expectedExceptions = ObjectSetException.class)
@@ -48,15 +61,5 @@ public class IdTest {
         Id id = new Id("/system/xml/");
         id.expectObjectId();
     }
-
-//    @Test
-//    public void testGetId() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testEscapeUid() throws Exception {
-//
-//    }
 
 }

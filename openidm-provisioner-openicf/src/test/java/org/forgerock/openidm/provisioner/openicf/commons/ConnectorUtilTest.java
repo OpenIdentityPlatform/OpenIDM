@@ -142,24 +142,24 @@ public class ConnectorUtilTest {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode configuration = new JsonNode(mapper.readValue(inputStream, Map.class));
         Map<String, ConnectorObjectOptions> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
-        OperationHelper helper = new OperationHelperImpl(null, null, null, operationOptionHelpers.get("__ACCOUNT__"));
-        Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class),"Create - ALLOWED");
-        Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class),"Sync - DENIED");
+        OperationHelper helper = new OperationHelperImpl(new APIConfigurationImpl(), new Id("system/TEST/account"), org.mockito.Mockito.mock(ObjectClassInfoHelper.class), operationOptionHelpers.get("__ACCOUNT__"));
+        Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class), "Create - ALLOWED");
+        Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class), "Sync - DENIED");
         boolean authenticated = true;
         try {
             helper.isOperationPermitted(AuthenticationApiOp.class);
-        } catch (ForbiddenException e){
+        } catch (ForbiddenException e) {
             authenticated = false;
         }
-        Assert.assertFalse(authenticated,"Authentication - DENIED(Exception)");
+        Assert.assertFalse(authenticated, "Authentication - DENIED(Exception)");
         boolean operationSupported = true;
         try {
             helper.isOperationPermitted(ScriptOnResourceApiOp.class);
-        } catch (ForbiddenException e){
+        } catch (ForbiddenException e) {
             operationSupported = false;
         }
         //Assert.assertFalse(operationSupported,"ScriptOnResource - NotSupported(Exception)");
-        Assert.assertFalse(helper.isOperationPermitted(SearchApiOp.class),"Search - DENIED");
+        Assert.assertFalse(helper.isOperationPermitted(SearchApiOp.class), "Search - DENIED");
     }
 
 

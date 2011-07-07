@@ -26,32 +26,23 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.fest.assertions.MapAssert;
-import org.forgerock.json.fluent.JsonNode;
+import org.testng.annotations.BeforeClass;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.*;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * @author $author$
@@ -59,18 +50,17 @@ import static org.fest.assertions.Assertions.assertThat;
  */
 public abstract class OpenICFProvisionerServiceTestBase {
 
-    private TestLocalConnectorInfoProviderStub connectorInfoProvider = new TestLocalConnectorInfoProviderStub();
     private Dictionary properties = null;
     private ProvisionerService service = null;
 
 
-    @BeforeTest
-    public void BeforeTest() throws Exception {
+    @BeforeClass
+    public void BeforeClass() throws Exception {
         properties = new Hashtable<String, Object>(3);
 
         //Answer to the Ultimate Question of Life, the Universe, and Everything (42)
         properties.put(ComponentConstants.COMPONENT_ID, 42);
-        properties.put(ComponentConstants.COMPONENT_NAME, OpenICFProvisionerServiceXMLConnectorTest.class.getCanonicalName());
+        properties.put(ComponentConstants.COMPONENT_NAME, getClass().getCanonicalName());
 
         String configurationFile = getConfigurationFilePath();
         String config = getTestableSystemConfiguration(configurationFile);
@@ -79,22 +69,31 @@ public abstract class OpenICFProvisionerServiceTestBase {
 
         properties.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, config);
 
-        service = new OpenICFProvisionerService();
 
+        service = createInitialService();
         Method bind = OpenICFProvisionerService.class.getDeclaredMethod("bind", ConnectorInfoProvider.class);
-        Assert.assertNotNull(bind);
-        bind.invoke(service, connectorInfoProvider);
+        if (null != bind) {
+            bind.invoke(service, getConnectorInfoProvider());
+        }
         Method activate = OpenICFProvisionerService.class.getDeclaredMethod("activate", ComponentContext.class);
-        Assert.assertNotNull(activate);
+        if (null != activate) {
 
-        ComponentContext context = mock(ComponentContext.class);
-        //stubbing
-        when(context.getProperties()).thenReturn(properties);
-        activate.invoke(service, context);
-
+            ComponentContext context = mock(ComponentContext.class);
+            //stubbing
+            when(context.getProperties()).thenReturn(properties);
+            activate.invoke(service, context);
+        }
     }
 
     protected abstract String updateRuntimeConfiguration(String config) throws Exception;
+
+    protected ProvisionerService createInitialService() {
+        return new OpenICFProvisionerService();
+    }
+
+    protected ConnectorInfoProvider getConnectorInfoProvider() {
+        return new TestLocalConnectorInfoProviderStub();
+    }
 
     protected String getConfigurationFilePath() {
         return "/config/" + getClass().getCanonicalName() + ".json";
@@ -113,7 +112,7 @@ public abstract class OpenICFProvisionerServiceTestBase {
         return new String(buffer.toByteArray());
     }
 
-    protected ProvisionerService getService() {
+    final protected ProvisionerService getService() {
         return service;
     }
 }

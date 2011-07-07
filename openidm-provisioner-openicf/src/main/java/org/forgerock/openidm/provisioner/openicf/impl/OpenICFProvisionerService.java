@@ -47,6 +47,7 @@ import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.operations.*;
+import org.identityconnectors.framework.common.FrameworkUtil;
 import org.identityconnectors.framework.common.exceptions.*;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
@@ -380,7 +381,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 } else {
                     connectorObject = helper.build(UpdateApiOp.class, complexId.getLocalId(), object);
                     attributeSet = new HashSet<Attribute>();
-                    for (Attribute attribute: connectorObject.getAttributes()) {
+                    for (Attribute attribute : connectorObject.getAttributes()) {
                         if (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) {
                             continue;
                         }
@@ -619,9 +620,104 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return result;
     }
 
+    /**
+     * {
+     * _script-type = Boo|SHELL|Groovy,
+     * _script-expression = xxx,
+     * _script-execute-on = onConnectorServer | onResource,
+     * _script-variable-prefix = openidm_,
+     * attr1 = x,
+     * }
+     *
+     * @param id     identifies the object to perform the action on.
+     * @param params the parameters of the action to perform.
+     * @return
+     * @throws ObjectSetException
+     */
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new ForbiddenException("Action not yet supported on OpenICF objects");
+        String METHOD = "action";
+        Id complexId = new Id(id);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), params);
+        Map<String, Object> result = new HashMap<String, Object>();
+        ConnectorScript script = new ConnectorScript(params);
+        if (helper.isOperationPermitted(script.getAPIOperation())) {
+            try {
+                Object vpo = params.get(ConnectorScript.SCRIPT_VARIABLE_PREFIX);
+                String variablePrefix = null;
+                if (vpo instanceof String) {
+                    variablePrefix = (String) vpo;
+                }
+
+                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                    if (entry.getKey().startsWith("_")) {
+                        continue;
+                    }
+                    Object value = entry.getValue();
+                    if (null != value && !FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                        value = value.toString();
+                    }
+
+                    if (null != variablePrefix) {
+                        script.getScriptContextBuilder().addScriptArgument(variablePrefix + entry.getKey(), value);
+                    } else {
+                        script.getScriptContextBuilder().addScriptArgument(entry.getKey(), value);
+                    }
+                }
+                script.getScriptContextBuilder().addScriptArgument("openidm_id", id);
+
+                Object scriptResult = null;
+                if (ConnectorScript.ExecutionMode.CONNECTOR.equals(script.getExecMode())) {
+                    scriptResult = getConnectorFacade(helper.getRuntimeAPIConfiguration()).runScriptOnConnector(script.getScriptContextBuilder().build(), script.getOperationOptionsBuilder().build());
+                } else {
+                    scriptResult = getConnectorFacade(helper.getRuntimeAPIConfiguration()).runScriptOnResource(script.getScriptContextBuilder().build(), script.getOperationOptionsBuilder().build());
+                }
+                result.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+            } catch (AlreadyExistsException e) {
+                TRACE.error("System object {} already exists", id, e);
+                throw new ConflictException(e);
+            } catch (ConfigurationException e) {
+                TRACE.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectionBrokenException e) {
+                TRACE.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectionFailedException e) {
+                TRACE.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (ConnectorIOException e) {
+                TRACE.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (OperationTimeoutException e) {
+                TRACE.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ServiceUnavailableException(e);
+            } catch (PasswordExpiredException e) {
+                TRACE.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (InvalidPasswordException e) {
+                TRACE.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (UnknownUidException e) {
+                TRACE.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new NotFoundException(e);
+            } catch (InvalidCredentialException e) {
+                TRACE.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (PermissionDeniedException e) {
+                TRACE.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                throw new ForbiddenException(e);
+            } catch (ConnectorSecurityException e) {
+                TRACE.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (ConnectorException e) {
+                TRACE.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                throw new InternalServerErrorException(e);
+            } catch (Exception e) {
+                TRACE.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
+                throw new ObjectSetException(e);
+            }
+        }
+        return result;
     }
 
     /**
@@ -697,45 +793,45 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
                     try {
                         operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
-                                    /**
-                                     * Called to handle a delta in the stream. The Connector framework will call
-                                     * this method multiple times, once for each result.
-                                     * Although this method is callback, the framework will invoke it synchronously.
-                                     * Thus, the framework guarantees that once an application's call to
-                                     * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)}  SyncApiOp#sync()} returns,
-                                     * the framework will no longer call this method
-                                     * to handle results from that <code>sync()</code> operation.
-                                     *
-                                     * @param syncDelta The change
-                                     * @return True iff the application wants to continue processing more
-                                     *         results.
-                                     * @throws RuntimeException If the application encounters an exception. This will stop
-                                     *                          iteration and the exception will propagate to
-                                     *                          the application.
-                                     */
-                                    public boolean handle(SyncDelta syncDelta) {
-                                        try {
-                                            Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
-                                            switch (syncDelta.getDeltaType()) {
-                                                case CREATE_OR_UPDATE:
-                                                    if (null != syncDelta.getPreviousUid()) {
-                                                        deltaObject.put("_previousid", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
-                                                    }
-                                                    synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).getPath(), null, new JsonNode(deltaObject));
-                                                    break;
-                                                case DELETE:
-                                                    synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).getPath());
-                                                    break;
+                            /**
+                             * Called to handle a delta in the stream. The Connector framework will call
+                             * this method multiple times, once for each result.
+                             * Although this method is callback, the framework will invoke it synchronously.
+                             * Thus, the framework guarantees that once an application's call to
+                             * {@link org.identityconnectors.framework.api.operations.SyncApiOp#sync(org.identityconnectors.framework.common.objects.ObjectClass, org.identityconnectors.framework.common.objects.SyncToken, org.identityconnectors.framework.common.objects.SyncResultsHandler, org.identityconnectors.framework.common.objects.OperationOptions)}  SyncApiOp#sync()} returns,
+                             * the framework will no longer call this method
+                             * to handle results from that <code>sync()</code> operation.
+                             *
+                             * @param syncDelta The change
+                             * @return True iff the application wants to continue processing more
+                             *         results.
+                             * @throws RuntimeException If the application encounters an exception. This will stop
+                             *                          iteration and the exception will propagate to
+                             *                          the application.
+                             */
+                            public boolean handle(SyncDelta syncDelta) {
+                                try {
+                                    Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
+                                    switch (syncDelta.getDeltaType()) {
+                                        case CREATE_OR_UPDATE:
+                                            if (null != syncDelta.getPreviousUid()) {
+                                                deltaObject.put("_previous-id", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                             }
-                                            lastToken[0] = syncDelta.getToken();
-                                        } catch (Exception e) {
-                                            failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
-                                            TRACE.error("Failed synchronise {} object", syncDelta.getUid(), e);
-                                            throw new ConnectorException("Failed synchronise " + syncDelta.getUid() + " object", e);
-                                        }
-                                        return true;
+                                            synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonNode(deltaObject));
+                                            break;
+                                        case DELETE:
+                                            synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString());
+                                            break;
                                     }
-                                }, operationOptionsBuilder.build());
+                                    lastToken[0] = syncDelta.getToken();
+                                } catch (Exception e) {
+                                    failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
+                                    TRACE.error("Failed synchronise {} object", syncDelta.getUid(), e);
+                                    throw new ConnectorException("Failed synchronise " + syncDelta.getUid() + " object", e);
+                                }
+                                return true;
+                            }
+                        }, operationOptionsBuilder.build());
                     } catch (Throwable t) {
                         Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
                         lastException.put("throwable", t.getMessage());
@@ -770,7 +866,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return new JsonNode(enhancedConfig.getConfiguration(componentContext));
     }
 
-    private ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
+    ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
     }

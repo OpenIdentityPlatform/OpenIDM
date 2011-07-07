@@ -35,6 +35,7 @@ import java.util.Enumeration;
 import javax.servlet.ServletContext;
 import java.util.Properties;
 import java.util.ServiceLoader;
+
 import org.apache.felix.main.AutoProcessor;
 import org.apache.felix.main.Main;
 import org.osgi.framework.Constants;
@@ -197,7 +198,7 @@ public class FrameworkService {
      * initializing the "<tt>felix.system.properties</tt>" system property to an
      * arbitrary URL.
      * </p>
-     **/
+     */
     private void loadSystemProperties() {
         // The system properties file is either specified by a system
         // property or it is in the same directory as the Felix JAR file.
@@ -224,8 +225,10 @@ public class FrameworkService {
             } else {
                 is = propURL.openConnection().getInputStream();
             }
-            props.load(is);
-            is.close();
+            if (null != is) {
+                props.load(is);
+                is.close();
+            }
         } catch (FileNotFoundException ex) {
             // Ignore file not found.
         } catch (Exception ex) {
@@ -243,7 +246,7 @@ public class FrameworkService {
         }
 
         // Perform variable substitution on specified properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             System.setProperty(name,
                     Util.substVars(props.getProperty(name), name, null, null));
@@ -264,8 +267,9 @@ public class FrameworkService {
      * properties can be set by initializing the "<tt>felix.config.properties</tt>"
      * system property to an arbitrary URL.
      * </p>
+     *
      * @return A <tt>Properties</tt> instance or <tt>null</tt> if there was an error.
-     **/
+     */
     private Properties loadConfigProperties() {
         // The config properties file is either specified by a system
         // property or it is in the conf/ directory of the Felix
@@ -311,7 +315,7 @@ public class FrameworkService {
         }
 
         // Perform variable substitution for system properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             props.setProperty(name,
                     Util.substVars(props.getProperty(name), name, null, props));

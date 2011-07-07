@@ -24,11 +24,25 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl.script;
 
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.script.Script;
+import org.identityconnectors.common.Assertions;
+import org.identityconnectors.framework.api.operations.APIOperation;
+import org.identityconnectors.framework.api.operations.ScriptOnConnectorApiOp;
+import org.identityconnectors.framework.api.operations.ScriptOnResourceApiOp;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
 
+import java.util.Map;
+
 /**
  * Sample Class Doc
+ * {
+ * "_script-type" : "Boo|SHELL|Groovy",
+ * "_script-expression" : "echo OPENIDM_attr1",
+ * "_script-execute-mode" : "CONNECTOR|RESOURCE",
+ * "attr1" : "Hello World!"
+ * }
  *
  * @author $author$
  * @version $Revision$ $Date$
@@ -36,49 +50,70 @@ import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
  */
 public class ConnectorScript {
 
-    private ScriptContextBuilder _scriptContextBuilder;
-    private OperationOptionsBuilder _operationOptionsBuilder;
-    private String _actionName;
-    private String _execMode;
-    private String _resourceName;
+    public static final String SCRIPT_TYPE = "_script-type";
+    public static final String SCRIPT_EXPRESSION = "_script-expression";
+    public static final String SCRIPT_EXECUTE_MODE = "_script-execute-mode";
+    public static final String SCRIPT_VARIABLE_PREFIX = "_script-variable-prefix";
 
-    public String getResourceName() {
-        return this._resourceName;
+    public enum ExecutionMode {
+        CONNECTOR,
+        RESOURCE;
     }
 
-    public void setResourceName(String resourceName) {
-        this._resourceName = resourceName;
+    private ScriptContextBuilder _scriptContextBuilder = null;
+    private OperationOptionsBuilder _operationOptionsBuilder = null;
+    private ExecutionMode _execMode = null;
+
+
+    public ConnectorScript(Map<String, Object> params) {
+        init(params);
+    }
+
+    public ConnectorScript(Map<String, Object> params, OperationOptionsBuilder _operationOptionsBuilder) {
+        this._operationOptionsBuilder = _operationOptionsBuilder;
+        init(params);
+    }
+
+    private void init(Map<String, Object> params) {
+        JsonNode _params = new JsonNode(params);
+        getScriptContextBuilder().setScriptLanguage(_params.get(SCRIPT_TYPE).required().expect(String.class).asString());
+        if (getScriptContextBuilder().getScriptLanguage().equalsIgnoreCase("SHELL")) {
+            getOperationOptionsBuilder().setOption("variablePrefix", "OPENIDM_");
+        }
+        getScriptContextBuilder().setScriptText(_params.get(SCRIPT_EXPRESSION).required().expect(String.class).asString());
+        setExecMode(_params.get(SCRIPT_EXECUTE_MODE).required().expect(String.class).asString());
+        if (null == _execMode) {
+            throw new IllegalArgumentException("Script execute mode can not be determined from: " + _params.get("_script-execute-mode").asString());
+        }
     }
 
     public ScriptContextBuilder getScriptContextBuilder() {
         if (this._scriptContextBuilder == null) {
             this._scriptContextBuilder = new ScriptContextBuilder();
         }
-
         return this._scriptContextBuilder;
     }
 
-    public String getActionName() {
-        return this._actionName;
-    }
 
-    public void setActionName(String actionName) {
-        this._actionName = actionName;
-    }
-
-    public String getExecMode() {
+    public ExecutionMode getExecMode() {
         return this._execMode;
     }
 
+    public Class<? extends APIOperation> getAPIOperation() {
+        if (ExecutionMode.RESOURCE.equals(_execMode)) {
+            return ScriptOnResourceApiOp.class;
+        }
+        return ScriptOnConnectorApiOp.class;
+    }
+
     public void setExecMode(String execMode) {
-        this._execMode = execMode;
+        this._execMode = Enum.valueOf(ExecutionMode.class, execMode.toUpperCase());
     }
 
     public OperationOptionsBuilder getOperationOptionsBuilder() {
         if (this._operationOptionsBuilder == null) {
             this._operationOptionsBuilder = new OperationOptionsBuilder();
         }
-
         return this._operationOptionsBuilder;
     }
 }

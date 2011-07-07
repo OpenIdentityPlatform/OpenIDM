@@ -40,6 +40,8 @@ public class AttributeInfoHelper {
     private final AttributeInfo attributeInfo;
     private final Object defaultValue;
 
+
+
     public AttributeInfoHelper(String name, boolean isOperationalOption, Map<String, Object> schema) throws SchemaException {
         this.name = name;
 

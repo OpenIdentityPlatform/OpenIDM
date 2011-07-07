@@ -35,6 +35,7 @@ import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelp
 import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
 import org.forgerock.openidm.provisioner.openicf.query.operators.BooleanOperator;
 import org.forgerock.openidm.provisioner.openicf.query.operators.Operator;
+import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
@@ -61,11 +62,18 @@ public class OperationHelperImpl implements OperationHelper {
     private List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
     private Id systemObjectSetId;
 
+    /**
+     * @param configuration
+     * @param systemObjectSetId
+     * @param objectClassInfoHelper
+     * @param connectorObjectOptions
+     * @throws NullPointerException if any of the input values is null.
+     */
     public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper, ConnectorObjectOptions connectorObjectOptions) {
-        this.configuration = configuration;
-        this.objectClassInfoHelper = objectClassInfoHelper;
-        this.connectorObjectOptions = connectorObjectOptions;
-        this.systemObjectSetId = systemObjectSetId;
+        this.configuration = Assertions.nullChecked(configuration, "configuration");
+        this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
+        this.connectorObjectOptions = null != connectorObjectOptions ? connectorObjectOptions : new ConnectorObjectOptions(null);
+        this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");
     }
 
 
@@ -89,10 +97,7 @@ public class OperationHelperImpl implements OperationHelper {
 
 
     public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, Map<String, Object> source) throws Exception {
-        if (null != connectorObjectOptions) {
-            return connectorObjectOptions.find(operation).build(source, objectClassInfoHelper);
-        }
-        return new OperationOptionsBuilder();
+        return connectorObjectOptions.find(operation).build(source, objectClassInfoHelper);
     }
 
 

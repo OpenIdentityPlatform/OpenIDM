@@ -28,6 +28,7 @@ import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.provisioner.Id;
+import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
@@ -38,7 +39,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.jar.Attributes;
 
 /**
  * @author $author$
@@ -48,6 +48,7 @@ public class ObjectClassInfoHelper {
     private final Set<AttributeInfoHelper> attributes;
     private final ObjectClass objectClass;
     private String nameAttribute = null;
+    private final Set<String> attributesReturnedByDefault;
 
     /**
      * Create a custom object class.
@@ -59,13 +60,18 @@ public class ObjectClassInfoHelper {
         objectClass = new ObjectClass((String) schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS));
         Map<String, Object> properties = (Map<String, Object>) schema.get(Constants.PROPERTIES);
         attributes = new HashSet<AttributeInfoHelper>(properties.size());
+        Set<String> defaultAttributes = new HashSet<String>(properties.size());
         for (Map.Entry<String, Object> e : properties.entrySet()) {
             AttributeInfoHelper helper = new AttributeInfoHelper(e.getKey(), false, (Map<String, Object>) e.getValue());
             if (helper.getAttributeInfo().getName().equals(Name.NAME)) {
                 nameAttribute = e.getKey();
             }
+            if (helper.getAttributeInfo().isReturnedByDefault()) {
+                defaultAttributes.add(helper.getAttributeInfo().getName());
+            }
             attributes.add(helper);
         }
+        attributesReturnedByDefault = CollectionUtil.newReadOnlySet(defaultAttributes);
     }
 
     /**
@@ -75,6 +81,17 @@ public class ObjectClassInfoHelper {
      */
     public ObjectClass getObjectClass() {
         return objectClass;
+    }
+
+    /**
+     * Get a read only set of attributes should return by default.
+     * <p/>
+     * If the {@link OperationOptions#OP_ATTRIBUTES_TO_GET} attribute value is null this is the default always.
+     *
+     * @return set of attribute names to get for the object.
+     */
+    public Set<String> getAttributesReturnedByDefault() {
+        return attributesReturnedByDefault;
     }
 
     /**
@@ -100,7 +117,7 @@ public class ObjectClassInfoHelper {
         if (null == nameValue) {
             throw new PreconditionFailedException("Required NAME attribute is missing");
         } else {
-            nameValue = Id.escapeUid(nameValue);
+            nameValue = Id.unescapeUid(nameValue);
         }
 
         ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
@@ -117,7 +134,7 @@ public class ObjectClassInfoHelper {
                 if (attributeInfo.getAttributeInfo().isCreateable()) {
                     Object v = source.get(attributeInfo.getName());
                     if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
-                        throw new IllegalArgumentException("Required value is null");
+                        throw new IllegalArgumentException("Required attribute {" + attributeInfo.getName() + "} value is null");
                     }
                     builder.addAttribute(attributeInfo.build(v));
                 }
