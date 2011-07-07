@@ -30,18 +30,13 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.identityconnectors.framework.api.operations.APIOperation;
-import org.identityconnectors.framework.common.objects.AttributeInfo;
-import org.identityconnectors.framework.common.objects.ObjectClassInfo;
-import org.identityconnectors.framework.common.objects.OperationOptionInfo;
-import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
+import org.identityconnectors.common.security.GuardedString;
+import org.identityconnectors.framework.common.objects.*;
 
 import java.io.IOException;
 import java.util.*;
 
 import static org.forgerock.json.schema.validator.Constants.*;
-import static org.forgerock.json.schema.validator.Constants.PROPERTIES;
-import static org.forgerock.json.schema.validator.Constants.TYPE_OBJECT;
 
 /**
  * @author $author$
@@ -53,6 +48,21 @@ public class OperationOptionInfoHelper {
     public static final String OPERATION_OPTION_DENIED = "denied";
     public static final String OPERATION_OPTION_ON_DENY = "onDeny";
     public static final String OPERATION_OPTION_OPERATION_OPTION_INFO = "operationOptionInfo";
+
+
+//    public static final AttributeInfo OP_SCOPE;
+////    public static final AttributeInfo OP_CONTAINER;
+//    public static final AttributeInfo OP_RUN_AS_USER;
+//    public static final AttributeInfo OP_RUN_WITH_PASSWORD;
+//    public static final AttributeInfo OP_ATTRIBUTES_TO_GET;
+
+//    static {
+//        OP_SCOPE = AttributeInfoBuilder.build(OperationOptions.OP_SCOPE);
+////        OP_CONTAINER = AttributeInfoBuilder.build(OperationOptions.OP_CONTAINER, QualifiedUid.class);
+//        OP_RUN_AS_USER = AttributeInfoBuilder.build(OperationOptions.OP_RUN_AS_USER);
+//        OP_RUN_WITH_PASSWORD = AttributeInfoBuilder.build(OperationOptions.OP_RUN_WITH_PASSWORD, GuardedString.class);
+//        OP_ATTRIBUTES_TO_GET = new AttributeInfoBuilder(OperationOptions.OP_RUN_AS_USER).setMultiValued(true).build();
+//    }
 
     public static enum OnDenyAction {
         THROW_EXCEPTION,
@@ -110,9 +120,19 @@ public class OperationOptionInfoHelper {
     public OperationOptionsBuilder build(Map<String, Object> source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
         OperationOptionsBuilder builder = new OperationOptionsBuilder();
         if (null != source) {
+            //Get the explicit options object if defied.
+            Object o = source.get("_options");
+            Map<String, Object> options = null;
+            if (o instanceof Map) {
+                options = (Map<String, Object>) o;
+            }
+
+
             for (AttributeInfoHelper helper : attributes) {
                 helper.build(builder, source.get(helper.getName()));
             }
+        } else {
+            builder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
         }
         return builder;
     }

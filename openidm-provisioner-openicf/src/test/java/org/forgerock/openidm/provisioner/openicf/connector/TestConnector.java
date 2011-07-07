@@ -25,8 +25,11 @@
 package org.forgerock.openidm.provisioner.openicf.connector;
 
 import org.identityconnectors.common.script.Script;
+import org.identityconnectors.common.script.ScriptExecutor;
+import org.identityconnectors.common.script.ScriptExecutorFactory;
 import org.identityconnectors.common.security.GuardedByteArray;
 import org.identityconnectors.common.security.GuardedString;
+import org.identityconnectors.framework.common.exceptions.ConnectorException;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.FilterTranslator;
 import org.identityconnectors.framework.spi.AttributeNormalizer;
@@ -37,9 +40,12 @@ import org.identityconnectors.framework.spi.operations.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.ConnectException;
 import java.net.URI;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
+
 import org.identityconnectors.framework.spi.ConnectorClass;
 
 /**
@@ -334,7 +340,12 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Object runScriptOnConnector(ScriptContext request, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        if ("SHELL".equals(request.getScriptLanguage())) {
+            throw new ConnectorException("SHELL Script is not supported");
+        } else if ("Groovy".equals(request.getScriptLanguage())) {
+            return executeGroovyScript(request);
+        }
+        return null;
     }
 
     /**
@@ -350,7 +361,24 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public Object runScriptOnResource(ScriptContext request, OperationOptions options) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        if ("SHELL".equals(request.getScriptLanguage())) {
+            return "OK";
+        } else if ("Groovy".equals(request.getScriptLanguage())) {
+            return executeGroovyScript(request);
+        }
+        throw new ConnectorException(request.getScriptLanguage() + " script language is not supported");
+    }
+
+    private Object executeGroovyScript(ScriptContext request) {
+        Object result = null;
+        try {
+            ScriptExecutorFactory factory = ScriptExecutorFactory.newInstance(request.getScriptLanguage());
+            ScriptExecutor runOnConnectorExecutor = factory.newScriptExecutor(getClass().getClassLoader(), request.getScriptText(), true);
+            result = runOnConnectorExecutor.execute(request.getScriptArguments());
+        } catch (Exception e) {
+            throw new ConnectorException("RunOnConnector script parse error", e);
+        }
+        return result;
     }
 
     /**

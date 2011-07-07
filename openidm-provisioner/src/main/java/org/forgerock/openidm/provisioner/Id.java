@@ -86,12 +86,16 @@ public class Id {
         }
         try {
             this.baseURI = new URI("");
+            this.systemName = URLDecoder.decode(systemName, CHARACTER_ENCODING_UTF_8);
+            this.objectType = URLDecoder.decode(objectType, CHARACTER_ENCODING_UTF_8);
         } catch (URISyntaxException e) {
             // Should never happen.
             throw new UndeclaredThrowableException(e);
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
         }
-        this.systemName = systemName;
-        this.objectType = objectType;
+
     }
 
     public Id(String systemName, String objectType, String localId) throws ObjectSetException {
@@ -106,13 +110,16 @@ public class Id {
         }
         try {
             this.baseURI = new URI("");
+            this.systemName = URLDecoder.decode(systemName, CHARACTER_ENCODING_UTF_8);
+            this.objectType = URLDecoder.decode(objectType, CHARACTER_ENCODING_UTF_8);
+            this.localId = URLDecoder.decode(localId, CHARACTER_ENCODING_UTF_8);
         } catch (URISyntaxException e) {
             // Should never happen.
             throw new UndeclaredThrowableException(e);
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
         }
-        this.systemName = systemName;
-        this.objectType = objectType;
-        this.localId = localId;
     }
 
     public Id(String id) throws ObjectSetException {
@@ -228,10 +235,30 @@ public class Id {
      */
     public static String escapeUid(String uid) {
         if (StringUtils.isBlank(uid)) {
-            throw new IllegalArgumentException("UUID can not be blank");
+            throw new IllegalArgumentException("UID can not be blank");
         }
         try {
             return URLEncoder.encode(uid, CHARACTER_ENCODING_UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+
+    /**
+     * Safely unescapes the {@code uid} value
+     *
+     * @param uid
+     * @return
+     * @throws IllegalArgumentException if the {@code uid} is blank
+     * @throws NullPointerException     if the {@code uid} is null
+     */
+    public static String unescapeUid(String uid) {
+        if (StringUtils.isBlank(uid)) {
+            throw new IllegalArgumentException("UID can not be blank");
+        }
+        try {
+            return URLDecoder.decode(uid, CHARACTER_ENCODING_UTF_8);
         } catch (UnsupportedEncodingException e) {
             // Should never happen.
             throw new UndeclaredThrowableException(e);

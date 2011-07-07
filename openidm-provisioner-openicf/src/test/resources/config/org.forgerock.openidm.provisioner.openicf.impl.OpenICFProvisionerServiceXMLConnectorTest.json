@@ -207,7 +207,7 @@
                               },
                            "nativeName" : "__GROUPS__",
                            "nativeType" : "string",
-                           "flags" :
+                           "flags-FIX" :
                               [
                                  "NOT_RETURNED_BY_DEFAULT"
                               ]

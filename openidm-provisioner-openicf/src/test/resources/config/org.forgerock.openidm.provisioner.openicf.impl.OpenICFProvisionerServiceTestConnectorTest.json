@@ -1,0 +1,34 @@
+{
+   "name" : "Test",
+   "connectorRef" :
+      {
+         "bundleName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector.bundle",
+         "bundleVersion" : "1.0",
+         "connectorName" : "org.forgerock.openidm.provisioner.openicf.connector.TestConnector"
+      },
+   "poolConfigOption" :
+      {
+      },
+   "operationTimeout" :
+      {
+      },
+   "configurationProperties" :
+      {
+      },
+   "objectTypes" :
+      {
+         "account" :
+            {
+               "$schema" : "http://json-schema.org/draft-03/schema",
+               "id" : "__ACCOUNT__",
+               "type" : "object",
+               "nativeType" : "__ACCOUNT__",
+               "properties" :
+                  {
+                  }
+            }
+      },
+   "operationOptions" :
+      {
+      }
+}

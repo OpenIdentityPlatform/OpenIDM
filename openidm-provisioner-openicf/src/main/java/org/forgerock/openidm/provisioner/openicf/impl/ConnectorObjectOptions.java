@@ -53,7 +53,7 @@ public class ConnectorObjectOptions {
     }
 
     public OperationOptionInfoHelper find(Class<? extends APIOperation> operation) {
-        if (null != operation) {
+        if (null != operation && null != operations) {
             OperationOptionInfoHelper v = operations.get(operation);
             if (null != v) {
                 return v;
@@ -61,5 +61,6 @@ public class ConnectorObjectOptions {
         }
         return defaultOperationOptionInfoHelper;
     }
+
 
 }
