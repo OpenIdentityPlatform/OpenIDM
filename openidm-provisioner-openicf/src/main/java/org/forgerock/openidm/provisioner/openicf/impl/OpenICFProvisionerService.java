@@ -60,6 +60,8 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -654,23 +656,50 @@ public class OpenICFProvisionerService implements ProvisionerService {
                         continue;
                     }
                     Object value = entry.getValue();
-                    if (null != value && !FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                        value = value.toString();
+                    Object newValue = value;
+                    if (null != value) {
+                        if (value instanceof Collection) {
+                            newValue = Array.newInstance(Object.class, ((Collection) value).size());
+                            int i = 0;
+                            for (Object v : (Collection) value) {
+                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                    Array.set(newValue, i, v);
+                                } else {
+                                    //Serializable may not be acceptable
+                                    Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+                                }
+                                i++;
+                            }
+
+                        } else if (value.getClass().isArray()) {
+                            //TODO implement the array support later
+                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                            //Serializable may not be acceptable
+                            newValue = value instanceof Serializable ? value : value.toString();
+                        }
                     }
 
                     if (null != variablePrefix) {
-                        script.getScriptContextBuilder().addScriptArgument(variablePrefix + entry.getKey(), value);
+                        script.getScriptContextBuilder().addScriptArgument(variablePrefix + entry.getKey(), newValue);
                     } else {
-                        script.getScriptContextBuilder().addScriptArgument(entry.getKey(), value);
+                        script.getScriptContextBuilder().addScriptArgument(entry.getKey(), newValue);
                     }
                 }
                 script.getScriptContextBuilder().addScriptArgument("openidm_id", id);
 
                 Object scriptResult = null;
-                if (ConnectorScript.ExecutionMode.CONNECTOR.equals(script.getExecMode())) {
-                    scriptResult = getConnectorFacade(helper.getRuntimeAPIConfiguration()).runScriptOnConnector(script.getScriptContextBuilder().build(), script.getOperationOptionsBuilder().build());
-                } else {
-                    scriptResult = getConnectorFacade(helper.getRuntimeAPIConfiguration()).runScriptOnResource(script.getScriptContextBuilder().build(), script.getOperationOptionsBuilder().build());
+                ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
+                ScriptContext scriptContext = script.getScriptContextBuilder().build();
+                OperationOptions oo = script.getOperationOptionsBuilder().build();
+                try {
+                    if (ConnectorScript.ExecutionMode.CONNECTOR.equals(script.getExecMode())) {
+                        scriptResult = facade.runScriptOnConnector(scriptContext, oo);
+                    } else {
+                        scriptResult = facade.runScriptOnResource(scriptContext, oo);
+                    }
+                } catch (Throwable t) {
+                    TRACE.error("Script execution error.", t);
+                    result.put("error", t.getMessage());
                 }
                 result.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
             } catch (AlreadyExistsException e) {
@@ -786,12 +815,14 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 }
                 if (null == token) {
                     token = operation.getLatestSyncToken(helper.getObjectClass());
+                    TRACE.debug("New LatestSyncToken has been fetched. New token is: {}", token);
                 } else {
                     final SyncToken[] lastToken = new SyncToken[1];
                     final String[] failedRecord = new String[1];
                     OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage.asMap());
                     InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
                     try {
+                        TRACE.debug("Execute sync(ObjectClass:{}, SyncToken:{})", new Object[]{helper.getObjectClass().getObjectClassValue(), token});
                         operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
                             /**
                              * Called to handle a delta in the stream. The Connector framework will call
@@ -842,6 +873,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                         TRACE.error("Active synchronisation of {} failed on {}", new Object[]{objectType, systemIdentifier.getName()}, t);
                     } finally {
                         token = lastToken[0];
+                        TRACE.debug("Synchronization is finished. New LatestSyncToken value: {}", token);
                         InvokeContext.getContext().popActivityId();
                     }
                 }

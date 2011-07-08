@@ -43,6 +43,7 @@ import org.identityconnectors.framework.impl.test.TestHelpersImpl;
 import org.identityconnectors.framework.spi.PoolableConnector;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,15 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
         action.put("testArgument", "Ford Prefect");
         result = getService().action("system/Test/account", action);
         assertThat(result).includes(entry("result", "Ford Prefect"));
+
+        action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument.length");
+        action.put("testArgument", Arrays.asList("Ford Prefect", "Tricia McMillan"));
+        result = getService().action("system/Test/account", action);
+        assertThat(result).includes(entry("result", 2));
+
+        action.put(ConnectorScript.SCRIPT_EXPRESSION, "throw new RuntimeException(\"Marvin\")");
+        result = getService().action("system/Test/account", action);
+        assertThat(result).includes(entry("error", "Marvin"));
     }
 
 
