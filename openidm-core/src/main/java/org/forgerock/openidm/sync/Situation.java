@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.sync;
+package org.forgerock.openidm.sync.impl;
 
 /**
  * TODO: Description.
@@ -37,7 +37,8 @@ enum Situation {
      */
     FOUND(Action.UPDATE),
 
-    /** The mapping qualifies for a target object, there is no link to a target object, and
+    /**
+     * The mapping qualifies for a target object, there is no link to a target object, and
      * there is no correlated target object to link. Detected during source object changes
      * and reconciliation. Default action: {@code CREATE}.
      */

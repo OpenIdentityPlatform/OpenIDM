@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.sync;
+package org.forgerock.openidm.sync.impl;
 
 /**
  * TODO: Description.

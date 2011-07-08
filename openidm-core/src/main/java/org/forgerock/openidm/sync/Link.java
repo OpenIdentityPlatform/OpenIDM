@@ -16,7 +16,7 @@
 
 // TODO: Extend from something like FieldMap to handle the Java ↔ JSON translations.
 
-package org.forgerock.openidm.sync;
+package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.util.HashMap;
@@ -35,6 +35,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * TODO: Description.
