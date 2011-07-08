@@ -375,8 +375,10 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
             ScriptExecutorFactory factory = ScriptExecutorFactory.newInstance(request.getScriptLanguage());
             ScriptExecutor runOnConnectorExecutor = factory.newScriptExecutor(getClass().getClassLoader(), request.getScriptText(), true);
             result = runOnConnectorExecutor.execute(request.getScriptArguments());
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ConnectorException("RunOnConnector script parse error", e);
+            throw new RuntimeException(e);
         }
         return result;
     }
