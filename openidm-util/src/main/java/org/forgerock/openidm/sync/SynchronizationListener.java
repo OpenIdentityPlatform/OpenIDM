@@ -51,8 +51,7 @@ public interface SynchronizationListener {
      * @param newValue the value of the object after the update.
      * @throws SynchronizationException if an exception occurs processing the notification.
      */
-    void onUpdate(String id, JsonNode oldValue, JsonNode newValue)
-    throws SynchronizationException;
+    void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException;
 
     /**
      * Called when a source object has been deleted.

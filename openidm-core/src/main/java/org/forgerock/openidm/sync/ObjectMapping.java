@@ -21,7 +21,7 @@
  * Did I mention the part where this implementation was rushed?
  */
 
-package org.forgerock.openidm.sync;
+package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.text.SimpleDateFormat;
@@ -50,7 +50,8 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
-
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.SynchronizationListener;
 /**
  * TODO: Description.
  *

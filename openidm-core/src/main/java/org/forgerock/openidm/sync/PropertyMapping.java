@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.sync;
+package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.util.HashMap;
@@ -29,6 +29,7 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * TODO: Description.

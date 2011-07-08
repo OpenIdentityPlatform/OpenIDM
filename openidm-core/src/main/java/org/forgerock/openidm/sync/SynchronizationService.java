@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.sync;
+package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.util.ArrayList;
@@ -47,6 +47,8 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.SynchronizationListener;
 
 /**
  * TODO: Description.
