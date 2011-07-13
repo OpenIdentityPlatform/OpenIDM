@@ -39,7 +39,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/orientstudio/orientdb-1.0rc3-SNAPSHOT/www</directory>
-            <outputDirectory>/openidm/src/site</outputDirectory>
+            <outputDirectory>/openidm/db/studio</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>

@@ -39,6 +39,7 @@ import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
 import com.orientechnologies.orient.server.config.OServerCommandConfiguration;
 import com.orientechnologies.orient.server.config.OServerConfiguration;
+import com.orientechnologies.orient.server.config.OServerEntryConfiguration;
 import com.orientechnologies.orient.server.config.OServerHandlerConfiguration;
 import com.orientechnologies.orient.server.config.OServerNetworkConfiguration;
 import com.orientechnologies.orient.server.config.OServerNetworkListenerConfiguration;
@@ -136,10 +137,21 @@ public class EmbeddedOServerService {
         OServerCommandConfiguration command1 = new OServerCommandConfiguration();
         command1.pattern = "POST|*.action GET|*.action";
         command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
-        command1.parameters = null; // TODO: <temporary disable> new OServerEntryConfiguration[0];
+        command1.parameters = new OServerEntryConfiguration[0];
+        
+        // Access to the studio web app
+        OServerCommandConfiguration command2 = new OServerCommandConfiguration();
+        command2.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt";
+        command2.implementation="com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
+        command2.parameters = new OServerEntryConfiguration[2];
+        command2.parameters[0] = new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache");
+        command2.parameters[1] = new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120");
+        
         listener2.commands = new OServerCommandConfiguration[] {
-                command1
+                command1,
+                command2
         };
+        
         listener2.parameters = new OServerParameterConfiguration[0];
         configuration.network.listeners.add(listener2);
         
@@ -176,12 +188,13 @@ public class EmbeddedOServerService {
         configuration.users = new OServerUserConfiguration[] {
                 new OServerUserConfiguration("root", "3358BE3413F53E0D3DDA03C95C0A3F8357D0D160F8186EDA0C191CE9A4FA271B", "*")
         };
-        configuration.properties = null; /* disabled new OServerEntryConfiguration[] {
+        configuration.properties = new OServerEntryConfiguration[] {
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
-                new OServerEntryConfiguration("log.console.level", "info"),
-                new OServerEntryConfiguration("log.file.level", "fine")
+                new OServerEntryConfiguration("orientdb.www.path", "db/studio")
+                //new OServerEntryConfiguration("log.console.level", "info"),
+                //new OServerEntryConfiguration("log.file.level", "fine")
                 
-        };*/
+        };
 
         return configuration;
     }
