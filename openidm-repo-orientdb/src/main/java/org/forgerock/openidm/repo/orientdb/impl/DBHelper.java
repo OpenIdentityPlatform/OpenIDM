@@ -43,6 +43,8 @@ import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
+import com.orientechnologies.orient.core.storage.OStorage.CLUSTER_TYPE;
+import com.orientechnologies.orient.core.storage.impl.local.OClusterLocal;
 
 /**
  * A Helper to interact with the OrientDB
@@ -69,12 +71,11 @@ public class DBHelper {
         
         // Immediate disk sync for commit 
         OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
-
-        System.out.println("completeConfig" + completeConfig);
         
         checkDB(dbURL, user, password, completeConfig);
         
-        ODatabaseDocumentPool pool = new ODatabaseDocumentPool(); //ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this, is it safe?
+        ODatabaseDocumentPool pool = new ODatabaseDocumentPool(); 
+        //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this
         pool.setup(minSize, maxSize);
         warmUpPool(pool, dbURL, user, password, minSize);
         
@@ -143,7 +144,7 @@ public class DBHelper {
                     JsonNode orientClassConfig = (JsonNode) orientDBClasses.get(orientClassName);
                    
                     logger.info("Creating OrientDB class {}", orientClassName);
-                    OClass orientClass = schema.createClass(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL); 
+                    OClass orientClass = schema.createClass(orientClassName, db.getStorage().addCluster(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL));
                     
                     JsonNode indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
                     for (JsonNode index : indexes) {

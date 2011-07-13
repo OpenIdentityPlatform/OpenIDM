@@ -30,6 +30,10 @@ import org.slf4j.LoggerFactory;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.openidm.repo.RepositoryService;
 
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;
@@ -52,6 +56,14 @@ import com.orientechnologies.orient.server.config.OServerUserConfiguration;
 public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
 
+    // TODO: resolve issue with connection failure when this is enabled
+    // Only start this if the OrientDB Repo is configured to start
+    //@Reference(
+    //        policy = ReferencePolicy.DYNAMIC,
+    //        target = "(service.pid=org.forgerock.openidm.repo.orientdb)"
+    //)
+    //RepositoryService repo;
+    
     OServer orientDBServer;
     
     @Activate
@@ -77,6 +89,8 @@ public class EmbeddedOServerService {
 
     // TODO: make configurable
     protected OServerConfiguration getOrientDBConfig() {
+        //OrientDBRepoService orientDBRepo = (OrientDBRepoService) repo;
+        
         OServerConfiguration configuration = new OServerConfiguration();
         
         configuration.handlers = new ArrayList<OServerHandlerConfiguration>();
@@ -130,21 +144,35 @@ public class EmbeddedOServerService {
         configuration.network.listeners.add(listener2);
         
         OServerStorageConfiguration storage1 = new OServerStorageConfiguration();
-        storage1.name = "temp";
+        storage1.name = "temp"; 
         storage1.path = "memory:temp";
         storage1.userName = "admin";
         storage1.userPassword = "admin";
         storage1.loadOnStartup = false;
+
+        // TOOD: Get these settings from the Repo config        
+/*        OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
+        storage2.name = "openidm";
+        storage2.path = orientDBRepo.dbURL;
+        storage2.userName = orientDBRepo.user;
+        storage2.userPassword = orientDBRepo.password;
+        storage2.loadOnStartup = false;
+*/
+        
         OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
         storage2.name = "openidm";
         storage2.path = "local:./db/openidm";
         storage2.userName = "admin";
         storage2.userPassword = "admin";
         storage2.loadOnStartup = false;
+        
         configuration.storages = new OServerStorageConfiguration[] {
                 storage1,
                 storage2
         };
+        
+
+        // TODO: make configurable
         configuration.users = new OServerUserConfiguration[] {
                 new OServerUserConfiguration("root", "3358BE3413F53E0D3DDA03C95C0A3F8357D0D160F8186EDA0C191CE9A4FA271B", "*")
         };

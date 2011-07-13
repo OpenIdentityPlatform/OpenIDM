@@ -312,11 +312,16 @@ public class RepoServiceFunctionalTest {
         obj.put("lastname", "Added");
         repo.update(id, revAfterCreate, obj); // Change the object to increase the revision
         
+        System.out.println("Obj after update: " + obj);
+        
         long rev = Long.valueOf(revAfterCreate).longValue();
         long expectedRev = ++rev;
         String expectedRevStr = "" + rev;
         
         Map<String, Object> objToDelete = repo.read(id);
+        
+        System.out.println("Obj re-read after update: " + objToDelete);
+        
         assertThat(objToDelete).includes(
             entry(DocumentUtil.TAG_ID, uuid),
             entry(DocumentUtil.TAG_REV, expectedRevStr),
@@ -376,7 +381,7 @@ public class RepoServiceFunctionalTest {
     public void inlineQuery() throws ObjectSetException {
         Map params = new HashMap();
         //params.put("firstname", "Zebra");
-        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = 'inlinequery'");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed_user where lastname like 'Eglo%' and test = 'inlinequery'");
         Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
@@ -392,9 +397,7 @@ public class RepoServiceFunctionalTest {
         Map params = new HashMap();
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
-        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like 'Eglo%' and test = ${querytype} ");
-        // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
-        //params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed_user where lastname like 'Eglo%' and test = ${querytype} ");
         Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
@@ -413,7 +416,7 @@ public class RepoServiceFunctionalTest {
         Map params = new HashMap();
         params.put("lastname", "Eglo");
         params.put("querytype", "inlinequery");
-        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed_user where lastname like ${lastname}% and test = ${querytype}");
         Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         
@@ -429,9 +432,7 @@ public class RepoServiceFunctionalTest {
         Map params = new HashMap();
         params.put("lastname", "Eglo%");
         params.put("querytype", "inlinequery");
-        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname} and test = ${querytype} ");
-        // TODO: work with OrientDB team as OrientDB :token% ':token%' or ':token' does not seem to work        
-        //params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed/user where lastname like ${lastname}% and test = ${querytype}");
+        params.put(QueryConstants.QUERY_EXPRESSION, "select * from managed_user where lastname like ${lastname} and test = ${querytype} ");
         Map result = repo.query("managed/user", params); 
         List resultSet = (List) result.get(QueryConstants.QUERY_RESULT);
         

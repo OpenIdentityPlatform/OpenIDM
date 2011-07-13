@@ -131,6 +131,7 @@ public class OrientDBRepoService implements RepositoryService {
         
         Map<String, Object> result = null;
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        
         try {
             ODocument doc = predefinedQueries.getByID(localId, type, db);
             if (doc == null) {
@@ -141,7 +142,6 @@ public class OrientDBRepoService implements RepositoryService {
         } finally {
             if (db != null) {
                 db.close();
-                pool.release(db);
             }
         }
 
@@ -164,6 +164,7 @@ public class OrientDBRepoService implements RepositoryService {
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
+        String orientClassName = typeToOrientClassName(type);
  
         if (fullId == null || localId == null) {
             throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: " + fullId + " local identifier: " + localId);
@@ -176,7 +177,7 @@ public class OrientDBRepoService implements RepositoryService {
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
         try{
             // Rather than using MVCC for insert, rely on primary key uniqueness constraints to detect duplicate create
-            ODocument newDoc = DocumentUtil.toDocument(obj, null, db, type);
+            ODocument newDoc = DocumentUtil.toDocument(obj, null, db, orientClassName);
             logger.trace("Created doc for id: {} to save {}", fullId, newDoc);
             newDoc.save();
             
@@ -202,7 +203,6 @@ public class OrientDBRepoService implements RepositoryService {
         } finally {
             if (db != null) {
                 db.close();
-                pool.release(db);
             }
         }
     }
@@ -230,6 +230,7 @@ public class OrientDBRepoService implements RepositoryService {
         
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
+        String orientClassName = typeToOrientClassName(type);
         
         if (rev == null) {
             throw new ConflictException("Object passed into update does not have revision it expects set.");
@@ -238,14 +239,16 @@ public class OrientDBRepoService implements RepositoryService {
         }
         
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        
         try{
             db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
                 throw new NotFoundException("Update on object " + fullId + " could not find existing object.");
             }
-            ODocument updatedDoc = DocumentUtil.toDocument(obj, existingDoc, db, type);
+            ODocument updatedDoc = DocumentUtil.toDocument(obj, existingDoc, db, orientClassName);
             logger.trace("Updated doc for id {} to save {}", fullId, updatedDoc);
+            
             updatedDoc.save();
             db.commit();
 
@@ -260,7 +263,6 @@ public class OrientDBRepoService implements RepositoryService {
         } finally {
             if (db != null) {
                 db.close();
-                pool.release(db);
             } 
         }
     }
@@ -308,7 +310,6 @@ public class OrientDBRepoService implements RepositoryService {
         } finally {
             if (db != null) {
                 db.close();
-                pool.release(db);
             }
         }
     }
@@ -361,6 +362,7 @@ public class OrientDBRepoService implements RepositoryService {
         
         Map<String, Object> result = new HashMap<String, Object>();
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        
         try {
             List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
             result.put(QueryConstants.QUERY_RESULT, docs);
@@ -387,7 +389,6 @@ public class OrientDBRepoService implements RepositoryService {
         } finally {
             if (db != null) {
                 db.close();
-                pool.release(db);
             }
         }
         
@@ -411,7 +412,7 @@ public class OrientDBRepoService implements RepositoryService {
     }
     
     // TODO: replace with common utility to handle ID, this is temporary
-    private String getObjectType(String id) {
+    private static String getObjectType(String id) {
         String type = null;
         int lastSlashPos = id.lastIndexOf("/");
         if (lastSlashPos > -1) {
@@ -425,6 +426,15 @@ public class OrientDBRepoService implements RepositoryService {
         }
         return type;
     }
+    
+    public static String typeToOrientClassName(String type) {
+        return type.replace("/", "_");
+    }
+    
+    //public static String idToOrientClassName(String id) {
+    //    String type = getObjectType(id);
+    //    return typeToOrientClassName(type);
+    //}
     
     /**
      * Detect if the root cause of the exception is an index constraint violation

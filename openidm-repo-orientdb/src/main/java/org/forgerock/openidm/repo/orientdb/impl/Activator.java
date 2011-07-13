@@ -36,10 +36,10 @@ public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
      public void start(BundleContext context) {
-         logger.debug("Bundle started", context);
+         logger.trace("Bundle started", context);
      }
 
      public void stop(BundleContext context) {
-         logger.debug("Bundle stopped", context);
+         logger.trace("Bundle stopped", context);
      }
 }

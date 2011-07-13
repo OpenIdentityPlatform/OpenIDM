@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public class Queries {
      * 
      * The keys for the input parameters as well as the return map entries are in QueryConstants.
      * 
-     * @param type the relative/local resource name, which matches the OrientDB document class name
+     * @param type the relative/local resource name, which needs to be converted to match the OrientDB document class name
      * @param params the parameters which include the query id, or the query expression, as well as the 
      *        token key/value pairs to replace in the query
      * @param database a handle to a database connection instance for exclusive use by the query method whilst it is executing.
@@ -72,9 +73,11 @@ public class Queries {
     public List<ODocument> query(final String type, Map<String, Object> params, ODatabaseDocumentTx database) 
             throws BadRequestException {
         
+        String orientClassName = OrientDBRepoService.typeToOrientClassName(type);
+        
         List<ODocument> result = null;
         QueryInfo foundQueryInfo = null;
-        params.put(QueryConstants.RESOURCE_NAME, type); 
+        params.put(QueryConstants.RESOURCE_NAME, orientClassName); 
         
         String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);
         if (queryExpression != null) {
@@ -185,7 +188,7 @@ public class Queries {
     /**
      * Populate and prepare the query information with the query expression passed in the parameters
      *
-     * @param type the relative/local resource name, which matches the OrientDB document class name
+     * @param type the relative/local resource name
      * @param params the parameters with the query expression and token replacement key/values
      * @param database a handle to a OrientDB db that is available for exclusive use during the invocation of this method
      * @return the populated query info
