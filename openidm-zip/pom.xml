@@ -31,6 +31,13 @@
             <artifactId>openidm-audit</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+<!--
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-config</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
@@ -181,7 +188,7 @@
                                 <artifactItem>
                                     <groupId>com.orientechnologies</groupId>
                                     <artifactId>orientdb</artifactId>
-                                    <version>1.0rc2-SNAPSHOT</version>
+                                    <version>${orientdb.version}</version>
                                     <type>zip</type>
                                     <classifier>distribution</classifier>
                                     <overWrite>false</overWrite>

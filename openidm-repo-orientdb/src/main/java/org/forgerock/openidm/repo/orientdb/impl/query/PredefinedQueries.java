@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.orientdb.impl.DocumentUtil;
+import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,8 @@ public class PredefinedQueries {
      */
     public ODocument getByID(final String id, final String type, ODatabaseDocumentTx database) throws BadRequestException {
 
+        String orientClassName = OrientDBRepoService.typeToOrientClassName(type);
+        
         if (id == null) {
             throw new BadRequestException("Query by id the passed id was null.");
         } else if (type == null) {
@@ -67,12 +70,17 @@ public class PredefinedQueries {
         
         // TODO: convert into a prepared statement
         OSQLSynchQuery<ODocument> query = new OSQLSynchQuery<ODocument>(
-                "select * from " + type + " where " + DocumentUtil.ORIENTDB_PRIMARY_KEY + " = '" + id + "'");
+                "select * from " + orientClassName + " where " + DocumentUtil.ORIENTDB_PRIMARY_KEY + " = '" + id + "'");
         List<ODocument> result = database.query(query);
         logger.trace("Query: {} Result: {}", query, result);
         ODocument first = null;
         if (result.size() > 0) {
             first = result.get(0); // ID is of type unique index, there must only be one at most
+
+            // TODO: Remove this work-around once OrientDB fixes this
+            // Work-around to ensure the queried object reflects the latest document data, 
+            // Which OrientDB starting in RC3 did not always return after an update save() and commit(0.
+            first.reload();
         }
         return first;
     }
