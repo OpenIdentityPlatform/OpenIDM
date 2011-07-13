@@ -190,7 +190,7 @@ public class EmbeddedOServerService {
         };
         configuration.properties = new OServerEntryConfiguration[] {
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
-                new OServerEntryConfiguration("orientdb.www.path", "db/studio")
+                new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio")
                 //new OServerEntryConfiguration("log.console.level", "info"),
                 //new OServerEntryConfiguration("log.file.level", "fine")
                 
