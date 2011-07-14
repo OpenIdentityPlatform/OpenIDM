@@ -317,13 +317,18 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
     @Override // ObjectSet
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new ConflictException("action not implemented yet");
+        Id identifier = new Id(id);
+
+        Map<String, Object> result = locateService(identifier).query(id, params);
+        ActivityLog.log(getRouter(), Action.ACTION, "Query parameters " + params, id, result, null, Status.SUCCESS);
+
+        return result;
     }
 
     /**
      * Called when a source object has been created.
      *
-     * @param id     the fully-qualified identifier of the object that was created.
+     * @param id    the fully-qualified identifier of the object that was created.
      * @param value the value of the object that was created.
      * @throws org.forgerock.openidm.sync.SynchronizationException
      *          if an exception occurs processing the notification.

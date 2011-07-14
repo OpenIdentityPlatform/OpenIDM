@@ -817,7 +817,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     token = operation.getLatestSyncToken(helper.getObjectClass());
                     TRACE.debug("New LatestSyncToken has been fetched. New token is: {}", token);
                 } else {
-                    final SyncToken[] lastToken = new SyncToken[1];
+                    final SyncToken[] lastToken = new SyncToken[]{token};
                     final String[] failedRecord = new String[1];
                     OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage.asMap());
                     InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
