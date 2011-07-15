@@ -139,7 +139,7 @@ public class GenericTableHandler implements TableHandler {
         
         logger.debug("Executing: {}", readStatement);
         ResultSet rs = readStatement.executeQuery();
-        if (rs.first()) {
+        if (rs.next()) {
             String rev = rs.getString("rev");  
             String objString = rs.getString("fullobject");
             ObjectMapper mapper = new ObjectMapper();
@@ -183,7 +183,7 @@ public class GenericTableHandler implements TableHandler {
         int val = createStatement.executeUpdate();
         
         ResultSet keys = createStatement.getGeneratedKeys();
-        boolean validKeyEntry = keys.first();
+        boolean validKeyEntry = keys.next();
         if (!validKeyEntry) {
             throw new InternalServerErrorException("Object creation for " + fullId + " failed to retrieve an assigned ID from the DB.");
         }
@@ -261,7 +261,7 @@ public class GenericTableHandler implements TableHandler {
         
         logger.debug("Executing: {}", readTypeStatement);
         ResultSet rs = readTypeStatement.executeQuery();
-        if (rs.first()) {
+        if (rs.next()) {
             typeId = rs.getLong("id");
             logger.debug("Type: {}, id: {}", new Object[] {type, typeId});  
         } 
@@ -300,7 +300,7 @@ public class GenericTableHandler implements TableHandler {
         
         logger.debug("Executing: {}", readForUpdateStatement);
         ResultSet rs = readForUpdateStatement.executeQuery();
-        if (rs.first()) {
+        if (rs.next()) {
             logger.debug("Read for update full id: {}", fullId); 
             return rs;
         } else { 
