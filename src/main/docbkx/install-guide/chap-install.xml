@@ -104,7 +104,7 @@ $ </screen>
    connector and a reconcilation task scheduled to run every minute.
    To learn more about the sample please refer to 
    Chapter 3.  To disable the sample you may delete or rename the 
-   schedular configuration file for the sample at
+   scheduler configuration file for the sample at
    </para>
    <para>
    <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
