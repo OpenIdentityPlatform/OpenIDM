@@ -45,7 +45,7 @@
  <para>
  If you would like to query the internal noSQL database (OrientDB), you will
  need to download
- <link xlink:href='http://code.google.com/p/orient/wiki/Download'>OrientDB 1.0rc2</link>.
+ <link xlink:href='http://code.google.com/p/orient/wiki/Download'>OrientDB 1.0rc3</link>.
  Once downloaded and unzipped you will find the shell console in the bin directory.
  You may start it and then connect to the running OpenIDM with the connect command
  as follows:

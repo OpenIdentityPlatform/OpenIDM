@@ -23,55 +23,52 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter version="5.0"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-         xml:id="chap-scheduling" xml:lang="en"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xinclude="http://www.w3.org/2001/XInclude"
-         xmlns:ns="http://docbook.org/ns/docbook">
-  <title>Scheduling</title>
+<chapter version="5.0" xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd" xml:id="chap-scheduling" xml:lang="en" xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xinclude="http://www.w3.org/2001/XInclude" xmlns:ns="http://docbook.org/ns/docbook">
+    <title>Scheduling</title>
 
-  <sect1>
-    <title>Overview</title>
+    <sect1>
+        <title>Overview</title>
 
-    <para></para>
+        <para></para>
 
-    <para>Invocations that need to be scheduled can use the scheduler
+        <para>Invocations that need to be scheduled can use the scheduler
     facility. The facility is akin to a cron schedule, and uses the Quartz
     library.</para>
 
-    <para></para>
+        <para></para>
 
-    <para>The facility can be configured via the org.forgerock.scheduler
+        <para>The facility can be configured via the org.forgerock.openidm.scheduler
     service, e.g. by creating a file with the name pattern</para>
 
-    <para><code>conf/org.forgerock.scheduler-&lt;my-schedule-name&gt;.json</code></para>
+        <para>
+            <code>conf/org.forgerock.openidm.scheduler-&lt;my-schedule-name&gt;.json</code>
+            <footnote>
+                <para>In most of the cases it is preferred to skipp the <citetitle>org.forgerock.openidm.</citetitle> part in the fine name. It will be added automatically when the configuration is read in. </para>
+            </footnote>
+        </para>
 
-    <para></para>
+        <para></para>
 
-    <para>where <code>&lt;my-schedule-name&gt;</code> is replaced with the
+        <para>where <code>&lt;my-schedule-name&gt;</code> is replaced with the
     logical name for the schedule to be configured.</para>
 
-    <para></para>
+        <para></para>
 
-    <para>Or the scheduling can be requested by modules themselves, with the
+        <para>Or the scheduling can be requested by modules themselves, with the
     configuration in their format/location.</para>
 
-    <para></para>
-  </sect1>
+        <para></para>
+    </sect1>
 
-  <sect1>
-    <title>Configuration</title>
+    <sect1>
+        <title>Configuration</title>
 
-    <para>The scheduler configuration in the file
-    conf/org.forgerock.scheduler-&lt;my-schedule-name&gt;.json has the
+        <para>The scheduler configuration in the file
+    conf/org.forgerock.openidm.scheduler-&lt;my-schedule-name&gt;.json has the
     format</para>
 
-    <example>
-      <literallayout class="monospaced">
+        <example>
+            <literallayout class="monospaced">
                 <code>
 {
     "type" : "cron",
@@ -84,42 +81,44 @@
 }
                 </code>
             </literallayout>
-    </example>
+        </example>
 
-    <para></para>
+        <para></para>
 
-    <para>time/date is in ISO 8601 format of YYYY-MM-DDThh:mm:ss</para>
+        <para>time/date is in ISO 8601 format of YYYY-MM-DDThh:mm:ss</para>
 
-    <para></para>
+        <para></para>
 
-    <para>The optional properties can be absent, or empty</para>
+        <para>The optional properties can be absent, or empty</para>
 
-    <para></para>
+        <para></para>
 
-    <para>The schedule expression is in the cron style format described here
+        <para>The schedule expression is in the cron style format described here
     :</para>
 
-    <para><link
-    xlink:href="http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html">http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html</link></para>
+        <para>
+            <link xlink:href="http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html">http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html</link>
+        </para>
 
-    <para><link
-    xlink:href="http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html">http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html</link></para>
+        <para>
+            <link xlink:href="http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html">http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html</link>
+        </para>
 
-    <para></para>
+        <para></para>
 
-    <para>The invokeServer service identifier is defined in the documentation
+        <para>The invokeServer service identifier is defined in the documentation
     of scheduleable services, as well as the context information they can
     take. The scheduler identifier can be "relative" without the reverse
     domain notation, in which case it is prefixed with org.forgerock.openidm -
     e.g. an invokeService service identifier of "active-sync" is equivalent to
     "org.forgerock.openidm.active-sync".</para>
 
-    <para></para>
+        <para></para>
 
-    <example>
-      <title>Complex example</title>
+        <example>
+            <title>Complex example</title>
 
-      <literallayout class="monospaced">
+            <literallayout class="monospaced">
                 <code>
 {
     "type" : "cron",
@@ -132,14 +131,14 @@
 }
                 </code>
             </literallayout>
-    </example>
+        </example>
 
-    <para></para>
+        <para></para>
 
-    <example>
-      <title>Simple example</title>
+        <example>
+            <title>Simple example</title>
 
-      <literallayout class="monospaced">
+            <literallayout class="monospaced">
                 <code>
 {
     "type", "cron",
@@ -149,18 +148,18 @@
 }
                 </code>
             </literallayout>
-    </example>
-  </sect1>
+        </example>
+    </sect1>
 
-  <sect1>
-    <title>Service Implementer Notes</title>
+    <sect1>
+        <title>Service Implementer Notes</title>
 
-    <para></para>
+        <para></para>
 
-    <para>To implement a service that can be scheduled, the service needs to
+        <para>To implement a service that can be scheduled, the service needs to
     implement ScheduledService. The service PID is used as a basis for the
     service identifier in schedule definitions.</para>
 
-    <para></para>
-  </sect1>
+        <para></para>
+    </sect1>
 </chapter>
