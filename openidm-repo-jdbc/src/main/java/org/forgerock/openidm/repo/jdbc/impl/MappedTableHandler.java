@@ -169,7 +169,7 @@ public class MappedTableHandler implements TableHandler {
         
         logger.debug("Executing: {}", readStatement);
         ResultSet rs = readStatement.executeQuery();
-        if (rs.first()) {
+        if (rs.next()) {
             String rev = rs.getString("rev");  
             String objString = rs.getString("fullobject");
             ObjectMapper mapper = new ObjectMapper();
