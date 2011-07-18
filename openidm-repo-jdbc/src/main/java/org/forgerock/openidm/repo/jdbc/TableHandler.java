@@ -1,3 +1,26 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright © 2011 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.openidm.repo.jdbc;
 
 import java.io.IOException;
@@ -42,8 +65,8 @@ public interface TableHandler {
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
+     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param obj the contents of the object to create in the object set.
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
@@ -62,9 +85,9 @@ public interface TableHandler {
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param id the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
      * @param rev the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to put in the object set.
+     * @param obj the contents of the object to put in the object set.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
@@ -79,7 +102,7 @@ public interface TableHandler {
     /**
      * Deletes the specified object from the object set.
      *
-     * @param id the identifier of the object to be deleted.
+     * @param fullId the identifier of the object to be deleted.
      * @param rev the version of the object to delete or {@code null} if not provided.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
@@ -101,7 +124,7 @@ public interface TableHandler {
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
-     * @param id identifies the object to query.
+     * @param type identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found. 

@@ -23,59 +23,27 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService; 
-import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
 
 /**
  * Handling of tables in a generic (not object specific) layout
