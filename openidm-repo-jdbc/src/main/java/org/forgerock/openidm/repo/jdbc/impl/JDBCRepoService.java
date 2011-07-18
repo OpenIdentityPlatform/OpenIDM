@@ -23,78 +23,53 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.apache.felix.scr.annotations.*;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.objset.*;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.repo.jdbc.DatabaseType;
+import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService; 
-import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Repository service implementation using JDBC
+ *
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.repo.jdbc", immediate=true, policy=ConfigurationPolicy.REQUIRE)
+@Component(name = "org.forgerock.openidm.repo.jdbc", immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(name = "service.description", value = "Repository Service using JDBC"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "repo"),
-    @Property(name = "db.type", value = "JDBC")
+        @Property(name = "service.description", value = "Repository Service using JDBC"),
+        @Property(name = "service.vendor", value = "ForgeRock AS"),
+        @Property(name = "openidm.router.prefix", value = "repo"),
+        @Property(name = "db.type", value = "JDBC")
 })
 public class JDBCRepoService implements RepositoryService {
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
-    
+
     ObjectMapper mapper = new ObjectMapper();
 
     // Keys in the JSON configuration
     public final static String CONFIG_JNDI_NAME = "jndiName";
+    public final static String CONFIG_DB_TYPE = "dbType";
     public final static String CONFIG_DB_DRIVER = "dbDriver";
     public final static String CONFIG_DB_URL = "dbUrl";
     public final static String CONFIG_USER = "user";
@@ -112,31 +87,31 @@ public class JDBCRepoService implements RepositoryService {
     TableHandler defaultTableHandler;
 
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-    
+
     /**
-     * Gets an object from the repository by identifier. The returned object is not validated 
+     * Gets an object from the repository by identifier. The returned object is not validated
      * against the current schema and may need processing to conform to an updated schema.
-     * <p>
+     * <p/>
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency supported by OrientDB and OpenIDM.
      *
-     * @param id the identifier of the object to retrieve from the object set.
-     * @throws NotFoundException if the specified object could not be found. 
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws BadRequestException if the passed identifier is invalid
+     * @param fullId the identifier of the object to retrieve from the object set.
      * @return the requested object.
-     */    
+     * @throws NotFoundException   if the specified object could not be found.
+     * @throws ForbiddenException  if access to the object is forbidden.
+     * @throws BadRequestException if the passed identifier is invalid
+     */
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
-        
+
         if (fullId == null || localId == null) {
-            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: " 
+            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: "
                     + fullId + " local identifier: " + localId);
         } else if (type == null) {
             throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
         }
-                
+
         Connection connection = null;
         Map<String, Object> result = null;
         try {
@@ -144,42 +119,42 @@ public class JDBCRepoService implements RepositoryService {
             TableHandler handler = getTableHandler(type);
             result = handler.read(fullId, type, localId, connection);
 
-            connection.close();  
+            connection.close();
         } catch (SQLException ex) {
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
-        } catch (IOException ex) {  
+        } catch (IOException ex) {
             throw new InternalServerErrorException("Conversion of read object failed", ex);
         } finally {
             if (connection != null) {
                 try {
-                    connection.close();  
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.warn("Failure during connection close ", ex);
                 }
             }
         }
-        
+
         return result;
     }
 
     /**
      * Creates a new object in the object set.
-     * <p>
+     * <p/>
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolved. 
-     * @throws ForbiddenException if access to the object or object set is forbidden.
+     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param obj    the contents of the object to create in the object set.
+     * @throws NotFoundException           if the specified id could not be resolved.
+     * @throws ForbiddenException          if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
-     */    
+     */
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
- 
+
         if (fullId == null || localId == null) {
-            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: " 
+            throw new NotFoundException("The repository requires clients to supply an identifier for the object to create. Full identifier: "
                     + fullId + " local identifier: " + localId);
         } else if (type == null) {
             throw new NotFoundException("The object identifier did not include sufficient information to determine the object type: " + fullId);
@@ -198,7 +173,7 @@ public class JDBCRepoService implements RepositoryService {
         } catch (SQLException ex) {
             rollback(connection);
             // TODO: detect duplicate inserts with appropriate exception rather than generic
-            
+
             //if (isCauseIndexException()) {
             //    throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
             //            + ex.getMessage(), ex);
@@ -214,46 +189,46 @@ public class JDBCRepoService implements RepositoryService {
         } finally {
             if (connection != null) {
                 try {
-                    connection.close();  
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.warn("Failure during connection close ", ex);
                 }
             }
         }
     }
-    
+
     /**
-     * Updates the specified object in the object set. 
-     * <p>
-     * This implementation requires MVCC and hence enforces that clients state what revision they expect 
+     * Updates the specified object in the object set.
+     * <p/>
+     * This implementation requires MVCC and hence enforces that clients state what revision they expect
      * to be updating
-     * 
+     * <p/>
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param id the identifier of the object to be put, or {@code null} to request a generated identifier.
-     * @param rev the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to put in the object set.
-     * @throws ConflictException if version is required but is {@code null}.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param rev    the version of the object to update; or {@code null} if not provided.
+     * @param obj    the contents of the object to put in the object set.
+     * @throws ConflictException           if version is required but is {@code null}.
+     * @throws ForbiddenException          if access to the object is forbidden.
+     * @throws NotFoundException           if the specified object could not be found.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
-     * @throws BadRequestException if the passed identifier is invalid
-     */    
+     * @throws BadRequestException         if the passed identifier is invalid
+     */
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        
+
         String localId = getLocalId(fullId);
         String type = getObjectType(fullId);
-        
+
         if (rev == null) {
             throw new ConflictException("Object passed into update does not have revision it expects set.");
         }
-        
+
         Connection connection = null;
         try {
             connection = getConnection();
             connection.setAutoCommit(false);
-            
+
             getTableHandler(type).update(fullId, type, localId, rev, obj, connection);
 
             connection.commit();
@@ -264,13 +239,13 @@ public class JDBCRepoService implements RepositoryService {
         } catch (java.io.IOException ex) {
             rollback(connection);
             throw new InternalServerErrorException("Conversion of object to update failed", ex);
-        } catch (RuntimeException ex) {  
+        } catch (RuntimeException ex) {
             rollback(connection);
             throw new InternalServerErrorException("Updating object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {
                 try {
-                    connection.close();  
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.warn("Failure during connection close ", ex);
                 }
@@ -281,13 +256,13 @@ public class JDBCRepoService implements RepositoryService {
     /**
      * Deletes the specified object from the object set.
      *
-     * @param id the identifier of the object to be deleted.
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found. 
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws ConflictException if version is required but is {@code null}.
+     * @param fullId the identifier of the object to be deleted.
+     * @param rev    the version of the object to delete or {@code null} if not provided.
+     * @throws NotFoundException           if the specified object could not be found.
+     * @throws ForbiddenException          if access to the object is forbidden.
+     * @throws ConflictException           if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */ 
+     */
     public void delete(String fullId, String rev) throws ObjectSetException {
 
         String localId = getLocalId(fullId);
@@ -295,13 +270,13 @@ public class JDBCRepoService implements RepositoryService {
 
         if (rev == null) {
             throw new ConflictException("Object passed into delete does not have revision it expects set.");
-        } 
-        
+        }
+
         Connection connection = null;
         try {
             connection = getConnection();
             connection.setAutoCommit(false);
-            
+
             getTableHandler(type).delete(fullId, type, localId, rev, connection);
 
             connection.commit();
@@ -318,25 +293,25 @@ public class JDBCRepoService implements RepositoryService {
         } finally {
             if (connection != null) {
                 try {
-                    connection.close();  
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.warn("Failure during connection close ", ex);
                 }
             }
         }
     }
-    
+
     /**
      * Currently not supported by this implementation.
-     * 
+     * <p/>
      * Applies a patch (partial change) to the specified object in the object set.
      *
-     * @param id the identifier of the object to be patched.
-     * @param rev the version of the object to patch or {@code null} if not provided.
+     * @param id    the identifier of the object to be patched.
+     * @param rev   the version of the object to patch or {@code null} if not provided.
      * @param patch the partial change to apply to the object.
-     * @throws ConflictException if patch could not be applied object state or if version is required.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @throws ConflictException           if patch could not be applied object state or if version is required.
+     * @throws ForbiddenException          if access to the object is forbidden.
+     * @throws NotFoundException           if the specified object could not be found.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
@@ -345,78 +320,78 @@ public class JDBCRepoService implements RepositoryService {
 
     /**
      * Performs the query on the specified object and returns the associated results.
-     * <p>
+     * <p/>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types. 
-     * 
-     * The returned map is structured as follow: 
+     * The query result is a JSON object structure composed of basic Java types.
+     * <p/>
+     * The returned map is structured as follow:
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
-     * @param id identifies the object to query.
+     * @param fullId identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @throws NotFoundException   if the specified object could not be found.
      * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
-     * configured, a query expression that is invalid, or missing query substitution tokens.
-     * @throws ForbiddenException if access to the object or specified query is forbidden.
+     *                             configured, a query expression that is invalid, or missing query substitution tokens.
+     * @throws ForbiddenException  if access to the object or specified query is forbidden.
      */
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO: replace with common utility
         String type = fullId;
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
-        
+
         Map<String, Object> result = new HashMap<String, Object>();
         Connection connection = null;
         try {
             connection = getConnection();
             long start = System.currentTimeMillis();
-            List<Map<String, Object>> docs = getTableHandler(type).query(type, params, connection); 
+            List<Map<String, Object>> docs = getTableHandler(type).query(type, params, connection);
             long end = System.currentTimeMillis();
             result.put(QueryConstants.QUERY_RESULT, docs);
             // TODO: split out conversion time 
             //result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
-                
-            result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end-start));
-            
+
+            result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end - start));
+
             if (logger.isDebugEnabled()) {
                 logger.debug("Query result contains {} records, took {} ms and took {} ms to convert result.",
-                        new Object[] {((List) result.get(QueryConstants.QUERY_RESULT)).size(),
-                        result.get(QueryConstants.STATISTICS_QUERY_TIME),
-                        result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
+                        new Object[]{((List) result.get(QueryConstants.QUERY_RESULT)).size(),
+                                result.get(QueryConstants.STATISTICS_QUERY_TIME),
+                                result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
             }
         } catch (SQLException ex) {
             throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {
                 try {
-                    connection.close();  
+                    connection.close();
                 } catch (SQLException ex) {
                     logger.warn("Failure during connection close", ex);
                 }
             }
         }
-        
+
         return result;
 
     }
-    
+
     public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
         throw new UnsupportedOperationException("JDBC repository does not support action");
     }
-    
+
     // Utility method to cleanly roll back including logging
     private void rollback(Connection connection) {
         if (connection != null) {
             try {
                 logger.debug("Rolling back transaction.");
                 connection.rollback();
-            } catch(SQLException ex) {
+            } catch (SQLException ex) {
                 logger.warn("Rolling back transaction reported failure ", ex);
             }
         }
     }
-    
+
     // TODO: replace with common utility to handle ID, this is temporary
     private String getLocalId(String id) {
         String localId = null;
@@ -427,7 +402,7 @@ public class JDBCRepoService implements RepositoryService {
         logger.trace("Full id: {} Extracted local id: {}", id, localId);
         return localId;
     }
-    
+
     // TODO: replace with common utility to handle ID, this is temporary
     private String getObjectType(String id) {
         String type = null;
@@ -448,10 +423,10 @@ public class JDBCRepoService implements RepositoryService {
         if (useJndi) {
             return ds.getConnection();
         } else {
-            return DriverManager.getConnection(dbUrl, user, password); 
+            return DriverManager.getConnection(dbUrl, user, password);
         }
     }
-    
+
     TableHandler getTableHandler(String type) {
         TableHandler handler = tableHandlers.get(type);
         if (handler != null) {
@@ -471,18 +446,18 @@ public class JDBCRepoService implements RepositoryService {
     }
 
     @Activate
-    void activate(ComponentContext compContext) { 
+    void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         JsonNode config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
-            
+
             String enabled = config.get("enabled").asString();
             if ("false".equals(enabled)) {
                 logger.debug("JDBC repository not enabled");
                 throw new RuntimeException("JDBC repository not enabled.");
             }
-            
+
             // Data Source configuration
             jndiName = config.get(CONFIG_JNDI_NAME).asString();
             if (jndiName != null && jndiName.trim().length() > 0) {
@@ -495,10 +470,10 @@ public class JDBCRepoService implements RepositoryService {
                     logger.warn("Getting JNDI initial context failed: " + ex.getMessage(), ex);
                 }
                 if (ctx == null) {
-                    throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. " 
+                    throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. "
                             + " Configure DB initialization via direct " + CONFIG_DB_DRIVER + " configuration instead.");
                 }
-                
+
                 useJndi = true;
                 ds = (DataSource) ctx.lookup(jndiName); // e.g. "java:comp/env/jdbc/MySQLDB"
             } else {
@@ -513,25 +488,35 @@ public class JDBCRepoService implements RepositoryService {
                 password = config.get(CONFIG_PASSWORD).defaultTo("").asString();
                 logger.info("Using DB connection configured via Driver Manager with Driver {} and URL", dbDriver, dbUrl);
                 try {
-                    Class.forName(dbDriver);  
+                    Class.forName(dbDriver);
                 } catch (ClassNotFoundException ex) {
                     logger.error("Could not find configured database driver " + dbDriver + " to start repository ", ex);
-                    throw new InvalidException("Could not find configured database driver " 
+                    throw new InvalidException("Could not find configured database driver "
                             + dbDriver + " to start repository ", ex);
                 }
             }
-            
+
             // Table Handling configuration
             String dbSchemaName = config.get("queries").get("dbSchema").defaultTo("openidm").asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
-            
+
             tableHandlers = new HashMap<String, TableHandler>();
             JsonNode defaultMapping = config.get("resourceMapping").get("default");
             String defaultMainTable = defaultMapping.get("mainTable").defaultTo("genericobjects").asString();
             String defaultPropTable = defaultMapping.get("propertiesTable").defaultTo("genericobjectproperties").asString();
-            defaultTableHandler = new GenericTableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
+
+            //TODO Make safe the database type detection
+            DatabaseType databaseType = DatabaseType.valueOf(config.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
+
+            switch (databaseType) {
+                case DB2:
+                    defaultTableHandler = new DB2TableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
+                    break;
+                default:
+                    defaultTableHandler = new GenericTableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
+            }
             logger.debug("Using default table handler: {}", defaultTableHandler);
-            
+
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
             if (!genericMapping.isNull()) {
                 for (String key : genericMapping.keys()) {
@@ -540,16 +525,27 @@ public class JDBCRepoService implements RepositoryService {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
                     }
-                    TableHandler handler = new GenericTableHandler(
-                            value.get("mainTable").required().asString(), 
-                            value.get("propertiesTable").required().asString(),
-                            dbSchemaName,
-                            genericQueries);
+                    TableHandler handler = null;
+                    switch (databaseType) {
+                        case DB2:
+                            handler = new DB2TableHandler(
+                                    value.get("mainTable").required().asString(),
+                                    value.get("propertiesTable").required().asString(),
+                                    dbSchemaName,
+                                    genericQueries);
+                            break;
+                        default:
+                            handler = new GenericTableHandler(
+                                    value.get("mainTable").required().asString(),
+                                    value.get("propertiesTable").required().asString(),
+                                    dbSchemaName,
+                                    genericQueries);
+                    }
                     tableHandlers.put(key, handler);
                     logger.debug("For pattern {} added handler: {}", key, handler);
                 }
             }
-            
+
             JsonNode explicitQueries = config.get("queries").get("explicitTables");
             JsonNode explicitMapping = config.get("resourceMapping").get("explicitMapping");
             if (!explicitMapping.isNull()) {
@@ -561,7 +557,7 @@ public class JDBCRepoService implements RepositoryService {
                         key = key.substring(0, key.length() - 1);
                     }
                     TableHandler handler = new MappedTableHandler(
-                            value.get("table").required().asString(), 
+                            value.get("table").required().asString(),
                             value.get("objectToColumn").required().asMap(),
                             dbSchemaName,
                             explicitQueries);
@@ -569,19 +565,19 @@ public class JDBCRepoService implements RepositoryService {
                     logger.debug("For pattern {} added handler: {}", key, handler);
                 }
             }
-            
+
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start JDBC repository.", ex);
             throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
         } catch (NamingException ex) {
             throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
         }
-        
+
         try {
             // Check if we can get a connection
             Connection testConn = getConnection();
         } catch (Exception ex) {
-            logger.warn("JDBC Repository start-up experienced a failure getting a DB connection: " + ex.getMessage() 
+            logger.warn("JDBC Repository start-up experienced a failure getting a DB connection: " + ex.getMessage()
                     + ". If this is not temporary or resolved, Repository operation will be affected.", ex);
         }
 
@@ -598,9 +594,9 @@ public class JDBCRepoService implements RepositoryService {
     }
     */
 
-    
+
     @Deactivate
-    void deactivate(ComponentContext compContext) { 
+    void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
         logger.info("Repository stopped.");
     }

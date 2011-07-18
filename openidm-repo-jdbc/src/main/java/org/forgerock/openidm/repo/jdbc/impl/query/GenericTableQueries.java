@@ -23,28 +23,21 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Configured and add-hoc query support on tables in generic (non-object specific) layout
@@ -108,10 +101,10 @@ public class GenericTableQueries {
      * @param type the relative/local resource name, which matches the OrientDB document class name
      * @param params the parameters which include the query id, or the query expression, as well as the 
      *        token key/value pairs to replace in the query
-     * @param database a handle to a database connection instance for exclusive use by the query method whilst it is executing.
+     * @param con a handle to a database connection instance for exclusive use by the query method whilst it is executing.
      * @return The query result, which includes meta-data about the query, and the result set itself.
      * @throws BadRequestException if the passed request parameters are invalid, e.g. missing query id or query expression or tokens.
-     * @throws InternalServerException if the preparing or executing the query fails because of configuration or DB issues
+     * @throws InternalServerErrorException if the preparing or executing the query fails because of configuration or DB issues
      */
     public List<Map<String, Object>> query(final String type, Map<String, Object> params, Connection con) 
             throws BadRequestException, InternalServerErrorException {
@@ -183,7 +176,7 @@ public class GenericTableQueries {
     
     boolean hasColumn (ResultSetMetaData rsMetaData, String columnName) throws SQLException {
         for (int colPos = 1 ; colPos <= rsMetaData.getColumnCount(); colPos++) {
-            if (columnName.equals(rsMetaData.getColumnName(colPos))) {
+            if (columnName.equalsIgnoreCase(rsMetaData.getColumnName(colPos))) {
                 return true;
             }
         }

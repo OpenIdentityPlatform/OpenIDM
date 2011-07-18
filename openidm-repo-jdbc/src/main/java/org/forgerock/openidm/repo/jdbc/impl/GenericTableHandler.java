@@ -23,60 +23,30 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService; 
-import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
-
 /**
  * Handling of tables in a generic (not object specific) layout
+ *
  * @author aegloff
  */
 public class GenericTableHandler implements TableHandler {
@@ -85,119 +55,136 @@ public class GenericTableHandler implements TableHandler {
     String mainTableName;
     String propTableName;
     String dbSchemaName;
-    
+
     ObjectMapper mapper = new ObjectMapper();
     GenericTableQueries queries;
-    
-    String readTypeQueryStr;
-    String createTypeQueryStr;
-    String readForUpdateQueryStr;
-    String readQueryStr;
-    String createQueryStr;
-    String updateQueryStr;
-    String deleteQueryStr;
-    String propCreateQueryStr;
-    String propDeleteQueryStr;
-    
+
+    Map<QueryDefinition, String> queryMap;
+
+    public enum QueryDefinition {
+        READTYPEQUERYSTR,
+        CREATETYPEQUERYSTR,
+        READFORUPDATEQUERYSTR,
+        READQUERYSTR,
+        CREATEQUERYSTR,
+        UPDATEQUERYSTR,
+        DELETEQUERYSTR,
+        PROPCREATEQUERYSTR,
+        PROPDELETEQUERYSTR;
+    }
+
     public GenericTableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
         this.dbSchemaName = dbSchemaName;
-        
+
         queries = new GenericTableQueries();
         queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig);
+        queryMap = Collections.unmodifiableMap(initializeQueryMap());
+    }
+
+
+    protected Map<QueryDefinition, String> initializeQueryMap() {
+        Map<QueryDefinition, String> result = new EnumMap<QueryDefinition, String>(QueryDefinition.class);
 
         // objecttypes table
-        createTypeQueryStr = "INSERT INTO " + dbSchemaName + ".objecttypes (objecttype) VALUES (?)"; 
-        readTypeQueryStr = "SELECT id FROM "  + dbSchemaName + ".objecttypes objtype WHERE objtype.objecttype = ?";
-        
+        result.put(QueryDefinition.CREATETYPEQUERYSTR, "INSERT INTO " + dbSchemaName + ".objecttypes (objecttype) VALUES (?)");
+        result.put(QueryDefinition.READTYPEQUERYSTR, "SELECT id FROM " + dbSchemaName + ".objecttypes objtype WHERE objtype.objecttype = ?");
+
         // Main object table
-        readForUpdateQueryStr = "SELECT obj.* FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid  = ? FOR UPDATE";
-        readQueryStr = "SELECT obj.rev, obj.fullobject FROM " + dbSchemaName + ".objecttypes objtype, " + dbSchemaName + "." + mainTableName + " obj WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?";
-        createQueryStr = "INSERT INTO " + dbSchemaName + "." + mainTableName + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?)";
-        updateQueryStr = "UPDATE " + dbSchemaName + "." + mainTableName + " obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?"; 
-        deleteQueryStr = "DELETE obj FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?";
+        result.put(QueryDefinition.READFORUPDATEQUERYSTR, "SELECT obj.* FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid  = ? FOR UPDATE");
+        result.put(QueryDefinition.READQUERYSTR, "SELECT obj.rev, obj.fullobject FROM " + dbSchemaName + ".objecttypes objtype, " + dbSchemaName + "." + mainTableName + " obj WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?");
+        result.put(QueryDefinition.CREATEQUERYSTR, "INSERT INTO " + dbSchemaName + "." + mainTableName + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?)");
+        result.put(QueryDefinition.UPDATEQUERYSTR, "UPDATE " + dbSchemaName + "." + mainTableName + " obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?");
+        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?");
+
+        /* DB2 Script
+        deleteQueryStr = "DELETE FROM " + dbSchemaName + "." + mainTableName + " obj WHERE EXISTS (SELECT 1 FROM " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?";
+        */
 
         // Object properties table
-        propCreateQueryStr = "INSERT INTO " + dbSchemaName + "." + propTableName + " ( " + mainTableName + "_id, propkey, proptype, propvalue) VALUES (?,?,?,?)";        
-        propDeleteQueryStr = "DELETE prop FROM " + dbSchemaName + "." + propTableName + " prop WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + dbSchemaName + "." + mainTableName + " obj, " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)";
+        result.put(QueryDefinition.PROPCREATEQUERYSTR, "INSERT INTO " + dbSchemaName + "." + propTableName + " ( " + mainTableName + "_id, propkey, proptype, propvalue) VALUES (?,?,?,?)");
+        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + propTableName + " prop WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + dbSchemaName + "." + mainTableName + " obj, " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
+
+
+        return result;
     }
-    
+
     /* (non-Javadoc)
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
-     */
+    * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
+    */
     @Override
-    public Map<String, Object> read(String fullId, String type, String localId, Connection connection) 
-                    throws NotFoundException, SQLException, IOException {
-        
+    public Map<String, Object> read(String fullId, String type, String localId, Connection connection)
+            throws NotFoundException, SQLException, IOException {
+
         Map<String, Object> result = null;
-        PreparedStatement readStatement = queries.getPreparedStatement(connection, readQueryStr);
+        PreparedStatement readStatement = getPreparedStatement(connection, QueryDefinition.READQUERYSTR);
 
         logger.trace("Populating prepared statement {} for {}", readStatement, fullId);
         readStatement.setString(1, type);
         readStatement.setString(2, localId);
-        
+
         logger.debug("Executing: {}", readStatement);
         ResultSet rs = readStatement.executeQuery();
         if (rs.next()) {
-            String rev = rs.getString("rev");  
+            String rev = rs.getString("rev");
             String objString = rs.getString("fullobject");
             ObjectMapper mapper = new ObjectMapper();
             result = (Map<String, Object>) mapper.readValue(objString, Map.class);
             result.put("_rev", rev);
-            logger.debug(" full id: {}, rev: {}, obj {}", new Object[] {fullId, rev, result});  
+            logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, result});
         } else {
             throw new NotFoundException("Object " + fullId + " not found in " + type);
         }
-        
+
         return result;
     }
-    
+
     /* (non-Javadoc)
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#create(java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
-     */    
+    * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#create(java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+    */
     @Override
-    public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection) 
-                throws SQLException, IOException, InternalServerErrorException {
+    public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection)
+            throws SQLException, IOException, InternalServerErrorException {
         // Do this outside of the main tx.
         connection.setAutoCommit(true);
         long typeId = getTypeId(type, connection);
-        
+
         connection.setAutoCommit(false);
 
-        PreparedStatement createStatement = queries.getPreparedStatement(connection, createQueryStr, true);
+        PreparedStatement createStatement = queries.getPreparedStatement(connection, queryMap.get(QueryDefinition.CREATEQUERYSTR), true);
 
         logger.debug("Create with fullid {}", fullId);
         String rev = "0";
         obj.put("_id", localId); // Save the id in the object
         obj.put("_rev", rev); // Save the rev in the object, and return the changed rev from the create.
         String objString = mapper.writeValueAsString(obj);
-        
-        logger.trace("Populating statement {} with params {}, {}, {}, {}", 
-                new Object[]{ createStatement, typeId, localId, rev, objString });
+
+        logger.trace("Populating statement {} with params {}, {}, {}, {}",
+                new Object[]{createStatement, typeId, localId, rev, objString});
         createStatement.setLong(1, typeId);
         createStatement.setString(2, localId);
         createStatement.setString(3, rev);
         createStatement.setString(4, objString);
         logger.debug("Executing: {}", createStatement);
         int val = createStatement.executeUpdate();
-        
+
         ResultSet keys = createStatement.getGeneratedKeys();
         boolean validKeyEntry = keys.next();
         if (!validKeyEntry) {
             throw new InternalServerErrorException("Object creation for " + fullId + " failed to retrieve an assigned ID from the DB.");
         }
         long dbId = keys.getLong(1);
-        
+
         logger.debug("Created object for id {} with rev {}", fullId, rev);
         JsonNode node = new JsonNode(obj);
         writeNodeProperties(fullId, dbId, localId, node, connection);
     }
 
     void writeNodeProperties(String fullId, long dbId, String localId, JsonNode node, Connection connection) throws SQLException {
-        
-        PreparedStatement propCreateStatement = queries.getPreparedStatement(connection, propCreateQueryStr);
-        
+
+        PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
+
         for (JsonNode entry : node) {
             String propkey = entry.getPointer().toString();
             if (entry.isMap() || entry.isList()) {
@@ -212,7 +199,7 @@ public class GenericTableHandler implements TableHandler {
                 if (propvalue != null) {
                     proptype = entry.getValue().getClass().getName(); // TODO: proper type info
                 }
-                logger.trace("Populating statement {} with params {}, {}, {}, {}, {}", 
+                logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
                         new Object[]{propCreateStatement, dbId, localId, propkey, proptype, propvalue});
                 propCreateStatement.setLong(1, dbId);
                 propCreateStatement.setString(2, propkey);
@@ -220,11 +207,11 @@ public class GenericTableHandler implements TableHandler {
                 propCreateStatement.setString(4, propvalue);
                 logger.debug("Executing: {}", propCreateStatement);
                 int val2 = propCreateStatement.executeUpdate();
-                logger.debug("Created objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[] {fullId, propkey, proptype, propvalue});
+                logger.debug("Created objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[]{fullId, propkey, proptype, propvalue});
             }
         }
     }
-    
+
     // Ensure type is in objecttypes table and get its assigned id
     long getTypeId(String type, Connection connection) throws SQLException, InternalServerErrorException {
         Exception detectedEx = null;
@@ -244,9 +231,9 @@ public class GenericTableHandler implements TableHandler {
         }
         return typeId;
     }
-    
+
     /**
-     * @param type the object type URI
+     * @param type       the object type URI
      * @param connection the DB connection
      * @return the typeId for the given type if exists, or -1 if does not exist
      */
@@ -254,84 +241,84 @@ public class GenericTableHandler implements TableHandler {
         long typeId = -1;
 
         Map<String, Object> result = null;
-        PreparedStatement readTypeStatement = queries.getPreparedStatement(connection, readTypeQueryStr);
-        
+        PreparedStatement readTypeStatement = getPreparedStatement(connection, QueryDefinition.READTYPEQUERYSTR);
+
         logger.trace("Populating prepared statement {} for {}", readTypeStatement, type);
         readTypeStatement.setString(1, type);
-        
+
         logger.debug("Executing: {}", readTypeStatement);
         ResultSet rs = readTypeStatement.executeQuery();
         if (rs.next()) {
             typeId = rs.getLong("id");
-            logger.debug("Type: {}, id: {}", new Object[] {type, typeId});  
-        } 
+            logger.debug("Type: {}, id: {}", new Object[]{type, typeId});
+        }
         return typeId;
     }
-    
+
     /**
-     * @param type the object type URI
+     * @param type       the object type URI
      * @param connection the DB connection
      * @return true if a type was inserted
      * @throws SQLException if the insert failed (e.g. concurrent insert by another thread)
      */
     boolean createTypeId(String type, Connection connection) throws SQLException {
-        PreparedStatement createTypeStatement = queries.getPreparedStatement(connection, createTypeQueryStr);
+        PreparedStatement createTypeStatement = getPreparedStatement(connection, QueryDefinition.CREATETYPEQUERYSTR);
 
-        logger.debug("Create objecttype {}", type);        
+        logger.debug("Create objecttype {}", type);
         createTypeStatement.setString(1, type);
         logger.debug("Executing: {}", createTypeStatement);
         int val = createTypeStatement.executeUpdate();
-        
+
         return (val == 1);
     }
-   
+
     /**
      * @return the row for the requested object, selected FOR UPDATE
      * @throws NotFoundException if the requested object was not found in the DB
      */
-    public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection) 
+    public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException, IOException {
-        
-        PreparedStatement readForUpdateStatement = queries.getPreparedStatement(connection, readForUpdateQueryStr);
-        
+
+        PreparedStatement readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
+
         logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
         readForUpdateStatement.setString(1, type);
         readForUpdateStatement.setString(2, localId);
-        
+
         logger.debug("Executing: {}", readForUpdateStatement);
         ResultSet rs = readForUpdateStatement.executeQuery();
         if (rs.next()) {
-            logger.debug("Read for update full id: {}", fullId); 
+            logger.debug("Read for update full id: {}", fullId);
             return rs;
-        } else { 
+        } else {
             throw new NotFoundException("Object " + fullId + " not found in " + type);
         }
-     }
-    
+    }
+
     /* (non-Javadoc)
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
-     */
+    * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+    */
     @Override
-    public void update(String fullId, String type, String localId, String rev, Map<String, Object> obj, Connection connection) 
-                throws SQLException, IOException, PreconditionFailedException, NotFoundException, InternalServerErrorException {
+    public void update(String fullId, String type, String localId, String rev, Map<String, Object> obj, Connection connection)
+            throws SQLException, IOException, PreconditionFailedException, NotFoundException, InternalServerErrorException {
         logger.debug("Update with fullid {}", fullId);
-        
+
         int revInt = Integer.parseInt(rev);
         ++revInt;
         String newRev = Integer.toString(revInt);
         obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
-        
-        ResultSet rs = readForUpdate(fullId, type, localId, connection); 
+
+        ResultSet rs = readForUpdate(fullId, type, localId, connection);
         String existingRev = rs.getString("rev");
-        long dbId = rs.getLong("id");  
+        long dbId = rs.getLong("id");
         long objectTypeDbId = rs.getLong("objecttypes_id");
-        logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[] {fullId, existingRev, dbId, objectTypeDbId});
-        
+        logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
+
         if (!existingRev.equals(rev)) {
             throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
         }
-        PreparedStatement updateStatement = queries.getPreparedStatement(connection, updateQueryStr);
-        PreparedStatement deletePropStatement = queries.getPreparedStatement(connection, propDeleteQueryStr);
+        PreparedStatement updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
+        PreparedStatement deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
 
         // Support changing object identifier
         String newLocalId = (String) obj.get("_id");
@@ -342,8 +329,8 @@ public class GenericTableHandler implements TableHandler {
             obj.put("_id", newLocalId); // Ensure the ID is saved in the object
         }
         String objString = mapper.writeValueAsString(obj);
-        
-        logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[] {updateStatement, fullId, newLocalId, newRev, objString, dbId});
+
+        logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
         updateStatement.setString(1, newLocalId);
         updateStatement.setString(2, newRev);
         updateStatement.setString(3, objString);
@@ -357,22 +344,22 @@ public class GenericTableHandler implements TableHandler {
 
         JsonNode node = new JsonNode(obj);
         // TODO: only update what changed?
-        logger.trace("Populating prepared statement {} for {} {} {}", new Object[] {deletePropStatement, fullId, type, localId});
+        logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
         deletePropStatement.setString(1, type);
         deletePropStatement.setString(2, localId);
         logger.debug("Update properties del statement: {}", deletePropStatement);
         int deleteCount = deletePropStatement.executeUpdate();
         logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
         writeNodeProperties(fullId, dbId, localId, node, connection);
-        
+
     }
 
     /* (non-Javadoc)
      * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
-     */ 
+     */
     @Override
-    public void delete(String fullId, String type, String localId, String rev, Connection connection) 
-                throws PreconditionFailedException, InternalServerErrorException, NotFoundException, SQLException, IOException {
+    public void delete(String fullId, String type, String localId, String rev, Connection connection)
+            throws PreconditionFailedException, InternalServerErrorException, NotFoundException, SQLException, IOException {
         logger.debug("Delete with fullid {}", fullId);
 
         // First check if the revision matches and select it for UPDATE
@@ -384,20 +371,20 @@ public class GenericTableHandler implements TableHandler {
         }
         String existingRev = existing.getString("rev");
         if (!rev.equals(existingRev)) {
-            throw new PreconditionFailedException("Delete rejected as current Object revision " + existingRev + " is different than " 
+            throw new PreconditionFailedException("Delete rejected as current Object revision " + existingRev + " is different than "
                     + "expected by caller " + rev + ", the object has changed since retrieval.");
         }
-        
+
         // Proceed with the valid delete
-        PreparedStatement deleteStatement = queries.getPreparedStatement(connection, deleteQueryStr);
-        logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[] {deleteStatement, fullId, type, localId, rev});
-        
+        PreparedStatement deleteStatement = getPreparedStatement(connection, QueryDefinition.DELETEQUERYSTR);
+        logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[]{deleteStatement, fullId, type, localId, rev});
+
         // Rely on ON DELETE CASCADE for connected object properties to be deleted
         deleteStatement.setString(1, type);
         deleteStatement.setString(2, localId);
         deleteStatement.setString(3, rev);
         logger.debug("Delete statement: {}", deleteStatement);
-               
+
         int deletedRows = deleteStatement.executeUpdate();
         logger.trace("Deleted {} rows for id : {} {}", deletedRows, localId);
         if (deletedRows < 1) {
@@ -409,15 +396,19 @@ public class GenericTableHandler implements TableHandler {
 
     /* (non-Javadoc)
      * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
-     */ 
+     */
     @Override
-    public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
-                throws ObjectSetException {
-        return queries.query(type, params, connection); 
-    } 
-    
+    public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection)
+            throws ObjectSetException {
+        return queries.query(type, params, connection);
+    }
+
     @Override
     public String toString() {
-        return "Generic handler mapped to [" + mainTableName + ", " + propTableName + "]"; 
+        return "Generic handler mapped to [" + mainTableName + ", " + propTableName + "]";
+    }
+
+    protected PreparedStatement getPreparedStatement(Connection connection, QueryDefinition queryDefinition) throws SQLException {
+        return queries.getPreparedStatement(connection, queryMap.get(queryDefinition));
     }
 }
