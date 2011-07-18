@@ -76,11 +76,6 @@ public class PredefinedQueries {
         ODocument first = null;
         if (result.size() > 0) {
             first = result.get(0); // ID is of type unique index, there must only be one at most
-
-            // TODO: Remove this work-around once OrientDB fixes this
-            // Work-around to ensure the queried object reflects the latest document data, 
-            // Which OrientDB starting in RC3 did not always return after an update save() and commit(0.
-            first.reload();
         }
         return first;
     }
