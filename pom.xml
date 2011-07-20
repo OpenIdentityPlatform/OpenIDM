@@ -146,7 +146,7 @@
 
     <ciManagement>
         <system>hudson</system>
-        <url>http://builds.forgerock.org/job/OpenIDM</url>
+        <url>http://builds.forgerock.org/job/OpenIDM%202.x/</url>
         <notifiers>
             <notifier>
                 <type>mail</type>
