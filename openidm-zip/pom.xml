@@ -31,13 +31,11 @@
             <artifactId>openidm-audit</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-<!--
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
--->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>

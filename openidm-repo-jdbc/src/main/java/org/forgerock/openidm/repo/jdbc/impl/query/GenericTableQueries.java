@@ -28,6 +28,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,7 +150,7 @@ public class GenericTableQueries {
                     Map<String, Object> obj = (Map<String, Object>) mapper.readValue(objString, Map.class);
 
                     // TODO: remove data logging            
-                    logger.debug("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  
+                    logger.trace("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  
                     
                     result.add(obj);
                 } else {
@@ -216,11 +217,26 @@ public class GenericTableQueries {
      * Success to set the queries does not mean they are valid as some can only be validated at
      * query execution time.
      * 
-     * @param queries the complete list of configured queries, mapping from query id to the 
+     * @param mainTableName name of the table containing the object identifier and all related info
+     * @param propTableName name of the table holding individual properties for searching and indexing
+     * @param dbSchemaName the database scheme the table is in
+     * @param queriesConfig queries configured in configuration (files)
+     * @param defaultQueryMap static default queries already defined for handling this table type
+     * 
      * query details
      */
-    public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
+    public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig, 
+            Map<QueryDefinition, String> defaultQueryMap) {
         queries = new HashMap<String, QueryInfo>();
+        
+        if (queriesConfig == null || queriesConfig.isNull()) {
+            queriesConfig = new JsonNode(new HashMap());
+        }
+        // Default query-all-ids to allow bootstrapping of configuration
+        if (!queriesConfig.isDefined(QueryConstants.QUERY_ALL_IDS) && defaultQueryMap != null) {
+            queriesConfig.put(QueryConstants.QUERY_ALL_IDS, defaultQueryMap.get(QueryDefinition.QUERYALLIDS));
+        }
+        
         for (String queryName : queriesConfig.keys()) {
             String rawQuery = queriesConfig.get(queryName).required().asString();
             

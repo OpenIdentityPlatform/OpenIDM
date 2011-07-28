@@ -145,7 +145,7 @@
     </issueManagement>
 
     <ciManagement>
-        <system>hudson</system>
+        <system>Jenkins</system>
         <url>http://builds.forgerock.org/job/OpenIDM%202.x/</url>
         <notifiers>
             <notifier>
@@ -154,7 +154,7 @@
                 <sendOnFailure>true</sendOnFailure>
                 <sendOnSuccess>false</sendOnSuccess>
                 <sendOnWarning>false</sendOnWarning>
-                <address>openidm-issues@forgerock.org</address>
+                <address>openidm-dev@forgerock.org</address>
             </notifier>
         </notifiers>
     </ciManagement>
@@ -176,11 +176,12 @@
         <slf4j.version>1.6.1</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <orientdb.version>1.0rc4-SNAPSHOT</orientdb.version>
+        <!--<orientdb.version>1.0rc3</orientdb.version>-->
     </properties>
 
     <modules>
         <module>openidm-audit</module>
-        <!-- <module>openidm-config</module> -->
+        <module>openidm-config</module>
         <module>openidm-core</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>

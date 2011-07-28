@@ -305,6 +305,7 @@ public class RepoServiceFunctionalTest {
         obj.put("firstname", "Cesar");
         repo.create(id, obj);
         String revAfterCreate = (String) obj.get(DocumentUtil.TAG_REV);
+        
         assertThat(obj).includes(
                 entry(DocumentUtil.TAG_ID, uuid));
             // Disabled check whilst OrientDB version not stable at 0
@@ -312,15 +313,11 @@ public class RepoServiceFunctionalTest {
         obj.put("lastname", "Added");
         repo.update(id, revAfterCreate, obj); // Change the object to increase the revision
         
-        System.out.println("Obj after update: " + obj);
-        
         long rev = Long.valueOf(revAfterCreate).longValue();
         long expectedRev = ++rev;
         String expectedRevStr = "" + rev;
         
         Map<String, Object> objToDelete = repo.read(id);
-        
-        System.out.println("Obj re-read after update: " + objToDelete);
         
         assertThat(objToDelete).includes(
             entry(DocumentUtil.TAG_ID, uuid),
@@ -331,7 +328,7 @@ public class RepoServiceFunctionalTest {
         repo.delete(id, "0"); // Trying to delete old revision must fail
         assertTrue(false, "Delete of changed object must fail, but did not.");
     }
-    
+
     // Test Query support    
     
     // IDs for test Queries

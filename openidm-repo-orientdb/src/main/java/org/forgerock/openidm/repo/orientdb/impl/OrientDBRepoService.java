@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +54,7 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService; 
 import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
 import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
@@ -69,33 +69,34 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  * Repository service implementation using OrientDB
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true, policy=ConfigurationPolicy.REQUIRE)
-@Service
+@Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
+@Service (value = {RepositoryService.class, ObjectSet.class}) // Omit the RepoBootService interface from the managed service
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.router.prefix", value = "repo"),
     @Property(name = "db.type", value = "OrientDB")
 })
-public class OrientDBRepoService implements RepositoryService {
+public class OrientDBRepoService implements RepositoryService, RepoBootService {
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
 
     // Keys in the JSON configuration
-    public final static String CONFIG_QUERIES = "queries";
-    public final static String CONFIG_DB_URL = "dbUrl";
-    public final static String CONFIG_DB_STRUCTURE = "dbStructure";
-    public final static String CONFIG_ORIENTDB_CLASS = "orientdbClass";
-    public final static String CONFIG_INDEX = "index";
-    public final static String CONFIG_PROPERTY_NAME = "propertyName";
-    public final static String CONFIG_PROPERTY_TYPE = "propertyType";
-    public final static String CONFIG_INDEX_TYPE = "indexType";
+    public static final String CONFIG_QUERIES = "queries";
+    public static final String CONFIG_DB_URL = "dbUrl";
+    public static final String CONFIG_USER = "user";
+    public static final String CONFIG_PASSWORD = "password";
+    public static final String CONFIG_DB_STRUCTURE = "dbStructure";
+    public static final String CONFIG_ORIENTDB_CLASS = "orientdbClass";
+    public static final String CONFIG_INDEX = "index";
+    public static final String CONFIG_PROPERTY_NAME = "propertyName";
+    public static final String CONFIG_PROPERTY_TYPE = "propertyType";
+    public static final String CONFIG_INDEX_TYPE = "indexType";
     
     ODatabaseDocumentPool pool;
 
     String dbURL; 
-    // TODO make configurable
-    String user = "admin";
-    String password = "admin";
+    String user;
+    String password;
     int poolMinSize = 5; 
     int poolMaxSize = 20;
 
@@ -455,36 +456,70 @@ public class OrientDBRepoService implements RepositoryService {
         return false;
     }
 
+    /**
+     * Populate and return a repository service that knows how to query and manipulate configuration.
+     *
+     * @param repoConfig the bootstrap configuration
+     * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
+     */
+    static RepoBootService getRepoBootService(Map repoConfig) {
+        OrientDBRepoService bootRepo = new OrientDBRepoService();
+        JsonNode cfg = new JsonNode(repoConfig);
+        bootRepo.init(cfg);
+        return bootRepo;
+    }
+    
     @Activate
     void activate(ComponentContext compContext) { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
+
         JsonNode config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository: " 
+                    + ex.getMessage(), ex);
+            throw ex;
+        }
+        init(config);
+        
+        logger.info("Repository started.");
+    }
     
+    /**
+     * Initialize the instnace with the given configuration.
+     * 
+     * This can configure managed (DS/SCR) instances, as well as explicitly instantiated
+     * (bootstrap) instances.
+     * 
+     * @param config the configuration
+     */
+    void init (JsonNode config) {
+        try {
             dbURL = config.get(CONFIG_DB_URL).defaultTo("local:./db/openidm").asString();
+            user = config.get(CONFIG_USER).defaultTo("admin").asString();
+            password = config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
 
             Map map = config.get(CONFIG_QUERIES).asMap();
             Map<String, String> queryMap = (Map<String, String>) map;
             queries.setConfiguredQueries(queryMap);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid, can not start OrientDB repository.", ex);
+            logger.warn("Configuration invalid, can not start OrientDB repository: " 
+                    + ex.getMessage(), ex);
             throw ex;
         }
 
         try {
             pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize, config);
-            logger.info("Repository started.");
         } catch (RuntimeException ex) {
-            logger.warn("Initializing database pool failed", ex);
+            logger.warn("Initializing database pool failed: " + ex.getMessage(), ex);
             throw ex;
-        } 
+        }
     }
 
     /* Currently rely on deactivate/activate to be called by DS if config changes instead
-    //@Modified
+    @Modified
     void modified(ComponentContext compContext) {
-        logger.trace("Modifying service {}", compContext);
         logger.info("Configuration of repository changed.");
         deactivate(compContext);
         activate(compContext);

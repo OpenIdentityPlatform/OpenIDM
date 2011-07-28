@@ -156,6 +156,12 @@ public class Queries {
      */
     public void setConfiguredQueries(Map<String, String> queries) {
         Map<String, QueryInfo> prepQueries = new HashMap<String, QueryInfo>();
+        
+        // Query all IDs is a mandatory query, default it and allow override.
+        QueryInfo defaultAllIdsQuery = prepareQuery("select _openidm_id from ${_resource}");
+        prepQueries.put("query-all-ids", defaultAllIdsQuery);
+        
+        // Populate/Override with Queries configured
         if (queries != null) {
             for (Map.Entry<String, String> entry : queries.entrySet()) {
                 String queryId = entry.getKey();

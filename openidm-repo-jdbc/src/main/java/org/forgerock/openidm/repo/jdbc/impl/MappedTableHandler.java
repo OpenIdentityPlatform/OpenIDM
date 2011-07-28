@@ -77,7 +77,7 @@ public class MappedTableHandler implements TableHandler {
         
         queries = new GenericTableQueries();
         //TODO: replace with explicit table specific handling.
-        queries.setConfiguredQueries(tableName, tableName, dbSchemaName, queriesConfig);
+        queries.setConfiguredQueries(tableName, tableName, dbSchemaName, queriesConfig, null);
         tokenReplacementPropNames = new ArrayList<String>();
         
         readQueryStr = "SELECT * FROM " + dbSchemaName + "." + tableName + " WHERE objectid  = ?";
