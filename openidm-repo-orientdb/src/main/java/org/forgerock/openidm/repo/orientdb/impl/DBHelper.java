@@ -110,16 +110,14 @@ public class DBHelper {
             if (db.exists()) {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
+                // Check if structure changed
+                JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+                populateSample(db, completeConfig);
             } else { 
                 JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
-                if (dbStructure == null) {
-                    logger.warn("No database exists, and no database structure defined in the configuration to populate one.");
-                    throw new InvalidException("No database exists, and no database structure defined in the configuration to populate one.");
-                } else {
-                    logger.info("DB does not exist, creating {}", dbURL);
-                    db.create(); 	       
-                    populateSample(db, completeConfig);
-                }
+                logger.info("DB does not exist, creating {}", dbURL);
+                db.create(); 	       
+                populateSample(db, completeConfig);
             } 
         } finally {
             if (db != null) {
@@ -137,44 +135,57 @@ public class DBHelper {
         } else {
             JsonNode orientDBClasses = dbStructure.get(OrientDBRepoService.CONFIG_ORIENTDB_CLASS);
             OSchema schema = db.getMetadata().getSchema();
+            
+            // Default always to create Config class for bootstrapping
+            if (orientDBClasses == null || orientDBClasses.isNull()) {
+                orientDBClasses = new JsonNode(new java.util.HashMap());
+            }
+            
+            Map cfgIndexes = new java.util.HashMap();
+            orientDBClasses.put("config", cfgIndexes);
+                            
             logger.info("Setting up database");
             if (orientDBClasses != null) {
                 for (Object key : orientDBClasses.keys()) {
                     String orientClassName = (String) key;
                     JsonNode orientClassConfig = (JsonNode) orientDBClasses.get(orientClassName);
-                   
-                    logger.info("Creating OrientDB class {}", orientClassName);
-                    OClass orientClass = schema.createClass(orientClassName, db.getStorage().addCluster(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL));
-                    
-                    JsonNode indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
-                    for (JsonNode index : indexes) {
-                        String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
-                        String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
-                        String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
+                    if (schema.existsClass(orientClassName)) {
+                        // TODO: update indexes too if changed
+                        logger.trace("OrientDB class {} already exists, skiping", orientClassName);
+                    } else {
+                        logger.info("Creating OrientDB class {}", orientClassName);
+                        OClass orientClass = schema.createClass(orientClassName, db.getStorage().addCluster(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL));
                         
-                        logger.info("Creating index on property {} of type {} with index type {} on {} for OrientDB class ", 
-                                new Object[] {propertyName, propertyType, indexType, orientClassName});
-            
-                        OType orientPropertyType = null;
-                        try {
-                            orientPropertyType = OType.valueOf(propertyType.toUpperCase());
-                        } catch (IllegalArgumentException ex) {
-                            throw new InvalidException("Invalid property type '" + propertyType + "' in configuration on property "
-                                    + propertyName + " with index type " + indexType + " on " 
-                                    + orientClassName + " valid values: " + OType.values() 
-                                    + " failure message: " + ex.getMessage(), ex);
-                        }
-                        
-                        try {
-                            OProperty.INDEX_TYPE orientIndexType = OProperty.INDEX_TYPE.valueOf(indexType.toUpperCase());
+                        JsonNode indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
+                        for (JsonNode index : indexes) {
+                            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
+                            String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
+                            String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
                             
-                            OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
-                            prop.createIndex(orientIndexType);
-                        } catch (IllegalArgumentException ex) {
-                            throw new InvalidException("Invalid index type '" + indexType + "' in configuration on property "
-                                    + propertyName + " of type " + propertyType + " on " 
-                                    + orientClassName + " valid values: " + OProperty.INDEX_TYPE.values() 
-                                    + " failure message: " + ex.getMessage(), ex);
+                            logger.info("Creating index on property {} of type {} with index type {} on {} for OrientDB class ", 
+                                    new Object[] {propertyName, propertyType, indexType, orientClassName});
+                
+                            OType orientPropertyType = null;
+                            try {
+                                orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+                            } catch (IllegalArgumentException ex) {
+                                throw new InvalidException("Invalid property type '" + propertyType + "' in configuration on property "
+                                        + propertyName + " with index type " + indexType + " on " 
+                                        + orientClassName + " valid values: " + OType.values() 
+                                        + " failure message: " + ex.getMessage(), ex);
+                            }
+                            
+                            try {
+                                OProperty.INDEX_TYPE orientIndexType = OProperty.INDEX_TYPE.valueOf(indexType.toUpperCase());
+                                
+                                OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
+                                prop.createIndex(orientIndexType);
+                            } catch (IllegalArgumentException ex) {
+                                throw new InvalidException("Invalid index type '" + indexType + "' in configuration on property "
+                                        + propertyName + " of type " + propertyType + " on " 
+                                        + orientClassName + " valid values: " + OProperty.INDEX_TYPE.values() 
+                                        + " failure message: " + ex.getMessage(), ex);
+                            }
                         }
                     }
                 }

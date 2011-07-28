@@ -49,6 +49,11 @@
                     {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
                     {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
                 ]
+            },
+            "config" : {
+                "index" : [
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
+                ]
             }
         }
     }    

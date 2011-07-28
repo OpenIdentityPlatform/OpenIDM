@@ -22,26 +22,20 @@
         <artifactId>openidm-project</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-util</artifactId>
-    <name>OpenIDM utility classes</name>
+    <artifactId>openidm-config</artifactId>
+    <name>OpenIDM configuration support</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-fluent</artifactId>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo</artifactId>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-            <version>1.7R2_2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.configadmin</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -54,12 +48,24 @@
             <artifactId>org.apache.felix.scr.annotations</artifactId>
             <scope>provided</scope>
         </dependency>
-            
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
@@ -101,16 +107,9 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Export-Package>
-                            org.forgerock.openidm.audit.util;version=${openidm.version},
-                            org.forgerock.openidm.config;version=${openidm.version},
-                            org.forgerock.openidm.config.installer;version=${openidm.version},
-                            org.forgerock.openidm.context;version=${openidm.version},
-                            org.forgerock.openidm.objset;version=${openidm.version},
-                            org.forgerock.openidm.script;version=${openidm.version},
-                            org.forgerock.openidm.script.javascript;version=${openidm.version},
-                            org.forgerock.openidm.sync;version=${openidm.version}
+                        <Export-Package> org.forgerock.openidm.config.persistence;version=${openidm.version}
                         </Export-Package>
+                        <Bundle-Activator>org.forgerock.openidm.config.persistence.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

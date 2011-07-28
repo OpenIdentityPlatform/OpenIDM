@@ -24,7 +24,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -40,6 +39,9 @@ import org.slf4j.LoggerFactory;
  */
 public class JSONEnhancedConfig implements EnhancedConfig {
 
+    // The key in the OSGi configuration dictionary holding the complete JSON configuration string
+    public final static String JSON_CONFIG_PROPERTY = "jsonconfig";
+    
     final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
     
     private ObjectMapper mapper = new ObjectMapper();
@@ -78,7 +80,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         Map<String, Object> parsedConfig = new HashMap<String, Object>();
         
         if (dict != null) {
-            String jsonConfig = (String) dict.get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
+            String jsonConfig = (String) dict.get(JSON_CONFIG_PROPERTY);
             logger.debug("Get configuration from JSON config property ", jsonConfig);
     
             try {

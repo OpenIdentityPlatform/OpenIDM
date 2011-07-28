@@ -29,6 +29,7 @@ import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
 import org.slf4j.Logger;
@@ -70,7 +71,8 @@ public class GenericTableHandler implements TableHandler {
         UPDATEQUERYSTR,
         DELETEQUERYSTR,
         PROPCREATEQUERYSTR,
-        PROPDELETEQUERYSTR;
+        PROPDELETEQUERYSTR,
+        QUERYALLIDS
     }
 
     public GenericTableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
@@ -79,8 +81,8 @@ public class GenericTableHandler implements TableHandler {
         this.dbSchemaName = dbSchemaName;
 
         queries = new GenericTableQueries();
-        queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig);
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
+        queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig, queryMap);
     }
 
 
@@ -104,9 +106,11 @@ public class GenericTableHandler implements TableHandler {
 
         // Object properties table
         result.put(QueryDefinition.PROPCREATEQUERYSTR, "INSERT INTO " + dbSchemaName + "." + propTableName + " ( " + mainTableName + "_id, propkey, proptype, propvalue) VALUES (?,?,?,?)");
-        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + propTableName + " prop WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + dbSchemaName + "." + mainTableName + " obj, " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
+        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + propTableName + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + dbSchemaName + "." + mainTableName + " obj, " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
 
-
+        // Default object queries
+        result.put(QueryDefinition.QUERYALLIDS, "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}");
+        
         return result;
     }
 

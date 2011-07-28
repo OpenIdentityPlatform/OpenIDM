@@ -31,6 +31,8 @@ package org.forgerock.openidm.repo;
 public final class QueryConstants {
     private QueryConstants() {}
 
+    // Keys for the query input
+    
     /**
      * Query input key.
      * 
@@ -68,6 +70,9 @@ public final class QueryConstants {
      */
     public final static String RESOURCE_NAME = "_resource";
     
+    
+    // Keys in the query output
+    
     /**
      * Query output key.
      * 
@@ -91,4 +96,15 @@ public final class QueryConstants {
      */
     public final static String STATISTICS_CONVERSION_TIME = "conversion-time-ms";
     
+    
+    // Well known values for the query map input
+    
+    /**
+     * Query input value for the QUERY_ID input key.
+     * 
+     * Querying with this query id results in querying all object IDs for a given ObjectSet.
+     * 
+     * All ObjectSets supporting query must support the query corresponding to this ID
+     */    
+    public final static String QUERY_ALL_IDS = "query-all-ids";;
 }

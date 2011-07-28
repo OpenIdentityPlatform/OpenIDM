@@ -31,6 +31,7 @@ import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
@@ -55,25 +56,28 @@ import java.util.Map;
  * @author aegloff
  */
 @Component(name = "org.forgerock.openidm.repo.jdbc", immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
+@Service (value = {RepositoryService.class, ObjectSet.class}) // Omit the RepoBootService interface from the managed service
 @Properties({
         @Property(name = "service.description", value = "Repository Service using JDBC"),
         @Property(name = "service.vendor", value = "ForgeRock AS"),
         @Property(name = "openidm.router.prefix", value = "repo"),
         @Property(name = "db.type", value = "JDBC")
 })
-public class JDBCRepoService implements RepositoryService {
+public class JDBCRepoService implements RepositoryService, RepoBootService {
+
+
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     ObjectMapper mapper = new ObjectMapper();
 
     // Keys in the JSON configuration
-    public final static String CONFIG_JNDI_NAME = "jndiName";
-    public final static String CONFIG_DB_TYPE = "dbType";
-    public final static String CONFIG_DB_DRIVER = "dbDriver";
-    public final static String CONFIG_DB_URL = "dbUrl";
-    public final static String CONFIG_USER = "user";
-    public final static String CONFIG_PASSWORD = "password";
+    public static final String CONFIG_JNDI_NAME = "jndiName";
+    public static final String CONFIG_DB_TYPE = "dbType";
+    public static final String CONFIG_DB_DRIVER = "dbDriver";
+    public static final String CONFIG_DB_URL = "dbUrl";
+    public static final String CONFIG_USER = "user";
+    public static final String CONFIG_PASSWORD = "password";
+    public static final String CONFIG_DB_SCHEMA = "dbSchema";
 
     private boolean useJndi;
     private String jndiName;
@@ -445,13 +449,37 @@ public class JDBCRepoService implements RepositoryService {
         }
     }
 
+    /**
+     * Populate and return a repository service that knows how to query and maniuplate configuration.
+     *
+     * @param repoConfig the bootstrap configuration
+     * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
+     */
+    static RepoBootService getRepoBootService(Map repoConfig) {
+        JDBCRepoService bootRepo = new JDBCRepoService();
+        JsonNode cfg = new JsonNode(repoConfig);
+        bootRepo.init(cfg);
+        return bootRepo;
+    }
+    
     @Activate
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         JsonNode config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: " 
+                    + ex.getMessage(), ex);
+            throw ex;
+        }
+        init(config);
 
+        logger.info("Repository started.");
+    }
+    
+    void init (JsonNode config) throws InvalidException {
+        try {
             String enabled = config.get("enabled").asString();
             if ("false".equals(enabled)) {
                 logger.debug("JDBC repository not enabled");
@@ -495,9 +523,9 @@ public class JDBCRepoService implements RepositoryService {
                             + dbDriver + " to start repository ", ex);
                 }
             }
-
-            // Table Handling configuration
-            String dbSchemaName = config.get("queries").get("dbSchema").defaultTo("openidm").asString();
+            
+            // Table handling configuration
+            String dbSchemaName = config.get(CONFIG_DB_SCHEMA).defaultTo("openidm").asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
 
             tableHandlers = new HashMap<String, TableHandler>();
@@ -508,15 +536,19 @@ public class JDBCRepoService implements RepositoryService {
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(config.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
-            switch (databaseType) {
-                case DB2:
-                    defaultTableHandler = new DB2TableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
-                    break;
-                default:
-                    defaultTableHandler = new GenericTableHandler(defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
-            }
+            defaultTableHandler = getGenericTableHandler(databaseType, defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
+            
             logger.debug("Using default table handler: {}", defaultTableHandler);
 
+            // Default the configuration table for bootstrap
+            GenericTableHandler defaultConfigHandler = getGenericTableHandler(
+                    databaseType,
+                    "configobjects",
+                    "configobjectproperties",
+                    dbSchemaName,
+                    genericQueries);
+            tableHandlers.put("config", defaultConfigHandler);
+            
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
             if (!genericMapping.isNull()) {
                 for (String key : genericMapping.keys()) {
@@ -525,27 +557,18 @@ public class JDBCRepoService implements RepositoryService {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
                     }
-                    TableHandler handler = null;
-                    switch (databaseType) {
-                        case DB2:
-                            handler = new DB2TableHandler(
-                                    value.get("mainTable").required().asString(),
-                                    value.get("propertiesTable").required().asString(),
-                                    dbSchemaName,
-                                    genericQueries);
-                            break;
-                        default:
-                            handler = new GenericTableHandler(
-                                    value.get("mainTable").required().asString(),
-                                    value.get("propertiesTable").required().asString(),
-                                    dbSchemaName,
-                                    genericQueries);
-                    }
+                    TableHandler handler = getGenericTableHandler(
+                            databaseType,
+                            value.get("mainTable").required().asString(),
+                            value.get("propertiesTable").required().asString(),
+                            dbSchemaName,
+                            genericQueries);
+
                     tableHandlers.put(key, handler);
                     logger.debug("For pattern {} added handler: {}", key, handler);
                 }
             }
-
+            
             JsonNode explicitQueries = config.get("queries").get("explicitTables");
             JsonNode explicitMapping = config.get("resourceMapping").get("explicitMapping");
             if (!explicitMapping.isNull()) {
@@ -580,14 +603,35 @@ public class JDBCRepoService implements RepositoryService {
             logger.warn("JDBC Repository start-up experienced a failure getting a DB connection: " + ex.getMessage()
                     + ". If this is not temporary or resolved, Repository operation will be affected.", ex);
         }
+    }
+    
+    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, String mainTable, String propertiesTable, 
+            String dbSchemaName, JsonNode queries) {
 
-        logger.info("Repository started.");
+        GenericTableHandler handler = null;
+        
+        // TODO: make pluggable
+        switch (databaseType) {
+            case DB2:
+                handler = new DB2TableHandler(
+                        mainTable,
+                        propertiesTable,
+                        dbSchemaName,
+                        queries);
+                break;
+            default:
+                handler = new GenericTableHandler(
+                        mainTable,
+                        propertiesTable,
+                        dbSchemaName,
+                        queries);
+        }
+        return handler;
     }
 
     /* Currently rely on deactivate/activate to be called by DS if config changes instead
-    //@Modified
+    @Modified
     void modified(ComponentContext compContext) {
-        logger.trace("Modifying service {}", compContext);
         logger.info("Configuration of repository changed.");
         deactivate(compContext);
         activate(compContext);

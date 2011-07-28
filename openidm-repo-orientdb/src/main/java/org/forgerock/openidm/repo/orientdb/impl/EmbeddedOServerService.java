@@ -53,7 +53,7 @@ import com.orientechnologies.orient.server.config.OServerUserConfiguration;
  * 
  * @author aegloff
  */
-@Component(name = "embedded-orientdb-server-component", immediate=true)
+@Component(name = "org.forgerock.openidm.embedded-orientdb-server", immediate=true)
 public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
 
