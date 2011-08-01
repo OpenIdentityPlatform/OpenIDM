@@ -46,13 +46,16 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) {
         logger.debug("Config Bundle starting");
 
-        // Initiate configuration bootstrapping
+        // Initiate configuration bootstrapping by registering the repository based
+        // persistence manager plug-in to store and manipulate configuration
         Hashtable<String, String> persistenceProp = new Hashtable<String, String>();
         persistenceProp.put("service.cmRanking", "0");
         RepoPersistenceManager persistenceMgr = new RepoPersistenceManager(context);
         context.registerService(PersistenceManager.class.getName(), persistenceMgr, persistenceProp);
         logger.debug("Repository persistence manager service registered");
 
+        // Register the optional "file view" handling of configuration
+        // It will not start polling configuration files until configuration for it is set
         JSONConfigInstaller installer = new JSONConfigInstaller();
         installer.start(context);
         Hashtable<String, String> installerProp = new Hashtable<String, String>();

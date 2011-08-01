@@ -45,8 +45,9 @@ import org.slf4j.LoggerFactory;
  * The boostrapping mechanism works in the following order:
  * 1. Repository bundle activators register a bootstrap repository that knows how to access configuration.
  *    The basic info to bootstrap comes from system properties or configuration files
- * 2. A plug-in for the configuration admin is registered to configuration to get loaded/stored in the repository
- * 3. When the configuration administration service comes up, proceed with handling configuration in files (if enabled) 
+ * 2. A repo persistence plug-in for the configuration admin is registered for configuration to get loaded/stored in the repository
+ * 3. When the OSGi configuration administration service comes up, proceed with handling configuration in files (if enabled)
+ *    via the felix file install mechanism
  * 
  * @author aegloff
  */
@@ -62,6 +63,7 @@ public class ConfigBootstrapHelper {
     public static final String OPENIDM_FILEINSTALL_DIR = "openidm.fileinstall.dir";
     public static final String OPENIDM_FILEINSTALL_POLL = "openidm.fileinstall.poll";
     public static final String OPENIDM_FILEINSTALL_ENABLED = "openidm.fileinstall.enabled";
+    
     public static final String FELIX_FILEINSTALL_PID = "org.apache.felix.fileinstall";
 
     // Filename prefix for repository configuration
