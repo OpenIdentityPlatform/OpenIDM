@@ -98,7 +98,7 @@ public class GenericTableHandler implements TableHandler {
         result.put(QueryDefinition.READQUERYSTR, "SELECT obj.rev, obj.fullobject FROM " + dbSchemaName + ".objecttypes objtype, " + dbSchemaName + "." + mainTableName + " obj WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?");
         result.put(QueryDefinition.CREATEQUERYSTR, "INSERT INTO " + dbSchemaName + "." + mainTableName + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?)");
         result.put(QueryDefinition.UPDATEQUERYSTR, "UPDATE " + dbSchemaName + "." + mainTableName + " obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?");
-        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?");
+        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE obj FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?");
 
         /* DB2 Script
         deleteQueryStr = "DELETE FROM " + dbSchemaName + "." + mainTableName + " obj WHERE EXISTS (SELECT 1 FROM " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?";
