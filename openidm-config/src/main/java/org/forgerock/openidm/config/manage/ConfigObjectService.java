@@ -17,6 +17,7 @@
 package org.forgerock.openidm.config.manage;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -35,6 +36,8 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
+
+import org.codehaus.jackson.map.ObjectMapper;
 
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
@@ -88,7 +91,7 @@ public class ConfigObjectService implements ObjectSet {
     /**
      * Gets an object from the object set by identifier. 
      * 
-     * The object will contain metadata properties, including object identifier {@code _id},
+     * The object may contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency supported by OpenIDM.
      *
      * @param id the identifier of the object to retrieve from the object set.
@@ -146,11 +149,32 @@ public class ConfigObjectService implements ObjectSet {
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
+     * @throws BadRequestException if the passed identifier is invalid
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-// TODO: implement
-        throw new UnsupportedOperationException();
+        if (fullId == null) {
+            throw new BadRequestException("The passed identifier to create is null");
+        }
+        try {
+            String pid = fullId;
+            Configuration config = configAdmin.getConfiguration(pid, null);
+            if (config.getProperties() != null) {
+                throw new PreconditionFailedException("Can not create a new configuration with ID " + pid + ", configuration for this ID already exists.");
+            }
+            Dictionary dict = new Hashtable();
+            ObjectMapper mapper = new ObjectMapper();
+            StringWriter sw = new StringWriter();
+            mapper.writeValue(sw, obj);
+            dict.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
+            config.setProperties(dict);
+            config.update();
+        //} catch (ObjectSetException ex) {
+        //    throw ex;
+        } catch (Exception ex) {
+            logger.warn("Failure to create configuration for {}", fullId, ex);
+            throw new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex);
+        } 
     }
     
     /**
