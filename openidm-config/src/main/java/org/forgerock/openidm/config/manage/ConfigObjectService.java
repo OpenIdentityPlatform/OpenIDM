@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
@@ -153,12 +155,14 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
+        logger.info("Calling create configuration {} {}", fullId, obj);
         if (fullId == null) {
             throw new BadRequestException("The passed identifier to create is null");
         }
         try {
             String pid = fullId;
-            Configuration config = configAdmin.getConfiguration(pid, null);
+            String factoryPid = null; // TODO: get factory pids
+            Configuration config = configAdmin.getConfiguration(pid, factoryPid);
             if (config.getProperties() != null) {
                 throw new PreconditionFailedException("Can not create a new configuration with ID " + pid + ", configuration for this ID already exists.");
             }
@@ -167,14 +171,13 @@ public class ConfigObjectService implements ObjectSet {
             StringWriter sw = new StringWriter();
             mapper.writeValue(sw, obj);
             dict.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
-            config.setProperties(dict);
-            config.update();
+            config.update(dict);
         //} catch (ObjectSetException ex) {
         //    throw ex;
         } catch (Exception ex) {
             logger.warn("Failure to create configuration for {}", fullId, ex);
             throw new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex);
-        } 
+        }
     }
     
     /**
@@ -198,6 +201,7 @@ public class ConfigObjectService implements ObjectSet {
     @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
 // TODO: implement
+        logger.info("update call {} {}", fullId, obj);
         throw new UnsupportedOperationException();
     }
 
