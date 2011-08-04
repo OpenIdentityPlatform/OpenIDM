@@ -89,6 +89,7 @@ public class ConfigObjectService implements ObjectSet {
     ConfigurationAdmin configAdmin; 
     
     private ComponentContext context;
+    private ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Gets an object from the object set by identifier. 
@@ -104,6 +105,7 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
+        logger.debug("Invoking read {}", fullId);
         Map<String, Object> result = null;
         
         try {
@@ -119,6 +121,7 @@ public class ConfigObjectService implements ObjectSet {
                     configList.add(configEntry);
                 }
                 result.put("configurations", configList);
+                logger.debug("Read list of configurations with {} entries", configList.size());
             } else {
                 // Get the details of a configuration
                 String pidFilter = "(" + Constants.SERVICE_PID + "=" + fullId + ")";
@@ -130,6 +133,7 @@ public class ConfigObjectService implements ObjectSet {
                 Dictionary props = configs[0].getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
                 result = enhancedConfig.getConfiguration(props);
+                logger.debug("Read configuration for service {}", fullId);
             }
         } catch (ObjectSetException ex) {
             throw ex;
@@ -155,25 +159,44 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        logger.info("Calling create configuration {} {}", fullId, obj);
+        logger.debug("Invoking create configuration {} {}", fullId, obj);
         if (fullId == null) {
             throw new BadRequestException("The passed identifier to create is null");
         }
         try {
-            String pid = fullId;
-            String factoryPid = null; // TODO: get factory pids
-            Configuration config = configAdmin.getConfiguration(pid, factoryPid);
+            String[] splitId = split(fullId);
+            // Null if this is a managed object config and not factory config
+            String factoryPid = splitId[0];
+            
+            // For managed object config the PID
+            // For factory config, a human readable alias for PID, PID gets assigned by OSGi
+            String pidOrAlias = splitId[1]; 
+
+            Configuration config = null;
+            if (factoryPid != null) {
+                config = configAdmin.createFactoryConfiguration(factoryPid, null);
+            } else {
+                config = configAdmin.getConfiguration(pidOrAlias, null);
+            }
             if (config.getProperties() != null) {
-                throw new PreconditionFailedException("Can not create a new configuration with ID " + pid + ", configuration for this ID already exists.");
+                throw new PreconditionFailedException("Can not create a new configuration with ID " 
+                        + pidOrAlias + ", configuration for this ID already exists.");
             }
             Dictionary dict = new Hashtable();
             ObjectMapper mapper = new ObjectMapper();
             StringWriter sw = new StringWriter();
             mapper.writeValue(sw, obj);
             dict.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
+            
+            if (factoryPid != null) {
+                dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID, pidOrAlias); // The alias for the PID as understood by fileinstall
+            }
+            // TODO: consider adding DirectoryWatcher.FILENAME to allow externalizing to file
+            
             config.update(dict);
-        //} catch (ObjectSetException ex) {
-        //    throw ex;
+            logger.debug("Created new configuration for {} {}", factoryPid, pidOrAlias);
+        } catch (ObjectSetException ex) {
+            throw ex;
         } catch (Exception ex) {
             logger.warn("Failure to create configuration for {}", fullId, ex);
             throw new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex);
@@ -200,9 +223,28 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-// TODO: implement
-        logger.info("update call {} {}", fullId, obj);
-        throw new UnsupportedOperationException();
+        logger.debug("Invoking update configuration {} {}", fullId, rev);
+        if (fullId == null) {
+            throw new BadRequestException("The passed identifier to update is null");
+        }
+        try {
+            String pid = fullId;
+            Configuration config = configAdmin.getConfiguration(pid, null);
+            Dictionary existingConfig = config.getProperties();
+            if (existingConfig == null) {
+                throw new NotFoundException("No existing configuration found for " + pid + ", can not update the configuration.");
+            }
+            StringWriter sw = new StringWriter();
+            mapper.writeValue(sw, obj);
+            existingConfig.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
+            config.update(existingConfig);
+            logger.debug("Updated existing configuration for {}", pid);
+        } catch (ObjectSetException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.warn("Failure to update configuration for {}", fullId, ex);
+            throw new InternalServerErrorException("Failure to update configuration for " + fullId + ": " + ex.getMessage(), ex);
+        }
     }
 
     /**
@@ -217,8 +259,25 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public void delete(String fullId, String rev) throws ObjectSetException {
-// TODO: implement
-        throw new UnsupportedOperationException();
+        logger.debug("Invoking delete configuration {} {}", fullId, rev);
+        if (fullId == null) {
+            throw new BadRequestException("The passed identifier to delete is null");
+        }
+        try {
+            String pid = fullId;
+            Configuration config = configAdmin.getConfiguration(pid, null);
+            Dictionary existingConfig = config.getProperties();
+            if (existingConfig == null) {
+                throw new NotFoundException("No existing configuration found for " + pid + ", can not delete the configuration.");
+            }
+            config.delete();
+            logger.debug("Deleted configuration for {}", pid);
+        } catch (ObjectSetException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.warn("Failure to delete configuration for {}", fullId, ex);
+            throw new InternalServerErrorException("Failure to delete configuration for " + fullId + ": " + ex.getMessage(), ex);
+        }
     }
 
     /**
@@ -236,6 +295,7 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+        logger.info("Patch not supported");
         throw new UnsupportedOperationException();
     }
 
@@ -259,18 +319,20 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
+        logger.info("Invoking query {} {}", fullId, params);
         // TODO
         return null;
     }
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        logger.info("Call to action not supported");
         throw new UnsupportedOperationException();
     }
     
     @Activate
     protected void activate(ComponentContext context) {
-        logger.info("Activating configuration management service");
+        logger.debug("Activating configuration management service");
         this.context = context;
     }
 
@@ -281,5 +343,27 @@ public class ConfigObjectService implements ObjectSet {
      */
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        logger.debug("Deactivating configuration management service");
+    }
+    
+    /**
+     * Split an URI identifier into context (part before the first slash) and remaining identifier (part after first slash)
+     * @param id the full URI
+     * @return an array with 2 elements; 
+     * The first contains the context if present, or null if the URI consists of only one part. 
+     * The second element contains the remainder of the URI
+     */
+    private String[] split(String id) {
+        String idContext = null;
+        String localId = null;
+        int firstSlashPos = id.indexOf("/");
+        if (firstSlashPos > -1) {
+            idContext = id.substring(0, firstSlashPos);
+            
+        }
+        int startPos = firstSlashPos + 1;
+        localId = id.substring(startPos);
+        logger.trace("Split id context: {} local id: {}", idContext, localId);
+        return new String[] {idContext, localId};
     }
 }
