@@ -139,7 +139,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
             result = DocumentUtil.toMap(doc);
-            logger.trace("get for id: {} result: {}", fullId, result);        
+            logger.trace("Completed get for id: {} result: {}", fullId, result);        
         } finally {
             if (db != null) {
                 db.close();
@@ -183,7 +183,8 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
             newDoc.save();
             
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
-            logger.debug("create for id: {} doc: {}", fullId, newDoc);
+            logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
+            logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
         } catch (OIndexException ex) {
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
@@ -251,7 +252,8 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
             db.commit();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
-            logger.debug("update for id: {} saved doc: {}", fullId, updatedDoc);
+            logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
+            logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
         } catch (OConcurrentModificationException ex) {
             db.rollback();
             throw new PreconditionFailedException("Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " + ex.getMessage(), ex);
