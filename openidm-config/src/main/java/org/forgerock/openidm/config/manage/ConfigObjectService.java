@@ -54,8 +54,10 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
@@ -116,21 +118,35 @@ public class ConfigObjectService implements ObjectSet {
                 List configList = new ArrayList();
                 for (Configuration conf : rawConfigs) {
                     Map configEntry = new LinkedHashMap<String, Object>();
-                    configEntry.put("_id", conf.getPid());
-                    configEntry.put("factoryPid", conf.getFactoryPid());
+                    
+                    String alias = null;
+                    Dictionary properties = conf.getProperties();
+                    if (properties != null) {
+                        alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID);
+                    }
+                    String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
+                    String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
+                    String id = null;
+                    // If there is an alias for factory config is available, make a nicer ID then the internal PID
+                    if (factoryPid != null && alias != null) {
+                        id = factoryPid + "/" + alias;
+                    } else {
+                        id = pid;
+                    }
+                    
+                    configEntry.put("_id", id);
+                    configEntry.put("pid", pid);
+                    configEntry.put("factoryPid", factoryPid);
                     configList.add(configEntry);
                 }
                 result.put("configurations", configList);
                 logger.debug("Read list of configurations with {} entries", configList.size());
             } else {
-                // Get the details of a configuration
-                String pidFilter = "(" + Constants.SERVICE_PID + "=" + fullId + ")";
-                Configuration[] configs = configAdmin.listConfigurations(pidFilter);
-                if (configs == null || configs.length < 1) {
+                Configuration config = findExistingConfiguration(fullId);
+                if (config == null) {
                     throw new NotFoundException("No configuration exists for id " + fullId);
                 }
-                //Configuration config = configAdmin.getConfiguration(fullId, null);
-                Dictionary props = configs[0].getProperties();
+                Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
                 result = enhancedConfig.getConfiguration(props);
                 logger.debug("Read configuration for service {}", fullId);
@@ -174,9 +190,11 @@ public class ConfigObjectService implements ObjectSet {
 
             Configuration config = null;
             if (factoryPid != null) {
-                config = configAdmin.createFactoryConfiguration(factoryPid, null);
+                String qualifiedFactoryPid = ConfigBootstrapHelper.qualifyPid(factoryPid);
+                config = configAdmin.createFactoryConfiguration(qualifiedFactoryPid, null);
             } else {
-                config = configAdmin.getConfiguration(pidOrAlias, null);
+                String qualifiedPid = ConfigBootstrapHelper.qualifyPid(pidOrAlias);
+                config = configAdmin.getConfiguration(qualifiedPid, null);
             }
             if (config.getProperties() != null) {
                 throw new PreconditionFailedException("Can not create a new configuration with ID " 
@@ -191,7 +209,6 @@ public class ConfigObjectService implements ObjectSet {
             if (factoryPid != null) {
                 dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID, pidOrAlias); // The alias for the PID as understood by fileinstall
             }
-            // TODO: consider adding DirectoryWatcher.FILENAME to allow externalizing to file
             
             config.update(dict);
             logger.debug("Created new configuration for {} {}", factoryPid, pidOrAlias);
@@ -228,17 +245,17 @@ public class ConfigObjectService implements ObjectSet {
             throw new BadRequestException("The passed identifier to update is null");
         }
         try {
-            String pid = fullId;
-            Configuration config = configAdmin.getConfiguration(pid, null);
-            Dictionary existingConfig = config.getProperties();
+            Configuration config = findExistingConfiguration(fullId);
+            
+            Dictionary existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + pid + ", can not update the configuration.");
+                throw new NotFoundException("No existing configuration found for " + fullId + ", can not update the configuration.");
             }
             StringWriter sw = new StringWriter();
             mapper.writeValue(sw, obj);
             existingConfig.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
             config.update(existingConfig);
-            logger.debug("Updated existing configuration for {}", pid);
+            logger.debug("Updated existing configuration for {}", fullId);
         } catch (ObjectSetException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -247,6 +264,8 @@ public class ConfigObjectService implements ObjectSet {
         }
     }
 
+
+    
     /**
      * Deletes the specified object from the object set.
      *
@@ -264,14 +283,14 @@ public class ConfigObjectService implements ObjectSet {
             throw new BadRequestException("The passed identifier to delete is null");
         }
         try {
-            String pid = fullId;
-            Configuration config = configAdmin.getConfiguration(pid, null);
+            Configuration config = findExistingConfiguration(fullId);
+            
             Dictionary existingConfig = config.getProperties();
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + pid + ", can not delete the configuration.");
+                throw new NotFoundException("No existing configuration found for " + fullId + ", can not delete the configuration.");
             }
             config.delete();
-            logger.debug("Deleted configuration for {}", pid);
+            logger.debug("Deleted configuration for {}", fullId);
         } catch (ObjectSetException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -328,6 +347,46 @@ public class ConfigObjectService implements ObjectSet {
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         logger.info("Call to action not supported");
         throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Locate an existing configuration based on its id, which can be
+     * a pid or for factory configurations the <factory pid>/<alias>
+     * pids can be qualified or if they use the default openidm prefix unqualified
+     * 
+     * @param fullId the id
+     * @return the configuration if found, null if not
+     * @throws IOException
+     * @throws InvalidSyntaxException
+     */
+    Configuration findExistingConfiguration(String fullId) throws IOException, InvalidSyntaxException {
+        
+        String[] splitId = split(fullId);
+        // Null if this is a managed object config and not factory config
+        String factoryPid = ConfigBootstrapHelper.qualifyPid(splitId[0]);
+        
+        String pid = null;
+        String instanceAlias = null;
+        if (factoryPid == null) {
+            pid = ConfigBootstrapHelper.qualifyPid(splitId[1]); // For managed object config this is the (possibly unqualified) pid
+        } else {
+            instanceAlias = splitId[1]; // For factory config this part is a human readable alias
+        }
+        
+        String filter = null;
+        if (factoryPid != null) {
+            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")(" + JSONConfigInstaller.SERVICE_FACTORY_PID+ "=" + instanceAlias + "))";
+        } else {
+            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+        }
+        logger.trace("List configurations with filter: {}", filter);
+        Configuration[] configurations = configAdmin.listConfigurations(filter);
+        logger.debug("Configs found: {}", configurations);
+        if (configurations != null && configurations.length > 0) {
+            return configurations[0];
+        } else {
+            return null;
+        }
     }
     
     @Activate
