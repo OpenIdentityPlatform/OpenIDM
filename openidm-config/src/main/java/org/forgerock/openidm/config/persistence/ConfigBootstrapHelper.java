@@ -70,6 +70,9 @@ public class ConfigBootstrapHelper {
     public static final String REPO_FILE_PREFIX = "repo.";
     public static final String JSON_CONFIG_FILE_EXT = ".json";
     
+    // Default prefix for OpenIDM OSGi services
+    public static final String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
+    
     final static Logger logger = LoggerFactory.getLogger(ConfigBootstrapHelper.class);
 
     static boolean warnMissingConfig = true;
@@ -108,7 +111,7 @@ public class ConfigBootstrapHelper {
         // If bootstrap info not found in system properties, check for configuration files
         String confDir = getConfigFileInstallDir();
         File unqualified = new File(confDir, REPO_FILE_PREFIX + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
-        File qualified = new File(confDir, JSONConfigInstaller.DEFAULT_SERVICE_RDN_PREFIX + REPO_FILE_PREFIX 
+        File qualified = new File(confDir, ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX + REPO_FILE_PREFIX 
                 + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
         
         try {
@@ -202,4 +205,36 @@ public class ConfigBootstrapHelper {
             logger.info("Configuration from file disabled");
         }
     }
+    
+    /**
+     * Prefixes unqualified PIDs with the default RDN qualifier
+     * I.e. file names can be unqualified and will be prefixed
+     * with the default. 
+     * Configuring services with PIDs that are not qualified 
+     * by org. or com. is currently not supported.
+     */
+    public static String qualifyPid(String fileNamePid) {
+        String qualifiedPid = fileNamePid;
+        // Prefix unqualified pid names with the default.
+        if (fileNamePid != null && !(fileNamePid.startsWith("org.") || fileNamePid.startsWith("com."))) {
+            qualifiedPid = DEFAULT_SERVICE_RDN_PREFIX + fileNamePid;
+        }
+        return qualifiedPid;
+    }
+    
+    /**
+     * Removes the default RDN prefix if this is a qualified name 
+     * int the default namespace. IF not, it STAYS qualified.
+     * 
+     * Configuring services with PIDs that are not qualified 
+     * by org. or com. is currently not supported.
+     */
+    public static String unqualifyPid(String qualifiedPid) {
+        if (qualifiedPid != null && qualifiedPid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {
+            return qualifiedPid.substring(DEFAULT_SERVICE_RDN_PREFIX.length());
+        } else {
+            return qualifiedPid;
+        }
+    }
+    
 }

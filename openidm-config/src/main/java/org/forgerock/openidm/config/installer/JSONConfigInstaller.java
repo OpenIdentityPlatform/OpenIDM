@@ -74,7 +74,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     public final static String JSON_CONFIG_PROPERTY = JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
     
     public final static String SERVICE_FACTORY_PID = "config.factory-pid";
-    public final static String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
     
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
     
@@ -165,8 +164,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 String confDir = ConfigBootstrapHelper.getConfigFileInstallDir();
                 
                 // Externalize OpenIDM configurations into the file "view"
-                if (fileName == null && pid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {
-                    String unqualified = pid.substring(DEFAULT_SERVICE_RDN_PREFIX.length());
+                if (fileName == null && pid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
+                    String unqualified = pid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
                     if (factoryPid != null) {
                         fileName = toConfigKey(new File(confDir, unqualified + "-" + factoryPid + 
                                 ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT));
@@ -370,7 +369,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         {
             String factoryPid = pid.substring(n + 1);
             pid = pid.substring(0, n);
-            pid = qualifyPid(pid);
+            pid = ConfigBootstrapHelper.qualifyPid(pid);
             logger.info("Configuring service PID {} factory PID {}", pid, factoryPid);
             return new String[]
                 {
@@ -379,7 +378,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
         else
         {
-            pid = qualifyPid(pid);
+            pid = ConfigBootstrapHelper.qualifyPid(pid);
             return new String[]
                 {
                     pid, null
@@ -387,22 +386,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
     
-    /**
-     * Prefixes unqualified PIDs with the default RDN qualifier
-     * I.e. file names can be unqualified and will be prefixed
-     * with the default. 
-     * Configuring services with PIDs that are not qualified 
-     * by org. or com. is currently not supported.
-     */
-    String qualifyPid(String fileNamePid) {
-        String qualifiedPid = fileNamePid;
-        // Prefix unqualified pid names with the default.
-        if (!(fileNamePid.startsWith("org.") || fileNamePid.startsWith("com."))) {
-            qualifiedPid = DEFAULT_SERVICE_RDN_PREFIX + fileNamePid;
-        }
-        return qualifiedPid;
-    }
-
     Configuration getConfiguration(String fileName, String pid, String factoryPid)
         throws Exception
     {
