@@ -106,7 +106,7 @@ public class ConfigBootstrapHelper {
         }
 
         // If bootstrap info not found in system properties, check for configuration files
-        String confDir = getFileInstallDir();
+        String confDir = getConfigFileInstallDir();
         File unqualified = new File(confDir, REPO_FILE_PREFIX + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
         File qualified = new File(confDir, JSONConfigInstaller.DEFAULT_SERVICE_RDN_PREFIX + REPO_FILE_PREFIX 
                 + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
@@ -160,7 +160,12 @@ public class ConfigBootstrapHelper {
         return repoConfigFiles;
     }
     
-    static String getFileInstallDir() {
+    /**
+     * Get the directory for configuration file view
+     * 
+     * @return config dir
+     */
+    public static String getConfigFileInstallDir() {
         // Default the configuration directory if not declared
         String dir = System.getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
         return dir;
@@ -175,7 +180,7 @@ public class ConfigBootstrapHelper {
         
         String enabled = System.getProperty(OPENIDM_FILEINSTALL_ENABLED, "true");
         String poll = System.getProperty(OPENIDM_FILEINSTALL_POLL, "2000");
-        String dir = getFileInstallDir();
+        String dir = getConfigFileInstallDir();
         String filter = System.getProperty(OPENIDM_FILEINSTALL_FILTER, ".*\\.cfg|.*\\.json");
         String start = System.getProperty(OPENIDM_FILEINSTALL_BUNDLES_NEW_START, "false");
         

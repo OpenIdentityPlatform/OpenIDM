@@ -32,8 +32,10 @@ import java.io.Writer;
 import java.net.URI;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,6 +51,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -74,6 +77,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     public final static String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
     
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
+    
+    private Map<String, String> pidToFile = Collections.synchronizedMap(new HashMap<String, String>());
     
     private BundleContext context;
     private ConfigurationAdmin configAdmin;
@@ -107,7 +112,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
        
         if (this.configAdmin != null) {
             logger.debug("Checking if can handle artifact: " + artifact);
-            return artifact.getName().endsWith(".json");
+            return artifact.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT);
         } else {
             return false;
         }
@@ -145,18 +150,38 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 return;
             }
         }
+        
+        String factoryPid = configurationEvent.getFactoryPid();
+        String pid = configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED)
         {
             try
             {
                 Configuration config = getConfigurationAdmin().getConfiguration(
-                                            configurationEvent.getPid(),
-                                            configurationEvent.getFactoryPid());
+                                            pid,
+                                            factoryPid);
                 Dictionary dict = config.getProperties();
                 String fileName = (String) dict.get( DirectoryWatcher.FILENAME );
+                String confDir = ConfigBootstrapHelper.getConfigFileInstallDir();
+                
+                // Externalize OpenIDM configurations into the file "view"
+                if (fileName == null && pid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {
+                    String unqualified = pid.substring(DEFAULT_SERVICE_RDN_PREFIX.length());
+                    if (factoryPid != null) {
+                        fileName = toConfigKey(new File(confDir, unqualified + "-" + factoryPid + 
+                                ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT));
+                    } else {
+                        fileName = toConfigKey(new File(confDir, unqualified + ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT));
+                    }
+                    logger.debug("Store config view filename in configuration {}", fileName);
+                    dict.put(DirectoryWatcher.FILENAME, fileName);
+                    config.update(dict);
+                }
+                
                 File file = fileName != null ? fromConfigKey(fileName) : null;
-                if( file != null && file.isFile()   ) {
-                    if (fileName.endsWith(".json")) {
+                // IF file exists, update it, if does not exist create it
+                if( file != null) {
+                    if (fileName.endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
                         logger.debug("Updating configuration file " + fileName);
                         // Note: currently only stores JSON config property, not other properties in Dictionary.
                         String jsonConfig = "";
@@ -170,10 +195,23 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                         } finally {
                           writer.close();
                         }
+                        logger.debug("Completed update of configuration file " + fileName);
                     }
                 }
             } catch (Exception e) {
                 logger.info("Unable to save configuration", e);
+            }
+        } else if (configurationEvent.getType() == ConfigurationEvent.CM_DELETED) {
+            String fileName = pidToFile.get(pid);
+            if (fileName != null) {
+                File fileToDel = fromConfigKey(fileName);
+                logger.trace("Try to delete {} exists: {}", fileToDel, fileToDel.exists());
+                boolean deleted = fileToDel.delete();
+                if (deleted) {
+                    logger.debug("Deleted configuration file from view {}", fileName);
+                } else {
+                    logger.info("No configuration deleted from view corresponding to {} {}", pid, fileName);
+                }
             }
         }
     }
@@ -220,7 +258,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         final Hashtable ht = new Hashtable();
         final InputStream in = new BufferedInputStream(new FileInputStream(f));
         try {
-            if (f.getName().endsWith( ".json")) {
+            if (f.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
                 
                 StringBuffer fileBuf = new StringBuffer(1024);
                 BufferedReader reader = new BufferedReader(new FileReader(f));
@@ -371,7 +409,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         Configuration oldConfiguration = findExistingConfiguration(fileName);
         if (oldConfiguration != null)
         {
-            logger.debug("Updating configuration from " + pid + (factoryPid == null ? "" : "-" + factoryPid) + ".json");
+            logger.debug("Updating configuration from {}", fileName);
             return oldConfiguration;
         }
         else
@@ -395,6 +433,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         Configuration[] configurations = getConfigurationAdmin().listConfigurations(filter);
         if (configurations != null && configurations.length > 0)
         {
+            pidToFile.put(configurations[0].getPid(), fileName);
             return configurations[0];
         }
         else
