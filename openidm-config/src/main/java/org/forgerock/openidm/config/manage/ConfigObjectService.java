@@ -122,7 +122,7 @@ public class ConfigObjectService implements ObjectSet {
                     String alias = null;
                     Dictionary properties = conf.getProperties();
                     if (properties != null) {
-                        alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID);
+                        alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
                     }
                     String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
                     String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
@@ -207,7 +207,7 @@ public class ConfigObjectService implements ObjectSet {
             dict.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
             
             if (factoryPid != null) {
-                dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID, pidOrAlias); // The alias for the PID as understood by fileinstall
+                dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS, pidOrAlias); // The alias for the PID as understood by fileinstall
             }
             
             config.update(dict);
@@ -375,7 +375,7 @@ public class ConfigObjectService implements ObjectSet {
         
         String filter = null;
         if (factoryPid != null) {
-            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")(" + JSONConfigInstaller.SERVICE_FACTORY_PID+ "=" + instanceAlias + "))";
+            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")(" + JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS + "=" + instanceAlias + "))";
         } else {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
         }
