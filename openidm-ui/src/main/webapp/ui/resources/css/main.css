@@ -1,0 +1,120 @@
+/* CSS Document */
+body {
+	margin: 0px 0px 0px 0px;
+	background-color:#F8F8F8;
+	background-image: url(../images/background-gradient.png);
+    background-repeat:repeat-x;
+	font: 62.5% "Trebuchet MS", sans-serif; margin: 50px;
+	font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+}
+#page {
+	background-color:#F8F8F8;
+	font-size:0.8em;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -moz-box-shadow: 10px 10px 20px #000;
+    -webkit-box-shadow: 10px 10px 20px #000;
+    box-shadow: 10px 10px 20px #000;
+    behavior: url(../resources/css/ie-css3.htc);
+}
+#top-content {
+	position: relative;
+}
+#header {
+	padding: 10px;
+}
+#banner {
+    height: 65px;
+    background-image: url(../images/ForgeRock-226x60.png);
+	background-repeat: no-repeat;	
+}
+#preferences {
+    float:right;	
+}
+
+#preferences button {
+    border: none;
+color: #ffffff;
+border-radius:5px;
+ -moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+}
+
+#top-menu {
+	background-color:#616C75
+}
+#top-menu p {
+	color:#FFF
+}
+
+#breadcrumbs {
+    height: 13px;
+    background-image: url(../images/breadcrumbs.jpg);
+    padding: 5px 10px 14px 20px;
+}
+* html #breadcrumbs {
+    padding-bottom: 8px;
+}
+
+#middle-content {
+ 	padding: 10px;
+	display: block;
+    float: none;
+}
+
+#bottom-content {
+	
+}
+#footer {
+	position: relative;
+    padding: 5px;
+    clear: both;
+	padding: 10px;
+    margin: 20px 0px 20px 0px;
+    border-top: solid #ccc 1px;
+    color: #333333;
+}
+#copyright {
+    clear: both;
+    bottom: 0px;
+    padding-top: 12px;
+    padding-bottom: 8px;
+    font-family: Verdana;
+    font-size: 9px;
+    line-height: 1.3em;
+    position: relative;
+    text-align: center;
+    color: #252525;
+}
+
+#copyright a {
+    color: #F48120;
+    text-decoration: none;
+}
+
+
+.errormark, .warningmark, .donemark, .infomark {
+    background: url(../images/icon_error_sml.gif) no-repeat;
+}
+
+.warningmark {
+    background-image: url(../images/icon_warning_sml.gif);
+}
+
+.donemark {
+    background-image: url(../images/icon_success_sml.gif);
+}
+
+.infomark {
+    background-image: url(../images/icon_info_sml.gif);
+}
+
+.demoHeaders { margin-top: 2em; }
+#dialog_link {padding: .4em 1em .4em 20px;text-decoration: none;position: relative;}
+#dialog_link span.ui-icon {margin: 0 5px 0 0;position: absolute;left: .2em;top: 50%;margin-top: -8px;}
+ul#icons {margin: 0; padding: 0;}
+ul#icons li {margin: 2px; position: relative; padding: 4px 0; cursor: pointer; float: left;  list-style: none;}
+ul#icons span.ui-icon {float: left; margin: 0 4px;}
+
+
