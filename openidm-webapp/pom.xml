@@ -116,6 +116,11 @@
             <artifactId>openidm-audit</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-ui</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
 
         <!-- Core OSGi -->
         <dependency>
@@ -267,6 +272,7 @@
                                 json-fluent,
                                 json-schema,
                                 openidm-audit,
+                                openidm-config,
                                 openidm-core,
                                 openidm-provisioner-openicf,
                                 openidm-provisioner,
@@ -274,6 +280,7 @@
                                 openidm-repo,
                                 openidm-restlet,
                                 openidm-scheduler,
+                                openidm-ui,
                                 openidm-util,
                                 org.apache.felix.configadmin,
                                 org.apache.felix.fileinstall,
@@ -326,18 +333,9 @@
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>maven-jetty-plugin</artifactId>
-                <version>6.1.10</version>
+                <version>6.1.26</version>
                 <configuration>
                     <contextPath>/</contextPath>
-                    <systemProperties>
-                        <systemProperty>
-                            <name>java.security.manager</name>
-                        </systemProperty>
-                        <systemProperty>
-                            <name>java.security.policy</name>
-                            <value>${basedir}/src/java.policy</value>
-                        </systemProperty>
-                    </systemProperties>
                 </configuration>
             </plugin>
         </plugins>
