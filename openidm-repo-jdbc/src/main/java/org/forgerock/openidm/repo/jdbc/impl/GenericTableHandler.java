@@ -40,6 +40,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
@@ -61,6 +62,9 @@ public class GenericTableHandler implements TableHandler {
     GenericTableQueries queries;
 
     Map<QueryDefinition, String> queryMap;
+    
+    boolean enableBatching; // Whether to use JDBC statement batching. 
+    int maxBatchSize;       // The maximum number of statements to batch together. If max batch size is 1, do not use batching.
 
     public enum QueryDefinition {
         READTYPEQUERYSTR,
@@ -75,14 +79,32 @@ public class GenericTableHandler implements TableHandler {
         QUERYALLIDS
     }
 
-    public GenericTableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig) {
+    public GenericTableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
         this.dbSchemaName = dbSchemaName;
+        if (maxBatchSize < 1) {
+            this.maxBatchSize = 1;
+        } else {
+            this.maxBatchSize = maxBatchSize;
+        }
 
         queries = new GenericTableQueries();
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig, queryMap);
+        
+        // TODO: Consider taking into account DB meta-data rather than just configuration
+        //DatabaseMetaData metadata = connection.getMetaData();
+        //boolean isBatchingSupported = metadata.supportsBatchUpdates();  
+        //if (!isBatchingSupported) {
+        //    maxBatchSize = 1;
+        //}
+        enableBatching = (maxBatchSize > 1);
+        if (enableBatching) {
+            logger.info("JDBC statement batching enabled, maximum batch size {}", maxBatchSize);
+        } else {
+            logger.info("JDBC statement batching disabled.");
+        }
     }
 
 
@@ -185,14 +207,55 @@ public class GenericTableHandler implements TableHandler {
         writeNodeProperties(fullId, dbId, localId, node, connection);
     }
 
+    /**
+     * Writes all properties of a given resource to the properties table and links them to the main table record.
+     * 
+     * @param fullId the full URI of the resource the belongs to
+     * @param dbId the generated identifier to link the properties table with the main table (foreign key)
+     * @param localId the local identifier of the resource these properties belong to
+     * @param node the JSON node with the properties to write
+     * @param connection the DB connection
+     * @throws SQLException if the insert failed
+     */
     void writeNodeProperties(String fullId, long dbId, String localId, JsonNode node, Connection connection) throws SQLException {
-
+        Integer batchingCount = 0;
+        
         PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
-
+        batchingCount = writeNodeProperties(fullId, dbId, localId, node, connection, propCreateStatement, batchingCount);
+        if (enableBatching && batchingCount > 0) {
+            int[] numUpdates = propCreateStatement.executeBatch(); 
+            logger.debug("Batch update of objectproperties updated: {}", numUpdates);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Writing batch of objectproperties, updated: {}", Arrays.asList(numUpdates));
+            }
+            propCreateStatement.clearBatch();
+        }
+    }
+    /**
+     * Internal recursive function to add/write properties. 
+     * If batching is enabled, prepared statements are added to the batch and only executed if they hit the max limit. 
+     * After completion returns the number of properties that have only been added to the batch but not yet executed. 
+     * The caller is responsible for executing the batch on remaining items when it deems the batch complete.
+     * 
+     * If batching is not enabled, prepared statements are immediately executed. 
+     * 
+     * @param fullId the full URI of the resource the belongs to
+     * @param dbId the generated identifier to link the properties table with the main table (foreign key)
+     * @param localId the local identifier of the resource these properties belong to
+     * @param node the JSON node with the properties to write
+     * @param connection the DB connection
+     * @param propCreateStatement the prepared properties insert statement
+     * @param batchingCount the current number of statements that have been batched and not yet executed on the prepared statement
+     * @return status of the current batchingCount, i.e. how many statements are not yet executed in the PreparedStatement
+     * @throws SQLException if the insert failed
+     */
+    private int writeNodeProperties(String fullId, long dbId, String localId, JsonNode node, Connection connection, 
+            PreparedStatement propCreateStatement, int batchingCount) throws SQLException {
+        
         for (JsonNode entry : node) {
             String propkey = entry.getPointer().toString();
             if (entry.isMap() || entry.isList()) {
-                writeNodeProperties(fullId, dbId, localId, entry, connection);
+                batchingCount = writeNodeProperties(fullId, dbId, localId, entry, connection, propCreateStatement, batchingCount);
             } else {
                 String propvalue = null;
                 Object val = entry.getValue();
@@ -203,17 +266,36 @@ public class GenericTableHandler implements TableHandler {
                 if (propvalue != null) {
                     proptype = entry.getValue().getClass().getName(); // TODO: proper type info
                 }
-                logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
-                        new Object[]{propCreateStatement, dbId, localId, propkey, proptype, propvalue});
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
+                            new Object[]{propCreateStatement, dbId, localId, propkey, proptype, propvalue});
+                }
                 propCreateStatement.setLong(1, dbId);
                 propCreateStatement.setString(2, propkey);
                 propCreateStatement.setString(3, proptype);
                 propCreateStatement.setString(4, propvalue);
                 logger.debug("Executing: {}", propCreateStatement);
-                int val2 = propCreateStatement.executeUpdate();
-                logger.debug("Created objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[]{fullId, propkey, proptype, propvalue});
+                if (enableBatching) {
+                    propCreateStatement.addBatch();
+                    batchingCount++;
+                } else {
+                    int numUpdate = propCreateStatement.executeUpdate();
+                }
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Inserting objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[]{fullId, propkey, proptype, propvalue});
+                }
+            }
+            if (enableBatching && batchingCount >= maxBatchSize) {
+                int[] numUpdates = propCreateStatement.executeBatch();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Batch limit reached, update of objectproperties updated: {}", Arrays.asList(numUpdates));
+                }
+                propCreateStatement.clearBatch();
+                batchingCount = 0;
             }
         }
+
+        return batchingCount;
     }
 
     // Ensure type is in objecttypes table and get its assigned id
