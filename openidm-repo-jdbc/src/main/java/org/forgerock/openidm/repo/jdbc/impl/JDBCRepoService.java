@@ -65,7 +65,6 @@ import java.util.Map;
 })
 public class JDBCRepoService implements RepositoryService, RepoBootService {
 
-
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     ObjectMapper mapper = new ObjectMapper();
@@ -78,6 +77,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     public static final String CONFIG_USER = "user";
     public static final String CONFIG_PASSWORD = "password";
     public static final String CONFIG_DB_SCHEMA = "dbSchema";
+    public static final String CONFIG_MAX_BATCH_SIZE = "maxBatchSize";
 
     private boolean useJndi;
     private String jndiName;
@@ -527,6 +527,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             // Table handling configuration
             String dbSchemaName = config.get(CONFIG_DB_SCHEMA).defaultTo("openidm").asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
+            int maxBatchSize = config.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
             tableHandlers = new HashMap<String, TableHandler>();
             JsonNode defaultMapping = config.get("resourceMapping").get("default");
@@ -536,7 +537,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(config.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
-            defaultTableHandler = getGenericTableHandler(databaseType, defaultMainTable, defaultPropTable, dbSchemaName, genericQueries);
+            defaultTableHandler = getGenericTableHandler(databaseType, defaultMainTable, defaultPropTable, dbSchemaName, genericQueries, maxBatchSize);
             
             logger.debug("Using default table handler: {}", defaultTableHandler);
 
@@ -546,7 +547,8 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     "configobjects",
                     "configobjectproperties",
                     dbSchemaName,
-                    genericQueries);
+                    genericQueries,
+                    1);
             tableHandlers.put("config", defaultConfigHandler);
             
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
@@ -562,7 +564,8 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                             value.get("mainTable").required().asString(),
                             value.get("propertiesTable").required().asString(),
                             dbSchemaName,
-                            genericQueries);
+                            genericQueries,
+                            maxBatchSize);
 
                     tableHandlers.put(key, handler);
                     logger.debug("For pattern {} added handler: {}", key, handler);
@@ -606,7 +609,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     }
     
     GenericTableHandler getGenericTableHandler(DatabaseType databaseType, String mainTable, String propertiesTable, 
-            String dbSchemaName, JsonNode queries) {
+            String dbSchemaName, JsonNode queries, int maxBatchSize) {
 
         GenericTableHandler handler = null;
         
@@ -617,14 +620,16 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         mainTable,
                         propertiesTable,
                         dbSchemaName,
-                        queries);
+                        queries,
+                        maxBatchSize);
                 break;
             default:
                 handler = new GenericTableHandler(
                         mainTable,
                         propertiesTable,
                         dbSchemaName,
-                        queries);
+                        queries,
+                        maxBatchSize);
         }
         return handler;
     }
