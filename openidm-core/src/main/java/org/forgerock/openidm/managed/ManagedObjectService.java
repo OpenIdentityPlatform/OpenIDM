@@ -39,15 +39,16 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON-Fluent library
+// JSON Fluent library
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
-// ForgeRock OpenIDM
+// OpenIDM
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
 /**
@@ -69,9 +70,7 @@ import org.forgerock.openidm.sync.SynchronizationListener;
 @Service
 public class ManagedObjectService extends ObjectSetRouter {
 
-    /**
-     * Internal object set router service.
-     */
+    /** Internal object set router service. */
     @Reference(
         name = "ref_ManagedObjectService_ObjectSetRouterService",
         referenceInterface = ObjectSet.class,
@@ -81,7 +80,7 @@ public class ManagedObjectService extends ObjectSetRouter {
         policy = ReferencePolicy.STATIC,
         target = "(service.pid=org.forgerock.openidm.router)"
     )
-    private ObjectSet router;
+    protected ObjectSet router;
     protected void bindRouter(ObjectSet router) {
         this.router = router;
     }
@@ -89,7 +88,7 @@ public class ManagedObjectService extends ObjectSetRouter {
         this.router = null;
     }
 
-    /** TODO: Description. */
+    /** Synchronization listeners. */
     @Reference(
         name="ref_ManagedObjectService_SynchronizationListener",
         referenceInterface=SynchronizationListener.class,
@@ -105,6 +104,23 @@ public class ManagedObjectService extends ObjectSetRouter {
     }
     protected void unbindListener(SynchronizationListener listener) {
         listeners.remove(listener);
+    }
+
+    /** Cryptographic service. */
+    @Reference(
+        name="ref_ManagedObjectService_CryptoService",
+        referenceInterface=CryptoService.class,
+        bind="bindCryptoService",
+        unbind="unbindCryptoService",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC
+    )
+    protected CryptoService cryptoService;
+    protected void bindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+    protected void unbindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = null;
     }
 
     /** TODO: Description. */
@@ -128,8 +144,7 @@ public class ManagedObjectService extends ObjectSetRouter {
                 }
                 routes.put(name, objectSet);
             }
-        }
-        catch (JsonNodeException jne) {
+        } catch (JsonNodeException jne) {
             throw new ComponentException("Configuration error", jne);
         }
     }
@@ -161,5 +176,12 @@ public class ManagedObjectService extends ObjectSetRouter {
      */
     Set<SynchronizationListener> getListeners() {
         return listeners;
+    }
+
+    /**
+     * TODO: Description.
+     */
+    CryptoService getCryptoService() {
+        return cryptoService;
     }
 }

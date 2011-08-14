@@ -46,12 +46,14 @@
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-fluent</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-crypto</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>

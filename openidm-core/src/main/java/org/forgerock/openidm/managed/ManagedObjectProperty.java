@@ -20,11 +20,16 @@ package org.forgerock.openidm.managed;
 import java.util.HashMap;
 import java.util.Map;
 
-// JSON-Fluent library
+// JSON Fluent library
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonTransformer;
 
-// ForgeRock OpenIDM
+// JSON Cryptography library
+import org.forgerock.json.crypto.JsonCryptoException;
+
+// OpenIDM
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.script.Script;
@@ -52,44 +57,55 @@ class ManagedObjectProperty {
     /** Script to execute when an property is about to be stored in the repository. */
     private Script onStore;
 
+    /** TODO: Description. */
+    private JsonTransformer encryptionTransformer;
+
     /**
      * Constructs a new managed object property.
      *
      * @param config configuration object to use to initialize managed object property.
      * @throws JsonNodeException if the configuration is malformed.
      */
-    public ManagedObjectProperty(JsonNode config) throws JsonNodeException {
+    public ManagedObjectProperty(ManagedObjectService service, JsonNode config) throws JsonNodeException {
         name = config.get("name").required().asString();
         onRetrieve = Scripts.newInstance(config.get("onRetrieve"));
         onStore = Scripts.newInstance(config.get("onStore"));
         onValidate = Scripts.newInstance(config.get("onValidate"));
+        JsonNode encryptionNode = config.get("encryption");
+        if (!encryptionNode.isNull()) {
+            try {
+                encryptionTransformer = service.getCryptoService().getEncryptionTransformer(
+                 encryptionNode.get("cipher").defaultTo("AES/CBS/PKCS5Padding").asString(),
+                 encryptionNode.get("key").required().asString());
+            } catch (JsonCryptoException jce) {
+                throw new JsonNodeException(encryptionNode, jce);
+            }
+        }
     }
 
     /**
-     * Executes a script that performs transformation of a property. Populates the
+     * Executes a script that performs a transformation of a property. Populates the
      * {@code "property"} property in the script scope with the property value. Any changes
-     * to the scope are reflected back into the managed object once the script successfully
+     * to the property are reflected back into the managed object if the script successfully
      * completes.
      *
      * @param script the script to execute, or {@code null} to execute nothing.
-     * @param object the object containing the property value.
+     * @param managedObject the managed object containing the property value.
      * @throws InternalServerErrorException if script execution fails.
      */
-    private void execTransformation(Script script, Map<String, Object> object) throws InternalServerErrorException {
-        HashMap<String, Object> scope = new HashMap<String, Object>();
-        scope.put("property", object.get(name));
-        try {
-            script.exec(scope);
-        }
-        catch (ScriptException se) {
-            throw new InternalServerErrorException(se.getMessage());
-        }
-        if (scope.containsKey("property")) { // property (still) defined in scope
-            object.put(name, scope.get("property")); // propagate it back to managed object
-        }
-        else { // property was removed from scope
-            if (object.containsKey(name)) { // was defined in object
-                object.remove(name); // remove it from object
+    private void execScript(Script script, JsonNode managedObject) throws InternalServerErrorException {
+        if (script != null) {
+            HashMap<String, Object> scope = new HashMap<String, Object>();
+            scope.put("property", managedObject.get(name).getValue());
+            try {
+                script.exec(scope);
+            } catch (ScriptException se) {
+                throw new InternalServerErrorException(se.getMessage());
+            }
+            if (scope.containsKey("property")) { // property (still) defined in scope
+                managedObject.put(name, scope.get("property")); // propagate it back to managed object
+            } else if (managedObject.isDefined(name)) { // not in scope but was in managed object
+                managedObject.remove(name); // remove it from managed object
             }
         }
     }
@@ -97,50 +113,59 @@ class ManagedObjectProperty {
     /**
      * Executes the script if it exists, to validate a property value.
      *
-     * @param object the object containing the property value to be validated.
+     * @param node the JSON node containing the property value to be validated.
      * @throws ForbiddenException if validation of the property fails.
      * @throws InternalServerErrorException if any other exception occurs during execution.
      */
-    public void onValidate(Map<String, Object> object) throws ForbiddenException, InternalServerErrorException {
+    void onValidate(JsonNode node) throws ForbiddenException, InternalServerErrorException {
         if (onValidate != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
-            scope.put("property", object.get(name));
+            scope.put("property", node.get(name).getValue());
             try {
                 onValidate.exec(scope);
-            }
-            catch (ScriptThrownException ste) {
+            } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString()); // validation failed
-            }
-            catch (ScriptException se) {
+            } catch (ScriptException se) {
                 throw new InternalServerErrorException(se.getMessage()); // other scripting error
             }
         }
     }
 
     /**
-     * Executes the script if it exists, for when a property is retrieved from the repository.
+     * Performs tasks when a property has been retrieved from the repository, including:
+     * executing the {@code onRetrieve} script.
      *
-     * @param object the object that was retrieved from the repository.
-     * @throws InternalServerErrorException if an exception occurs executing the script.
+     * @param node the JSON node that was retrieved from the repository.
+     * @throws InternalServerErrorException if an exception occurs processing the property.
      */
-    public void onRetrieve(Map<String, Object> object) throws InternalServerErrorException {
-        execTransformation(onRetrieve, object);
+    void onRetrieve(JsonNode node) throws InternalServerErrorException {
+        execScript(onRetrieve, node);
     }
 
     /**
-     * Executes the script if it exists, for when a property is to be stored in the repository.
+     * Performs tasks when a property is to be stored in the repository, including:
+     * executing the {@code onStore} script and encrypting the property.
      *
-     * @param object the object is to be stored in the repository.
-     * @throws InternalServerErrorException if an exception occurs executing the script.
+     * @param object the JSON node to be stored in the repository.
+     * @throws InternalServerErrorException if an exception occurs processing the property.
      */
-    public void onStore(Map<String, Object> object) throws InternalServerErrorException {
-        execTransformation(onStore, object);
+    void onStore(JsonNode node) throws InternalServerErrorException {
+        execScript(onStore, node);
+        if (encryptionTransformer != null && node.isDefined(name)) {
+            try {
+                JsonNode property = node.get(name).copy(); // deep copy; apply all transformations
+                encryptionTransformer.transform(property);
+                node.put(name, property.getValue());
+            } catch (JsonException je) {
+                throw new InternalServerErrorException(je);
+            }
+        }
     }
 
     /**
      * Returns the name of the property.
      */
-    public String getName() {
+    String getName() {
         return name;
     }
 }
