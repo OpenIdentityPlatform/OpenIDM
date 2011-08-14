@@ -30,11 +30,12 @@ import org.slf4j.LoggerFactory;
 // OSGi Framework
 import org.osgi.framework.ServiceReference;
 
-// JSON-Fluent library
+// JSON Fluent library
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
-// ForgeRock OpenIDM
+// OpenIDM
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
@@ -108,8 +109,8 @@ class ManagedObjectSet implements ObjectSet {
         onUpdate = Scripts.newInstance(config.get("onUpdate"));
         onDelete = Scripts.newInstance(config.get("onDelete"));
         onValidate = Scripts.newInstance(config.get("onValidate"));
-        for (JsonNode node : config.get("properties").expect(List.class)) {
-            properties.add(new ManagedObjectProperty(node));
+        for (JsonNode property : config.get("properties").expect(List.class)) {
+            properties.add(new ManagedObjectProperty(service, property));
         }
         LOGGER.debug("Instantiated managed object set: {}", name);
     }
@@ -144,22 +145,19 @@ class ManagedObjectSet implements ObjectSet {
      * scope.
      *
      * @param script the script to execute, or {@code null} to execute nothing.
-     * @param object the object to populate in the script scope.
+     * @param node the JSON node whose value is to be populated in the script scope.
      * @throws ForbiddenException if the script throws an exception.
      * @throws InternalServerErrorException if any other exception is encountered.
      */
-    private void execScript(Script script, Map<String, Object> object)
-    throws ForbiddenException, InternalServerErrorException {
+    private void execScript(Script script, JsonNode node) throws ForbiddenException, InternalServerErrorException {
         if (script != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
-            scope.put("object", object);
+            scope.put("object", node.getValue());
             try {
                 script.exec(scope); // allows direct modification to the object
-            }
-            catch (ScriptThrownException ste) {
+            } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString()); // script aborting the trigger
-            }
-            catch (ScriptException se) {
+            } catch (ScriptException se) {
                 throw new InternalServerErrorException(se.getMessage());
             }
         }
@@ -169,19 +167,19 @@ class ManagedObjectSet implements ObjectSet {
      * Executes all of the necessary trigger scripts when an object is retrieved from the
      * repository.
      *
-     * @param object the object that was retrieved from the repository.
+     * @param node the JSON node that was retrieved from the repository.
      * @throws ForbiddenException if a validation trigger throws an exception.
      * @throws InternalServerErrorException if any other exception occurs.
      */
-    private void onRetrieve(Map<String, Object> object) throws ForbiddenException, InternalServerErrorException {
-        execScript(onRetrieve, object);
+    private void onRetrieve(JsonNode node) throws ForbiddenException, InternalServerErrorException {
+        execScript(onRetrieve, node);
         for (ManagedObjectProperty property : properties) {
-            property.onRetrieve(object);
+            property.onRetrieve(node);
         }
-        // TODO: schema validation here (w. optimization)
-        execScript(onValidate, object);
+// TODO: schema validation here (w. optimization), using on-the-fly decryption transformations
+        execScript(onValidate, node);
         for (ManagedObjectProperty property : properties) {
-            property.onValidate(object);
+            property.onValidate(node);
         }
     }
 
@@ -189,45 +187,63 @@ class ManagedObjectSet implements ObjectSet {
      * Executes all of the necessary trigger scripts when an object is to be stored in the
      * repository.
      *
-     * @param object the object to be stored in the repository.
+     * @param node the JSON node to be stored in the repository.
      * @throws ForbiddenException if a validation trigger throws an exception.
      * @throws InternalServerErrorException if any other exception occurs.
      */
-    private void onStore(Map<String, Object> object) throws ForbiddenException, InternalServerErrorException {
+    private void onStore(JsonNode node) throws ForbiddenException, InternalServerErrorException {
         for (ManagedObjectProperty property : properties) {
-            property.onValidate(object);
+            property.onValidate(node);
         }
-        execScript(onValidate, object);
+        execScript(onValidate, node);
 // TODO: schema validation here (w. optimizations)
         for (ManagedObjectProperty property : properties) {
-            property.onStore(object);
+            property.onStore(node); // includes per-property encryption
         }
-        execScript(onStore, object);
+        execScript(onStore, node);
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @param object TODO.
+     * @return TODO.
+     * @throws InternalServerErrorException TODO.
+     */ 
+    private JsonNode decrypt(Map<String, Object> object) throws InternalServerErrorException {
+        try {
+            return service.getCryptoService().decrypt(new JsonNode(object)); // makes a copy, which we can modify
+        } catch (JsonException je) {
+            throw new InternalServerErrorException(je);
+        }
     }
 
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Create name={} id={}", name, id);
-        execScript(onCreate, object);
-        onStore(object);
-        if (object.containsKey("_id")) { // trigger assigned an identifier
-            id = object.get("_id").toString(); // override requested id
+        JsonNode node = decrypt(object); // decrypt any incoming encrypted properties
+        execScript(onCreate, node);
+        onStore(node); // includes per-property encryption
+        JsonNode _id = node.get("_id");
+        if (_id.isString()) {
+            id = _id.asString(); // override requested ID with one specified in object
         }
         if (id == null) { // default is to assign a UUID identifier
             id = UUID.randomUUID().toString();
-            object.put("_id", id);
+            node.put("_id", id);
         }
-        service.getRouter().create(repoId(id), object);
-        ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, object, Status.SUCCESS);
+        service.getRouter().create(repoId(id), node.asMap());
+        ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, node.asMap(), Status.SUCCESS);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onCreate(managedId(id), new JsonNode(object));
+                listener.onCreate(managedId(id), node);
             }
-        }
-        catch (SynchronizationException se) {
-// TODO: invert action to provide undo-like functionality
+        } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);
         }
+        // workaround until JsonNode works its way into the ObjectSet API
+        object.put("_id", node.get("_id").getValue());
+        object.put("_rev", node.get("_rev").getValue());
     }
 
     @Override
@@ -236,11 +252,11 @@ class ManagedObjectSet implements ObjectSet {
         if (id == null) {
             throw new ForbiddenException("cannot read entire set");
         }
-        Map<String, Object> object = service.getRouter().read(repoId(id));
-        onRetrieve(object);
-        execScript(onRead, object);
-        ActivityLog.log(service.getRouter(), Action.READ, "", managedId(id), object, null, Status.SUCCESS);
-        return object;
+        JsonNode node = new JsonNode(service.getRouter().read(repoId(id)));
+        onRetrieve(node);
+        execScript(onRead, node);
+        ActivityLog.log(service.getRouter(), Action.READ, "", managedId(id), node.asMap(), null, Status.SUCCESS);
+        return node.asMap();
     }
 
     @Override
@@ -249,37 +265,38 @@ class ManagedObjectSet implements ObjectSet {
         if (id == null) {
             throw new ForbiddenException("cannot update entire set");
         }
-        Map<String, Object> oldObject = service.getRouter().read(repoId(id));
-        if (object.equals(oldObject)) {
-            // Object hasn't changed, do not update 
-            return;
+        JsonNode node = decrypt(object); // decrypt any incoming encrypted properties
+        Map<String, Object> oldEncrypted = service.getRouter().read(repoId(id));
+        JsonNode oldDecrypted = decrypt(oldEncrypted);
+        if (node.asMap().equals(oldDecrypted.asMap())) {
+            return; // object hasn't changed; do not update
         }
         if (onUpdate != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
-            scope.put("oldObject", oldObject);
-            scope.put("newObject", object);
+            scope.put("oldObject", oldDecrypted.getValue());
+            scope.put("newObject", node.asMap());
             try {
                 onUpdate.exec(scope); // allows direct modification to the objects
-            }
-            catch (ScriptThrownException ste) {
+            } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString()); // script aborting the trigger
-            }
-            catch (ScriptException se) {
+            } catch (ScriptException se) {
                 throw new InternalServerErrorException(se.getMessage());
             }
         }
-        onStore(object);
-        service.getRouter().update(repoId(id), rev, object);
-        ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), oldObject, object, Status.SUCCESS);
+        onStore(node); // performs per-property encryption
+        service.getRouter().update(repoId(id), rev, node.asMap());
+        ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), oldEncrypted, node.asMap(), Status.SUCCESS);
         try {
+            JsonNode oldEncryptedNode = new JsonNode(oldEncrypted);
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onUpdate(managedId(id), new JsonNode(oldObject), new JsonNode(object));
+                listener.onUpdate(managedId(id), oldEncryptedNode, node);
             }
-        }
-        catch (SynchronizationException se) {
-// TODO: invert action to provide undo-like functionality
+        } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);
         }
+        // workaround until JsonNode works its way into the ObjectSet API
+        object.put("_id", node.get("_id").getValue());
+        object.put("_rev", node.get("_rev").getValue());
     }
 
     @Override
@@ -288,19 +305,17 @@ class ManagedObjectSet implements ObjectSet {
         if (id == null) {
             throw new ForbiddenException("cannot delete entire set");
         }
-        Map<String, Object> object = service.getRouter().read(repoId(id));;
+        Map<String, Object> encrypted = service.getRouter().read(repoId(id));
         if (onDelete != null) {
-            execScript(onDelete, object);
+            execScript(onDelete, decrypt(encrypted));
         }
         service.getRouter().delete(repoId(id), rev);
-        ActivityLog.log(service.getRouter(), Action.DELETE, "", managedId(id), object, null, Status.SUCCESS);
+        ActivityLog.log(service.getRouter(), Action.DELETE, "", managedId(id), encrypted, null, Status.SUCCESS);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
                 listener.onDelete(managedId(id));
             }
-        }
-        catch (SynchronizationException se) {
-// TODO: invert action to provide undo-like functionality
+        } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);
         }
     }
@@ -314,14 +329,14 @@ class ManagedObjectSet implements ObjectSet {
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         LOGGER.debug("Query name={} id={}", name, id);
         Map<String, Object> result = service.getRouter().query(repoId(id), params);
-        ActivityLog.log(service.getRouter(), Action.QUERY, "Query parameters " + params, 
-                managedId(id), result, null, Status.SUCCESS);
+        ActivityLog.log(service.getRouter(), Action.QUERY, "Query parameters " + params,
+         managedId(id), result, null, Status.SUCCESS);
         return result;
     }
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new ForbiddenException("action not yet supported on managed objects");
+        throw new ForbiddenException("action not yet implemented");
     }
 
     /**
