@@ -68,7 +68,7 @@ import org.forgerock.openidm.crypto.CryptoService;
 @Component(
     name = "org.forgerock.openidm.crypto",
     immediate = true,
-    policy = ConfigurationPolicy.REQUIRE
+    policy = ConfigurationPolicy.OPTIONAL
 )
 @Properties({
     @Property(name = "service.description", value = "OpenIDM cryptography service"),
