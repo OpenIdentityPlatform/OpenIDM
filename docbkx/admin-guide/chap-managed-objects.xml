@@ -222,12 +222,6 @@
         </sect2>
     </sect1>
     <sect1>
-        <title>Encryption</title>
-        <para/>
-        <para>Sensitive object properties can be encrypted prior to storage, typically through the property onStorage trigger. The trigger will have access to configuration data, which can include arbitrary customer-defined attributes, such as symmetric encryption key. Such attributes can be decrypted during retrieval from the data store through the property onRetrieval trigger.</para>
-        <para/>
-    </sect1>
-    <sect1>
         <title>Configuration</title>
         <para>Configuration of managed objects is provided through an array of :</para>
         <sect2>
@@ -402,7 +396,8 @@
   "name": string,
   "onValidate": script object,
   "onRetrieve": script object,
-  "onStore": script object
+  "onStore": script object,
+  "encryption": property-encryption object
 }]]>
                         </code>
                     </literallayout>
@@ -436,8 +431,52 @@
                     <varlistentry>
                         <term>onStore</term>
                         <listitem>
-                            <para>scrip object, optional</para>
+                            <para>script object, optional</para>
                             <para>A script object to trigger when a property is about to be stored in the repository. The property to be stored is provided in the root scope as the property property. The script may change the property value. If an exception is thrown, then object storage will fail.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>encryption</term>
+                        <listitem>
+                            <para>property-encryption object, optional</para>
+                            <para>Specifies the configuration for encryption of the property in the repository. If omitted or null, the property is not encrypted.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </sect3>
+        </sect2>
+        <sect2>
+            <title>property-encryption object</title>
+            <para/>
+            <sect3>
+                <title>Usage</title>
+                <example>
+                    <literallayout class="monospaced">
+                        <code><![CDATA[
+{
+  "cipher": string,
+  "key": string
+}]]>
+                        </code>
+                    </literallayout>
+                </example>
+                <para/>
+            </sect3>
+            <sect3>
+                <title>Properties</title>
+                <variablelist>
+                    <varlistentry>
+                        <term>cipher</term>
+                        <listitem>
+                            <para>string, optional</para>
+                            <para>The cipher transformation used to encrypt the property. If omitted or null, the default cipher of "AES/CBC/PKCS5Padding" is used.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>key</term>
+                        <listitem>
+                            <para>string, required</para>
+                            <para>The alias of the key in the OpenIDM cryptography service keystore used to encrypt the property.</para>
                         </listitem>
                     </varlistentry>
                 </variablelist>
