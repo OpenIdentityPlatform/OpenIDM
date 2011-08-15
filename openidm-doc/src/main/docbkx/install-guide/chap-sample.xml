@@ -83,7 +83,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           <para>
           A descriptive overview of the sample:
           </para>
-          <itemizedlist>
+          <orderedlist>
           <listitem>
           <para>OpenIDM regularly scans for any schedular configuration files in the conf directory.</para>
           </listitem>
@@ -108,7 +108,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           <para>All operations are written to the audit logs in both the internal database and to flat
           files under the openidm/audit directory.</para>
           </listitem>
-          </itemizedlist>
+          </orderedlist>
          </section>
 
          <section>
