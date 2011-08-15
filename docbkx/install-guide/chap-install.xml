@@ -71,20 +71,13 @@ Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
 Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
   </step>
   <step>
-   <!-- TODO: Update this step when we have a downloads page to stable versions. -->
-   <para>Download <link
-   xlink:href='http://builds.forgerock.org/job/OpenIDM%202.x/lastSuccessfulBuild/artifact/openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip'
-   >openidm-2.0.0-SNAPSHOT.zip</link>.</para>
+   <para>Download OpenIDM from the <link
+   xlink:href='http://forgerock.org/openidm.html'>downloads page</link>.</para>
   </step>
   <step>
    <para>Unpack the contents of the .zip file into the install location.</para>
    <screen width='80'>$ cd /path/to
-$ unzip ~/Downloads/openidm-zip-2.0.0.zip 
-Archive:  /Users/mark/Downloads/openidm-zip-2.0.0.zip
-   creating: openidm/
-   creating: openidm/bundle/
-  inflating: openidm/bundle/openidm-audit-2.0.0-SNAPSHOT.jar  
-  inflating: openidm/bundle/openidm-repo-2.0.0-SNAPSHOT.jar  
+$ unzip ~/Downloads/openidm-*.zip 
 ...
   inflating: openidm/src/site/index.htm  
 $ </screen>
