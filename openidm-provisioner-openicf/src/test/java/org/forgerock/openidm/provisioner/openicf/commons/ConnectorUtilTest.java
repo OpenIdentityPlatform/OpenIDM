@@ -36,7 +36,6 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
-import org.forgerock.openidm.provisioner.openicf.impl.ConnectorObjectOptions;
 import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperBuilder;
 import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperImpl;
 import org.forgerock.openidm.provisioner.openicf.impl.SimpleSystemIdentifier;
@@ -46,8 +45,7 @@ import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorKey;
 import org.identityconnectors.framework.api.operations.*;
-import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.Schema;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
@@ -60,11 +58,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -141,10 +136,14 @@ public class ConnectorUtilTest {
         Assert.assertNotNull(inputStream);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode configuration = new JsonNode(mapper.readValue(inputStream, Map.class));
-        Map<String, ConnectorObjectOptions> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
-        OperationHelper helper = new OperationHelperImpl(new APIConfigurationImpl(), new Id("system/TEST/account"), org.mockito.Mockito.mock(ObjectClassInfoHelper.class), operationOptionHelpers.get("__ACCOUNT__"));
+        Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
+        ObjectClassInfoHelper objectClassInfoHelper = org.mockito.Mockito.mock(ObjectClassInfoHelper.class);
+        org.mockito.Mockito.when(objectClassInfoHelper.getObjectClass()).thenReturn(new ObjectClass("__ACCOUNT__"));
+        OperationHelper helper = new OperationHelperImpl(new APIConfigurationImpl(), new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"));
+
         Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class), "Create - ALLOWED");
         Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class), "Sync - DENIED");
+
         boolean authenticated = true;
         try {
             helper.isOperationPermitted(AuthenticationApiOp.class);
@@ -152,13 +151,16 @@ public class ConnectorUtilTest {
             authenticated = false;
         }
         Assert.assertFalse(authenticated, "Authentication - DENIED(Exception)");
+
         boolean operationSupported = true;
         try {
             helper.isOperationPermitted(ScriptOnResourceApiOp.class);
         } catch (ForbiddenException e) {
             operationSupported = false;
         }
-        //Assert.assertFalse(operationSupported,"ScriptOnResource - NotSupported(Exception)");
+        Assert.assertFalse(operationSupported, "ScriptOnResource - NotSupported(Exception)");
+
+        Assert.assertFalse(helper.isOperationPermitted(ScriptOnConnectorApiOp.class), "ScriptOnConnector - DENIED");
         Assert.assertFalse(helper.isOperationPermitted(SearchApiOp.class), "Search - DENIED");
     }
 

@@ -285,6 +285,9 @@
             {
                "denied" : true,
                "onDeny" : "DO_NOTHING",
+               "supportedObjectTypes" : [
+                  "__ACCOUNT__"
+               ],
                "objectFeatures" :
                   {
                      "__ACCOUNT__" :
@@ -533,6 +536,9 @@
             },
          "SCRIPT_ON_RESOURCE" :
             {
+               "supportedObjectTypes" : [
+                   "__GROUP__"
+               ],
                "objectFeatures" :
                   {
                      "__GROUP__" :
@@ -1171,128 +1177,8 @@
             },
          "SCRIPT_ON_CONNECTOR" :
             {
-               "objectFeatures" :
-                  {
-                     "__ACCOUNT__" :
-                        {
-                           "denied" : false,
-                           "onDeny" : "DO_NOTHING",
-                           "operationOptionInfo" :
-                              {
-                                 "$schema" : "http://json-schema.org/draft-03/schema",
-                                 "id" : "FIX_ME",
-                                 "type" : "object",
-                                 "properties" :
-                                    {
-                                       "_OperationOption-float" :
-                                          {
-                                             "type" : "number",
-                                             "nativeType" : "JAVA_TYPE_PRIMITIVE_FLOAT"
-                                          },
-                                       "_OperationOption-QualifiedUid" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_QUALIFIEDUID"
-                                          },
-                                       "_OperationOption-GuardedByteArray" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_GUARDEDBYTEARRAY"
-                                          },
-                                       "_OperationOption-int" :
-                                          {
-                                             "type" : "integer",
-                                             "nativeType" : "JAVA_TYPE_INT"
-                                          },
-                                       "_OperationOption-Uid " :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_UID"
-                                          },
-                                       "_OperationOption-Double" :
-                                          {
-                                             "type" : "number",
-                                             "nativeType" : "JAVA_TYPE_DOUBLE"
-                                          },
-                                       "_OperationOption-Long" :
-                                          {
-                                             "type" : "number",
-                                             "nativeType" : "JAVA_TYPE_LONG"
-                                          },
-                                       "_OperationOption-URI" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_URI"
-                                          },
-                                       "_OperationOption-long" :
-                                          {
-                                             "type" : "number",
-                                             "nativeType" : "JAVA_TYPE_PRIMITIVE_LONG"
-                                          },
-                                       "_OperationOption-double" :
-                                          {
-                                             "type" : "number",
-                                             "nativeType" : "JAVA_TYPE_PRIMITIVE_DOUBLE"
-                                          },
-                                       "_OperationOption-ObjectClass" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_OBJECTCLASS"
-                                          },
-                                       "_OperationOption-Script" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_SCRIPT"
-                                          },
-                                       "_OperationOption-Integer" :
-                                          {
-                                             "type" : "integer",
-                                             "nativeType" : "integer"
-                                          },
-                                       "_OperationOption-GuardedString" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_GUARDEDSTRING"
-                                          },
-                                       "_OperationOption-char" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_CHAR"
-                                          },
-                                       "_OperationOption-Boolean" :
-                                          {
-                                             "type" : "boolean",
-                                             "nativeType" : "boolean"
-                                          },
-                                       "_OperationOption-String" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "string"
-                                          },
-                                       "_OperationOption-Float" :
-                                          {
-                                             "type" : "number",
-                                             "nativeType" : "JAVA_TYPE_FLOAT"
-                                          },
-                                       "_OperationOption-File" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_FILE"
-                                          },
-                                       "_OperationOption-Character" :
-                                          {
-                                             "type" : "string",
-                                             "nativeType" : "JAVA_TYPE_CHARACTER"
-                                          },
-                                       "_OperationOption-boolean" :
-                                          {
-                                             "type" : "boolean",
-                                             "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
-                                          }
-                                    }
-                              }
-                        }
-                  }
+               "denied" : true,
+               "onDeny" : "DO_NOTHING"
             },
          "SCHEMA" :
             {

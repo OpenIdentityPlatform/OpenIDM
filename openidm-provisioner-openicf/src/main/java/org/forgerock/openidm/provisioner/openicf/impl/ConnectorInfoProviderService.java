@@ -17,10 +17,10 @@ import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.AbstractConnectorInfo;
 import org.identityconnectors.framework.impl.api.remote.RemoteConnectorInfoImpl;
 import org.osgi.framework.Constants;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.osgi.service.component.ComponentContext;
 
 import java.io.*;
 import java.lang.reflect.UndeclaredThrowableException;

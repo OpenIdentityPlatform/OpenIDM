@@ -25,8 +25,6 @@
 package org.forgerock.openidm.provisioner.openicf.impl.script;
 
 import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.openidm.script.Script;
-import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.ScriptOnConnectorApiOp;
 import org.identityconnectors.framework.api.operations.ScriptOnResourceApiOp;

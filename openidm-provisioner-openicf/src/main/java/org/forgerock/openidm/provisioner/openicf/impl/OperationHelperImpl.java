@@ -58,7 +58,7 @@ public class OperationHelperImpl implements OperationHelper {
 
     private APIConfiguration configuration;
     private ObjectClassInfoHelper objectClassInfoHelper;
-    private ConnectorObjectOptions connectorObjectOptions;
+    private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
     private List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
     private Id systemObjectSetId;
 
@@ -69,10 +69,10 @@ public class OperationHelperImpl implements OperationHelper {
      * @param connectorObjectOptions
      * @throws NullPointerException if any of the input values is null.
      */
-    public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper, ConnectorObjectOptions connectorObjectOptions) {
+    public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper, Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions) {
         this.configuration = Assertions.nullChecked(configuration, "configuration");
         this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
-        this.connectorObjectOptions = null != connectorObjectOptions ? connectorObjectOptions : new ConnectorObjectOptions(null);
+        this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");
         this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");
     }
 
@@ -83,21 +83,24 @@ public class OperationHelperImpl implements OperationHelper {
 
 
     public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ForbiddenException {
-        if (null == connectorObjectOptions) {
-            return true;
+        OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);
+        String reason = "not supported.";
+        if (null != operationOptionInfoHelper && (null == operationOptionInfoHelper.getSupportedObjectTypes() ||
+                operationOptionInfoHelper.getSupportedObjectTypes().contains(objectClassInfoHelper.getObjectClass().getObjectClassValue()))) {
+
+            if (!operationOptionInfoHelper.isDenied()) {
+                return true;
+            } else if (OperationOptionInfoHelper.OnDenyAction.DO_NOTHING.equals(operationOptionInfoHelper.getOnDeny())) {
+                return false;
+            }
+            reason = "denied.";
         }
-        OperationOptionInfoHelper operationOptionInfoHelper = connectorObjectOptions.find(operation);
-        if (!operationOptionInfoHelper.isDenied()) {
-            return true;
-        } else if (OperationOptionInfoHelper.OnDenyAction.DO_NOTHING.equals(operationOptionInfoHelper.getOnDeny())) {
-            return false;
-        }
-        throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is denied");
+        throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is " + reason);
     }
 
 
     public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, Map<String, Object> source) throws Exception {
-        return connectorObjectOptions.find(operation).build(source, objectClassInfoHelper);
+        return operations.get(operation).build(source, objectClassInfoHelper);
     }
 
 
@@ -197,7 +200,6 @@ public class OperationHelperImpl implements OperationHelper {
             }
         }
     }
-
 
     private Operator createOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
 

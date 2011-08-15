@@ -34,19 +34,16 @@ import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.FilterTranslator;
 import org.identityconnectors.framework.spi.AttributeNormalizer;
 import org.identityconnectors.framework.spi.Configuration;
+import org.identityconnectors.framework.spi.ConnectorClass;
 import org.identityconnectors.framework.spi.PoolableConnector;
 import org.identityconnectors.framework.spi.operations.*;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.ConnectException;
 import java.net.URI;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.Set;
-
-import org.identityconnectors.framework.spi.ConnectorClass;
 
 /**
  * Sample Class Doc

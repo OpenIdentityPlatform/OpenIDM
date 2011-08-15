@@ -25,7 +25,6 @@
 package org.forgerock.openidm.provisioner.openicf;
 
 import org.identityconnectors.framework.api.APIConfiguration;
-import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorInfo;
 
 import java.util.List;

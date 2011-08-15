@@ -30,8 +30,8 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.framework.common.objects.*;
+import org.identityconnectors.framework.common.objects.OperationOptionInfo;
+import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -47,22 +47,9 @@ public class OperationOptionInfoHelper {
 
     public static final String OPERATION_OPTION_DENIED = "denied";
     public static final String OPERATION_OPTION_ON_DENY = "onDeny";
+    public static final String OPERATION_OPTION_SUPPORTEDOBJECTTYPES = "supportedObjectTypes";
     public static final String OPERATION_OPTION_OPERATION_OPTION_INFO = "operationOptionInfo";
 
-
-//    public static final AttributeInfo OP_SCOPE;
-////    public static final AttributeInfo OP_CONTAINER;
-//    public static final AttributeInfo OP_RUN_AS_USER;
-//    public static final AttributeInfo OP_RUN_WITH_PASSWORD;
-//    public static final AttributeInfo OP_ATTRIBUTES_TO_GET;
-
-//    static {
-//        OP_SCOPE = AttributeInfoBuilder.build(OperationOptions.OP_SCOPE);
-////        OP_CONTAINER = AttributeInfoBuilder.build(OperationOptions.OP_CONTAINER, QualifiedUid.class);
-//        OP_RUN_AS_USER = AttributeInfoBuilder.build(OperationOptions.OP_RUN_AS_USER);
-//        OP_RUN_WITH_PASSWORD = AttributeInfoBuilder.build(OperationOptions.OP_RUN_WITH_PASSWORD, GuardedString.class);
-//        OP_ATTRIBUTES_TO_GET = new AttributeInfoBuilder(OperationOptions.OP_RUN_AS_USER).setMultiValued(true).build();
-//    }
 
     public static enum OnDenyAction {
         THROW_EXCEPTION,
@@ -71,9 +58,12 @@ public class OperationOptionInfoHelper {
 
     private boolean denied;
     private OnDenyAction onDeny;
+    private Set<String> supportedObjectTypes = null;
     private final Set<AttributeInfoHelper> attributes;
 
     public OperationOptionInfoHelper() {
+        denied = false;
+        onDeny = OnDenyAction.DO_NOTHING;
         attributes = Collections.emptySet();
     }
 
@@ -90,6 +80,17 @@ public class OperationOptionInfoHelper {
         } else {
             attributes = Collections.emptySet();
         }
+        JsonNode supportedObjectTypesNode = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
+        if (supportedObjectTypesNode.isList()) {
+            List<Object> source = supportedObjectTypesNode.asList();
+            this.supportedObjectTypes = new HashSet<String>(source.size());
+            for (Object o : source) {
+                if (o instanceof String) {
+                    this.supportedObjectTypes.add((String) o);
+                }
+            }
+        }
+
     }
 
     public OperationOptionInfoHelper(JsonNode configuration, OperationOptionInfoHelper globalOption) throws JsonNodeException, SchemaException {
@@ -103,6 +104,18 @@ public class OperationOptionInfoHelper {
                 attributes.add(new AttributeInfoHelper(entry.getKey(), true, (Map<String, Object>) entry.getValue()));
             }
         }
+        JsonNode supportedObjectTypesNode = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
+        if (supportedObjectTypesNode.isList()) {
+            List<Object> source = supportedObjectTypesNode.asList();
+            this.supportedObjectTypes = new HashSet<String>(source.size());
+            for (Object o : source) {
+                if (o instanceof String) {
+                    this.supportedObjectTypes.add((String) o);
+                }
+            }
+        } else {
+            this.supportedObjectTypes = globalOption.getSupportedObjectTypes();
+        }
     }
 
     public boolean isDenied() {
@@ -115,6 +128,10 @@ public class OperationOptionInfoHelper {
 
     Set<AttributeInfoHelper> getAttributes() {
         return attributes;
+    }
+
+    public Set<String> getSupportedObjectTypes() {
+        return null != supportedObjectTypes ? Collections.unmodifiableSet(supportedObjectTypes) : null;
     }
 
     public OperationOptionsBuilder build(Map<String, Object> source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {

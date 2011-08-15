@@ -31,9 +31,6 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 
-import java.net.URI;
-import java.util.regex.Pattern;
-
 /**
  * SimpleSystemIdentifier class helps to match the id against the name of the
  * system configuration.

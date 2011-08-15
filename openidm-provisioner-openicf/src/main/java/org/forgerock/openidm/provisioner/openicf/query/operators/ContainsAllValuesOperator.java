@@ -29,10 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.query.operators;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.filter.ContainsAllValuesFilter;
-import org.identityconnectors.framework.common.objects.filter.EndsWithFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
-
-import java.util.List;
 
 public class ContainsAllValuesOperator extends FunctionalOperator {
 

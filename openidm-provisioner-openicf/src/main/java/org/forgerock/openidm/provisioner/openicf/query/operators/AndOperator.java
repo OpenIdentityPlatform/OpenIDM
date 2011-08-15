@@ -29,10 +29,6 @@ package org.forgerock.openidm.provisioner.openicf.query.operators;
 import org.identityconnectors.framework.common.objects.filter.AndFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
 public class AndOperator extends BooleanOperator {
 
 

@@ -34,7 +34,6 @@ import org.identityconnectors.framework.spi.ConfigurationProperty;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Arrays;
 
 /**
  * @author $author$

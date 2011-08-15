@@ -33,13 +33,13 @@ import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.objset.*;
+import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
-import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -80,6 +80,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
+    private boolean allowModification = true;
 
 
     @Reference(name = "ConnectorInfoProviderServiceReference", referenceInterface = ConnectorInfoProvider.class, bind = "bind", unbind = "unbind", cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
@@ -117,6 +118,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         try {
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
             operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration, connectorInfo.createDefaultAPIConfiguration());
+            allowModification = !jsonConfiguration.get("readOnly").defaultTo(false).asBoolean();
         } catch (Exception e) {
             TRACE.error("Invalid configuration", e);
             throw new ComponentException("Invalid configuration, service can not be started.", e);
@@ -207,7 +209,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
 
-        if (helper.isOperationPermitted(CreateApiOp.class)) {
+        if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
             try {
                 ConnectorObject connectorObject = helper.build(CreateApiOp.class, object);
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, object);
@@ -371,7 +373,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
 
-        if (helper.isOperationPermitted(UpdateApiOp.class)) {
+        if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
             try {
                 Object newName = object.get("_name");
                 ConnectorObject connectorObject = null;
@@ -460,7 +462,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         Id complexId = new Id(id);
         OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
 
-        if (helper.isOperationPermitted(DeleteApiOp.class)) {
+        if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
             try {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, (ConnectorObject) null, null);
                 getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());

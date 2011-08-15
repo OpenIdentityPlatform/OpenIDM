@@ -24,6 +24,8 @@
  */
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import org.identityconnectors.framework.api.operations.*;
+
 /**
  * <p>Java class for OperationType.
  * <p/>
@@ -57,84 +59,86 @@ public enum OperationType {
     /**
      * CreateApiOp.class
      */
-    CREATE("create"),
+    CREATE(CreateApiOp.class),
 
     /**
      * UpdateApiOp.class
      */
-    UPDATE("update"),
+    UPDATE(UpdateApiOp.class),
 
     /**
      * DeleteApiOp.class
      */
-    DELETE("delete"),
+    DELETE(DeleteApiOp.class),
 
     /**
      * TestApiOp.class
      */
-    TEST("test"),
+    TEST(TestApiOp.class),
 
     /**
      * ScriptOnConnectorApiOp.class
      */
-    SCRIPT_ON_CONNECTOR("scriptOnConnector"),
+    SCRIPT_ON_CONNECTOR(ScriptOnConnectorApiOp.class),
 
     /**
      * ScriptOnResourceApiOp.class
      */
-    SCRIPT_ON_RESOURCE("scriptOnResource"),
+    SCRIPT_ON_RESOURCE(ScriptOnResourceApiOp.class),
 
     /**
      * GetApiOp.class
      */
-    GET("get"),
+    GET(GetApiOp.class),
 
     /**
      * ResolveUsernameApiOp.class
      */
-    RESOLVEUSERNAME("resolveusername"),
+    RESOLVEUSERNAME(ResolveUsernameApiOp.class),
 
     /**
      * AuthenticationApiOp.class
      */
-    AUTHENTICATE("authenticate"),
+    AUTHENTICATE(AuthenticationApiOp.class),
 
     /**
      * SearchApiOp.class
      */
-    SEARCH("search"),
+    SEARCH(SearchApiOp.class),
 
     /**
      * ValidateApiOp.class
      */
-    VALIDATE("validate"),
+    VALIDATE(ValidateApiOp.class),
 
     /**
      * SyncApiOp.class
      */
-    SYNC("sync"),
+    SYNC(SyncApiOp.class),
 
     /**
      * SchemaApiOp.class
      */
-    SCHEMA("schema");
-    private final String value;
+    SCHEMA(SchemaApiOp.class);
+    private final Class<? extends APIOperation> clazz;
 
-    OperationType(String v) {
-        value = v;
+
+    OperationType(Class<? extends APIOperation> v) {
+        clazz = v;
     }
 
-    public String value() {
-        return value;
+    public Class<? extends APIOperation> getValue() {
+        return clazz;
     }
 
-    public static OperationType fromValue(String v) {
+    public static OperationType fromValue(Class<? extends APIOperation> v) {
+        OperationType op = null;
         for (OperationType c : OperationType.values()) {
-            if (c.value.equals(v)) {
-                return c;
+            if (c.clazz.equals(v)) {
+                op = c;
             }
         }
-        throw new IllegalArgumentException(v);
+        return op;
     }
 
 }

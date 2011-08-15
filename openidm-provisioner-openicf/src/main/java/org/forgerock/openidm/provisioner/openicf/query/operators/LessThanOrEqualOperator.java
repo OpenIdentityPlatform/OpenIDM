@@ -29,10 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.query.operators;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.filter.Filter;
-import org.identityconnectors.framework.common.objects.filter.LessThanFilter;
 import org.identityconnectors.framework.common.objects.filter.LessThanOrEqualFilter;
-
-import java.util.List;
 
 public class LessThanOrEqualOperator extends FunctionalOperator {
 
