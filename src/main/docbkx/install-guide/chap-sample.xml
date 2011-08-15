@@ -48,7 +48,7 @@
  <link xlink:href='http://code.google.com/p/orient/wiki/Download'>OrientDB 1.0rc3</link>.
  Once downloaded and unzipped you will find the shell console in the bin directory.
  You may start it and then connect to the running OpenIDM with the connect command
- as follows:
+ as follows:</para>
  <screen width='80'>
 $ /path/to/orientdb-1.0rc2-SNAPSHOT/bin/console.sh
 >
@@ -59,17 +59,17 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 > 
  </screen>
          <para>
-         After connecting to the database you can run commands like: 
-         <step>info to show you the classes and records. 
-         </step>
-         <step>select * from managed/user to see all the users in the OpenIDM repository.
-         </step>
-         <step>select * from audit/activity to see all the activity audit records
-         </step>
-         <step>select * from audit/recon to see all the recon audit records 
-         </step>
-         </para>
-         </para>
+         After connecting to the database you can run commands like:</para>
+         <itemizedlist>
+         <listitem><para>info to show you the classes and records.</para>
+         </listitem>
+         <listitem><para>select * from managed/user to see all the users in the OpenIDM repository.</para>
+         </listitem>
+         <listitem><para>select * from audit/activity to see all the activity audit records</para>
+         </listitem>
+         <listitem><para>select * from audit/recon to see all the recon audit records</para>
+         </listitem>
+         </itemizedlist>
         </section>
 
          <section>
@@ -83,30 +83,32 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           <para>
           A descriptive overview of the sample:
           </para>
-          <step>
-          OpenIDM regularly scans for any schedular configuration files in the conf directory.
-          </step>
-          <step>
-          A scheduled recon from the source to the target connector is found and scheduled
+          <itemizedlist>
+          <listitem>
+          <para>OpenIDM regularly scans for any schedular configuration files in the conf directory.</para>
+          </listitem>
+          <listitem>
+          <para>A scheduled recon from the source to the target connector is found and scheduled
           to run every 60 seconds per the  
-          <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.
-          </step>
-          <step>
-          The recon service reads in the mappings and any special actions for the source and target
-          users from <filename>conf/sync.json</filename>.
-          </step>
-          <step>
-          Recon runs and queries all users in the source and creates, deletes, or modifies the users in the
-          local OpenIDM repository according to the sync mappings. 
-          </step>
-          <step>
-          Recon then syncronizes all users in the local repository to the target according to the sync
-          mappings.
-          </step>
-          <step>
-          All operations are written to the audit logs in both the internal database and to flat
-          files under the openidm/audit directory.
-          </step>
+          <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.</para>
+          </listitem>
+          <listitem>
+          <para>The recon service reads in the mappings and any special actions for the source and target
+          users from <filename>conf/sync.json</filename>.</para>
+          </listitem>
+          <listitem>
+          <para>Recon runs and queries all users in the source and creates, deletes, or modifies the users in the
+          local OpenIDM repository according to the sync mappings.</para>
+          </listitem>
+          <listitem>
+          <para>Recon then syncronizes all users in the local repository to the target according to the sync
+          mappings.</para>
+          </listitem>
+          <listitem>
+          <para>All operations are written to the audit logs in both the internal database and to flat
+          files under the openidm/audit directory.</para>
+          </listitem>
+          </itemizedlist>
          </section>
 
          <section>
@@ -232,11 +234,11 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           the XML file connector(source) and the local repository(target). 
           </para>
           <note>
-          A source or target path starting with
+          <para>A source or target path starting with
           managed, such as managed/user, always refers to an object in the 
           OpenIDM local repository, whereas a path starting with 
           system, such as system/xml/account, refers to a connector object. In
-          this case the source XML file connector.  
+          this case the source XML file connector.</para>
           </note>
           <para>
           In the second mapping the source is the
@@ -308,8 +310,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           will see the new user in the source connector, create it in the
           local repository and then sync it to the target XML connector.
           To add a user copy the following into
-          </para>
           <filename>data/xmlConnectorData.xml</filename>:
+          </para>
          <screen width='80'>
 &lt;ri:__ACCOUNT__&gt;
    &lt;icf:__UID__&gt;12345&lt;/icf:__UID__&gt;
@@ -340,7 +342,6 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
          understand what took place during the reconciliation. This formatted excerpt 
          from the log covers four recon runs:
          </para>
-         <para>
          <screen width='100'>
 "id","action", "recon", "reconId","situation", "sourceObjectId", "status",  "targetObjectId";
 
@@ -355,7 +356,6 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 "9", "IGNORE", "source", "66b1",   "CONFIRMED", "system/xml/2fe", "SUCCESS", "managed/user/c783";
 ...
          </screen>
-         </para>
          <para>
          The important fields in the audit log are the source (sourceObjectId) and 
          target(targetObjectId), the 
