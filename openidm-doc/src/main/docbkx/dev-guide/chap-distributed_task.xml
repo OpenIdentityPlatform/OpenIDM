@@ -128,7 +128,7 @@
     </sect1>
     <sect1>
         <title>Scheduling </title>
-        <para/>
+        
         <para>Rather than having the scheduler be cluster aware, every node will have its own local scheduler - configured with a homogenous schedule. Where there are tasks that should be triggered only once cluster-wide this can be achieved by inserting a task with a taskId that is the same for all nodes, and for example encodes the configured trigger time. The submit should be configured to ignore if the task already exists. Hence, examples of some variations upon a scheduler triggering:</para>
         <itemizedlist>
             <listitem>
@@ -159,74 +159,53 @@
     </sect1>
     <sect1>
         <title>API</title>
-        <para/>
-        <para>package org.forgerock.openidm.distributedtask;</para>
-        <para>
-            <programlisting language="java"><![CDATA[
+        
+        <programlisting language="java"><![CDATA[
 package org.forgerock.openidm.distributedtask;
 
 
-
 /**
-
  * Distribute tasks across the cluster nodes for both scaling and HA/fail-over
-
  */
 
 public interface DistributedTask {
 
-
-
     /**
-
-     * @param failGroupFast if true a single task failure within the group aborts further processing of the group and eventually triggers the group handler
-
-     * @param taskData the data associated with the task. Content must be either 1. String, 2. JSON based object model and/or 3. Serializable
-
+     * @param failGroupFast if true a single task failure within the group
+     * aborts further processing of the group and eventually triggers the
+     * group handler
+     * @param taskData the data associated with the task. Content must be
+     * either 1. String, 2. JSON based object model and/or 3. Serializable
      * @return Task ID
-
      */
 
     String submit(TaskIdentifier taskId, int priority, Object taskData);
 
-
-
     /**
-
      * Register the implementation for a given task type
-
      * Will get invoked when a node claims a task and hands it to this handler.
-
-     * The handler is responsible for executing the task, maintaining the lease as it is processing, and for returning results if any
-
+     * The handler is responsible for executing the task, maintaining the
+     * lease as it is processing, and for returning results if any
      */
 
     void registerTaskHandler(String taskType, TaskHandler taskHandler);
 
-
-
-
-
     /**
-
-     * Handle if a group is finished processing, either successfully (all tasks) or not.
-
+     * Handle if a group is finished processing, either successfully
+     * (all tasks) or not.
      */
 
     void registerGroupFinishedHandler(String taskType, TaskHandler taskHandler);
 
-
-
     /**
-
-     * Optional handler to customize how failed tasks are treated. Default is to log, remove individual task and trigger group complete handling if appropriate.
-
+     * Optional handler to customize how failed tasks are treated. Default
+     * is to log, remove individual task and trigger group complete handling
+     * if appropriate.
      */
 
     void registerInvalidTaskHandler(TaskHandler taskHandler);
 
 }
-
 
 
 public interface TaskIdentifier {
@@ -239,65 +218,69 @@ public interface TaskIdentifier {
 
 public class SingleTaskId implements TaskIdentifier {
 
-    public SingleTaskId(String taskType, String taskName) {…};
+    public SingleTaskId(String taskType, String taskName) {...};
 
 }
-
 
 
 public class GroupedTaskId implements TaskIdentifier {
 
-    public GroupedTaskId(String taskType, String groupName, boolean failGroupFast, int taskNumber, int totalGroupTasks) {…};
+    public GroupedTaskId(String taskType, String groupName,
+        boolean failGroupFast, int taskNumber, int totalGroupTasks) {...};
 
 }
 
 
-
 public abstract class TaskHandler {
 
-
-
     /**
-
-     * @param leaseSeconds sets the initial number of seconds the task handler should own the task, it should be
-
-     * plenty of time to either process the task, or to renew the lease; but at the same time be reasonably short to achieve the desired fail-over times when a handler/node has a problem and stops processing/renewing the lease.
-
+     * @param leaseSeconds sets the initial number of seconds the task
+     * handler should own the task, it should be
+     * plenty of time to either process the task, or to renew the lease;
+     * but at the same time be reasonably short to achieve the desired
+     * fail-over times when a handler/node has a problem and stops
+     * processing/renewing the lease.
      */
 
     public void setInitialLeaseTime(int leaseSeconds) {
 
     }
 
-
-
     /**
-     * @param taskData The data for the task to process. For a regular task this data is what was submitted, for group finished tasks this contains the success/failure and results of all the tasks that ran in the group.
-
-     * @return optional result, which can be used in the group complete handler
-
+     * @param taskData The data for the task to process. For a regular task
+     * this data is what was submitted, for group finished tasks this
+     * contains the success/failure and results of all the tasks that ran in
+     * the group.
+     * @return optional result, which can be used in the group complete
+     * handler
      */
 
-    Object process(TaskIdentifier taskId, int priority, Object taskData, LeaseManager leaseManager) throws InvalidTaskException, RetryLaterException, LeaseExpiredException;
+    Object process(TaskIdentifier taskId, int priority, Object taskData,
+        LeaseManager leaseManager) throws InvalidTaskException,
+        RetryLaterException, LeaseExpiredException;
 
 }
-
 
 
 public interface LeaseManager {
 
     /**
-
-     * Renew the lease (the time allotted for the task handler to process the next step and before someone else should assume that this taskHandler has an issue and another node should take over. The lease time should be selected so that during normal operation it is plenty of time for the taskHandler to renew the lease for continous processing.
-
-     * An example would be a lease of 5 minutes, and the taskHandler expects to renew the lease every ~30 seconds.
-
-     * To allow for frequent lease updates without unnecessary performance overhead, the lease manager may batch/time writes to the persistence store, but it must first check continued ownership of the task with sufficient time.
-
-     * @param leaseSeconds how many seconds from current time the lease should expire
-
-     * @throws LeaseExpiredException if the lease renewal did not succeed.The task handler is required to abort the task processing as it now does not own the task anymore.
-
+     * Renew the lease (the time allotted for the task handler to process the
+     * next step and before someone else should assume that this taskHandler
+     * has an issue and another node should take over. The lease time should
+     * be selected so that during normal operation it is plenty of time for
+     * the taskHandler to renew the lease for continous processing.
+     * An example would be a lease of 5 minutes, and the taskHandler expects
+     * to renew the lease every ~30 seconds.
+     * To allow for frequent lease updates without unnecessary performance
+     * overhead, the lease manager may batch/time writes to the persistence
+     * store, but it must first check continued ownership of the task with
+     * sufficient time.
+     * @param leaseSeconds how many seconds from current time the lease
+     * should expire
+     * @throws LeaseExpiredException if the lease renewal did not succeed.
+     * The task handler is required to abort the task processing as it now
+     * does not own the task anymore.
      */
 
     boolean renewLease(int leaseSeconds) throws LeaseExpiredException {}
@@ -305,8 +288,6 @@ public interface LeaseManager {
 }
 ]]>
             </programlisting>
-        </para>
-        <para/>
     </sect1>
 
 </chapter>
