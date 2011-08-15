@@ -26,13 +26,13 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.testng.annotations.BeforeClass;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

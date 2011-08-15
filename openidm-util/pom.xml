@@ -110,6 +110,7 @@
                             org.forgerock.openidm.config;version=${openidm.version},
                             org.forgerock.openidm.config.installer;version=${openidm.version},
                             org.forgerock.openidm.context;version=${openidm.version},
+                            org.forgerock.openidm.crypto;version=${openidm.version},
                             org.forgerock.openidm.objset;version=${openidm.version},
                             org.forgerock.openidm.script;version=${openidm.version},
                             org.forgerock.openidm.script.javascript;version=${openidm.version},

@@ -26,13 +26,10 @@
 
 package org.forgerock.openidm.provisioner.openicf.query.operators;
 
-import com.sun.org.apache.xpath.internal.functions.Function;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
 import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
-
-import java.util.List;
 
 public class EqualsOperator extends FunctionalOperator {
 

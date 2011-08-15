@@ -29,7 +29,6 @@ package org.forgerock.openidm.provisioner.openicf.query;
 import org.forgerock.openidm.provisioner.openicf.query.operators.*;
 import org.identityconnectors.framework.common.objects.Attribute;
 
-import java.util.List;
 import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
 
 public class OperatorFactory {

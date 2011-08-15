@@ -28,8 +28,6 @@ package org.forgerock.openidm.provisioner.openicf.query.operators;
 
 import org.identityconnectors.framework.common.objects.Attribute;
 
-import java.util.List;
-
 public abstract class FunctionalOperator implements Operator {
 
 //    protected String field;

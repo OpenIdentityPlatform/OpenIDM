@@ -26,7 +26,6 @@
 
 package org.forgerock.openidm.provisioner.openicf.query.operators;
 
-import org.identityconnectors.framework.common.objects.filter.AndFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.objects.filter.OrFilter;
 

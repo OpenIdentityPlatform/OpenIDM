@@ -34,12 +34,13 @@ import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
+import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
 import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
+import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -50,7 +51,7 @@ public class OperationHelperBuilder {
 
     private APIConfigurationImpl runtimeAPIConfiguration;
     private Map<String, ObjectClassInfoHelper> supportedObjectTypes;
-    private Map<String, ConnectorObjectOptions> operationOptionHelpers;
+    private Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers;
     private String systemName;
 
     public OperationHelperBuilder(String system, JsonNode jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws SchemaException, JsonNodeException {
