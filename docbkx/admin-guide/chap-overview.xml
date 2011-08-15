@@ -52,12 +52,12 @@
     </inlinemediaobject>
   </para>
 
-  <sect1>
+  <section>
     <title>OpenIDM Modularity Framework</title>
 
     <para>The OpenIDM framework is based on OSGi.</para>
 
-    <sect4>
+    <section>
       <title>OSGi</title>
 
       <para>OSGi is a module system and service platform for the Java
@@ -67,7 +67,7 @@
       While the OpenIDM services should be
       able to run in any OSGi container, it is currently running in
       <link xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>.</para>
-    </sect4>
+    </section>
 
     <section>
       <title>Servlet</title>
@@ -76,7 +76,7 @@
       managed objects and services. While the servlet layer may be provided by
       many different engines, OpenIDM embeds Jetty by default.</para>
     </section>
-  </sect1>
+  </section>
 
   <section>
     <title>Infrastructure Modules</title>
@@ -93,9 +93,8 @@
       typically used to schedule regular syncronizations and
       reconciliations.
       </para>
-      <para>
-      <xref linkend="chap-scheduling"/>
-      </para>
+<!--  Currently xref linkends must reference IDs within the same file.
+      <para><xref linkend="chap-scheduling"/></para> -->
     </section>
 
     <section>
@@ -114,7 +113,8 @@
       log stores. This includes the data from reconciliation as a basis for
       reporting, as well as detailed activity logs to capture operations on
       the internal (managed) and external (system) objects.</para>
-      <para> <xref linkend="chap-auditing"/> </para>
+<!--  Currently xref linkends must reference IDs within the same file.
+      <para> <xref linkend="chap-auditing"/> </para> -->
     </section>
 
     <section>
@@ -178,7 +178,8 @@
       objects and their attributes during synchronization and reconciliation.
       Mappings may also define triggers for validation, customization
       filtering, and transformation of the source and target objects.</para>
-      <para> <xref linkend="chap-synchronization"/> </para>
+<!--  Currently xref linkends must reference IDs within the same file.
+      <para> <xref linkend="chap-synchronization"/> </para> -->
     </section>
 
     <section>
@@ -191,7 +192,8 @@
 
       <para>Synchronization provides for on-demand or scheduled create,
       update, and delete of resources from a source to a target system.</para>
-      <para> <xref linkend="chap-synchronization"/> </para>
+<!--  Currently xref linkends must reference IDs within the same file.
+      <para> <xref linkend="chap-synchronization"/> </para> -->
     </section>
   </section>
 
@@ -206,7 +208,8 @@
 
       <para>REST APIs for CRUD operations and invoking sync and recon are
       provided for both HTTP and Java.</para>
-      <para> <xref linkend="chap-rest"/> </para>
+<!--  Currently xref linkends must reference IDs within the same file.
+      <para> <xref linkend="chap-rest"/> </para> -->
     </section>
 
     <section>

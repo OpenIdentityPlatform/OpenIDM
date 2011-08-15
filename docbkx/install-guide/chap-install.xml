@@ -59,8 +59,8 @@
    in Apache Felix.
    </para>
   </section>
- </section>
-
+  <section>
+   <title>Installing &amp; Running OpenIDM</title>
  <procedure>
   <title>Install the OpenIDM Services</title>
   <step>
@@ -248,6 +248,7 @@ $
    </para>
  </step>
  </procedure>
-
+ </section>
+</section>
 </chapter>
 
