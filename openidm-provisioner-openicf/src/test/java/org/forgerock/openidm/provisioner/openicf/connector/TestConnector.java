@@ -423,7 +423,12 @@ public class TestConnector implements PoolableConnector, AuthenticateOp, CreateO
      */
     @Override
     public void executeQuery(ObjectClass oclass, String query, ResultsHandler handler, OperationOptions options) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        ConnectorObjectBuilder bld = new ConnectorObjectBuilder();
+        bld.setName("BEEBLEBROX");
+        bld.setUid("beeblebrox");
+        bld.addAttribute("location", "Betelgeuse");
+        bld.addAttribute("invention", "Pan Galactic Gargle Blaster");
+        handler.handle(bld.build());
     }
 
     /**
