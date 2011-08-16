@@ -105,6 +105,8 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     Queries queries = new Queries();
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
+    EmbeddedOServerService embeddedServer;
+    
     
     /**
      * Gets an object from the repository by identifier. The returned object is not validated 
@@ -472,7 +474,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     }
     
     @Activate
-    void activate(ComponentContext compContext) { 
+    void activate(ComponentContext compContext) throws Exception { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
 
         JsonNode config = null;
@@ -483,6 +485,9 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
                     + ex.getMessage(), ex);
             throw ex;
         }
+        embeddedServer = new EmbeddedOServerService();
+        embeddedServer.activate(config);
+        
         init(config);
         
         logger.info("Repository started.");
@@ -538,6 +543,9 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
             } catch (Exception ex) {
                 logger.warn("Closing pool reported exception ", ex);
             }
+        }
+        if (embeddedServer != null) {
+            embeddedServer.deactivate();
         }
         logger.info("Repository stopped.");
     }

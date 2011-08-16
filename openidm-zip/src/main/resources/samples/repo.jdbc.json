@@ -6,6 +6,7 @@
     "user" : "root",
     "password" : "",
     "dbSchema" : "openidm",
+    "maxBatchSize" : 100,
     "queries" : {
         "genericTables" : {
             "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
