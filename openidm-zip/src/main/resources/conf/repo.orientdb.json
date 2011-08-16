@@ -56,5 +56,8 @@
                 ]
             }
         }
-    }    
+    },
+    "embeddedServer" : {
+        "enabled" : "true"
+    }
 }

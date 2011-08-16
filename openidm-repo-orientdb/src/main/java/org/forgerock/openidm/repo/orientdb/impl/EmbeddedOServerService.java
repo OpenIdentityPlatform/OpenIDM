@@ -27,12 +27,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.repo.RepositoryService;
 
 import com.orientechnologies.orient.server.OServer;
@@ -53,35 +48,27 @@ import com.orientechnologies.orient.server.config.OServerUserConfiguration;
  * 
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.embedded-orientdb-server", immediate=true)
 public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
-
-    // TODO: resolve issue with connection failure when this is enabled
-    // Only start this if the OrientDB Repo is configured to start
-    //@Reference(
-    //        policy = ReferencePolicy.DYNAMIC,
-    //        target = "(service.pid=org.forgerock.openidm.repo.orientdb)"
-    //)
-    //RepositoryService repo;
     
     OServer orientDBServer;
     
-    @Activate
-    private void activate(java.util.Map<String, Object> config) throws Exception {
+    void activate(JsonNode config) throws Exception {
         logger.trace("Activating Service with configuration {}", config);
         try {
-            orientDBServer = OServerMain.create();
-            OServerConfiguration serverConfig = getOrientDBConfig();
-            orientDBServer.startup(serverConfig);
+            String enabled = config.get("embeddedServer").get("enabled").defaultTo("false").asString();
+            if ("true".equalsIgnoreCase(enabled)) {
+                orientDBServer = OServerMain.create();
+                OServerConfiguration serverConfig = getOrientDBConfig(config);
+                orientDBServer.startup(serverConfig);
+            }
         } catch (Exception ex) {
             logger.warn("Could not start OrientDB embedded server, service disabled.", ex);
             throw ex;
         }
     }
-    
-    @Deactivate
-    private void deactivate(Map<String, Object> config) {
+
+    void deactivate() {
         if (orientDBServer != null) {
             orientDBServer.shutdown();
             logger.debug("Embedded DB server stopped.");
@@ -89,8 +76,7 @@ public class EmbeddedOServerService {
     }
 
     // TODO: make configurable
-    protected OServerConfiguration getOrientDBConfig() {
-        //OrientDBRepoService orientDBRepo = (OrientDBRepoService) repo;
+    protected OServerConfiguration getOrientDBConfig(JsonNode config) {
         
         OServerConfiguration configuration = new OServerConfiguration();
         
@@ -162,27 +148,21 @@ public class EmbeddedOServerService {
         storage1.userPassword = "admin";
         storage1.loadOnStartup = false;
 
-        // TOOD: Get these settings from the Repo config        
-/*        OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
-        storage2.name = "openidm";
-        storage2.path = orientDBRepo.dbURL;
-        storage2.userName = orientDBRepo.user;
-        storage2.userPassword = orientDBRepo.password;
-        storage2.loadOnStartup = false;
-*/
-        
+        String dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:./db/openidm").asString();
+        String user = config.get(OrientDBRepoService.CONFIG_USER).defaultTo("admin").asString();
+        String pwd = config.get(OrientDBRepoService.CONFIG_PASSWORD).defaultTo("admin").asString();
+
         OServerStorageConfiguration storage2 = new OServerStorageConfiguration();
         storage2.name = "openidm";
-        storage2.path = "local:./db/openidm";
-        storage2.userName = "admin";
-        storage2.userPassword = "admin";
+        storage2.path = dbURL;
+        storage2.userName = user;
+        storage2.userPassword = pwd;
         storage2.loadOnStartup = false;
         
         configuration.storages = new OServerStorageConfiguration[] {
                 storage1,
                 storage2
         };
-        
 
         // TODO: make configurable
         configuration.users = new OServerUserConfiguration[] {
