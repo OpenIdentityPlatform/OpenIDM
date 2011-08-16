@@ -122,7 +122,7 @@ public interface ObjectSet {
 
     /**
      * Performs a query on the specified object and returns the associated result. The
-     * execution of a query should not incur side effects.
+     * execution of a query is not allowed to incur side effects.
      * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
      * The query result is a JSON object structure composed of basic Java types; its overall
@@ -137,16 +137,16 @@ public interface ObjectSet {
     Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException;
 
     /**
-     * Performs an action on the specified object and returns the associated result. The
-     * execution of an action may incur side effects.
+     * Performs an action on the specified object and optionally returns an associated result.
+     * The execution of an action is allowed to incur side effects.
      * <p>
-     * Actions are parametric; a set of named parameters is provided as the action criteria.
+     * Actions are parametric; a set of named parameters is provided as input to the action.
      * The action result is a JSON object structure composed of basic Java types; its overall
-     * structure is defined by the implementation.
+     * structure is defined by a specific implementation.
      *
      * @param id identifies the object to perform the action on.
      * @param params the parameters of the action to perform.
-     * @return the action result object.
+     * @return the action result object or {@code null} if no result required.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object or the specified action is forbidden.
      */

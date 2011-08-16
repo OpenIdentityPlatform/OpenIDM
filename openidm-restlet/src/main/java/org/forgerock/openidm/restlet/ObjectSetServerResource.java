@@ -37,7 +37,6 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.MethodNotAllowedException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -140,14 +139,17 @@ public class ObjectSetServerResource extends ExtendedServerResource {
      */
     @SuppressWarnings("unchecked")
     private Map<String, Object> entityObject(Representation entity) throws BadRequestException {
-// TODO: Will this ever already be a JacksonRepresentation?
-        JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
-         (JacksonRepresentation)entity : new JacksonRepresentation<Object>(entity, Object.class));
-        Object object = jr.getObject();
-        if (object == null || !(object instanceof Map)) {
-            throw new BadRequestException("Failed to parse JSON entity");
+        Map result = null;
+        if (entity != null) {
+            JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
+             (JacksonRepresentation)entity : new JacksonRepresentation<Object>(entity, Object.class));
+            Object object = jr.getObject();
+            if (object == null || !(object instanceof Map)) {
+                throw new BadRequestException("Expecting a JSON object entity");
+            }
+            result = (Map)object;
         }
-        return (Map)object;
+        return result;
     }
 
     /**
@@ -158,6 +160,9 @@ public class ObjectSetServerResource extends ExtendedServerResource {
      * @throws ObjectSetException TODO.
      */
     private Representation create(Map<String, Object> object) throws ObjectSetException {
+        if (object == null) {
+            throw new BadRequestException("Create request must include an entity");
+        }
         objectSet.create(id, object);
         setStatus(Status.SUCCESS_CREATED);
         return cuResponse(object);
@@ -171,6 +176,9 @@ public class ObjectSetServerResource extends ExtendedServerResource {
      * @throws ObjectSetException TODO.
      */
     private Representation update(Map<String, Object> object) throws ObjectSetException {
+        if (object == null) {
+            throw new BadRequestException("Update request must include an entity");
+        }
         objectSet.update(id, useRev(), object);
         setStatus(Status.SUCCESS_OK);
         return cuResponse(object);
@@ -224,9 +232,6 @@ public class ObjectSetServerResource extends ExtendedServerResource {
                 status = Status.CLIENT_ERROR_FORBIDDEN;
             } else if (cause instanceof ConflictException) {
                 status = Status.CLIENT_ERROR_CONFLICT;
-            } else if (cause instanceof MethodNotAllowedException) {
-// FIXME: RFC 2616 §10.4.6: "The response MUST include an Allow header containing a list of valid methods for the requested resource."
-                status = Status.CLIENT_ERROR_METHOD_NOT_ALLOWED;
             } else if (cause instanceof InternalServerErrorException) {
                 status = Status.SERVER_ERROR_INTERNAL;
             } else if (cause instanceof ServiceUnavailableException) {
@@ -252,7 +257,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     @Override
     public void doInit() {
         setAnnotated(false); // using method names, not annotations
-        setNegotiated(false); // we speak all-JSON for the time being
+        setNegotiated(false); // we shall speak all JSON for now
         setConditional(false); // need to handle conditional requests in implementation
         objectSet = (ObjectSet)getRequestAttributes().get(ObjectSet.class.getName());
         String rp = getReference().getRemainingPart(false, false);
@@ -262,6 +267,14 @@ public class ObjectSetServerResource extends ExtendedServerResource {
         conditions = getConditions();
     }
 
+    /**
+     * Processes a GET request. The GET method can be used to read an object from the
+     * object set, or perform a query against the object set or object within.
+     * <p>
+     * If no query is included in the request, then the request is dispatched to the object
+     * set's {@code read} method. Otherwise, the request is dispatched to the object set's
+     * {@code query} method.
+     */
     @Override
     public Representation get() throws ResourceException {
         try {
@@ -286,6 +299,17 @@ public class ObjectSetServerResource extends ExtendedServerResource {
         }
     }
 
+    /**
+     * Processes a PUT request. The PUT method can be used to create an object or update an
+     * existing object.
+     * <p>
+     * The request is unambigously interpreted as a create if the {@code If-None-Match}
+     * header has the single value that is: {@code *}. The request is unambiguously interpeted
+     * as an update if the {@code If-Match} header has a single value that is not: {@code *}.
+     * If the request is ambiguous, then this implementation first attempts to update the
+     * object, and the update fails with a {@code NotFoundException}, then attempts to create
+     * the object.
+     */
     @Override
     public Representation put(Representation entity) throws ResourceException {
         try {
@@ -309,25 +333,58 @@ public class ObjectSetServerResource extends ExtendedServerResource {
         }
     }
 
+    /**
+     * Processes a POST request. The POST method is used to perform a number of different
+     * functions, including: object creation, HTTP method override and initiation of object set
+     * actions.
+     * <p>
+     * By default, the Restlet tunnel service enables support for the
+     * {@code X-HTTP-Method-Override} header. If this header is set in an incoming request,
+     * a different method will be automatically dispatched to.
+     * <p>
+     * If a query parameter named "{@code _action}" is included, and contains the value
+     * "{@code create}", then the request dispatched to the object set's {@code create}
+     * method. Otherwise, the request is dispatched to the object set's {@code action} method.
+     */
     @Override 
     public Representation post(Representation entity) throws ResourceException {
-        Representation result;
+        Representation result = null;
         Form query = getQuery();
-        String action = query.getFirstValue("action");
+        String _action = query.getFirstValue("_action");
         try {
-            if ("create".equals(action)) {
+            if ("create".equals(_action)) {
+                String _id = query.getFirstValue("_id");
+                if (_id != null) { // allow optional specification of identifier in query parameter
+                    this.id = _id;
+                }
                 result = create(entityObject(entity));
             } else {
                 HashMap<String, Object> params = new HashMap<String, Object>();
                 params.putAll(query.getValuesMap()); // copy values to cope with generics
-                result = jacksonRepresentation(objectSet.action(id, params));
+                JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
+                 (JacksonRepresentation)entity : new JacksonRepresentation<Object>(entity, Object.class));
+                Object object = jr.getObject();
+                if (object != null) {
+                    params.put("_entity", object);
+                }
+                Map<String, Object> actionResult = objectSet.action(id, params);
+                if (actionResult != null) {
+                    result = jacksonRepresentation(actionResult);
+                }
             }
         } catch (ObjectSetException ose) {
             throw new ResourceException(ose);
         }
+        if (result == null) {
+            setStatus(Status.SUCCESS_NO_CONTENT);
+        }
         return result;
     }
 
+    /**
+     * Processes a DELETE request. The request is dispatched to the object set's
+     * {@code delete} method.
+     */
     @Override
     public Representation delete() throws ResourceException {
         try {
