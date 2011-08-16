@@ -78,6 +78,11 @@ public class ConnectorUtil {
     private static final String OPENICF_MIN_EVICTABLE_IDLE_TIME_MILLIS = "minEvictableIdleTimeMillis";
     private static final String OPENICF_MIN_IDLE = "minIdle";
     private static final String OPENICF_POOL_CONFIG_OPTION = "poolConfigOption";
+    private static final String OPENICF_RESULTSHANDLER_CONFIG_OPTION = "resultsHandlerConfig";
+    private static final String OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER = "enableNormalizingResultsHandler";
+    private static final String OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER = "enableFilteredResultsHandler";
+    private static final String OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER = "enableCaseInsensitiveFilter";
+    private static final String OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER = "enableAttributesToGetSearchResultsHandler";
     private static final String OPENICF_OPERATION_TIMEOUT = "operationTimeout";
     private static final String OPENICF_CONFIGURATION_PROPERTIES = "configurationProperties";
     public static final String OPENICF_FLAGS = "flags";
@@ -267,6 +272,42 @@ public class ConnectorUtil {
      * @return
      * @throws UnsupportedOperationException when the property value can not be converted to String.
      */
+    public static void configureResultsHandlerConfiguration(JsonNode source, ResultsHandlerConfiguration target) throws JsonNodeException {
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).isNull()){
+            target.setEnableNormalizingResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).asBoolean());
+        }
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).isNull()){
+            target.setEnableFilteredResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).asBoolean());
+        }
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).isNull()){
+            target.setEnableCaseInsensitiveFilter(source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).asBoolean());
+        }
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).isNull()){
+            target.setEnableAttributesToGetSearchResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).asBoolean());
+        }
+    }
+
+        /**
+     * Convert the {@link ObjectPoolConfiguration} to simple Map.
+     * <p/>
+     *
+     * @param info
+     * @return
+     */
+    public static Map<String, Object> getResultsHandlerConfiguration(ResultsHandlerConfiguration info) {
+        Map<String, Object> config = new LinkedHashMap<String, Object>(5);
+        config.put(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER, info.isEnableNormalizingResultsHandler());
+        config.put(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER, info.isEnableFilteredResultsHandler());
+        config.put(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER, info.isEnableCaseInsensitiveFilter());
+        config.put(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER, info.isEnableAttributesToGetSearchResultsHandler());
+        return config;
+    }
+
+    /**
+     * @param source
+     * @return
+     * @throws UnsupportedOperationException when the property value can not be converted to String.
+     */
     public static void configureObjectPoolConfiguration(JsonNode source, ObjectPoolConfiguration target) throws JsonNodeException {
         Map<String, Object> poolConfiguration = source.asMap();
         if (null != poolConfiguration.get(OPENICF_MAX_OBJECTS)) {
@@ -401,6 +442,10 @@ public class ConnectorUtil {
         if (poolConfigOption.isMap()) {
             configureObjectPoolConfiguration(poolConfigOption, target.getConnectorPoolConfiguration());
         }
+        JsonNode resultsHandlerConfigOption = source.get(OPENICF_RESULTSHANDLER_CONFIG_OPTION);
+        if (resultsHandlerConfigOption.isMap()) {
+            configureResultsHandlerConfiguration(resultsHandlerConfigOption, target.getResultsHandlerConfiguration());
+        }
         JsonNode operationTimeout = source.get(OPENICF_OPERATION_TIMEOUT);
         if (operationTimeout.isMap()) {
             configureTimeout(operationTimeout, target);
@@ -411,6 +456,7 @@ public class ConnectorUtil {
 
     public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, Map<String, Object> target) {
         target.put(OPENICF_POOL_CONFIG_OPTION, getObjectPoolConfiguration(source.getConnectorPoolConfiguration()));
+        target.put(OPENICF_RESULTSHANDLER_CONFIG_OPTION, getResultsHandlerConfiguration(source.getResultsHandlerConfiguration()));
         target.put(OPENICF_OPERATION_TIMEOUT, getTimeout(source));
         Map<String, Object> configurationProperties = new LinkedHashMap<String, Object>();
         target.put(OPENICF_CONFIGURATION_PROPERTIES, configurationProperties);

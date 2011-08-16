@@ -28,6 +28,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
@@ -101,7 +102,7 @@ public class ConnectorUtilTest {
     }
 
 
-    @Test
+    //@Test
     public void testGetConfiguration() throws Exception {
         Map<String, Object> target = new LinkedHashMap<String, Object>();
         ConnectorUtil.createSystemConfigurationFromAPIConfiguration(runtimeAPIConfiguration, target);
@@ -112,6 +113,14 @@ public class ConnectorUtilTest {
         ObjectMapper mapper = new ObjectMapper();
         URL root = ConnectorUtilTest.class.getResource("/");
         mapper.writeValue(new File((new URL(root, "runtimeAPIConfiguration.json")).toURI()), target);
+    }
+
+    @Test
+    public void testGetAPIConfiguration() throws Exception {
+        APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
+        ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, clonedConfiguration);
+        Assert.assertFalse(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler(),"\"enableFilteredResultsHandler\":false");
+        Assert.assertTrue(clonedConfiguration.getResultsHandlerConfiguration().isEnableCaseInsensitiveFilter(),"\"enableCaseInsensitiveFilter\":true");
     }
 
     @Test

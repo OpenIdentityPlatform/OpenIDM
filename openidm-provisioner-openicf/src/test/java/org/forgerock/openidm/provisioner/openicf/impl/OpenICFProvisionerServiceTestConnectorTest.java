@@ -129,6 +129,8 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
                     JavaClassProperties.createConfigurationProperties(new TestConfiguration());
             rv.setConfigurationProperties(properties);
             rv.setConnectorInfo(info);
+            rv.getResultsHandlerConfiguration().setEnableAttributesToGetSearchResultsHandler(false);
+            rv.getResultsHandlerConfiguration().setEnableFilteredResultsHandler(false);
             rv.setSupportedOperations(
                     FrameworkUtil.getDefaultSupportedOperations(TestConnector.class));
             info.setDefaultAPIConfiguration(

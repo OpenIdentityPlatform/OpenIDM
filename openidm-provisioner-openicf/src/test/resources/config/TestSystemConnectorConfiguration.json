@@ -22,6 +22,12 @@
          "minEvictableIdleTimeMillis":120000,
          "minIdle":1
       },
+      "resultsHandlerConfig":{
+         "enableNormalizingResultsHandler":true,
+         "enableFilteredResultsHandler":false,
+         "enableCaseInsensitiveFilter":true,
+         "enableAttributesToGetSearchResultsHandler":true
+      },
       "operationTimeout":{
          "SYNC":-1,
          "SCHEMA":-1,
