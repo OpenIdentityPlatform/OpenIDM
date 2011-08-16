@@ -321,7 +321,7 @@ class ObjectMapping implements SynchronizationListener {
     @Override
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
 // TODO: use old value to project incremental diff without fetch of source
-        if (oldValue == null || JsonPatch.diff(new JsonNode(oldValue), new JsonNode(newValue)).size() > 0) {
+        if (oldValue == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
             doSourceSync(id, newValue); // synchronous for now
         }
     }
@@ -700,7 +700,7 @@ class ObjectMapping implements SynchronizationListener {
                 try {
                     Object query = correlationQuery.exec(queryScope);
                     if (query == null || !(query instanceof Map)) {
-                        throw new SynchronizationException("expected correlationQuery script to yield a Map");
+                        throw new SynchronizationException("Expected correlationQuery script to yield a Map");
                     }
                     result = new JsonNode(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {

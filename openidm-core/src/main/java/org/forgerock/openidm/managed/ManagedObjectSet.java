@@ -34,16 +34,22 @@ import org.osgi.framework.ServiceReference;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonPointer;
 
 // OpenIDM
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.patch.JsonPatchWrapper;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
@@ -210,12 +216,23 @@ class ManagedObjectSet implements ObjectSet {
      * @return TODO.
      * @throws InternalServerErrorException TODO.
      */ 
-    private JsonNode decrypt(Map<String, Object> object) throws InternalServerErrorException {
+    private JsonNode decrypt(JsonNode node) throws InternalServerErrorException {
         try {
-            return service.getCryptoService().decrypt(new JsonNode(object)); // makes a copy, which we can modify
+            return service.getCryptoService().decrypt(node); // makes a copy, which we can modify
         } catch (JsonException je) {
             throw new InternalServerErrorException(je);
         }
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @param object TODO.
+     * @return TODO.
+     * @throws InternalServerErrorException TODO.
+     */ 
+    private JsonNode decrypt(Map<String, Object> object) throws InternalServerErrorException {
+        return decrypt(new JsonNode(object));
     }
 
     @Override
@@ -250,7 +267,7 @@ class ManagedObjectSet implements ObjectSet {
     public Map<String, Object> read(String id) throws ObjectSetException {
         LOGGER.debug("Read name={} id={}", name, id);
         if (id == null) {
-            throw new ForbiddenException("cannot read entire set");
+            throw new ForbiddenException("cannot read entire object set");
         }
         JsonNode node = new JsonNode(service.getRouter().read(repoId(id)));
         onRetrieve(node);
@@ -259,22 +276,14 @@ class ManagedObjectSet implements ObjectSet {
         return node.asMap();
     }
 
-    @Override
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        LOGGER.debug("Update {} ", "name=" + name + " id=" + id + " rev=" + rev);
-        if (id == null) {
-            throw new ForbiddenException("cannot update entire set");
-        }
-        JsonNode node = decrypt(object); // decrypt any incoming encrypted properties
-        Map<String, Object> oldEncrypted = service.getRouter().read(repoId(id));
-        JsonNode oldDecrypted = decrypt(oldEncrypted);
-        if (node.asMap().equals(oldDecrypted.asMap())) {
-            return; // object hasn't changed; do not update
+    private void update(String id, String rev, JsonNode oldValue, JsonNode newValue) throws ObjectSetException {
+        if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
+            return; // do nothing
         }
         if (onUpdate != null) {
             HashMap<String, Object> scope = new HashMap<String, Object>();
-            scope.put("oldObject", oldDecrypted.getValue());
-            scope.put("newObject", node.asMap());
+            scope.put("oldObject", oldValue.asMap());
+            scope.put("newObject", newValue.asMap());
             try {
                 onUpdate.exec(scope); // allows direct modification to the objects
             } catch (ScriptThrownException ste) {
@@ -283,27 +292,37 @@ class ManagedObjectSet implements ObjectSet {
                 throw new InternalServerErrorException(se.getMessage());
             }
         }
-        onStore(node); // performs per-property encryption
-        service.getRouter().update(repoId(id), rev, node.asMap());
-        ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), oldEncrypted, node.asMap(), Status.SUCCESS);
+        onStore(newValue); // performs per-property encryption
+        service.getRouter().update(repoId(id), rev, newValue.asMap());
         try {
-            JsonNode oldEncryptedNode = new JsonNode(oldEncrypted);
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onUpdate(managedId(id), oldEncryptedNode, node);
+                listener.onUpdate(managedId(id), oldValue, newValue);
             }
         } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);
         }
-        // workaround until JsonNode works its way into the ObjectSet API
-        object.put("_id", node.get("_id").getValue());
-        object.put("_rev", node.get("_rev").getValue());
+    }
+
+    @Override
+    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        LOGGER.debug("update {} ", "name=" + name + " id=" + id + " rev=" + rev);
+        if (id == null) {
+            throw new ForbiddenException("cannot update entire object set");
+        }
+        JsonNode _new = decrypt(object); // decrypt any incoming encrypted properties
+        Map<String, Object> encrypted = service.getRouter().read(repoId(id));
+        JsonNode decrypted = decrypt(encrypted);
+        update(id, rev, decrypted, _new);
+        ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), encrypted, _new.asMap(), Status.SUCCESS);
+        object.put("_id", _new.get("_id").getValue());
+        object.put("_rev", _new.get("_rev").getValue());
     }
 
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
         LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
         if (id == null) {
-            throw new ForbiddenException("cannot delete entire set");
+            throw new ForbiddenException("cannot delete entire object set");
         }
         Map<String, Object> encrypted = service.getRouter().read(repoId(id));
         if (onDelete != null) {
@@ -320,23 +339,85 @@ class ManagedObjectSet implements ObjectSet {
         }
     }
 
+// TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
     @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new InternalServerErrorException("patch not yet implemented");
+// FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
+        LOGGER.debug("patch name={} id={}", name, id);
+        if (id == null) {
+            throw new ForbiddenException("cannot patch entire object set");
+        }
+        JsonNode oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
+        JsonNode newValue = oldValue.copy();
+        patch.apply(newValue.asMap());
+        update(id, rev, oldValue, newValue);
+        ActivityLog.log(service.getRouter(), Action.PATCH, "Patch " + patch, managedId(id), null, null, Status.SUCCESS);
     }
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        LOGGER.debug("Query name={} id={}", name, id);
+        LOGGER.debug("query name={} id={}", name, id);
         Map<String, Object> result = service.getRouter().query(repoId(id), params);
         ActivityLog.log(service.getRouter(), Action.QUERY, "Query parameters " + params,
          managedId(id), result, null, Status.SUCCESS);
         return result;
     }
 
+    /**
+     * Applies a patch document to an object, or by finding an object in the object set itself
+     * via query parameters. As this is an action, the patch document to be applied is in the
+     * {@code _entity} parameter.
+     */
+    private JsonNode patchAction(String id, JsonNode params) throws ObjectSetException {
+        String _id = id; // identifier provided in path
+        if (_id == null) {
+            _id = params.get("_id").asString(); // identifier provided as query parameter 
+        }
+        String _rev = params.get("_rev").asString();
+        if (_id == null) { // identifier not provided in URI; this is patch-by-query
+            try {
+                JsonNode results = new JsonNode(service.getRouter().query(repoId(null),
+                 params.asMap()), new JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
+                if (!results.isList()) {
+                    throw new InternalServerErrorException("expecting list result from query");
+                } else if (results.size() == 0) {
+                    throw new NotFoundException();
+                } else if (results.size() > 1) {
+                    throw new ConflictException("query yielded more than one result");
+                }
+                JsonNode result = results.get(0);
+                _id = result.get("_id").required().asString();
+                if (_rev == null) { // don't override an explicitly supplied revision
+                    _rev = result.get("_rev").asString();
+                }
+            } catch (JsonNodeException jne) {
+                throw new InternalServerErrorException(jne);
+            }
+        }
+        patch(_id, _rev, new JsonPatchWrapper(params.get("_entity")));
+        return new JsonNode(null); // empty response (and lack of exception) indicates success
+    }
+
+    /**
+     * Processes action requests.
+     * <p>
+     * If the {@code _action} parameter is {@code patch}, then the request is handled as
+     * a partial modification to an object, either explicitly (identifier is supplied) or by
+     * query (query parameters specify the query to perform to yield a single object to patch.
+     */ 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new ForbiddenException("action not yet implemented");
+        LOGGER.debug("action name={} id={}", name, id);
+        Object _action = (String)params.get("_action");
+        Map<String, Object> result;
+        if (_action == null) {
+            throw new BadRequestException("expecting _action parameter");
+        } else if (_action.equals("patch")) {
+            result = patchAction(id, new JsonNode(params, new JsonPointer("parameters"))).asMap();
+        } else {
+            throw new BadRequestException("unsupported _action parameter");
+        }
+        return result;
     }
 
     /**

@@ -40,7 +40,6 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.MethodNotAllowedException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -148,7 +147,7 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new MethodNotAllowedException("Not allowed on audit service");
+        throw new ForbiddenException("Not allowed on audit service");
     }
 
     /**
@@ -156,7 +155,7 @@ public class RepoAuditLogger implements AuditLogger {
      */ 
     @Override
     public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new MethodNotAllowedException("Not allowed on audit service");
+        throw new ForbiddenException("Not allowed on audit service");
     }
 
     /**
@@ -164,7 +163,7 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new MethodNotAllowedException("Not allowed on audit service");
+        throw new ForbiddenException("Not allowed on audit service");
     }
 
     /**
@@ -172,6 +171,6 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        throw new MethodNotAllowedException("Not allowed on audit service");
+        throw new ForbiddenException("Not allowed on audit service");
     }
 }

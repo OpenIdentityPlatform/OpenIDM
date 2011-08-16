@@ -54,7 +54,11 @@ public class JsonPatchWrapper implements Patch {
     @Override
     public void apply(Map<String, Object> object) throws ConflictException {
         try {
-            JsonPatch.patch(new JsonNode(object), diff);
+            JsonNode node = new JsonNode(object);
+            JsonPatch.patch(node, diff);
+            if (node.getValue() != object) {
+                throw new ConflictException("replacing the root node is not supported");
+            }
         } catch (JsonNodeException jne) {
             throw new ConflictException(jne);
         }
