@@ -78,7 +78,7 @@ public class TokenHandler {
         StringBuffer buf = new StringBuffer();
         while (matcher.find()) {
             String origToken = matcher.group(1);
-            if (origToken != null && origToken.length() > 3) {
+            if (origToken != null && origToken.length() > 0) {
                 // OrientDB token is of format :token-name
                 String newToken = ":" + origToken;
                 matcher.appendReplacement(buf, "");
