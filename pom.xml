@@ -173,7 +173,7 @@
         <dbstyle-dir>${basedir}/src/main/docbkx-stylesheets</dbstyle-dir>
         <docbkx-out>${basedir}/target/docbkx</docbkx-out>
         <site-out>${basedir}/target/site</site-out>
-        <siteDistributionURL>scp://openidm.forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
+        <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
 
         <!-- version management -->
         <openidm.version>2.0.0-SNAPSHOT</openidm.version>
