@@ -72,5 +72,5 @@ public interface ProvisionerService extends ObjectSet {
      * @param synchronizationListener The listener to send the changes to.
      * @return The new updated stage object. This will be the {@code previousStage} at next call.
      */
-    public JsonNode activeSynchronise(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener);
+    public JsonNode liveSynchronize(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener);
 }

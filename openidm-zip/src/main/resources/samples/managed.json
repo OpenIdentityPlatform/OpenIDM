@@ -1,0 +1,18 @@
+{
+   "objects" :
+      [
+         {
+            "name" : "user",
+            "properties" :
+               [
+                  {
+                     "name" : "name",
+                     "encryption" :
+                        {
+                           "key" : "openidm-sym-default"
+                        }
+                  }
+               ]
+         }
+      ]
+}

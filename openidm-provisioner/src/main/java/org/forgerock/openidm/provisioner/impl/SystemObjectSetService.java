@@ -319,8 +319,8 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         Id identifier = new Id(id);
 
-        Map<String, Object> result = locateService(identifier).query(id, params);
-        ActivityLog.log(getRouter(), Action.ACTION, "Query parameters " + params, id, result, null, Status.SUCCESS);
+        Map<String, Object> result = locateService(identifier).action(id, params);
+        ActivityLog.log(getRouter(), Action.ACTION, "Action parameters " + params, id, result, null, Status.SUCCESS);
 
         return result;
     }
@@ -394,17 +394,17 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         try {
             JsonNode params = new JsonNode(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
-            if ("activeSync".equals(action)) {
+            if ("liveSync".equals(action) || "activeSync".equals(action)) {
                 Id id = new Id(params.get("source").asString());
                 String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
                 try {
                     try {
                         Map<String, Object> previousStage = getRouter().read(previousStageId);
                         Object rev = previousStage.get("_rev");
-                        getRouter().update(previousStageId, (String) rev, locateService(id).activeSynchronise(id.getObjectType(), previousStage != null ? new JsonNode(previousStage) : null, this).asMap());
+                        getRouter().update(previousStageId, (String) rev, locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? new JsonNode(previousStage) : null, this).asMap());
                     } catch (NotFoundException e) {
                         TRACE.info("PooledSyncStage object {} is not found. First execution.");
-                        getRouter().create(previousStageId, locateService(id).activeSynchronise(id.getObjectType(), null, this).asMap());
+                        getRouter().create(previousStageId, locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
                     }
                 } catch (ObjectSetException e) {
                     throw new ExecutionException(e);

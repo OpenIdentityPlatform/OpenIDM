@@ -109,35 +109,36 @@ public class OpenICFProvisionerService implements ProvisionerService {
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
             connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
         } catch (Exception e) {
-            TRACE.error("Invalid configuration", e);
-            throw new ComponentException("Invalid configuration, connectorInfo can not be retrieved.", e);
+            TRACE.error("ERROR - Invalid Configuration and/or ConnectorReference", e);
+            throw new ComponentException("Invalid Configuration and/or ConnectorReference", e);
         }
         if (null == connectorInfo) {
-            throw new ComponentException("ConnectorInfo can not retrieved for " + connectorReference);
+            TRACE.error("ERROR - ConnectorInfo can not be retrieved for {}", connectorReference);
+            throw new ComponentException("ConnectorInfo can not be retrieved for " + connectorReference);
         }
+        TRACE.info("OK - ConnectorInfo was found.");
         try {
             systemIdentifier = new SimpleSystemIdentifier(jsonConfiguration);
             operationHelperBuilder = new OperationHelperBuilder(systemIdentifier.getName(), jsonConfiguration, connectorInfo.createDefaultAPIConfiguration());
             allowModification = !jsonConfiguration.get("readOnly").defaultTo(false).asBoolean();
         } catch (Exception e) {
-            TRACE.error("Invalid configuration", e);
-            throw new ComponentException("Invalid configuration, service can not be started.", e);
+            TRACE.error("ERROR - Invalid Configuration", e);
+            throw new ComponentException("Invalid Configuration, service can not be started", e);
         }
-
+        TRACE.info("OK - Configuration accepted.");
         try {
             ConnectorFacade facade = getConnectorFacade(operationHelperBuilder.getRuntimeAPIConfiguration());
             if (facade.getSupportedOperations().contains(TestApiOp.class)) {
                 facade.test();
-                TRACE.debug("Test of {} succeeded!", systemIdentifier);
+                TRACE.debug("OK - Test of {} succeeded!", systemIdentifier);
             } else {
                 TRACE.debug("Test is not supported.");
             }
         } catch (Throwable e) {
-            TRACE.error("Test of {} failed.", systemIdentifier, e);
+            TRACE.error("ERROR - Test of {} failed.", systemIdentifier, e);
             throw new ComponentException("Connector test failed.", e);
         }
-
-        TRACE.info("OpenICFProvisionerService component with {} is activated.", systemIdentifier);
+        TRACE.info("OK - OpenICFProvisionerService component with '{}' is activated.", systemIdentifier);
     }
 
     @Deactivate
@@ -757,7 +758,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * <p/>
      * Invoked by the scheduler when the scheduler triggers.
      * <p/>
-     * Synchronisation object:
+     * Synchronization object:
      * {@code
      * {
      * "connectorData" :
@@ -780,7 +781,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * {@inheritDoc}
      * Synchronise the changes from the end system for the given {@code objectType}.
      * <p/>
-     * OpenIDM takes active role in the synchronisation process by asking the end system to get all changed object.
+     * OpenIDM takes active role in the synchronization process by asking the end system to get all changed object.
      * Not all system is capable to fulfill this kind of request but if the end system is capable then the implementation
      * send each changes to the {@link org.forgerock.openidm.sync.SynchronizationListener} and when it finished it return a new <b>stage</b> object.
      * <p/>
@@ -795,7 +796,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
      *                                       if the  {@code previousStage} is not Map.
      * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonNode)} or any exception happed inside the connector.
      */
-    public JsonNode activeSynchronise(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener) {
+    public JsonNode liveSynchronize(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener) {
         JsonNode stage = previousStage != null ? previousStage.copy() : new JsonNode(new LinkedHashMap<String, Object>());
         JsonNode connectorData = stage.get("connectorData");
         SyncToken token = null;
@@ -872,7 +873,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                             lastException.put("syncDelta", failedRecord[0]);
                         }
                         stage.put("lastException", lastException);
-                        TRACE.error("Active synchronisation of {} failed on {}", new Object[]{objectType, systemIdentifier.getName()}, t);
+                        TRACE.error("Live synchronization of {} failed on {}", new Object[]{objectType, systemIdentifier.getName()}, t);
                     } finally {
                         token = lastToken[0];
                         TRACE.debug("Synchronization is finished. New LatestSyncToken value: {}", token);
@@ -903,21 +904,5 @@ public class OpenICFProvisionerService implements ProvisionerService {
     ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
-    }
-
-
-    /**
-     * @param connector
-     * @param script
-     * @param operationOptions
-     * @throws UnsupportedOperationException
-     */
-    public void doExecuteScript(ConnectorFacade connector, ConnectorScript script, OperationOptionsBuilder operationOptions) {
-        ScriptContext ctxt = new ScriptContext(script.getScriptContextBuilder().getScriptLanguage(), script.getScriptContextBuilder().getScriptText(), script.getScriptContextBuilder().getScriptArguments());
-        if ("connector".equals(script.getExecMode())) {
-            connector.runScriptOnConnector(ctxt, new OperationOptionsBuilder().build());
-        } else if ("resource".equals(script.getExecMode())) {
-            connector.runScriptOnResource(ctxt, new OperationOptionsBuilder().build());
-        }
     }
 }
