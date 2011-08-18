@@ -18,7 +18,6 @@ package org.forgerock.openidm.script.javascript;
 
 // Java Standard Edition
 import java.util.List;
-import java.util.Map;
 
 // Mozilla Rhino
 import org.mozilla.javascript.Context;
@@ -26,8 +25,11 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
+// OpenIDM
+import org.forgerock.openidm.script.Function;
+
 /**
- * Provides a {@code Scriptable} wrapper for a {@code List}.
+ * Provides a {@code Scriptable} wrapper for a {@code List} object.
  *
  * @author Paul C. Bryan
  */
@@ -66,16 +68,14 @@ class ScriptableList implements Scriptable, Wrapper {
         while (list.size() < size) {
             try {
                 list.add(null);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw Context.reportRuntimeError("list prohibits addition of null elements");
             }
         }
         while (list.size() > size) {
             try {
                 list.remove(size);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw Context.reportRuntimeError("list prohibits element removal");
             }
         }
@@ -90,8 +90,7 @@ class ScriptableList implements Scriptable, Wrapper {
     public Object get(String name, Scriptable start) {
         if ("length".equals(name)) {
             return Integer.valueOf(list.size());
-        }
-        else {
+        } else {
             return NOT_FOUND;
         }
     }
@@ -100,21 +99,8 @@ class ScriptableList implements Scriptable, Wrapper {
     @SuppressWarnings("unchecked")
     public Object get(int index, Scriptable start) {
         if (index >= 0 && index < list.size()) {
-            Object value = list.get(index);
-            if (value == null) {
-                return null;
-            }
-            else if (value instanceof List) {
-                return new ScriptableList((List)value); // wrap any returned list
-            }
-            else if (value != null && value instanceof Map) {
-                return new ScriptableMap((Map)value); // wrap any returned map
-            }
-            else {
-                return value;
-            }
-        }
-        else {
+            return ScriptableWrapper.wrap(list.get(index));
+        } else {
             return NOT_FOUND;
         }
     }
@@ -155,12 +141,10 @@ class ScriptableList implements Scriptable, Wrapper {
         try {
             if (index < list.size()) {
                 list.set(index, value);
-            }
-            else {
+            } else {
                 list.add(value);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw Context.reportRuntimeError("list prohibits modification");
         }
     }
@@ -175,8 +159,7 @@ class ScriptableList implements Scriptable, Wrapper {
         if (index >= 0 && index < list.size()) {
             try {
                 list.set(index, null); // "sparse" allocation; does not remove elements
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw Context.reportRuntimeError("list prohibits modification");
             }
         }
@@ -218,14 +201,11 @@ class ScriptableList implements Scriptable, Wrapper {
     public Object getDefaultValue(Class<?> hint) {
         if (hint == null || hint == String.class) {
             return "[object ScriptableList]";
-        }
-        else if (hint == Number.class) {
+        } else if (hint == Number.class) {
             return Double.NaN;
-        }
-        else if (hint == Boolean.class) {
+        } else if (hint == Boolean.class) {
             return Boolean.TRUE;
-        }
-        else {
+        } else {
             return this;
         }
     }

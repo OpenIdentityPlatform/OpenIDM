@@ -45,6 +45,9 @@ import org.forgerock.openidm.script.ScriptThrownException;
  */
 class ManagedObjectProperty {
 
+    /** TODO: Description. */
+    private ManagedObjectService service;
+
     /** The name of the property within the managed object. */
     private String name;
 
@@ -67,6 +70,7 @@ class ManagedObjectProperty {
      * @throws JsonNodeException if the configuration is malformed.
      */
     public ManagedObjectProperty(ManagedObjectService service, JsonNode config) throws JsonNodeException {
+        this.service = service;
         name = config.get("name").required().asString();
         onRetrieve = Scripts.newInstance(config.get("onRetrieve"));
         onStore = Scripts.newInstance(config.get("onStore"));
@@ -95,7 +99,7 @@ class ManagedObjectProperty {
      */
     private void execScript(Script script, JsonNode managedObject) throws InternalServerErrorException {
         if (script != null) {
-            HashMap<String, Object> scope = new HashMap<String, Object>();
+            Map<String, Object> scope = service.newScope();
             scope.put("property", managedObject.get(name).getValue());
             try {
                 script.exec(scope);
@@ -119,7 +123,7 @@ class ManagedObjectProperty {
      */
     void onValidate(JsonNode node) throws ForbiddenException, InternalServerErrorException {
         if (onValidate != null) {
-            HashMap<String, Object> scope = new HashMap<String, Object>();
+            Map<String, Object> scope = service.newScope();
             scope.put("property", node.get(name).getValue());
             try {
                 onValidate.exec(scope);

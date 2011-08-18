@@ -27,6 +27,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Wrapper;
 
+// TODO: get rid of this; provide a replacement that just wraps the scriptable and exposes list/map interfaces
+
 /**
  * Converts scriptable types provided by Rhino into standard Java objects.
  *
@@ -44,17 +46,14 @@ class Converter {
     private static boolean isInteger(Number number) {
         if (number instanceof Integer || number instanceof Long || number instanceof Byte) {
             return true;
-        }
-        else if (number instanceof Double || number instanceof Float) {
+        } else if (number instanceof Double || number instanceof Float) {
             double d = number.doubleValue();
             if ((d >= 0.0 && d == Math.floor(d)) || (d < 0 && d == Math.ceil(d))) {
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -89,17 +88,14 @@ class Converter {
         Object result = null;
         if (value == null || value == Context.getUndefinedValue() || value == Scriptable.NOT_FOUND) {
             result = null; // null is how undefined values are manifested
-        }
-        else if (value instanceof Double || value instanceof Float) { // coerce to integer without rounding
+        } else if (value instanceof Double || value instanceof Float) { // coerce to integer without rounding
             Number number = (Number)value;
             result = (isInteger(number) ? Integer.valueOf(number.intValue()) : number);
-        }
-        else if (value instanceof Scriptable) { // javascript array or object
+        } else if (value instanceof Scriptable) { // javascript array or object
             Scriptable scriptable = (Scriptable)value;
             if (value instanceof Wrapper) {
                 result = convert(((Wrapper)value).unwrap()); // recursive
-            }
-            else if (isArray(scriptable)) {
+            } else if (isArray(scriptable)) {
                 Object o = scriptable.get("length", scriptable);
                 if (o != null && o instanceof Number) {
                     int size = ((Number)o).intValue();
@@ -109,16 +105,14 @@ class Converter {
                     }
                     result = list;
                 }
-            }
-            else {
+            } else {
                 HashMap<String, Object> map = new HashMap<String, Object>();
                 for (Object id : scriptable.getIds()) {
                     String sid = id.toString();
                     Object object;
                     if (id instanceof Number && isInteger((Number)id)) {
                         object = scriptable.get(((Number)id).intValue(), scriptable);
-                    }
-                    else {
+                    } else {
                         object = scriptable.get(sid, scriptable);
                     }
                     map.put(sid, convert(object)); // recursive

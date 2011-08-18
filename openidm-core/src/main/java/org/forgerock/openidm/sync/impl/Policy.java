@@ -17,7 +17,7 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
-import java.util.HashMap;
+import java.util.Map;
 
 // JSON-Fluent library
 import org.forgerock.json.fluent.JsonNode;
@@ -37,12 +37,14 @@ import org.forgerock.openidm.sync.SynchronizationException;
 class Policy {
 
     /** TODO: Description. */
+    private final SynchronizationService service;
+
+    /** TODO: Description. */
     private final Situation situation;
 
     /** TODO: Description. */
     private final Action action;
 
-// TODO: Do we even need a script or did I over-engineer this?
     /** TODO: Description. */
     private final Script script;
 
@@ -52,14 +54,14 @@ class Policy {
      * @param config TODO.
      * @throws JsonNodeException TODO>
      */
-    public Policy(JsonNode config) throws JsonNodeException {
+    public Policy(SynchronizationService service, JsonNode config) throws JsonNodeException {
+        this.service = service;
         situation = config.get("situation").required().asEnum(Situation.class);
         JsonNode action = config.get("action").required();
         if (action.isString()) {
             this.action = action.asEnum(Action.class);
             this.script = null;
-        }
-        else {
+        } else {
             this.action = null;
             this.script = Scripts.newInstance(action);
         }
@@ -78,24 +80,21 @@ class Policy {
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    public Action getAction() throws SynchronizationException {
+    public Action getAction(JsonNode source, JsonNode target) throws SynchronizationException {
         Action result = null;
         if (action != null) { // static action specified
             result = action;
-        }
-        else if (script != null) { // action is dynamically determine 
-// TODO: review what the scope this script call should be.
-            HashMap<String, Object> scope = new HashMap<String, Object>();
+        } else if (script != null) { // action is dynamically determine 
+            Map<String, Object> scope = service.newScope();
+            scope.put("source", source.asMap());
+            scope.put("target", target.asMap());
             try {
                 result = Enum.valueOf(Action.class, script.exec(scope).toString());
-            }
-            catch (NullPointerException npe) {
+            } catch (NullPointerException npe) {
                 throw new SynchronizationException("action script returned null value");
-            }
-            catch (IllegalArgumentException iae) {
+            } catch (IllegalArgumentException iae) {
                 throw new SynchronizationException("action script returned invalid action");
-            }
-            catch (ScriptException se) {
+            } catch (ScriptException se) {
                 throw new SynchronizationException(se);
             }
         }

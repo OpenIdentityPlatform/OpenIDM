@@ -23,7 +23,7 @@ import java.io.File;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
-// ForgeRock OpenIDM Core
+// OpenIDM
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptFactory;

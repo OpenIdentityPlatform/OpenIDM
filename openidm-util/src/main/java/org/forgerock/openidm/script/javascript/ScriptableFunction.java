@@ -17,26 +17,25 @@
 package org.forgerock.openidm.script.javascript;
 
 // Java Standard Edition
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 // Mozilla Rhino
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
+import org.mozilla.javascript.WrappedException;
 
 // OpenIDM
 import org.forgerock.openidm.script.Function;
 
 /**
- * Provides a {@code Scriptable} wrapper for a {@code Map} object.
+ * Provides a Rhino {@code Function} wrapper for an OpenIDM {@code Function} object.
  *
  * @author Paul C. Bryan
  */
-class ScriptableMap implements Scriptable, Wrapper {
-
-    /** The map being wrapped. */
-    private final Map<String, Object> map;
+class ScriptableFunction implements org.mozilla.javascript.Function, Wrapper {
 
     /** The parent scope of the object. */
     private Scriptable parent;
@@ -44,17 +43,45 @@ class ScriptableMap implements Scriptable, Wrapper {
     /** The prototype of the object. */
     private Scriptable prototype;
 
+    /** TODO: Description. */
+    private Function function;
+
     /**
-     * Constructs a new scriptable wrapper around the specified list.
+     * TODO: Description.
      *
-     * @param map the map to be wrapped.
-     * @throws NullPointerException if the specified map is {@code null}.
+     * @param function TODO.
      */
-    public ScriptableMap(Map<String, Object> map) {
-        if (map == null) {
-            throw new NullPointerException();
+    public ScriptableFunction(Function function) {
+        this.function = function;
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @param args TODO.
+     * @return TODO.
+     */
+    private List<Object> convert(Object[] args) {
+        ArrayList<Object> list = new ArrayList<Object>();
+        for (Object object : args) {
+            list.add(Converter.convert(object));
         }
-        this.map = map;
+        return list;
+    }
+
+    @Override
+    public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+        try {
+// TODO: Replace Converter w. something that dynamically exposes scope and thisObj values as MLNBN primitives, and avoids copying these entire structures.
+            return ScriptableWrapper.wrap(function.call(null, null, convert(args)));
+        } catch (Throwable throwable) {
+            throw new WrappedException(throwable);
+        }
+    }
+
+    @Override
+    public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
+        throw Context.reportRuntimeError("functions may not be used as constructors");
     }
 
     @Override
@@ -63,63 +90,47 @@ class ScriptableMap implements Scriptable, Wrapper {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public Object get(String name, Scriptable start) {
-        if (map.containsKey(name)) {
-            return ScriptableWrapper.wrap(map.get(name));
-        } else {
-            return NOT_FOUND;
-        }
+        return NOT_FOUND;
     }
 
     @Override
     public Object get(int index, Scriptable start) {
-        return get(Integer.toString(index), start);
+        return NOT_FOUND;
     }
 
     @Override
     public boolean has(String name, Scriptable start) {
-        return (map.containsKey(name));
+        return false;
     }
 
     @Override
     public boolean has(int index, Scriptable start) {
-        return has(Integer.toString(index), start);
+        return false;
     }
     
     @Override
     public void put(String name, Scriptable start, Object value) {
-        try {
-            map.put(name, Converter.convert(value));
-        } catch (Exception e) {
-            throw Context.reportRuntimeError("map prohibits modification");
-        }
+        throw Context.reportRuntimeError("function prohibits modification");
     }
 
     @Override
     public void put(int index, Scriptable start, Object value) {
-        put(Integer.toString(index), start, value);
+        throw Context.reportRuntimeError("function prohibits modification");
     }
 
     @Override
     public void delete(String name) {
-        try {
-            map.remove(name);
-        } catch (Exception e) {
-            throw Context.reportRuntimeError("map prohibits modification");
-        }
+        throw Context.reportRuntimeError("function prohibits modification");
     }
 
     @Override
     public void delete(int index) {
-        delete(Integer.toString(index));
+        throw Context.reportRuntimeError("function prohibits modification");
     }
 
     @Override
     public Scriptable getPrototype() {
-/*        if (prototype == null) { // default if not explicitly set
-            return ScriptableObject.getClassPrototype(prototype, "Object");
-        } FIXME */ 
         return prototype;
     }
 
@@ -140,29 +151,21 @@ class ScriptableMap implements Scriptable, Wrapper {
 
     @Override
     public Object[] getIds() {
-        return map.keySet().toArray();
+        return new Object[0];
     }
 
     @Override
     public Object getDefaultValue(Class<?> hint) {
-        if (hint == null || hint == String.class) {
-            return "[object ScriptableMap]";
-        } else if (hint == Number.class) {
-            return Double.NaN;
-        } else if (hint == Boolean.class) {
-            return Boolean.TRUE;
-        } else {
-            return this;
-        }
+        return this;
     }
 
     @Override
     public boolean hasInstance(Scriptable instance) {
-        return false; // no support for javascript instanceof
+        return false;
     }
 
     @Override
     public Object unwrap() {
-        return map;
+        return function;
     }
 }

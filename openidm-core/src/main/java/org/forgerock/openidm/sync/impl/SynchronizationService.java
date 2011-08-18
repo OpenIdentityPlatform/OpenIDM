@@ -18,6 +18,7 @@ package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -49,6 +50,7 @@ import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
+import org.forgerock.openidm.scope.ObjectSetFunctions;
 
 /**
  * TODO: Description.
@@ -135,6 +137,16 @@ public class SynchronizationService implements SynchronizationListener, Schedule
             throw new SynchronizationException("Not bound to internal router");
         }
         return router;
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @return TODO.
+     * @throws SynchronizationException TODO.
+     */
+    Map<String, Object> newScope()  throws SynchronizationException {
+        return ObjectSetFunctions.addToScope(new HashMap<String, Object>(), getRouter());
     }
 
     @Override

@@ -47,7 +47,7 @@ public class ScriptTest {
         scope = new HashMap<String, Object>();
     }
 
-    // ----- unit tests ----------
+    // ----- happy path ----------
 
     @Test
     public void JavaScriptTest() throws JsonNodeException, ScriptException {
@@ -57,6 +57,27 @@ public class ScriptTest {
         Script script = Scripts.newInstance(config);
         assertThat(script.exec(scope)).isEqualTo(3);
     }
+
+    @Test
+    public void FunctionTest() throws JsonNodeException, ScriptException {
+        JsonNode config = new JsonNode(new HashMap<String, Object>());
+        config.put("type", "text/javascript");
+        config.put("source", "x.add(1,2)");
+        HashMap<String, Object> x = new HashMap<String, Object>();
+        x.put("add", new Function() {
+            @Override public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
+                JsonNode node = new JsonNode(params);
+                int i1 = node.get(0).required().asInteger();
+                int i2 = node.get(1).required().asInteger();
+                return i1 + i2;
+            }
+        });
+        scope.put("x", x);
+        Script script = Scripts.newInstance(config);
+        assertThat(script.exec(scope)).isEqualTo(3);
+    }
+
+    // ---- exceptions ----------
 
     @Test(expectedExceptions=JsonNodeException.class)
     public void UnknownScriptTest() throws JsonNodeException, ScriptException {

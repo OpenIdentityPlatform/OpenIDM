@@ -20,6 +20,7 @@ package org.forgerock.openidm.managed;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 // OSGi Framework
@@ -46,10 +47,11 @@ import org.forgerock.json.fluent.JsonNodeException;
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetRouter;
-import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.sync.SynchronizationListener;
+import org.forgerock.openidm.scope.ObjectSetFunctions;
 
 /**
  * Provides access to managed objects.
@@ -162,13 +164,23 @@ public class ManagedObjectService extends ObjectSetRouter {
 
     /**
      * Returns the internal object set for which operations will be applied. If there is no
-     * router, throws {@link ServiceUnavailableException}.
+     * router, throws {@link InternalServerErrorException}.
      */
-    ObjectSet getRouter() throws ServiceUnavailableException {
+    ObjectSet getRouter() throws InternalServerErrorException {
         if (router == null) {
-            throw new ServiceUnavailableException("not bound to internal router");
+            throw new InternalServerErrorException("Not bound to internal router");
         }
         return router;
+    }
+
+    /**
+     * TODO: Description.
+     *
+     * @return TODO.
+     * @throws InternalServerErrorException TODO.
+     */
+    Map<String, Object> newScope() throws InternalServerErrorException {
+        return ObjectSetFunctions.addToScope(new HashMap<String, Object>(), getRouter());
     }
 
     /**
