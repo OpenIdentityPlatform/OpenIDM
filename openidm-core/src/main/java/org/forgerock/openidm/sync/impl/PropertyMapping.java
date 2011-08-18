@@ -18,6 +18,7 @@ package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.util.HashMap;
+import java.util.Map;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
@@ -37,6 +38,9 @@ import org.forgerock.openidm.sync.SynchronizationException;
  * @author Paul C. Bryan
  */
 class PropertyMapping {
+
+    /** TODO: Description. */
+    private final SynchronizationService service;
 
     /** TODO: Description. */
     private final JsonPointer targetPointer;
@@ -89,7 +93,8 @@ class PropertyMapping {
      * @param config TODO.
      * @throws JsonNodeException TODO>
      */
-    public PropertyMapping(JsonNode config) throws JsonNodeException {
+    public PropertyMapping(SynchronizationService service, JsonNode config) throws JsonNodeException {
+        this.service = service;
         targetPointer = config.get("target").required().asPointer();
         sourcePointer = config.get("source").asPointer(); // optional
         script = Scripts.newInstance(config.get("script"));
@@ -112,7 +117,7 @@ class PropertyMapping {
             }
         }
         if (script != null) { // optional
-            HashMap<String, Object> scope = new HashMap<String, Object>();
+            Map<String, Object> scope = service.newScope();
             scope.put("source", result);
             try {
                 result = script.exec(scope); // script yields transformation result

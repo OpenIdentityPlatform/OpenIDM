@@ -30,7 +30,7 @@ import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
-// ForgeRock OpenIDM Core
+// OpenIDM
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
@@ -84,17 +84,15 @@ public class JavaScript implements Script {
         Context cx = Context.enter();
         try {
             script = cx.compileString(source, "line", 1, null);
-        }
-        catch (RhinoException re) {
+        } catch (RhinoException re) {
             throw new ScriptException(re.getMessage());
-        }
-        finally {
+        } finally {
             Context.exit();
         }
     }
 
     /**
-     * TEMPORARY
+     * TEMPORARY?
      */
     public JavaScript(File file) throws ScriptException {
         this(file, true);
@@ -162,16 +160,13 @@ public class JavaScript implements Script {
             inner.setPrototype(outer);
             inner.setParentScope(null);
             return Converter.convert(script.exec(context, inner));
-        }
-        catch (RhinoException re) {
+        } catch (RhinoException re) {
             if (re instanceof JavaScriptException) { // thrown by the script itself
                 throw new ScriptThrownException(Converter.convert(((JavaScriptException)re).getValue()));
-            }
-            else { // some other runtime exception encountered
+            } else { // some other runtime exception encountered
                 throw new ScriptException(re.getMessage());
             }
-        }   
-        finally {
+        } finally {
             Context.exit();
         } 
     }

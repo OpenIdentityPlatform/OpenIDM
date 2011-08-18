@@ -67,6 +67,9 @@ class ManagedObjectSet implements ObjectSet {
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ManagedObjectSet.class);
 
+    /** The managed objects service that instantiated this managed object set. */
+    private ManagedObjectService service;
+
     /** Name of the managed object type. */
     private String name;
 
@@ -96,9 +99,6 @@ class ManagedObjectSet implements ObjectSet {
 
     /** Properties for which triggers are executed during object set operations. */
     private ArrayList<ManagedObjectProperty> properties = new ArrayList<ManagedObjectProperty>();
-
-    /** The managed objects service that instantiated this managed object set. */
-    private ManagedObjectService service;
 
     /**
      * Constructs a new managed object set.
@@ -157,7 +157,7 @@ class ManagedObjectSet implements ObjectSet {
      */
     private void execScript(Script script, JsonNode node) throws ForbiddenException, InternalServerErrorException {
         if (script != null) {
-            HashMap<String, Object> scope = new HashMap<String, Object>();
+            Map<String, Object> scope = service.newScope();
             scope.put("object", node.getValue());
             try {
                 script.exec(scope); // allows direct modification to the object
@@ -281,7 +281,7 @@ class ManagedObjectSet implements ObjectSet {
             return; // do nothing
         }
         if (onUpdate != null) {
-            HashMap<String, Object> scope = new HashMap<String, Object>();
+            Map<String, Object> scope = service.newScope();
             scope.put("oldObject", oldValue.asMap());
             scope.put("newObject", newValue.asMap());
             try {

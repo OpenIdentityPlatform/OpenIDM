@@ -93,7 +93,7 @@ class Link {
      */
     private void getLink(JsonNode query) throws SynchronizationException {
         try {
-            JsonNode results = new JsonNode(mapping.getRouter().query(linkId(null),
+            JsonNode results = new JsonNode(mapping.getService().getRouter().query(linkId(null),
              query.asMap())).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
             if (results.size() == 1) {
                 fromJsonNode(results.get(0));
@@ -194,7 +194,7 @@ class Link {
         _id = UUID.randomUUID().toString(); // client-assigned identifier
         JsonNode node = toJsonNode();
         try {
-            mapping.getRouter().create(linkId(_id), node.asMap());
+            mapping.getService().getRouter().create(linkId(_id), node.asMap());
         } catch (ObjectSetException ose) {
             LOGGER.debug("failed to create link", ose);
             throw new SynchronizationException(ose);
@@ -211,7 +211,7 @@ class Link {
     void delete() throws SynchronizationException {
         if (_id != null) { // forgiving delete
             try {
-                mapping.getRouter().delete(linkId(_id), _rev);
+                mapping.getService().getRouter().delete(linkId(_id), _rev);
             }
             catch (ObjectSetException ose) {
                 LOGGER.debug("failed to delete link", ose);
@@ -232,7 +232,7 @@ class Link {
         }
         JsonNode node = toJsonNode();
         try {
-            mapping.getRouter().update(linkId(_id), _rev, node.asMap());
+            mapping.getService().getRouter().update(linkId(_id), _rev, node.asMap());
         }
         catch (ObjectSetException ose) {
             LOGGER.debug("failed to update link", ose);
