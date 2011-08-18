@@ -20,6 +20,10 @@ package org.forgerock.openidm.managed;
 import java.util.HashMap;
 import java.util.Map;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
@@ -44,6 +48,9 @@ import org.forgerock.openidm.script.ScriptThrownException;
  * @author Paul C. Bryan
  */
 class ManagedObjectProperty {
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(ManagedObjectProperty.class);
 
     /** TODO: Description. */
     private ManagedObjectService service;
@@ -93,18 +100,21 @@ class ManagedObjectProperty {
      * to the property are reflected back into the managed object if the script successfully
      * completes.
      *
+     * @param type type of script to execute.
      * @param script the script to execute, or {@code null} to execute nothing.
      * @param managedObject the managed object containing the property value.
      * @throws InternalServerErrorException if script execution fails.
      */
-    private void execScript(Script script, JsonNode managedObject) throws InternalServerErrorException {
+    private void execScript(String type, Script script, JsonNode managedObject) throws InternalServerErrorException {
         if (script != null) {
             Map<String, Object> scope = service.newScope();
             scope.put("property", managedObject.get(name).getValue());
             try {
                 script.exec(scope);
             } catch (ScriptException se) {
-                throw new InternalServerErrorException(se.getMessage());
+                String msg = name + " " + type + " script encountered exception";
+                LOGGER.debug(msg, se);
+                throw new InternalServerErrorException(msg, se);
             }
             if (scope.containsKey("property")) { // property (still) defined in scope
                 managedObject.put(name, scope.get("property")); // propagate it back to managed object
@@ -130,7 +140,9 @@ class ManagedObjectProperty {
             } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString()); // validation failed
             } catch (ScriptException se) {
-                throw new InternalServerErrorException(se.getMessage()); // other scripting error
+                String msg = name + " onValidate script encountered exception";
+                LOGGER.debug(msg, se);
+                throw new InternalServerErrorException(msg, se);
             }
         }
     }
@@ -143,7 +155,7 @@ class ManagedObjectProperty {
      * @throws InternalServerErrorException if an exception occurs processing the property.
      */
     void onRetrieve(JsonNode node) throws InternalServerErrorException {
-        execScript(onRetrieve, node);
+        execScript("onRetrieve", onRetrieve, node);
     }
 
     /**
@@ -154,14 +166,16 @@ class ManagedObjectProperty {
      * @throws InternalServerErrorException if an exception occurs processing the property.
      */
     void onStore(JsonNode node) throws InternalServerErrorException {
-        execScript(onStore, node);
+        execScript("onStore", onStore, node);
         if (encryptionTransformer != null && node.isDefined(name)) {
             try {
                 JsonNode property = node.get(name).copy(); // deep copy; apply all transformations
                 encryptionTransformer.transform(property);
                 node.put(name, property.getValue());
             } catch (JsonException je) {
-                throw new InternalServerErrorException(je);
+                String msg = name + " property encryption exception";
+                LOGGER.debug(msg, je);
+                throw new InternalServerErrorException(msg, je);
             }
         }
     }

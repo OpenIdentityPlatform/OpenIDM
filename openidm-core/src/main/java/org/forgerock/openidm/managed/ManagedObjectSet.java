@@ -150,12 +150,14 @@ class ManagedObjectSet implements ObjectSet {
      * Executes a script if it exists, populating an {@code "object"} property in the root
      * scope.
      *
+     * @param type the type of script being executed.
      * @param script the script to execute, or {@code null} to execute nothing.
      * @param node the JSON node whose value is to be populated in the script scope.
      * @throws ForbiddenException if the script throws an exception.
      * @throws InternalServerErrorException if any other exception is encountered.
      */
-    private void execScript(Script script, JsonNode node) throws ForbiddenException, InternalServerErrorException {
+    private void execScript(String type, Script script, JsonNode node)
+    throws ForbiddenException, InternalServerErrorException {
         if (script != null) {
             Map<String, Object> scope = service.newScope();
             scope.put("object", node.getValue());
@@ -164,7 +166,9 @@ class ManagedObjectSet implements ObjectSet {
             } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString()); // script aborting the trigger
             } catch (ScriptException se) {
-                throw new InternalServerErrorException(se.getMessage());
+                String msg = type + " script encountered exception";
+                LOGGER.debug(msg, se);
+                throw new InternalServerErrorException(msg, se);
             }
         }
     }
@@ -178,12 +182,12 @@ class ManagedObjectSet implements ObjectSet {
      * @throws InternalServerErrorException if any other exception occurs.
      */
     private void onRetrieve(JsonNode node) throws ForbiddenException, InternalServerErrorException {
-        execScript(onRetrieve, node);
+        execScript("onRetrieve", onRetrieve, node);
         for (ManagedObjectProperty property : properties) {
             property.onRetrieve(node);
         }
 // TODO: schema validation here (w. optimization), using on-the-fly decryption transformations
-        execScript(onValidate, node);
+        execScript("onValidate", onValidate, node);
         for (ManagedObjectProperty property : properties) {
             property.onValidate(node);
         }
@@ -201,12 +205,12 @@ class ManagedObjectSet implements ObjectSet {
         for (ManagedObjectProperty property : properties) {
             property.onValidate(node);
         }
-        execScript(onValidate, node);
+        execScript("onValidate", onValidate, node);
 // TODO: schema validation here (w. optimizations)
         for (ManagedObjectProperty property : properties) {
             property.onStore(node); // includes per-property encryption
         }
-        execScript(onStore, node);
+        execScript("onStore", onStore, node);
     }
 
     /**
@@ -239,7 +243,7 @@ class ManagedObjectSet implements ObjectSet {
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Create name={} id={}", name, id);
         JsonNode node = decrypt(object); // decrypt any incoming encrypted properties
-        execScript(onCreate, node);
+        execScript("onCreate", onCreate, node);
         onStore(node); // includes per-property encryption
         JsonNode _id = node.get("_id");
         if (_id.isString()) {
@@ -271,7 +275,7 @@ class ManagedObjectSet implements ObjectSet {
         }
         JsonNode node = new JsonNode(service.getRouter().read(repoId(id)));
         onRetrieve(node);
-        execScript(onRead, node);
+        execScript("onRead", onRead, node);
         ActivityLog.log(service.getRouter(), Action.READ, "", managedId(id), node.asMap(), null, Status.SUCCESS);
         return node.asMap();
     }
@@ -289,7 +293,9 @@ class ManagedObjectSet implements ObjectSet {
             } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString()); // script aborting the trigger
             } catch (ScriptException se) {
-                throw new InternalServerErrorException(se.getMessage());
+                String msg = "onUpdate script encountered exception";
+                LOGGER.debug(msg, se);
+                throw new InternalServerErrorException(msg, se);
             }
         }
         onStore(newValue); // performs per-property encryption
@@ -326,7 +332,7 @@ class ManagedObjectSet implements ObjectSet {
         }
         Map<String, Object> encrypted = service.getRouter().read(repoId(id));
         if (onDelete != null) {
-            execScript(onDelete, decrypt(encrypted));
+            execScript("onDelete", onDelete, decrypt(encrypted));
         }
         service.getRouter().delete(repoId(id), rev);
         ActivityLog.log(service.getRouter(), Action.DELETE, "", managedId(id), encrypted, null, Status.SUCCESS);
