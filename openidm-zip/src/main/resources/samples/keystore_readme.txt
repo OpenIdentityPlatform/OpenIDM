@@ -2,6 +2,8 @@
 
 echo changeit > keystore.pin
 
+keytool -genseckey -alias openidm-sym-default -keyalg AES -keysize 128 -keystore keystore.jceks -storetype JCEKS
+
 keytool -genkey -alias openidm-local-openidm-forgerock-org -keyalg rsa -dname "CN=local.openidm.forgerock.org, O=OpenIDM Self-Signed Certificate" -keystore keystore.jceks -storetype JCEKS
 keytool -genkey -alias openidm-localhost -keyalg rsa -dname "CN=localhost, O=OpenIDM Self-Signed Certificate" -keystore keystore.jceks -storetype JCEKS
 
