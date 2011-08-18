@@ -86,8 +86,12 @@ class Policy {
             result = action;
         } else if (script != null) { // action is dynamically determine 
             Map<String, Object> scope = service.newScope();
-            scope.put("source", source.asMap());
-            scope.put("target", target.asMap());
+            if (source != null) {
+                scope.put("source", source.asMap());
+            }
+            if (target != null) {
+                scope.put("target", target.asMap());
+            }
             try {
                 result = Enum.valueOf(Action.class, script.exec(scope).toString());
             } catch (NullPointerException npe) {
