@@ -19,11 +19,15 @@ package org.forgerock.openidm.sync.impl;
 // Java Standard Edition
 import java.util.Map;
 
-// JSON-Fluent library
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+// JSON Fluent library
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
-// ForgeRock OpenIDM
+// OpenIDM
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
@@ -35,6 +39,9 @@ import org.forgerock.openidm.sync.SynchronizationException;
  * @author Paul C. Bryan
  */
 class Policy {
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(Policy.class);
 
     /** TODO: Description. */
     private final SynchronizationService service;
@@ -99,6 +106,7 @@ class Policy {
             } catch (IllegalArgumentException iae) {
                 throw new SynchronizationException("action script returned invalid action");
             } catch (ScriptException se) {
+                LOGGER.debug("action script encountered exception", se);
                 throw new SynchronizationException(se);
             }
         }

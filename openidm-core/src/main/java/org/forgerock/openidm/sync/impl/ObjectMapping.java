@@ -123,6 +123,9 @@ class ObjectMapping implements SynchronizationListener {
         LOGGER.debug("Instantiated object mapping: {}", name + ": " + sourceObjectSet + "->" + targetObjectSet);
     }
 
+    /**
+     * TODO: Description.
+     */
     SynchronizationService getService() {
         return service;
     }
@@ -493,7 +496,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
                     targetObject = new JsonNode(new HashMap<String, Object>());
                     applyMappings(sourceObject, targetObject); // apply property mappings to target
-                    execScript(onCreateScript);
+                    execScript("onCreate", onCreateScript);
                     createTargetObject(targetObject);
                     // falls through to link the newly created target
                 case UPDATE:
@@ -514,7 +517,7 @@ class ObjectMapping implements SynchronizationListener {
                     if (sourceObject != null && targetObject != null) {
                         JsonNode oldTarget = targetObject.copy();
                         applyMappings(sourceObject, targetObject);
-                        execScript(onUpdateScript);
+                        execScript("onUpdate", onUpdateScript);
                         if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
                             updateTargetObject(targetObject);
                         }
@@ -563,6 +566,7 @@ class ObjectMapping implements SynchronizationListener {
                         }
                         result = (Boolean)o;
                     } catch (ScriptException se) {
+                        LOGGER.debug(name + " validSource script encountered exception", se);
                         throw new SynchronizationException(se);
                     }
                 } else { // no script means true
@@ -591,6 +595,7 @@ class ObjectMapping implements SynchronizationListener {
                         }
                         result = (Boolean)o;
                     } catch (ScriptException se) {
+                        LOGGER.debug(name + " validTarget script encountered exception", se);
                         throw new SynchronizationException(se);
                     }
                 } else { // no script means true
@@ -603,10 +608,11 @@ class ObjectMapping implements SynchronizationListener {
         /**
          * TODO: Description.
          *
+         * @param type TODO.
          * @param script TODO.
          * @throws SynchronizationException TODO.
          */
-        private void execScript(Script script) throws SynchronizationException {
+        private void execScript(String type, Script script) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = service.newScope();
                 scope.put("source", sourceObject.asMap());
@@ -615,6 +621,7 @@ class ObjectMapping implements SynchronizationListener {
                 try {
                     script.exec(scope);
                 } catch (ScriptException se) {
+                    LOGGER.debug("mapping " + name + " " + type + " script encountered exception", se);
                     throw new SynchronizationException(se);
                 }
             }
@@ -699,6 +706,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
                     result = new JsonNode(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {
+                    LOGGER.debug(name + " correlationQuery script encountered exception", se);
                     throw new SynchronizationException(se);
                 }
             }

@@ -20,13 +20,17 @@ package org.forgerock.openidm.sync.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.fluent.JsonPointer;
 
-// ForgeRock OpenIDM
+// OpenIDM
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
@@ -38,6 +42,9 @@ import org.forgerock.openidm.sync.SynchronizationException;
  * @author Paul C. Bryan
  */
 class PropertyMapping {
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(PropertyMapping.class);
 
     /** TODO: Description. */
     private final SynchronizationService service;
@@ -122,6 +129,8 @@ class PropertyMapping {
             try {
                 result = script.exec(scope); // script yields transformation result
             } catch (ScriptException se) {
+                LOGGER.debug("property mapping " + sourcePointer + " -> " + targetPointer +
+                 "script encountered exception", se);
                 throw new SynchronizationException(se);
             }
         }

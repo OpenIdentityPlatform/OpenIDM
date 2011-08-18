@@ -22,6 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // Restlet Framework
 import org.restlet.data.Conditions;
 import org.restlet.data.Form;
@@ -49,6 +53,9 @@ import org.forgerock.openidm.objset.ServiceUnavailableException;
  * @author Paul C. Bryan
  */
 public class ObjectSetServerResource extends ExtendedServerResource {
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(ObjectSetServerResource.class);
 
     /** Identifier of resource being accessed, or {@code null} to represent the object set itself. */
     private String id;
@@ -214,14 +221,32 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     }
 
     /**
+     * TODO: Description.
+     *
+     * @param throwable TODO.
+     * @return TODO.
+     */
+    private String getDescription(Throwable throwable) {
+        StringBuilder sb = new StringBuilder();
+        for (Throwable t = throwable; t != null; t = t.getCause()) {
+            String msg = t.getMessage();
+            if (sb.length() > 0) {
+                sb.append(": ");
+            }
+            sb.append(msg != null ? msg : t.getClass().getName());
+        }
+        return sb.toString();
+    }
+
+    /**
      * Overrides the response to provide a JSON error structure in the entity if a
      * {@link ResourceException} is being thrown.
      */
     @Override
     protected void doCatch(Throwable throwable) {
+        Status status = Status.SERVER_ERROR_INTERNAL; // default: 500 Internal Server Error
         Throwable cause = throwable.getCause();
         if (throwable instanceof ResourceException && cause instanceof ObjectSetException) {
-            Status status;
             if (cause instanceof NotFoundException) {
                 status = Status.CLIENT_ERROR_NOT_FOUND;
             } else if (cause instanceof PreconditionFailedException) {
@@ -239,19 +264,14 @@ public class ObjectSetServerResource extends ExtendedServerResource {
             } else { // default
                 status = Status.SERVER_ERROR_INTERNAL;
             }
-            String description = (cause != null ? cause.getMessage() : null);
-            throwable = new ResourceException(status, description, cause);
+        } else {
+            LOGGER.debug("caught exception during operation on: " + id, throwable);
         }
-        if (throwable instanceof ResourceException) {
-            ResourceException re = (ResourceException)throwable;
-            Map<String, Object> entity = new HashMap<String, Object>();
-            Status status = re.getStatus();
-// TODO: Design more useful error output format? Perhaps standardize in its own class?
-            entity.put("error", status != null ? status.getName() : "Unclassified");
-            entity.put("description", status != null ? status.getDescription() : re.getMessage());
-            setStatus(status);
-            getResponse().setEntity(jacksonRepresentation(entity));
-        }
+        Map<String, Object> entity = new HashMap<String, Object>();
+        entity.put("error", status.getName());
+        entity.put("description", getDescription(throwable));
+        setStatus(status);
+        getResponse().setEntity(jacksonRepresentation(entity));
     }
 
     @Override
