@@ -47,10 +47,10 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -133,8 +133,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
         }
         
         Map<String, Object> result = null;
-        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-        
+        ODatabaseDocumentTx db = getConnection();
         try {
             ODocument doc = predefinedQueries.getByID(localId, type, db);
             if (doc == null) {
@@ -177,7 +176,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
         
         obj.put(DocumentUtil.TAG_ID, localId);
         
-        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        ODatabaseDocumentTx db = getConnection();
         try{
             // Rather than using MVCC for insert, rely on primary key uniqueness constraints to detect duplicate create
             ODocument newDoc = DocumentUtil.toDocument(obj, null, db, orientClassName);
@@ -239,8 +238,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
             obj.put(DocumentUtil.TAG_REV, rev);
         }
         
-        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-        
+        ODatabaseDocumentTx db = getConnection();
         try{
             db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
@@ -290,7 +288,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
         
         int ver = DocumentUtil.parseVersion(rev); // This throws ConflictException if parse fails
         
-        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+        ODatabaseDocumentTx db = getConnection();
         try {
             db.begin();
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
@@ -363,8 +361,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
         
         Map<String, Object> result = new HashMap<String, Object>();
-        ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
-        
+        ODatabaseDocumentTx db = getConnection();
         try {
             List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
             result.put(QueryConstants.QUERY_RESULT, docs);
@@ -400,6 +397,40 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * @return A connection from the pool. Call close on the connection when done to return to the pool.
+     */
+    ODatabaseDocumentTx getConnection() throws InternalServerErrorException {
+        ODatabaseDocumentTx db = null;
+        int maxRetry = 100; // give it up to approx 10 seconds to recover
+        int retryCount = 0;
+        
+        while (db == null && retryCount < maxRetry) {
+            retryCount++;
+            try {
+                db = pool.acquire(dbURL, user, password);
+                retryCount = maxRetry;
+            } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
+                // TODO: remove work-around once OrientDB resolves this condition
+                if (retryCount == maxRetry) {
+                    logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
+                    throw new InternalServerErrorException(
+                            "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: " 
+                            + ex.getMessage(), ex);
+                } else {
+                    logger.info("Pool acquire reported failure, retrying");
+                    logger.debug("Pool acquire failure detail ", ex);
+                    try {
+                        Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
+                    } catch (InterruptedException iex) {
+                        // ignore that sleep was interrupted
+                    }
+                }
+            }
+        }
+        return db;
     }
 
     // TODO: replace with common utility to handle ID, this is temporary
