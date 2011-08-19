@@ -150,7 +150,7 @@
 
     <ciManagement>
         <system>Jenkins</system>
-        <url>http://builds.forgerock.org/job/OpenIDM%202.x/</url>
+        <url>http://builds.forgerock.org/job/OpenIDM/</url>
         <notifiers>
             <notifier>
                 <type>mail</type>
@@ -586,7 +586,7 @@
                 <artifactId>maven-jxr-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <aggregate>${openicf.parent.reports.aggregate}</aggregate>
+                    <aggregate>${openidm.parent.reports.aggregate}</aggregate>
                     <windowTitle>OpenIDM ${project.version} Reference</windowTitle>
                     <linkJavadoc>true</linkJavadoc>
                 </configuration>
@@ -596,7 +596,7 @@
                 <artifactId>taglist-maven-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                    <aggregate>${openicf.parent.reports.aggregate}</aggregate>
+                    <aggregate>${openidm.parent.reports.aggregate}</aggregate>
                     <tags>
                         <tag>@FIXME</tag>
                         <tag>@fixme</tag>
