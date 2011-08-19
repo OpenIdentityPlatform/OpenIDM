@@ -33,6 +33,7 @@ import org.forgerock.openidm.config.InvalidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.orientechnologies.common.exception.OException;
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
@@ -74,12 +75,54 @@ public class DBHelper {
         
         checkDB(dbURL, user, password, completeConfig);
         
-        ODatabaseDocumentPool pool = new ODatabaseDocumentPool(); 
-        //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this
-        pool.setup(minSize, maxSize);
-        warmUpPool(pool, dbURL, user, password, minSize);
+        boolean success = false;
+        int maxRetry = 10;
+        int retryCount = 0;
+        ODatabaseDocumentPool pool = null;
+        
+        // Initialize and try to verify the DB. Retry maxRetry times.
+        do {
+            retryCount++;
+            if (pool != null) {
+                pool.close();
+            }
+            pool = new ODatabaseDocumentPool(); 
+            //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this
+            pool.setup(minSize, maxSize);
+            warmUpPool(pool, dbURL, user, password, minSize);
+            
+            boolean finalTry = (retryCount >= maxRetry);
+            success = test(pool, dbURL, user, password, finalTry);
+        } while (!success && retryCount < maxRetry);
+        
+        if (!success) {
+            logger.warn("DB could not be verified.");
+        }
         
         return pool;
+    }
+    
+    /**
+     * Perform a basic access on the DB for a rudimentary test 
+     * @return whether the basic access succeeded
+     */
+    private static boolean test(ODatabaseDocumentPool pool, String dbURL, String user, String password, boolean finalTry) {
+        try {
+            logger.info("Verifying the DB.");
+            ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+            java.util.Iterator iter = db.browseClass("config"); // Config always should exist
+            if (iter.hasNext()) {
+                iter.next();
+            }
+        } catch (OException ex) {
+            if (finalTry) {
+                logger.info("Exceptions encountered in verifying the DB", ex);
+            } else {
+                logger.debug("DB exception in testing.", ex);
+            }
+            return false;
+        }
+        return true;
     }
     
     /**
@@ -151,7 +194,7 @@ public class DBHelper {
                     JsonNode orientClassConfig = (JsonNode) orientDBClasses.get(orientClassName);
                     if (schema.existsClass(orientClassName)) {
                         // TODO: update indexes too if changed
-                        logger.trace("OrientDB class {} already exists, skiping", orientClassName);
+                        logger.trace("OrientDB class {} already exists, skipping", orientClassName);
                     } else {
                         logger.info("Creating OrientDB class {}", orientClassName);
                         OClass orientClass = schema.createClass(orientClassName, db.getStorage().addCluster(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL));
