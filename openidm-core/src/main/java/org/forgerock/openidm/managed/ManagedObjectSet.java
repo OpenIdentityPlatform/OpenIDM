@@ -400,7 +400,7 @@ class ManagedObjectSet implements ObjectSet {
                 throw new InternalServerErrorException(jne);
             }
         }
-        patch(_id, _rev, new JsonPatchWrapper(params.get("_entity")));
+        patch(_id, _rev, new JsonPatchWrapper(decrypt(params.get("_entity"))));
         return new JsonNode(null); // empty response (and lack of exception) indicates success
     }
 

@@ -17,6 +17,7 @@
 package org.forgerock.openidm.crypto.impl;
 
 // Java Standard Edition
+import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -58,6 +59,8 @@ import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -76,7 +79,7 @@ import org.forgerock.openidm.crypto.CryptoService;
 })
 @Service
 public class CryptoServiceImpl implements CryptoService {
-
+    private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
     /** TODO: Description. */
     private ComponentContext context;
 
@@ -100,11 +103,21 @@ public class CryptoServiceImpl implements CryptoService {
         InputStream result = null;
         if (location != null && !location.isNull()) {
             try {
-                result = new URI("file:///").resolve(location.asURI()).toURL().openStream();
+                URI uri = location.asURI();
+                URL loc = null;
+                if (uri.isAbsolute()) {
+                    loc = uri.toURL();
+                } else {
+                    //TODO Do we really need this if we don't have a unified way to detect the instance root?
+                    //Default to user.dir system parameter. This is not reliable in embedded mode
+                    loc = (new File(".")).getAbsoluteFile().toURI().resolve(uri).toURL();
+                }
+                result = loc.openStream();
+                if (null == result) {
+                    logger.info("KeyStore not found under crypto.json#location {}", loc);
+                }
             } catch (IOException ioe) {
                 throw new JsonNodeException(location, ioe);
-            } catch (URISyntaxException use) {
-                throw new JsonNodeException(location, use);
             }
         }
         return result;
