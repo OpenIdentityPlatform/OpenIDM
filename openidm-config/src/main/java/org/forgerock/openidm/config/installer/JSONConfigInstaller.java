@@ -181,20 +181,31 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 // IF file exists, update it, if does not exist create it
                 if( file != null) {
                     if (fileName.endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
-                        logger.debug("Updating configuration file " + fileName);
-                        // Note: currently only stores JSON config property, not other properties in Dictionary.
-                        String jsonConfig = "";
-                        Object entry = dict.get(JSON_CONFIG_PROPERTY);
-                        if (entry != null) {
-                            jsonConfig = entry.toString(); 
+                        synchronized(this) { // With rapid changes prevent conflicting writes to a file
+                            boolean isUpToDate = false;
+                            if (file.exists()) {
+                                Hashtable existingCfg = loadConfigFile(file);
+                                isUpToDate = isConfigSame(dict, existingCfg);
+                            }
+                            if (isUpToDate) {
+                                logger.debug("Config file is up-to-date: {}", fileName);
+                            } else {
+                                logger.info("Updating configuration file: {}", fileName);
+                                // Note: currently only stores JSON config property, not other properties in Dictionary.
+                                String jsonConfig = "";
+                                Object entry = dict.get(JSON_CONFIG_PROPERTY);
+                                if (entry != null) {
+                                    jsonConfig = entry.toString(); 
+                                }
+                                Writer writer = new OutputStreamWriter(new FileOutputStream(file));
+                                try {
+                                  writer.write(jsonConfig);
+                                } finally {
+                                  writer.close();
+                                }
+                                logger.debug("Completed update of configuration file " + fileName);
+                            }
                         }
-                        Writer writer = new OutputStreamWriter(new FileOutputStream(file));
-                        try {
-                          writer.write(jsonConfig);
-                        } finally {
-                          writer.close();
-                        }
-                        logger.debug("Completed update of configuration file " + fileName);
                     }
                 }
             } catch (Exception e) {
@@ -204,12 +215,14 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             String fileName = pidToFile.get(pid);
             if (fileName != null) {
                 File fileToDel = fromConfigKey(fileName);
-                logger.trace("Try to delete {} exists: {}", fileToDel, fileToDel.exists());
-                boolean deleted = fileToDel.delete();
-                if (deleted) {
-                    logger.debug("Deleted configuration file from view {}", fileName);
-                } else {
-                    logger.info("No configuration deleted from view corresponding to {} {}", pid, fileName);
+                synchronized(this) {
+                    logger.trace("Try to delete {} exists: {}", fileToDel, fileToDel.exists());
+                    boolean deleted = fileToDel.delete();
+                    if (deleted) {
+                        logger.debug("Deleted configuration file from view {}", fileName);
+                    } else {
+                        logger.info("No configuration deleted from view corresponding to {} {}", pid, fileName);
+                    }
                 }
             }
         }
@@ -289,7 +302,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    boolean setConfig(final File f) throws Exception
+    synchronized boolean setConfig(final File f) throws Exception
     {
         boolean updated = false;
         try {
@@ -299,15 +312,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
     
             Dictionary props = config.getProperties();
-            Hashtable old = props != null ? new Hashtable(new DictionaryAsMap(props)) : null;
-            if (old != null) {
-            	old.remove( DirectoryWatcher.FILENAME );
-            	old.remove( Constants.SERVICE_PID );
-            	old.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-            	old.remove( SERVICE_FACTORY_PID_ALIAS );
-            }
-    
-            if( !ht.equals( old ) )
+            if (!isConfigSame(ht, props))
             {
                 ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
                 if (pid != null && pid[1] != null) {
@@ -336,7 +341,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
         return updated;
     }
-
+   
     /**
      * Remove the configuration.
      *
@@ -384,6 +389,51 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                     pid, null
                 };
         }
+    }
+    
+    /**
+     * Whether the JSON configuration is the same (Including formatting)
+     * Ignores meta-data such as whether factory pid has been assigned yet
+     * 
+     * @return true if the JSON config is the same 
+     */
+    boolean isConfigSame(Hashtable newCfg, Hashtable oldCfg) {
+        if (newCfg == null || oldCfg == null) {
+            return oldCfg == newCfg;
+        }
+        Hashtable newCompare = (Hashtable) newCfg.clone();
+        newCompare.remove( DirectoryWatcher.FILENAME );
+        newCompare.remove( Constants.SERVICE_PID );
+        newCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+        newCompare.remove( SERVICE_FACTORY_PID_ALIAS );
+        
+        Hashtable oldCompare = (Hashtable) oldCfg.clone();
+        oldCompare.remove( DirectoryWatcher.FILENAME );
+        oldCompare.remove( Constants.SERVICE_PID );
+        oldCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+        oldCompare.remove( SERVICE_FACTORY_PID_ALIAS );
+        
+        if (newCompare != null) {
+            return newCompare.equals( oldCompare );
+        } else {
+            return oldCfg == null;
+        }
+    }
+    
+    /**
+     * @see JSONConfigInstaller#isConfigSame(Hashtable, Hashtable)
+     */
+    boolean isConfigSame(Hashtable newCfg, Dictionary oldCfg) {
+        Hashtable oldConvCfg = oldCfg != null ? new Hashtable(new DictionaryAsMap(oldCfg)) : null;
+        return isConfigSame(newCfg, oldConvCfg);
+    }
+
+    /**
+     * @see JSONConfigInstaller#isConfigSame(Hashtable, Hashtable)
+     */
+    boolean isConfigSame(Dictionary newCfg, Hashtable oldCfg) {
+        Hashtable newConvCfg = newCfg != null ? new Hashtable(new DictionaryAsMap(newCfg)) : null;
+        return isConfigSame(newConvCfg, oldCfg);
     }
     
     Configuration getConfiguration(String fileName, String pid, String factoryPid)
