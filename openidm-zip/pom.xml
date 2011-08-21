@@ -124,12 +124,12 @@
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jetty-bundle</artifactId>
-            <version>1.0.4</version>
+            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-extender-whiteboard</artifactId>
-            <version>1.0.4</version>
+            <version>1.1.1</version>
             <exclusions>
                 <exclusion>
                     <artifactId>servlet-api</artifactId>
@@ -243,7 +243,7 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-jdk14</artifactId>
-                    <version>1.6.1</version>
+                    <version>1.6.2</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -271,7 +271,7 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
-                    <version>1.6.1</version>
+                    <version>${slf4j.version}</version>
                 </dependency>
                 <!-- https://issues.apache.org/bugzilla/show_bug.cgi?id=50800 -->
                 <dependency>
@@ -288,7 +288,7 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>jcl-over-slf4j</artifactId>
-                    <version>1.6.1</version>
+                    <version>${slf4j.version}</version>
                 </dependency>
             </dependencies>
         </profile>
