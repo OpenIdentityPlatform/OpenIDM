@@ -264,7 +264,12 @@ public class DocumentUtil  {
                     ODocument existingDoc = null;
                     if (docToPopulate != null) {
                         logger.trace("Update existing embedded map entry {}", key);
-                        existingDoc = docToPopulate.field(entry.getKey());
+                        Object o = docToPopulate.field(entry.getKey());
+                        if (o instanceof ODocument) {
+                            existingDoc = (ODocument) o;
+                        } else {
+                            docToPopulate.removeField(entry.getKey());
+                        }
                     }
                     // TODO: below is temporary work-around for OrientDB update not saving embedded ODocument,
                     // unless it is a new instance

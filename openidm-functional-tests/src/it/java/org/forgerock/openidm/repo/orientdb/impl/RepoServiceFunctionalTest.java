@@ -216,6 +216,65 @@ public class RepoServiceFunctionalTest {
                .hasSize(2)
                .includes(entry("street", "Business road"), entry("city", "Newport Beach"));
     }
+    
+    @Test(groups = {"repo"}) 
+    @SuppressWarnings("unchecked")
+    public void updateCurrentObjectTypeChange() throws ObjectSetException {
+        String uuid = "xyz01ec0-66e0-11e0-ae3e-0800200c1234";
+        String id = "managed/user/" + uuid;
+        
+        Map<String, Object> obj = new java.util.HashMap<String, Object>();
+        obj.put("firstname", "Adam");
+        obj.put("lastname", "Zeta");
+        Map addresses = new HashMap();
+        Map homeAddress = new HashMap();
+        addresses.put("home", homeAddress);
+        homeAddress.put("street", "Main street");
+        homeAddress.put("city", "Los Angeles");
+        Map workAddress = new HashMap();
+        addresses.put("work", workAddress);
+        workAddress.put("street", "Business road");
+        workAddress.put("city", "Newport Beach");
+        obj.put("addresses", addresses);
+        obj.put("phone", "1234");
+        
+        repo.create(id, obj);
+        String revAfterCreate = (String) obj.get(DocumentUtil.TAG_REV);
+        assertThat(obj).includes(
+                entry(DocumentUtil.TAG_ID, uuid));
+                // Disabled check whilst OrientDB version not stable at 0
+                //, entry(DocumentUtil.TAG_REV, "0"));
+        
+        Map<String, Object> objToUpdate = repo.read(id);
+        Map phoneMap = new HashMap();
+        phoneMap.put("home", "2345");
+        phoneMap.put("work", "3456");
+        objToUpdate.put("phone", phoneMap);
+        objToUpdate.put("work", "replacement addr");
+
+        repo.update(id, (String) objToUpdate.get(DocumentUtil.TAG_REV), objToUpdate);
+        
+        Map<String, Object> result = repo.read(id);
+        
+        long rev = Long.valueOf(revAfterCreate).longValue();
+        long expectedRev = ++rev;
+        String expectedRevStr = "" + rev;
+        
+        assertThat(result).includes(
+                entry(DocumentUtil.TAG_ID, uuid),
+                entry(DocumentUtil.TAG_REV, expectedRevStr),
+                entry("work", "replacement addr")); 
+        
+        assertThat(result).excludes(entry("phone", "1234"));
+       
+        Object checkPhone = result.get("phone");
+        assertNotNull(checkPhone, "updated phone map entry null");
+        assertThat(checkPhone).isInstanceOf(Map.class);
+        assertThat((Map)checkPhone)
+                .hasSize(2)
+                .includes(entry("home", "2345"))
+                .includes(entry("work", "3456"));
+    }
 
     @Test(enabled = true, groups = {"repo"}, expectedExceptions = PreconditionFailedException.class)
     @SuppressWarnings("unchecked")
