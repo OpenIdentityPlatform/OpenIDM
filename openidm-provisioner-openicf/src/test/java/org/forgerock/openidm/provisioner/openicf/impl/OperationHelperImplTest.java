@@ -63,13 +63,13 @@ public class OperationHelperImplTest {
         JsonNode jsonConfiguration = new JsonNode(mapper.readValue(inputStream, Map.class));
 
         APIConfiguration config = new APIConfigurationImpl();
-        builder = new OperationHelperBuilder("xml",jsonConfiguration, config);
+        builder = new OperationHelperBuilder("xml", jsonConfiguration, config);
     }
 
 
     @Test
     public void testBuild() throws Exception {
-        OperationHelper helper = builder.build("account", null);
+        OperationHelper helper = builder.build("account", null, null);
 
         ObjectMapper mapper = new ObjectMapper();
         Filter filter = helper.build(mapper.readValue(superChained, Map.class), null);

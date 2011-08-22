@@ -3,7 +3,7 @@
       {
          "type" : "JCEKS",
          "location-comment" : "The relative location does not work because the value is always resolved for file:///",
-         "location" : "/openidm/samples/keystore.jceks",
+         "location" : "samples/keystore.jceks",
          "password" : "changeit"
       }
 }

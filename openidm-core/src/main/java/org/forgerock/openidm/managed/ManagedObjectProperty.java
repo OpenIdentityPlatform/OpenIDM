@@ -86,7 +86,7 @@ class ManagedObjectProperty {
         if (!encryptionNode.isNull()) {
             try {
                 encryptionTransformer = service.getCryptoService().getEncryptionTransformer(
-                 encryptionNode.get("cipher").defaultTo("AES/CBS/PKCS5Padding").asString(),
+                 encryptionNode.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
                  encryptionNode.get("key").required().asString());
             } catch (JsonCryptoException jce) {
                 throw new JsonNodeException(encryptionNode, jce);

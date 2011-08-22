@@ -28,7 +28,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
@@ -119,8 +118,8 @@ public class ConnectorUtilTest {
     public void testGetAPIConfiguration() throws Exception {
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, clonedConfiguration);
-        Assert.assertFalse(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler(),"\"enableFilteredResultsHandler\":false");
-        Assert.assertTrue(clonedConfiguration.getResultsHandlerConfiguration().isEnableCaseInsensitiveFilter(),"\"enableCaseInsensitiveFilter\":true");
+        Assert.assertFalse(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler(), "\"enableFilteredResultsHandler\":false");
+        Assert.assertTrue(clonedConfiguration.getResultsHandlerConfiguration().isEnableCaseInsensitiveFilter(), "\"enableCaseInsensitiveFilter\":true");
     }
 
     @Test
@@ -148,7 +147,7 @@ public class ConnectorUtilTest {
         Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
         ObjectClassInfoHelper objectClassInfoHelper = org.mockito.Mockito.mock(ObjectClassInfoHelper.class);
         org.mockito.Mockito.when(objectClassInfoHelper.getObjectClass()).thenReturn(new ObjectClass("__ACCOUNT__"));
-        OperationHelper helper = new OperationHelperImpl(new APIConfigurationImpl(), new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"));
+        OperationHelper helper = new OperationHelperImpl(new APIConfigurationImpl(), new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"), null);
 
         Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class), "Create - ALLOWED");
         Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class), "Sync - DENIED");
@@ -191,14 +190,14 @@ public class ConnectorUtilTest {
 
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder(((SimpleSystemIdentifier) systemIdentifier).getName(), jsonConfiguration, runtimeAPIConfiguration);
 
-        OperationHelper helper = operationHelperBuilder.build("__ACCOUNT__", null);
+        OperationHelper helper = operationHelperBuilder.build("__ACCOUNT__", null, null);
         Assert.assertEquals(helper.getObjectClass().getObjectClassValue(), "__ACCOUNT__");
     }
 
     @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__.*")
     public void testUnsupportedObjectType() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test", jsonConfiguration, runtimeAPIConfiguration);
-        OperationHelper helper = operationHelperBuilder.build("__NONE__", null);
+        OperationHelper helper = operationHelperBuilder.build("__NONE__", null, null);
     }
 
     @Test

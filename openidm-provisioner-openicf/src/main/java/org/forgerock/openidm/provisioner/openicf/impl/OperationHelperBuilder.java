@@ -29,6 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
@@ -59,13 +60,13 @@ public class OperationHelperBuilder {
         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, defaultAPIConfiguration);
         supportedObjectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);
         operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(jsonConfiguration);
-        this.systemName = Assertions.blankChecked(system,"systemName");
+        this.systemName = Assertions.blankChecked(system, "systemName");
     }
 
-    public OperationHelper build(String objectType, Map<String, Object> object) throws ObjectSetException {
+    public OperationHelper build(String objectType, Map<String, Object> object, CryptoService cryptoService) throws ObjectSetException {
         ObjectClassInfoHelper objectClassInfoHelper = supportedObjectTypes.get(objectType);
         if (null == objectClassInfoHelper) {
-            throw new ObjectSetException("Unsupported object type: " + objectType 
+            throw new ObjectSetException("Unsupported object type: " + objectType
                     + " not in supported types" + supportedObjectTypes.keySet());
         }
         APIConfiguration _configuration = getRuntimeAPIConfiguration();
@@ -76,7 +77,7 @@ public class OperationHelperBuilder {
 //        }
 
 
-        return new OperationHelperImpl(_configuration, new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType));
+        return new OperationHelperImpl(_configuration, new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType), cryptoService);
     }
 
 

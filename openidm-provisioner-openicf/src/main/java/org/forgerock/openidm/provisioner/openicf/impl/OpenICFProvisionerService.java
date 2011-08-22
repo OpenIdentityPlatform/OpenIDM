@@ -32,6 +32,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.context.InvokeContext;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -82,8 +83,16 @@ public class OpenICFProvisionerService implements ProvisionerService {
     private OperationHelperBuilder operationHelperBuilder = null;
     private boolean allowModification = true;
 
-
-    @Reference(name = "ConnectorInfoProviderServiceReference", referenceInterface = ConnectorInfoProvider.class, bind = "bind", unbind = "unbind", cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.STATIC)
+    /**
+     * ConnectorInfoProvider service.
+     */
+    @Reference(
+            name = "ConnectorInfoProviderServiceReference",
+            referenceInterface = ConnectorInfoProvider.class,
+            bind = "bind",
+            unbind = "unbind",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC)
     private ConnectorInfoProvider connectorInfoProvider = null;
 
 
@@ -96,6 +105,27 @@ public class OpenICFProvisionerService implements ProvisionerService {
     protected void unbind(ConnectorInfoProvider connectorInfoProvider) {
         this.connectorInfoProvider = null;
         TRACE.info("ConnectorInfoProvider is unbound.");
+    }
+
+    /**
+     * Cryptographic service.
+     */
+    @Reference(
+            name = "ref_ManagedObjectService_CryptoService",
+            referenceInterface = CryptoService.class,
+            bind = "bindCryptoService",
+            unbind = "unbindCryptoService",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC
+    )
+    protected CryptoService cryptoService;
+
+    protected void bindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+
+    protected void unbindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = null;
     }
 
     @Activate
@@ -208,7 +238,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         String METHOD = "create";
         Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object, cryptoService);
 
         if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
             try {
@@ -280,7 +310,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public Map<String, Object> read(String id) throws ObjectSetException {
         String METHOD = "read";
         Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null, cryptoService);
         try {
             ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
             if (facade.getSupportedOperations().contains(GetApiOp.class)) {
@@ -372,7 +402,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         String METHOD = "update";
         Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object, cryptoService);
 
         if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
             try {
@@ -461,7 +491,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public void delete(String id, String rev) throws ObjectSetException {
         String METHOD = "delete";
         Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null, cryptoService);
 
         if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
             try {
@@ -552,7 +582,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         String METHOD = "query";
         Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null, cryptoService);
         Map<String, Object> result = new HashMap<String, Object>();
         if (helper.isOperationPermitted(SearchApiOp.class)) {
             try {
@@ -643,7 +673,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         String METHOD = "action";
         Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), params);
+        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), params, cryptoService);
         Map<String, Object> result = new HashMap<String, Object>();
         ConnectorScript script = new ConnectorScript(params);
         if (helper.isOperationPermitted(script.getAPIOperation())) {
@@ -809,7 +839,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         }
         stage.remove("lastException");
         try {
-            final OperationHelper helper = operationHelperBuilder.build(objectType, stage.asMap());
+            final OperationHelper helper = operationHelperBuilder.build(objectType, stage.asMap(), cryptoService);
             if (helper.isOperationPermitted(SyncApiOp.class)) {
                 ConnectorFacade connector = getConnectorFacade(helper.getRuntimeAPIConfiguration());
                 SyncApiOp operation = (SyncApiOp) connector.getOperation(SyncApiOp.class);

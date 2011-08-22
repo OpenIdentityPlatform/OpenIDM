@@ -14,7 +14,11 @@
                 { "source" : "firstname", "target" : "firstname" },
                 { "source" : "email", "target" : "email" },
                 { "default" : "external", "target" : "employeeType" }
-            ]
+            ],
+            "onCreate" : {
+                "type": "text/javascript",
+                "source": "target.password = 'Passw0rd'"
+            }
         },
         {
             "name": "managedUser_systemXmlTargetAccounts",
@@ -25,12 +29,9 @@
                 { "source" : "lastname", "target" : "lastname" },
                 { "source" : "firstname", "target" : "firstname" },
                 { "source" : "email", "target" : "email" },
+                { "source" : "password", "target" : "__PASSWORD__" },
                 { "default" : "defaultpwd", "target" : "IGNORE__PASSWORD__" }
-            ],
-            "onCreate" : {
-                "type": "text/javascript",
-                "source": "target.__PASSWORD__ = 'defaultpwd'"
-            }
+            ]
         },
         {
             "name" : "systemLdapAccount_managedUser",
