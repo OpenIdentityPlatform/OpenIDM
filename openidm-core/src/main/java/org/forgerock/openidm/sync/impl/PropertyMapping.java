@@ -50,13 +50,16 @@ class PropertyMapping {
     private final SynchronizationService service;
 
     /** TODO: Description. */
+    private final Script condition;
+
+    /** TODO: Description. */
     private final JsonPointer targetPointer;
 
     /** TODO: Description. */
     private final JsonPointer sourcePointer;
 
     /** TODO: Description. */
-    private final Script script;
+    private final Script transform;
 
     /** TODO: Description. */
     private final Object defaultValue;
@@ -98,13 +101,14 @@ class PropertyMapping {
      * TODO: Description.
      *
      * @param config TODO.
-     * @throws JsonNodeException TODO>
+     * @throws JsonNodeException TODO.
      */
     public PropertyMapping(SynchronizationService service, JsonNode config) throws JsonNodeException {
         this.service = service;
+        condition = Scripts.newInstance(config.get("condition"));
         targetPointer = config.get("target").required().asPointer();
         sourcePointer = config.get("source").asPointer(); // optional
-        script = Scripts.newInstance(config.get("script"));
+        transform = Scripts.newInstance(config.get("transform"));
         defaultValue = config.get("default").getValue();
     }
 
@@ -116,21 +120,38 @@ class PropertyMapping {
      * @throws MappingException TODO.
      */
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
-        Object result = null;
-        if (sourcePointer != null) { // optional
-            JsonNode node = sourceObject.get(sourcePointer);
-            if (node != null) { // source property value found
-                result = node.getValue();
+        if (condition != null) { // optional property mapping condition
+            Map<String, Object> scope = service.newScope();
+            scope.put("object", sourceObject);
+            try {
+                Object o = condition.exec(scope);
+                if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
+                    return; // property mapping is not applicable; do not apply
+                }
+            } catch (ScriptException se) {
+                LOGGER.debug("property mapping " + targetPointer + " condition script encountered exception", se);
+                throw new SynchronizationException(se);
             }
         }
-        if (script != null) { // optional
-            Map<String, Object> scope = service.newScope();
-            scope.put("source", result);
+        Map<String, Object> scope = null;
+        if (transform != null) { // only initialize with scope if script to execute
+            scope = service.newScope();
+        }
+        Object result = null;
+        if (sourcePointer != null) { // optional source property
+            JsonNode node = sourceObject.get(sourcePointer);
+            if (node != null) { // source property value found with pointer
+                result = node.getValue();
+                if (scope != null) {
+                    scope.put("source", result);
+                }
+            }
+        }
+        if (transform != null) { // optional property mapping script
             try {
-                result = script.exec(scope); // script yields transformation result
+                result = transform.exec(scope); // script yields transformation result
             } catch (ScriptException se) {
-                LOGGER.debug("property mapping " + sourcePointer + " -> " + targetPointer +
-                 "script encountered exception", se);
+                LOGGER.debug("property mapping " + targetPointer + " value script encountered exception", se);
                 throw new SynchronizationException(se);
             }
         }
