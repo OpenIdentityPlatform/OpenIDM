@@ -26,6 +26,8 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
@@ -61,6 +63,7 @@ public class OperationHelperImpl implements OperationHelper {
     private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
     private List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
     private Id systemObjectSetId;
+    private CryptoService cryptoService;
 
     /**
      * @param configuration
@@ -69,11 +72,14 @@ public class OperationHelperImpl implements OperationHelper {
      * @param connectorObjectOptions
      * @throws NullPointerException if any of the input values is null.
      */
-    public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper, Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions) {
+    public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
+                               Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions,
+                               CryptoService cryptoService) {
         this.configuration = Assertions.nullChecked(configuration, "configuration");
         this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
         this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");
         this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");
+        this.cryptoService = cryptoService;
     }
 
 
@@ -116,18 +122,18 @@ public class OperationHelperImpl implements OperationHelper {
 
 
     public ConnectorObject build(Class<? extends APIOperation> operation, Map<String, Object> source) throws Exception {
-        return objectClassInfoHelper.build(operation, null, source);
+        return objectClassInfoHelper.build(operation, null, source, cryptoService);
     }
 
 
     public ConnectorObject build(Class<? extends APIOperation> operation, String id, Map<String, Object> source) throws Exception {
         //TODO do something with ID
-        return objectClassInfoHelper.build(operation, id, source);
+        return objectClassInfoHelper.build(operation, id, source, cryptoService);
     }
 
 
     public Map<String, Object> build(ConnectorObject source) throws Exception {
-        Map<String, Object> result = objectClassInfoHelper.build(source);
+        Map<String, Object> result = objectClassInfoHelper.build(source, cryptoService);
         resetUid(source.getUid(), result);
         return result;
     }
@@ -136,13 +142,6 @@ public class OperationHelperImpl implements OperationHelper {
     public void resetUid(Uid uid, Map<String, Object> target) {
         if (null != uid && null != target) {
             target.put("_id", Id.escapeUid(uid.getUidValue()));
-//            Object oldId = target.get("_id");
-//            if (oldId instanceof String) {
-//                Id newId = new Id((String) oldId);
-//                target.put("_id", newId.resolveLocalId(uid).toString());
-//            } else {
-//                target.put("_id", systemObjectSetId.resolveLocalId(uid).toString());
-//            }
         }
     }
 
@@ -154,7 +153,6 @@ public class OperationHelperImpl implements OperationHelper {
      * @param uid original un escaped unique identifier of the object
      * @return
      */
-
     public URI resolveQualifiedId(Uid uid) {
         if (null != uid) {
             try {
@@ -194,8 +192,11 @@ public class OperationHelperImpl implements OperationHelper {
          */
         public boolean handle(ConnectorObject obj) {
             try {
-                return resultList.add(objectClassInfoHelper.build(obj));
+                return resultList.add(objectClassInfoHelper.build(obj, cryptoService));
             } catch (IOException e) {
+                throw new IllegalArgumentException(e);
+            } catch (JsonCryptoException e) {
+                //TODO: This is a configuaration exception. Improve it later.
                 throw new IllegalArgumentException(e);
             }
         }
@@ -246,7 +247,7 @@ public class OperationHelperImpl implements OperationHelper {
             values = (List<String>) params.get(field);
         }
 
-        Operator operator = OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values));
+        Operator operator = OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values, cryptoService));
 
         return operator;
     }

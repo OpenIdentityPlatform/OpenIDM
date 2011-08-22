@@ -24,8 +24,12 @@
  */
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.objects.*;
 
@@ -39,7 +43,8 @@ public class AttributeInfoHelper {
     private final Set<AttributeFlag> flags;
     private final AttributeInfo attributeInfo;
     private final Object defaultValue;
-
+    private final String cipher;
+    private final String key;
 
 
     public AttributeInfoHelper(String name, boolean isOperationalOption, Map<String, Object> schema) throws SchemaException {
@@ -88,6 +93,20 @@ public class AttributeInfoHelper {
 
         if (!isOperationalOption) {
 
+            //Encrypted attribute
+            Object k = schema.get("key");
+            if (k instanceof String) {
+                key = (String) k;
+            } else {
+                key = null;
+            }
+            Object c = schema.get("cipher");
+            if (c instanceof String) {
+                cipher = (String) c;
+            } else {
+                cipher = "AES/CBC/PKCS5Padding";
+            }
+
             AttributeInfoBuilder builder = new AttributeInfoBuilder(nativeName, nativeType);
             builder.setMultiValued(Collection.class.isAssignableFrom(type));
 
@@ -121,6 +140,8 @@ public class AttributeInfoHelper {
         } else {
             flags = null;
             attributeInfo = null;
+            key = null;
+            cipher = null;
         }
     }
 
@@ -148,7 +169,6 @@ public class AttributeInfoHelper {
         return type;
     }
 
-
     public String getName() {
         return name;
     }
@@ -157,8 +177,13 @@ public class AttributeInfoHelper {
         return attributeInfo;
     }
 
-    public Attribute build(Object source) throws Exception {
-        return AttributeInfoHelper.build(attributeInfo, source);
+    public boolean isConfidential() {
+        return null != key;
+    }
+
+    public Attribute build(Object source, CryptoService cryptoService) throws Exception {
+        JsonNode decryptedNode = new JsonNode(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
+        return AttributeInfoHelper.build(attributeInfo, decryptedNode.getValue());
     }
 
     public static Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
@@ -175,15 +200,25 @@ public class AttributeInfoHelper {
         return attribute;
     }
 
-    public Object build(Attribute source) throws IOException {
+    public Object build(Attribute source, CryptoService cryptoService) throws IOException, JsonCryptoException {
+        Object resultValue = null;
         if (attributeInfo.isMultiValued()) {
             List<Object> value = new ArrayList<Object>(source.getValue().size());
             for (Object o : source.getValue()) {
                 value.add(ConnectorUtil.coercedTypeCasting(o, Object.class));
             }
-            return value;
+            resultValue = value;
         } else {
-            return ConnectorUtil.coercedTypeCasting(AttributeUtil.getSingleValue(source), type);
+            resultValue = ConnectorUtil.coercedTypeCasting(AttributeUtil.getSingleValue(source), type);
+        }
+        if (isConfidential()) {
+            if (null == cryptoService) {
+                throw new JsonCryptoException("Confidential attribute can not be encrypted. Reason: CryptoService is null");
+            } else {
+                return cryptoService.encrypt(new JsonNode(resultValue), cipher, key).getValue();
+            }
+        } else {
+            return resultValue;
         }
     }
 

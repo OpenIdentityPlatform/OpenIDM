@@ -24,8 +24,10 @@
  */
 package org.forgerock.openidm.provisioner.openicf.commons;
 
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.provisioner.Id;
 import org.identityconnectors.common.CollectionUtil;
@@ -98,7 +100,7 @@ public class ObjectClassInfoHelper {
      * @return
      * @throws PreconditionFailedException if ID value can not be determined from the {@code source}
      */
-    public ConnectorObject build(Class<? extends APIOperation> operation, String name, Map<String, Object> source) throws Exception {
+    public ConnectorObject build(Class<? extends APIOperation> operation, String name, Map<String, Object> source, CryptoService cryptoService) throws Exception {
         String nameValue = name;
 
         if (null == nameValue) {
@@ -133,7 +135,7 @@ public class ObjectClassInfoHelper {
                     if (null == v && attributeInfo.getAttributeInfo().isRequired()) {
                         throw new IllegalArgumentException("Required attribute {" + attributeInfo.getName() + "} value is null");
                     }
-                    builder.addAttribute(attributeInfo.build(v));
+                    builder.addAttribute(attributeInfo.build(v, cryptoService));
                 }
             }
         } else if (UpdateApiOp.class.isAssignableFrom(operation)) {
@@ -144,7 +146,7 @@ public class ObjectClassInfoHelper {
                 }
                 if (attributeInfo.getAttributeInfo().isUpdateable()) {
                     Object v = source.get(attributeInfo.getName());
-                    builder.addAttribute(attributeInfo.build(v));
+                    builder.addAttribute(attributeInfo.build(v, cryptoService));
                 }
             }
         } else {
@@ -154,13 +156,13 @@ public class ObjectClassInfoHelper {
                     continue;
                 }
                 Object v = source.get(attributeInfo.getName());
-                builder.addAttribute(attributeInfo.build(v));
+                builder.addAttribute(attributeInfo.build(v, cryptoService));
             }
         }
         return builder.build();
     }
 
-    public Map<String, Object> build(ConnectorObject source) throws IOException {
+    public Map<String, Object> build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
         if (null == source) {
             return null;
         }
@@ -168,17 +170,17 @@ public class ObjectClassInfoHelper {
         for (AttributeInfoHelper attributeInfo : attributes) {
             Attribute attribute = source.getAttributeByName(attributeInfo.getAttributeInfo().getName());
             if (null != attribute) {
-                result.put(attributeInfo.getName(), attributeInfo.build(attribute));
+                result.put(attributeInfo.getName(), attributeInfo.build(attribute, cryptoService));
             }
         }
         result.put("_id", Id.escapeUid(source.getUid().getUidValue()));
         return result;
     }
 
-    public Attribute build(String attributeName, Object source) throws Exception {
+    public Attribute build(String attributeName, Object source, CryptoService cryptoService) throws Exception {
         for (AttributeInfoHelper attributeInfoHelper : attributes) {
             if (attributeInfoHelper.getName().equals(attributeName)) {
-                return attributeInfoHelper.build(source);
+                return attributeInfoHelper.build(source, cryptoService);
             }
         }
         if (source instanceof Collection) {

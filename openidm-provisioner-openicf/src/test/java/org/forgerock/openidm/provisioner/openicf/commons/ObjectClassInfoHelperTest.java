@@ -72,10 +72,10 @@ public class ObjectClassInfoHelperTest {
         source.put("_id", "ID_NAME");
         source.put("__NAME__", "NAME_NAME");
 
-        ConnectorObject co = helper.build(UpdateApiOp.class, "rename", source);
+        ConnectorObject co = helper.build(UpdateApiOp.class, "rename", source, null);
         Assert.assertEquals(co.getName().getNameValue(), "rename");
 
-        co = helper.build(UpdateApiOp.class, null, source);
+        co = helper.build(UpdateApiOp.class, null, source, null);
         Assert.assertEquals(co.getName().getNameValue(), "ID_NAME");
     }
 
