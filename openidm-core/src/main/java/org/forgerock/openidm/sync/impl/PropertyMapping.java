@@ -133,21 +133,13 @@ class PropertyMapping {
                 throw new SynchronizationException(se);
             }
         }
-        Map<String, Object> scope = null;
-        if (transform != null) { // only initialize with scope if script to execute
-            scope = service.newScope();
-        }
         Object result = null;
         if (sourcePointer != null) { // optional source property
-            JsonNode node = sourceObject.get(sourcePointer);
-            if (node != null) { // source property value found with pointer
-                result = node.getValue();
-                if (scope != null) {
-                    scope.put("source", result);
-                }
-            }
+            result = sourceObject.get(sourcePointer).getValue(); // null indicates no value
         }
         if (transform != null) { // optional property mapping script
+            Map<String, Object> scope = service.newScope();
+            scope.put("source", result);
             try {
                 result = transform.exec(scope); // script yields transformation result
             } catch (ScriptException se) {
@@ -156,7 +148,7 @@ class PropertyMapping {
             }
         }
         if (result == null) {
-            result = defaultValue; // default null if not specified
+            result = defaultValue; // remains null if default not specified
         }
         put(targetObject, targetPointer, result);
     }
