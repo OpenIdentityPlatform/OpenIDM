@@ -59,6 +59,8 @@ public class RepoPersistenceManager implements PersistenceManager {
     // Meta-data when converting from array to list to enable later conversion to original form
     private static final String OPENIDM_ORIG_ARRAY = "_openidm_orig_array";
     private static final String OPENIDM_ORIG_ARRAY_TYPE = "_openidm_orig_array_type=";
+    
+    private static final String BUNDLE_LOCATION = "service__bundleLocation";
 
     final static Logger logger = LoggerFactory.getLogger(RepoPersistenceManager.class);
     
@@ -301,6 +303,7 @@ public class RepoPersistenceManager implements PersistenceManager {
                     existing.remove(RepositoryService.ID);
                     obj.remove(RepositoryService.REV); // beware, this means _id and _rev should not be in config file
                     obj.remove(RepositoryService.ID); // beware, this means _id and _rev should not be in config file
+                    obj.remove(RepoPersistenceManager.BUNDLE_LOCATION);
                     if(!existing.equals(obj)) {
                         logger.trace("Not matching {} {}", existing, obj);
                         boolean retry;
