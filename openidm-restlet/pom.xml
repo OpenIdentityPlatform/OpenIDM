@@ -30,23 +30,22 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
-            <scope>compile</scope>
         </dependency>
         
         <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.jackson</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.servlet</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>

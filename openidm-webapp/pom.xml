@@ -282,6 +282,7 @@
                                 openidm-repo,
                                 openidm-restlet,
                                 openidm-scheduler,
+                                openidm-system,
                                 openidm-ui,
                                 openidm-util,
                                 org.apache.felix.configadmin,

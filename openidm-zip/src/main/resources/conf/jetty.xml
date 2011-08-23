@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//
+DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+<Configure class="org.eclipse.jetty.server.Server">
+
+    <!-- =========================================================== -->
+    <!-- Set connectors                                              -->
+    <!-- =========================================================== -->
+    <!-- One of each type!                                           -->
+    <!-- =========================================================== -->
+
+    <!-- Use this connector for many frequently idle connections
+         and for threadless continuations.
+    -->
+    <Call name="addConnector">
+      <Arg>
+          <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+            <Set name="host"><Property name="jetty.host" /></Set>
+            <Set name="maxIdleTime">300000</Set>
+            <Set name="Acceptors">2</Set>
+            <Set name="statsOn">false</Set>
+            <Set name="confidentialPort">8443</Set>
+	    <Set name="lowResourcesConnections">20000</Set>
+	    <Set name="lowResourcesMaxIdleTime">5000</Set>
+          </New>
+      </Arg>
+    </Call>
+
+    <Call name="addConnector">
+        <Arg>
+            <New class="org.eclipse.jetty.server.ssl.SslSocketConnector">
+                <Set name="Port">8443</Set>
+                <Set name="maxIdleTime">30000</Set>
+                <Set name="keystore"><SystemProperty name="jetty.home" default="."/>/samples/keystore.jceks
+                </Set>
+                <Set name="keystoreType">JCEKS</Set>
+                <Set name="password">changeit</Set>
+                <Set name="keyPassword">changeit</Set>
+                <Set name="truststore"><SystemProperty name="jetty.home" default="."/>/samples/truststore
+                </Set>
+                <Set name="trustPassword">changeit</Set>
+                <Set name="wantClientAuth">true</Set>
+                <Set name="needClientAuth">false</Set>
+            </New>
+        </Arg>
+    </Call>
+	
+	<!-- =========================================================== -->
+    <!-- Configure Authentication Realms                             -->
+    <!-- Realms may be configured for the entire server here, or     -->
+    <!-- they can be configured for a specific web app in a context  -->
+    <!-- configuration (see $(jetty.home)/contexts/test.xml for an   -->
+    <!-- example).                                                   -->
+    <!-- =========================================================== -->
+    <Call name="addBean">
+        <Arg>
+            <New class="org.eclipse.jetty.security.HashLoginService">
+                <Set name="name">openidm</Set>
+                <Set name="config"><SystemProperty name="jetty.home" default="."/>/conf/realm.properties</Set>
+                <Set name="refreshInterval">0</Set>
+            </New>
+        </Arg>
+    </Call>
+</Configure>

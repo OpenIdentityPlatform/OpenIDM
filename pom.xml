@@ -195,8 +195,9 @@
         <module>openidm-repo-jdbc</module>
         <module>openidm-restlet</module>
         <module>openidm-scheduler</module>
+        <module>openidm-system</module>
         <module>openidm-util</module>
-	<module>openidm-ui</module>
+	    <module>openidm-ui</module>
         <module>openidm-zip</module>
     </modules>
 

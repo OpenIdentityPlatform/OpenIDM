@@ -6,6 +6,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -132,7 +133,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
             try {
                 String connectorsDir = URLDecoder.decode(connectorsArea, "UTF-8");
                 TRACE.info("Using connectors from [" + connectorsDir + "]");
-                File dir = new File(connectorsDir);
+                File dir = IdentityServer.getFileForPath(connectorsDir);
                 //This is a fix to support absolute path on OSX
                 if (!dir.exists()) {
                     String absolutePath = dir.getAbsolutePath();
