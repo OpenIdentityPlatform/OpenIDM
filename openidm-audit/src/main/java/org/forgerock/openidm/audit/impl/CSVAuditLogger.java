@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 
 import org.slf4j.Logger;
@@ -57,6 +59,7 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 
 /**
  * Comma delimited audit logger
+ *
  * @author aegloff
  */
 public class CSVAuditLogger implements AuditLogger {
@@ -64,7 +67,7 @@ public class CSVAuditLogger implements AuditLogger {
 
     public final static String CONFIG_LOG_LOCATION = "location";
     public final static String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
-    
+
     File auditLogDir;
     String recordDelim;
     Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
@@ -73,19 +76,21 @@ public class CSVAuditLogger implements AuditLogger {
         String location = null;
         try {
             location = (String) config.get(CONFIG_LOG_LOCATION);
-            auditLogDir = new File(location);
+            auditLogDir = IdentityServer.getFileForPath(location);
+            logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());
             auditLogDir.mkdirs();
             recordDelim = (String) config.get(CONFIG_LOG_RECORD_DELIM);
             if (recordDelim == null) {
                 recordDelim = "";
             }
-            recordDelim += System.getProperty("line.separator");
+            recordDelim += ServerConstants.EOL;
         } catch (Exception ex) {
-            throw new InvalidException("Configured CSV file location must be a directory and '" + location 
+            logger.error("ERROR - Configured CSV file location must be a directory and {} is invalid.", auditLogDir.getAbsolutePath(), ex);
+            throw new InvalidException("Configured CSV file location must be a directory and '" + location
                     + "' is invalid " + ex.getMessage(), ex);
         }
     }
-    
+
     public void cleanup() {
         for (Map.Entry<String, FileWriter> entry : fileWriters.entrySet()) {
             try {
@@ -95,10 +100,10 @@ public class CSVAuditLogger implements AuditLogger {
                 }
             } catch (Exception ex) {
                 logger.info("File writer close reported failure ", ex);
-            } 
+            }
         }
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -110,7 +115,7 @@ public class CSVAuditLogger implements AuditLogger {
 
     /**
      * Currently not supported.
-     * 
+     * <p/>
      * {@inheritdoc}
      */
     @Override
@@ -118,7 +123,7 @@ public class CSVAuditLogger implements AuditLogger {
         // TODO
         return new HashMap();
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -127,15 +132,15 @@ public class CSVAuditLogger implements AuditLogger {
         // TODO: replace ID handling utility
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];
-        
+
         // TODO: optimize buffered, cached writing
         FileWriter fileWriter = null;
         try {
             // TODO: Optimize ordering etc.
-            Collection<String> fieldOrder = 
-                new TreeSet<String>(Collator.getInstance());
+            Collection<String> fieldOrder =
+                    new TreeSet<String>(Collator.getInstance());
             fieldOrder.addAll(obj.keySet());
-            
+
             File auditFile = new File(auditLogDir, type + ".csv");
             // Create header if creating a new file
             if (!auditFile.exists()) {
@@ -154,7 +159,7 @@ public class CSVAuditLogger implements AuditLogger {
 
             String key = null;
             Iterator iter = fieldOrder.iterator();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 key = (String) iter.next();
                 Object value = obj.get(key);
                 fileWriter.append("\"");
@@ -173,13 +178,13 @@ public class CSVAuditLogger implements AuditLogger {
             fileWriter.flush();
         } catch (Exception ex) {
             throw new BadRequestException(ex);
-        } 
+        }
     }
-    
-    private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter) 
+
+    private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter)
             throws IOException {
         Iterator iter = fieldOrder.iterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             String key = (String) iter.next();
             fileWriter.append("\"");
             String escapedStr = key.replaceAll("\"", "\"\"");
@@ -194,7 +199,7 @@ public class CSVAuditLogger implements AuditLogger {
 
     private FileWriter getWriter(String type, File auditFile) throws IOException {
         // TODO: optimize synchronization strategy
-        synchronized(fileWriters) {
+        synchronized (fileWriters) {
             FileWriter existingWriter = fileWriters.get(type);
             if (existingWriter == null) {
                 existingWriter = new FileWriter(auditFile, true);
@@ -203,7 +208,7 @@ public class CSVAuditLogger implements AuditLogger {
             return existingWriter;
         }
     }
-    
+
     /**
      * Audit service does not support changing audit entries.
      */

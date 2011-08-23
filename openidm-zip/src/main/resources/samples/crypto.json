@@ -2,7 +2,6 @@
    "keystore" :
       {
          "type" : "JCEKS",
-         "location-comment" : "The relative location does not work because the value is always resolved for file:///",
          "location" : "samples/keystore.jceks",
          "password" : "changeit"
       }

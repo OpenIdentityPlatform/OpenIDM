@@ -27,26 +27,16 @@ package org.forgerock.openidm.provisioner.impl;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.objset.*;
-import org.forgerock.openidm.provisioner.Id;
-import org.forgerock.openidm.provisioner.ProvisionerService;
-import org.forgerock.openidm.provisioner.SystemIdentifier;
-import org.forgerock.openidm.scheduler.ExecutionException;
-import org.forgerock.openidm.scheduler.ScheduledService;
-import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.*;
 
 /**
@@ -65,12 +55,6 @@ import java.util.*;
 })
 public class ExternalSystemObjectSetService implements ObjectSet {
 
-    /**
-     * The name of the system property that can be used to enable
-     * for the debug on startup.
-     */
-    public static final String PROPERTY_DEBUG_ENABLE =
-            "org.forgerock.openidm.server.debug.enable";
 
     private final static Logger TRACE = LoggerFactory.getLogger(ExternalSystemObjectSetService.class);
 
@@ -241,17 +225,17 @@ public class ExternalSystemObjectSetService implements ObjectSet {
                     //TODO Use the _scriptid to retrieve the storedObject
                     Map<String, Object> storedScript = new HashMap<String, Object>();
 
-                    for (Map.Entry<String,Object> e : params.entrySet()) {
+                    for (Map.Entry<String, Object> e : params.entrySet()) {
                         if (storedScript.containsKey(e.getKey())) {
                             continue;
                         }
-                        storedScript.put(e.getKey(),e.getValue());
+                        storedScript.put(e.getKey(), e.getValue());
                     }
                     result = getProvisioner().action(id, storedScript);
                 }
                 break;
             case DEBUGEXECUTESCRIPT:
-                if (isDebugEnabled()) {
+                if (IdentityServer.isDevelopmentModeEnabled()) {
                     Object _entity = params.get("_entity");
                     if (_entity instanceof Map) {
                         Map<String, Object> script = (Map<String, Object>) _entity;
@@ -276,11 +260,6 @@ public class ExternalSystemObjectSetService implements ObjectSet {
 
     private ObjectSet getProvisioner() {
         return provisioner;
-    }
-
-    private boolean isDebugEnabled() {
-        String debug = System.getProperty(PROPERTY_DEBUG_ENABLE);
-        return (null != debug) && Boolean.valueOf(debug);
     }
 
     private void validateActionRequest(SystemAction action, String id, Map<String, Object> params) throws ObjectSetException {

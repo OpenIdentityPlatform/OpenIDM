@@ -24,6 +24,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
 // OpenIDM
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptFactory;
@@ -56,7 +57,7 @@ public class JavaScriptFactory implements ScriptFactory {
                 }
             } else if (config.isDefined("file")) { // TEMPORARY
                 try {
-                    return new JavaScript(new File(config.get("file").asString()), sharedScope);
+                    return new JavaScript(IdentityServer.getFileForPath(config.get("file").asString()), sharedScope);
                 } catch (ScriptException se) { // re-cast to show exact node of failure 
                     throw new JsonNodeException(config.get("file"), se);
                 }

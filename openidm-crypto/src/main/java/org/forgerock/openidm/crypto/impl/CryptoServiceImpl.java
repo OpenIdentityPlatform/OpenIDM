@@ -17,19 +17,20 @@
 package org.forgerock.openidm.crypto.impl;
 
 // Java Standard Edition
+
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 // OSGi Framework
+import org.forgerock.openidm.core.IdentityServer;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -49,7 +50,6 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.fluent.JsonTransformer;
 
 // JSON Cryptography library
-import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
@@ -69,24 +69,30 @@ import org.slf4j.LoggerFactory;
  * @author Paul C. Bryan
  */
 @Component(
-    name = "org.forgerock.openidm.crypto",
-    immediate = true,
-    policy = ConfigurationPolicy.OPTIONAL
+        name = "org.forgerock.openidm.crypto",
+        immediate = true,
+        policy = ConfigurationPolicy.OPTIONAL
 )
 @Properties({
-    @Property(name = "service.description", value = "OpenIDM cryptography service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS")
+        @Property(name = "service.description", value = "OpenIDM cryptography service"),
+        @Property(name = "service.vendor", value = "ForgeRock AS")
 })
 @Service
 public class CryptoServiceImpl implements CryptoService {
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
-    /** TODO: Description. */
+    /**
+     * TODO: Description.
+     */
     private ComponentContext context;
 
-    /** TODO: Description. */
+    /**
+     * TODO: Description.
+     */
     private SimpleKeyStoreSelector keySelector;
 
-    /** TODO: Description. */
+    /**
+     * TODO: Description.
+     */
     private final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<JsonTransformer>();
 
     /**
@@ -97,27 +103,16 @@ public class CryptoServiceImpl implements CryptoService {
      *
      * @param location the location to open the stream for.
      * @return an input stream for reading the content of the location, or {@code null} if no location.
-     * @throws JsonNodeException if there was exception opening the stream.
+     * @throws IOException if there was exception opening the stream.
      */
-    private InputStream openStream(JsonNode location) throws JsonNodeException {
+    private InputStream openStream(JsonNode location) throws IOException {
         InputStream result = null;
         if (location != null && !location.isNull()) {
-            try {
-                URI uri = location.asURI();
-                URL loc = null;
-                if (uri.isAbsolute()) {
-                    loc = uri.toURL();
-                } else {
-                    //TODO Do we really need this if we don't have a unified way to detect the instance root?
-                    //Default to user.dir system parameter. This is not reliable in embedded mode
-                    loc = (new File(".")).getAbsoluteFile().toURI().resolve(uri).toURL();
-                }
-                result = loc.openStream();
-                if (null == result) {
-                    logger.info("KeyStore not found under crypto.json#location {}", loc);
-                }
-            } catch (IOException ioe) {
-                throw new JsonNodeException(location, ioe);
+            File configFile = IdentityServer.getFileForPath(location.asString());
+            if (configFile.exists()) {
+                result = new FileInputStream(configFile);
+            } else {
+                logger.error("ERROR - KeyStore not found under CryptoService#location {}", configFile.getAbsolutePath());
             }
         }
         return result;
@@ -129,6 +124,7 @@ public class CryptoServiceImpl implements CryptoService {
         JsonNode config = new JSONEnhancedConfig().getConfigurationAsJson(context);
         try {
             JsonNode keystore = config.get("keystore");
+            int keyCount = 0;
             if (!keystore.isNull()) { // optional
                 String type = keystore.get("type").defaultTo(KeyStore.getDefaultType()).asString();
                 String provider = keystore.get("provider").asString();
@@ -136,16 +132,27 @@ public class CryptoServiceImpl implements CryptoService {
                 try {
                     KeyStore ks = (provider == null ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
                     InputStream in = openStream(keystore.get("location"));
-                    ks.load(in, password == null ? null : password.toCharArray());
-                    keySelector = new SimpleKeyStoreSelector(ks, password);
+                    if (null != in) {
+                        ks.load(in, password == null ? null : password.toCharArray());
+                        keySelector = new SimpleKeyStoreSelector(ks, password);
+                        Enumeration<String> aliases = ks.aliases();
+                        while (aliases.hasMoreElements()) {
+                            logger.info("Available cryptography key: {}", aliases.nextElement());
+                            keyCount++;
+                        }
+                    }
                 } catch (IOException ioe) {
+                    logger.error("ERROR - IOException when loading KeyStore file.", ioe);
                     throw new JsonNodeException(keystore, ioe);
                 } catch (GeneralSecurityException gse) {
+                    logger.error("ERROR - GeneralSecurityException when loading KeyStore file.", gse);
                     throw new JsonNodeException(keystore, gse);
                 }
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
             }
+            logger.info("OK - CryptoService is initialized with {} keys.", keyCount);
         } catch (JsonNodeException jne) {
+            logger.error("ERROR - JsonNodeException when loading CryptoService configuration", jne);
             throw new ComponentException("Configuration error", jne);
         }
     }
@@ -161,6 +168,7 @@ public class CryptoServiceImpl implements CryptoService {
     public JsonTransformer getEncryptionTransformer(String cipher, String alias) throws JsonCryptoException {
         Key key = keySelector.select(alias);
         if (key == null) {
+            logger.error("ERROR - EncryptionKey not found: {}", alias);
             throw new JsonCryptoException("key not found: " + alias);
         }
         return new JsonCryptoTransformer(new SimpleEncryptor(cipher, key, alias));
