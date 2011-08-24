@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import org.apache.felix.cm.PersistenceManager;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.logging.OsgiLogHandler;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.ConfigurationListener;
@@ -45,6 +46,13 @@ public class Activator implements BundleActivator {
     
     public void start(BundleContext context) {
         logger.debug("Config Bundle starting");
+        // Re-direct OSGi logging to the same openidm log
+        Hashtable<String, String> logHandlerProp = new Hashtable<String, String>();
+        logHandlerProp.put("service.description", "OpenIDM OSGi log handler");
+        logHandlerProp.put("service.vendor", "ForgeRock AS");
+        OsgiLogHandler logHandler = new OsgiLogHandler(context);
+        context.registerService(OsgiLogHandler.class.getName(), logHandler, logHandlerProp);
+        logger.debug("Log handler service registered");
 
         // Initiate configuration bootstrapping by registering the repository based
         // persistence manager plug-in to store and manipulate configuration
