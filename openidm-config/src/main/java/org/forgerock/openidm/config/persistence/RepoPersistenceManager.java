@@ -61,6 +61,7 @@ public class RepoPersistenceManager implements PersistenceManager {
     private static final String OPENIDM_ORIG_ARRAY_TYPE = "_openidm_orig_array_type=";
     
     private static final String BUNDLE_LOCATION = "service__bundleLocation";
+    private static final String FELIX_FILEINSTALL_FILENAME = "felix__fileinstall__filename";
 
     final static Logger logger = LoggerFactory.getLogger(RepoPersistenceManager.class);
     
@@ -304,6 +305,7 @@ public class RepoPersistenceManager implements PersistenceManager {
                     obj.remove(RepositoryService.REV); // beware, this means _id and _rev should not be in config file
                     obj.remove(RepositoryService.ID); // beware, this means _id and _rev should not be in config file
                     obj.remove(RepoPersistenceManager.BUNDLE_LOCATION);
+                    obj.remove(RepoPersistenceManager.FELIX_FILEINSTALL_FILENAME);
                     if(!existing.equals(obj)) {
                         logger.trace("Not matching {} {}", existing, obj);
                         boolean retry;

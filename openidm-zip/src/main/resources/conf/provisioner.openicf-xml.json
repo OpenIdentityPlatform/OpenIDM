@@ -1,12 +1,5 @@
 {
-   "_id" : "1AB5045E-607C-11E0-95F8-77CADFD72085",
-   "_rev" : "686897696a7c876b7e",
-   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-   "_schema_rev" : "696a687c897c87e79d",
-   "name" : "xml",
-   "displayName" : "Test XML Connector",
-   "typeString" : "File",
-   "hasId" : "true",
+   "name" : "ldap",
    "connectorRef" :
       {
          "bundleName" : "org.forgerock.openicf.connectors.file.xml",

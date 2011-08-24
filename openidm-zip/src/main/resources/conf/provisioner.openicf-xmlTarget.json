@@ -1,12 +1,5 @@
 {
-   "_id" : "abab54d7-a01e-4245-bbe7-fd1b780093cc",
-   "_rev" : "686897696a7c876b7e",
-   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-   "_schema_rev" : "696a687c897c87e79d",
-   "name" : "xmlTarget",
-   "displayName" : "Test XML Connector",
-   "typeString" : "File",
-   "hasId" : "true",
+   "name" : "ad",
    "connectorRef" :
       {
          "bundleName" : "org.forgerock.openicf.connectors.file.xml",

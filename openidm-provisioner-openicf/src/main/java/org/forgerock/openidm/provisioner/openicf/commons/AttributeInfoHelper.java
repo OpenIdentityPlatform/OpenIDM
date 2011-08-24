@@ -29,6 +29,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.objects.*;
@@ -104,7 +105,7 @@ public class AttributeInfoHelper {
             if (c instanceof String) {
                 cipher = (String) c;
             } else {
-                cipher = "AES/CBC/PKCS5Padding";
+                cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
             }
 
             AttributeInfoBuilder builder = new AttributeInfoBuilder(nativeName, nativeType);

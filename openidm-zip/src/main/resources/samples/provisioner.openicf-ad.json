@@ -1,11 +1,5 @@
 {
-   "_id" : "aed2c0a0-8baf-11e0-83f2-0800200c9a66",
-   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-   "_schema_rev" : "696a687c897c87e79d",
-   "name" : "ad",
-   "displayName" : "ActiveDirectory Sample Connector",
-   "typeString" : "ldap",
-   "hasId" : "true",
+   "name" : "ActiveDirectory",
    "connectorRef" :
       {
          "connectorHostRef" : "dotnet",

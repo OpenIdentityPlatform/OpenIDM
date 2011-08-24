@@ -24,9 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * This class defines the core of the Directory Server.  It manages the startup
- * and shutdown processes and coordinates activities between all other
- * components.
+ * This class defines the core of the Identity Server.
  *
  * @author $author$
  * @version $Revision$ $Date$
@@ -43,7 +41,7 @@ public class IdentityServer {
 
 
     /**
-     * Creates a new directory environment configuration initialized
+     * Creates a new identity environment configuration initialized
      * from the system properties defined in the JVM.
      */
     public IdentityServer() {
@@ -163,6 +161,16 @@ public class IdentityServer {
         }
     }
 
+    /**
+     * Retrieves the current running mode of Identity Server.
+     * <p/>
+     * Default running mode is the {@code Production}, that prohibit access to some
+     * insecure method.
+     * Development mode allow access to all method. To enable development mode set the
+     * {@link ServerConstants#PROPERTY_DEBUG_ENABLE} system property {@code true}.
+     *
+     * @return true if {@code Development} mode is on.
+     */
     public static boolean isDevelopmentModeEnabled() {
         String debug = identityServer.getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE);
         return (null != debug) && Boolean.valueOf(debug);
