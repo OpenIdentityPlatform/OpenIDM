@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -534,7 +536,9 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      */
     void init (JsonNode config) {
         try {
-            dbURL = config.get(CONFIG_DB_URL).defaultTo("local:./db/openidm").asString();
+            File dbFolder = IdentityServer.getFileForPath("db/openidm");
+            dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + dbFolder.getAbsolutePath()).asString();
+            System.out.println("dbURL: " + dbURL);
             user = config.get(CONFIG_USER).defaultTo("admin").asString();
             password = config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
 

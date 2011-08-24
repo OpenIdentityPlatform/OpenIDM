@@ -156,8 +156,7 @@ public class IdentityServer {
         if (f.isAbsolute()) {
             return f;
         } else {
-            return new File(getServerRoot() + File.separator +
-                    path);
+            return new File(getServerRoot(), path);
         }
     }
 
