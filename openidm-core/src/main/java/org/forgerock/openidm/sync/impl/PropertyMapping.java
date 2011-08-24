@@ -135,7 +135,9 @@ class PropertyMapping {
         }
         Object result = null;
         if (sourcePointer != null) { // optional source property
-            result = sourceObject.get(sourcePointer).getValue(); // null indicates no value
+            if (sourceObject.get(sourcePointer) != null){  
+                result = sourceObject.get(sourcePointer).getValue(); // null indicates no value
+            }
         }
         if (transform != null) { // optional property mapping script
             Map<String, Object> scope = service.newScope();
