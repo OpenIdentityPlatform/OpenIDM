@@ -67,7 +67,7 @@ class PropertyMapping {
     /**
      * TODO: Description.
      *
-     * @param node TODO.
+     * @param targetObject TODO.
      * @param pointer TODO.
      * @param value TODO.
      * @throws SynchronizationException TODO.
@@ -115,9 +115,9 @@ class PropertyMapping {
     /**
      * TODO: Description.
      *
-     * @param source TODO.
-     * @param target TODO.
-     * @throws MappingException TODO.
+     * @param sourceObject TODO.
+     * @param targetObject TODO.
+     * @throws SynchronizationException TODO.
      */
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
         if (condition != null) { // optional property mapping condition

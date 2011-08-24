@@ -1,12 +1,5 @@
 {
-   "_id" : "5b2857c0-8250-11e0-b278-0800200c9a66",
-   "_rev" : "686897696a7c876b7e",
-   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-   "_schema_rev" : "696a687c897c87e79d",
-   "name" : "ldap",
-   "displayName" : "OpenDJ Sample Connector",
-   "typeString" : "ldap",
-   "hasId" : "true",
+   "name" : "OpenDJ",
    "connectorRef" :
       {
          "connectorHostRef" : "#LOCAL",

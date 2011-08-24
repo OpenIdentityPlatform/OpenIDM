@@ -2,7 +2,7 @@
     "mappings" : [
         {
             "name" : "systemXmlAccounts_managedUser",
-            "source" : "system/xml/account",
+            "source" : "system/ldap/account",
             "target" : "managed/user",
             "validTarget": {
                 "type": "text/javascript",
@@ -17,25 +17,83 @@
             ],
             "onCreate" : {
                 "type": "text/javascript",
-                "source": "target.password = 'Passw0rd'"
+                "source": "target.ldapPassword = null;target.adPassword = null;"
             }
         },
         {
             "name": "managedUser_systemXmlTargetAccounts",
             "source": "managed/user",
-            "target": "system/xmlTarget/account",
+            "target": "system/ad/account",
+            "correlationQuery" : {
+                "type": "text/javascript",
+                "file": "jscript/name_eq_name_correlationQuery.js"
+            },
             "properties": [
                 { "source" : "name", "target" : "name" },
                 { "source" : "lastname", "target" : "lastname" },
                 { "source" : "firstname", "target" : "firstname" },
                 { "source" : "email", "target" : "email" },
-                { "source" : "password", "target" : "__PASSWORD__" },
+                {   "source" : "ldapPassword",
+                    "target" : "__PASSWORD__",
+                    "condition" : {
+                        "type": "text/javascript",
+                        "file": "jscript/ldapPassword_to_ad_condition.js"
+                    }
+                },
                 { "default" : "defaultpwd", "target" : "IGNORE__PASSWORD__" }
+            ],
+            "onCreate" : {
+                "type": "text/javascript",
+                "source": "target.__PASSWORD__ = 'initial_Passw0rd'"
+            }
+        },
+        {
+            "name": "managedUser_systemXmlAccounts",
+            "source": "managed/user",
+            "target": "system/ldap/account",
+            "correlationQuery" : {
+                "type": "text/javascript",
+                "file": "jscript/name_eq_name_correlationQuery.js"
+            },
+            "validSource" : {
+                "type": "text/javascript",
+                "source": "source.adPassword != null"
+            },
+            "properties": [
+                {   "source" : "adPassword",
+                    "target" : "__PASSWORD__",
+                    "condition" : {
+                        "type": "text/javascript",
+                        "file": "jscript/adPassword_to_ldap_condition.js"
+                    }
+                }
+            ],
+            "policies" : [
+                { "situation" : "CONFIRMED",
+                  "comment" : "IGNORE during initial reconciles, UPDATE when all initial links in place",
+                  "action" : "UPDATE"
+                },
+                { "situation" : "FOUND",
+                  "comment" : "LINK during initial reconciles, UPDATE when all initial links in place",
+                  "action" : "UPDATE"
+                },
+                { "situation" : "ABSENT",
+                  "comment" : "IGNORE during initial reconciles",
+                  "action" : {
+                      "comment" : "CREATE if employee, IGNORE otherwise?",
+                      "type" : "text/javascript",
+                      "source" : "if (1>0) {'CREATE';} else {'IGNORE';}"
+                  }
+                },
+                { "situation" : "AMBIGUOUS", "action" : "EXCEPTION" },
+                { "situation" : "MISSING", "action" : "EXCEPTION" },
+                { "situation" : "UNQUALIFIED", "action" : "UNLINK" },
+                { "situation" : "UNASSIGNED", "action" : "EXCEPTION" }
             ]
         },
         {
             "name" : "systemLdapAccount_managedUser",
-            "source" : "system/ldap/__ACCOUNT__",
+            "source" : "system/OpenDJ/__ACCOUNT__",
             "target" : "managed/user",
             "validTarget": {
                 "type": "text/javascript",

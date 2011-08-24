@@ -35,6 +35,14 @@
                     {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
                 ]
             },
+            "link_managedUser_systemXmlAccounts" : {
+                "index" : [
+                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
+                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
+                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
+                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
+                ]
+            },
             "link_systemLdapAccount_managedUser" : {
                 "index" : [
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },

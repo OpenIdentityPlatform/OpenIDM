@@ -6,7 +6,14 @@
             "properties" :
                [
                   {
-                     "name" : "password",
+                     "name" : "ldapPassword",
+                     "encryption" :
+                        {
+                           "key" : "openidm-sym-default"
+                        }
+                  },
+                  {
+                     "name" : "adPassword",
                      "encryption" :
                         {
                            "key" : "openidm-sym-default"

@@ -84,7 +84,7 @@ public class ConfigBootstrapHelper {
      * 
      * Bootstrap information in system properties takes precedence over configuration files
      * 
-     * Configuration keys returned are lower case, whether they orignate from system properties or 
+     * Configuration keys returned are lower case, whether they originate from system properties or
      * configuration files.
      * 
      * @param repoType the type of the boostrap repository, 
@@ -192,7 +192,7 @@ public class ConfigBootstrapHelper {
         if (props == null) {
             props = new Hashtable();
         }
-        
+
         if ("true".equals(enabled)) {
             props.put("felix.fileinstall.poll", poll);
             props.put("felix.fileinstall.dir", dir);
