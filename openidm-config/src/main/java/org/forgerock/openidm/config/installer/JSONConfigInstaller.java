@@ -439,7 +439,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     Configuration getConfiguration(String fileName, String pid, String factoryPid)
         throws Exception
     {
-        Configuration oldConfiguration = findExistingConfiguration(fileName);
+        Configuration oldConfiguration = findExistingConfiguration(fileName, pid, factoryPid);
         if (oldConfiguration != null)
         {
             logger.debug("Updating configuration from {}", fileName);
@@ -460,9 +460,15 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
 
-    Configuration findExistingConfiguration(String fileName) throws Exception
+    Configuration findExistingConfiguration(String fileName,String pid, String factoryPid) throws Exception
     {
-        String filter = "(" + DirectoryWatcher.FILENAME + "=" + fileName + ")";
+        String filter = null;
+        if (null == factoryPid) {
+            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+        }  else {
+            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + pid + ")(config.factory-pid=" + factoryPid + "))";
+        }
+
         Configuration[] configurations = getConfigurationAdmin().listConfigurations(filter);
         if (configurations != null && configurations.length > 0)
         {

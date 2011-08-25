@@ -59,6 +59,56 @@
 					function() { $(this).addClass('ui-state-hover'); },
 					function() { $(this).removeClass('ui-state-hover'); }
 				);
+
+                $('#config_get').click(function() {
+                    var pid = $('#pid').val();
+                    $('#config_json').val(null);
+                    if (pid.length != 0) {
+                        $.getJSON('../openidm/config/org.forgerock.openidm.' + pid, function(data) {
+                            $('#config_json').val(JSON.stringify(data));
+                        });
+                    } else {
+                        $.getJSON('../openidm/config', function(data) {
+                            jQuery.each(data.configurations, function() {
+                                $('#config_json').val($('#config_json').val() + this._id + "\n");
+                            });
+                        });
+                    }
+                });
+
+                $('#config_put').click(function() {
+                    var text = $('#config_json').val();
+                    var pid = $('#pid').val();
+                    $.ajax({
+                        type: 'PUT',
+                        contentType: "application/json",
+                        data: text,
+                        dataType: 'json', // format of the response
+                        success: function(msg) {
+                            alert("Data Saved: " + msg._id);
+                        },
+                        error: function() {
+                            alert("Error: " + msg._id);
+                        },
+                        url: '../openidm/config/org.forgerock.openidm.' + pid,
+                        cache:false
+                    });
+                });
+
+                $('#config_delete').click(function() {
+                    var pid = $('#pid').val();
+                    $.ajax({
+                        type: 'DELETE',
+                        success: function(msg) {
+                            alert("Config Deleted: " + msg._id);
+                        },
+                        error: function() {
+                            alert("Error: " + msg._id);
+                        },
+                        url: '../openidm/config/org.forgerock.openidm.' + pid,
+                        cache:false
+                    });
+                });
 				
 			});
 		</script>
@@ -93,6 +143,46 @@
             <!-- Middle -->
             <div id="middle-content">
 
+                <!-- Tabs -->
+                <h2 class="demoHeaders">Tabs</h2>
+
+                <div id="tabs">
+                    <ul>
+                        <li><a href="#tabs-1">Configuration Service</a></li>
+                        <li><a href="#tabs-2">Second</a></li>
+                        <li><a href="#tabs-3">Third</a></li>
+                    </ul>
+                    <div id="tabs-1">
+                        <table border="0">
+                            <tr>
+                                <td>Service PID</td>
+                                <td>
+                                    <input id="pid" type="text" name="pid"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Configuration JSON</td>
+                                <td><textarea id="config_json" name="jsonConfig" rows="20" cols="80"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <input id="config_get" type="submit" value="Download"/>
+                                    <input id="config_put" type="submit" value="Update"/>
+                                    <input id="config_delete" type="submit" value="Delete"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="tabs-2">Phasellus mattis tincidunt nibh. Cras orci urna, blandit id, pretium vel,
+                        aliquet ornare, felis. Maecenas scelerisque sem non nisl. Fusce sed lorem in enim dictum
+                        bibendum.
+                    </div>
+                    <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque
+                        nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor
+                        ullamcorper augue.
+                    </div>
+                </div>
+
                 <div class="demo">
 
                     <!-- Accordion -->
@@ -114,29 +204,6 @@
                             <h3><a href="#">Third</a></h3>
 
                             <div>Nam dui erat, auctor a, dignissim quis.</div>
-                        </div>
-                    </div>
-
-                    <!-- Tabs -->
-                    <h2 class="demoHeaders">Tabs</h2>
-
-                    <div id="tabs">
-                        <ul>
-                            <li><a href="#tabs-1">First</a></li>
-                            <li><a href="#tabs-2">Second</a></li>
-                            <li><a href="#tabs-3">Third</a></li>
-                        </ul>
-                        <div id="tabs-1">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-                            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                        </div>
-                        <div id="tabs-2">Phasellus mattis tincidunt nibh. Cras orci urna, blandit id, pretium vel,
-                            aliquet ornare, felis. Maecenas scelerisque sem non nisl. Fusce sed lorem in enim dictum
-                            bibendum.
-                        </div>
-                        <div id="tabs-3">Nam dui erat, auctor a, dignissim quis, sollicitudin eu, felis. Pellentesque
-                            nisi urna, interdum eget, sagittis et, consequat vestibulum, lacus. Mauris porttitor
-                            ullamcorper augue.
                         </div>
                     </div>
 
