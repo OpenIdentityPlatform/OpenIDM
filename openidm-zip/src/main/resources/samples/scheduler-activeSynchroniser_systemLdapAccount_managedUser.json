@@ -3,7 +3,7 @@
     "schedule": "0 0/1 * * * ?",
     "invokeService": "provisioner",
     "invokeContext": {
-        "action": "activeSync",
-        "source" : "system/ldap/__ACCOUNT__"
+        "action": "liveSync",
+        "source" : "system/OpenDJ/__ACCOUNT__"
     }
 }

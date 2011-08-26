@@ -3,7 +3,7 @@
     "schedule": "0 0/1 * * * ?",
     "invokeService": "provisioner",
     "invokeContext": {
-        "action": "activeSync",
-        "source" : "system/ad/account"
+        "action": "liveSync",
+        "source" : "system/ActiveDirectory/account"
     }
 }

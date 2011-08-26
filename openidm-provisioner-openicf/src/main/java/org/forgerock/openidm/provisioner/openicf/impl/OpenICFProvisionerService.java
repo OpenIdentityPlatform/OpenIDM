@@ -111,14 +111,14 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * Cryptographic service.
      */
     @Reference(
-            name = "ref_ManagedObjectService_CryptoService",
+            name = "ref_OpenICFProvisionerService_CryptoService",
             referenceInterface = CryptoService.class,
             bind = "bindCryptoService",
             unbind = "unbindCryptoService",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.STATIC
     )
-    protected CryptoService cryptoService;
+    protected CryptoService cryptoService = null;
 
     protected void bindCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
@@ -875,9 +875,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
                              */
                             public boolean handle(SyncDelta syncDelta) {
                                 try {
-                                    Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
                                     switch (syncDelta.getDeltaType()) {
                                         case CREATE_OR_UPDATE:
+                                            Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
                                             if (null != syncDelta.getPreviousUid()) {
                                                 deltaObject.put("_previous-id", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                             }

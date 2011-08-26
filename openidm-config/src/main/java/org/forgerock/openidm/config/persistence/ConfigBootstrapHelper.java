@@ -198,7 +198,7 @@ public class ConfigBootstrapHelper {
             props.put("felix.fileinstall.dir", dir);
             props.put("felix.fileinstall.filter", filter);
             props.put("felix.fileinstall.bundles.new.start", start);
-            
+            props.put("config.factory-pid","openidm");
             config.update(props);
             logger.info("Configuration from file enabled");
         } else {
