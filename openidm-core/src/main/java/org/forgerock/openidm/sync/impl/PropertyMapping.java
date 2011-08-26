@@ -122,7 +122,7 @@ class PropertyMapping {
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
         if (condition != null) { // optional property mapping condition
             Map<String, Object> scope = service.newScope();
-            scope.put("object", sourceObject);
+            scope.put("object", sourceObject.asMap());
             try {
                 Object o = condition.exec(scope);
                 if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
