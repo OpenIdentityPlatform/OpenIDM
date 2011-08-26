@@ -115,7 +115,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
             referenceInterface = CryptoService.class,
             bind = "bindCryptoService",
             unbind = "unbindCryptoService",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.STATIC
     )
     protected CryptoService cryptoService;
