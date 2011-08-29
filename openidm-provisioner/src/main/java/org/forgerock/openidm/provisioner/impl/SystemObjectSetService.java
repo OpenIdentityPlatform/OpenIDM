@@ -157,12 +157,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         // Append the system created local identifier
         URI newId = identifier.resolveLocalId((String) object.get("_id")).getId();
         ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
-        try {
+        /*try {
             onCreate(id, new JsonNode(object));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
-        }
+        }*/
     }
 
     /**
@@ -215,12 +215,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         service.update(id, rev, object);
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, object, Status.SUCCESS);
 
-        try {
+        /*try {
             onUpdate(id, new JsonNode(oldValue), new JsonNode(object));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
-        }
+        }*/
     }
 
     /**
@@ -246,12 +246,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         service.delete(id, rev);
         ActivityLog.log(getRouter(), Action.DELETE, "", id, oldValue, null, Status.SUCCESS);
 
-        try {
+        /*try {
             onDelete(id);
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
-        }
+        }*/
     }
 
     /**
@@ -281,14 +281,12 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         Map<String, Object> newValue = service.read(id);
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, newValue, Status.SUCCESS);
 
-        try {
+        /*try {
             onUpdate(id, new JsonNode(oldValue), new JsonNode(newValue));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
-        }
-
-
+        }*/
     }
 
     /**

@@ -456,7 +456,7 @@ public class GenericTableHandler implements TableHandler {
             throw new NotFoundException("Object does not exist for delete on: " + fullId);
         }
         String existingRev = existing.getString("rev");
-        if (!rev.equals(existingRev)) {
+        if (!"*".equals(rev) && !rev.equals(existingRev)) {
             throw new PreconditionFailedException("Delete rejected as current Object revision " + existingRev + " is different than "
                     + "expected by caller " + rev + ", the object has changed since retrieval.");
         }

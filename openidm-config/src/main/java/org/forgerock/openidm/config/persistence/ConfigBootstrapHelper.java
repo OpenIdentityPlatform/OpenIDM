@@ -159,7 +159,7 @@ public class ConfigBootstrapHelper {
             }
         };
         
-        String[] repoConfigFiles = new File(confDir).list(repoConfFilter);
+        String[] repoConfigFiles = new File(confDir).getAbsoluteFile().list(repoConfFilter);
         return repoConfigFiles;
     }
     
