@@ -57,7 +57,19 @@
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
                 <exclude>org.forgerock.openicf.connectors.*</exclude>
+                <exclude>org.forgerock.openidm:openidm-config</exclude>
+                <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
+                <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
             </excludes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/bundle/init</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-config</include>
+                <include>org.forgerock.openidm:openidm-repo-jdbc</include>
+                <include>org.forgerock.openidm:openidm-repo-orientdb</include>
+            </includes>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
