@@ -87,8 +87,10 @@ public class RepoPersistenceManager implements PersistenceManager {
             new Thread() {
                 public void run() {
                     try {
-                        while (repo == null) {
-                            
+                        //Rapid development may require only memory store.
+                        boolean requireRepo = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
+                        while (requireRepo && (repo == null)) {
+
                             logger.debug("Bootstrapping repository");
                             repo = (RepoBootService) repoTracker.waitForService(5000);
                             if (repo != null) {
@@ -107,6 +109,10 @@ public class RepoPersistenceManager implements PersistenceManager {
                         
                         // Proceed to configuration file handling once repo bootstrapped 
                         // and configuration admin service is available
+
+                        // This code is never reached if the JDBC Repo configured in a JSON file. The JSONConfigInstaller
+                        // is never started. It does not init the JDBC Repo. Catch-22
+                        // If you use JDBC Repo you must bootstrap it via System properties first.
                         ConfigBootstrapHelper.installAllConfig(configAdmin);
                         logger.debug("Enabled handling of configuration files");
                     } catch (InterruptedException ex) {

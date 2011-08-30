@@ -98,6 +98,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo-jdbc</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -206,6 +211,13 @@
             <version>1.1.0.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- Sample Dependencies -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>3.0.5.RELEASE</version>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -230,7 +242,7 @@
                         WEB-INF/lib/jcl-over-slf4j*.jar,
                         WEB-INF/lib/logback-core*.jar,
                         WEB-INF/lib/logback-classic*.jar,
-                        WEB-INF/bundle/*,
+                        WEB-INF/bundle/**/*,
                         WEB-INF/classes/**/*,
                         WEB-INF/conf/*,
                         WEB-INF/connectors/*,
@@ -255,6 +267,24 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>copy-init-bundles</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>
+                                openidm-config,
+                                openidm-repo-jdbc,
+                                openidm-repo-orientdb,
+                                openidm-system,
+                            </includeArtifactIds>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>
+                                ${project.build.directory}/${project.build.finalName}/WEB-INF/bundle/init
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>copy-bundles</id>
                         <goals>
                             <goal>copy-dependencies</goal>
@@ -273,16 +303,13 @@
                                 json-fluent,
                                 json-schema,
                                 openidm-audit,
-                                openidm-config,
                                 openidm-crypto,
                                 openidm-core,
                                 openidm-provisioner-openicf,
                                 openidm-provisioner,
-                                openidm-repo-orientdb,
                                 openidm-repo,
                                 openidm-restlet,
-                                openidm-scheduler,
-                                openidm-system,
+                                openidm-scheduler,                                
                                 openidm-ui,
                                 openidm-util,
                                 org.apache.felix.configadmin,
@@ -339,7 +366,21 @@
                 <version>6.1.26</version>
                 <configuration>
                     <contextPath>/</contextPath>
+                    <scanIntervalSeconds>0</scanIntervalSeconds>
+                    <!--userRealms>
+                        <userRealm implementation="org.mortbay.jetty.security.HashUserRealm">
+                            <name>openidm</name>
+                            <config>src/main/webapp/WEB-INF/conf/realm.properties</config>
+                        </userRealm>
+                    </userRealms-->
                 </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>mysql</groupId>
+                        <artifactId>mysql-connector-java</artifactId>
+                        <version>5.1.17</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
