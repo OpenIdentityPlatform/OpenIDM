@@ -186,7 +186,7 @@ public class ContainerUtil  {
      */
     private static Framework startFramework() {        
         Option[] options = new Option[]{
-            systemProperty("felix.fileinstall.dir").value("./target/openidm-pkg/openidm/bundle,./src/it/resources/conf"),
+            systemProperty("felix.fileinstall.dir").value("./target/openidm-pkg/openidm/bundle/init,./target/openidm-pkg/openidm/bundle,./src/it/resources/conf"),
             systemProperty("felix.fileinstall.filter").value("^((?!fileinstall).)*$"),
             //systemProperty("felix.fileinstall.log.level").value("4"),
             felix(),
