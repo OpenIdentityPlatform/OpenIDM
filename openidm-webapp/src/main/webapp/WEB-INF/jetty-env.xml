@@ -1,0 +1,34 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<Configure class="org.mortbay.jetty.webapp.WebAppContext">
+    <Set name="maxFormContentSize">1000000</Set>
+    <!-- See more examples at http://docs.codehaus.org/display/JETTY/DataSource+Examples -->
+    <!--
+    <New id="OpenIDM" class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>jdbc/OpenIDM</Arg>
+        <Arg>
+            <New class="com.ibm.db2.jcc.DB2SimpleDataSource">
+                <Set name="DatabaseName">OPENIDM</Set>
+                <Set name="User">openidm_proxy</Set>
+                <Set name="Password"></Set>
+                <Set name="ServerName">127.0.0.1</Set>
+                <Set name="PortNumber">446</Set>
+                <Set name="DriverType">4</Set>
+            </New>
+        </Arg>
+    </New>
+    -->
+    <!--
+    <New id="OpenIDM" class="org.mortbay.jetty.plus.naming.Resource">
+        <Arg>jdbc/OpenIDM</Arg>
+        <Arg>
+            <New class="com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource">
+                <Set name="Url">jdbc:mysql://localhost:3306/openidm</Set>
+                <Set name="User">root</Set>
+                <Set name="Password"></Set>
+            </New>
+        </Arg>
+    </New>
+    -->
+</Configure>
