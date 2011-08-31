@@ -97,16 +97,13 @@ class Link {
              query.asMap())).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
             if (results.size() == 1) {
                 fromJsonNode(results.get(0));
+            } else if (results.size() > 1) { // shouldn't happen if index is unique
+                throw new SynchronizationException("More than one link found");
             }
-            else if (results.size() > 1) { // shouldn't happen if index is unique
-                throw new SynchronizationException("more than one link found");
-            }
-        }
-        catch (JsonNodeException jne) {
-            throw new SynchronizationException("malformed link query response", jne);
-        }
-        catch (ObjectSetException ose) {
-            throw new SynchronizationException("link query failed", ose);
+        } catch (JsonNodeException jne) {
+            throw new SynchronizationException("Malformed link query response", jne);
+        } catch (ObjectSetException ose) {
+            throw new SynchronizationException("Link query failed", ose);
         }
     }
 
@@ -196,7 +193,7 @@ class Link {
         try {
             mapping.getService().getRouter().create(linkId(_id), node.asMap());
         } catch (ObjectSetException ose) {
-            LOGGER.debug("failed to create link", ose);
+            LOGGER.warn("Failed to create link", ose);
             throw new SynchronizationException(ose);
         }
         this._id = node.get("_id").required().asString();
@@ -212,9 +209,8 @@ class Link {
         if (_id != null) { // forgiving delete
             try {
                 mapping.getService().getRouter().delete(linkId(_id), _rev);
-            }
-            catch (ObjectSetException ose) {
-                LOGGER.debug("failed to delete link", ose);
+            } catch (ObjectSetException ose) {
+                LOGGER.warn("Failed to delete link", ose);
                 throw new SynchronizationException(ose);
             }
             clear();
@@ -228,14 +224,13 @@ class Link {
      */
     void update() throws SynchronizationException {
         if (_id == null) {
-            throw new SynchronizationException("attempt to update non-existent link");
+            throw new SynchronizationException("Attempt to update non-existent link");
         }
         JsonNode node = toJsonNode();
         try {
             mapping.getService().getRouter().update(linkId(_id), _rev, node.asMap());
-        }
-        catch (ObjectSetException ose) {
-            LOGGER.debug("failed to update link", ose);
+        } catch (ObjectSetException ose) {
+            LOGGER.warn("Failed to update link", ose);
             throw new SynchronizationException(ose);
         }
         this._rev = node.get("_rev").asString(); // optional

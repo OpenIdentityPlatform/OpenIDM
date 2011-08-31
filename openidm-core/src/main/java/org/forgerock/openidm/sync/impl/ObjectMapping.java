@@ -120,7 +120,7 @@ class ObjectMapping implements SynchronizationListener {
         }
         onCreateScript = Scripts.newInstance(config.get("onCreate"));
         onUpdateScript = Scripts.newInstance(config.get("onUpdate"));
-        LOGGER.debug("Instantiated object mapping: {}", name + ": " + sourceObjectSet + "->" + targetObjectSet);
+        LOGGER.debug("Instantiated {}", name);
     }
 
     /**
@@ -229,7 +229,7 @@ class ObjectMapping implements SynchronizationListener {
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
-            LOGGER.debug("failed to read target object", ose);
+            LOGGER.warn("Failed to read target object", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -252,7 +252,7 @@ class ObjectMapping implements SynchronizationListener {
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
-            LOGGER.debug("failed to create target object", ose);
+            LOGGER.warn("Failed to create target object", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -271,7 +271,7 @@ class ObjectMapping implements SynchronizationListener {
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
-            LOGGER.debug("failed to update target object", ose);
+            LOGGER.warn("Failed to update target object", ose);
             throw new SynchronizationException(ose);
         }
     }
@@ -293,7 +293,7 @@ class ObjectMapping implements SynchronizationListener {
             } catch (NotFoundException nfe) {
                 // forgiving delete
             } catch (ObjectSetException ose) {
-                LOGGER.debug("failed to delete target object", ose);
+                LOGGER.warn("Failed to delete target object", ose);
                 throw new SynchronizationException(ose);
             }
         }
@@ -354,9 +354,8 @@ class ObjectMapping implements SynchronizationListener {
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
-                    LOGGER.info("Unexpected failure during source reconciliation " + reconId, se);
+                    LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
                 }
-
                 Throwable throwable = se;
                 while (throwable.getCause() != null) { // want message associated with original cause
                     throwable = throwable.getCause();
@@ -385,7 +384,7 @@ class ObjectMapping implements SynchronizationListener {
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
-                    LOGGER.info("Unexpected failure during target reconciliation " + reconId, se);
+                    LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
                 }
                 Throwable throwable = se;
                 while (throwable.getCause() != null) { // want message associated with original cause
@@ -476,6 +475,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
                 }
             }
+            LOGGER.debug("Determined action to be {}", action);
         }
 
         /**
@@ -541,8 +541,7 @@ class ObjectMapping implements SynchronizationListener {
                 case EXCEPTION:
                     throw new SynchronizationException(); // aborts change; recon reports
                 }
-            }
-            catch (JsonNodeException jne) {
+            } catch (JsonNodeException jne) {
                 throw new SynchronizationException(jne);
             }
         }
@@ -566,7 +565,7 @@ class ObjectMapping implements SynchronizationListener {
                         }
                         result = (Boolean)o;
                     } catch (ScriptException se) {
-                        LOGGER.debug(name + " validSource script encountered exception", se);
+                        LOGGER.debug("{} validSource script encountered exception", name, se);
                         throw new SynchronizationException(se);
                     }
                 } else { // no script means true
@@ -595,7 +594,7 @@ class ObjectMapping implements SynchronizationListener {
                         }
                         result = (Boolean)o;
                     } catch (ScriptException se) {
-                        LOGGER.debug(name + " validTarget script encountered exception", se);
+                        LOGGER.debug("{} validTarget script encountered exception", name, se);
                         throw new SynchronizationException(se);
                     }
                 } else { // no script means true
@@ -621,7 +620,7 @@ class ObjectMapping implements SynchronizationListener {
                 try {
                     script.exec(scope);
                 } catch (ScriptException se) {
-                    LOGGER.debug("mapping " + name + " " + type + " script encountered exception", se);
+                    LOGGER.debug("{} script encountered exception", name + " " + type, se);
                     throw new SynchronizationException(se);
                 }
             }
@@ -686,6 +685,7 @@ class ObjectMapping implements SynchronizationListener {
                     situation = null; // TODO: provide a situation for this?
                 }
             }
+            LOGGER.debug("Assessed situation to be {}", situation);
         }
 
         /**
@@ -706,7 +706,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
                     result = new JsonNode(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {
-                    LOGGER.debug(name + " correlationQuery script encountered exception", se);
+                    LOGGER.debug("{} correlationQuery script encountered exception", name, se);
                     throw new SynchronizationException(se);
                 }
             }
