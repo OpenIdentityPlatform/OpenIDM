@@ -122,14 +122,17 @@ class PropertyMapping {
     public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
         if (condition != null) { // optional property mapping condition
             Map<String, Object> scope = service.newScope();
-            scope.put("object", sourceObject.asMap());
             try {
+                scope.put("object", sourceObject.asMap());
                 Object o = condition.exec(scope);
                 if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
                     return; // property mapping is not applicable; do not apply
                 }
+            } catch (JsonNodeException jne) {
+                LOGGER.warn("Unexpected JSON node exception", jne);
+                throw new SynchronizationException(jne);
             } catch (ScriptException se) {
-                LOGGER.debug("property mapping " + targetPointer + " condition script encountered exception", se);
+                LOGGER.warn("Property mapping " + targetPointer + " condition script encountered exception", se);
                 throw new SynchronizationException(se);
             }
         }
@@ -146,7 +149,7 @@ class PropertyMapping {
             try {
                 result = transform.exec(scope); // script yields transformation result
             } catch (ScriptException se) {
-                LOGGER.debug("property mapping " + targetPointer + " value script encountered exception", se);
+                LOGGER.warn("Property mapping " + targetPointer + " transformation script encountered exception", se);
                 throw new SynchronizationException(se);
             }
         }
