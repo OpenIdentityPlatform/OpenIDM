@@ -84,7 +84,6 @@ public class FrameworkService {
 
         // Load system properties.
         loadSystemProperties();
-        System.setProperty("user.dir", this.context.getRealPath("/WEB-INF"));
         // Read configuration properties.
         Properties configProps = loadConfigProperties();
         // If no configuration properties were found, then create

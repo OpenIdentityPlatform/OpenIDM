@@ -14,6 +14,8 @@ keytool -selfcert -alias openidm-localhost -validity 3653 -keystore keystore.jce
 keytool -export -alias openidm-local-openidm-forgerock-org -file openidm-local-openidm-forgerock-org-cert.txt -rfc -keystore keystore.jceks -storetype JCEKS
 keytool -export -alias openidm-localhost -file openidm-localhost-cert.txt -rfc -keystore keystore.jceks -storetype JCEKS
 
+keytool -export -alias openidm-local-openidm-forgerock-org -file openidm-local-openidm-forgerock-org-cert-der.crt -keystore keystore.jceks -storetype JCEKS
+keytool -export -alias openidm-localhost -file openidm-localhost-cert-der.crt -keystore keystore.jceks -storetype JCEKS
 
 keytool -import -alias openidm-local-openidm-forgerock-org -file openidm-local-openidm-forgerock-org-cert.txt -keystore truststore -storetype JKS
 keytool -import -alias openidm-localhost -file openidm-localhost-cert.txt -keystore truststore -storetype JKS
