@@ -99,7 +99,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
      */
     @Override // ObjectSet
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        if (IdentityServer.isDevelopmentModeEnabled()) {
+        if (IdentityServer.isDevelopmentProfileEnabled()) {
             getProvisioner().create(id, object);
         } else {
             throw new ForbiddenException("Operation is only allowed in debug profile");
@@ -122,7 +122,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
      */
     @Override // ObjectSet
     public Map<String, Object> read(String id) throws ObjectSetException {
-        if (IdentityServer.isDevelopmentModeEnabled()) {
+        if (IdentityServer.isDevelopmentProfileEnabled()) {
             return getProvisioner().read(id);
         }
         throw new ForbiddenException("Operation is only allowed in debug profile");
@@ -148,7 +148,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
      */
     @Override // ObjectSet
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        if (IdentityServer.isDevelopmentModeEnabled()) {
+        if (IdentityServer.isDevelopmentProfileEnabled()) {
             getProvisioner().update(id, rev, object);
         } else {
             throw new ForbiddenException("Operation is only allowed in debug profile");
@@ -171,7 +171,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
      */
     @Override // ObjectSet
     public void delete(String id, String rev) throws ObjectSetException {
-        if (IdentityServer.isDevelopmentModeEnabled()) {
+        if (IdentityServer.isDevelopmentProfileEnabled()) {
             getProvisioner().delete(id, rev);
         } else {
             throw new ForbiddenException("Operation is only allowed in debug profile");
@@ -195,7 +195,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
      */
     @Override // ObjectSet
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        if (IdentityServer.isDevelopmentModeEnabled()) {
+        if (IdentityServer.isDevelopmentProfileEnabled()) {
             getProvisioner().patch(id, rev, patch);
         } else {
             throw new ForbiddenException("Operation is only allowed in debug profile");
@@ -218,7 +218,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
      */
     @Override // ObjectSet
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        if (IdentityServer.isDevelopmentModeEnabled()) {
+        if (IdentityServer.isDevelopmentProfileEnabled()) {
             return getProvisioner().query(id, params);
         }
         throw new ForbiddenException("Operation is only allowed in debug profile");
@@ -251,7 +251,7 @@ public class ExternalSystemObjectSetService implements ObjectSet {
                 }
                 break;
             case DEBUGEXECUTESCRIPT:
-                if (IdentityServer.isDevelopmentModeEnabled()) {
+                if (IdentityServer.isDevelopmentProfileEnabled()) {
                     Object _entity = params.get("_entity");
                     if (_entity instanceof Map) {
                         Map<String, Object> script = (Map<String, Object>) _entity;

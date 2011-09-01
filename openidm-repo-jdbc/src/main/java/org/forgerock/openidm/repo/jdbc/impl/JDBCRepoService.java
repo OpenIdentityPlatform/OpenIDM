@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
@@ -30,11 +31,14 @@ import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.*;
+import org.forgerock.openidm.osgi.OsgiName;
+import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +60,8 @@ import java.util.Map;
  * @author aegloff
  */
 @Component(name = "org.forgerock.openidm.repo.jdbc", immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service (value = {RepositoryService.class, ObjectSet.class}) // Omit the RepoBootService interface from the managed service
+@Service(value = {RepositoryService.class, ObjectSet.class})
+// Omit the RepoBootService interface from the managed service
 @Properties({
         @Property(name = "service.description", value = "Repository Service using JDBC"),
         @Property(name = "service.vendor", value = "ForgeRock AS"),
@@ -71,6 +76,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
     // Keys in the JSON configuration
     public static final String CONFIG_JNDI_NAME = "jndiName";
+    public static final String CONFIG_JTA_NAME = "jtaName";
     public static final String CONFIG_DB_TYPE = "dbType";
     public static final String CONFIG_DB_DRIVER = "dbDriver";
     public static final String CONFIG_DB_URL = "dbUrl";
@@ -79,8 +85,9 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     public static final String CONFIG_DB_SCHEMA = "dbSchema";
     public static final String CONFIG_MAX_BATCH_SIZE = "maxBatchSize";
 
-    private boolean useJndi;
+    private boolean useDataSource;
     private String jndiName;
+    private String jtaName;
     private DataSource ds;
     private String dbDriver;
     private String dbUrl;
@@ -424,7 +431,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     }
 
     Connection getConnection() throws SQLException {
-        if (useJndi) {
+        if (useDataSource) {
             return ds.getConnection();
         } else {
             return DriverManager.getConnection(dbUrl, user, password);
@@ -455,13 +462,13 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
      * @param repoConfig the bootstrap configuration
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
-    static RepoBootService getRepoBootService(Map repoConfig) {
+    static RepoBootService getRepoBootService(Map repoConfig, BundleContext context) {
         JDBCRepoService bootRepo = new JDBCRepoService();
         JsonNode cfg = new JsonNode(repoConfig);
-        bootRepo.init(cfg);
+        bootRepo.init(cfg, context);
         return bootRepo;
     }
-    
+
     @Activate
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
@@ -469,16 +476,16 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: " 
+            logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: "
                     + ex.getMessage(), ex);
             throw ex;
         }
-        init(config);
+        init(config, compContext.getBundleContext());
 
         logger.info("Repository started.");
     }
-    
-    void init (JsonNode config) throws InvalidException {
+
+    void init(JsonNode config, BundleContext bundleContext) throws InvalidException {
         try {
             String enabled = config.get("enabled").asString();
             if ("false".equals(enabled)) {
@@ -488,6 +495,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
             // Data Source configuration
             jndiName = config.get(CONFIG_JNDI_NAME).asString();
+            jtaName = config.get(CONFIG_JTA_NAME).asString();
             if (jndiName != null && jndiName.trim().length() > 0) {
                 // Get DB connection via JNDI
                 logger.info("Using DB connection configured via Driver Manager");
@@ -502,8 +510,18 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                             + " Configure DB initialization via direct " + CONFIG_DB_DRIVER + " configuration instead.");
                 }
 
-                useJndi = true;
+                useDataSource = true;
                 ds = (DataSource) ctx.lookup(jndiName); // e.g. "java:comp/env/jdbc/MySQLDB"
+            } else if (!StringUtils.isBlank(jtaName)) {
+                // e.g. osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)
+                OsgiName lookupName = OsgiName.parse(jtaName);
+                Object service = ServiceUtil.getService(bundleContext, lookupName, null, true);
+                if (service instanceof DataSource) {
+                    useDataSource = true;
+                    ds = (DataSource) service;
+                } else {
+                    throw new RuntimeException("DataSource can not be retrieved for: " + jtaName);
+                }
             } else {
                 // Get DB Connection via Driver Manager
                 dbDriver = config.get(CONFIG_DB_DRIVER).asString();
@@ -523,7 +541,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                             + dbDriver + " to start repository ", ex);
                 }
             }
-            
+
             // Table handling configuration
             String dbSchemaName = config.get(CONFIG_DB_SCHEMA).defaultTo("openidm").asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
@@ -538,7 +556,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             DatabaseType databaseType = DatabaseType.valueOf(config.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
             defaultTableHandler = getGenericTableHandler(databaseType, defaultMainTable, defaultPropTable, dbSchemaName, genericQueries, maxBatchSize);
-            
+
             logger.debug("Using default table handler: {}", defaultTableHandler);
 
             // Default the configuration table for bootstrap
@@ -550,7 +568,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     genericQueries,
                     1);
             tableHandlers.put("config", defaultConfigHandler);
-            
+
             JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
             if (!genericMapping.isNull()) {
                 for (String key : genericMapping.keys()) {
@@ -571,7 +589,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     logger.debug("For pattern {} added handler: {}", key, handler);
                 }
             }
-            
+
             JsonNode explicitQueries = config.get("queries").get("explicitTables");
             JsonNode explicitMapping = config.get("resourceMapping").get("explicitMapping");
             if (!explicitMapping.isNull()) {
@@ -607,12 +625,12 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     + ". If this is not temporary or resolved, Repository operation will be affected.", ex);
         }
     }
-    
-    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, String mainTable, String propertiesTable, 
-            String dbSchemaName, JsonNode queries, int maxBatchSize) {
+
+    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, String mainTable, String propertiesTable,
+                                               String dbSchemaName, JsonNode queries, int maxBatchSize) {
 
         GenericTableHandler handler = null;
-        
+
         // TODO: make pluggable
         switch (databaseType) {
             case DB2:

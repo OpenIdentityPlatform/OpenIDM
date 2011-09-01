@@ -156,7 +156,7 @@ public class IdentityServer {
         if (f.isAbsolute()) {
             return f;
         } else {
-            return new File(getServerRoot(), path);
+            return new File(getServerRoot(), path).getAbsoluteFile();
         }
     }
 
@@ -170,7 +170,7 @@ public class IdentityServer {
      *
      * @return true if {@code Development} mode is on.
      */
-    public static boolean isDevelopmentModeEnabled() {
+    public static boolean isDevelopmentProfileEnabled() {
         String debug = identityServer.getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE);
         return (null != debug) && Boolean.valueOf(debug);
     }
