@@ -66,8 +66,7 @@ import org.forgerock.openidm.scope.ObjectSetFunctions;
 @Properties({
     @Property(name = "service.description", value = "OpenIDM managed objects service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "managed"),
-    @Property(name = "openidm.restlet.path", value = "/managed")
+    @Property(name = "openidm.router.prefix", value = "managed")
 })
 @Service
 public class ManagedObjectService extends ObjectSetRouter {

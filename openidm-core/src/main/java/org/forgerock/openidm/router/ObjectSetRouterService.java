@@ -75,7 +75,8 @@ import org.forgerock.openidm.script.Scripts;
 )
 @Properties({
     @Property(name = "service.description", value = "OpenIDM internal object set router"),
-    @Property(name = "service.vendor", value = "ForgeRock AS")
+    @Property(name = "service.vendor", value = "ForgeRock AS"),
+    @Property(name = "openidm.restlet.path", value = "/")
 })
 @Service
 public class ObjectSetRouterService extends ObjectSetRouter {
@@ -257,6 +258,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         throws ForbiddenException, InternalServerErrorException {
             if (before != null && matches(method, id)) {
                 try {
+                    LOGGER.debug("calling before trigger for {}", pattern.toString()); 
                     before.exec(newScope(method, id, object, params, null));
                 } catch (ScriptThrownException ste) {
                     throw new ForbiddenException(ste.getValue().toString()); // validation failed
@@ -277,6 +279,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         Map<String, Object> result) throws InternalServerErrorException {
             if (after != null && matches(method, id)) {
                 try {
+                    LOGGER.debug("calling after trigger for {}", pattern.toString()); 
                     after.exec(newScope(method, id, object, params, result));
                 } catch (ScriptException se) {
                     String msg = pattern.toString() + " after script encountered exception";
