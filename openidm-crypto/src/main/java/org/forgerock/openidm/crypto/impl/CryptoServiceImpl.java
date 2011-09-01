@@ -189,8 +189,8 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public JsonNode decrypt(JsonNode node) throws JsonException {
-        node = new JsonNode(node); // make a shallow copy that we can modify
-        node.getTransformers().addAll(getDecryptionTransformers()); // add decryption transformers
-        return node.copy(); // make a deep copy, applying all transformations (incl. decryption)
+        ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(node.getTransformers());
+        transformers.addAll(getDecryptionTransformers());
+        return new JsonNode(node.getValue(), node.getPointer(), transformers).copy();
     }
 }
