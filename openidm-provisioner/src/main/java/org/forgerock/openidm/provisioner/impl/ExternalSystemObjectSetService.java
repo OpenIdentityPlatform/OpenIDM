@@ -49,9 +49,8 @@ import java.util.*;
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service")
         //@Property(name = "openidm.router.prefix", value = "external-system"), // internal object set router
-        @Property(name = "openidm.restlet.path", value = "/system")
 })
 public class ExternalSystemObjectSetService implements ObjectSet {
 

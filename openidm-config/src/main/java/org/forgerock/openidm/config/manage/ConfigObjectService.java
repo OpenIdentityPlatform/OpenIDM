@@ -79,8 +79,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = "service.description", value = "OpenIDM configuration service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "config"),
-    @Property(name = "openidm.restlet.path", value = "/config")
+    @Property(name = "openidm.router.prefix", value = "config")
 })
 @Service
 public class ConfigObjectService implements ObjectSet {

@@ -42,10 +42,13 @@ public class Application extends org.restlet.Application {
      * @param restlet TODO.
      */
     void attach(String path, Restlet restlet) {
+        if (!path.startsWith("/")) {
+            throw new IllegalArgumentException("Illegal path");
+        }
         restlet.setContext(getContext()); // set to this application's context
         Router router = (Router)getInboundRoot();
         router.attach((String)path, restlet, Template.MODE_EQUALS); // request for object set itself
-        router.attach((String)path + '/', restlet, Template.MODE_STARTS_WITH); // object within set
+        router.attach((String)path + (path.equals("/") ? "" : "/"), restlet, Template.MODE_STARTS_WITH); // object within set
     }
     
     /**
