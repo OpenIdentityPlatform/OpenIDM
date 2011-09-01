@@ -44,8 +44,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  PRIMARY KEY (`genericobjects_id`, `propkey`) ,
   INDEX `fk_genericobjectproperties_genericobjects` (`genericobjects_id` ASC) ,
+  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
   CONSTRAINT `fk_genericobjectproperties_genericobjects`
     FOREIGN KEY (`genericobjects_id` )
     REFERENCES `openidm`.`genericobjects` (`id` )
@@ -82,8 +82,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  PRIMARY KEY (`managedobjects_id`, `propkey`) ,
   INDEX `fk_managedobjectproperties_managedobjects` (`managedobjects_id` ASC) ,
+  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
@@ -121,7 +121,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_configobjectproperties_configobjects` (`configobjects_id` ASC) ,
-  PRIMARY KEY (`configobjects_id`, `propkey`) ,
+  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
   CONSTRAINT `fk_configobjectproperties_configobjects`
     FOREIGN KEY (`configobjects_id` )
     REFERENCES `openidm`.`configobjects` (`id` )
