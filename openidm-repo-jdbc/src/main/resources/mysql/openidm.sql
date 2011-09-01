@@ -6,13 +6,13 @@ CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 ;
 USE `openidm` ;
 
 -- -----------------------------------------------------
--- Table `openidm`.`objectypes`
+-- Table `openidm`.`objecttypes`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`objectypes` (
+CREATE  TABLE IF NOT EXISTS `openidm`.`objecttypes` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `objectype` VARCHAR(255) NULL ,
+  `objecttype` VARCHAR(255) NULL ,
   PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `idx_objecttypes_objecttype` (`objectype` ASC) )
+  UNIQUE INDEX `idx_objecttypes_objecttype` (`objecttype` ASC) )
 ENGINE = InnoDB;
 
 
@@ -30,7 +30,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjects` (
   UNIQUE INDEX `idx_genericobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
   CONSTRAINT `fk_genericobjects_objecttypes`
     FOREIGN KEY (`objecttypes_id` )
-    REFERENCES `openidm`.`objectypes` (`id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -44,8 +44,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  PRIMARY KEY (`genericobjects_id`, `propkey`) ,
   INDEX `fk_genericobjectproperties_genericobjects` (`genericobjects_id` ASC) ,
+  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
   CONSTRAINT `fk_genericobjectproperties_genericobjects`
     FOREIGN KEY (`genericobjects_id` )
     REFERENCES `openidm`.`genericobjects` (`id` )
@@ -68,7 +68,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjects` (
   INDEX `fk_managedobjects_objectypes` (`objecttypes_id` ASC) ,
   CONSTRAINT `fk_managedobjects_objectypes`
     FOREIGN KEY (`objecttypes_id` )
-    REFERENCES `openidm`.`objectypes` (`id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -82,8 +82,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
-  PRIMARY KEY (`managedobjects_id`, `propkey`) ,
   INDEX `fk_managedobjectproperties_managedobjects` (`managedobjects_id` ASC) ,
+  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
@@ -106,7 +106,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjects` (
   UNIQUE INDEX `idx_configobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
   CONSTRAINT `fk_configobjects_objecttypes`
     FOREIGN KEY (`objecttypes_id` )
-    REFERENCES `openidm`.`objectypes` (`id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -121,7 +121,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_configobjectproperties_configobjects` (`configobjects_id` ASC) ,
-  PRIMARY KEY (`configobjects_id`, `propkey`) ,
+  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
   CONSTRAINT `fk_configobjectproperties_configobjects`
     FOREIGN KEY (`configobjects_id` )
     REFERENCES `openidm`.`configobjects` (`id` )
@@ -146,7 +146,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   INDEX `fk_links_objecttypes` (`objecttypes_id` ASC) ,
   CONSTRAINT `fk_links_objecttypes`
     FOREIGN KEY (`objecttypes_id` )
-    REFERENCES `openidm`.`objectypes` (`id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
