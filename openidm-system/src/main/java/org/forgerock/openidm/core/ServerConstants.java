@@ -95,14 +95,14 @@ public class ServerConstants {
      * server root.
      */
     public static final String PROPERTY_SERVER_ROOT =
-            "org.forgerock.openidm.server.ServerRoot";
+            "openidm.system.server.root";
 
     /**
      * The name of the system property that can be used to enable
      * for the debug on startup.
      */
     public static final String PROPERTY_DEBUG_ENABLE =
-            "org.forgerock.openidm.server.debug.enable";
+            "openidm.system.debug.enable";
 
     /**
      * The column at which to wrap long lines of output in the command-line tools.
