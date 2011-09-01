@@ -145,7 +145,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     private void after(Method method, String id, Map<String, Object> object,
     Map<String, Object> params, Map<String, Object> result) throws ObjectSetException {
         for (Trigger trigger : triggers) {
-            trigger.before(method, id, object, params);
+            trigger.after(method, id, object, params, result);
         }
     }
 
