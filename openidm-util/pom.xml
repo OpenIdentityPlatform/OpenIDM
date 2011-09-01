@@ -117,6 +117,7 @@
                             org.forgerock.openidm.context;version=${openidm.version},
                             org.forgerock.openidm.crypto;version=${openidm.version},
                             org.forgerock.openidm.objset;version=${openidm.version},
+							org.forgerock.openidm.osgi;version=${openidm.version},
                             org.forgerock.openidm.patch;version=${openidm.version},
                             org.forgerock.openidm.scope;version=${openidm.version},
                             org.forgerock.openidm.script;version=${openidm.version},
