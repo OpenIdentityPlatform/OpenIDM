@@ -79,7 +79,9 @@ import org.slf4j.LoggerFactory;
 })
 @Service
 public class CryptoServiceImpl implements CryptoService {
-    private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
+
     /**
      * TODO: Description.
      */
@@ -112,7 +114,7 @@ public class CryptoServiceImpl implements CryptoService {
             if (configFile.exists()) {
                 result = new FileInputStream(configFile);
             } else {
-                logger.error("ERROR - KeyStore not found under CryptoService#location {}", configFile.getAbsolutePath());
+                LOGGER.error("ERROR - KeyStore not found under CryptoService#location {}", configFile.getAbsolutePath());
             }
         }
         return result;
@@ -137,22 +139,22 @@ public class CryptoServiceImpl implements CryptoService {
                         keySelector = new SimpleKeyStoreSelector(ks, password);
                         Enumeration<String> aliases = ks.aliases();
                         while (aliases.hasMoreElements()) {
-                            logger.info("Available cryptography key: {}", aliases.nextElement());
+                            LOGGER.info("Available cryptography key: {}", aliases.nextElement());
                             keyCount++;
                         }
                     }
                 } catch (IOException ioe) {
-                    logger.error("ERROR - IOException when loading KeyStore file.", ioe);
+                    LOGGER.error("IOException when loading KeyStore file", ioe);
                     throw new JsonNodeException(keystore, ioe);
                 } catch (GeneralSecurityException gse) {
-                    logger.error("ERROR - GeneralSecurityException when loading KeyStore file.", gse);
+                    LOGGER.error("GeneralSecurityException when loading KeyStore file", gse);
                     throw new JsonNodeException(keystore, gse);
                 }
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
             }
-            logger.info("OK - CryptoService is initialized with {} keys.", keyCount);
+            LOGGER.info("CryptoService is initialized with {} keys.", keyCount);
         } catch (JsonNodeException jne) {
-            logger.error("ERROR - JsonNodeException when loading CryptoService configuration", jne);
+            LOGGER.error("Exception when loading CryptoService configuration", jne);
             throw new ComponentException("Configuration error", jne);
         }
     }
@@ -168,8 +170,9 @@ public class CryptoServiceImpl implements CryptoService {
     public JsonTransformer getEncryptionTransformer(String cipher, String alias) throws JsonCryptoException {
         Key key = keySelector.select(alias);
         if (key == null) {
-            logger.error("ERROR - EncryptionKey not found: {}", alias);
-            throw new JsonCryptoException("key not found: " + alias);
+            String msg = "Encryption key " + alias + " not found";
+            LOGGER.error(msg);
+            throw new JsonCryptoException(msg);
         }
         return new JsonCryptoTransformer(new SimpleEncryptor(cipher, key, alias));
     }

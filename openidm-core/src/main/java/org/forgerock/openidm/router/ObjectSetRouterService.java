@@ -90,7 +90,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     /** TODO: Description. */
     private ComponentContext context;
 
-    private final List<Trigger> triggers = new ArrayList<Trigger>();
+    private final List<Filter> filters = new ArrayList<Filter>();
 
     /** TODO: Description. */
     private enum Method { CREATE, READ, UPDATE, DELETE, QUERY, ACTION, ALL };
@@ -123,8 +123,8 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         this.context = context;
         JsonNode config = new JsonNode(new JSONEnhancedConfig().getConfiguration(context));
         try {
-            for (JsonNode node : config.get("triggers").expect(List.class)) { // optional
-                triggers.add(new Trigger(node));
+            for (JsonNode node : config.get("filters").expect(List.class)) { // optional
+                filters.add(new Filter(node));
             }
         } catch (JsonNodeException jne) {
             throw new ComponentException("Configuration error", jne);
@@ -132,85 +132,91 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     }
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        triggers.clear();
+        filters.clear();
         this.context = null;
     }
 
-    private void before(Method method, String id, Map<String, Object> object,
+    private void onRequest(Method method, String id, Map<String, Object> object,
     Map<String, Object> params) throws ObjectSetException {
-        for (Trigger trigger : triggers) {
-            trigger.before(method, id, object, params);
+        for (Filter filter : filters) {
+            filter.onRequest(method, id, object, params);
         }
     }
 
-    private void after(Method method, String id, Map<String, Object> object,
+    private void onResponse(Method method, String id, Map<String, Object> object,
     Map<String, Object> params, Map<String, Object> result) throws ObjectSetException {
-        for (Trigger trigger : triggers) {
-            trigger.after(method, id, object, params, result);
+        for (Filter filter : filters) {
+            filter.onResponse(method, id, object, params, result);
         }
     }
 
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        before(Method.CREATE, id, object, null);
+        onRequest(Method.CREATE, id, object, null);
         super.create(id, object);
-        after(Method.CREATE, id, object, null, null);
+        onResponse(Method.CREATE, id, object, null, null);
     }
 
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
-        before(Method.READ, id, null, null);
+        onRequest(Method.READ, id, null, null);
         Map<String, Object> result = super.read(id);
-        after(Method.READ, id, null, null, result);
+        onResponse(Method.READ, id, null, null, result);
         return result;
     }
 
     @Override
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        before(Method.UPDATE, id, object, null);
+        onRequest(Method.UPDATE, id, object, null);
         super.update(id, rev, object);
-        after(Method.UPDATE, id, object, null, null);
+        onResponse(Method.UPDATE, id, object, null, null);
     }
 
     @Override
     public void delete(String id, String rev) throws ObjectSetException {
-        before(Method.DELETE, id, null, null);
+        onRequest(Method.DELETE, id, null, null);
         super.delete(id, rev);
-        after(Method.DELETE, id, null, null, null); 
+        onResponse(Method.DELETE, id, null, null, null); 
     }
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        before(Method.QUERY, id, null, params);
+        onRequest(Method.QUERY, id, null, params);
         Map<String, Object> result = super.query(id, params);
-        after(Method.QUERY, id, null, params, result);
+        onResponse(Method.QUERY, id, null, params, result);
         return result;
     }
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        before(Method.ACTION, id, null, params);
+        onRequest(Method.ACTION, id, null, params);
         Map<String, Object> result = super.action(id, params);
-        after(Method.ACTION, id, null, params, result);
+        onResponse(Method.ACTION, id, null, params, result);
         return result;
     }
 
     /**
      * TODO: Description.
      */
-    private class Trigger {
+    private class Filter {
 
         /** TODO: Description. */
         private Pattern pattern;
 
         /** TODO: Description. */
-        private final HashSet<Method> methods = new HashSet<Method>();
+        private String pointer;
 
         /** TODO: Description. */
-        private Script before;
+        private HashSet<Method> methods;
 
         /** TODO: Description. */
-        private Script after;
+        private Script condition;
+
+        /** TODO: Description. */
+        private Script onRequest;
+
+        /** TODO: Description. */
+        private Script onResponse;
 
         /**
          * TODO: Description.
@@ -218,15 +224,29 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          * @param config TODO.
          * @throws JsonNodeException TODO.
          */
-        public Trigger(JsonNode config) throws JsonNodeException {
-            pattern = config.get("pattern").required().asPattern();
-            for (JsonNode method : config.get("methods").required().expect(List.class)) {
+        public Filter(JsonNode config) throws JsonNodeException {
+            pointer = config.getPointer().toString();
+            pattern = config.get("pattern").asPattern();
+            for (JsonNode method : config.get("methods").expect(List.class)) {
+                if (methods == null) { // lazy initialization
+                    methods = new HashSet<Method>();
+                }
                 methods.add(method.asEnum(Method.class));
             }
-            before = Scripts.newInstance(config.get("before"));
-            after = Scripts.newInstance(config.get("after"));
+            condition = Scripts.newInstance(config.get("condition")); // optional
+            onRequest = Scripts.newInstance(config.get("onRequest")); // optional
+            onResponse = Scripts.newInstance(config.get("onResponse")); // optional
         }
 
+        /**
+         * TODO: Description.
+         *
+         * @param method TODO.
+         * @param id TODO.
+         * @param object TODO.
+         * @param params TODO.
+         * @param result TODO.
+         */
         private Map<String, Object> newScope(Method method, String id,
         Map<String, Object> object, Map<String, Object> params, Map<String, Object> result) {
             Map<String, Object> scope = ObjectSetFunctions.addToScope(new HashMap<String, Object>(), ObjectSetRouterService.this);
@@ -242,28 +262,56 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          * TODO: Description.
          *
          * @param method TODO.
+         * @param id TODO.
          * @return TODO.
          */
         private boolean matches(Method method, String id) {
-            return (id != null && (methods.contains(Method.ALL) || methods.contains(method)) && pattern.matcher(id).matches());
+            boolean result = (id != null && (methods == null || methods.contains(method)) && pattern.matcher(id).matches());
+            LOGGER.debug("{} matches yielded {}", pointer, Boolean.toString(result));
+            return result;
         }
 
         /**
          * TODO: Description.
          *
+         * @param scope.
+         * @return TODO.
+         * @throws InternalServerErrorException TODO.
+         */
+        private boolean evalCondition(Map<String, Object> scope) throws InternalServerErrorException {
+            boolean result = true; // default true unless script proves otherwise
+            if (condition != null) {
+                try {
+                    result = Boolean.TRUE.equals(condition.exec(scope));
+                } catch (ScriptException se) {
+                    String msg = pointer + " condition script encountered exception";
+                    LOGGER.debug(msg, se);
+                    throw new InternalServerErrorException(msg, se);
+                }
+            }
+            LOGGER.debug("{} evalCondition yielded {}", pointer, Boolean.toString(result));
+            return result;
+        }
+
+       /**
+         * TODO: Description.
+         *
          * @throws ForbiddenException if the script throws an exception.
          * @throws InternalServerErrorException if any other exception occurs during execution.
          */
-        void before(Method method, String id, Map<String, Object> object, Map<String, Object> params)
+        void onRequest(Method method, String id, Map<String, Object> object, Map<String, Object> params)
         throws ForbiddenException, InternalServerErrorException {
-            if (before != null && matches(method, id)) {
+            if (onRequest != null && matches(method, id)) {
                 try {
-                    LOGGER.debug("calling before trigger for {}", pattern.toString()); 
-                    before.exec(newScope(method, id, object, params, null));
+                    Map<String, Object> scope = newScope(method, id, object, params, null);
+                    if (evalCondition(scope)) {
+                        LOGGER.debug("Calling {} onRequest script", pointer); 
+                        onRequest.exec(scope);
+                    }
                 } catch (ScriptThrownException ste) {
                     throw new ForbiddenException(ste.getValue().toString()); // validation failed
                 } catch (ScriptException se) {
-                    String msg = pattern.toString() + " before script encountered exception";
+                    String msg = pointer + " onRequest script encountered exception";
                     LOGGER.debug(msg, se);
                     throw new InternalServerErrorException(msg, se);
                 }
@@ -275,14 +323,17 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          *
          * @throws InternalServerErrorException if any exception occurs during script execution.
          */
-        void after(Method method, String id, Map<String, Object> object, Map<String, Object> params,
+        void onResponse(Method method, String id, Map<String, Object> object, Map<String, Object> params,
         Map<String, Object> result) throws InternalServerErrorException {
-            if (after != null && matches(method, id)) {
+            if (onResponse != null && matches(method, id)) {
                 try {
-                    LOGGER.debug("calling after trigger for {}", pattern.toString()); 
-                    after.exec(newScope(method, id, object, params, result));
+                    Map<String, Object> scope = newScope(method, id, object, params, result);
+                    if (evalCondition(scope)) {
+                        LOGGER.debug("Calling {} onResponse script", pointer); 
+                        onResponse.exec(scope);
+                    }
                 } catch (ScriptException se) {
-                    String msg = pattern.toString() + " after script encountered exception";
+                    String msg = pointer + " onResponse script encountered exception";
                     LOGGER.debug(msg, se);
                     throw new InternalServerErrorException(msg, se);
                 }
