@@ -37,6 +37,7 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
+import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -132,8 +133,13 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
             connection.close();
         } catch (SQLException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL Exception in read of {} with error code {}, sql state {}", 
+                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+            }
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
         } catch (IOException ex) {
+            logger.debug("IO Exception in read of {}", fullId, ex);
             throw new InternalServerErrorException("Conversion of read object failed", ex);
         } finally {
             if (connection != null) {
@@ -182,19 +188,23 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             logger.debug("Commited created object for id: {}", fullId);
 
         } catch (SQLException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL Exception in create of {} with error code {}, sql state {}", 
+                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+            }
             rollback(connection);
-            // TODO: detect duplicate inserts with appropriate exception rather than generic
-
-            //if (isCauseIndexException()) {
-            //    throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
-            //            + ex.getMessage(), ex);
-            //} else {
+            boolean alreadyExisted = getTableHandler(type).isErrorType(ex, ErrorType.DUPLICATE_KEY);
+            if (alreadyExisted) {
+                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
+                        + ex.getMessage(), ex);
+            }
             throw new InternalServerErrorException("Creating object failed " + ex.getMessage(), ex);
-            //}
         } catch (java.io.IOException ex) {
+            logger.debug("IO Exception in create of {}", fullId, ex);
             rollback(connection);
             throw new InternalServerErrorException("Conversion of object to create failed", ex);
         } catch (RuntimeException ex) {
+            logger.debug("Runtime Exception in create of {}", fullId, ex);
             rollback(connection);
             throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
@@ -245,12 +255,18 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             connection.commit();
             logger.debug("Commited updated object for id: {}", fullId);
         } catch (SQLException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL Exception in update of {} with error code {}, sql state {}", 
+                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+            }
             rollback(connection);
             throw new InternalServerErrorException("Updating object failed " + ex.getMessage(), ex);
         } catch (java.io.IOException ex) {
+            logger.debug("IO Exception in update of {}", fullId, ex);
             rollback(connection);
             throw new InternalServerErrorException("Conversion of object to update failed", ex);
         } catch (RuntimeException ex) {
+            logger.debug("Runtime Exception in update of {}", fullId, ex);
             rollback(connection);
             throw new InternalServerErrorException("Updating object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
@@ -293,12 +309,18 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             connection.commit();
             logger.debug("Commited deleted object for id: {}", fullId);
         } catch (IOException ex) {
+            logger.debug("IO Exception in delete of {}", fullId, ex);
             rollback(connection);
             throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
         } catch (SQLException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL Exception in delete of {} with error code {}, sql state {}", 
+                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+            }
             rollback(connection);
             throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
         } catch (RuntimeException ex) {
+            logger.debug("Runtime Exception in delete of {}", fullId, ex);
             rollback(connection);
             throw new InternalServerErrorException("Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
         } finally {
@@ -372,6 +394,10 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                                 result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
             }
         } catch (SQLException ex) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SQL Exception in query of {} with error code {}, sql state {}", 
+                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+            }
             throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
         } finally {
             if (connection != null) {

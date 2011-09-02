@@ -30,6 +30,7 @@ import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
 import org.slf4j.Logger;
@@ -298,6 +299,14 @@ public class GenericTableHandler implements TableHandler {
         return batchingCount;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public boolean isErrorType(SQLException ex, ErrorType errorType) {
+        return XOpenErrorMapping.isErrorType(ex, errorType);
+    }
+    
+    
     // Ensure type is in objecttypes table and get its assigned id
     long getTypeId(String type, Connection connection) throws SQLException, InternalServerErrorException {
         Exception detectedEx = null;
