@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import org.apache.felix.cm.PersistenceManager;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.logging.OsgiLogHandler;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -71,6 +72,7 @@ public class Activator implements BundleActivator {
         context.registerService(new String[] {ArtifactInstaller.class.getName(), ConfigurationListener.class.getName()}, 
                  installer, installerProp);
         logger.debug("JSON configuration installer service registered");
+        logger.info("OpenIDM is starting from {}", IdentityServer.getServerRoot());
     }
 
     public void stop(BundleContext context) {

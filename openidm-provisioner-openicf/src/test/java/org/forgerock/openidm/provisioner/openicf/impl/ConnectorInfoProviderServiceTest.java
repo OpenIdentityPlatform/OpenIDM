@@ -29,6 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelperTest;
@@ -171,7 +172,8 @@ public class ConnectorInfoProviderServiceTest {
         URL root = ConnectorInfoProviderServiceTest.class.getResource("/connectorServer/");
         Assert.assertNotNull(root);
         Map<String, String> systemProperties = new HashMap<String, String>(1);
-        systemProperties.put("bundles.configuration.location", root.getPath());
+        systemProperties.put(ServerConstants.PROPERTY_SERVER_ROOT, root.getPath());
+        System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, root.getPath());
         return systemProperties;
     }
 

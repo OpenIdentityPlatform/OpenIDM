@@ -28,6 +28,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -61,7 +62,9 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -82,6 +85,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
     private boolean allowModification = true;
+    private final static ObjectMapper mapper = new ObjectMapper();
 
     /**
      * ConnectorInfoProvider service.
@@ -242,7 +246,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
 
         if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
             try {
+                traceObject(METHOD, id, object, null);
                 ConnectorObject connectorObject = helper.build(CreateApiOp.class, object);
+                traceObject(METHOD, id, null, connectorObject);
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, object);
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
@@ -406,6 +412,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
 
         if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
             try {
+                traceObject(METHOD, id, object, null);
                 Object newName = object.get("_name");
                 ConnectorObject connectorObject = null;
                 Set<Attribute> attributeSet = null;
@@ -424,7 +431,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     }
                 }
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
-
+                traceObject(METHOD, id, null, connectorObject);
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), attributeSet, operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
             } catch (AlreadyExistsException e) {
@@ -934,5 +941,22 @@ public class OpenICFProvisionerService implements ProvisionerService {
     ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
+    }
+
+    private void traceObject(String action, String id, Map<String, Object> source, ConnectorObject co) {
+        if (TRACE.isTraceEnabled()) {
+            if (null != source) {
+                StringWriter writer = new StringWriter();
+                try {
+                    mapper.writeValue(writer, source);
+                } catch (IOException e) {
+                    //Don't care
+                }
+                TRACE.info("Action: {}, Id: {}\nObject: {}", new Object[]{action, id, writer});
+            }
+            if (null != co) {
+                TRACE.trace("Action: {}, ConnectorObject: {}\n{}", new Object[]{action, id, SerializerUtil.serializeXmlObject(co, false)});
+            }
+        }
     }
 }

@@ -97,6 +97,14 @@ public class ServerConstants {
     public static final String PROPERTY_SERVER_ROOT =
             "openidm.system.server.root";
 
+
+    /**
+     * The name of the system property that can be used to specify the environment where
+     * the server is deployed to.
+     */
+    public static final String PROPERTY_SERVER_ENVIRONMENT =
+            "openidm.system.server.environment";
+
     /**
      * The name of the system property that can be used to enable
      * for the debug on startup.

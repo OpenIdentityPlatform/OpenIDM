@@ -23,7 +23,6 @@
  *
  * $Id$
  */
-
 package org.forgerock.openidm.web.osgi;
 
 import java.io.FileNotFoundException;
@@ -175,7 +174,6 @@ public class FrameworkService {
 //        map.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, Arrays.asList(new ProvisionActivator(this.context)));
 //        return map;
 //    }
-
     private void log(String message, Throwable cause) {
         this.context.log(message, cause);
     }
@@ -220,7 +218,12 @@ public class FrameworkService {
         InputStream is = null;
         try {
             if (null == propURL) {
-                is = this.context.getResourceAsStream("/WEB-INF/" + Main.CONFIG_DIRECTORY + "/" + Main.SYSTEM_PROPERTIES_FILE_VALUE);
+                String environment = System.getProperty("openidm.system.server.environment");
+                if (null != environment) {
+                    is = this.context.getResourceAsStream("/WEB-INF/" + Main.CONFIG_DIRECTORY + "/" + environment + "/" + Main.SYSTEM_PROPERTIES_FILE_VALUE);
+                } else {
+                    is = this.context.getResourceAsStream("/WEB-INF/" + Main.CONFIG_DIRECTORY + "/" + Main.SYSTEM_PROPERTIES_FILE_VALUE);
+                }
             } else {
                 is = propURL.openConnection().getInputStream();
             }
@@ -245,7 +248,7 @@ public class FrameworkService {
         }
 
         // Perform variable substitution on specified properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             System.setProperty(name,
                     Util.substVars(props.getProperty(name), name, null, null));
@@ -314,7 +317,7 @@ public class FrameworkService {
         }
 
         // Perform variable substitution for system properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
             String name = (String) e.nextElement();
             props.setProperty(name,
                     Util.substVars(props.getProperty(name), name, null, props));

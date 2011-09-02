@@ -7,6 +7,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -25,7 +26,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.UndeclaredThrowableException;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -39,9 +43,8 @@ import java.util.jar.JarInputStream;
 @Component(name = "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider", policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
 @Service
 @Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service"),
-        @Property(name = ConnectorInfoProviderService.PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL, value = ConnectorInfoProviderService.DEFAULT_CONNECTORS_LOCATION)
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service")
 })
 public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     private final static Logger TRACE = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
@@ -49,10 +52,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
 
     //Public Constants
     public static final String DEFAULT_CONNECTORS_LOCATION = "connectors";
-    public static final String PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL = "connectorsLocation";
+    public static final String PROPERTY_OPENICF_CONNECTOR_URL = "connectorsLocation";
 
     //Private
-    private static final String BUNDLES_CONFIGURATION_LOCATION = "bundles.configuration.location";
     private Map<String, RemoteFrameworkConnectionInfo> remoteFrameworkConnectionInfo = new HashMap<String, RemoteFrameworkConnectionInfo>();
     private URL[] connectorURLs = null;
 
@@ -64,32 +66,16 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
 
         // Create a single instance of ConnectorInfoManagerFactory
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
-        String connectorsArea = context.getBundleContext().getProperty(BUNDLES_CONFIGURATION_LOCATION);
         try {
             // String connectorLocation = DEFAULT_CONNECTORS_LOCATION;
-            String connectorLocation = configuration.get(PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL).asString();
-            if (StringUtil.isBlank(connectorLocation)) {
-                connectorLocation = DEFAULT_CONNECTORS_LOCATION;
-            }
-            // Only run the configuration changes if the connectorsArea is set.
-            if (connectorsArea == null) {
-                TRACE.info("System property [{}] is not defined.", BUNDLES_CONFIGURATION_LOCATION);
-                TRACE.info("Using default connectors location [{}].", connectorLocation);
-                connectorsArea = connectorLocation;
-            } else {
-                try {
-                    connectorsArea = new URI(connectorsArea).resolve(connectorLocation + "/").toString();
-                } catch (URISyntaxException e) {
-                    TRACE.error("Invalid connectorsArea {}", connectorsArea, e);
-                }
-            }
+            String connectorLocation = configuration.get(PROPERTY_OPENICF_CONNECTOR_URL).defaultTo(DEFAULT_CONNECTORS_LOCATION).asString();
+            // Initialise Local ConnectorInfoManager
+            initialiseLocalManager(factory, connectorLocation);
         } catch (JsonNodeException e) {
             TRACE.error("Invalid configuration {}", configuration.getValue(), e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
 
-        // Initialise Local ConnectorInfoManager
-        initialiseLocalManager(factory, connectorsArea);
 
         JsonNode remoteConnectorHosts = null;
         try {
@@ -129,41 +115,37 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     }
 
     protected void initialiseLocalManager(ConnectorInfoManagerFactory factory, String connectorsArea) {
-        if (null != connectorsArea) {
-            try {
-                String connectorsDir = URLDecoder.decode(connectorsArea, "UTF-8");
-                TRACE.info("Using connectors from [" + connectorsDir + "]");
-                File dir = IdentityServer.getFileForPath(connectorsDir);
-                //This is a fix to support absolute path on OSX
-                if (!dir.exists()) {
-                    String absolutePath = dir.getAbsolutePath();
-                    if (!absolutePath.endsWith(File.separator)) {
-                        dir = new File(absolutePath.concat(File.separator));
-                    }
+        try {
+            String connectorsDir = URLDecoder.decode(connectorsArea, "UTF-8");
+            TRACE.debug("Using connectors from [" + connectorsDir + "]");
+            File dir = IdentityServer.getFileForPath(connectorsDir);
+            //This is a fix to support absolute path on OSX
+            if (!dir.exists()) {
+                String absolutePath = dir.getAbsolutePath();
+                if (!absolutePath.endsWith(File.separator)) {
+                    dir = new File(absolutePath.concat(File.separator));
                 }
-
-                if (!dir.exists()) {
-                    String absolutePath = dir.getAbsolutePath();
-                    TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
-                } else {
-                    try {
-                        TRACE.debug("Looking for connectors in {} directory.", dir.getAbsoluteFile().toURI().toURL());
-                        URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
-                        factory.getLocalManager(bundleUrls);
-                    } catch (MalformedURLException e) {
-                        TRACE.error("How can this happen?", e);
-                    }
-
-                }
-            } catch (UnsupportedEncodingException e) {
-                // Should never happen.
-                throw new UndeclaredThrowableException(e);
-            } catch (Throwable t) {
-                TRACE.error("LocalManager initialisation for {} failed.", connectorsArea, t);
-                throw new ComponentException("LocalManager initialisation failed.", t);
             }
-        } else {
-            throw new ComponentException("connectors directory MUST be configured");
+
+            if (!dir.exists()) {
+                String absolutePath = dir.getAbsolutePath();
+                TRACE.error("Configuration area [" + absolutePath + "] does not exist. Unable to load connectors.");
+            } else {
+                try {
+                    TRACE.debug("Looking for connectors in {} directory.", dir.getAbsoluteFile().toURI().toURL());
+                    URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
+                    factory.getLocalManager(bundleUrls);
+                } catch (MalformedURLException e) {
+                    TRACE.error("How can this happen?", e);
+                }
+
+            }
+        } catch (UnsupportedEncodingException e) {
+            // Should never happen.
+            throw new UndeclaredThrowableException(e);
+        } catch (Throwable t) {
+            TRACE.error("LocalManager initialisation for {} failed.", connectorsArea, t);
+            throw new ComponentException("LocalManager initialisation failed.", t);
         }
     }
 
@@ -285,13 +267,10 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     private URL[] getConnectorURLs(URL... resourceURLs) {
         if (null == connectorURLs) {
             Set<URL> _bundleURLs = new HashSet<URL>();
-            //URL[] resourceURLs = ClasspathUrlFinder.findResourceBases(BUNDLES_REL_PATH);
             for (int j = 0; j < resourceURLs.length; j++) {
                 try {
-                    //URL bundleDirUrl = new URL(resourceURLs[j], BUNDLES_REL_PATH);
                     URL bundleDirUrl = resourceURLs[j];
 
-                    TRACE.debug("Make sure the URL {} end with \"/\"", bundleDirUrl);
                     Vector<URL> urls = null;
                     if ("file".equals(bundleDirUrl.getProtocol())) {
                         File file = new File(bundleDirUrl.toURI());
@@ -307,7 +286,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                             for (int i = 0; i < files.length; ++i) {
                                 File subFile = files[i];
                                 String fname = subFile.getName();
-                                TRACE.info("Load Connector Bundle: {}", fname);
+                                TRACE.trace("Load Connector Bundle: {}", fname);
                                 urls.add(new URL(bundleDirUrl, fname));
                             }
                         }
