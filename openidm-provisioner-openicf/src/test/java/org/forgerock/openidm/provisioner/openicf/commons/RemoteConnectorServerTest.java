@@ -116,7 +116,7 @@
 ////        URL root = RemoteConnectorServerTest.class.getResource("/connectors");
 ////        Assert.assertNotNull(root);
 ////        Map<String, Object> properties = new HashMap<String, Object>(1);
-////        properties.put(ConnectorInfoProviderService.PROPERTY_ORG_FORGEROCK_OPENICF_CONNECTOR_URL, root);
+////        properties.put(ConnectorInfoProviderService.PROPERTY_OPENICF_CONNECTOR_URL, root);
 ////        ConnectorInfoProviderService instance = new ConnectorInfoProviderService();
 ////        instance.activate(properties);
 //    }

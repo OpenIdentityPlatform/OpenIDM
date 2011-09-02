@@ -114,15 +114,12 @@ public class IdentityServer {
     public static String getServerRoot() {
         String root = identityServer.getProperty(ServerConstants.PROPERTY_SERVER_ROOT);
         if (null != root) {
-            try {
-                URI r = new URI(root);
+                File r = new File(root);
                 if (r.isAbsolute()) {
                     return root;
                 } else {
-                    return new File(r).getAbsolutePath();
+                    return r.getAbsolutePath();
                 }
-            } catch (URISyntaxException e) {
-            }
         }
         // We don't know where the server root is, so we'll have to assume it's
         // the current working directory.

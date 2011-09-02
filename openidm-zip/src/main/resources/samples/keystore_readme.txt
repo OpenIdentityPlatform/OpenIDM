@@ -19,3 +19,10 @@ keytool -export -alias openidm-localhost -file openidm-localhost-cert-der.crt -k
 
 keytool -import -alias openidm-local-openidm-forgerock-org -file openidm-local-openidm-forgerock-org-cert.txt -keystore truststore -storetype JKS
 keytool -import -alias openidm-localhost -file openidm-localhost-cert.txt -keystore truststore -storetype JKS
+
+
+keytool -importkeystore -srckeystore keystore.jceks -srcstoretype JCEKS -srcstorepass changeit -srckeypass changeit -srcalias openidm-localhost \
+ -destkeystore openidm-localhost.p12  -deststoretype PKCS12  -deststorepass changeit -destalias openidm-localhost  -destkeypass changeit -noprompt
+
+keytool -importkeystore -srckeystore keystore.jceks -srcstoretype JCEKS -srcstorepass changeit -srckeypass changeit -srcalias openidm-local-openidm-forgerock-org \
+ -destkeystore openidm-local-openidm-forgerock-org.p12  -deststoretype PKCS12  -deststorepass changeit -destalias openidm-local-openidm-forgerock-org  -destkeypass changeit -noprompt
