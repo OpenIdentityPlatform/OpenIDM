@@ -30,6 +30,7 @@ import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
 import org.slf4j.Logger;
@@ -312,6 +313,13 @@ public class MappedTableHandler implements TableHandler {
                 throws ObjectSetException {
         return queries.query(type, params, connection); 
     } 
+
+    /* (non-Javadoc)
+     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#isErrorType(SQLException, ErrorType)
+     */ 
+    public boolean isErrorType(SQLException ex, ErrorType errorType) {
+        return XOpenErrorMapping.isErrorType(ex, errorType);
+    }
     
     @Override
     public String toString() {

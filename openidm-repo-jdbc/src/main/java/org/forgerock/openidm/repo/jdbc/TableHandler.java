@@ -47,7 +47,7 @@ public interface TableHandler {
      * and object version {@code _rev} to enable optimistic concurrency
      *
      * @param fullId the qualified identifier of the object to retrieve from the object set.
-     * @param type is the qualifier of the object the retrieve
+     * @param type is the qualifier of the object to retrieve
      * @param localId the identifier without the qualifier of the object to retrieve
      * @throws NotFoundException if the specified object could not be found. 
      * @throws SQLException if a DB failure was reported
@@ -136,4 +136,15 @@ public interface TableHandler {
     
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
                 throws SQLException, ObjectSetException;
+    
+    /**
+     * Query if a given exception signifies a well known error type
+     * 
+     * Allows table handlers to abstract database specific differences in reporting errors.
+     * 
+     * @param ex The exception thrown by the database
+     * @param errorType the error type to test against
+     * @return true if the exception matches the error type passed
+     */
+    public boolean isErrorType(SQLException ex, ErrorType errorType);
 }
