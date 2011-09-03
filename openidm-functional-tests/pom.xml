@@ -54,6 +54,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.17</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
             <scope>test</scope>
@@ -125,6 +131,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId> 
+                <configuration>
+                    <argLine>-Xmx1024M -XX:MaxPermSize=128M</argLine>
+                    <excludedGroups>jdbc-repo</excludedGroups>
+                </configuration>
                 <executions>
                     <execution> 
                         <phase>integration-test</phase> 
@@ -158,7 +168,8 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                         <configuration>
                             <tasks>
                                 <echo message="prepare phase" />
-                                <unzip src="../openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip" dest="target/openidm-pkg/" />
+                                <unzip src="../openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip" dest="target/openidm-orientdb-pkg/" />
+                                <unzip src="../openidm-zip/target/openidm-2.0.0-SNAPSHOT.zip" dest="target/openidm-jdbc-pkg/" />
                             </tasks>
                         </configuration>
                         <goals>
@@ -166,7 +177,33 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                         </goals>
                     </execution>
                 </executions>
-            </plugin> 
+            </plugin>
+     <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+                <artifactItems>
+                  <artifactItem>
+                      <groupId>mysql</groupId>
+                      <artifactId>mysql-connector-java</artifactId>
+                      <version>5.1.17</version>
+                     <type>jar</type>
+                   </artifactItem>
+                 </artifactItems>
+               <outputDirectory>${project.build.directory}/openidm-jdbc-pkg/openidm/bundle</outputDirectory>
+               <overWriteReleases>false</overWriteReleases>
+               <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
         </plugins>
     </build>
 </project>
