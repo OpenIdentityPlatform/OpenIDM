@@ -168,7 +168,10 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public JsonTransformer getEncryptionTransformer(String cipher, String alias) throws JsonCryptoException {
-        Key key = keySelector.select(alias);
+        Key key = null;
+        if (keySelector != null) {
+            key = keySelector.select(alias);
+        }
         if (key == null) {
             String msg = "Encryption key " + alias + " not found";
             LOGGER.error(msg);
