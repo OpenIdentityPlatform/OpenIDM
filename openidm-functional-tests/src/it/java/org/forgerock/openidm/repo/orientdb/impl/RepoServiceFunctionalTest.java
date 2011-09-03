@@ -35,10 +35,7 @@ import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.testutil.osgi.ContainerUtil;
 
-
-
 import org.testng.annotations.*;
-
 
 import static org.testng.Assert.*;
 import static org.fest.assertions.Assertions.assertThat;
@@ -53,14 +50,18 @@ public class RepoServiceFunctionalTest {
     @BeforeClass
     public void activateService() {
         // Starts and installs all package bundles
-        containerUtil = ContainerUtil.startContainer();
+        String bundleDirs = "./target/openidm-orientdb-pkg/openidm/bundle/init,./target/openidm-orientdb-pkg/openidm/bundle";
+        String configDir = "./src/it/resources/conf/orientdb-test";
+        containerUtil = ContainerUtil.startContainer(bundleDirs, configDir);
         // Waits for the service to appear
         repo = containerUtil.getService(RepositoryService.class, "(db.type=OrientDB)");
     }
     
     @AfterClass
     public void cleanup() {
-        containerUtil.stop();
+        if (containerUtil != null) {
+            containerUtil.stop();
+        }
     }
      
     @Test(groups = {"repo"})

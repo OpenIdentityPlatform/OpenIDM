@@ -23,6 +23,7 @@
  */
 package org.forgerock.testutil.osgi;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -50,21 +51,29 @@ public class ContainerUtil  {
     
     Framework framework;
     // How long to wait for services to get registered
-    int defaultTimeout;
+    int defaultTimeout = 10000;
     
     private ContainerUtil(Framework framework) {
         this.framework = framework;
-        this.defaultTimeout = 10000;
     }
-    
     
     /**
      * Start a test container will all the bundles prepared in the 
-     * expanded openidm package in target/openidm-pkg
+     * expanded openidm package in bundleDirs
+     * @param bundleDirs the directory with the osgi bundles to start, comma delimited
+     * @param configDir the directory with the component configuration files to use
+     * @return the ContainerUtil helper wrapping the started container
      */
-    public static ContainerUtil startContainer() {
-        Framework aFramework = startFramework();
+    public static ContainerUtil startContainer(String bundleDirs, String configDir) {
+        Framework aFramework = startFramework(bundleDirs, configDir);
         return new ContainerUtil(aFramework);
+    }
+
+    /** @inheritdoc */
+    public static ContainerUtil startContainer() {
+        String bundleDirs  = "./target/openidm-pkg/openidm/bundle/init,./target/openidm-pkg/openidm/bundle";
+        String configDir = "./src/it/resources/conf";
+        return startContainer(bundleDirs, configDir);
     }
 
     /**
@@ -184,9 +193,9 @@ public class ContainerUtil  {
     /**
      * Start the embedded OSGi framework
      */
-    private static Framework startFramework() {        
+    private static Framework startFramework(String bundleDirs, String configDir) {
         Option[] options = new Option[]{
-            systemProperty("felix.fileinstall.dir").value("./target/openidm-pkg/openidm/bundle/init,./target/openidm-pkg/openidm/bundle,./src/it/resources/conf"),
+            systemProperty("felix.fileinstall.dir").value(bundleDirs + "," + configDir),
             systemProperty("felix.fileinstall.filter").value("^((?!fileinstall).)*$"),
             //systemProperty("felix.fileinstall.log.level").value("4"),
             felix(),
@@ -286,11 +295,13 @@ class SimpleProxy implements java.lang.reflect.InvocationHandler {
             String exName = exClass.getName();
             Class localClass = Class.forName(exName);
             if (localClass != null && !(localClass.equals(exClass))) {
-                exToThrow = (Throwable) localClass.newInstance();
-                // TODO: populate the details
-                //String message
-                //Throwable cause
-                //setStackTrace();
+                // If exception loaded by different classloader, re-create with compatible classloader
+                Constructor ctor = localClass.getConstructor(new Class[] {String.class, Throwable.class});
+                exToThrow = (Throwable) ctor.newInstance(
+                        new Object[] {
+                                ex.getTargetException().getMessage(), 
+                                ex.getTargetException().getCause()});
+                exToThrow.setStackTrace(ex.getTargetException().getStackTrace());
             }
             throw exToThrow;
         } catch (RuntimeException ex) {
