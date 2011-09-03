@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.fluent.JsonPatch;
+import org.forgerock.json.fluent.JsonTransformer;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.context.InvokeContext;
@@ -225,7 +226,7 @@ class ObjectMapping implements SynchronizationListener {
             throw new NullPointerException();
         }
         try {
-            return new JsonNode(service.getRouter().read(objectSet + '/' + id));
+            return decryptable(new JsonNode(service.getRouter().read(objectSet + '/' + id)));
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
@@ -311,13 +312,28 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    /**
+     * Wraps the given node in decryption transformers. This causes on-the-fly decryption
+     * of values, should any encrypted values be accessed.
+     *
+     * @param node the node to be wrapped.
+     * @return the node wrapped with decryption transformers.
+     */
+    private JsonNode decryptable(JsonNode node) {
+        ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(node.getTransformers());
+        transformers.addAll(service.getCryptoService().getDecryptionTransformers());
+        return new JsonNode(node.getValue(), node.getPointer(), transformers);
+    }
+
     @Override
     public void onCreate(String id, JsonNode value) throws SynchronizationException {
-        doSourceSync(id, value); // synchronous for now
+        doSourceSync(id, decryptable(value)); // synchronous for now
     }
     
     @Override
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
+        oldValue = decryptable(oldValue);
+        newValue = decryptable(newValue);
 // TODO: use old value to project incremental diff without fetch of source
         if (oldValue == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
             doSourceSync(id, newValue); // synchronous for now
@@ -561,7 +577,7 @@ class ObjectMapping implements SynchronizationListener {
                     try {
                         Object o = validSource.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
-                            throw new SynchronizationException("expecting boolean value from validSource");
+                            throw new SynchronizationException("Expecting boolean value from validSource");
                         }
                         result = (Boolean)o;
                     } catch (ScriptException se) {
@@ -590,7 +606,7 @@ class ObjectMapping implements SynchronizationListener {
                     try {
                         Object o = validTarget.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
-                            throw new SynchronizationException("expecting boolean value from validTarget");
+                            throw new SynchronizationException("Expecting boolean value from validTarget");
                         }
                         result = (Boolean)o;
                     } catch (ScriptException se) {

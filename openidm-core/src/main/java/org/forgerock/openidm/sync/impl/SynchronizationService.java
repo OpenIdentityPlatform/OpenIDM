@@ -45,6 +45,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
@@ -75,7 +76,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     /** TODO: Description. */
     private ComponentContext context;
 
-    /** Internal object set router service. */
+    /** Object set router service. */
     @Reference(
         name = "ref_SynchronizationService_ObjectSetRouterService",
         referenceInterface = ObjectSet.class,
@@ -91,6 +92,23 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     }
     protected void unbindRouter(ObjectSet router) {
         this.router = null;
+    }
+
+    /** Cryptographic service. */
+    @Reference(
+        name="ref_SynchronizationService_CryptoService",
+        referenceInterface=CryptoService.class,
+        bind="bindCryptoService",
+        unbind="unbindCryptoService",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC
+    )
+    protected CryptoService cryptoService;
+    protected void bindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+    protected void unbindCryptoService(CryptoService cryptoService) {
+        this.cryptoService = null;
     }
 
     @Activate
@@ -199,5 +217,12 @@ public class SynchronizationService implements SynchronizationListener, Schedule
         String reconId = UUID.randomUUID().toString();
         getMapping(mapping).recon(reconId); // throws SynchronizationException
         return reconId;
+    }
+
+    /**
+     * TODO: Description.
+     */
+    CryptoService getCryptoService() {
+        return cryptoService;
     }
 }
