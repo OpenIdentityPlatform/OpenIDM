@@ -1,6 +1,0 @@
-{
-    "logTo" : [
-        { "logType" : "csv", "location" : "audit", "recordDelimiter" : ";" },
-        { "logType" : "repository" }
-    ]
-}
