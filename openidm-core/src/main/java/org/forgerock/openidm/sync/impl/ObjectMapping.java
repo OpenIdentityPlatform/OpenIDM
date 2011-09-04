@@ -592,7 +592,7 @@ class ObjectMapping implements SynchronizationListener {
             if (sourceObject != null) { // must have a source object to be valid
                 if (validSource != null) {
                     Map<String, Object> scope = service.newScope();
-                    scope.put("source", sourceObject.asMap());
+                    scope.put("source", sourceObject.copy().asMap());
                     try {
                         Object o = validSource.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -607,7 +607,7 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
-            LOGGER.trace("isSourceValid of {} evaluated: {}", sourceObject.get("_id").getValue(), result);
+            LOGGER.trace("isSourceValid of {} evaluated: {}", null != sourceObject ? sourceObject.get("_id").getValue() : "[NULL]", result);
             return result;
         }
 
@@ -622,7 +622,7 @@ class ObjectMapping implements SynchronizationListener {
             if (targetObject != null) { // must have a target object to qualify
                 if (validTarget != null) {
                     Map<String, Object> scope = service.newScope();
-                    scope.put("target", targetObject.asMap());
+                    scope.put("target", targetObject.copy().asMap());
                     try {
                         Object o = validTarget.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -637,7 +637,7 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
-            LOGGER.trace("isTargetValid of {} evaluated: {}", targetObject.get("_id").getValue(), result);
+            LOGGER.trace("isTargetValid of {} evaluated: {}", null != targetObject ? targetObject.get("_id").getValue() : "[NULL]", result);
             return result;
         }
 
@@ -651,8 +651,8 @@ class ObjectMapping implements SynchronizationListener {
         private void execScript(String type, Script script) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = service.newScope();
-                scope.put("source", sourceObject.asMap());
-                scope.put("target", targetObject.asMap());
+                scope.put("source", sourceObject.copy().asMap());
+                scope.put("target", targetObject.copy().asMap());
                 scope.put("situation", situation.toString());
                 try {
                     script.exec(scope);
@@ -722,7 +722,7 @@ class ObjectMapping implements SynchronizationListener {
                     situation = null; // TODO: provide a situation for this?
                 }
             }
-            LOGGER.debug("Assessed situation of {} to be {}", sourceId, situation);
+            LOGGER.debug("Mapping '{}' assessed situation of {} to be {}", new Object[]{name, sourceId, situation});
         }
 
         /**
@@ -735,7 +735,7 @@ class ObjectMapping implements SynchronizationListener {
             JsonNode result = null;
             if (correlationQuery != null) {
                 Map<String, Object> queryScope = service.newScope();
-                queryScope.put("source", sourceObject.asMap());
+                queryScope.put("source", sourceObject.copy().asMap());
                 try {
                     Object query = correlationQuery.exec(queryScope);
                     if (query == null || !(query instanceof Map)) {

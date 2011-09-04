@@ -124,7 +124,7 @@ class PropertyMapping {
         if (condition != null) { // optional property mapping condition
             Map<String, Object> scope = service.newScope();
             try {
-                scope.put("object", sourceObject.asMap());
+                scope.put("object", sourceObject.copy().asMap());
                 Object o = condition.exec(scope);
                 if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
                     return; // property mapping is not applicable; do not apply
@@ -139,7 +139,7 @@ class PropertyMapping {
         }
         Object result = null;
         if (sourcePointer != null) { // optional source property
-            JsonNode node = sourceObject.get(sourcePointer);
+            JsonNode node = sourceObject.get(sourcePointer); // this gets decrypted or not??
             if (node != null) {
                 result = node.getValue(); // null indicates no value
             }
