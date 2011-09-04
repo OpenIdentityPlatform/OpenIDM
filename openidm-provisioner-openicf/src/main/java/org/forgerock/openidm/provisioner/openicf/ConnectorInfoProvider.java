@@ -41,7 +41,7 @@ public interface ConnectorInfoProvider {
 
     /**
      * @param connectorReference
-     * @return null if there is no {@ConnectorInfo} available.
+     * @return null if there is no {@link ConnectorInfo} available.
      */
     public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference);
 

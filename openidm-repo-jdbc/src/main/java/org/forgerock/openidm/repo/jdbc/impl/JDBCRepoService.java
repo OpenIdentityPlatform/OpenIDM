@@ -88,7 +88,6 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
     private boolean useDataSource;
     private String jndiName;
-    private String jtaName;
     private DataSource ds;
     private String dbDriver;
     private String dbUrl;
@@ -98,7 +97,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     Map<String, TableHandler> tableHandlers;
     TableHandler defaultTableHandler;
 
-    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     /**
      * Gets an object from the repository by identifier. The returned object is not validated
@@ -486,6 +485,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
      * Populate and return a repository service that knows how to query and maniuplate configuration.
      *
      * @param repoConfig the bootstrap configuration
+     * @param context
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
     static RepoBootService getRepoBootService(Map repoConfig, BundleContext context) {
@@ -521,7 +521,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
             // Data Source configuration
             jndiName = config.get(CONFIG_JNDI_NAME).asString();
-            jtaName = config.get(CONFIG_JTA_NAME).asString();
+            String jtaName = config.get(CONFIG_JTA_NAME).asString();
             if (jndiName != null && jndiName.trim().length() > 0) {
                 // Get DB connection via JNDI
                 logger.info("Using DB connection configured via Driver Manager");

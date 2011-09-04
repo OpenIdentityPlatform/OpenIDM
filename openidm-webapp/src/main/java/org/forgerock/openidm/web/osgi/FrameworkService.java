@@ -144,36 +144,15 @@ public class FrameworkService {
 
     private void doStop() throws Exception {
         if (null != framework) {
-            try {
-                // Stop the framework
-                framework.stop();
-                // Wait for the framework to stop completely
-                framework.waitForStop(0);
-            } finally {
-                // HEHE :) System.exit(0);
-            }
+            // Stop the framework
+            framework.stop();
+            // Wait for the framework to stop completely
+            framework.waitForStop(0);
         }
 
         log("OSGi framework stopped");
     }
 
-//    private Map<String, Object> createConfig()
-//            throws Exception {
-//        Properties props = new Properties();
-//        //props.load(this.context.getResourceAsStream("/WEB-INF/framework.properties"));
-//        props.load(this.context.getResourceAsStream("/WEB-INF/config.properties"));
-//
-//        HashMap<String, Object> map = new HashMap<String, Object>();
-//        for (Object key : props.keySet()) {
-//            map.put(key.toString(), props.get(key));
-//        }
-//
-//        //WAS 7 and 6.1 issue
-//        map.put(Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK);
-//        //System.setProperty("user.dir",this.context.getRealPath("/WEB-INF/"));
-//        map.put(FelixConstants.SYSTEMBUNDLE_ACTIVATORS_PROP, Arrays.asList(new ProvisionActivator(this.context)));
-//        return map;
-//    }
     private void log(String message, Throwable cause) {
         this.context.log(message, cause);
     }
@@ -248,7 +227,7 @@ public class FrameworkService {
         }
 
         // Perform variable substitution on specified properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             System.setProperty(name,
                     Util.substVars(props.getProperty(name), name, null, null));
@@ -317,7 +296,7 @@ public class FrameworkService {
         }
 
         // Perform variable substitution for system properties.
-        for (Enumeration e = props.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
             props.setProperty(name,
                     Util.substVars(props.getProperty(name), name, null, props));

@@ -34,6 +34,7 @@ public class BadRequestException extends ObjectSetException {
     
     /**
      * Constructs a new exception with the specified detail message.
+     * @param message
      */
     public BadRequestException(String message) {
         super(message);
@@ -41,6 +42,7 @@ public class BadRequestException extends ObjectSetException {
     
     /**
      * Constructs a new exception with the specified cause.
+     * @param cause
      */
     public BadRequestException(Throwable cause) {
         super(cause);
@@ -48,6 +50,8 @@ public class BadRequestException extends ObjectSetException {
 
     /**
      * Constructs a new exception with the specified detail message and cause.
+     * @param message
+     * @param cause
      */
     public BadRequestException(String message, Throwable cause) {
         super(message, cause);

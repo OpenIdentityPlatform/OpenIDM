@@ -117,7 +117,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency supported by OrientDB and OpenIDM.
      *
-     * @param id the identifier of the object to retrieve from the object set.
+     * @param fullId the identifier of the object to retrieve from the object set.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
@@ -158,8 +158,8 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
+     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param obj the contents of the object to create in the object set.
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
@@ -218,9 +218,9 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param id the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
      * @param rev the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to put in the object set.
+     * @param obj the contents of the object to put in the object set.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
@@ -272,7 +272,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     /**
      * Deletes the specified object from the object set.
      *
-     * @param id the identifier of the object to be deleted.
+     * @param fullId the identifier of the object to be deleted.
      * @param rev the version of the object to delete or {@code null} if not provided.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
@@ -344,7 +344,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
-     * @param id identifies the object to query.
+     * @param fullId identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found. 
@@ -403,6 +403,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     
     /**
      * @return A connection from the pool. Call close on the connection when done to return to the pool.
+     * @throws org.forgerock.openidm.objset.InternalServerErrorException
      */
     ODatabaseDocumentTx getConnection() throws InternalServerErrorException {
         ODatabaseDocumentTx db = null;
@@ -478,16 +479,13 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * @param ex The throwable to check
      * @param maxLevels the maximum level of causes to check, avoiding the cost
      * of checking recursiveness
+     * @return
      */
     private boolean isCauseIndexException(Throwable ex, int maxLevels) {
         if (maxLevels > 0) {
             Throwable cause = ex.getCause();
-            if (cause != null) { 
-                if (cause instanceof OIndexException) {
-                    return true;
-                } else {
-                    return isCauseIndexException(cause, maxLevels-1);
-                }
+            if (cause != null) {
+                return cause instanceof OIndexException || isCauseIndexException(cause, maxLevels - 1);
             }
         }    
         return false;

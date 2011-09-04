@@ -35,6 +35,7 @@ public class ConflictException extends ObjectSetException {
     
     /**
      * Constructs a new exception with the specified detail message.
+     * @param message
      */
     public ConflictException(String message) {
         super(message);
@@ -42,6 +43,7 @@ public class ConflictException extends ObjectSetException {
     
     /**
      * Constructs a new exception with the specified cause.
+     * @param cause
      */
     public ConflictException(Throwable cause) {
         super(cause);
@@ -49,6 +51,8 @@ public class ConflictException extends ObjectSetException {
 
     /**
      * Constructs a new exception with the specified detail message and cause.
+     * @param message
+     * @param cause
      */
     public ConflictException(String message, Throwable cause) {
         super(message, cause);

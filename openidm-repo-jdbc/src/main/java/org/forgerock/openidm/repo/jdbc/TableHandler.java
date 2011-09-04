@@ -49,7 +49,8 @@ public interface TableHandler {
      * @param fullId the qualified identifier of the object to retrieve from the object set.
      * @param type is the qualifier of the object to retrieve
      * @param localId the identifier without the qualifier of the object to retrieve
-     * @throws NotFoundException if the specified object could not be found. 
+     * @param connection
+     * @throws NotFoundException if the specified object could not be found.
      * @throws SQLException if a DB failure was reported
      * @throws IOException if a failure to convert the JSON model was reported
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
@@ -66,11 +67,16 @@ public interface TableHandler {
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
      * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param type
+     * @param localId
      * @param obj the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolved. 
+     * @param connection
+     * @throws NotFoundException if the specified id could not be resolved.
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
+     * @throws java.io.IOException
+     * @throws java.sql.SQLException
      */
     public abstract void create(String fullId, String type, String localId,
             Map<String, Object> obj, Connection connection)
@@ -86,14 +92,19 @@ public interface TableHandler {
      * including: a new {@code _rev} value for the revised object's version
      *
      * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param type
+     * @param localId
      * @param rev the version of the object to update; or {@code null} if not provided.
      * @param obj the contents of the object to put in the object set.
+     * @param connection
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws BadRequestException if the passed identifier is invalid
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
+     * @throws java.io.IOException
+     * @throws java.sql.SQLException
      */
     public abstract void update(String fullId, String type, String localId,
             String rev, Map<String, Object> obj, Connection connection)
@@ -103,12 +114,17 @@ public interface TableHandler {
      * Deletes the specified object from the object set.
      *
      * @param fullId the identifier of the object to be deleted.
+     * @param type
+     * @param localId
      * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @param connection
+     * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
+     * @throws java.io.IOException
+     * @throws java.sql.SQLException
      */
     public abstract void delete(String fullId, String type, String localId,
             String rev, Connection connection)
@@ -126,12 +142,14 @@ public interface TableHandler {
      *
      * @param type identifies the object to query.
      * @param params the parameters of the query to perform.
+     * @param connection
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
      * configured, a query expression that is invalid, or missing query substitution tokens.
      * @throws ForbiddenException if access to the object or specified query is forbidden.
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
+     * @throws java.sql.SQLException
      */
     
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 

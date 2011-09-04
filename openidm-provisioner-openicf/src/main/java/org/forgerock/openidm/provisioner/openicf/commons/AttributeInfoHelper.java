@@ -33,12 +33,15 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.objects.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 
 
 public class AttributeInfoHelper {
+    private final static Logger logger = LoggerFactory.getLogger(AttributeInfoHelper.class);
     private final Class<?> type;
     private final String name;
     private final Set<AttributeFlag> flags;
@@ -63,7 +66,7 @@ public class AttributeInfoHelper {
 //            }
             type = ConnectorUtil.findClassForName((String) typeString);
         } else {
-            throw new SchemaException("type MUST be non empty String or List<String> value");
+            throw new SchemaException("Type of [" + name + "] attribute MUST be non empty String or List<String> value");
         }
 
         //nativeType
@@ -183,12 +186,17 @@ public class AttributeInfoHelper {
     }
 
     public Attribute build(Object source, CryptoService cryptoService) throws Exception {
-        JsonNode decryptedNode = new JsonNode(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
-        return AttributeInfoHelper.build(attributeInfo, decryptedNode.getValue());
+        try {
+            JsonNode decryptedNode = new JsonNode(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
+            return build(attributeInfo, decryptedNode.getValue());
+        } catch (Exception e) {
+            logger.error("Failed to build {} attribute out of {}", name, source);
+            throw e;
+        }
     }
 
-    public static Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
-        Attribute attribute = null;
+    public Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
+        Attribute attribute;
         if (null == source) {
             attribute = AttributeBuilder.build(attributeInfo.getName());
         } else {
@@ -201,7 +209,7 @@ public class AttributeInfoHelper {
         return attribute;
     }
 
-    public Object build(Attribute source, CryptoService cryptoService) throws IOException, JsonCryptoException {
+    public Object build(Attribute source, CryptoService cryptoService) throws JsonCryptoException {
         Object resultValue = null;
         if (attributeInfo.isMultiValued()) {
             List<Object> value = new ArrayList<Object>(source.getValue().size());
@@ -246,7 +254,7 @@ public class AttributeInfoHelper {
         }
     }
 
-    private static Object getNewValue(Object source, boolean isMultiValued, Class type) throws IOException {
+    private Object getNewValue(Object source, boolean isMultiValued, Class type) {
         if (isMultiValued) {
             return getMultiValue(source, type);
         } else {
@@ -255,7 +263,7 @@ public class AttributeInfoHelper {
     }
 
 
-    private static <T> T getSingleValue(Object source, Class<T> clazz) throws IOException {
+    private <T> T getSingleValue(Object source, Class<T> clazz) {
         if (null == source) {
             return null;
         } else if ((source instanceof List)) {
@@ -267,15 +275,17 @@ public class AttributeInfoHelper {
                     return ConnectorUtil.coercedTypeCasting(c.get(0), clazz);
                 }
             }
-            throw new IllegalArgumentException("Non multivalued argument has collection value");
+            logger.error("Non multivalued [{}] argument has collection value", name);
+            throw new IllegalArgumentException("Non multivalued argument [" + name + "] has collection value");
         } else if (source.getClass().isArray()) {
-            throw new IllegalArgumentException("Non multivalued argument has collection value");
+            logger.error("Non multivalued [{}] argument has array value", name);
+            throw new IllegalArgumentException("Non multivalued argument [" + name + "] has array value");
         } else {
             return ConnectorUtil.coercedTypeCasting(source, clazz);
         }
     }
 
-    private static <T> Collection<T> getMultiValue(Object source, Class<T> clazz) throws IOException {
+    private <T> Collection<T> getMultiValue(Object source, Class<T> clazz) {
         if (null == source) {
             return null;
         }

@@ -246,6 +246,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          * @param object TODO.
          * @param params TODO.
          * @param result TODO.
+         * @return
          */
         private Map<String, Object> newScope(Method method, String id,
         Map<String, Object> object, Map<String, Object> params, Map<String, Object> result) {
@@ -266,15 +267,15 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          * @return TODO.
          */
         private boolean matches(Method method, String id) {
-            boolean result = (id != null && (methods == null || methods.contains(method)) && pattern.matcher(id).matches());
-            LOGGER.debug("{} matches yielded {}", pointer, Boolean.toString(result));
+            boolean result = (id != null && (methods == null || methods.contains(Method.ALL) || methods.contains(method)) && pattern.matcher(id).matches());
+            LOGGER.debug("{} matches yielded {} on {}", new Object[]{pointer, Boolean.toString(result) , id});
             return result;
         }
 
         /**
          * TODO: Description.
          *
-         * @param scope.
+         * @param scope TODO
          * @return TODO.
          * @throws InternalServerErrorException TODO.
          */
@@ -296,7 +297,11 @@ public class ObjectSetRouterService extends ObjectSetRouter {
        /**
          * TODO: Description.
          *
-         * @throws ForbiddenException if the script throws an exception.
+         * @param method
+        * @param id
+        * @param object
+        * @param params
+        * @throws ForbiddenException if the script throws an exception.
          * @throws InternalServerErrorException if any other exception occurs during execution.
          */
         void onRequest(Method method, String id, Map<String, Object> object, Map<String, Object> params)
@@ -321,6 +326,11 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         /**
          * TODO: Description.
          *
+         * @param method
+         * @param id
+         * @param object
+         * @param params
+         * @param result
          * @throws InternalServerErrorException if any exception occurs during script execution.
          */
         void onResponse(Method method, String id, Map<String, Object> object, Map<String, Object> params,

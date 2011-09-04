@@ -162,8 +162,9 @@ public class ManagedObjectService extends ObjectSetRouter {
     }
 
     /**
-     * Returns the internal object set for which operations will be applied. If there is no
+     * @return The internal object set for which operations will be applied. If there is no
      * router, throws {@link InternalServerErrorException}.
+     * @throws org.forgerock.openidm.objset.InternalServerErrorException
      */
     ObjectSet getRouter() throws InternalServerErrorException {
         if (router == null) {
@@ -184,6 +185,7 @@ public class ManagedObjectService extends ObjectSetRouter {
 
     /**
      * TODO: Description.
+     * @return
      */
     Set<SynchronizationListener> getListeners() {
         return listeners;
@@ -191,6 +193,7 @@ public class ManagedObjectService extends ObjectSetRouter {
 
     /**
      * TODO: Description.
+     * @return
      */
     CryptoService getCryptoService() {
         return cryptoService;

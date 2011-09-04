@@ -102,6 +102,7 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
+     * @param service
      * @param config TODO.
      * @throws JsonNodeException TODO.
      */
@@ -126,6 +127,7 @@ class ObjectMapping implements SynchronizationListener {
 
     /**
      * TODO: Description.
+     * @return
      */
     SynchronizationService getService() {
         return service;
@@ -133,6 +135,7 @@ class ObjectMapping implements SynchronizationListener {
 
     /**
      * TODO: Description.
+     * @return
      */
     public String getName() {
         return name;
@@ -142,11 +145,12 @@ class ObjectMapping implements SynchronizationListener {
      * TODO: Description.
      *
      * @param id fully-qualified source object identifier.
-     * @param object TODO.
+     * @param value TODO.
      * @throws SynchronizationException TODO.
      */
     private void doSourceSync(String id, JsonNode value) throws SynchronizationException {
         if (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1) {
+            LOGGER.trace("Start synchronizing of {} {}", id, null == value ? "without given value" : "with given value");
             String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
             SourceSyncOperation op = new SourceSyncOperation();
@@ -179,6 +183,7 @@ class ObjectMapping implements SynchronizationListener {
      *
      * @param objectSet TODO.
      * @return TODO.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
      */
 // TODO: Codify query-all-ids in ObjectSet or provide per-ObjectSet query for all IDs.
     private Iterable<String> queryAllIds(final String objectSet) throws SynchronizationException {
@@ -198,7 +203,7 @@ class ObjectMapping implements SynchronizationListener {
             }
             @Override public Iterator<String> iterator() {
                 final Iterator<JsonNode> iterator = list.iterator();
-                return new Iterator() {
+                return new Iterator<String>() {
                     @Override public boolean hasNext() {
                         return iterator.hasNext();
                     }
@@ -220,6 +225,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param id TODO.
      * @throws NullPointerException if {@code targetId} is {@code null}.
      * @throws SynchronizationException TODO.
+     * @return
      */
     private JsonNode readObject(String objectSet, String id) throws SynchronizationException {
         if (id == null) {
@@ -239,7 +245,7 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
-     * @param targetId TODO.
+     * @param target TODO.
      * @throws SynchronizationException TODO.
      */
     private void createTargetObject(JsonNode target) throws SynchronizationException {
@@ -249,6 +255,7 @@ class ObjectMapping implements SynchronizationListener {
             sb.append('/').append(target.get("_id").asString());
         }
         try {
+            LOGGER.trace("Create target object: {}", sb.toString());
             service.getRouter().create(sb.toString(), target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
@@ -262,12 +269,14 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
-     * @param targetId TODO.
+     * @param target TODO.
      * @throws SynchronizationException TODO.
      */
     private void updateTargetObject(JsonNode target) throws SynchronizationException {
         try {
-            service.getRouter().update(targetObjectSet + '/' + target.get("_id").required().asString(),
+            String id = targetObjectSet + '/' + target.get("_id").required().asString();
+            LOGGER.trace("Update target object: {}", id);
+            service.getRouter().update(id ,
              target.get("_rev").asString(), target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
@@ -287,8 +296,10 @@ class ObjectMapping implements SynchronizationListener {
     private void deleteTargetObject(JsonNode target) throws SynchronizationException {
         if (target.get("_id").isString()) { // forgiving delete
             try {
-                service.getRouter().delete(targetObjectSet + '/' + target.get("_id").asString(),
-                 target.get("_rev").asString());
+                String id = targetObjectSet + '/' + target.get("_id").required().asString();
+                LOGGER.trace("Delete target object: {}", id);
+                service.getRouter().delete(id,
+                        target.get("_rev").asString());
             } catch (JsonNodeException jne) {
                 throw new SynchronizationException(jne);
             } catch (NotFoundException nfe) {
@@ -337,6 +348,8 @@ class ObjectMapping implements SynchronizationListener {
 // TODO: use old value to project incremental diff without fetch of source
         if (oldValue == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
             doSourceSync(id, newValue); // synchronous for now
+        } else {
+            LOGGER.trace("There is nothing to update on {}", id);
         }
     }
 
@@ -356,6 +369,8 @@ class ObjectMapping implements SynchronizationListener {
     
     /**
      * TEMPORARY. Future version will have this break-down into discrete units of work.
+     * @param reconId
+     * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
         for (String sourceId : queryAllIds(sourceObjectSet)) {
@@ -424,6 +439,9 @@ class ObjectMapping implements SynchronizationListener {
 
     /**
      * Qualified Id if the object is not null, null if the object is null
+     * @param objSet
+     * @param obj
+     * @return
      */
     private String qualifiedId(String objSet, JsonNode obj) {
         if (obj == null) {
@@ -436,6 +454,7 @@ class ObjectMapping implements SynchronizationListener {
      * TODO: Description.
      *
      * @param entry TODO.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
@@ -497,7 +516,7 @@ class ObjectMapping implements SynchronizationListener {
         /**
          * TODO: Description.
          *
-         * @throws SynchronziationException TODO.
+         * @throws SynchronizationException TODO.
          */
         protected void performAction() throws SynchronizationException {
             Action action = (this.action == null ? Action.IGNORE : this.action);
@@ -588,6 +607,7 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
+            LOGGER.trace("isSourceValid of {} evaluated: {}", sourceObject.get("_id").getValue(), result);
             return result;
         }
 
@@ -617,6 +637,7 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
+            LOGGER.trace("isTargetValid of {} evaluated: {}", targetObject.get("_id").getValue(), result);
             return result;
         }
 
@@ -701,7 +722,7 @@ class ObjectMapping implements SynchronizationListener {
                     situation = null; // TODO: provide a situation for this?
                 }
             }
-            LOGGER.debug("Assessed situation to be {}", situation);
+            LOGGER.debug("Assessed situation of {} to be {}", sourceId, situation);
         }
 
         /**

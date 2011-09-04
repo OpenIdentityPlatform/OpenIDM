@@ -61,7 +61,9 @@ public class DBHelper {
      * @param password the orientdb password to connect
      * @param minSize the orientdb pool minimum size
      * @param maxSize the orientdb pool maximum size
+     * @param completeConfig
      * @return the initialized pool
+     * @throws org.forgerock.openidm.config.InvalidException
      */
     public static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
             int minSize, int maxSize, JsonNode completeConfig) throws InvalidException {

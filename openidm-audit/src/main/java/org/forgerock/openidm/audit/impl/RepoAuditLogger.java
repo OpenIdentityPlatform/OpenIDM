@@ -68,7 +68,7 @@ public class RepoAuditLogger implements AuditLogger {
     }
     
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
@@ -86,7 +86,7 @@ public class RepoAuditLogger implements AuditLogger {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
@@ -104,7 +104,7 @@ public class RepoAuditLogger implements AuditLogger {
     }
     
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {

@@ -201,6 +201,7 @@ public class ConnectorUtil {
      * <tr><td>JAVA_TYPE_URI</td><td>{@link URI}</td></tr>
      * </table>
      *
+     * @param name
      * @return class if it has mapped to a type or null if not.
      */
     public static Class findClassForName(String name) {
@@ -269,25 +270,25 @@ public class ConnectorUtil {
 
     /**
      * @param source
-     * @return
+     * @param target
      * @throws UnsupportedOperationException when the property value can not be converted to String.
      */
     public static void configureResultsHandlerConfiguration(JsonNode source, ResultsHandlerConfiguration target) throws JsonNodeException {
-        if (!source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).isNull()){
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).isNull()) {
             target.setEnableNormalizingResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).asBoolean());
         }
-        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).isNull()){
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).isNull()) {
             target.setEnableFilteredResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).asBoolean());
         }
-        if (!source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).isNull()){
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).isNull()) {
             target.setEnableCaseInsensitiveFilter(source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).asBoolean());
         }
-        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).isNull()){
+        if (!source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).isNull()) {
             target.setEnableAttributesToGetSearchResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).asBoolean());
         }
     }
 
-        /**
+    /**
      * Convert the {@link ObjectPoolConfiguration} to simple Map.
      * <p/>
      *
@@ -305,7 +306,7 @@ public class ConnectorUtil {
 
     /**
      * @param source
-     * @return
+     * @param target
      * @throws UnsupportedOperationException when the property value can not be converted to String.
      */
     public static void configureObjectPoolConfiguration(JsonNode source, ObjectPoolConfiguration target) throws JsonNodeException {
@@ -667,6 +668,7 @@ public class ConnectorUtil {
      * }
      *
      * @param info
+     * @return
      */
     public static Map<String, Object> getAttributeInfoMap(AttributeInfo info) {
         Map<String, Object> schema = new LinkedHashMap<String, Object>();
@@ -738,7 +740,7 @@ public class ConnectorUtil {
         JsonNode nativeType = token.get(OPENICF_NATIVE_TYPE);
         JsonNode tokenValue = token.get(OPENICF_SYNC_TOKEN).required();
         SyncToken result = null;
-        if (null != nativeType) {
+        if (null == nativeType) {
             result = new SyncToken(tokenValue.getValue());
         } else {
             result = new SyncToken(coercedTypeCasting(tokenValue.getValue(), findClassForName(nativeType.asString())));
@@ -929,7 +931,8 @@ public class ConnectorUtil {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == int.class) {
-                    result = (T) Double.valueOf((Integer.valueOf((Integer) source).doubleValue()));
+                    //noinspection BoxingBoxedValue
+                    result = (T) Double.valueOf((((Integer) source).doubleValue()));
                     coerced = true;
                 } else if (sourceClass == Integer.class) {
                     result = (T) Double.valueOf(((Integer) source).doubleValue());
@@ -943,7 +946,7 @@ public class ConnectorUtil {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == int.class) {
-                    result = (T) Double.valueOf((Integer.valueOf((Integer) source).doubleValue()));
+                    result = (T) Double.valueOf((((Integer) source).doubleValue()));
                     coerced = true;
                 } else if (sourceClass == Integer.class) {
                     result = (T) Double.valueOf(((Integer) source).doubleValue());
@@ -965,7 +968,7 @@ public class ConnectorUtil {
                     result = (T) new Float((Double) source);
                     coerced = true;
                 } else if (sourceClass == int.class) {
-                    result = (T) Float.valueOf((Integer.valueOf((Integer) source).floatValue()));
+                    result = (T) Float.valueOf((((Integer) source).floatValue()));
                     coerced = true;
                 } else if (sourceClass == Integer.class) {
                     result = (T) Float.valueOf(((Integer) source).floatValue());
@@ -996,18 +999,18 @@ public class ConnectorUtil {
                     result = (T) Integer.valueOf((String) source);
                     coerced = true;
                 } else if (sourceClass == Float.class) {
-                    result = targetClazz.cast(new Integer(((Float) source).intValue()));
+                    result = targetClazz.cast(((Float) source).intValue());
                     coerced = true;
                 } else if (sourceClass == Long.class) {
                     Long l = (Long) source;
                     if (l.longValue() <= Integer.MAX_VALUE) {
-                        result = targetClazz.cast(new Integer(l.intValue()));
+                        result = targetClazz.cast(l.intValue());
                         coerced = true;
                     }
                 } else if (sourceClass == Boolean.class) {
                     boolean val = ((Boolean) source).booleanValue();
                     if (val) {
-                        result = targetClazz.cast(new Integer(1));
+                        result = targetClazz.cast(1);
                     } else {
                         result = targetClazz.cast(new Integer(0));
                     }
@@ -1015,7 +1018,7 @@ public class ConnectorUtil {
                 }
             } else if (targetClazz.equals(long.class) || targetClazz.equals(Long.class)) {
                 if (sourceClass == int.class) {
-                    result = (T) Long.valueOf((Integer.valueOf((Integer) source).longValue()));
+                    result = (T) Long.valueOf((((Integer) source).longValue()));
                     coerced = true;
                 } else if (sourceClass == Integer.class) {
                     result = (T) Long.valueOf(((Integer) source).longValue());
@@ -1098,7 +1101,7 @@ public class ConnectorUtil {
                     result = targetClazz.cast(s);
                     coerced = true;
                 } else if (sourceClass == java.math.BigInteger.class) {
-                    String s = ((java.math.BigInteger) source).toString();
+                    String s = source.toString();
                     result = targetClazz.cast(s);
                     coerced = true;
                 } else if (sourceClass == java.math.BigDecimal.class) {
@@ -1149,10 +1152,16 @@ public class ConnectorUtil {
                 }
             }
         } catch (Exception e) {
+            if (TRACE.isDebugEnabled()) {
+                TRACE.error("Failed to coerce {} from {} to {} ", new Object[]{source, sourceClass.getCanonicalName(), targetClazz.getCanonicalName()}, e);
+            } else {
+                TRACE.error("Failed to coerce from {} to {} ", new Object[]{sourceClass.getCanonicalName(), targetClazz.getCanonicalName()}, e);
+            }
             throw new IllegalArgumentException(source.getClass().getCanonicalName() + " to " + targetClazz.getCanonicalName(), e);
         }
 
-        if (coerced == false) {
+        if (!coerced) {
+            TRACE.error("Can not coerce {} to {}", sourceClass.getCanonicalName(), targetClazz.getCanonicalName());
             throw new IllegalArgumentException(source.getClass().getCanonicalName() + " to " + targetClazz.getCanonicalName());
         }
         return result;

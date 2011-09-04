@@ -69,7 +69,7 @@ public class DemoScheduledService implements ScheduledService {
      * Invoked by the scheduler when the scheduler triggers.
      * 
      * @param context Context information passed by the scheduler service
-     * @throws ExecutionException if execution of the scheduled work failed. 
+     * @throws ExecutionException if execution of the scheduled work failed.
      * Implementations can also throw RuntimeExceptions which will get logged.
      */
     public void execute(Map<String, Object> context) throws ExecutionException {

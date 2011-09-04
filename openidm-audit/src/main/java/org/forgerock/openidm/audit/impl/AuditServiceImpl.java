@@ -95,7 +95,7 @@ public class AuditServiceImpl implements AuditService {
      * The object will contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency 
      *
-     * @param id the identifier of the object to retrieve from the object set.
+     * @param fullId the identifier of the object to retrieve from the object set.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
@@ -104,7 +104,7 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         // TODO
-        return new HashMap();
+        return new HashMap<String,Object>();
     }
 
     /**
@@ -113,8 +113,8 @@ public class AuditServiceImpl implements AuditService {
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
+     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param obj the contents of the object to create in the object set.
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
@@ -176,7 +176,7 @@ public class AuditServiceImpl implements AuditService {
      * 
      * Deletes the specified object from the object set.
      *
-     * @param id the identifier of the object to be deleted.
+     * @param fullId the identifier of the object to be deleted.
      * @param rev the version of the object to delete or {@code null} if not provided.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
@@ -206,7 +206,7 @@ public class AuditServiceImpl implements AuditService {
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
-     * @param id identifies the object to query.
+     * @param fullId identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found. 
@@ -217,7 +217,7 @@ public class AuditServiceImpl implements AuditService {
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO
-        return new HashMap();
+        return new HashMap<String,Object>();
     }
 
     /**
@@ -282,8 +282,8 @@ public class AuditServiceImpl implements AuditService {
         return configFilters;
     }
     
-    List getAuditLoggers(JsonNode config, ComponentContext compContext) {
-        List configuredLoggers = new ArrayList();
+    List<AuditLogger> getAuditLoggers(JsonNode config, ComponentContext compContext) {
+        List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
         List logTo = config.get(CONFIG_LOG_TO).asList();
         for (Map entry : (List<Map>)logTo) {
             String logType = (String) entry.get(CONFIG_LOG_TYPE);

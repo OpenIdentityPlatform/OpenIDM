@@ -67,7 +67,7 @@ public class SchedulerServiceJob implements Job {
         logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}", 
                 new Object[] {invokeService, invokeContext, context});
 
-        Map scheduledServiceContext = new HashMap();
+        Map<String,Object> scheduledServiceContext = new HashMap<String,Object>();
         scheduledServiceContext.putAll(data);
         scheduledServiceContext.remove(SchedulerService.SERVICE_TRACKER);
         scheduledServiceContext.put(ScheduledService.INVOKER_NAME, "Scheduled " +

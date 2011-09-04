@@ -77,7 +77,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     
     final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
     
-    private Map<String, String> pidToFile = Collections.synchronizedMap(new HashMap<String, String>());
+    private final Map<String, String> pidToFile = Collections.synchronizedMap(new HashMap<String, String>());
     
     private BundleContext context;
     private ConfigurationAdmin configAdmin;
@@ -142,7 +142,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         {
             Object obj = this.context.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
             if (obj instanceof String) {
-                obj = new Boolean((String) obj );
+                obj = Boolean.valueOf((String) obj);
             }
             if( Boolean.FALSE.equals( obj ) )
             {
@@ -263,16 +263,17 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * 
      * @param f
      * @return
+     * @throws java.io.IOException
      */
     @SuppressWarnings("unchecked")
-    public static Hashtable loadConfigFile(final File f) throws IOException, FileNotFoundException {
+    public static Hashtable loadConfigFile(final File f) throws IOException {
         logger.debug("Loading configuration from {}", f);
         final Hashtable ht = new Hashtable();
         final InputStream in = new BufferedInputStream(new FileInputStream(f));
         try {
             if (f.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
-                
-                StringBuffer fileBuf = new StringBuffer(1024);
+
+                StringBuilder fileBuf = new StringBuilder(1024);
                 BufferedReader reader = new BufferedReader(new FileReader(f));
                 try {
                     char[] buf = new char[1024];
@@ -395,7 +396,9 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * Whether the JSON configuration is the same (Including formatting)
      * Ignores meta-data such as whether factory pid has been assigned yet
      * 
-     * @return true if the JSON config is the same 
+     * @param newCfg
+     * @param oldCfg
+     * @return true if the JSON config is the same
      */
     boolean isConfigSame(Hashtable newCfg, Hashtable oldCfg) {
         if (newCfg == null || oldCfg == null) {
@@ -421,7 +424,10 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     }
     
     /**
+     * @param newCfg
+     * @param oldCfg
      * @see JSONConfigInstaller#isConfigSame(Hashtable, Hashtable)
+     * @return
      */
     boolean isConfigSame(Hashtable newCfg, Dictionary oldCfg) {
         Hashtable oldConvCfg = oldCfg != null ? new Hashtable(new DictionaryAsMap(oldCfg)) : null;
@@ -429,7 +435,10 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     }
 
     /**
+     * @param newCfg
+     * @param oldCfg
      * @see JSONConfigInstaller#isConfigSame(Hashtable, Hashtable)
+     * @return
      */
     boolean isConfigSame(Dictionary newCfg, Hashtable oldCfg) {
         Hashtable newConvCfg = newCfg != null ? new Hashtable(new DictionaryAsMap(newCfg)) : null;

@@ -39,6 +39,7 @@ public class Application extends org.restlet.Application {
     /**
      * TODO: Description.
      *
+     * @param path
      * @param restlet TODO.
      */
     void attach(String path, Restlet restlet) {

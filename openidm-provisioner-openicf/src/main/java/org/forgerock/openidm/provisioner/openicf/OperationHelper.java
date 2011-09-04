@@ -113,6 +113,7 @@ public interface OperationHelper {
      * @param query
      * @param params
      * @return
+     * @throws Exception
      */
     public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception;
 

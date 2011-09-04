@@ -231,7 +231,7 @@ public class RepoPersistenceManager implements PersistenceManager {
                     
                     if (!hasMore) {
                         if (repo != null && dbIter == null) {
-                            Map params = new HashMap();
+                            Map<String,Object> params = new HashMap<String,Object>();
                             params.put(QueryConstants.QUERY_ID, "query-all-ids");
                             Map<String, Object> result = repo.query("config", params);
                             List<Map<String, Object>> queryResult = (List<Map<String, Object>>) result.get(QueryConstants.QUERY_RESULT);
@@ -259,9 +259,7 @@ public class RepoPersistenceManager implements PersistenceManager {
                     } else {
                         Map entry = (Map) dbIter.next();
                         String entryId = (String) entry.get(RepositoryService.ID);
-                        Dictionary fullEntry = load(entryId);
-
-                        return fullEntry;
+                        return load(entryId);
                     }
                 } catch (RuntimeException ex) {
                     logger.warn("Failure getting configuration dictionaries for nextElement " + ex.getMessage(), ex);
@@ -296,8 +294,8 @@ public class RepoPersistenceManager implements PersistenceManager {
         try {
             if (repo != null) {
                 String id = pidToId(pid);
-                Map obj = dictToMap(properties);
-                Map existing = null;
+                Map<String,Object> obj = dictToMap(properties);
+                Map<String,Object> existing = null;
                 try {
                     existing = repo.read(id);
                 } catch (NotFoundException ex) {
@@ -403,8 +401,8 @@ public class RepoPersistenceManager implements PersistenceManager {
      * @param dict the (OSGi configuration) dictionary
      * @return the converted map
      */
-    Map dictToMap(Dictionary dict) {
-        Map convert = new HashMap();
+    Map<String,Object> dictToMap(Dictionary dict) {
+        Map<String,Object> convert = new HashMap<String,Object>();
         Enumeration keysEnum = dict.keys();
         while(keysEnum.hasMoreElements()) {
             String key = (String) keysEnum.nextElement();

@@ -100,6 +100,7 @@ class PropertyMapping {
     /**
      * TODO: Description.
      *
+     * @param service
      * @param config TODO.
      * @throws JsonNodeException TODO.
      */

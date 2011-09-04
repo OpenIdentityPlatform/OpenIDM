@@ -73,6 +73,7 @@ class ManagedObjectProperty {
     /**
      * Constructs a new managed object property.
      *
+     * @param service
      * @param config configuration object to use to initialize managed object property.
      * @throws JsonNodeException if the configuration is malformed.
      */
@@ -162,8 +163,9 @@ class ManagedObjectProperty {
      * Performs tasks when a property is to be stored in the repository, including:
      * executing the {@code onStore} script and encrypting the property.
      *
-     * @param object the JSON node to be stored in the repository.
+     * @param node the JSON node to be stored in the repository.
      * @throws InternalServerErrorException if an exception occurs processing the property.
+     * @param node
      */
     void onStore(JsonNode node) throws InternalServerErrorException {
         execScript("onStore", onStore, node);
@@ -182,6 +184,7 @@ class ManagedObjectProperty {
 
     /**
      * Returns the name of the property.
+     * @return
      */
     String getName() {
         return name;
