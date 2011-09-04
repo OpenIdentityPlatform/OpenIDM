@@ -58,18 +58,19 @@ import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
  */
 public class OperationHelperImpl implements OperationHelper {
 
-    private APIConfiguration configuration;
-    private ObjectClassInfoHelper objectClassInfoHelper;
-    private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
-    private List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-    private Id systemObjectSetId;
-    private CryptoService cryptoService;
+    private final APIConfiguration configuration;
+    private final ObjectClassInfoHelper objectClassInfoHelper;
+    private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
+    private final List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
+    private final Id systemObjectSetId;
+    private final CryptoService cryptoService;
 
     /**
      * @param configuration
      * @param systemObjectSetId
      * @param objectClassInfoHelper
      * @param connectorObjectOptions
+     * @param cryptoService
      * @throws NullPointerException if any of the input values is null.
      */
     public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
@@ -247,27 +248,18 @@ public class OperationHelperImpl implements OperationHelper {
             values = (List<String>) params.get(field);
         }
 
-        Operator operator = OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values, cryptoService));
-
-        return operator;
+        return OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values, cryptoService));
     }
 
     private boolean isBooleanOperator(String key) {
-        if (key.equals(OPERATOR_AND)
+        return key.equals(OPERATOR_AND)
                 || key.equals(OPERATOR_OR)
                 || key.equals(OPERATOR_NOR)
-                || key.equals(OPERATOR_NAND)) {
+                || key.equals(OPERATOR_NAND);
 
-            return true;
-        }
-
-        return false;
     }
 
     private String getKey(Map<String, Object> node) {
-        for (String s : node.keySet())
-            return s;
-
-        return null;
+        return node.keySet().isEmpty() ? null : node.keySet().iterator().next();
     }
 }

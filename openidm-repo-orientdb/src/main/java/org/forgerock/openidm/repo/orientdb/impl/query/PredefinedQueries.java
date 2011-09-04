@@ -56,7 +56,7 @@ public class PredefinedQueries {
      * @param type the OrientDB class
      * @param database a handle to the OrientDB database object. No other thread must operate on this concurrently.
      * @return The ODocument if found, null if not found.
-     * @throws Bad if the passed identifier or type are invalid
+     * @throws BadRequestException if the passed identifier or type are invalid
      */
     public ODocument getByID(final String id, final String type, ODatabaseDocumentTx database) throws BadRequestException {
 

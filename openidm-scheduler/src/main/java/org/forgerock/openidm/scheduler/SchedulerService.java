@@ -167,6 +167,7 @@ public class SchedulerService  {
     
     /**
      * Initialize the service configuration
+     * @param compContext
      * @throws InvalidException if the configuration is invalid.
      */
     void initConfig(ComponentContext compContext) throws InvalidException {

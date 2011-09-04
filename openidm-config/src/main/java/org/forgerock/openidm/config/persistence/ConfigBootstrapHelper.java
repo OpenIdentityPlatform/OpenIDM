@@ -93,7 +93,7 @@ public class ConfigBootstrapHelper {
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
     public static Map getRepoBootConfig(String repoType) {
-        Map result = new HashMap();
+        Map<String,Object> result = new HashMap<String,Object>();
         result.put(OPENIDM_REPO_TYPE, repoType);
         
         // System properties take precedence over configuration files
@@ -152,16 +152,11 @@ public class ConfigBootstrapHelper {
         FilenameFilter repoConfFilter = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                if (name.startsWith(REPO_FILE_PREFIX)) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return name.startsWith(REPO_FILE_PREFIX);
             }
         };
-        
-        String[] repoConfigFiles = new File(confDir).getAbsoluteFile().list(repoConfFilter);
-        return repoConfigFiles;
+
+        return IdentityServer.getFileForPath(confDir).list(repoConfFilter);
     }
     
     /**
@@ -181,6 +176,7 @@ public class ConfigBootstrapHelper {
      * Configure to process all JSON configuration files (if enabled)
      * 
      * @param configAdmin the OSGi configuration admin service
+     * @throws java.io.IOException
      */
     public static void installAllConfig(ConfigurationAdmin configAdmin) throws IOException {
         
@@ -215,6 +211,8 @@ public class ConfigBootstrapHelper {
      * with the default. 
      * Configuring services with PIDs that are not qualified 
      * by org. or com. is currently not supported.
+     * @param fileNamePid
+     * @return
      */
     public static String qualifyPid(String fileNamePid) {
         String qualifiedPid = fileNamePid;
@@ -231,6 +229,8 @@ public class ConfigBootstrapHelper {
      * 
      * Configuring services with PIDs that are not qualified 
      * by org. or com. is currently not supported.
+     * @param qualifiedPid
+     * @return
      */
     public static String unqualifyPid(String qualifiedPid) {
         if (qualifiedPid != null && qualifiedPid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {

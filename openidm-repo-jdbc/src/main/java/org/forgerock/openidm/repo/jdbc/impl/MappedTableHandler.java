@@ -53,16 +53,16 @@ import java.util.Map;
 public class MappedTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(MappedTableHandler.class);
 
-    String tableName;
+    final String tableName;
     String dbSchemaName;
 
-    LinkedHashMap<String, String> mapping;
+    final LinkedHashMap<String, String> mapping;
     // The names of the properties to replace the ? tokens in the prepared statement, 
     // in the order they need populating
     List<String> tokenReplacementPropNames = new ArrayList<String>();
     
     ObjectMapper mapper = new ObjectMapper();
-    GenericTableQueries queries;
+    final GenericTableQueries queries;
 
     String readQueryStr;
     String createQueryStr;
@@ -109,10 +109,10 @@ public class MappedTableHandler implements TableHandler {
                 prepTokens.append(",");
             }
             colNames.append(colName);
-            tokenNames.append("${" + entry.getKey() + "}");
+            tokenNames.append("${").append(entry.getKey()).append("}");
             prepTokens.append("?");
             tokenReplacementPropNames.add(entry.getKey());
-            updateAssign.append(colName + " = ${" + entry.getKey() + "}");
+            updateAssign.append(colName).append(" = ${").append(entry.getKey()).append("}");
             isFirst = false;
         }
         createQueryStr = "INSERT INTO " + dbSchemaName + "." + tableName + " (" + colNames + ") VALUES ( " + prepTokens + ")";

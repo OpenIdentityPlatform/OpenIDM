@@ -50,7 +50,7 @@ public class Activator implements BundleActivator {
              logger.info("Bootstrapping JDBC repository");
              // Only take the configuration strictly needed for bootstrapping the repository
              // Also, bootstrap property keys are lower case, Repo expects camel case
-             Map bootConfig = new HashMap();
+             Map<String,Object> bootConfig = new HashMap<String,Object>();
 
              bootConfig.put(JDBCRepoService.CONFIG_JNDI_NAME, repoConfig.get(JDBCRepoService.CONFIG_JNDI_NAME.toLowerCase()));
              bootConfig.put(JDBCRepoService.CONFIG_DB_TYPE, repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE.toLowerCase()));

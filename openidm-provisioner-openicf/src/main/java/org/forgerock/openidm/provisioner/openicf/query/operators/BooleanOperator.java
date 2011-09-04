@@ -30,7 +30,7 @@ import java.util.Stack;
 
 public abstract class BooleanOperator implements Operator {
 
-    protected Stack<Operator> operators;
+    protected final Stack<Operator> operators;
 
     public BooleanOperator() {
         operators = new Stack<Operator>();

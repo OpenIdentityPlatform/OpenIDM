@@ -17,7 +17,6 @@ package org.forgerock.openidm.core;
 
 import java.io.File;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +33,7 @@ public class IdentityServer {
     /**
      * The singleton Identity Server instance.
      */
-    private static IdentityServer identityServer = new IdentityServer();
+    private static final IdentityServer identityServer = new IdentityServer();
 
     // The set of properties for the environment config.
     private final HashMap<String, String> configProperties;

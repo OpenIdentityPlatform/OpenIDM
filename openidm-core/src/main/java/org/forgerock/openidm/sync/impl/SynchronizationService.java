@@ -135,6 +135,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      *
      * @param name TODO.
      * @return TODO.
+     * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     ObjectMapping getMapping(String name) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
@@ -149,6 +150,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      * TODO: Description.
      *
      * @throws SynchronizationException TODO.
+     * @return
      */
     ObjectSet getRouter() throws SynchronizationException {
         if (router == null) {
@@ -212,6 +214,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      *
      * @param mapping TODO.
      * @throws SynchronizationException TODO.
+     * @return
      */
     public String reconcile(String mapping) throws SynchronizationException {
         String reconId = UUID.randomUUID().toString();
@@ -221,6 +224,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     /**
      * TODO: Description.
+     * @return
      */
     CryptoService getCryptoService() {
         return cryptoService;

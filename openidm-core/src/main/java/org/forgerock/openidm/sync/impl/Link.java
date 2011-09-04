@@ -76,6 +76,8 @@ class Link {
 
     /**
      * TODO: Description.
+     * @param id
+     * @return
      */
     private String linkId(String id) {
         StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getName());
@@ -111,6 +113,7 @@ class Link {
      * TODO: Description.
      *
      * @param node TODO.
+     * @throws org.forgerock.json.fluent.JsonNodeException
      */
     private void fromJsonNode(JsonNode node) throws JsonNodeException {
         _id = node.get("_id").required().asString();

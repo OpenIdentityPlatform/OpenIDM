@@ -50,7 +50,7 @@ import java.util.Map;
  */
 public class OperationHelperBuilder {
 
-    private APIConfigurationImpl runtimeAPIConfiguration;
+    private final APIConfigurationImpl runtimeAPIConfiguration;
     private Map<String, ObjectClassInfoHelper> supportedObjectTypes;
     private Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers;
     private String systemName;

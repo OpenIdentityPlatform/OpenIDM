@@ -106,5 +106,5 @@ public final class QueryConstants {
      * 
      * All ObjectSets supporting query must support the query corresponding to this ID
      */    
-    public final static String QUERY_ALL_IDS = "query-all-ids";;
+    public final static String QUERY_ALL_IDS = "query-all-ids";
 }

@@ -23,7 +23,7 @@ import java.util.Map;
 /**
  * Routes calls to other object sets based on identifier prefixes.
  * <p>
- * The {@link routes} map associates routing prefixes with object sets to route to. Any
+ * The {@link #routes} map associates routing prefixes with object sets to route to. Any
  * request where the prefix itself is the identifier or where it begins the identifier
  * and is separated by a slash {@code /} character will be routed to the associated object
  * The {@code _id} property should not be fully qualified, and is not modified during routing.
@@ -32,7 +32,7 @@ import java.util.Map;
  * thrown.
  * <p>
  * This class is designed to be subclassed, where the subclass is responsible for initializing
- * the {@link routes} map with prefixes and object sets to route to.
+ * the {@link #routes} map with prefixes and object sets to route to.
  *
  * @author Paul C. Bryan
  */
@@ -49,7 +49,7 @@ public class ObjectSetRouter implements ObjectSet {
 
     /**
      * Splits an identifier into two parts. The first part is the routing prefix, which
-     * correlates to a value in the {@link routes} map. The second part is the remaining
+     * correlates to a value in the {@link #routes} map. The second part is the remaining
      * identifier, which is local to the routed {@code ObjectSet}. If the second part
      * is {@code null}, then the request is against routed the objet set itself.
      *

@@ -110,7 +110,7 @@ public class GenericTableQueries {
     public List<Map<String, Object>> query(final String type, Map<String, Object> params, Connection con) 
             throws BadRequestException, InternalServerErrorException {
         
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();;
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         params.put(QueryConstants.RESOURCE_NAME, type); 
         
         //TODO: support QUERY_EXPRESSION

@@ -90,7 +90,7 @@ public class ConfigObjectService implements ObjectSet {
     ConfigurationAdmin configAdmin; 
     
     private ComponentContext context;
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Gets an object from the object set by identifier. 
@@ -98,7 +98,7 @@ public class ConfigObjectService implements ObjectSet {
      * The object may contain metadata properties, including object identifier {@code _id},
      * and object version {@code _rev} to enable optimistic concurrency supported by OpenIDM.
      *
-     * @param id the identifier of the object to retrieve from the object set.
+     * @param fullId the identifier of the object to retrieve from the object set.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
@@ -116,7 +116,7 @@ public class ConfigObjectService implements ObjectSet {
                 Configuration[] rawConfigs = configAdmin.listConfigurations(null);
                 List configList = new ArrayList();
                 for (Configuration conf : rawConfigs) {
-                    Map configEntry = new LinkedHashMap<String, Object>();
+                    Map<String,Object> configEntry = new LinkedHashMap<String, Object>();
                     
                     String alias = null;
                     Dictionary properties = conf.getProperties();
@@ -165,8 +165,8 @@ public class ConfigObjectService implements ObjectSet {
      * This method sets the {@code _id} property to the assigned identifier for the object,
      * and the {@code _rev} property to the revised object version (For optimistic concurrency)
      *
-     * @param id the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
+     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
+     * @param obj the contents of the object to create in the object set.
      * @throws NotFoundException if the specified id could not be resolved. 
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
@@ -228,9 +228,9 @@ public class ConfigObjectService implements ObjectSet {
      * If successful, this method updates metadata properties within the passed object,
      * including: a new {@code _rev} value for the revised object's version
      *
-     * @param id the identifier of the object to be put, or {@code null} to request a generated identifier.
+     * @param fullId the identifier of the object to be put, or {@code null} to request a generated identifier.
      * @param rev the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to put in the object set.
+     * @param obj the contents of the object to put in the object set.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws NotFoundException if the specified object could not be found. 
@@ -268,7 +268,7 @@ public class ConfigObjectService implements ObjectSet {
     /**
      * Deletes the specified object from the object set.
      *
-     * @param id the identifier of the object to be deleted.
+     * @param fullId the identifier of the object to be deleted.
      * @param rev the version of the object to delete or {@code null} if not provided.
      * @throws NotFoundException if the specified object could not be found. 
      * @throws ForbiddenException if access to the object is forbidden.
@@ -327,7 +327,7 @@ public class ConfigObjectService implements ObjectSet {
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
-     * @param id identifies the object to query.
+     * @param fullId identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
      * @throws NotFoundException if the specified object could not be found. 

@@ -39,6 +39,7 @@ public interface AuditLogger extends ObjectSet {
      * Set the audit logger configuration which is a logger specific 
      * map 
      * @param config the configuration
+     * @param ctx
      */
     void setConfig(Map config, BundleContext ctx);
     

@@ -23,6 +23,8 @@
  */
 package org.forgerock.testutil.osgi;
 
+import java.lang.Class;
+import java.lang.String;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -69,7 +71,7 @@ public class ContainerUtil  {
         return new ContainerUtil(aFramework);
     }
 
-    /** @inheritdoc */
+    /** {@inheritdoc} */
     public static ContainerUtil startContainer() {
         String bundleDirs  = "./target/openidm-pkg/openidm/bundle/init,./target/openidm-pkg/openidm/bundle";
         String configDir = "./src/it/resources/conf";

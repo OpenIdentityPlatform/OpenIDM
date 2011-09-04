@@ -4,8 +4,6 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.net.URI;
-
 /**
  * @author $author$
  * @version $Revision$ $Date$

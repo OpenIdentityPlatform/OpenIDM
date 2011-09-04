@@ -79,7 +79,8 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     }
 
     /**
-     * Throws a {@link PreconditionFailedException} if there are any unsupported preconditions
+     * Throws a {@link PreconditionFailedException}
+     * @throws org.forgerock.openidm.objset.PreconditionFailedException if there are any unsupported preconditions
      * specified in the request.
      */
     private void enforceSupportedConditions() throws PreconditionFailedException {
@@ -92,9 +93,10 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     }
 
     /**
-     * Returns the revision that should be provided in the object set method. The revision
+     * @return The revision that should be provided in the object set method. The revision
      * is derived from the request. This may result in the retrieval of the object in order
      * to apply the precondition(s).
+     * @throws org.forgerock.openidm.objset.ObjectSetException
      */
     private String useRev() throws ObjectSetException {
         enforceSupportedConditions();
@@ -110,8 +112,8 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     /**
      * TODO: Description.
      *
-     * @returns TODO.
-     * @throws ObjectSetException TODO.
+     * @return TODO.
+     * @throws ResourceException TODO.
      */
     private Map<String, Object> readObject() throws ResourceException {
         try {
@@ -129,7 +131,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     /**
      * TODO: Description.
      *
-     * @param object TODO.
+     * @param map TODO.
      * @return TODO.
      */
     private Tag getTag(Map<String, Object> map) {
@@ -162,7 +164,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     /**
      * TODO: Description.
      *
-     * @param entity TODO.
+     * @param object TODO.
      * @return TODO.
      * @throws ObjectSetException TODO.
      */
@@ -178,7 +180,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     /**
      * TODO: Description.
      *
-     * @param entity TODO.
+     * @param object TODO.
      * @return TODO.
      * @throws ObjectSetException TODO.
      */

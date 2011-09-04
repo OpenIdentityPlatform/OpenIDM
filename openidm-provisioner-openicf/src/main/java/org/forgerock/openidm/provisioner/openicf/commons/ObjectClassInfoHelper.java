@@ -35,6 +35,9 @@ import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.CreateApiOp;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
 import org.identityconnectors.framework.common.objects.*;
+import org.identityconnectors.framework.common.serializer.SerializerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -44,6 +47,7 @@ import java.util.*;
  * @version $Revision$ $Date$
  */
 public class ObjectClassInfoHelper {
+    private final static Logger logger = LoggerFactory.getLogger(ObjectClassInfoHelper.class);
     private final Set<AttributeInfoHelper> attributes;
     private final ObjectClass objectClass;
     private String nameAttribute = null;
@@ -54,6 +58,8 @@ public class ObjectClassInfoHelper {
      *
      * @param schema string representation for the name of the object class.
      * @throws IllegalArgumentException when objectClass is null
+     * @throws org.forgerock.json.schema.validator.exceptions.SchemaException
+     *
      */
     public ObjectClassInfoHelper(Map<String, Object> schema) throws SchemaException {
         objectClass = new ObjectClass((String) schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS));
@@ -97,6 +103,7 @@ public class ObjectClassInfoHelper {
      * @param operation
      * @param name
      * @param source
+     * @param cryptoService
      * @return
      * @throws PreconditionFailedException if ID value can not be determined from the {@code source}
      */
@@ -117,6 +124,7 @@ public class ObjectClassInfoHelper {
             throw new PreconditionFailedException("Required NAME attribute is missing");
         } else {
             nameValue = Id.unescapeUid(nameValue);
+            logger.trace("Build ConnectorObject {} for {}", nameValue, operation.getSimpleName());
         }
 
         ConnectorObjectBuilder builder = new ConnectorObjectBuilder();
@@ -159,12 +167,19 @@ public class ObjectClassInfoHelper {
                 builder.addAttribute(attributeInfo.build(v, cryptoService));
             }
         }
-        return builder.build();
+        ConnectorObject result = builder.build();
+        if (logger.isTraceEnabled()) {
+            logger.trace("ConnectorObject build return: {}", SerializerUtil.serializeXmlObject(result, false));
+        }
+        return result;
     }
 
     public Map<String, Object> build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
         if (null == source) {
             return null;
+        }
+        if (logger.isTraceEnabled()) {
+            logger.trace("ConnectorObject source: {}", SerializerUtil.serializeXmlObject(source, false));
         }
         Map<String, Object> result = new LinkedHashMap<String, Object>(source.getAttributes().size());
         for (AttributeInfoHelper attributeInfo : attributes) {

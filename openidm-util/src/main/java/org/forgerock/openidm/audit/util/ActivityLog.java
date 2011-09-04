@@ -55,7 +55,7 @@ public class ActivityLog {
                 after = null;
             }
             
-            Map activity = new HashMap();
+            Map<String,Object> activity = new HashMap<String,Object>();
             activity.put("timestamp", isoFormatter.format(new Date())); 
             activity.put("action", action == null ? null : action.toString());
             activity.put("message", message);

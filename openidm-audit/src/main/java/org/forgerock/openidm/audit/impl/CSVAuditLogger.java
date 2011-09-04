@@ -70,7 +70,7 @@ public class CSVAuditLogger implements AuditLogger {
 
     File auditLogDir;
     String recordDelim;
-    Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
+    final Map<String, FileWriter> fileWriters = new HashMap<String, FileWriter>();
 
     public void setConfig(Map config, BundleContext ctx) throws InvalidException {
         String location = null;
@@ -105,27 +105,27 @@ public class CSVAuditLogger implements AuditLogger {
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
         // TODO
-        return new HashMap();
+        return new HashMap<String,Object>();
     }
 
     /**
      * Currently not supported.
      * <p/>
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
         // TODO
-        return new HashMap();
+        return new HashMap<String,Object>();
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {

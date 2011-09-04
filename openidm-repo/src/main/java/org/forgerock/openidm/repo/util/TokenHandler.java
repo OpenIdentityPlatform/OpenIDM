@@ -67,7 +67,8 @@ public class TokenHandler {
      * specified replacement string for all tokens.
      * 
      * @param queryString the query with tokens to replace
-     * @return the query with all tokens replaced 
+     * @param replacement
+     * @return the query with all tokens replaced
      */
     public String replaceTokens(String queryString, String replacement) {
         Matcher matcher = tokenPattern.matcher(queryString);
@@ -77,9 +78,8 @@ public class TokenHandler {
             //TODO: the size check seems invalid
             if (origToken != null) {
                 // OrientDB token is of format :token-name
-                String newToken = replacement;
                 matcher.appendReplacement(buf, "");
-                buf.append(newToken);
+                buf.append(replacement);
             }
         }
         matcher.appendTail(buf);
@@ -93,7 +93,7 @@ public class TokenHandler {
      * @return the list of token names, in the order they appear in the queryString
      */
     public List<String> extractTokens(String queryString) {
-        List<String> tokens = new ArrayList();
+        List<String> tokens = new ArrayList<String>();
         Matcher matcher = tokenPattern.matcher(queryString);
         while (matcher.find()) {
             String origToken = matcher.group(1);

@@ -103,6 +103,7 @@ class ManagedObjectSet implements ObjectSet {
     /**
      * Constructs a new managed object set.
      *
+     * @param service
      * @param config configuration object to use to initialize managed object set.
      * @throws JsonNodeException if the configuration is malformed.
      */
@@ -216,7 +217,7 @@ class ManagedObjectSet implements ObjectSet {
     /**
      * TODO: Description.
      *
-     * @param object TODO.
+     * @param node TODO.
      * @return TODO.
      * @throws InternalServerErrorException TODO.
      */ 
@@ -373,6 +374,10 @@ class ManagedObjectSet implements ObjectSet {
      * Applies a patch document to an object, or by finding an object in the object set itself
      * via query parameters. As this is an action, the patch document to be applied is in the
      * {@code _entity} parameter.
+     * @param id
+     * @param params
+     * @return
+     * @throws org.forgerock.openidm.objset.ObjectSetException
      */
     private JsonNode patchAction(String id, JsonNode params) throws ObjectSetException {
         String _id = id; // identifier provided in path
@@ -428,6 +433,7 @@ class ManagedObjectSet implements ObjectSet {
 
     /**
      * Returns the name of the managed object set.
+     * @return
      */
     public String getName() {
         return name;

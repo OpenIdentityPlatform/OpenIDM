@@ -55,16 +55,16 @@ import java.util.Map;
 public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
 
-    String mainTableName;
+    final String mainTableName;
     String propTableName;
-    String dbSchemaName;
+    final String dbSchemaName;
 
     ObjectMapper mapper = new ObjectMapper();
-    GenericTableQueries queries;
+    final GenericTableQueries queries;
 
     Map<QueryDefinition, String> queryMap;
     
-    boolean enableBatching; // Whether to use JDBC statement batching. 
+    final boolean enableBatching; // Whether to use JDBC statement batching.
     int maxBatchSize;       // The maximum number of statements to batch together. If max batch size is 1, do not use batching.
 
     public enum QueryDefinition {
@@ -331,6 +331,7 @@ public class GenericTableHandler implements TableHandler {
      * @param type       the object type URI
      * @param connection the DB connection
      * @return the typeId for the given type if exists, or -1 if does not exist
+     * @throws java.sql.SQLException
      */
     long readTypeId(String type, Connection connection) throws SQLException {
         long typeId = -1;
@@ -368,11 +369,16 @@ public class GenericTableHandler implements TableHandler {
     }
 
     /**
+     * @param fullId
+     * @param type
+     * @param localId
+     * @param connection
      * @return the row for the requested object, selected FOR UPDATE
      * @throws NotFoundException if the requested object was not found in the DB
+     * @throws java.sql.SQLException
      */
     public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
-            throws NotFoundException, SQLException, IOException {
+            throws NotFoundException, SQLException {
 
         PreparedStatement readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
 

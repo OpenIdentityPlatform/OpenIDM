@@ -267,13 +267,11 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     private URL[] getConnectorURLs(URL... resourceURLs) {
         if (null == connectorURLs) {
             Set<URL> _bundleURLs = new HashSet<URL>();
-            for (int j = 0; j < resourceURLs.length; j++) {
+            for (URL resourceURL : resourceURLs) {
                 try {
-                    URL bundleDirUrl = resourceURLs[j];
-
                     Vector<URL> urls = null;
-                    if ("file".equals(bundleDirUrl.getProtocol())) {
-                        File file = new File(bundleDirUrl.toURI());
+                    if ("file".equals(resourceURL.getProtocol())) {
+                        File file = new File(resourceURL.toURI());
                         if (file.isDirectory()) {
                             FileFilter filter = new FileFilter() {
 
@@ -283,21 +281,20 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                             };
                             File[] files = file.listFiles(filter);
                             urls = new Vector<URL>(files.length);
-                            for (int i = 0; i < files.length; ++i) {
-                                File subFile = files[i];
+                            for (File subFile : files) {
                                 String fname = subFile.getName();
                                 TRACE.trace("Load Connector Bundle: {}", fname);
-                                urls.add(new URL(bundleDirUrl, fname));
+                                urls.add(new URL(resourceURL, fname));
                             }
                         }
-                    } else if (("jar".equals(bundleDirUrl.getProtocol())) || ("wsjar".equals(bundleDirUrl.getProtocol()))) {
-                        urls = getJarFileListing(bundleDirUrl, "^META-INF/" + DEFAULT_CONNECTORS_LOCATION + "/(.*).jar$");
+                    } else if (("jar".equals(resourceURL.getProtocol())) || ("wsjar".equals(resourceURL.getProtocol()))) {
+                        urls = getJarFileListing(resourceURL, "^META-INF/" + DEFAULT_CONNECTORS_LOCATION + "/(.*).jar$");
 
                     } else {
-                        TRACE.info("Local connector support disabled.  No support for bundle URLs with protocol {}", bundleDirUrl.getProtocol());
+                        TRACE.info("Local connector support disabled.  No support for bundle URLs with protocol {}", resourceURL.getProtocol());
                     }
                     if ((urls == null) || (urls.size() == 0)) {
-                        TRACE.info("No local connector bundles found within {}", bundleDirUrl);
+                        TRACE.info("No local connector bundles found within {}", resourceURL);
                     }
                     if (null != urls) {
                         _bundleURLs.addAll(urls);
@@ -314,7 +311,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
                     TRACE.debug("Connector URL: {}", u);
                 }
             }
-            connectorURLs = _bundleURLs.toArray(new URL[0]);
+            connectorURLs = _bundleURLs.toArray(new URL[_bundleURLs.size()]);
         }
         return connectorURLs;
     }
@@ -324,6 +321,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
      * file. If filtered results are needed, you can supply a |filter|
      * regular expression which will match each entry.
      *
+     * @param jarLocation
      * @param filter to filter the results within a regular expression.
      * @return a list of files within the jar |file|
      */

@@ -25,20 +25,17 @@
  */
 package org.forgerock.openidm.provisioner;
 
-import java.net.URISyntaxException;
-
 import org.apache.commons.lang.StringUtils;
-
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Id is a util class to work with the {@code id} property in the {@link org.forgerock.openidm.objset.ObjectSet}
@@ -217,7 +214,7 @@ public class Id {
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer(SYSTEM_BASE);
+        StringBuilder sb = new StringBuilder(SYSTEM_BASE);
         sb.append(systemName).append("/").append(objectType);
         if (null != localId) {
             sb.append("/").append(localId);

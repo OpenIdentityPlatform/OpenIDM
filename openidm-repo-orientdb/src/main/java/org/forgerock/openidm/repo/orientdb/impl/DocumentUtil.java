@@ -206,6 +206,7 @@ public class DocumentUtil  {
      * @param orientDocClass the OrientDB class of the ODocument to create
      * @param patch whether the objModel passed in is only partial values (replacing and adding values), 
      * or if false replaces the whole document with the given {@code objModel}
+     * @param topLevel
      * @return the converted orientdb document, or null if objModel was null
      * @throws ConflictException when the revision in the Object model is invalid
      */

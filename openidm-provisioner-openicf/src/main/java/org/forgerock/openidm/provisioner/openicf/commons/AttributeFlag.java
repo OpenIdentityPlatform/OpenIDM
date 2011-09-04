@@ -80,7 +80,7 @@ public enum AttributeFlag {
      */
     REMOTE_ATTRIBUTE("REMOTE");
 
-    private String value;
+    private final String value;
 
 
     private AttributeFlag(String _key) {

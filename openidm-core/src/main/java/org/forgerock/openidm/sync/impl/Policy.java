@@ -58,6 +58,7 @@ class Policy {
     /**
      * TODO: Description.
      *
+     * @param service
      * @param config TODO.
      * @throws JsonNodeException TODO>
      */
@@ -76,6 +77,7 @@ class Policy {
 
     /**
      * TODO: Description.
+     * @return
      */
     public Situation getSituation() {
         return situation;
@@ -84,6 +86,8 @@ class Policy {
     /**
      * TODO: Description.
      *
+     * @param source
+     * @param target
      * @return TODO.
      * @throws SynchronizationException TODO.
      */

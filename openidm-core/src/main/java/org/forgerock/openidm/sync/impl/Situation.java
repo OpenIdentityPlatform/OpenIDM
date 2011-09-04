@@ -85,6 +85,7 @@ enum Situation {
 
     /**
      * TODO: Description.
+     * @return
      */
     public Action getDefaultAction() {
         return defaultAction;

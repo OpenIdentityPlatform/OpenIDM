@@ -53,7 +53,7 @@ public class JDBCRepoServiceFunctionalTest extends RepoServiceFunctionalTestBase
     
     @BeforeClass(dependsOnMethods={"activateService"})
     public void clearDb() throws ObjectSetException {
-        Map params = new HashMap();
+        Map<String,Object> params = new HashMap<String,Object>();
         params.put(QueryConstants.QUERY_ID, "query-all-idsandrev");
         Map result = repo.query("managed/user", params); 
         List<Map<String, Object>> resultSet = (List<Map<String, Object>>) result.get(QueryConstants.QUERY_RESULT);

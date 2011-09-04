@@ -26,8 +26,6 @@
 
 package org.forgerock.openidm.provisioner;
 
-import java.net.URI;
-
 /**
  * SystemIdentifier is a composite key to identify the {@link ProvisionerService} instance.
  *

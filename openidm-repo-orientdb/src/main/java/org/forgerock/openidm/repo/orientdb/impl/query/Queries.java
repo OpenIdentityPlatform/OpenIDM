@@ -184,11 +184,10 @@ public class Queries {
      * @return the query with any found tokens replaced
      * @throws BadRequestException if the queryString contains token missing from params
      */
-    protected OSQLSynchQuery<ODocument> resolveQuery(String queryString, Map params) 
+    protected OSQLSynchQuery<ODocument> resolveQuery(String queryString, Map<String,Object> params)
             throws BadRequestException {
         String resolvedQueryString = tokenHandler.replaceTokensWithValues(queryString, params);
-        OSQLSynchQuery<ODocument> query = new OSQLSynchQuery<ODocument>(resolvedQueryString);
-        return query;
+        return new OSQLSynchQuery<ODocument>(resolvedQueryString);
     }
     
     /**
@@ -202,8 +201,7 @@ public class Queries {
     protected QueryInfo resolveInlineQuery(final String type, Map<String, Object> params, ODatabaseDocumentTx database ) {
         // TODO: LRU cache
         String queryString = (String) params.get(QueryConstants.QUERY_EXPRESSION);
-        QueryInfo queryInfo = prepareQuery(queryString);
-        return queryInfo;
+        return  prepareQuery(queryString);
     }
 
     /**

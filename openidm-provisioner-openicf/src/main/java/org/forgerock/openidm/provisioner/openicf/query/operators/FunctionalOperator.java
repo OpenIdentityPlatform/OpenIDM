@@ -33,7 +33,7 @@ public abstract class FunctionalOperator implements Operator {
 //    protected String field;
 //    protected List<String> values;
 
-    protected Attribute attribute;
+    protected final Attribute attribute;
 
     protected FunctionalOperator(Attribute attribute) {
         this.attribute = attribute;

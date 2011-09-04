@@ -41,7 +41,7 @@ public class JsonPatchWrapper implements Patch {
     /**
      * TODO: Description.
      *
-     * @param patch TODO.
+     * @param diff TODO.
      * @throws NullPointerException if {@code patch} is {@code null}.
      */
     public JsonPatchWrapper(JsonNode diff) {

@@ -44,7 +44,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     
     final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
     
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      *  {@inheritdoc}
@@ -58,7 +58,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     }
     
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public JsonNode getConfigurationAsJson(ComponentContext compContext) throws InvalidException {
         Map conf = getConfiguration(compContext);
@@ -74,7 +74,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     }
     
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
     public  Map<String, Object> getConfiguration(Dictionary<String, Object> dict) throws InvalidException {
         Map<String, Object> parsedConfig = new HashMap<String, Object>();

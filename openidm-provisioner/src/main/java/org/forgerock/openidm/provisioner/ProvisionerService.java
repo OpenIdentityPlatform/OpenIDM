@@ -68,6 +68,7 @@ public interface ProvisionerService extends ObjectSet {
      * <p/>
      * All exceptions must be handled to save the the new stage object.
      *
+     * @param objectType
      * @param previousStage           The previously returned object. If null then it's the first execution.
      * @param synchronizationListener The listener to send the changes to.
      * @return The new updated stage object. This will be the {@code previousStage} at next call.

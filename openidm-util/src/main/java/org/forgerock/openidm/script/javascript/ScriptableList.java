@@ -62,7 +62,7 @@ class ScriptableList implements Scriptable, Wrapper {
      * elements with {@code null} value are added.
      *
      * @param size the required size of the list.
-     * @throws EvaluatorException if the list could not be resized.
+     * @throws org.mozilla.javascript.EvaluatorException if the list could not be resized.
      */
     private void resize(int size) {
         while (list.size() < size) {
