@@ -139,7 +139,7 @@ class PropertyMapping {
         }
         Object result = null;
         if (sourcePointer != null) { // optional source property
-            JsonNode node = sourceObject.get(sourcePointer); // this gets decrypted or not??
+            JsonNode node = sourceObject.get(sourcePointer);
             if (node != null) {
                 result = node.getValue(); // null indicates no value
             }

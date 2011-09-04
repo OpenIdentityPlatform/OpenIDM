@@ -14,13 +14,6 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-/*
- * TODO:
- * This implementation was rushed; do some consolidation and cleanup work.
- * Make ObjectSet methods use JsonNode instead of Map; will clean up a lot of this code.
- * Did I mention the part where this implementation was rushed?
- */
-
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
@@ -37,10 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON-Fluent library
+import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.fluent.JsonPatch;
-import org.forgerock.json.fluent.JsonTransformer;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.context.InvokeContext;
@@ -150,7 +143,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void doSourceSync(String id, JsonNode value) throws SynchronizationException {
         if (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1) {
-            LOGGER.trace("Start synchronizing of {} {}", id, null == value ? "without given value" : "with given value");
+            LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
             String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
             SourceSyncOperation op = new SourceSyncOperation();
@@ -221,6 +214,21 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
+     * @param node TODO.
+     * @return TODO.
+     * @throws SynchronizationException TODO.
+     */ 
+    private JsonNode decrypt(JsonNode node) throws SynchronizationException {
+        try {
+            return service.getCryptoService().decrypt(node); // makes a copy
+        } catch (JsonException je) {
+            throw new SynchronizationException(je);
+        }
+    }
+
+    /**
+     * TODO: Description.
+     *
      * @param objectSet TODO.
      * @param id TODO.
      * @throws NullPointerException if {@code targetId} is {@code null}.
@@ -232,7 +240,7 @@ class ObjectMapping implements SynchronizationListener {
             throw new NullPointerException();
         }
         try {
-            return decryptable(new JsonNode(service.getRouter().read(objectSet + '/' + id)));
+            return decrypt(new JsonNode(service.getRouter().read(objectSet + '/' + id)));
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
@@ -254,9 +262,10 @@ class ObjectMapping implements SynchronizationListener {
         if (target.get("_id").isString()) {
             sb.append('/').append(target.get("_id").asString());
         }
+        String id = sb.toString();
+        LOGGER.trace("Create target object {}", id);
         try {
-            LOGGER.trace("Create target object: {}", sb.toString());
-            service.getRouter().create(sb.toString(), target.asMap());
+            service.getRouter().create(id, target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
@@ -275,9 +284,8 @@ class ObjectMapping implements SynchronizationListener {
     private void updateTargetObject(JsonNode target) throws SynchronizationException {
         try {
             String id = targetObjectSet + '/' + target.get("_id").required().asString();
-            LOGGER.trace("Update target object: {}", id);
-            service.getRouter().update(id ,
-             target.get("_rev").asString(), target.asMap());
+            LOGGER.trace("Update target object {}", id);
+            service.getRouter().update(id, target.get("_rev").asString(), target.asMap());
         } catch (JsonNodeException jne) {
             throw new SynchronizationException(jne);
         } catch (ObjectSetException ose) {
@@ -297,9 +305,8 @@ class ObjectMapping implements SynchronizationListener {
         if (target.get("_id").isString()) { // forgiving delete
             try {
                 String id = targetObjectSet + '/' + target.get("_id").required().asString();
-                LOGGER.trace("Delete target object: {}", id);
-                service.getRouter().delete(id,
-                        target.get("_rev").asString());
+                LOGGER.trace("Delete target object {}", id);
+                service.getRouter().delete(id, target.get("_rev").asString());
             } catch (JsonNodeException jne) {
                 throw new SynchronizationException(jne);
             } catch (NotFoundException nfe) {
@@ -323,28 +330,15 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
-    /**
-     * Wraps the given node in decryption transformers. This causes on-the-fly decryption
-     * of values, should any encrypted values be accessed.
-     *
-     * @param node the node to be wrapped.
-     * @return the node wrapped with decryption transformers.
-     */
-    private JsonNode decryptable(JsonNode node) {
-        ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(node.getTransformers());
-        transformers.addAll(service.getCryptoService().getDecryptionTransformers());
-        return new JsonNode(node.getValue(), node.getPointer(), transformers);
-    }
-
     @Override
     public void onCreate(String id, JsonNode value) throws SynchronizationException {
-        doSourceSync(id, decryptable(value)); // synchronous for now
+        doSourceSync(id, decrypt(value)); // synchronous for now
     }
     
     @Override
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
-        oldValue = decryptable(oldValue);
-        newValue = decryptable(newValue);
+        oldValue = decrypt(oldValue);
+        newValue = decrypt(newValue);
 // TODO: use old value to project incremental diff without fetch of source
         if (oldValue == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
             doSourceSync(id, newValue); // synchronous for now
@@ -592,7 +586,7 @@ class ObjectMapping implements SynchronizationListener {
             if (sourceObject != null) { // must have a source object to be valid
                 if (validSource != null) {
                     Map<String, Object> scope = service.newScope();
-                    scope.put("source", sourceObject.copy().asMap());
+                    scope.put("source", sourceObject.asMap());
                     try {
                         Object o = validSource.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -622,7 +616,7 @@ class ObjectMapping implements SynchronizationListener {
             if (targetObject != null) { // must have a target object to qualify
                 if (validTarget != null) {
                     Map<String, Object> scope = service.newScope();
-                    scope.put("target", targetObject.copy().asMap());
+                    scope.put("target", targetObject.asMap());
                     try {
                         Object o = validTarget.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -651,8 +645,8 @@ class ObjectMapping implements SynchronizationListener {
         private void execScript(String type, Script script) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = service.newScope();
-                scope.put("source", sourceObject.copy().asMap());
-                scope.put("target", targetObject.copy().asMap());
+                scope.put("source", sourceObject.asMap());
+                scope.put("target", targetObject.asMap());
                 scope.put("situation", situation.toString());
                 try {
                     script.exec(scope);
@@ -735,7 +729,7 @@ class ObjectMapping implements SynchronizationListener {
             JsonNode result = null;
             if (correlationQuery != null) {
                 Map<String, Object> queryScope = service.newScope();
-                queryScope.put("source", sourceObject.copy().asMap());
+                queryScope.put("source", sourceObject.asMap());
                 try {
                     Object query = correlationQuery.exec(queryScope);
                     if (query == null || !(query instanceof Map)) {
