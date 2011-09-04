@@ -98,10 +98,10 @@ class Policy {
         } else if (script != null) { // action is dynamically determine 
             Map<String, Object> scope = service.newScope();
             if (source != null) {
-                scope.put("source", source.copy().asMap());
+                scope.put("source", source.asMap());
             }
             if (target != null) {
-                scope.put("target", target.copy().asMap());
+                scope.put("target", target.asMap());
             }
             try {
                 result = Enum.valueOf(Action.class, script.exec(scope).toString());
