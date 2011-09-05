@@ -23,12 +23,10 @@
  */
 package org.forgerock.openidm.audit.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +57,7 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService; 
+import org.forgerock.openidm.repo.RepositoryService;
 
 
 /**
@@ -75,28 +73,44 @@ import org.forgerock.openidm.repo.RepositoryService;
 })
 public class AuditServiceImpl implements AuditService {
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
-    
+
     // Keys in the JSON configuration
     public final static String CONFIG_LOG_TO = "logTo";
     public final static String CONFIG_LOG_TYPE = "logType";
     public final static String CONFIG_LOG_TYPE_CSV = "csv";
     public final static String CONFIG_LOG_TYPE_REPO = "repository";
-    
+
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
     Map<String, List<String>> filters;
-    
+
     List<AuditLogger> auditLoggers;
-    
+
+    // TODO: replace with proper formatter
+    SimpleDateFormat ISO8601_FORMAT = new SimpleDateFormat(ServerConstants.DATE_FORMAT_ISO8601_TIME);
+    public String formatDateTime(Date date) {
+        if (date == null) {
+            return formatDateTime(new Date());
+        }
+
+        // format in (almost) ISO8601 format
+        String dateStr = ISO8601_FORMAT.format(date);
+
+        // remap the timezone from 0000 to 00:00 (starts at char 22)
+        return dateStr.substring(0, 25)
+                + ":" + dateStr.substring(25);
+    }
+
+
     /**
-     * Gets an object from the audit logs by identifier. The returned object is not validated 
+     * Gets an object from the audit logs by identifier. The returned object is not validated
      * against the current schema and may need processing to conform to an updated schema.
      * <p>
      * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} to enable optimistic concurrency 
+     * and object version {@code _rev} to enable optimistic concurrency
      *
      * @param fullId the identifier of the object to retrieve from the object set.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
      * @return the requested object.
@@ -115,13 +129,13 @@ public class AuditServiceImpl implements AuditService {
      *
      * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
      * @param obj the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolved. 
+     * @throws NotFoundException if the specified id could not be resolved.
      * @throws ForbiddenException if access to the object or object set is forbidden.
      * @throws PreconditionFailedException if an object with the same ID already exists.
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        logger.debug("Audit create called for {} with {}", fullId, obj);        
+        logger.debug("Audit create called for {} with {}", fullId, obj);
         // Work-around until router id strategy in sync
         if (fullId.startsWith(ROUTER_PREFIX)) {
             String[] withoutAuditLevel = splitFirstLevel(fullId);
@@ -140,7 +154,7 @@ public class AuditServiceImpl implements AuditService {
                 return;
             }
         }
-        
+
         // Generate an ID if there is none
         if (localId == null) {
             localId = UUID.randomUUID().toString();
@@ -148,7 +162,12 @@ public class AuditServiceImpl implements AuditService {
             logger.debug("Assigned id {}", localId);
         }
         String id = type + "/" + localId;
-        
+
+        // Generate unified timestamp
+        if (null == obj.get("timestamp")) {
+            obj.put("timestamp",formatDateTime(null));
+        }
+
         logger.debug("Create audit entry for {} with {}", id, obj);
         for (AuditLogger auditLogger : auditLoggers) {
             try {
@@ -159,10 +178,10 @@ public class AuditServiceImpl implements AuditService {
             } catch (RuntimeException ex) {
                 logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
                 throw ex;
-            } 
+            }
         }
     }
-    
+
     /**
      * Audit service does not support changing audit entries.
      */
@@ -173,12 +192,12 @@ public class AuditServiceImpl implements AuditService {
 
     /**
      * Audit service currently does not support deleting audit entries.
-     * 
+     *
      * Deletes the specified object from the object set.
      *
      * @param fullId the identifier of the object to be deleted.
      * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @throws NotFoundException if the specified object could not be found.
      * @throws ForbiddenException if access to the object is forbidden.
      * @throws ConflictException if version is required but is {@code null}.
      * @throws PreconditionFailedException if version did not match the existing object in the set.
@@ -200,16 +219,16 @@ public class AuditServiceImpl implements AuditService {
      * Performs the query on the specified object and returns the associated results.
      * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types. 
-     * 
-     * The returned map is structured as follow: 
+     * The query result is a JSON object structure composed of basic Java types.
+     *
+     * The returned map is structured as follow:
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
      * @param fullId identifies the object to query.
      * @param params the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException if the specified object could not be found. 
+     * @throws NotFoundException if the specified object could not be found.
      * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
      * configured, a query expression that is invalid, or missing query substitution tokens.
      * @throws ForbiddenException if access to the object or specified query is forbidden.
@@ -241,9 +260,9 @@ public class AuditServiceImpl implements AuditService {
         logger.trace("Extracted first level: {} rest: {}", firstLevel, rest);
         return new String[] { firstLevel, rest };
     }
-    
+
     @Activate
-    void activate(ComponentContext compContext) { 
+    void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         JsonNode config = null;
         try {
@@ -260,7 +279,7 @@ public class AuditServiceImpl implements AuditService {
 
     Map<String, List<String>> getFilters(JsonNode config) {
         Map<String, List<String>> configFilters = new HashMap<String, List<String>>();
-        
+
         Map<String, Object> eventTypes = config.get("eventTypes").asMap();
         if (eventTypes == null) {
             return configFilters;
@@ -281,7 +300,7 @@ public class AuditServiceImpl implements AuditService {
         }
         return configFilters;
     }
-    
+
     List<AuditLogger> getAuditLoggers(JsonNode config, ComponentContext compContext) {
         List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
         List logTo = config.get(CONFIG_LOG_TO).asList();
@@ -304,17 +323,17 @@ public class AuditServiceImpl implements AuditService {
         }
         return configuredLoggers;
     }
-    
-    
+
+
     /* Currently rely on deactivate/activate to be called by DS if config changes instead
     @Modified
     void modified(ComponentContext compContext) {
     }
     */
 
-    
+
     @Deactivate
-    void deactivate(ComponentContext compContext) { 
+    void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext.getProperties());
         for (AuditLogger auditLogger : auditLoggers) {
             try {
