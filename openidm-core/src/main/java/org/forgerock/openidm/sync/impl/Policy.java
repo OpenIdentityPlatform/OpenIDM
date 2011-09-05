@@ -88,15 +88,18 @@ class Policy {
      *
      * @param source
      * @param target
+     * @param sourceAction true if the {@link Action} is determined for the {@link org.forgerock.openidm.sync.impl.ObjectMapping.SourceSyncOperation}
+     * and false if the action is determined for the {@link org.forgerock.openidm.sync.impl.ObjectMapping.TargetSyncOperation}.
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    public Action getAction(JsonNode source, JsonNode target) throws SynchronizationException {
+    public Action getAction(JsonNode source, JsonNode target, boolean sourceAction) throws SynchronizationException {
         Action result = null;
         if (action != null) { // static action specified
             result = action;
         } else if (script != null) { // action is dynamically determine 
             Map<String, Object> scope = service.newScope();
+            scope.put("sourceAction", sourceAction);
             if (source != null) {
                 scope.put("source", source.asMap());
             }

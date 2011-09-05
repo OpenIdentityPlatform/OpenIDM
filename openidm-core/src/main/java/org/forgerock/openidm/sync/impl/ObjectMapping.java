@@ -490,15 +490,16 @@ class ObjectMapping implements SynchronizationListener {
 
         /**
          * TODO: Description.
-         *
+         * @param sourceAction sourceAction true if the {@link Action} is determined for the {@link SourceSyncOperation}
+         * and false if the action is determined for the {@link TargetSyncOperation}.
          * @throws SynchronizationException TODO.
          */
-        protected void determineAction() throws SynchronizationException {
+        protected void determineAction(boolean sourceAction) throws SynchronizationException {
             if (situation != null) {
                 action = situation.getDefaultAction(); // start with a reasonable default
                 for (Policy policy : policies) {
                     if (situation == policy.getSituation()) {
-                        action = policy.getAction(sourceObject, targetObject);
+                        action = policy.getAction(sourceObject, targetObject, sourceAction);
 // TODO: Consider limiting what actions can be returned for the given situation.
                         break;
                     }
@@ -669,7 +670,7 @@ class ObjectMapping implements SynchronizationListener {
         @Override
         public void sync() throws SynchronizationException {
             assessSituation();
-            determineAction();
+            determineAction(true);
             performAction();
         }
 
@@ -753,7 +754,7 @@ class ObjectMapping implements SynchronizationListener {
         @Override
         public void sync() throws SynchronizationException {
             assessSituation();
-            determineAction();
+            determineAction(false);
 // TODO: Option here to just report what action would be performed?
             performAction();
         }
