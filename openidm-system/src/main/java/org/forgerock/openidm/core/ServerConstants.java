@@ -61,7 +61,7 @@ public class ServerConstants {
      * represented using iso8601 time.
      */
     public static final String DATE_FORMAT_ISO8601_TIME =
-            "yyyy-MM-dd'T'HH:mm:ss.sZ";
+            "yyyy-MM-dd'T'HH:mm:ssZ";
 
     /**
      * The date format string that will be used to construct and parse dates

@@ -97,8 +97,8 @@ public class AuditServiceImpl implements AuditService {
         String dateStr = ISO8601_FORMAT.format(date);
 
         // remap the timezone from 0000 to 00:00 (starts at char 22)
-        return dateStr.substring(0, 25)
-                + ":" + dateStr.substring(25);
+        return dateStr.substring(0, 22)
+                + ":" + dateStr.substring(22);
     }
 
 
