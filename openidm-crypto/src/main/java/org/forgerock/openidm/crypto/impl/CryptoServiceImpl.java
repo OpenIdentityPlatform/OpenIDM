@@ -187,16 +187,23 @@ public class CryptoServiceImpl implements CryptoService {
 
     @Override
     public JsonNode encrypt(JsonNode node, String cipher, String alias) throws JsonCryptoException, JsonException {
-        JsonTransformer encryptionTransformer = getEncryptionTransformer(cipher, alias);
-        JsonNode copy = node.copy(); // make deep copy to encrypt; apply all existing transformations
-        encryptionTransformer.transform(copy); // apply encryption transformation to copy
-        return copy;
+        JsonNode result = null;
+        if (node != null) {
+            JsonTransformer encryptionTransformer = getEncryptionTransformer(cipher, alias);
+            result = node.copy(); // make deep copy to encrypt; apply all existing transformations
+            encryptionTransformer.transform(result); // apply encryption transformation to copy
+        }
+        return result;
     }
 
     @Override
     public JsonNode decrypt(JsonNode node) throws JsonException {
-        ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(node.getTransformers());
-        transformers.addAll(getDecryptionTransformers());
-        return new JsonNode(node.getValue(), node.getPointer(), transformers).copy();
+        JsonNode result = null;
+        if (node != null) {
+            ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(node.getTransformers());
+            transformers.addAll(getDecryptionTransformers());
+            result = new JsonNode(node.getValue(), node.getPointer(), transformers).copy();
+        }
+        return result;
     }
 }
