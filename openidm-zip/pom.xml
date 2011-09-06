@@ -78,6 +78,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-shell</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-ui</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -92,7 +97,8 @@
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.shell.tui</artifactId>
+            <artifactId>org.apache.felix.gogo.command</artifactId>
+            <version>0.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

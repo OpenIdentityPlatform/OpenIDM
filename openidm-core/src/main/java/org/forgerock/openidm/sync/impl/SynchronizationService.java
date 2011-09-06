@@ -17,6 +17,7 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +66,12 @@ import org.forgerock.openidm.scope.ObjectSetFunctions;
 )
 @Properties({
     @Property(name = "service.description", value = "OpenIDM object synchronization service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS")
+    @Property(name = "service.vendor", value = "ForgeRock AS"),
+    @Property(name = "openidm.osgi.shell.group.id", value = "sync"),
+    @Property(name = "openidm.osgi.shell.commands", value = {
+                "oncreate#Call the onCreate(<arg>,null)",
+                "onupdate#Call the onUpdate(<arg>,null,null)",
+                "ondelete#Call the onDelete(<arg>)"})
 })
 @Service
 public class SynchronizationService implements SynchronizationListener, ScheduledService {
@@ -228,5 +234,44 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      */
     CryptoService getCryptoService() {
         return cryptoService;
+    }
+
+    /**
+     * Shell Commands
+     */
+    public void oncreate(PrintWriter out, String[] args) {
+        if (args.length > 0) {
+            try {
+                this.onCreate(args[0], null);
+            } catch (SynchronizationException e) {
+                out.println("Error:" + e.getMessage());
+            }
+        } else {
+            out.println("Usage: oncreate <id>");
+        }
+    }
+
+    public void onupdate(PrintWriter out, String[] args) {
+        if (args.length > 0) {
+            try {
+                this.onUpdate(args[0], null, null);
+            } catch (SynchronizationException e) {
+                out.println("Error:" + e.getMessage());
+            }
+        } else {
+            out.println("Usage: onupdate <id>");
+        }
+    }
+
+    public void ondelete(PrintWriter out, String[] args) {
+        if (args.length > 0) {
+            try {
+                this.onDelete(args[0]);
+            } catch (SynchronizationException e) {
+                out.println("Error:" + e.getMessage());
+            }
+        } else {
+            out.println("Usage: ondelete <id>");
+        }
     }
 }
