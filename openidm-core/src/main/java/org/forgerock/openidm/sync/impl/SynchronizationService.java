@@ -17,6 +17,8 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 
 // OSGi Framework
+import org.forgerock.openidm.context.InvokeContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -239,39 +242,69 @@ public class SynchronizationService implements SynchronizationListener, Schedule
     /**
      * Shell Commands
      */
-    public void oncreate(PrintWriter out, String[] args) {
-        if (args.length > 0) {
-            try {
-                this.onCreate(args[0], null);
-            } catch (SynchronizationException e) {
-                out.println("Error:" + e.getMessage());
+    public void oncreate(InputStream in, PrintStream out, String[] args) throws Exception {
+        PrintWriter output = new PrintWriter(out);
+        try {
+            if (args.length > 0) {
+                String activityId = UUID.randomUUID().toString();
+                InvokeContext.getContext().pushActivityId(activityId);
+                try {
+                    output.println("Execute activityId: " + activityId);
+                    this.onCreate(args[0], null);
+                } catch (SynchronizationException e) {
+                    output.append("Error:").append(e.getMessage());
+                } finally {
+                    InvokeContext.getContext().popActivityId();
+                }
+            } else {
+                output.println("Usage: oncreate <id>");
             }
-        } else {
-            out.println("Usage: oncreate <id>");
+        } finally {
+            output.flush();
         }
     }
 
-    public void onupdate(PrintWriter out, String[] args) {
-        if (args.length > 0) {
-            try {
-                this.onUpdate(args[0], null, null);
-            } catch (SynchronizationException e) {
-                out.println("Error:" + e.getMessage());
+    public void onupdate(InputStream in, PrintStream out, String[] args) throws Exception {
+        PrintWriter output = new PrintWriter(out);
+        try {
+            if (args.length > 0) {
+                String activityId = UUID.randomUUID().toString();
+                InvokeContext.getContext().pushActivityId(activityId);
+                try {
+                    out.println("Execute activityId: " + activityId);
+                    this.onUpdate(args[0], null, null);
+                } catch (SynchronizationException e) {
+                    output.append("Error:").append(e.getMessage());
+                } finally {
+                    InvokeContext.getContext().popActivityId();
+                }
+            } else {
+                out.println("Usage: onupdate <id>");
             }
-        } else {
-            out.println("Usage: onupdate <id>");
+        } finally {
+            output.flush();
         }
     }
 
-    public void ondelete(PrintWriter out, String[] args) {
-        if (args.length > 0) {
-            try {
-                this.onDelete(args[0]);
-            } catch (SynchronizationException e) {
-                out.println("Error:" + e.getMessage());
+    public void ondelete(InputStream in, PrintStream out, String[] args) throws Exception {
+        PrintWriter output = new PrintWriter(out);
+        try {
+            if (args.length > 0) {
+                String activityId = UUID.randomUUID().toString();
+                InvokeContext.getContext().pushActivityId(activityId);
+                try {
+                    output.println("Execute activityId: " + activityId);
+                    this.onDelete(args[0]);
+                } catch (SynchronizationException e) {
+                    output.append("Error:").append(e.getMessage());
+                } finally {
+                    InvokeContext.getContext().popActivityId();
+                }
+            } else {
+                output.println("Usage: ondelete <id>");
             }
-        } else {
-            out.println("Usage: ondelete <id>");
+        } finally {
+            output.flush();
         }
     }
 }

@@ -25,6 +25,8 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.Map;
@@ -110,7 +112,7 @@ public class FelixGogoCommandsServiceGenerator {
             }
 
             // create new instance
-            Class<?> aClass = ctClass.toClass(FelixGogoCommandsServiceGenerator.class.getClassLoader());
+            Class<?> aClass = ctClass.toClass(FelixGogoCommandsServiceGenerator.class.getClassLoader(), null);
             Constructor<?> constructor = aClass.getConstructor(Object.class);
             return constructor.newInstance(service);
         } catch (Exception e) {
@@ -121,7 +123,7 @@ public class FelixGogoCommandsServiceGenerator {
 
     private static boolean isMethodAvailable(Object commandsProvider, String methodName) {
         try {
-            commandsProvider.getClass().getMethod(methodName, PrintWriter.class, String[].class);
+            commandsProvider.getClass().getMethod(methodName, InputStream.class, PrintStream.class, String[].class);
             return true;
         } catch (NoSuchMethodException e) {
             logger.warn("Unable to find Console Command: {}", methodName, e);

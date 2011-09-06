@@ -19,7 +19,8 @@ import org.apache.felix.service.command.CommandSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -49,10 +50,8 @@ public class AbstractFelixCommandsService {
      */
     protected void runCommand(String commandName, CommandSession session, String[] params) {
         try {
-            Method method = service.getClass().getMethod(commandName, PrintWriter.class, String[].class);
-            PrintWriter printWriter = new PrintWriter(session.getConsole());
-            method.invoke(service, printWriter, params);
-            printWriter.flush();
+            Method method = service.getClass().getMethod(commandName, InputStream.class, PrintStream.class, String[].class);
+            method.invoke(service, session.getKeyboard(), session.getConsole(), params);
         } catch (NoSuchMethodException e) {
             session.getConsole().println("No such command: " + commandName);
         } catch (Exception e) {
