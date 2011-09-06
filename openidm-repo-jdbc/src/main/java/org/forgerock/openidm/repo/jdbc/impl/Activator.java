@@ -53,6 +53,7 @@ public class Activator implements BundleActivator {
              Map<String,Object> bootConfig = new HashMap<String,Object>();
 
              bootConfig.put(JDBCRepoService.CONFIG_JNDI_NAME, repoConfig.get(JDBCRepoService.CONFIG_JNDI_NAME.toLowerCase()));
+             bootConfig.put(JDBCRepoService.CONFIG_JTA_NAME, repoConfig.get(JDBCRepoService.CONFIG_JTA_NAME.toLowerCase()));
              bootConfig.put(JDBCRepoService.CONFIG_DB_TYPE, repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE.toLowerCase()));
              bootConfig.put(JDBCRepoService.CONFIG_DB_DRIVER, repoConfig.get(JDBCRepoService.CONFIG_DB_DRIVER.toLowerCase()));             
              bootConfig.put(JDBCRepoService.CONFIG_DB_URL, repoConfig.get(JDBCRepoService.CONFIG_DB_URL.toLowerCase()));
