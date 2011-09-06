@@ -4,6 +4,7 @@ import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.openicf.framework.api.osgi.ConnectorManager;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
@@ -57,6 +58,30 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     //Private
     private Map<String, RemoteFrameworkConnectionInfo> remoteFrameworkConnectionInfo = new HashMap<String, RemoteFrameworkConnectionInfo>();
     private URL[] connectorURLs = null;
+
+    /**
+     * ConnectorManager service.
+     */
+    @Reference(
+            name = "ref_ConnectorManager_ConnectorInfoProvider",
+            referenceInterface = ConnectorManager.class,
+            bind = "bind",
+            unbind = "unbind",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+            policy = ReferencePolicy.STATIC)
+    private ConnectorManager osgiConnectorManager = null;
+
+
+    protected void bind(ConnectorManager service) {
+        TRACE.info("ConnectorManager is bound.");
+        this.osgiConnectorManager = service;
+
+    }
+
+    protected void unbind(ConnectorManager service) {
+        this.osgiConnectorManager = null;
+        TRACE.info("ConnectorManager is unbound.");
+    }
 
 
     @Activate
@@ -173,6 +198,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
         if (ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER.equals(connectorReference.getConnectorHost())) {
             connectorInfoManager = factory.getLocalManager(getConnectorURLs());
+        } else if (ConnectorReference.OSGI_SERVICE_CONNECTOR_MANAGER.equals(connectorReference.getConnectorHost())) {
+            connectorInfoManager = osgiConnectorManager;
         } else {
             RemoteFrameworkConnectionInfo rfci = remoteFrameworkConnectionInfo.get(connectorReference.getConnectorHost());
             if (null != rfci) {
@@ -198,6 +225,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
 
         List<ConnectorInfo> result = new ArrayList<ConnectorInfo>(connectorInfoManager.getConnectorInfos());
 
+        if (null != osgiConnectorManager) {
+            result.addAll(osgiConnectorManager.getConnectorInfos());
+        }
         for (RemoteFrameworkConnectionInfo entry : remoteFrameworkConnectionInfo.values()) {
             try {
                 ConnectorInfoManager remoteConnectorInfoManager = factory.getRemoteManager(entry);
@@ -219,6 +249,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     public void testConnector(APIConfiguration configuration) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
+        if (null == facade && null != osgiConnectorManager) {
+            try {
+                facade = osgiConnectorManager.newInstance(configuration);
+            } catch (Exception e) {
+                TRACE.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
+            }
+        }
         if (null != facade) {
             TestApiOp operation = (TestApiOp) facade.getOperation(TestApiOp.class);
             if (null != operation) {
@@ -234,6 +271,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
     public Map<String, Object> createSystemConfiguration(APIConfiguration configuration, boolean validate) {
         ConnectorFacadeFactory connectorFacadeFactory = ConnectorFacadeFactory.getInstance();
         ConnectorFacade facade = connectorFacadeFactory.newInstance(configuration);
+        if (null == facade && null != osgiConnectorManager) {
+            try {
+                facade = osgiConnectorManager.newInstance(configuration);
+            } catch (Exception e) {
+                TRACE.warn("OSGi ConnectorManager can not create ConnectorFacade", e);
+            }
+        }
         if (null != facade) {
             Map<String, Object> jsonConfiguration = new LinkedHashMap<String, Object>();
             APIConfigurationImpl impl = (APIConfigurationImpl) configuration;
@@ -322,7 +366,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
      * regular expression which will match each entry.
      *
      * @param jarLocation
-     * @param filter to filter the results within a regular expression.
+     * @param filter      to filter the results within a regular expression.
      * @return a list of files within the jar |file|
      */
     private static Vector<URL> getJarFileListing(URL jarLocation, String filter) {
