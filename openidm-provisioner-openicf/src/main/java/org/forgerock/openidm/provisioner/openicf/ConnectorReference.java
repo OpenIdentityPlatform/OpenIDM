@@ -38,6 +38,8 @@ import org.identityconnectors.framework.api.ConnectorKey;
  */
 public class ConnectorReference {
     public static final String SINGLE_LOCAL_CONNECTOR_MANAGER = "#LOCAL";
+    public static final String OSGI_SERVICE_CONNECTOR_MANAGER = "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager";
+    public static final String OSGI_SERVICE_CONNECTOR_MANAGER_11 = "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager/(ConnectorBundle-FrameworkVersion=1.1)";
     private ConnectorKey connectorKey;
     private String connectorHost = SINGLE_LOCAL_CONNECTOR_MANAGER;
 
