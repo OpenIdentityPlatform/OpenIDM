@@ -19,7 +19,8 @@ import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import java.io.PrintWriter;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -85,7 +86,7 @@ public class Activator implements BundleActivator {
      */
     private boolean isValidCommandMethod(Object service, String commandName) {
         try {
-            service.getClass().getMethod(commandName, PrintWriter.class, String[].class);
+            service.getClass().getMethod(commandName, InputStream.class, PrintStream.class, String[].class);
             return true;
         } catch (NoSuchMethodException e) {
             return false;
