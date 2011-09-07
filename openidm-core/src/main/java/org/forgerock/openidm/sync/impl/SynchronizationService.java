@@ -26,8 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 // OSGi Framework
-import org.forgerock.openidm.context.InvokeContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -43,14 +46,21 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON-Fluent library
+// JSON Fluent library
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonPointer;
 
-// ForgeRock OpenIDM
+// OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
 import org.forgerock.openidm.sync.SynchronizationException;
@@ -70,14 +80,16 @@ import org.forgerock.openidm.scope.ObjectSetFunctions;
 @Properties({
     @Property(name = "service.description", value = "OpenIDM object synchronization service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.osgi.shell.group.id", value = "sync"),
-    @Property(name = "openidm.osgi.shell.commands", value = {
-                "oncreate#Call the onCreate(<arg>,null)",
-                "onupdate#Call the onUpdate(<arg>,null,null)",
-                "ondelete#Call the onDelete(<arg>)"})
+    @Property(name = "openidm.router.prefix", value = "sync")
 })
 @Service
-public class SynchronizationService implements SynchronizationListener, ScheduledService {
+public class SynchronizationService implements ObjectSet, SynchronizationListener, ScheduledService {
+
+    /** TODO: Description. */
+    private enum Action { ONCREATE, ONUPDATE, ONDELETE, RECON }
+
+    /** TODO: Description. */
+    private final static Logger LOGGER = LoggerFactory.getLogger(SynchronizationService.class);
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private final ArrayList<ObjectMapping> mappings = new ArrayList<ObjectMapping>();
@@ -180,14 +192,15 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     @Override
     public void onCreate(String id, JsonNode object) throws SynchronizationException {
+// TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onCreate(id, object);
         }
     }
 
     @Override
-    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue)
-    throws SynchronizationException {
+    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
+// TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onUpdate(id, oldValue, newValue);
         }
@@ -195,6 +208,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     @Override
     public void onDelete(String id) throws SynchronizationException {
+// TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onDelete(id);
         }
@@ -202,6 +216,7 @@ public class SynchronizationService implements SynchronizationListener, Schedule
 
     @Override
     public void execute(Map<String, Object> context) throws ExecutionException {
+// TODO: Deprecate this; use resource interface instead.
         try {
             JsonNode params = new JsonNode(context).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
@@ -226,85 +241,87 @@ public class SynchronizationService implements SynchronizationListener, Schedule
      * @return
      */
     public String reconcile(String mapping) throws SynchronizationException {
+// TODO: Deprecate this; use resource interface instead.
         String reconId = UUID.randomUUID().toString();
         getMapping(mapping).recon(reconId); // throws SynchronizationException
         return reconId;
     }
 
+
+    @Override
+    public void create(String id, Map<String, Object> object) throws ObjectSetException {
+        throw new ForbiddenException(); // nothing to create... yet
+    }
+
+    @Override
+    public Map<String, Object> read(String id) throws ObjectSetException {
+        throw new ForbiddenException(); // nothing to read... yet
+    }
+
+    @Override
+    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        throw new ForbiddenException(); // nothing to update... yet
+    }
+
+    @Override
+    public void delete(String id, String rev) throws ObjectSetException {
+        throw new ForbiddenException(); // nothing to delete... yet
+    }
+
+    @Override
+    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+        throw new ForbiddenException(); // nothing to patch... yet
+    }
+
+    @Override
+    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
+// TODO: Allow polling of asynchronous reconciliation status.
+        throw new ForbiddenException(); // nothing to query... yet
+    }
+
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+        if (id != null) { // operation on entire set only... for now
+            throw new NotFoundException();
+        }
+        Map<String, Object> result = null;
+        JsonNode _params = new JsonNode(params, new JsonPointer("params"));
+        Action action = _params.get("_action").required().asEnum(Action.class);
+        try {
+            switch (action) {
+            case ONCREATE:
+                id = _params.get("id").required().asString();
+                LOGGER.debug("Synchronization _action=onCreate, id={}", id);
+                onCreate(id, _params.get("_entity").expect(Map.class));
+                break;
+            case ONUPDATE:
+                id = _params.get("id").required().asString();
+                LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
+                onUpdate(id, null, _params.get("_entity").expect(Map.class));
+                break;
+            case ONDELETE:
+                id = _params.get("id").required().asString();
+                LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
+                onDelete(id);
+                break;
+            case RECON:
+                result = new HashMap<String, Object>();
+                String mapping = _params.get("mapping").required().asString();
+                LOGGER.debug("Synchronization _action=recon, mapping={}", mapping);
+                result.put("reconId", reconcile(mapping));
+// TODO: Make asynchronous, and provide polling mechanism for reconciliation status.
+                break;
+            }
+        } catch (SynchronizationException se) {
+            throw new ConflictException(se);
+        }
+        return result;
+    }
+
     /**
      * TODO: Description.
-     * @return
      */
     CryptoService getCryptoService() {
         return cryptoService;
-    }
-
-    /**
-     * Shell Commands
-     */
-    public void oncreate(InputStream in, PrintStream out, String[] args) throws Exception {
-        PrintWriter output = new PrintWriter(out);
-        try {
-            if (args.length > 0) {
-                String activityId = UUID.randomUUID().toString();
-                InvokeContext.getContext().pushActivityId(activityId);
-                try {
-                    output.println("Execute activityId: " + activityId);
-                    this.onCreate(args[0], null);
-                } catch (SynchronizationException e) {
-                    output.append("Error:").append(e.getMessage());
-                } finally {
-                    InvokeContext.getContext().popActivityId();
-                }
-            } else {
-                output.println("Usage: oncreate <id>");
-            }
-        } finally {
-            output.flush();
-        }
-    }
-
-    public void onupdate(InputStream in, PrintStream out, String[] args) throws Exception {
-        PrintWriter output = new PrintWriter(out);
-        try {
-            if (args.length > 0) {
-                String activityId = UUID.randomUUID().toString();
-                InvokeContext.getContext().pushActivityId(activityId);
-                try {
-                    out.println("Execute activityId: " + activityId);
-                    this.onUpdate(args[0], null, null);
-                } catch (SynchronizationException e) {
-                    output.append("Error:").append(e.getMessage());
-                } finally {
-                    InvokeContext.getContext().popActivityId();
-                }
-            } else {
-                out.println("Usage: onupdate <id>");
-            }
-        } finally {
-            output.flush();
-        }
-    }
-
-    public void ondelete(InputStream in, PrintStream out, String[] args) throws Exception {
-        PrintWriter output = new PrintWriter(out);
-        try {
-            if (args.length > 0) {
-                String activityId = UUID.randomUUID().toString();
-                InvokeContext.getContext().pushActivityId(activityId);
-                try {
-                    output.println("Execute activityId: " + activityId);
-                    this.onDelete(args[0]);
-                } catch (SynchronizationException e) {
-                    output.append("Error:").append(e.getMessage());
-                } finally {
-                    InvokeContext.getContext().popActivityId();
-                }
-            } else {
-                output.println("Usage: ondelete <id>");
-            }
-        } finally {
-            output.flush();
-        }
     }
 }

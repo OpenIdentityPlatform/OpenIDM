@@ -235,12 +235,12 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      * @return
      */
-    private JsonNode readObject(String objectSet, String id) throws SynchronizationException {
+    private JsonNode readObject(String id) throws SynchronizationException {
         if (id == null) {
             throw new NullPointerException();
         }
         try {
-            return decrypt(new JsonNode(service.getRouter().read(objectSet + '/' + id)));
+            return decrypt(new JsonNode(service.getRouter().read(id)));
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
@@ -274,6 +274,22 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    /**
+     * TODO: Description.
+     *
+     * @param objSet TODO.
+     * @param objId TODO.
+     * @return TODO.
+     */
+    private String qualifiedId(String objSet, String objId) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(objSet);
+        if (objId != null) {
+            sb.append('/').append(objId);
+        }
+        return sb.toString();
+    }
+
 // TODO: maybe move all this target stuff into a target object wrapper to keep this class clean
     /**
      * TODO: Description.
@@ -283,7 +299,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void updateTargetObject(JsonNode target) throws SynchronizationException {
         try {
-            String id = targetObjectSet + '/' + target.get("_id").required().asString();
+            String id = qualifiedId(targetObjectSet, target.get("_id").required().asString());
             LOGGER.trace("Update target object {}", id);
             service.getRouter().update(id, target.get("_rev").asString(), target.asMap());
         } catch (JsonNodeException jne) {
@@ -304,7 +320,7 @@ class ObjectMapping implements SynchronizationListener {
     private void deleteTargetObject(JsonNode target) throws SynchronizationException {
         if (target.get("_id").isString()) { // forgiving delete
             try {
-                String id = targetObjectSet + '/' + target.get("_id").required().asString();
+                String id = qualifiedId(targetObjectSet, target.get("_id").required().asString());
                 LOGGER.trace("Delete target object {}", id);
                 service.getRouter().delete(id, target.get("_rev").asString());
             } catch (JsonNodeException jne) {
@@ -332,15 +348,21 @@ class ObjectMapping implements SynchronizationListener {
 
     @Override
     public void onCreate(String id, JsonNode value) throws SynchronizationException {
+        if (value == null || value.getValue() == null) { // notification without the actual value
+            value = readObject(id);
+        }
         doSourceSync(id, decrypt(value)); // synchronous for now
     }
     
     @Override
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
         oldValue = decrypt(oldValue);
+        if (newValue == null || newValue.getValue() == null) { // notification without the actual value
+            newValue = readObject(id);
+        }
         newValue = decrypt(newValue);
 // TODO: use old value to project incremental diff without fetch of source
-        if (oldValue == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
+        if (oldValue == null || oldValue.getValue() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
             doSourceSync(id, newValue); // synchronous for now
         } else {
             LOGGER.trace("There is nothing to update on {}", id);
@@ -369,11 +391,11 @@ class ObjectMapping implements SynchronizationListener {
     private void doRecon(String reconId) throws SynchronizationException {
         for (String sourceId : queryAllIds(sourceObjectSet)) {
             SourceSyncOperation op = new SourceSyncOperation();
-            op.sourceId = sourceId;
-            op.sourceObject = readObject(sourceObjectSet, sourceId);
-            op.reconId = reconId;
             ReconEntry entry = new ReconEntry(op);
-            entry.sourceId = sourceObjectSet + '/' + sourceId;
+            op.sourceId = sourceId;
+            entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
+            op.sourceObject = readObject(entry.sourceId);
+            op.reconId = reconId;
             try {
                 op.sync();
             } catch (SynchronizationException se) {
@@ -394,15 +416,17 @@ class ObjectMapping implements SynchronizationListener {
             if (entry.status == Status.FAILURE || op.action != null) {
                 entry.timestamp = new Date();
                 entry.reconciling = "source";
-                entry.targetId = qualifiedId(targetObjectSet, op.targetObject);
+                if (op.targetObject != null) {
+                    entry.targetId = qualifiedId(targetObjectSet, op.targetObject.get("_id").asString());
+                }
                 logReconEntry(entry);
             }
         }
         for (String targetId : queryAllIds(targetObjectSet)) {
             TargetSyncOperation op = new TargetSyncOperation();
             ReconEntry entry = new ReconEntry(op);
-            entry.targetId = targetObjectSet + '/' + targetId;
-            op.targetObject = readObject(targetObjectSet, targetId);
+            entry.targetId = qualifiedId(targetObjectSet, targetId);
+            op.targetObject = readObject(entry.targetId);
             op.reconId = reconId;
             try {
                 op.sync();
@@ -424,7 +448,9 @@ class ObjectMapping implements SynchronizationListener {
             if (entry.status == Status.FAILURE || op.action != null) {
                 entry.timestamp = new Date();
                 entry.reconciling = "target";
-                entry.sourceId = qualifiedId(sourceObjectSet, op.sourceObject);
+                if (op.sourceObject != null) {
+                    entry.sourceId = qualifiedId(sourceObjectSet, op.sourceObject.get("_id").asString());
+                }
                 logReconEntry(entry);
             }
         }
@@ -432,23 +458,10 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * Qualified Id if the object is not null, null if the object is null
-     * @param objSet
-     * @param obj
-     * @return
-     */
-    private String qualifiedId(String objSet, JsonNode obj) {
-        if (obj == null) {
-            return null;
-        }
-        return objSet + '/' + obj.get("_id").getValue();
-    }
-    
-    /**
      * TODO: Description.
      *
      * @param entry TODO.
-     * @throws org.forgerock.openidm.sync.SynchronizationException
+     * @throws SynchronizationException TODO.
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
@@ -533,6 +546,10 @@ class ObjectMapping implements SynchronizationListener {
                 case LINK:
                     if (targetObject == null) {
                         throw new SynchronizationException("no target object to link");
+                    }
+                    if (linkObject._id == null) {
+                        // try to read again as it may have been created in a cascade
+                        linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
                     }
                     if (linkObject._id == null) {
                         linkObject.sourceId = sourceObject.get("_id").required().asString();
@@ -685,7 +702,7 @@ class ObjectMapping implements SynchronizationListener {
                 linkObject.getLinkForSource(sourceId);
             }
             if (linkObject._id != null) {
-                targetObject = readObject(targetObjectSet, linkObject.targetId);
+                targetObject = readObject(qualifiedId(targetObjectSet, linkObject.targetId));
             }
             if (isSourceValid()) { // source is valid for mapping
                 if (linkObject._id != null) { // source object linked to target
@@ -700,8 +717,8 @@ class ObjectMapping implements SynchronizationListener {
                     if (results == null) { // no correlationQuery defined
                         situation = Situation.ABSENT;
                     } else if (results.size() == 1) {
-                        targetObject = readObject(targetObjectSet,
-                         results.get((Integer)0).required().get("_id").required().asString());
+                        targetObject = readObject(qualifiedId(targetObjectSet,
+                         results.get((Integer)0).required().get("_id").required().asString()));
                         situation = Situation.FOUND;
                     } else if (results.size() == 0) {
                         situation = Situation.ABSENT;
@@ -778,7 +795,7 @@ class ObjectMapping implements SynchronizationListener {
             } else if (linkObject._id == null || linkObject.sourceId == null) {
                 situation = Situation.UNQUALIFIED;
             } else {
-                sourceObject = readObject(sourceObjectSet, linkObject.sourceId);
+                sourceObject = readObject(qualifiedId(sourceObjectSet, linkObject.sourceId));
                 if (sourceObject == null || !isSourceValid()) {
                     situation = Situation.UNQUALIFIED;
                 } else { // proper link
@@ -814,7 +831,7 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public String message;
 
-        // TODO: replace with proper formatter
+// TODO: replace with proper formatter
         SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         
         public ReconEntry(SyncOperation op) {
