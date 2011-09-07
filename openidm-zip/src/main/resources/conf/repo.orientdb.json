@@ -19,7 +19,7 @@
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
                 ]
             },
-            "link_systemXmlAccounts_managedUser" : {
+            "link_systemLdapAccounts_managedUser" : {
                 "index" : [
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
                     {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
@@ -27,7 +27,7 @@
                     {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
                 ]
             },
-            "link_managedUser_systemXmlTargetAccounts" : {
+            "link_managedUser_systemAdAccounts" : {
                 "index" : [
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
                     {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
@@ -35,7 +35,7 @@
                     {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
                 ]
             },
-            "link_managedUser_systemXmlAccounts" : {
+            "link_managedUser_systemLdapAccounts" : {
                 "index" : [
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
                     {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
@@ -43,7 +43,7 @@
                     {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
                 ]
             },
-            "link_systemLdapAccount_managedUser" : {
+            "link_systemOpenDJAccount_managedUser" : {
                 "index" : [
                     { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
                     {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},

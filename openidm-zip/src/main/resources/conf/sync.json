@@ -1,7 +1,7 @@
 {
     "mappings" : [
         {
-            "name" : "systemXmlAccounts_managedUser",
+            "name" : "systemLdapAccounts_managedUser",
             "source" : "system/ldap/account",
             "target" : "managed/user",
             "validTarget": {
@@ -13,15 +13,18 @@
                 { "source" : "lastname", "target" : "lastname" },
                 { "source" : "firstname", "target" : "firstname" },
                 { "source" : "email", "target" : "email" },
+                { "source" : "__DESCRIPTION__", "target" : "description" },
+                { "source" : "__ENABLE__", "target" : "active" },
+                { "source" : "__GROUPS__", "target" : "groups" },
                 { "default" : "external", "target" : "employeeType" }
             ],
             "onCreate" : {
                 "type": "text/javascript",
-                "source": "target.ldapPassword = null;target.adPassword = null;"
+                "source": "target.ldapPassword = null;target.adPassword = null;target._id = source.name;"
             }
         },
         {
-            "name": "managedUser_systemXmlTargetAccounts",
+            "name": "managedUser_systemAdAccounts",
             "source": "managed/user",
             "target": "system/ad/account",
             "correlationQuery" : {
@@ -33,7 +36,7 @@
                 { "source" : "lastname", "target" : "lastname" },
                 { "source" : "firstname", "target" : "firstname" },
                 { "source" : "email", "target" : "email" },
-                {   "source" : "ldapPassword",
+                {   "source" : "password",
                     "target" : "__PASSWORD__",
                     "condition" : {
                         "type": "text/javascript",
@@ -48,7 +51,7 @@
             }
         },
         {
-            "name": "managedUser_systemXmlAccounts",
+            "name": "managedUser_systemLdapAccounts",
             "source": "managed/user",
             "target": "system/ldap/account",
             "correlationQuery" : {
@@ -60,7 +63,7 @@
                 "source": "source.adPassword != null"
             },
             "properties": [
-                {   "source" : "adPassword",
+                {   "source" : "password",
                     "target" : "__PASSWORD__",
                     "condition" : {
                         "type": "text/javascript",
@@ -92,7 +95,7 @@
             ]
         },
         {
-            "name" : "systemLdapAccount_managedUser",
+            "name" : "systemOpenDJAccount_managedUser",
             "source" : "system/OpenDJ/__ACCOUNT__",
             "target" : "managed/user",
             "validTarget": {

@@ -553,12 +553,7 @@
                         },
                      "__PASSWORD__" :
                         {
-                           "type" : "array",
-                           "items" :
-                              {
-                                 "type" : "string",
-                                 "nativeType" : "JAVA_TYPE_GUARDEDSTRING"
-                              },
+                           "type" : "string",
                            "nativeName" : "__PASSWORD__",
                            "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
                            "flags" :
@@ -671,54 +666,6 @@
             {
                "objectFeatures" :
                   {
-                     "account" :
-                        {
-                           "denied" : false,
-                           "onDeny" : "DO_NOTHING",
-                           "operationOptionInfo" :
-                              {
-                                 "$schema" : "http://json-schema.org/draft-03/schema",
-                                 "id" : "FIX_ME",
-                                 "type" : "object",
-                                 "properties" :
-                                    {
-                                    }
-                              }
-                        }
-                  }
-            },
-         "TEST" :
-            {
-               "objectFeatures" :
-                  {
-                     "Group" :
-                        {
-                           "denied" : false,
-                           "onDeny" : "DO_NOTHING",
-                           "operationOptionInfo" :
-                              {
-                                 "$schema" : "http://json-schema.org/draft-03/schema",
-                                 "id" : "FIX_ME",
-                                 "type" : "object",
-                                 "properties" :
-                                    {
-                                    }
-                              }
-                        },
-                     "organizationalUnit" :
-                        {
-                           "denied" : false,
-                           "onDeny" : "DO_NOTHING",
-                           "operationOptionInfo" :
-                              {
-                                 "$schema" : "http://json-schema.org/draft-03/schema",
-                                 "id" : "FIX_ME",
-                                 "type" : "object",
-                                 "properties" :
-                                    {
-                                    }
-                              }
-                        },
                      "account" :
                         {
                            "denied" : false,
