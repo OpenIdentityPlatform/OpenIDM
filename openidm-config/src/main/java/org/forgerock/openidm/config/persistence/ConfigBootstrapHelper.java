@@ -193,7 +193,9 @@ public class ConfigBootstrapHelper {
         }
 
         if ("true".equals(enabled)) {
+            // Apply the latest configuration changes from file
             props.put("felix.fileinstall.poll", poll);
+            props.put("felix.fileinstall.noInitialDelay", "true");
             props.put("felix.fileinstall.dir", dir);
             props.put("felix.fileinstall.filter", filter);
             props.put("felix.fileinstall.bundles.new.start", start);
