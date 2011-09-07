@@ -1,1 +1,1 @@
-object.ldapPassword != null && (object.adPassword == null || object.adPassword != object.ldapPassword)
+object.password != null && object.adPassword != object.password
