@@ -61,6 +61,8 @@
                 <exclude>org.forgerock.openidm:openidm-config</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
+                <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
+                <exclude>org.apache.felix:org.apache.felix.configadmin</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
