@@ -110,7 +110,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
        
         if (this.configAdmin != null) {
-            logger.debug("Checking if can handle artifact: " + artifact);
+            logger.debug("Checking if can handle artifact: {}", artifact);
             return artifact.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT);
         } else {
             return false;
@@ -119,25 +119,25 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     public void install(File artifact) throws Exception
     {
-        logger.debug("Artifact install ", artifact);
+        logger.debug("Artifact install {}", artifact);
         setConfig(artifact);
     }
 
     public void update(File artifact) throws Exception
     {
-        logger.debug("Artifact update ", artifact);
+        logger.debug("Artifact update {}", artifact);
         setConfig(artifact);
     }
 
     public void uninstall(File artifact) throws Exception
     {
-        logger.debug("Artifact uninstall ", artifact);
+        logger.debug("Artifact uninstall {}", artifact);
         deleteConfig(artifact);
     }
 
     public void configurationEvent(ConfigurationEvent configurationEvent)
     {    
-        logger.debug("ConfigurationEvent ", configurationEvent);
+        logger.debug("ConfigurationEvent {}", configurationEvent);
         // Check if writing back configurations has been disabled.
         {
             Object obj = this.context.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
@@ -203,7 +203,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                                 } finally {
                                   writer.close();
                                 }
-                                logger.debug("Completed update of configuration file " + fileName);
+                                logger.debug("Completed update of configuration file {}", fileName);
                             }
                         }
                     }
@@ -338,7 +338,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 updated = false;
             }
         } catch (Exception ex) {
-            logger.warn("Loading configuration file " + f + " failed ", ex);
+            logger.warn("Loading configuration file {} failed ", f, ex);
         }
         return updated;
     }
