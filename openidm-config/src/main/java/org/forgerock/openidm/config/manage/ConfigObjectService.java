@@ -344,7 +344,7 @@ public class ConfigObjectService implements ObjectSet {
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        logger.info("Call to action not supported");
+        logger.info("Call to action not supported for {} {}", id, params);
         throw new UnsupportedOperationException();
     }
     
