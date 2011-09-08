@@ -167,7 +167,17 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 if (fileName == null && pid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
                     String unqualified = pid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
                     if (factoryPid != null) {
-                        fileName = toConfigKey(new File(confDir, unqualified + "-" + factoryPid + 
+                        String unqualifiedFactoryPid = factoryPid;
+                        if (factoryPid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
+                            unqualifiedFactoryPid = factoryPid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
+                        }
+                        String alias = (String) dict.get(SERVICE_FACTORY_PID_ALIAS);
+                        if (alias == null) {
+                            logger.warn("Could not write out factory configuration file, as no friendly alias is set in the configuration."
+                                   + " factory pid: {} assigned pid {}", factoryPid, pid);
+                            return;
+                        }
+                        fileName = toConfigKey(new File(confDir, unqualifiedFactoryPid + "-" + alias + 
                                 ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT));
                     } else {
                         fileName = toConfigKey(new File(confDir, unqualified + ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT));
