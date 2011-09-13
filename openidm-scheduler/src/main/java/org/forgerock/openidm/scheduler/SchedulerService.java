@@ -186,6 +186,9 @@ public class SchedulerService  {
         logger.debug("Scheduler service activating with configuration {}", config);
         
         enabled = (Boolean) config.get(SCHEDULE_ENABLED);
+        if (enabled == null) {
+            enabled = Boolean.TRUE; // Default to enabled
+        }
         
         cronSchedule = (String) config.get(SCHEDULE_CRON_SCHEDULE);
         scheduleType = (String) config.get(SCHEDULE_TYPE);
