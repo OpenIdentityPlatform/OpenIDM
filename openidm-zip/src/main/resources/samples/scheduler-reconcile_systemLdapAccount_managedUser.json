@@ -1,4 +1,5 @@
 {
+    "enabled" : true,
     "type": "cron",
     "schedule": "0 0/1 * * * ?",
     "invokeService": "sync",
