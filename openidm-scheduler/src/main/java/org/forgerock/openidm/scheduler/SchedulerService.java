@@ -77,6 +77,7 @@ public class SchedulerService  {
     final static Logger logger = LoggerFactory.getLogger(SchedulerService.class);
 
     // Keys in the OSGi configuration     
+    public final static String SCHEDULE_ENABLED = "enabled";
     public final static String SCHEDULE_TYPE = "type";
     public final static String SCHEDULE_START_TIME = "startTime";
     public final static String SCHEDULE_END_TIME = "endTime";
@@ -97,6 +98,7 @@ public class SchedulerService  {
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     
     // Configuration
+    Boolean enabled;
     String scheduleType;
     Date startTime;
     Date endTime;
@@ -121,6 +123,11 @@ public class SchedulerService  {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
                 
         initConfig(compContext);
+        if (!enabled) {
+            logger.info("Scheduler for {} is disabled", configFactoryPID);
+            return;
+        }
+        
         scheduledServiceTracker = createServiceTracker(compContext, invokeService);
 
         try {
@@ -177,6 +184,8 @@ public class SchedulerService  {
         
         Map<String, Object> config = enhancedConfig.getConfiguration(compContext);
         logger.debug("Scheduler service activating with configuration {}", config);
+        
+        enabled = (Boolean) config.get(SCHEDULE_ENABLED);
         
         cronSchedule = (String) config.get(SCHEDULE_CRON_SCHEDULE);
         scheduleType = (String) config.get(SCHEDULE_TYPE);
@@ -249,7 +258,11 @@ public class SchedulerService  {
     void deactivate(ComponentContext compContext) { 
         logger.debug("Deactivating Service {}", compContext);
         try {
-            scheduler.deleteJob(jobName, groupName);
+            boolean deleted = false;
+            if (scheduler != null) {
+                deleted = scheduler.deleteJob(jobName, groupName);
+            }
+            logger.trace("Scheduler job deleted: ", deleted);
         } catch (SchedulerException ex) {
             logger.warn("Failure during removal of scheduled job ", ex);
         }
