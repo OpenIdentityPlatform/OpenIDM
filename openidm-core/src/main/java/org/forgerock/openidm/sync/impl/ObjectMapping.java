@@ -142,18 +142,16 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      */
     private void doSourceSync(String id, JsonNode value) throws SynchronizationException {
-        if (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1) {
-            LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
-            String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
+        LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
+        String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
-            SourceSyncOperation op = new SourceSyncOperation();
-            op.sourceId = localId;
-            if (value != null) {
-                op.sourceObject = value;
-                op.sourceObject.put("_id", localId); // unqualified
-            }
-            op.sync();
+        SourceSyncOperation op = new SourceSyncOperation();
+        op.sourceId = localId;
+        if (value != null) {
+            op.sourceObject = value;
+            op.sourceObject.put("_id", localId); // unqualified
         }
+        op.sync();
     }
 
     /**
@@ -346,32 +344,46 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    /**
+     * Returns {@code true} if the specified object identifer is in this mapping's source
+     * object set.
+     */ 
+    private boolean isSourceObject(String id) {
+        return (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1);
+    }
+
     @Override
     public void onCreate(String id, JsonNode value) throws SynchronizationException {
-        if (value == null || value.getValue() == null) { // notification without the actual value
-            value = readObject(id);
+        if (isSourceObject(id)) {
+            if (value == null || value.getValue() == null) { // notification without the actual value
+                value = readObject(id);
+            }
+            doSourceSync(id, decrypt(value)); // synchronous for now
         }
-        doSourceSync(id, decrypt(value)); // synchronous for now
     }
-    
+
     @Override
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
-        oldValue = decrypt(oldValue);
-        if (newValue == null || newValue.getValue() == null) { // notification without the actual value
-            newValue = readObject(id);
-        }
-        newValue = decrypt(newValue);
-// TODO: use old value to project incremental diff without fetch of source
-        if (oldValue == null || oldValue.getValue() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
-            doSourceSync(id, newValue); // synchronous for now
-        } else {
-            LOGGER.trace("There is nothing to update on {}", id);
+        if (isSourceObject(id)) {
+            oldValue = decrypt(oldValue);
+            if (newValue == null || newValue.getValue() == null) { // notification without the actual value
+                newValue = readObject(id);
+            }
+            newValue = decrypt(newValue);
+    // TODO: use old value to project incremental diff without fetch of source
+            if (oldValue == null || oldValue.getValue() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
+                doSourceSync(id, newValue); // synchronous for now
+            } else {
+                LOGGER.trace("There is nothing to update on {}", id);
+            }
         }
     }
 
     @Override
     public void onDelete(String id) throws SynchronizationException {
-        doSourceSync(id, null); // synchronous for now
+        if (isSourceObject(id)) {
+            doSourceSync(id, null); // synchronous for now
+        }
     }
 
     public void recon(String reconId) throws SynchronizationException {
