@@ -162,8 +162,12 @@ public class OpenICFProvisionerService implements ProvisionerService {
         try {
             ConnectorFacade facade = getConnectorFacade(operationHelperBuilder.getRuntimeAPIConfiguration());
             if (facade.getSupportedOperations().contains(TestApiOp.class)) {
-                facade.test();
-                logger.debug("OK - Test of {} succeeded!", systemIdentifier);
+                try {
+                    facade.test();
+                    logger.debug("OK - Test of {} succeeded!", systemIdentifier);
+                } catch (Exception e) {
+                    logger.warn("Test of {} failed when service was activated! Remote system may be unavailable or the It can be configuration problem.", systemIdentifier, e);
+                }
             } else {
                 logger.debug("Test is not supported.");
             }
