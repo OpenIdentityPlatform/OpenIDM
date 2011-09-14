@@ -71,6 +71,7 @@
             <literallayout class="monospaced">
                 <code>
 {
+    "enabled" : true,
     "type" : "cron",
     "startTime" : "&lt;optional time&gt;",
     "endTime" : "&lt;optional time&gt;",
@@ -121,6 +122,7 @@
             <literallayout class="monospaced">
                 <code>
 {
+    "enabled" : true,
     "type" : "cron",
     "startTime" : "2011-05-03T10:00:00 ",
     "endTime" : "2011-05-03T15:59:59",
@@ -141,6 +143,7 @@
             <literallayout class="monospaced">
                 <code>
 {
+    "enabled" : true,
     "type", "cron",
     "schedule" : "0 30 10-13 ? * WED,FRI"
     "invokeService" : "active-sync",
