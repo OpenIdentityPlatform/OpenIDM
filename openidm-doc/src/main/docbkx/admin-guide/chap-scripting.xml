@@ -23,33 +23,23 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter version="5.0"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-         xml:id="chap-scripting" xml:lang="en"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:xs="http://www.w3.org/2001/XMLSchema"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xinclude="http://www.w3.org/2001/XInclude"
-         xmlns:ns="http://docbook.org/ns/docbook">
+<chapter version="5.0" xsi:schemaLocation="http://docbook.org/ns/docbook
+  http://docbook.org/xml/5.0/xsd/docbook.xsd" xml:id="chap-scripting" xml:lang="en"
+  xmlns="http://docbook.org/ns/docbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xinclude="http://www.w3.org/2001/XInclude" xmlns:ns="http://docbook.org/ns/docbook">
   <title>Scripting</title>
-
-  <para>Scripting provides for custom logic between source and target
-  mappings. </para>
-
-  <para></para>
-
+  <para>Scripting provides the capabilities to customize behaviours in a variety of places through
+    out the product, such as provide for custom logic between source and target mappings, define
+    correlation rules, filters and triggeers etc. </para>
   <sect1>
     <title>Configuration</title>
-
-    <para>Scripts are defined as part of the mappings 
-    </para>
-
+    <para>Scripts are defined using script objects which can either inline the code script or call
+      out to an external file or object providing the script. </para>
     <sect2>
       <title>script object</title>
       <sect3>
         <title>Usage</title>
-
         <example>
           <literallayout class="monospaced">
                         <code>
@@ -57,33 +47,37 @@
   "type": "text/javascript",
   "source": string
 }
-                        </code>
+  
+or
+           
+{
+  "type": "text/javascript",
+  "file": "jscript/myCustomScript.js
+}           </code>
                     </literallayout>
         </example>
       </sect3>
-
       <sect3>
         <title>Properties</title>
-
         <variablelist>
           <varlistentry>
             <term>type</term>
-
             <listitem>
               <para>string, required</para>
-
-              <para>Specifies the type of script to be executed. Presently,
-              only "text/javascript" is supported.</para>
+              <para>Specifies the type of script to be executed. Presently, only "text/javascript"
+                is supported.</para>
             </listitem>
           </varlistentry>
-
           <varlistentry>
             <term>source</term>
-
             <listitem>
-              <para>string, required</para>
-
-              <para>Specifies the source code of the script to be
+              <para>string, required if file not specified</para>
+              <para>Specifies the source code of the script to be executed.</para>
+            </listitem>
+            <term>file</term>
+            <listitem>
+              <para>string, required if source not specified</para>
+              <para>Specifies the file containing the source code of the script to be
               executed.</para>
             </listitem>
           </varlistentry>
@@ -91,35 +85,49 @@
       </sect3>
     </sect2>
     <sect2>
-    <title>Examples</title>
-
-        <sect3>
-        <para>Returns true if the employeeType is equal to external, otherwise returns false. This script 
-        would be used during a reconciliation to establish whether the source object should be a part
-        of the reconiciliation or ignored.
-        </para>
-        <screen width='80'>
+      <title>Examples</title>
+      <sect3>
+        <para>Returns true if the employeeType is equal to external, otherwise returns false. This
+          script would be used during a reconciliation to establish whether the source object should
+          be a part of the reconiciliation or ignored. </para>
+        <screen width="80">
 
 "validTarget": {
    "type": "text/javascript",
    "source": "object.employeeType == 'external'"
 },
         </screen>
-        </sect3>
-
-        <sect3>
-        <para>During the creation of a target object the attribute __PASSWORD__ is set to the value "defaultpwd"
-        </para>
-        <screen width='80'>
+      </sect3>
+      <sect3>
+        <para>During the creation of a target object the attribute __PASSWORD__ is set to the value
+          "defaultpwd" </para>
+        <screen width="80">
 
 "onCreate" : {
     "type": "text/javascript",
     "source": "target.__PASSWORD__ = 'defaultpwd'"
 }
-
+</screen>
+      </sect3>
+      <sect3>
+        <para>Here is a nother full example from $OPENIDM/conf/router.json, where a trigger is
+          defined to create home directories using a script in Solaris. Script is located in a file
+          and  the property file is used instead of defining source and inlining the script. </para>
+        <screen width="80">
+          
+    {
+    "filters" : [
+        { "pattern" : "^system/solaris/account$",
+          "methods" : [ "create" ],
+          "onResponse" : {
+              "type" : "text/javascript",
+              "file" : "jscript/createUnixHomeDir.js"
+          }
+        }
+    ]
+}
         </screen>
-        </sect3>
-
+      </sect3>
     </sect2>
   </sect1>
 </chapter>
