@@ -401,7 +401,12 @@ class ObjectMapping implements SynchronizationListener {
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
-        for (String sourceId : queryAllIds(sourceObjectSet)) {
+        Iterator<String> i = queryAllIds(sourceObjectSet).iterator();
+        if (!i.hasNext()) {
+            throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
+        }
+        while (i.hasNext()) {
+            String sourceId = i.next();
             SourceSyncOperation op = new SourceSyncOperation();
             ReconEntry entry = new ReconEntry(op);
             op.sourceId = sourceId;
