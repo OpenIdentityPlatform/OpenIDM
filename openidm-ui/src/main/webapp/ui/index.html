@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <title>idm</title>
+  <script type="text/javascript" src="js/libs/jquery/jquery-1.6.4.js"></script>
+  <script type="text/javascript" src="js/libs/jqote/jquery.jqote2.min.js"></script>
+  <script type="text/javascript" src="js/libs/jquery/jquery-ui-1.8.16.custom.min.js"></script>
+
+  <script type="text/javascript" src="js/app/util/UIUtils.js"></script>
+  <script type="text/javascript" src="js/app/util/Constants.js"></script>
+  <script type="text/javascript" src="js/app/util/Validator.js"></script>
+
+  <script type="text/javascript" src="js/app/comp/main/MainView.js"></script>
+
+  <script type="text/javascript" src="js/app/comp/messages/MessagesView.js"></script>
+  <script type="text/javascript" src="js/app/comp/messages/MessagesCtrl.js"></script>
+  <script type="text/javascript" src="js/app/comp/breadcrumbs/BreadcrumbsView.js"></script>
+  <script type="text/javascript" src="js/app/comp/breadcrumbs/BreadcrumbsCtrl.js"></script>
+
+  <script type="text/javascript" src="js/app/comp/user/views/ProfileView.js"></script>
+  <script type="text/javascript" src="js/app/comp/user/views/LoginView.js"></script>
+  <script type="text/javascript" src="js/app/comp/user/views/RegistrationView.js"></script>
+
+  <script type="text/javascript" src="js/app/comp/user/delegates/UserDelegate.js"></script>
+
+  <script type="text/javascript" src="js/app/comp/user/controllers/ProfileCtrl.js"></script>
+  <script type="text/javascript" src="js/app/comp/user/controllers/RegistrationCtrl.js"></script>
+  <script type="text/javascript" src="js/app/comp/user/controllers/LoginCtrl.js"></script>
+
+  <script type="text/javascript" src="js/app/comp/main/MainCtrl.js"></script>
+  <link href="css/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div id="container">
+    <div id="header">
+      <div id="logo">
+        <a href="index.html" title="idm"><img src="images/logo.png" width="226" height="60" alt="idm logo" /></a>
+      </div><!-- #logo-->
+
+      <div id="loginBox">
+        <div id="loginForm">
+          <form action="" method="post">
+            <fieldset>
+              <input type="text" name="loginText" class="textFieldGray" size="17" />
+              <input type="password" name="loginPassword" class="textFieldGray" size="17" />
+              <input type="submit" name="loginButton" class="button gray" value="Login" />
+
+              <div id="loginRemember">
+                <input type="checkbox" name="remember" class="checkbox" />Remember my email <a href="#" title="password forgot" class="ice">Forgot your password ?</a>
+              </div>
+            </fieldset>
+          </form>
+        </div><!-- #loginForm -->
+
+        <div id="loginRegister">
+          <input type="button" value="Register" name="registerButton" class="button orange" />
+        </div><!-- #loginRegister -->
+      </div><!-- #loginBox-->
+
+      <div id="loginContent">
+        <span id="user_name">asdasd@asdasd.com</span>
+        | <a href="#" id="profile_link" class="orange" name="profile_link">My profile</a>
+        | <a href="#" id="logout_link" class="orange bold" name="logout_link">Log out</a>
+      </div><!-- #loginContent -->
+
+      <div class="clear"></div>
+    </div><!-- #header-->
+
+    <div id="menu">
+      <ul>
+        <li><a href="#" title="Navigation">Navigation</a></li>
+        <li><a href="#" title="Navigation">Navigation</a></li>
+        <li><a href="#" title="Navigation">Navigation</a></li>
+        <li><a href="#" title="Navigation">Navigation</a></li>
+        <li><a href="#" title="Navigation" class="last">Navigation</a></li>
+      </ul>
+    </div><!-- #menu-->
+
+    <div id="navi">
+      <div id="nav-content">
+        <a href="index.html" title="Home" class="orange">Home</a> &gt;
+        <span></span>
+      </div><!-- #navi-->
+
+      <div id="messages"></div><!-- #messages -->
+
+      <div class="clear"></div>
+    </div><!-- #navi -->
+
+    <div id="content">
+
+
+
+
+
+    </div><!-- #content-->
+
+		<div id="footer">
+
+		</div>
+
+  </div><!-- #container-->
+</body>
+</html>
+
