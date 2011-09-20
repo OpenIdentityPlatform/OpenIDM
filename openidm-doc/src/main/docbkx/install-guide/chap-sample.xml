@@ -195,8 +195,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           <screen width='80'>
           "mappings" : [
                 {
-                    "name" : "systemXmlAccounts_managedUser",
-                    "source" : "system/xml/account",
+                    "name" : "systemLdapAccounts_managedUser",
+                    "source" : "system/ldap/account",
                     "target" : "managed/user",
                     "validTarget": {
                         "type": "text/javascript",
@@ -211,9 +211,9 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
                     ]
                 },
                 {
-                    "name": "managedUser_systemXmlTargetAccounts",
+                    "name": "managedUser_systemAdAccounts",
                     "source": "managed/user",
-                    "target": "system/xmlTarget/account",
+                    "target": "system/ad/account",
                     "properties": [
                         { "source" : "name", "target" : "name" },
                         { "source" : "lastname", "target" : "lastname" },
@@ -226,6 +226,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
                         "source": "target.__PASSWORD__ = 'defaultpwd'"
                     }
                 },
+                ...
           </screen>
           <para>
           From the Scheduler entry above, the systemXmlAccounts_managedUser is
