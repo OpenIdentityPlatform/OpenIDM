@@ -71,7 +71,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
  * Repository service implementation using OrientDB
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.repo.orientdb", immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
+@Component(name = OrientDBRepoService.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
 @Service (value = {RepositoryService.class, ObjectSet.class}) // Omit the RepoBootService interface from the managed service
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
@@ -82,6 +82,8 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 public class OrientDBRepoService implements RepositoryService, RepoBootService {
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
 
+    public static final String PID = "org.forgerock.openidm.repo.orientdb";
+    
     // Keys in the JSON configuration
     public static final String CONFIG_QUERIES = "queries";
     public static final String CONFIG_DB_URL = "dbUrl";
