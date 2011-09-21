@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 
@@ -52,12 +53,12 @@ public class ConfigMeta implements MetaDataProvider {
     }
     
     /**
-     * Meta-data describing which configuration properties need to be encrypted
-     * 
-     * @return a map from PID to a list of configuration properties (identified by JSON pointers)
-     * that need to be encrypted.
+     * @inheritDoc
      */
-    public Map<String, List> getPropertiesToEncrypt() {
-        return propertiesToEncrypt;
+    public List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) {
+        if (propertiesToEncrypt.containsKey(pidOrFactory)) {
+            return propertiesToEncrypt.get(pidOrFactory);
+        }
+        return null;
     } 
 }

@@ -26,6 +26,8 @@ package org.forgerock.openidm.metadata;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonNode;
+
 /**
  * Meta data provider interface to describe configuration 
  * requirements of a bundle. Use a meta-data.json file to declare 
@@ -37,10 +39,16 @@ public interface MetaDataProvider {
     
     /**
      * Meta-data describing which configuration properties need to be encrypted
+     * for a given configuration.
      * 
-     * @return a map from PID (or factory PID for factory configuration) 
-     * to a list of configuration properties (identified by JSON pointers)
-     * that need to be encrypted.
+     * @param pidOrFactory the PID of either the managed service; or for factory configuration the PID of the Managed Service Factory
+     * @param instanceAlias null for plain managed service, or the subname (alias) for the managed factory configuration instance
+     * @param config the new configuration that is being set. May or may not already have encrypted values.
+     * 
+     * @return a list of configuration properties (identified by JSON pointers)
+     * that need to be encrypted if this MetaDataProvider is responsible for this configuration. 
+     * Empty list if none should be encrypted.
+     * Null if this provider is not responsible for this configuration.
      */
-    Map<String, List> getPropertiesToEncrypt();
+    List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config);
 }
