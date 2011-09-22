@@ -551,7 +551,7 @@ class ObjectMapping implements SynchronizationListener {
                     if (sourceObject == null) {
                         throw new SynchronizationException("no source object to create target from"); 
                     }
-                    if (linkObject._id != null || targetObject != null) {
+                    if (targetObject != null) {
                         throw new SynchronizationException("target object already exists");
                     }
                     targetObject = new JsonNode(new HashMap<String, Object>());
@@ -568,11 +568,16 @@ class ObjectMapping implements SynchronizationListener {
                         // try to read again as it may have been created in a cascade
                         linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
                     }
+                    String targetId = targetObject.get("_id").required().asString();
                     if (linkObject._id == null) {
                         linkObject.sourceId = sourceObject.get("_id").required().asString();
-                        linkObject.targetId = targetObject.get("_id").required().asString();
+                        linkObject.targetId = targetId;
                         linkObject.reconId = reconId;
                         linkObject.create();
+                    } else if (!targetId.equals(linkObject.targetId) || (reconId != null && !reconId.equals(linkObject.reconId))) {
+                        linkObject.targetId = targetId;
+                        linkObject.reconId = reconId;
+                        linkObject.update();
                     }
 // TODO: Detect change of source id, and update link accordingly.
                     if (action == Action.CREATE || action == Action.LINK) {
@@ -585,10 +590,6 @@ class ObjectMapping implements SynchronizationListener {
                         if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
                             updateTargetObject(targetObject);
                         }
-                    }
-                    if (linkObject._id != null && reconId != null && !reconId.equals(linkObject.reconId)) {
-                        linkObject.reconId = reconId; // note changed reconId in link (optimization)
-                        linkObject.update();
                     }
                     break; // terminate UPDATE
                 case DELETE:
