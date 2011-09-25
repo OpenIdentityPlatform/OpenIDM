@@ -92,7 +92,7 @@
                   <listitem>
                      <para>string, required</para>
                      <para>The name of the remote connector server object. Used to identify the
-                        remote connector server in connector refference object.</para>
+                        remote connector server in connector reference object.</para>
                   </listitem>
                </varlistentry>
                <varlistentry>
@@ -161,7 +161,7 @@
 ]]>
   </programlisting>
 <simplesect>
-   <title>Connector Refference Object</title>      
+   <title>Connector Reference Object</title>      
   <programlisting>
 <![CDATA[
    {

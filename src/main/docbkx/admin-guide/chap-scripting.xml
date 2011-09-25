@@ -74,6 +74,8 @@ or
               <para>string, required if file not specified</para>
               <para>Specifies the source code of the script to be executed.</para>
             </listitem>
+          </varlistentry>
+          <varlistentry>
             <term>file</term>
             <listitem>
               <para>string, required if source not specified</para>
