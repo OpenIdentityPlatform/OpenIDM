@@ -91,14 +91,14 @@ $ </screen>
 
 <procedure>
   <title>Start the OpenIDM Services</title>
-                <note>
-                    <para>
+  <note>
+      <para>
    In the current build of OpenIDM the reconciliation sample is 
-                       enabled by default. The sample consists of a source and a target
+  enabled by default. The sample consists of a source and a target
    connector and a reconcilation task scheduled to run every minute.
    To learn more about the sample please refer to 
-                       Chapter 3.  To disable the sample you may set the "enabled" attribute to "false" in the
-                       scheduler configuration file at
+  Chapter 3.  To disable the sample you may set the "enabled" attribute to "false" in the
+  scheduler configuration file at
    </para>
    <para>
    <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
@@ -136,7 +136,7 @@ Listening for transport dt_socket at address: 5005
    </para>
 <screen width='80'>
 -&gt; scr list
-   Id   State          Name
+Id     State           Name
 [   8] [active       ] embedded-orientdb-server-component
 [   0] [active       ] org.forgerock.openidm.audit
 [   5] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
@@ -151,7 +151,7 @@ Listening for transport dt_socket at address: 5005
 [   4] [active       ] org.forgerock.openidm.provisioner
 [   1] [active       ] org.forgerock.openidm.sync
 -&gt;
-</screen>
+</screen>       
   </step>
   <step>
    <para>You may also manage the container and services from the Felix administration console. The console may be started with the following defaults:</para>
@@ -185,7 +185,7 @@ Listening for transport dt_socket at address: 5005
    </para>
    <para>URL:
      <link xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids" >
-            http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
      </link>
      </para>
      <para>
@@ -197,12 +197,12 @@ Listening for transport dt_socket at address: 5005
          command to create the user joe in the repository.
      </para>
      <screen width='80'>
-       $ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com"}'
-       http://localhost:8080/openidm/managed/user/joe
+$ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com"}'
+http://localhost:8080/openidm/managed/user/joe
 
-       {"_rev":"1","_id":"joe"}
+{"_rev":"1","_id":"joe"}
 
-       $
+$
      </screen>
      <para>
        Now fetch the newly created user from the repository with a RESTful GET from
@@ -214,11 +214,11 @@ Listening for transport dt_socket at address: 5005
      </para>
 
      <screen width='80'>
-       $ curl http://localhost:8080/openidm/managed/user/joe
+$ curl http://localhost:8080/openidm/managed/user/joe
 
-       {"_id":"joe","_rev":"1","email":"joe@abc.com","name":"joe","lastname":"smith","firstname":"joe"}
+{"_id":"joe","_rev":"1","email":"joe@abc.com","name":"joe","lastname":"smith","firstname":"joe"}
 
-       $
+$
      </screen>
   </step>
 
