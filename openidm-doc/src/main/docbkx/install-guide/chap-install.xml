@@ -46,7 +46,7 @@
    <para>OpenIDM requires requires Oracle Java SE JDK 6, update 24 or
    later.</para>
    
-   <para>OpenJDK is not supported at this time.</para>
+   <para>The equivalent version of OpenJDK should work too.</para>
   </section>
   
   <section>
@@ -91,13 +91,14 @@ $ </screen>
 
 <procedure>
   <title>Start the OpenIDM Services</title>
-  <note><para>
+                <note>
+                    <para>
    In the current build of OpenIDM the reconciliation sample is 
-   enabled by default. This sample consists of a source and target
+                       enabled by default. The sample consists of a source and a target
    connector and a reconcilation task scheduled to run every minute.
    To learn more about the sample please refer to 
-   Chapter 3.  To disable the sample you may delete or rename the 
-   scheduler configuration file for the sample at
+                       Chapter 3.  To disable the sample you may set the "enabled" attribute to "false" in the
+                       scheduler configuration file at
    </para>
    <para>
    <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
@@ -177,43 +178,48 @@ Listening for transport dt_socket at address: 5005
   <step>
    <para>Executing the REST Interfaces</para>
    <para>
-   If you have not disabled the reconciliation sample you will be able to 
-   execute the following REST command to see all users in the OpenIDM
-   repository. The users in the repository were created as a result of the
-   sample reconciliation task.  If you have disabled the sample or the 
-   reconciliation task has not yet run your request will return an empty set.
+       The following REST command will return a json file with all users in the OpenIDM
+       repository. If there are alredy some users in the repository, they were created as a result of the
+       sample reconciliation task. If the reconciliation task has not yet run your request will return an empty set.
+       If sending the URL in the browser it depends on your browser settings how the result will be show.
    </para>
-    <para>URL: <link
-      xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
-      >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link></para>
-   <para>
-   Or create your own user joe by sending a RESTful PUT. Here is a sample curl
-   command to create the user joe in the repository.
-   </para>
-<screen width='80'>
-$ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com"}'
- http://localhost:8080/openidm/managed/user/joe
+   <para>URL:
+     <link xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids" >
+            http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+     </link>
+     </para>
+     <para>
+       <para>
+           The same URL can be used with the curl command line tool which is part of most os. For more info see:
+         <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>
+       </para>
+         Or create your own user joe by sending a RESTful PUT. Here is a sample curl
+         command to create the user joe in the repository.
+     </para>
+     <screen width='80'>
+       $ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com"}'
+       http://localhost:8080/openidm/managed/user/joe
 
-{"_rev":"1","_id":"joe"}
+       {"_rev":"1","_id":"joe"}
 
-$
-</screen>
-   <para>
-   Now fetch the newly created user from the repository with a RESTful GET from
-   the browser 
-   <link
-      xlink:href="http://localhost:8080/openidm/managed/user/joe"
-      >http://localhost:8080/openidm/managed/user/joe</link>
-   or from the command line using curl.
-   </para>
+       $
+     </screen>
+     <para>
+       Now fetch the newly created user from the repository with a RESTful GET from
+       the browser 
+     <link
+        xlink:href="http://localhost:8080/openidm/managed/user/joe"
+        >http://localhost:8080/openidm/managed/user/joe</link>
+        or from the command line using curl.
+     </para>
 
-<screen width='80'>
-$ curl http://localhost:8080/openidm/managed/user/joe
+     <screen width='80'>
+       $ curl http://localhost:8080/openidm/managed/user/joe
 
-{"_id":"joe","_rev":"1","email":"joe@abc.com","name":"joe","lastname":"smith","firstname":"joe"}
+       {"_id":"joe","_rev":"1","email":"joe@abc.com","name":"joe","lastname":"smith","firstname":"joe"}
 
-$
-</screen>
+       $
+     </screen>
   </step>
 
  </procedure> 
@@ -223,11 +229,11 @@ $
 
   <step performance='optional'>
    <para>To stop the OpenIDM services enter the shutdown command in the shell</para>
-<screen width='80'>
+    <screen width='80'>
 -&gt; shutdown
 ...
 $
-</screen>
+    </screen>
   </step>
 
    <step>
