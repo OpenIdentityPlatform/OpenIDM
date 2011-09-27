@@ -15,12 +15,20 @@
  */
 package org.forgerock.openidm.core;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * This class defines the core of the Identity Server.
@@ -30,23 +38,26 @@ import java.util.Properties;
  */
 public class IdentityServer {
 
+//    final static Logger logger = LoggerFactory.getLogger(IdentityServer.class);
+    
     /**
      * The singleton Identity Server instance.
      */
     private static final IdentityServer identityServer = new IdentityServer();
 
-    // The set of properties for the environment config.
-    private final HashMap<String, String> configProperties;
-
+    // The set of properties for the environment config. 
+    // Keys are lower case for easier case insensitive searching
+    // Precedences is 1. Explicit config properties, 2. Boot file properties, 3. System properties
+    private final Map<String, String> configProperties;
+    private final Map<String, String> bootFileProperties;
 
     /**
      * Creates a new identity environment configuration initialized
      * from the system properties defined in the JVM.
      */
-    public IdentityServer() {
-        this(System.getProperties());
+    private IdentityServer() {
+        this(null);
     }
-
 
     /**
      * Creates a new identity environment configuration initialized
@@ -56,53 +67,80 @@ public class IdentityServer {
      *                   environment configuration, or {@code null}
      *                   to use an empty set of properties.
      */
-    public IdentityServer(Properties properties) {
+    private IdentityServer(Map<String, String> properties) {
         configProperties = new HashMap<String, String>();
         if (properties != null) {
-            Enumeration propertyNames = properties.propertyNames();
-            while (propertyNames.hasMoreElements()) {
-                Object o = propertyNames.nextElement();
-                configProperties.put(String.valueOf(o),
-                        String.valueOf(properties.get(o)));
+            // Populate with lower case keys for easier case insensitive comparisons
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+                configProperties.put(entry.getKey().toLowerCase(), entry.getValue());
             }
         }
+        String bootFileName = getProperty(ServerConstants.CONFIG_BOOT_FILE_LOCATION, 
+                ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
+        bootFileProperties = loadProps(bootFileName);
     }
-
-
-    /**
-     * Creates a new identity environment configuration initialized
-     * with a copy of the provided set of properties.
-     *
-     * @param properties The properties to use when initializing this
-     *                   environment configuration, or {@code null}
-     *                   to use an empty set of properties.
-     */
-    public IdentityServer(Map<String, String> properties) {
-        if (properties == null) {
-            configProperties = new HashMap<String, String>();
-        } else {
-            configProperties = new HashMap<String, String>(properties);
-        }
+    
+    public static IdentityServer getInstance() {
+        return identityServer;
     }
-
-
+    
+    public static IdentityServer getInstance(Map<String, String> properties) {
+        return new IdentityServer(properties);
+    }
+    
     /**
-     * Retrieves the property with the specified name.  The check will
-     * first be made in the local config properties, but if no value is
+     * Retrieves the property with the specified name (case insensitvie).  
+     * The check will first be made in the local config properties, 
+     * the boot properties file, but if no value is
      * found then the JVM system properties will be checked.
      *
      * @param name The name of the property to retrieve.
+     * @param defaultValue the default value to return if the property is not set
+     * @return The property with the specified name, or {@code defaultValue} if
+     *         no such property is defined.
+     */
+    public String getProperty(String name, String defaultValue) {
+        String lowerCaseName = name.toLowerCase();
+        if (configProperties.containsKey(lowerCaseName)) {
+            return configProperties.get(lowerCaseName);
+        } else if (bootFileProperties != null && bootFileProperties.containsKey(lowerCaseName)) {
+            return bootFileProperties.get(lowerCaseName);
+        } else {
+            String value = getSystemPropertyIgnoreCase(lowerCaseName);
+            if (value == null) {
+                return defaultValue;
+            } else {
+                return value;
+            }
+        }
+    }
+    
+    /**
+     * Retrieves the property with the specified name (case insensitvie).  
+     * The check will first be made in the local config properties, 
+     * the boot properties file, but if no value is
+     * found then the JVM system properties will be checked.
+     *
+     * @param name The name of the property to retrieve.
+     * @param defaultValue the default value to return if the property is not set
      * @return The property with the specified name, or {@code null} if
      *         no such property is defined.
      */
     public String getProperty(String name) {
-        String value = configProperties.get(name);
-        if (value == null) {
-            value = System.getProperty(name);
-        }
-        return value;
+        return getProperty(name, null);
     }
 
+    // Case insensitive retrieval of system properties
+    private String getSystemPropertyIgnoreCase(String name) {
+        Properties allProps = System.getProperties();
+        for (Object key : allProps.keySet()) {
+            if (((String)key).equalsIgnoreCase(name)) {
+                return (String) allProps.get(key);
+            }
+        }
+        return null;
+    }
+    
     /**
      * Retrieves the path to the root directory for this instance of the Identity
      * Server.
@@ -111,7 +149,10 @@ public class IdentityServer {
      *         Server.
      */
     public static String getServerRoot() {
-        String root = identityServer.getProperty(ServerConstants.PROPERTY_SERVER_ROOT);
+        String root = null;
+        if (identityServer != null) {
+            root = identityServer.getProperty(ServerConstants.PROPERTY_SERVER_ROOT);
+        }
         if (null != root) {
                 File r = new File(root);
                 if (r.isAbsolute()) {
@@ -169,5 +210,48 @@ public class IdentityServer {
     public static boolean isDevelopmentProfileEnabled() {
         String debug = identityServer.getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE);
         return (null != debug) && Boolean.valueOf(debug);
+    }
+    
+    
+// TODO: move this class out of system bundle so we can use logging
+    
+    /**
+     * Loads boot properties file
+     * @return properties in boot properties file, keys in lower case
+     */
+    private static Map<String, String> loadProps(String bootFileLocation) { 
+        File bootFile = IdentityServer.getFileForPath(bootFileLocation);
+        Map<String, String> entries = new HashMap<String, String>();
+        
+        if (!bootFile.exists()) {
+            //logger.info("No boot properties file detected at {}.", bootFile.getAbsolutePath());
+        } else {
+            //logger.info("Using boot properties at {}.", bootFile.getAbsolutePath());
+            InputStream in = null;
+            try {
+                Properties prop = new Properties();
+                in = new BufferedInputStream(new FileInputStream(bootFile));
+                prop.load(in);
+                for (Map.Entry<Object, Object> entry :  prop.entrySet()) {
+                    entries.put(((String) entry.getKey()).toLowerCase(), (String) entry.getValue());
+                }
+            } catch (FileNotFoundException ex) {
+            //    logger.info("Boot properties file {} not found", bootFile.getAbsolutePath(), ex);
+            } catch (IOException ex) {
+            //    logger.warn("Failed to load boot properties file {}", bootFile.getAbsolutePath(), ex);
+                throw new RuntimeException("Failed to load boot properties file " 
+                        + bootFile.getAbsolutePath() + " " + ex.getMessage(), ex);
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException ex) {
+            //            logger.warn("Failure in closing boot properties file", ex);
+                    }
+                }
+            }
+        }
+
+        return entries;
     }
 }

@@ -28,6 +28,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.AbstractMap;
@@ -50,17 +51,26 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.openidm.config.crypto.ConfigCrypto;
+import org.forgerock.openidm.config.InternalErrorException;
+import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
+import org.forgerock.openidm.crypto.CryptoService;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,20 +79,22 @@ import org.slf4j.LoggerFactory;
  * TODO: This service lifecycle should be bound to the ConfigurationAdmin service lifecycle.
  */
 public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationListener {
-
+    final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
+    
     // The key in the OSGi configuration dictionary holding the complete JSON configuration string
     public final static String JSON_CONFIG_PROPERTY = JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
     
     public final static String SERVICE_FACTORY_PID_ALIAS = "config.factory-pid";
     
-    final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
-    
     private final Map<String, String> pidToFile = Collections.synchronizedMap(new HashMap<String, String>());
     
     private BundleContext context;
     private ConfigurationAdmin configAdmin;
+    private ConfigCrypto configCrypto;
 
     public void start(BundleContext ctx) {
+        configCrypto = ConfigCrypto.getInstance(ctx);
+        
         this.context = ctx;
         this.configAdmin = lookupConfigAdmin(context);
         if (this.configAdmin != null) {
@@ -317,7 +329,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     {
         boolean updated = false;
         try {
-            final Hashtable ht = loadConfigFile(f);
+            Dictionary ht = loadConfigFile(f);
     
             String pid[] = parsePid(f.getName());
             Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
@@ -325,6 +337,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             Dictionary props = config.getProperties();
             if (!isConfigSame(ht, props))
             {
+                ht = configCrypto.encrypt(pid[0], pid[1], ht);
                 ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
                 if (pid != null && pid[1] != null) {
                     ht.put(SERVICE_FACTORY_PID_ALIAS, pid[1]);
@@ -410,17 +423,17 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * @param oldCfg
      * @return true if the JSON config is the same
      */
-    boolean isConfigSame(Hashtable newCfg, Hashtable oldCfg) {
+    boolean isConfigSame(Dictionary newCfg, Dictionary oldCfg) {
         if (newCfg == null || oldCfg == null) {
             return oldCfg == newCfg;
         }
-        Hashtable newCompare = (Hashtable) newCfg.clone();
+        Dictionary newCompare = new Hashtable(new DictionaryAsMap(newCfg));
         newCompare.remove( DirectoryWatcher.FILENAME );
         newCompare.remove( Constants.SERVICE_PID );
         newCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
         newCompare.remove( SERVICE_FACTORY_PID_ALIAS );
         
-        Hashtable oldCompare = (Hashtable) oldCfg.clone();
+        Dictionary oldCompare = new Hashtable(new DictionaryAsMap(oldCfg));
         oldCompare.remove( DirectoryWatcher.FILENAME );
         oldCompare.remove( Constants.SERVICE_PID );
         oldCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
@@ -431,28 +444,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         } else {
             return oldCfg == null;
         }
-    }
-    
-    /**
-     * @param newCfg
-     * @param oldCfg
-     * @see JSONConfigInstaller#isConfigSame(Hashtable, Hashtable)
-     * @return
-     */
-    boolean isConfigSame(Hashtable newCfg, Dictionary oldCfg) {
-        Hashtable oldConvCfg = oldCfg != null ? new Hashtable(new DictionaryAsMap(oldCfg)) : null;
-        return isConfigSame(newCfg, oldConvCfg);
-    }
-
-    /**
-     * @param newCfg
-     * @param oldCfg
-     * @see JSONConfigInstaller#isConfigSame(Hashtable, Hashtable)
-     * @return
-     */
-    boolean isConfigSame(Dictionary newCfg, Hashtable oldCfg) {
-        Hashtable newConvCfg = newCfg != null ? new Hashtable(new DictionaryAsMap(newCfg)) : null;
-        return isConfigSame(newConvCfg, oldCfg);
     }
     
     Configuration getConfiguration(String fileName, String pid, String factoryPid)
@@ -499,7 +490,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             return null;
         }
     }
-
 }
 
 /**

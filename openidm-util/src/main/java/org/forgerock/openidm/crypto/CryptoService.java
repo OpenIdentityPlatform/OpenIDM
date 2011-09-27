@@ -71,4 +71,12 @@ public interface CryptoService {
      * @throws JsonException if an exception occurred decrypting the node.
      */
     JsonNode decrypt(JsonNode node) throws JsonException;
+    
+    /**
+     * Detects if a JSON node is encrypted in a format supported by this service
+     *
+     * @param node the JSON node to check
+     * @return true if encrypted, false otherwise
+     */
+    boolean isEncrypted(JsonNode node);
 }

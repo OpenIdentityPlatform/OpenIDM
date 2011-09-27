@@ -47,7 +47,7 @@ public class Activator implements BundleActivator {
      public void start(BundleContext context) {
          logger.debug("OrientDB bundle starting");
          
-         Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("orientdb");
+         Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("orientdb", context);
          
          if (repoConfig != null) {
              logger.info("Bootstrapping OrientDB repository");

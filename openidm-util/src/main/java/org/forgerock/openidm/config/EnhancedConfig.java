@@ -22,6 +22,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 
 public interface EnhancedConfig {
@@ -32,30 +33,34 @@ public interface EnhancedConfig {
      * @param compContext The component context with the configuration to retrieve
      * @return the enhanced configuration (with nested maps, list allowed), 
      * empty map if no configuration properties exist.
-     * @throws InvalidException
+     * @throws InvalidException if the configuration is invalid
+     * @throws InternalServerErrorException if a failure occurred in retrieving the configuration
      */
     public Map<String, Object> getConfiguration(ComponentContext compContext)
-            throws InvalidException;
+            throws InvalidException, InternalErrorException;
     
     /**
      * Gets the extended Configuration which allows for nested Maps and Lists
      * 
      * @param compContext The component context with the configuration to retrieve
      * @return the enhanced configuration with nested maps, list allowed
-     * @throws InvalidException
+     * @throws InvalidException if the configuration is invalid
+     * @throws InternalServerErrorException if a failure occurred in retrieving the configuration
      */
     public JsonNode getConfigurationAsJson(ComponentContext compContext)
-            throws InvalidException;
+            throws InvalidException, InternalErrorException;
 
     /**
      * Gets the extended Configuration which allows for nested Maps and Lists
      * 
      * @param dict The standard OSGi configuration properties dictionary
+     * @param context The OSGi bundle context, used to detect other services such as for decryption
+     * @param the service pid this configuration is for
      * @return the enhanced configuration (with nested maps, list allowed), 
      * empty map if no configuration properties exist.
      * @throws InvalidException
      */
-    public Map<String, Object> getConfiguration(Dictionary<String, Object> dict)
-            throws InvalidException;
+    public JsonNode getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid) 
+            throws InvalidException, InternalErrorException;
 
 }

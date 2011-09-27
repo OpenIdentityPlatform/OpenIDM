@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
      public void start(BundleContext context) {
          logger.debug("JDBC bundle starting", context);
          
-         Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc");
+         Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
          
          if (repoConfig != null) {
              logger.info("Bootstrapping JDBC repository");

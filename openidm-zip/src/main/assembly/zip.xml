@@ -59,6 +59,7 @@
                 <exclude>org.forgerock.openicf.connectors.file:xml:*</exclude>
                 <exclude>org.forgerock.openicf.connectors.ldap:ldap:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-config</exclude>
+                <exclude>org.forgerock.openidm:openidm-crypto</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
                 <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
@@ -70,6 +71,7 @@
             <outputDirectory>/openidm/bundle/init</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-config</include>
+                <include>org.forgerock.openidm:openidm-crypto</include>
                 <include>org.forgerock.openidm:openidm-repo-jdbc</include>
                 <include>org.forgerock.openidm:openidm-repo-orientdb</include>
                 <include>org.apache.felix:org.apache.felix.fileinstall</include>

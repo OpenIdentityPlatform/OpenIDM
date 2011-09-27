@@ -42,6 +42,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -91,6 +92,7 @@ public class ConfigObjectService implements ObjectSet {
     
     private ComponentContext context;
     private final ObjectMapper mapper = new ObjectMapper();
+    private ConfigCrypto configCrypto;
 
     /**
      * Gets an object from the object set by identifier. 
@@ -147,7 +149,8 @@ public class ConfigObjectService implements ObjectSet {
                 }
                 Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-                result = enhancedConfig.getConfiguration(props);
+                JsonNode node = enhancedConfig.getConfiguration(props, context.getBundleContext(), fullId, false);
+                result = node.asMap();
                 logger.debug("Read configuration for service {}", fullId);
             }
         } catch (ObjectSetException ex) {
@@ -178,39 +181,28 @@ public class ConfigObjectService implements ObjectSet {
         if (fullId == null) {
             throw new BadRequestException("The passed identifier to create is null");
         }
+        ParsedId parsedId = new ParsedId(fullId);
         try {
-            String[] splitId = split(fullId);
-            // Null if this is a managed object config and not factory config
-            String factoryPid = splitId[0];
-            
-            // For managed object config the PID
-            // For factory config, a human readable alias for PID, PID gets assigned by OSGi
-            String pidOrAlias = splitId[1]; 
-
             Configuration config = null;
-            if (factoryPid != null) {
-                String qualifiedFactoryPid = ConfigBootstrapHelper.qualifyPid(factoryPid);
+            if (parsedId.isFactoryConfig()) {
+                String qualifiedFactoryPid = ParsedId.qualifyPid(parsedId.factoryPid);
                 config = configAdmin.createFactoryConfiguration(qualifiedFactoryPid, null);
             } else {
-                String qualifiedPid = ConfigBootstrapHelper.qualifyPid(pidOrAlias);
+                String qualifiedPid = ParsedId.qualifyPid(parsedId.pid);
                 config = configAdmin.getConfiguration(qualifiedPid, null);
             }
             if (config.getProperties() != null) {
                 throw new PreconditionFailedException("Can not create a new configuration with ID " 
-                        + pidOrAlias + ", configuration for this ID already exists.");
+                        + parsedId + ", configuration for this ID already exists.");
             }
-            Dictionary dict = new Hashtable();
-            ObjectMapper mapper = new ObjectMapper();
-            StringWriter sw = new StringWriter();
-            mapper.writeValue(sw, obj);
-            dict.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
-            
-            if (factoryPid != null) {
-                dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS, pidOrAlias); // The alias for the PID as understood by fileinstall
+
+            Dictionary dict = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, null, new JsonNode(obj));
+            if (parsedId.isFactoryConfig()) {
+                dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS, parsedId.instanceAlias); // The alias for the PID as understood by fileinstall
             }
             
             config.update(dict);
-            logger.debug("Created new configuration for {} {}", factoryPid, pidOrAlias);
+            logger.debug("Created new configuration for {} with {}", fullId, dict);
         } catch (ObjectSetException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -244,17 +236,16 @@ public class ConfigObjectService implements ObjectSet {
             throw new BadRequestException("The passed identifier to update is null");
         }
         try {
+            ParsedId parsedId = new ParsedId(fullId);
             Configuration config = findExistingConfiguration(fullId);
             
             Dictionary existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
                 throw new NotFoundException("No existing configuration found for " + fullId + ", can not update the configuration.");
             }
-            StringWriter sw = new StringWriter();
-            mapper.writeValue(sw, obj);
-            existingConfig.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, sw.toString());
+            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonNode(obj));
             config.update(existingConfig);
-            logger.debug("Updated existing configuration for {}", fullId);
+            logger.debug("Updated existing configuration for {} with {}", fullId, existingConfig);
         } catch (ObjectSetException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -359,23 +350,14 @@ public class ConfigObjectService implements ObjectSet {
      * @throws InvalidSyntaxException
      */
     Configuration findExistingConfiguration(String fullId) throws IOException, InvalidSyntaxException {
-        
-        String[] splitId = split(fullId);
-        // Null if this is a managed object config and not factory config
-        String factoryPid = ConfigBootstrapHelper.qualifyPid(splitId[0]);
-        
-        String pid = null;
-        String instanceAlias = null;
-        if (factoryPid == null) {
-            pid = ConfigBootstrapHelper.qualifyPid(splitId[1]); // For managed object config this is the (possibly unqualified) pid
-        } else {
-            instanceAlias = splitId[1]; // For factory config this part is a human readable alias
-        }
-        
+        ParsedId parsedId = new ParsedId(fullId);
+
         String filter = null;
-        if (factoryPid != null) {
-            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")(" + JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS + "=" + instanceAlias + "))";
+        if (parsedId.isFactoryConfig()) {
+            String factoryPid = ParsedId.qualifyPid(parsedId.factoryPid);
+            filter = "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + factoryPid + ")(" + JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS + "=" + parsedId.instanceAlias + "))";
         } else {
+            String pid = ParsedId.qualifyPid(parsedId.pid);
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
         }
         logger.trace("List configurations with filter: {}", filter);
@@ -392,6 +374,7 @@ public class ConfigObjectService implements ObjectSet {
     protected void activate(ComponentContext context) {
         logger.debug("Activating configuration management service");
         this.context = context;
+        this.configCrypto = ConfigCrypto.getInstance(context.getBundleContext());
     }
 
     /**
@@ -403,25 +386,62 @@ public class ConfigObjectService implements ObjectSet {
     protected void deactivate(ComponentContext context) {
         logger.debug("Deactivating configuration management service");
     }
+}
+
+class ParsedId {
+    final static Logger logger = LoggerFactory.getLogger(ParsedId.class);
     
-    /**
-     * Split an URI identifier into context (part before the first slash) and remaining identifier (part after first slash)
-     * @param id the full URI
-     * @return an array with 2 elements; 
-     * The first contains the context if present, or null if the URI consists of only one part. 
-     * The second element contains the remainder of the URI
-     */
-    private String[] split(String id) {
+    public String pid;
+    public String factoryPid;
+    public String instanceAlias;
+    
+    public ParsedId(String fullId) {
         String idContext = null;
         String localId = null;
-        int firstSlashPos = id.indexOf("/");
+        int firstSlashPos = fullId.indexOf("/");
         if (firstSlashPos > -1) {
-            idContext = id.substring(0, firstSlashPos);
-            
+            factoryPid = fullId.substring(0, firstSlashPos);
+            instanceAlias = fullId.substring(firstSlashPos + 1);
+            logger.trace("Factory configuration pid: {} instance alias: {}", factoryPid, instanceAlias);
+        } else {
+            pid = fullId;
+            logger.trace("Managed service configuration pid: {}", pid);
         }
-        int startPos = firstSlashPos + 1;
-        localId = id.substring(startPos);
-        logger.trace("Split id context: {} local id: {}", idContext, localId);
-        return new String[] {idContext, localId};
+    }
+    
+    /**
+     * @return is this ID represents a managed factory configuration, or false if it is a managed service configuraiton
+     */
+    public boolean isFactoryConfig() {
+        return (instanceAlias != null);
+    }
+    
+    /*
+     * Make the PID fully qualified with the default context for OpenIDM
+     */
+    public static String qualifyPid(String pid) {
+        return ConfigBootstrapHelper.qualifyPid(pid);
+    }
+    
+    /**
+     * Get the qualified pid of the managed service or managed factory depending on the configuration represented
+     * Some APIs do not distinguish beween single managed service PID and managed factory PID
+     * @return the qualified pid if this ID represents a managed service configuration, or the managed factory PID 
+     * if it represents a managed factory configuration
+     */
+    public String getPidOrFactoryPid() {
+        if (isFactoryConfig()) {
+            return qualifyPid(factoryPid);
+        } else {
+            return qualifyPid(pid);
+        }
+    }
+    
+    public String toString() {
+        if (isFactoryConfig()) {
+            return factoryPid + "-" + instanceAlias;
+        } else {
+            return pid;
+        }
     }
 }
