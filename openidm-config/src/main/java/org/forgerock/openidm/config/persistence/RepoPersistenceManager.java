@@ -36,12 +36,15 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.felix.cm.PersistenceManager;
+
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -99,16 +102,26 @@ public class RepoPersistenceManager implements PersistenceManager {
                         }
 
                         ConfigurationAdmin configAdmin = null;
-                        logger.debug("Proceed to handling configuration files");
                         while (configAdmin == null) {
+                            logger.trace("Wait for Configuration Admin service ready");
                             Filter admFilter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + ConfigurationAdmin.class.getName() + ")");
                             final ServiceTracker adminTracker = new ServiceTracker(ctx, admFilter, null);
                             adminTracker.open();
                             configAdmin = (ConfigurationAdmin) adminTracker.waitForService(5000);
                         }
                         
+                        CryptoService crypto = null;
+                        while (configAdmin == null) {
+                            logger.trace("Wait for Cryptography service ready");
+                            Filter cryptoFilter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + CryptoService.class.getName() + ")");
+                            final ServiceTracker cryptoTracker = new ServiceTracker(ctx, cryptoFilter, null);
+                            cryptoTracker.open();
+                            crypto = (CryptoService) cryptoTracker.waitForService(5000);
+                        }
+                        
+                        logger.debug("Proceed to handling configuration files");
                         // Proceed to configuration file handling once repo bootstrapped 
-                        // and configuration admin service is available
+                        // and configuration admin as well as crypto service is available
 
                         // This code is never reached if the JDBC Repo configured in a JSON file. The JSONConfigInstaller
                         // is never started. It does not init the JDBC Repo. Catch-22
