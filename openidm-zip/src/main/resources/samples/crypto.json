@@ -1,8 +1,0 @@
-{
-   "keystore" :
-      {
-         "type" : "JCEKS",
-         "location" : "samples/keystore.jceks",
-         "password" : "changeit"
-      }
-}
