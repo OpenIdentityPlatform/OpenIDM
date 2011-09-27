@@ -32,6 +32,11 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-system</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
             <scope>provided</scope>

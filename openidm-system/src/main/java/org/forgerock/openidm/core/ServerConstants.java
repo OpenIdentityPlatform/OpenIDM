@@ -98,12 +98,24 @@ public class ServerConstants {
 
 
     /**
+     * The default location relative to the openidm root of the boot properties file.
+     * Override by setting system property {@code CONFIG_BOOT_FILE_LOCATION}
+     */
+    public static final String DEFAULT_BOOT_FILE_LOCATION = "conf/boot/boot.properties";
+    
+    /**
      * The name of the system property that can be used to specify the path to the
      * server root.
      */
     public static final String PROPERTY_SERVER_ROOT =
             "openidm.system.server.root";
 
+    /**
+     * The name of the system property that can be used to specify the location
+     * of the boot properties file
+     */
+    public static final String CONFIG_BOOT_FILE_LOCATION = "openidm.boot.file";
+    
 
     /**
      * The name of the system property that can be used to specify the environment where

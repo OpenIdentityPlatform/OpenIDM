@@ -17,7 +17,6 @@
 package org.forgerock.openidm.crypto.impl;
 
 // Java Standard Edition
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -30,7 +29,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 // OSGi Framework
-import org.forgerock.openidm.core.IdentityServer;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -50,6 +49,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.fluent.JsonTransformer;
 
 // JSON Cryptography library
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
@@ -58,26 +58,20 @@ import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.InternalErrorException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 /**
- * TODO: Description.
+ * Cryptography Service
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
-@Component(
-        name = "org.forgerock.openidm.crypto",
-        immediate = true,
-        policy = ConfigurationPolicy.OPTIONAL
-)
-@Properties({
-        @Property(name = "service.description", value = "OpenIDM cryptography service"),
-        @Property(name = "service.vendor", value = "ForgeRock AS")
-})
-@Service
 public class CryptoServiceImpl implements CryptoService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
@@ -85,7 +79,7 @@ public class CryptoServiceImpl implements CryptoService {
     /**
      * TODO: Description.
      */
-    private ComponentContext context;
+    private BundleContext context;
 
     /**
      * TODO: Description.
@@ -107,10 +101,10 @@ public class CryptoServiceImpl implements CryptoService {
      * @return an input stream for reading the content of the location, or {@code null} if no location.
      * @throws IOException if there was exception opening the stream.
      */
-    private InputStream openStream(JsonNode location) throws IOException {
+    private InputStream openStream(String location) throws IOException {
         InputStream result = null;
-        if (location != null && !location.isNull()) {
-            File configFile = IdentityServer.getFileForPath(location.asString());
+        if (location != null) {
+            File configFile = IdentityServer.getFileForPath(location);
             if (configFile.exists()) {
                 result = new FileInputStream(configFile);
             } else {
@@ -120,20 +114,21 @@ public class CryptoServiceImpl implements CryptoService {
         return result;
     }
 
-    @Activate
-    protected void activate(ComponentContext context) {
+    public void activate(BundleContext context) {
+        LOGGER.debug("Activating cryptography service");
         this.context = context;
-        JsonNode config = new JSONEnhancedConfig().getConfigurationAsJson(context);
         try {
-            JsonNode keystore = config.get("keystore");
             int keyCount = 0;
-            if (!keystore.isNull()) { // optional
-                String type = keystore.get("type").defaultTo(KeyStore.getDefaultType()).asString();
-                String provider = keystore.get("provider").asString();
-                String password = keystore.get("password").asString();
+            String password = IdentityServer.getInstance().getProperty("openidm.keystore.password");
+            if (password != null) { // optional
+                String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
+                String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
+                String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
+                
                 try {
-                    KeyStore ks = (provider == null ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
-                    InputStream in = openStream(keystore.get("location"));
+                    LOGGER.info("Activating cryptography service of type: {} provider: {} location: {}", new Object[] {type, provider, location});
+                    KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
+                    InputStream in = openStream(location);
                     if (null != in) {
                         ks.load(in, password == null ? null : password.toCharArray());
                         keySelector = new SimpleKeyStoreSelector(ks, password);
@@ -144,11 +139,14 @@ public class CryptoServiceImpl implements CryptoService {
                         }
                     }
                 } catch (IOException ioe) {
-                    LOGGER.error("IOException when loading KeyStore file", ioe);
-                    throw new JsonNodeException(keystore, ioe);
+                    LOGGER.error("IOException when loading KeyStore file of type: " 
+                            + type + " provider: " + provider + " location:" + location, ioe);
+                    throw new InternalErrorException("IOException when loading KeyStore file of type: " 
+                            + type + " provider: " + provider + " location:" + location, ioe);
                 } catch (GeneralSecurityException gse) {
                     LOGGER.error("GeneralSecurityException when loading KeyStore file", gse);
-                    throw new JsonNodeException(keystore, gse);
+                    throw new InvalidException("GeneralSecurityException when loading KeyStore file of type: " 
+                        + type + " provider: " + provider + " location:" + location, gse);
                 }
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
             }
@@ -159,11 +157,11 @@ public class CryptoServiceImpl implements CryptoService {
         }
     }
 
-    @Deactivate
-    protected void deactivate(ComponentContext context) {
+    public void deactivate(BundleContext context) {
         decryptionTransformers.clear();
         keySelector = null;
         this.context = null;
+        LOGGER.info("CryptoService stopped.");
     }
 
     @Override
@@ -205,5 +203,10 @@ public class CryptoServiceImpl implements CryptoService {
             result = new JsonNode(node.getValue(), node.getPointer(), transformers).copy();
         }
         return result;
+    }
+    
+    @Override
+    public boolean isEncrypted(JsonNode node) {
+        return JsonCrypto.isJsonCrypto(node);
     }
 }

@@ -32,9 +32,13 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.forgerock.json.fluent.JsonNode;
+
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.IdentityServer;
+
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -57,7 +61,7 @@ public class ConfigBootstrapHelper {
     // Properties to set bootstrapping behavior
     public static final String PREFIX_OPENIDM_REPO = "openidm.repo.";
     public static final String OPENIDM_REPO_TYPE = "openidm.repo.type";
-
+    
     // Properties to set configuration file handling behavior
     public static final String OPENIDM_FILEINSTALL_BUNDLES_NEW_START = "openidm.fileinstall.bundles.new.start";
     public static final String OPENIDM_FILEINSTALL_FILTER = "openidm.fileinstall.filter";
@@ -77,7 +81,7 @@ public class ConfigBootstrapHelper {
     final static Logger logger = LoggerFactory.getLogger(ConfigBootstrapHelper.class);
 
     static boolean warnMissingConfig = true;
-
+    
     /**
      * Get the configured bootstrap information for a repository
      * 
@@ -92,7 +96,7 @@ public class ConfigBootstrapHelper {
      * equivalent to the last part of its PID 
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
-    public static Map getRepoBootConfig(String repoType) {
+    public static Map getRepoBootConfig(String repoType, BundleContext bundleContext) {
         Map<String,Object> result = new HashMap<String,Object>();
         result.put(OPENIDM_REPO_TYPE, repoType);
         
@@ -133,8 +137,9 @@ public class ConfigBootstrapHelper {
                 
                 return null;
             }
-            Map<String, Object> jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig);
-            for (Entry<String, Object> entry : jsonCfg.entrySet()) {
+            JsonNode jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig, bundleContext, repoType);
+            Map<String, Object> cfg = jsonCfg.asMap();
+            for (Entry<String, Object> entry : cfg.entrySet()) {
                 result.put(entry.getKey().toLowerCase(), entry.getValue());
             }
         } catch (Exception ex) {
@@ -168,7 +173,7 @@ public class ConfigBootstrapHelper {
         // Default the configuration directory if not declared
         String dir = System.getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
         dir =  IdentityServer.getFileForPath(dir).getAbsolutePath();
-        logger.info("Configuration files are monitored in {} folder.", dir);
+        logger.debug("Configuration file directory {}", dir);
         return dir;
     }
     
