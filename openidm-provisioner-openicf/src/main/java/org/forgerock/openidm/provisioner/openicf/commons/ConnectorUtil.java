@@ -68,7 +68,7 @@ public class ConnectorUtil {
     private static final String OPENICF_CONNECTOR_HOST_REF = "connectorHostRef";
     private static final String OPENICF_HOST = "host";
     private static final String OPENICF_PORT = "port";
-    private static final String OPENICF_KEY = "key";
+    public static final String OPENICF_KEY = "key";
     private static final String OPENICF_USE_SSL = "useSSL";
     private static final String OPENICF_TRUST_MANAGERS = "trustManagers";
     private static final String OPENICF_TIMEOUT = "timeout";
@@ -84,7 +84,7 @@ public class ConnectorUtil {
     private static final String OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER = "enableCaseInsensitiveFilter";
     private static final String OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER = "enableAttributesToGetSearchResultsHandler";
     private static final String OPENICF_OPERATION_TIMEOUT = "operationTimeout";
-    private static final String OPENICF_CONFIGURATION_PROPERTIES = "configurationProperties";
+    public static final String OPENICF_CONFIGURATION_PROPERTIES = "configurationProperties";
     public static final String OPENICF_FLAGS = "flags";
     public static final String OPENICF_OBJECT_CLASS = "nativeType";
     //public static final String PROPERTY_IS_CONTAINER = "isContainer";
