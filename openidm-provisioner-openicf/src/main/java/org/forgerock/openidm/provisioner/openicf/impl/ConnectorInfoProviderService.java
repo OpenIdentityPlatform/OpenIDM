@@ -4,11 +4,13 @@ import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openicf.framework.api.osgi.ConnectorManager;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -41,19 +43,20 @@ import java.util.jar.JarInputStream;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider", policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
+@Component(name = ConnectorInfoProviderService.PID, policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service")
 })
-public class ConnectorInfoProviderService implements ConnectorInfoProvider {
+public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider {
     private final static Logger TRACE = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
 
 
     //Public Constants
     public static final String DEFAULT_CONNECTORS_LOCATION = "connectors";
     public static final String PROPERTY_OPENICF_CONNECTOR_URL = "connectorsLocation";
+    public static final String PID = "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider";
 
     //Private
     private Map<String, RemoteFrameworkConnectionInfo> remoteFrameworkConnectionInfo = new HashMap<String, RemoteFrameworkConnectionInfo>();
@@ -306,6 +309,48 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider {
             return jsonConfiguration;
         }
         throw new UnsupportedOperationException("ConnectorFacade can not be initialised");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) {
+        List<String> result = null;
+        if (null != pidOrFactory && null != config) {
+            if (PID.equals(pidOrFactory)) {
+                try {
+                    JsonNode remoteConnectorHosts = config.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS).expect(List.class);
+                    if (!remoteConnectorHosts.isNull()) {
+                        result = new ArrayList<String>(remoteConnectorHosts.size());
+                        for (JsonNode hostConfig : remoteConnectorHosts){
+                           result.add(hostConfig.get(ConnectorUtil.OPENICF_KEY).getPointer().toString());
+                        }
+                    }
+                } catch (JsonNodeException e) {
+                    TRACE.error("Invalid configuration remoteConnectorHosts must be list or null.", e);
+                }
+            } else if (pidOrFactory.startsWith(OpenICFProvisionerService.PID)) {
+                try {
+                    ConnectorInfo ci = findConnectorInfo(ConnectorUtil.getConnectorReference(config));
+                    if (null != ci) {
+                        ConfigurationProperties properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
+                        JsonPointer configurationProperties = new JsonPointer(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES);
+                        for (String name : properties.getPropertyNames()) {
+                            ConfigurationProperty property = properties.getProperty(name);
+                            if (property.isConfidential()) {
+                                if (null == result) {
+                                    result = new ArrayList<String>(properties.getPropertyNames().size());
+                                }
+                                result.add(configurationProperties.child(name).toString());
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    TRACE.error("Failed to parse the config of {}", pidOrFactory, e);
+                }
+            }
+        }
+        return result;
     }
 
     private URL[] getConnectorURLs(URL... resourceURLs) {

@@ -28,9 +28,11 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
+import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelperTest;
 import org.identityconnectors.common.security.GuardedString;
@@ -61,8 +63,9 @@ import static org.mockito.Mockito.when;
 public class ConnectorInfoProviderServiceTest {
 
     private Dictionary properties = null;
+    private JsonNode connectorInfoProviderServiceConfiguration = null;
 
-    protected ConnectorInfoProvider testableConnectorInfoProvider = null;
+    protected ConnectorInfoProviderService testableConnectorInfoProvider = null;
 
     @BeforeTest
     public void beforeTest() throws Exception {
@@ -75,6 +78,7 @@ public class ConnectorInfoProviderServiceTest {
             buffer.write(temp, 0, read);
         }
         String config = new String(buffer.toByteArray());
+        connectorInfoProviderServiceConfiguration = new JsonNode((new ObjectMapper()).readValue(config, Map.class));
 
         properties = new Hashtable<String, Object>();
         properties.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, config);
@@ -126,6 +130,8 @@ public class ConnectorInfoProviderServiceTest {
         InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
         instance.activate(context);
 
+        ConnectorReference ref = new ConnectorReference(new ConnectorKey("org.forgerock.openicf.connectors.file.xml", "1.1.0.0-SNAPSHOT", "com.forgerock.openicf.xml.XMLConnector"));
+        Assert.assertNotNull(testableConnectorInfoProvider.findConnectorInfo(ref), "XML Connector is missing");
 
     }
 
@@ -226,6 +232,159 @@ public class ConnectorInfoProviderServiceTest {
         URL root = ObjectClassInfoHelperTest.class.getResource("/");
         mapper.writeValue(new File((new URL(root, "LDAPConnector_configuration.json")).toURI()),
                 testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+
+    }
+
+    /**
+     * This test generates a new Solaris configuration file. It requires access to a running Solaris server.
+     *
+     * @throws URISyntaxException
+     */
+    @Test(enabled = false)
+    public void testCreateSolarisSystemConfiguration() throws Exception {
+        ConnectorInfo connectorInfo = null;
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.os.solaris", "1.1.0.0-SNAPSHOT", "org.identityconnectors.solaris.SolarisConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                connectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(connectorInfo);
+        APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+
+        Map<String, Object> configMap = new HashMap<String, Object>();
+        configMap.put("loginUser", "root");
+        configMap.put("loginShellPrompt", "root#");
+        configMap.put("password", "Passw0rd");
+        configMap.put("host", "localhost");
+
+
+        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+
+        ObjectMapper mapper = new ObjectMapper();
+        URL root = ObjectClassInfoHelperTest.class.getResource("/");
+        mapper.writeValue(new File((new URL(root, "SolarisConnector_configuration.json")).toURI()),
+                testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+    }
+
+    /**
+     * This test generates a new VMS configuration file. It requires access to a running VMS server.
+     *
+     * @throws URISyntaxException
+     */
+    @Test(enabled = false)
+    public void testCreateVMSSystemConfiguration() throws Exception {
+        ConnectorInfo connectorInfo = null;
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.os.vms", "1.1.0.0-SNAPSHOT", "org.identityconnectors.vms.VmsConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                connectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(connectorInfo);
+        APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+
+        Map<String, Object> configMap = new HashMap<String, Object>();
+        configMap.put("userName", "root");
+        configMap.put("hostPortNumber", 23);
+        configMap.put("password", "Passw0rd");
+        configMap.put("hostNameOrIpAddr", "localhost");
+
+
+        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+
+        ObjectMapper mapper = new ObjectMapper();
+        URL root = ObjectClassInfoHelperTest.class.getResource("/");
+        mapper.writeValue(new File((new URL(root, "VMSConnector_configuration.json")).toURI()),
+                testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+    }
+
+    /**
+     * This test generates a new Database Table Connector configuration file. It requires access to a running RDMS server.
+     *
+     * @throws URISyntaxException
+     */
+    @Test(enabled = false)
+    public void testCreateDatabaseTableSystemConfiguration() throws Exception {
+        ConnectorInfo connectorInfo = null;
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.db.databasetable", "1.1.0.0-SNAPSHOT", "org.identityconnectors.databasetable.DatabaseTableConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                connectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(connectorInfo);
+        APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+
+        Map<String, Object> configMap = new HashMap<String, Object>();
+        configMap.put("table", "users");
+
+
+        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+
+        ObjectMapper mapper = new ObjectMapper();
+        URL root = ObjectClassInfoHelperTest.class.getResource("/");
+        mapper.writeValue(new File((new URL(root, "DatabaseTableConnector_configuration.json")).toURI()),
+                testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+    }
+
+    /**
+     * This test generates a new MySQL configuration file.
+     *
+     * @throws URISyntaxException
+     */
+    @Test(enabled = false)
+    public void testCreateMySQLSystemConfiguration() throws Exception {
+        ConnectorInfo connectorInfo = null;
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.db.mysqluser", "1.1.0.0-SNAPSHOT", "org.identityconnectors.mysqluser.MySQLUserConnector");
+        for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
+            if (key.equals(info.getConnectorKey())) {
+                connectorInfo = info;
+                break;
+            }
+        }
+        Assert.assertNotNull(connectorInfo);
+        APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
+
+        Map<String, Object> configMap = new HashMap<String, Object>();
+        configMap.put("port", "3308");
+
+
+        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+
+        ObjectMapper mapper = new ObjectMapper();
+        URL root = ObjectClassInfoHelperTest.class.getResource("/");
+        mapper.writeValue(new File((new URL(root, "MySQLConnector_configuration.json")).toURI()),
+                testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
+
+
+        List valami = testableConnectorInfoProvider.getPropertiesToEncrypt(null, null, new JsonNode(testableConnectorInfoProvider.createSystemConfiguration(configuration, false)));
+        Assert.assertFalse(valami.isEmpty());
+    }
+
+    @Test()
+    public void testPropertiesToEncrypt() throws Exception {
+        InputStream inputStream = ConnectorInfoProviderServiceTest.class.getResourceAsStream("/config/org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceSolarisConnectorTest.json");
+        Assert.assertNotNull(inputStream);
+        Map config = (new ObjectMapper()).readValue(inputStream, Map.class);
+
+        List result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
+        assertThat(result).containsExactly("/configurationProperties/password",
+                "/configurationProperties/credentials",
+                "/configurationProperties/privateKey",
+                "/configurationProperties/passphrase");
+        inputStream = ConnectorInfoProviderServiceTest.class.getResourceAsStream("/config/org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceXMLConnectorTest.json");
+        Assert.assertNotNull(inputStream);
+        config = (new ObjectMapper()).readValue(inputStream, Map.class);
+
+        result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
+        Assert.assertNull(result);
+
+        result = testableConnectorInfoProvider.getPropertiesToEncrypt(ConnectorInfoProviderService.PID, null, connectorInfoProviderServiceConfiguration);
+        assertThat(result).hasSize(1).containsExactly("/remoteConnectorServers/0/key");
 
     }
 

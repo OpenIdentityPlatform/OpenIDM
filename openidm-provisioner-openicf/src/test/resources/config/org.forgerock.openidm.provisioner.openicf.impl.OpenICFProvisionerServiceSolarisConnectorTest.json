@@ -1,0 +1,47 @@
+{
+   "name" : "Solaris",
+   "connectorRef" :
+      {
+         "bundleName" : "org.forgerock.openicf.connectors.os.solaris",
+         "bundleVersion" : "1.1.0.0-SNAPSHOT",
+         "connectorName" : "org.identityconnectors.solaris.SolarisConnector"
+      },
+   "producerBufferSize" : 100,
+   "connectorPoolingSupported" : true,
+   "poolConfigOption" :
+      {
+         "maxObjects" : 10,
+         "maxIdle" : 10,
+         "maxWait" : 150000,
+         "minEvictableIdleTimeMillis" : 120000,
+         "minIdle" : 1
+      },
+   "operationTimeout" :
+      {
+         "CREATE" : -1,
+         "TEST" : -1,
+         "AUTHENTICATE" : -1,
+         "SEARCH" : -1,
+         "VALIDATE" : -1,
+         "GET" : -1,
+         "UPDATE" : -1,
+         "DELETE" : -1,
+         "SCRIPT_ON_CONNECTOR" : -1,
+         "SCRIPT_ON_RESOURCE" : -1,
+         "SYNC" : -1,
+         "SCHEMA" : -1
+      },
+   "configurationProperties" :
+      {
+         "loginUser" : "root",
+         "loginShellPrompt" : "root#",
+         "password" : "Passw0rd",
+         "host" : "localhost"
+      },
+   "objectTypes" :
+      {
+      },
+   "operationOptions" :
+      {
+      }
+}

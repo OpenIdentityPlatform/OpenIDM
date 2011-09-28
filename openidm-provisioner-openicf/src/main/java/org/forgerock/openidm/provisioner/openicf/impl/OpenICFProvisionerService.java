@@ -71,7 +71,7 @@ import java.util.*;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = "org.forgerock.openidm.provisioner.openicf", policy = ConfigurationPolicy.REQUIRE,
+@Component(name = OpenICFProvisionerService.PID, policy = ConfigurationPolicy.REQUIRE,
         description = "OpenIDM System Object Set Service", immediate = true)
 @Service(value = {ProvisionerService.class})
 @Properties({
@@ -79,6 +79,10 @@ import java.util.*;
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service")
 })
 public class OpenICFProvisionerService implements ProvisionerService {
+
+    //Public Constants
+    public static final String PID = "org.forgerock.openidm.provisioner.openicf";
+
     private final static Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
