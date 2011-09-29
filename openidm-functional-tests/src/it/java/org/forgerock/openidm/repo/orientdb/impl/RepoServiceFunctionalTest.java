@@ -50,9 +50,12 @@ public class RepoServiceFunctionalTest {
     @BeforeClass
     public void activateService() {
         // Starts and installs all package bundles
+        String idmRootDir = "./target/openidm-orientdb-pkg/openidm";
         String bundleDirs = "./target/openidm-orientdb-pkg/openidm/bundle/init,./target/openidm-orientdb-pkg/openidm/bundle";
         String configDir = "./src/it/resources/conf/orientdb-test";
-        containerUtil = ContainerUtil.startContainer(bundleDirs, configDir);
+        Map<String, String> systemProps = new HashMap<String, String>();
+        systemProps.put("openidm.system.server.root", idmRootDir);
+        containerUtil = ContainerUtil.startContainer(bundleDirs, configDir, systemProps);
         // Waits for the service to appear
         repo = containerUtil.getService(RepositoryService.class, "(db.type=OrientDB)");
     }

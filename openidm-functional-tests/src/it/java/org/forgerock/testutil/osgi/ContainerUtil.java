@@ -28,6 +28,8 @@ import java.lang.String;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -67,9 +69,23 @@ public class ContainerUtil  {
      * @return the ContainerUtil helper wrapping the started container
      */
     public static ContainerUtil startContainer(String bundleDirs, String configDir) {
-        Framework aFramework = startFramework(bundleDirs, configDir);
+        return startContainer(bundleDirs, configDir, null);
+    }
+    
+    /**
+     * Start a test container will all the bundles prepared in the 
+     * expanded openidm package in bundleDirs
+     * @param bundleDirs the directory with the osgi bundles to start, comma delimited
+     * @param configDir the directory with the component configuration files to use
+     * @param systemProps Additional system properties to set during container start
+     * @return the ContainerUtil helper wrapping the started container
+     */
+    public static ContainerUtil startContainer(String bundleDirs, String configDir, Map<String, String> systemProps) {
+        Framework aFramework = startFramework(bundleDirs, configDir, systemProps);
         return new ContainerUtil(aFramework);
     }
+    
+    Map<String, String> systemProps = new HashMap<String, String>();
 
     /** {@inheritdoc} */
     public static ContainerUtil startContainer() {
@@ -195,7 +211,7 @@ public class ContainerUtil  {
     /**
      * Start the embedded OSGi framework
      */
-    private static Framework startFramework(String bundleDirs, String configDir) {
+    private static Framework startFramework(String bundleDirs, String configDir, Map<String, String> systemProps) {
         Option[] options = new Option[]{
             systemProperty("felix.fileinstall.dir").value(bundleDirs + "," + configDir),
             systemProperty("felix.fileinstall.filter").value("^((?!fileinstall).)*$"),
@@ -206,6 +222,27 @@ public class ContainerUtil  {
                 mavenBundle().groupId( "org.apache.felix" ).artifactId( "org.apache.felix.fileinstall").versionAsInProject()
             )
         };
+        
+        if (systemProps != null) {
+            int extendedSize = options.length + systemProps.size();
+            Option[] extendedOptions = new Option[extendedSize];
+            
+            int count = 0;
+            for (Map.Entry<String, String> entry : systemProps.entrySet()) {
+                extendedOptions[count] = systemProperty(entry.getKey()).value(entry.getValue());
+                
+                // Work-around: pax exam doesn't seem to set java system properties with the above properly
+                System.setProperty(entry.getKey(), entry.getValue());
+                // TODO: enhancement: revert system properties after test run
+                
+                count++;
+            }
+            
+            System.arraycopy(options, 0, extendedOptions, systemProps.size(), options.length);
+            options = extendedOptions;
+            
+        }
+        System.out.println("Options: " + java.util.Arrays.asList(options));
 
         Framework aFramework = null;
         for( TestContainer testContainer : getTestContainerFactory().parse( options ) ) {
