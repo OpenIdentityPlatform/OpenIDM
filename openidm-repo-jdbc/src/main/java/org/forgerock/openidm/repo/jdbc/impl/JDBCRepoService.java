@@ -60,7 +60,7 @@ import java.util.Map;
  *
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.repo.jdbc", immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service(value = {RepositoryService.class, ObjectSet.class})
 // Omit the RepoBootService interface from the managed service
 @Properties({
@@ -70,9 +70,10 @@ import java.util.Map;
         @Property(name = "db.type", value = "JDBC")
 })
 public class JDBCRepoService implements RepositoryService, RepoBootService {
-
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
+    public static final String PID = "org.forgerock.openidm.repo.jdbc";
+    
     ObjectMapper mapper = new ObjectMapper();
 
     // Keys in the JSON configuration
