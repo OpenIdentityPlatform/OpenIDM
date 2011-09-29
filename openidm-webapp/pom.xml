@@ -93,6 +93,16 @@
         <!-- OpenIDM Dependencies -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-audit</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-crypto</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -114,11 +124,6 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-audit</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
@@ -163,28 +168,6 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
         </dependency>
-
-        <!-- Pax Web 1.0.3 war and whiteboard - ->
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-api</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-spi</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-extender-war</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-extender-whiteboard</artifactId>
-            <version>1.0.3</version>
-        </dependency-->
         
         <dependency>
             <groupId>ch.qos.logback</groupId>
@@ -197,11 +180,17 @@
             <version>1.6.1</version>
         </dependency>
 
-        <!-- OpenICF Logger -->
+        <!-- OpenICF -->
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>icfl-over-slf4j</artifactId>
             <version>1.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.framework</groupId>
+            <artifactId>connector-framework-osgi</artifactId>
+            <version>1.1.0.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- OpenICF Connectors -->
@@ -276,7 +265,9 @@
                                 openidm-config,
                                 openidm-repo-jdbc,
                                 openidm-repo-orientdb,
-                                openidm-system,
+                                openidm-crypto,
+                                org.apache.felix.configadmin,
+                                org.apache.felix.fileinstall
                             </includeArtifactIds>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>
@@ -294,6 +285,7 @@
                                 commons-codec,
                                 commons-lang,
                                 connector-framework-internal,
+                                connector-framework-osgi,
                                 connector-framework,
                                 groovy-all,
                                 icfl-over-slf4j,
@@ -303,17 +295,15 @@
                                 json-fluent,
                                 json-schema,
                                 openidm-audit,
-                                openidm-crypto,
                                 openidm-core,
                                 openidm-provisioner-openicf,
                                 openidm-provisioner,
                                 openidm-repo,
                                 openidm-restlet,
-                                openidm-scheduler,                                
+                                openidm-scheduler,
+                                openidm-system,
                                 openidm-ui,
                                 openidm-util,
-                                org.apache.felix.configadmin,
-                                org.apache.felix.fileinstall,
                                 org.apache.felix.http.bridge,
                                 org.apache.felix.http.whiteboard,
                                 org.apache.felix.log,
@@ -325,13 +315,13 @@
                                 org.apache.servicemix.bundles.rhino,
                                 org.restlet,
                                 org.restlet.ext.jackson,
-                                org.restlet.ext.servlet
-                                <!--,ops4j-base-util-collections,
-                                ops4j-base-lang,
-                                ops4j-base-util-xml,
+                                org.restlet.ext.servlet,
                                 pax-swissbox-core,
                                 pax-swissbox-extender,
                                 pax-swissbox-lifecycle,
+                                ops4j-base-lang
+                                <!--,ops4j-base-util-collections,
+                                ops4j-base-util-xml,
                                 pax-swissbox-tracker,
                                 pax-web-api,
                                 pax-web-extender-war,
@@ -385,7 +375,7 @@
         </plugins>
     </build>
 
-    <!-- Just to allow the standalon execution of the project -->
+    <!-- Just to allow the standalone execution of the project -->
     <repositories>
         <repository>
             <id>forgerock-staging-repository</id>

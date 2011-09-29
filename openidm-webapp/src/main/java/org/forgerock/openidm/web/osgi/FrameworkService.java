@@ -226,6 +226,11 @@ public class FrameworkService {
             return;
         }
 
+        //TODO Use this constant: ServerConstants.PROPERTY_SERVER_ROOT
+        if (null == props.get("openidm.system.server.root")) {
+            System.setProperty("openidm.system.server.root",this.context.getRealPath("/WEB-INF"));
+        }
+
         // Perform variable substitution on specified properties.
         for (Enumeration e = props.propertyNames(); e.hasMoreElements(); ) {
             String name = (String) e.nextElement();
