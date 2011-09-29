@@ -28,6 +28,11 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-enhanced-config</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo</artifactId>
             <version>${openidm.version}</version>
         </dependency>

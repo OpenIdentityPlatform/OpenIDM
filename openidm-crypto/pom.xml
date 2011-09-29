@@ -32,11 +32,6 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-config</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-fluent</artifactId>
         </dependency>
@@ -96,7 +91,7 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Export-Package>
-                            org.forgerock.openidm.crypto;version=${openidm.version}
+                            org.forgerock.openidm.crypto.factory;version=${openidm.version}
                         </Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.crypto.impl.Activator</Bundle-Activator>
                     </instructions>

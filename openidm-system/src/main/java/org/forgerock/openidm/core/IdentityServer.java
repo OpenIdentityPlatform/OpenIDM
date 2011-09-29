@@ -75,7 +75,7 @@ public class IdentityServer {
                 configProperties.put(entry.getKey().toLowerCase(), entry.getValue());
             }
         }
-        String bootFileName = getProperty(ServerConstants.CONFIG_BOOT_FILE_LOCATION, 
+        String bootFileName = getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION, 
                 ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
         bootFileProperties = loadProps(bootFileName);
     }
@@ -101,15 +101,19 @@ public class IdentityServer {
      */
     public String getProperty(String name, String defaultValue) {
         String lowerCaseName = name.toLowerCase();
-        if (configProperties.containsKey(lowerCaseName)) {
+        if (configProperties != null && configProperties.containsKey(lowerCaseName)) {
+            System.out.println("Property " + name + " resolved from programmatic config properties: " + configProperties.get(lowerCaseName));
             return configProperties.get(lowerCaseName);
         } else if (bootFileProperties != null && bootFileProperties.containsKey(lowerCaseName)) {
+            System.out.println("Property " + name + " resolved from boot properties file: " + bootFileProperties.get(lowerCaseName));
             return bootFileProperties.get(lowerCaseName);
         } else {
             String value = getSystemPropertyIgnoreCase(lowerCaseName);
             if (value == null) {
+                System.out.println("Property " + name + " no setting found, defaulting to: " + defaultValue);
                 return defaultValue;
             } else {
+                System.out.println("Property " + name + " resolved from system properties: " + value);
                 return value;
             }
         }
@@ -148,11 +152,9 @@ public class IdentityServer {
      * @return The path to the root directory for this instance of the Identity
      *         Server.
      */
-    public static String getServerRoot() {
-        String root = null;
-        if (identityServer != null) {
-            root = identityServer.getProperty(ServerConstants.PROPERTY_SERVER_ROOT);
-        }
+    public String getServerRoot() {
+        String root = getProperty(ServerConstants.PROPERTY_SERVER_ROOT);
+
         if (null != root) {
                 File r = new File(root);
                 if (r.isAbsolute()) {
@@ -174,7 +176,7 @@ public class IdentityServer {
      * @return The path to the root directory for this instance of the Identity
      *         Server.
      */
-    public static URI getServerRootURI() {
+    public URI getServerRootURI() {
         return URI.create(getServerRoot());
     }
 
@@ -188,12 +190,28 @@ public class IdentityServer {
      * @return A <CODE>File</CODE> object that corresponds to the specified path.
      */
     public static File getFileForPath(String path) {
+        return getFileForPath(path, identityServer.getServerRoot());
+    }
+    
+    /**
+     * Retrieves a <CODE>File</CODE> object corresponding to the specified path.
+     * If the given path is an absolute path, then it will be used.  If the path
+     * is relative, then it will be interpreted as if it were relative to the
+     * Identity Server root.
+     *
+     * @param path The path string to be retrieved as a <CODE>File</CODE>
+     * @param serverRoot the server root to resolve against
+     * @return A <CODE>File</CODE> object that corresponds to the specified path.
+     */
+    public static File getFileForPath(String path, String serverRoot) {
         File f = new File(path);
 
         if (f.isAbsolute()) {
+            //logger.trace("getFileForPath is absolute: {}", path);
             return f;
         } else {
-            return new File(getServerRoot(), path).getAbsoluteFile();
+            //logger.trace("getFileForPath is relative: {} resolving against {}", path, serverRoot);
+            return new File(serverRoot, path).getAbsoluteFile();
         }
     }
 
@@ -212,21 +230,21 @@ public class IdentityServer {
         return (null != debug) && Boolean.valueOf(debug);
     }
     
-    
-// TODO: move this class out of system bundle so we can use logging
-    
     /**
      * Loads boot properties file
      * @return properties in boot properties file, keys in lower case
      */
-    private static Map<String, String> loadProps(String bootFileLocation) { 
-        File bootFile = IdentityServer.getFileForPath(bootFileLocation);
+    private Map<String, String> loadProps(String bootFileLocation) { 
+        File bootFile = IdentityServer.getFileForPath(bootFileLocation, getServerRoot());
         Map<String, String> entries = new HashMap<String, String>();
         
         if (!bootFile.exists()) {
+// TODO: move this class out of system bundle so we can use logging
             //logger.info("No boot properties file detected at {}.", bootFile.getAbsolutePath());
+            System.out.println("No boot properties file detected at " + bootFile.getAbsolutePath());
         } else {
             //logger.info("Using boot properties at {}.", bootFile.getAbsolutePath());
+            System.out.println("Using boot properties at " + bootFile.getAbsolutePath());
             InputStream in = null;
             try {
                 Properties prop = new Properties();

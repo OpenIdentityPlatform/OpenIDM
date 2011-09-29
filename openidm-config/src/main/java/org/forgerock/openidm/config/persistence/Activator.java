@@ -72,7 +72,7 @@ public class Activator implements BundleActivator {
         context.registerService(new String[] {ArtifactInstaller.class.getName(), ConfigurationListener.class.getName()}, 
                  installer, installerProp);
         logger.debug("JSON configuration installer service registered");
-        logger.info("OpenIDM is starting from {}", IdentityServer.getServerRoot());
+        logger.info("OpenIDM is starting from {}", IdentityServer.getInstance().getServerRoot());
     }
 
     public void stop(BundleContext context) {

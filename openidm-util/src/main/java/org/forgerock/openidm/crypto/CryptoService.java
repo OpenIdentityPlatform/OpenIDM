@@ -31,9 +31,10 @@ import org.forgerock.json.crypto.JsonCryptoException;
  * Provides encryption and decryption services to OpenIDM components.
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 public interface CryptoService {
-
+    
     /**
      * Returns a transformer that can encrypt JSON nodes.
      *

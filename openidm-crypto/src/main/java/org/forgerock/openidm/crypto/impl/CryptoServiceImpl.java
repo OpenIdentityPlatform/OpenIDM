@@ -57,9 +57,6 @@ import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 
 // OpenIDM
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.slf4j.Logger;
@@ -75,7 +72,7 @@ import org.slf4j.LoggerFactory;
 public class CryptoServiceImpl implements CryptoService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
-
+    
     /**
      * TODO: Description.
      */
@@ -141,12 +138,12 @@ public class CryptoServiceImpl implements CryptoService {
                 } catch (IOException ioe) {
                     LOGGER.error("IOException when loading KeyStore file of type: " 
                             + type + " provider: " + provider + " location:" + location, ioe);
-                    throw new InternalErrorException("IOException when loading KeyStore file of type: " 
-                            + type + " provider: " + provider + " location:" + location, ioe);
+                    throw new RuntimeException("IOException when loading KeyStore file of type: " 
+                            + type + " provider: " + provider + " location:" + location + " message: " + ioe.getMessage(), ioe);
                 } catch (GeneralSecurityException gse) {
                     LOGGER.error("GeneralSecurityException when loading KeyStore file", gse);
-                    throw new InvalidException("GeneralSecurityException when loading KeyStore file of type: " 
-                        + type + " provider: " + provider + " location:" + location, gse);
+                    throw new RuntimeException("GeneralSecurityException when loading KeyStore file of type: " 
+                        + type + " provider: " + provider + " location:" + location + " message: " + gse.getMessage(), gse);
                 }
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
             }
