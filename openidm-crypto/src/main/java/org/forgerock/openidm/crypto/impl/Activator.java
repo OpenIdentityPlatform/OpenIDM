@@ -23,20 +23,14 @@
  */
 package org.forgerock.openidm.crypto.impl;
 
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
 
-import org.apache.felix.scr.annotations.Property;
-import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
-
-import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,11 +46,8 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         logger.debug("Crypto bundle starting");
         
-//JsonNode keystoreConfig = ConfigBootstrapHelper.getBootConfig("keystore");
-
-        cryptoSvc = new CryptoServiceImpl();
-        cryptoSvc.activate(context); 
-//, keystoreConfig);
+        
+        cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
         
         // Register crypto service 
         Hashtable<String, String> prop = new Hashtable<String, String>();

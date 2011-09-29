@@ -29,15 +29,16 @@ import org.forgerock.json.fluent.JsonNodeException;
 
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * A utility to handle enhanced configuration, including nested lists and maps to 
@@ -121,7 +122,8 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         logger.debug("Configuration for {}: {}", servicePid , node);
 
         JsonNode decrypted = node;
-        if (decrypt && context != null && context.getBundle() != null) { // todo: different way to handle mock unit tests
+        if (decrypt && dict != null && !node.isNull() 
+                && context != null && context.getBundle() != null) { // todo: different way to handle mock unit tests
             decrypted = decrypt(node, context);
         }
         
@@ -134,42 +136,6 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     
     private CryptoService getCryptoService(BundleContext context)
             throws InternalErrorException {
-        CryptoService crypto = null;
-
-        try {
-            synchronized (JSONEnhancedConfig.class) {
-                if (cryptoTracker == null) {
-                    Filter cryptoFilter = context.createFilter("("
-                            + Constants.OBJECTCLASS + "="
-                            + CryptoService.class.getName() + ")");
-                    cryptoTracker = new ServiceTracker(context, cryptoFilter,
-                            null);
-                    cryptoTracker.open();
-                }
-            }
-
-            crypto = (CryptoService) cryptoTracker.waitForService(5000);
-            if (crypto != null) {
-                logger.trace("Obtained crypto service");
-            } else {
-                logger.warn("Failed to get crypto service to handle configuration decryption");
-                if (logger.isTraceEnabled()) {
-                    logger.trace("List of available service {}",
-                            Arrays.asList(context.getAllServiceReferences(null,
-                                    null)));
-                }
-                throw new InternalErrorException(
-                        "Configuration handling could not locate cryptography service to decrypt configuration."
-                                + " Cryptography service is not registered..");
-            }
-        } catch (Exception ex) {
-            logger.warn(
-                    "Exception in getting crypto service to handle configuration decryption",
-                    ex);
-            throw new InternalErrorException(
-                    "Exception in getting cryptography service to decrypt configuration "
-                            + ex.getMessage(), ex);
-        }
-        return crypto;
+        return CryptoServiceFactory.getInstance();
     }
 }

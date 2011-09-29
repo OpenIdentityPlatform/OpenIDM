@@ -114,7 +114,7 @@ public class ServerConstants {
      * The name of the system property that can be used to specify the location
      * of the boot properties file
      */
-    public static final String CONFIG_BOOT_FILE_LOCATION = "openidm.boot.file";
+    public static final String PROPERTY_BOOT_FILE_LOCATION = "openidm.boot.file";
     
 
     /**

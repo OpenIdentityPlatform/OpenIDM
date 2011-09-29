@@ -15,31 +15,42 @@
   Copyright © 2011 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-audit</artifactId>
-    <name>OpenIDM audit module</name>
+    <artifactId>openidm-enhanced-config</artifactId>
+    <name>OpenIDM enhanced Configuration classes</name>
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-repo</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-crypto</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-fluent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -49,11 +60,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -74,6 +80,14 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         </dependency>
     </dependencies>
     <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/java</directory>
+                <includes>
+                    <include>META-INF/**/*</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -94,8 +108,9 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Private-Package>org.forgerock.openidm.audit.impl.*</Private-Package>
-                        <Export-Package>!org.forgerock.openidm.audit.impl.*,org.forgerock.openidm.audit;version="${openidm.version}"</Export-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.config;version=${openidm.version}
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
