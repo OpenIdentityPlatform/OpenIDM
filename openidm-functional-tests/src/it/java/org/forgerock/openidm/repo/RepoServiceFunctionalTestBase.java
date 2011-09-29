@@ -67,7 +67,9 @@ public abstract class RepoServiceFunctionalTestBase {
     public void activateService() {
         // Starts and installs all package bundles
         String bundleDirs = idmRootDir + "/bundle/init," + idmRootDir + "/bundle";
-        containerUtil = ContainerUtil.startContainer(bundleDirs, configDir);
+        Map<String, String> systemProps = new HashMap<String, String>();
+        systemProps.put("openidm.system.server.root", idmRootDir);
+        containerUtil = ContainerUtil.startContainer(bundleDirs, configDir, systemProps);
         // Waits for the service to appear
         repo = containerUtil.getService(RepositoryService.class, "(db.type=" + dbType + ")");
     }
