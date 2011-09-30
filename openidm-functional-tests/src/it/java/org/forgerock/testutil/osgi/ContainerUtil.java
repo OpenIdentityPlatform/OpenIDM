@@ -55,7 +55,7 @@ public class ContainerUtil  {
     
     Framework framework;
     // How long to wait for services to get registered
-    int defaultTimeout = 10000;
+    int defaultTimeout = 30000;
     
     private ContainerUtil(Framework framework) {
         this.framework = framework;
