@@ -85,7 +85,7 @@ public class SchedulerServiceJob implements Job {
                 logger.info("Scheduled service found, invoking.");
                 setInvokeContext(scheduledServiceContext);
                 scheduledService.execute(scheduledServiceContext);
-                logger.info("Scheduled service invoke completed sucessfully.");
+                logger.info("Scheduled service invoke completed successfully.");
             } catch (Exception ex) {
                 logger.warn("Scheduled service invokation reported failure: " + ex.getMessage(), ex);
             } finally {
