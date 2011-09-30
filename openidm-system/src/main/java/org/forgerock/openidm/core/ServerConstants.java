@@ -65,6 +65,13 @@ public class ServerConstants {
 
     /**
      * The date format string that will be used to construct and parse dates
+     * represented using iso8601 time.
+     */
+    public static final String DATE_FORMAT_ISO8601_TIME_MILLISECOND =
+            "yyyy-MM-dd'T'HH:mm:ss.SZ";
+
+    /**
+     * The date format string that will be used to construct and parse dates
      * represented using generalized time with a four-digit year.  It is assumed
      * that the provided date formatter will be set to UTC.
      */

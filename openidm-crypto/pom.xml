@@ -94,6 +94,7 @@
                             org.forgerock.openidm.crypto.factory;version=${openidm.version}
                         </Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.crypto.impl.Activator</Bundle-Activator>
+                        <Main-Class>org.forgerock.openidm.crypto.impl.Main</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>
