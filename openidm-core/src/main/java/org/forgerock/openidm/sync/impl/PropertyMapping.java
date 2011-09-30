@@ -140,8 +140,8 @@ class PropertyMapping {
         Object result = null;
         if (sourcePointer != null) { // optional source property
             JsonNode node = sourceObject.get(sourcePointer);
-            if (node != null) {
-                result = node.getValue(); // null indicates no value
+            if (node != null) { // null indicates no value
+                result = node.getValue();
             }
         }
         if (transform != null) { // optional property mapping script
