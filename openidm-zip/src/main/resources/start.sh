@@ -48,7 +48,7 @@ if [ "$1" = "jpda" ] ; then
   shift
 fi
 
-CLASSPATH="$CLASSPATH""$OPENIDM_HOME"/bin/felix.jar
+CLASSPATH="$OPENIDM_HOME"/bin/felix.jar
 
 echo "Using OPENIDM_HOME:   $OPENIDM_HOME"
 echo "Using OPENIDM_OPTS:   $OPENIDM_OPTS"
