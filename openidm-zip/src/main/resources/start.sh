@@ -1,8 +1,8 @@
 #!/bin/sh
-DEBUG_MODE="y" #Start in debug mode by default.
+DEBUG_MODE="n" # Default is no debug mode
 
-echo "Do you want to start in debug mode: [y]n"
-read DEBUG_MODE
+#echo "Do you want to start in debug mode: [y]n"
+#read DEBUG_MODE
 
 if [ "$DEBUG_MODE" == "n" ]; then
 	# start in normal mode
