@@ -102,18 +102,18 @@ public class IdentityServer {
     public String getProperty(String name, String defaultValue) {
         String lowerCaseName = name.toLowerCase();
         if (configProperties != null && configProperties.containsKey(lowerCaseName)) {
-            System.out.println("Property " + name + " resolved from programmatic config properties: " + configProperties.get(lowerCaseName));
+            //logger.trace("Property " + name + " resolved from programmatic config properties: " + configProperties.get(lowerCaseName));
             return configProperties.get(lowerCaseName);
         } else if (bootFileProperties != null && bootFileProperties.containsKey(lowerCaseName)) {
-            System.out.println("Property " + name + " resolved from boot properties file: " + bootFileProperties.get(lowerCaseName));
+            //logger.trace("Property " + name + " resolved from boot properties file: " + bootFileProperties.get(lowerCaseName));
             return bootFileProperties.get(lowerCaseName);
         } else {
             String value = getSystemPropertyIgnoreCase(lowerCaseName);
             if (value == null) {
-                System.out.println("Property " + name + " no setting found, defaulting to: " + defaultValue);
+                //logger.trace("Property " + name + " no setting found, defaulting to: " + defaultValue);
                 return defaultValue;
             } else {
-                System.out.println("Property " + name + " resolved from system properties: " + value);
+                //logger.trace("Property " + name + " resolved from system properties: " + value);
                 return value;
             }
         }
