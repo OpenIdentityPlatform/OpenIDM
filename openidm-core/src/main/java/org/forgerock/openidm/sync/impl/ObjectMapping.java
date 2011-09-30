@@ -90,6 +90,15 @@ class ObjectMapping implements SynchronizationListener {
     private Script onUpdateScript;
 
     /** TODO: Description. */
+    private Script onDeleteScript;
+
+    /** TODO: Description. */
+    private Script onLinkScript;
+
+    /** TODO: Description. */
+    private Script onUnlinkScript;
+
+    /** TODO: Description. */
     private SynchronizationService service;
 
     /**
@@ -115,6 +124,9 @@ class ObjectMapping implements SynchronizationListener {
         }
         onCreateScript = Scripts.newInstance(config.get("onCreate"));
         onUpdateScript = Scripts.newInstance(config.get("onUpdate"));
+        onDeleteScript = Scripts.newInstance(config.get("onDelete"));
+        onLinkScript = Scripts.newInstance(config.get("onLink"));
+        onUnlinkScript = Scripts.newInstance(config.get("onUnlink"));
         LOGGER.debug("Instantiated {}", name);
     }
 
@@ -570,6 +582,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
                     String targetId = targetObject.get("_id").required().asString();
                     if (linkObject._id == null) {
+                        execScript("onLink", onLinkScript);
                         linkObject.sourceId = sourceObject.get("_id").required().asString();
                         linkObject.targetId = targetId;
                         linkObject.reconId = reconId;
@@ -594,12 +607,14 @@ class ObjectMapping implements SynchronizationListener {
                     break; // terminate UPDATE
                 case DELETE:
                     if (targetObject != null) { // forgiving; does nothing if no target
+                        execScript("onDelete", onDeleteScript);
                         deleteTargetObject(targetObject);
                         targetObject = null;
                     }
                     // falls through to unlink the deleted target
                 case UNLINK:
                     if (linkObject._id != null) { // forgiving; does nothing if no link exists
+                        execScript("onUnlink", onUnlinkScript);
                         linkObject.delete();
                     }
                     break; // terminate DELETE and UNLINK
