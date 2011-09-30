@@ -696,9 +696,15 @@ class ObjectMapping implements SynchronizationListener {
         private void execScript(String type, Script script) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = service.newScope();
-                scope.put("source", sourceObject.asMap());
-                scope.put("target", targetObject.asMap());
-                scope.put("situation", situation.toString());
+                if (sourceObject != null) {
+                    scope.put("source", sourceObject.asMap());
+                }
+                if (targetObject != null) {
+                    scope.put("target", targetObject.asMap());
+                }
+                if (situation != null) {
+                    scope.put("situation", situation.toString());
+                }
                 try {
                     script.exec(scope);
                 } catch (ScriptException se) {
