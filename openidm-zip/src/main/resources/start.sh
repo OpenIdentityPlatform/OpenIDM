@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# clean up left over pid files if necessary
+function cleanupPidFile() {
+  if [[ -a $OPENIDM_PID_FILE ]]; then
+    rm -f "$OPENIDM_PID_FILE"
+  fi
+  trap - EXIT
+  exit
+}
+
 # resolve links - $0 may be a softlink
 PRG="$0"
 
@@ -13,11 +22,16 @@ while [ -h "$PRG" ]; do
   fi
 done
 
+echo $PRG
+
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
 # Only set OPENIDM_HOME if not already set
 [ -z "$OPENIDM_HOME" ] && OPENIDM_HOME=`cd "$PRGDIR" >/dev/null; pwd`
+
+# Only set OPENIDM_PID_FILE if not already set
+[ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE=$OPENIDM_HOME/.openidm.pid
 
 # Only set OPENIDM_OPTS if not already set
 [ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS=-Xmx1024m
@@ -54,6 +68,10 @@ echo "Using OPENIDM_HOME:   $OPENIDM_HOME"
 echo "Using OPENIDM_OPTS:   $OPENIDM_OPTS"
 echo "Using LOGGING_CONFIG: $LOGGING_CONFIG"
 
+# Keep track of this pid
+echo $$ > $OPENIDM_PID_FILE
+trap 'cleanupPidFile' EXIT
+
 # start in normal mode
 java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
@@ -61,3 +79,7 @@ java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
 	-Dignore.openidm.system.server.environment="dev|test|qa|prod" \
 	org.apache.felix.main.Main "$@"
+
+cleanupPidFile
+exit 0 
+
