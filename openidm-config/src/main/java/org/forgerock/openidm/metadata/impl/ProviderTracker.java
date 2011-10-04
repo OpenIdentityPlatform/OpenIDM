@@ -80,7 +80,7 @@ public class ProviderTracker implements ServiceTrackerListener {
     BundleContext context;
     ObjectMapper mapper = new ObjectMapper();
     
-    // Map from bundle IDs to MetaDataProvider
+    // Map from origin identifiers to MetaDataProvider
     // Long type key are bundle identifiers
     // String keys are service pids
     Map<Object, MetaDataProvider> providers = new HashMap<Object, MetaDataProvider>();
@@ -89,7 +89,9 @@ public class ProviderTracker implements ServiceTrackerListener {
      * Constructor
      * @param context a bundle context to access OSGi
      * @param listener the listener to notify when a provider change was detecte
-     * @param notifyDuringInit whether to notify the listener during the ProviderTracker construction.
+     * @param notifyDuringInit whether to notify the listener during the ProviderTracker construction. 
+     * Setting it to false allows to query the providers acquired during init with getProviders, and to process additional 
+     * providers via the listener.
      */
     public ProviderTracker(BundleContext context, ProviderListener listener, boolean notifyDuringInit) {
         this.context = context;
