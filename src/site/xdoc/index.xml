@@ -49,7 +49,7 @@
     mailing list</a> to ask questions, make suggestions, and tell us what
     you think of OpenIDM.</li>
     <li><a
-    href="https://idp.forgerock.org/OpenIDM/UI/Login?service=register">Register
+    href="https://idp.forgerock.org/openam/UI/Login?service=register">Register
     to join the community</a>.</li>
     <li>Read and edit <a
     href="http://wikis.forgerock.org/openidm/">OpenIDM Wiki documentation</a>.</li>
@@ -65,7 +65,7 @@
     href="https://wikis.forgerock.org/confluence/display/openidm/How+to+use+OpenIDM+Subversion"
     >How to Use OpenIDM Subversion</a>.</li>   
     <li>Make sure you <a
-    href="https://idp.forgerock.org/OpenIDM/UI/Login?service=register">register
+    href="https://idp.forgerock.org/openam/UI/Login?service=register">register
     to join the community</a>, thus also registering to <a
     href="https://bugster.forgerock.org/jira/browse/OPENIDM">report issues, and
     describe requests for enhancements</a>, as well as to edit <a
