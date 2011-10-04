@@ -106,10 +106,10 @@ class PropertyMapping {
      */
     public PropertyMapping(SynchronizationService service, JsonNode config) throws JsonNodeException {
         this.service = service;
-        condition = Scripts.newInstance(config.get("condition"));
+        condition = Scripts.newInstance("PropertyMapping", config.get("condition"));
         targetPointer = config.get("target").required().asPointer();
         sourcePointer = config.get("source").asPointer(); // optional
-        transform = Scripts.newInstance(config.get("transform"));
+        transform = Scripts.newInstance("PropertyMapping", config.get("transform"));
         defaultValue = config.get("default").getValue();
     }
 

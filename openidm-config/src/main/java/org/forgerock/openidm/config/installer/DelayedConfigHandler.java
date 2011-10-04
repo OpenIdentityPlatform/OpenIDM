@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.forgerock.json.fluent.JsonNode;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
 import org.forgerock.openidm.metadata.impl.ProviderTracker;
@@ -63,7 +64,7 @@ public class DelayedConfigHandler implements ProviderListener {
     public void addedProvider(Object originId, MetaDataProvider provider) {
         for (DelayedConfig config : delayedConfigs) {
             if (configCrypto != null) {
-                List<String> props = null;
+                List<JsonPointer> props = null;
                 try {
                     props = config.configCrypto.getPropertiesToEncrypt(config.pidOrFactory, config.factoryAlias, config.parsedConfig);
                     try {

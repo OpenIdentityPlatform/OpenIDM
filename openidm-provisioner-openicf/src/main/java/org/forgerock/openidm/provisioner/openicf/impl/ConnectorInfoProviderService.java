@@ -11,6 +11,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -61,6 +62,11 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     //Private
     private Map<String, RemoteFrameworkConnectionInfo> remoteFrameworkConnectionInfo = new HashMap<String, RemoteFrameworkConnectionInfo>();
     private URL[] connectorURLs = null;
+    /*
+     * If this instance was instantiated for MetaDataProvider by Class#newInstance then this is false.
+     * If this instance was activated by OSGi SCR then this is true.
+     */
+    private boolean isOSGiServiceInstance = false;
 
     /**
      * ConnectorManager service.
@@ -115,6 +121,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             TRACE.error("Invalid configuration remoteConnectorHosts must be list or null. {}", remoteConnectorHosts, e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
+        isOSGiServiceInstance = true;
         TRACE.info("Component is activated.");
     }
 
@@ -314,24 +321,25 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) {
-        List<String> result = null;
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) throws WaitForMetaData {
+        List<JsonPointer> result = null;
         if (null != pidOrFactory && null != config) {
             if (PID.equals(pidOrFactory)) {
                 try {
                     JsonNode remoteConnectorHosts = config.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS).expect(List.class);
                     if (!remoteConnectorHosts.isNull()) {
-                        result = new ArrayList<String>(remoteConnectorHosts.size());
-                        for (JsonNode hostConfig : remoteConnectorHosts){
-                           result.add(hostConfig.get(ConnectorUtil.OPENICF_KEY).getPointer().toString());
+                        result = new ArrayList<JsonPointer>(remoteConnectorHosts.size());
+                        for (JsonNode hostConfig : remoteConnectorHosts) {
+                            result.add(hostConfig.get(ConnectorUtil.OPENICF_KEY).getPointer());
                         }
                     }
                 } catch (JsonNodeException e) {
                     TRACE.error("Invalid configuration remoteConnectorHosts must be list or null.", e);
                 }
-            } else if (pidOrFactory.startsWith(OpenICFProvisionerService.PID)) {
+            } else if (pidOrFactory.startsWith(OpenICFProvisionerService.PID) && isOSGiServiceInstance) {
                 try {
-                    ConnectorInfo ci = findConnectorInfo(ConnectorUtil.getConnectorReference(config));
+                    ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(config);
+                    ConnectorInfo ci = findConnectorInfo(connectorReference);
                     if (null != ci) {
                         ConfigurationProperties properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
                         JsonPointer configurationProperties = new JsonPointer(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES);
@@ -339,11 +347,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                             ConfigurationProperty property = properties.getProperty(name);
                             if (property.isConfidential()) {
                                 if (null == result) {
-                                    result = new ArrayList<String>(properties.getPropertyNames().size());
+                                    result = new ArrayList<JsonPointer>(properties.getPropertyNames().size());
                                 }
-                                result.add(configurationProperties.child(name).toString());
+                                result.add(configurationProperties.child(name));
                             }
                         }
+                    } else {
+                        throw new WaitForMetaData(connectorReference.toString());
                     }
                 } catch (Exception e) {
                     TRACE.error("Failed to parse the config of {}", pidOrFactory, e);

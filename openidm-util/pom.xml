@@ -15,7 +15,7 @@
   Copyright © 2011 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
@@ -39,6 +39,12 @@
             <artifactId>openidm-system</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <!--dependency>
+            <groupId>org.eclipse.wst.jsdt</groupId>
+            <artifactId>debug.rhino.debugger</artifactId>
+            <version>1.0.300</version>
+            <optional>true</optional>
+        </dependency-->
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
@@ -63,7 +69,7 @@
             <artifactId>org.apache.felix.scr.annotations</artifactId>
             <scope>provided</scope>
         </dependency>
-            
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -109,22 +115,87 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
+                        <Import-Package>org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional,*
+                        </Import-Package>
                         <Export-Package>
                             org.forgerock.openidm.audit.util;version=${openidm.version},
                             org.forgerock.openidm.context;version=${openidm.version},
                             org.forgerock.openidm.crypto;version=${openidm.version},
                             org.forgerock.openidm.metadata;version=${openidm.version},
                             org.forgerock.openidm.objset;version=${openidm.version},
-							org.forgerock.openidm.osgi;version=${openidm.version},
+                            org.forgerock.openidm.osgi;version=${openidm.version},
                             org.forgerock.openidm.patch;version=${openidm.version},
                             org.forgerock.openidm.scope;version=${openidm.version},
                             org.forgerock.openidm.script;version=${openidm.version},
                             org.forgerock.openidm.script.javascript;version=${openidm.version},
-                            org.forgerock.openidm.sync;version=${openidm.version}
+                            org.forgerock.openidm.sync;version=${openidm.version},
+                            org.forgerock.openidm.util;version=${openidm.version}
                         </Export-Package>
                     </instructions>
                 </configuration>
+            </plugin>
+            <!-- External non-maven dependency management -->
+            <plugin>
+                <groupId>com.savage7.maven.plugins</groupId>
+                <artifactId>maven-external-dependency-plugin</artifactId>
+                <version>0.4</version>
+                <inherited>false</inherited>
+                <configuration>
+                    <stagingDirectory>${project.build.directory}/dependencies/</stagingDirectory>
+                    <createChecksum>true</createChecksum>
+                    <force>false</force>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>org.eclipse.wst.jsdt</groupId>
+                            <artifactId>debug.rhino.debugger</artifactId>
+                            <version>1.0.300</version>
+                            <packaging>jar</packaging>
+                            <downloadUrl>
+                                http://eclipse.ialto.org/webtools/downloads/drops/R3.4.0/S-3.4.0M2-20110922230524/buildrepository/wst4x-sdk/plugins/org.eclipse.wst.jsdt.debug.rhino.debugger_1.0.300.v201109150503.jar
+                            </downloadUrl>
+                            <install>true</install>
+                        </artifactItem>
+                        <artifactItem>
+                            <groupId>org.eclipse.wst.jsdt</groupId>
+                            <artifactId>debug.rhino.debugger</artifactId>
+                            <version>1.0.300</version>
+                            <packaging>jar</packaging>
+                            <classifier>sources</classifier>
+                            <downloadUrl>
+                                http://eclipse.ialto.org/webtools/downloads/drops/R3.4.0/S-3.4.0M2-20110922230524/buildrepository/wst4x-sdk/plugins/org.eclipse.wst.jsdt.debug.rhino.debugger.source_1.0.300.v201109150503.jar
+                            </downloadUrl>
+                            <install>true</install>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>clean-external-dependencies</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:clean-external -->
+                            <goal>clean-external</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>resolve-install-external-dependencies</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:resolve-external -->
+                            <goal>resolve-external</goal>
+                            <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:install-external -->
+                            <goal>install-external</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>deploy-external-dependencies</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <!-- mvn com.savage7.maven.plugins:maven-external-dependency-plugin:deploy-external -->
+                            <goal>deploy-external</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

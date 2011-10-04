@@ -42,7 +42,7 @@
             "onResponse" :
                {
                   "type" : "text/javascript",
-                  "source" : "java.lang.System.out.println('After: ' + method + '\\nId: ' + id + '\\nObject: [object]\\nParams: [query,anction]\\nResult: [result]');"
+                  "source" : "java.lang.System.out.println('After: ' + method + '\\nId: ' + id + '\\nObject: [object]\\nParams: [query,action]\\nResult: [result]');"
                }
          }
       ]

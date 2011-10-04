@@ -20,7 +20,6 @@ package org.forgerock.openidm.script.javascript;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 // Mozilla Rhino
@@ -65,8 +64,8 @@ public class JavaScript implements Script {
      * @param source the source code of the JavaScript script.
      * @throws ScriptException if there was an exception encountered while compiling the script.
      */
-    public JavaScript(String source) throws ScriptException {
-        this(source, true);
+    public JavaScript(String name, String source) throws ScriptException {
+        this(name, source, true);
     }
 
     /**
@@ -79,11 +78,11 @@ public class JavaScript implements Script {
      * @param sharedScope if {@code true}, uses the shared scope, otherwise allocates new scope.
      * @throws ScriptException if there was an exception encountered while compiling the script.
      */
-    public JavaScript(String source, boolean sharedScope) throws ScriptException {
+    public JavaScript(String name, String source, boolean sharedScope) throws ScriptException {
         this.sharedScope = sharedScope;
         Context cx = Context.enter();
         try {
-            script = cx.compileString(source, "line", 1, null);
+            script = cx.compileString(source, name, 1, null);
         } catch (RhinoException re) {
             throw new ScriptException(re.getMessage());
         } finally {
@@ -92,23 +91,16 @@ public class JavaScript implements Script {
     }
 
     /**
-     * TEMPORARY?
-     */
-    public JavaScript(File file) throws ScriptException {
-        this(file, true);
-    }
-
-    /**
      * TEMPORARY
      */
-    public JavaScript(File file, boolean sharedScope) throws ScriptException {
+    public JavaScript(String name, File file, boolean sharedScope) throws ScriptException {
         FileReader reader = null;
         try {
             reader = new FileReader(file);
             this.sharedScope = sharedScope;
             Context cx = Context.enter();
             try {
-                script = cx.compileReader(reader, file.getPath(), 1, null);
+                script = cx.compileReader(reader, name != null ? name : file.getPath(), 1, null);
             } catch (RhinoException re) {
                 throw new ScriptException(re);
             } finally {

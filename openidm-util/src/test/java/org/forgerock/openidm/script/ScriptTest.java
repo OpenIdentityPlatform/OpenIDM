@@ -54,7 +54,7 @@ public class ScriptTest {
         JsonNode config = new JsonNode(new HashMap<String, Object>());
         config.put("type", "text/javascript");
         config.put("source", "1 + 2");
-        Script script = Scripts.newInstance(config);
+        Script script = Scripts.newInstance("test", config);
         assertThat(script.exec(scope)).isEqualTo(3);
     }
 
@@ -73,7 +73,7 @@ public class ScriptTest {
             }
         });
         scope.put("x", x);
-        Script script = Scripts.newInstance(config);
+        Script script = Scripts.newInstance("test", config);
         assertThat(script.exec(scope)).isEqualTo(3);
     }
 
@@ -84,6 +84,6 @@ public class ScriptTest {
         JsonNode config = new JsonNode(new HashMap<String, Object>());
         config.put("type", "definitely/unknown");
         config.put("source", "lather; rinse; repeat;");
-        Scripts.newInstance(config); // should throw exception
+        Scripts.newInstance("test", config); // should throw exception
     }
 }

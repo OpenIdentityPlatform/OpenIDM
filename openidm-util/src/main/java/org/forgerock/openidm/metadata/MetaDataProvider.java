@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonPointer;
 
 /**
  * Meta data provider interface to describe configuration 
@@ -52,5 +53,5 @@ public interface MetaDataProvider {
      * @throws WaitForMetaData thrown if this provider knows that the given configuration 
      * has associated meta-data, but the meta-data is not yet available. 
      */
-    List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) throws WaitForMetaData;
+    List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) throws WaitForMetaData;
 }

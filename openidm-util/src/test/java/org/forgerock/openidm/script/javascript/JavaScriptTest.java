@@ -51,7 +51,7 @@ public class JavaScriptTest {
     @Test
     @SuppressWarnings("unchecked")
     public void yieldMapValue() throws ScriptException {
-        Object result = new JavaScript("x = { foo: 'bar'}").exec(scope);
+        Object result = new JavaScript("test","x = { foo: 'bar'}").exec(scope);
         assertThat(result).isInstanceOf(Map.class);
         Map<String, Object> map = (Map)result;
         assertThat(map.get("foo")).isEqualTo("bar");
@@ -60,7 +60,7 @@ public class JavaScriptTest {
     @Test
     @SuppressWarnings("unchecked")
     public void yieldListVaue() throws ScriptException {
-        Object result = new JavaScript("x = [ 'foo', 'bar' ]").exec(scope);
+        Object result = new JavaScript("test","x = [ 'foo', 'bar' ]").exec(scope);
         assertThat(result).isInstanceOf(List.class);
         List<Object> list = (List)result;
         assertThat(list.size()).isEqualTo(2);
@@ -70,37 +70,37 @@ public class JavaScriptTest {
 
     @Test
     public void yieldStringValue() throws ScriptException {
-        assertThat(new JavaScript("'foo'").exec(scope)).isEqualTo("foo");
+        assertThat(new JavaScript("test","'foo'").exec(scope)).isEqualTo("foo");
     }
 
     @Test
     public void yieldIntegerValue() throws ScriptException {
-        assertThat(new JavaScript("1.0").exec(scope)).isEqualTo(Integer.valueOf(1));
+        assertThat(new JavaScript("test","1.0").exec(scope)).isEqualTo(Integer.valueOf(1));
     }
 
     @Test
     public void yieldDoubleValue() throws ScriptException {
-        assertThat(new JavaScript("1.1").exec(scope)).isEqualTo(Double.valueOf(1.1d));
+        assertThat(new JavaScript("test","1.1").exec(scope)).isEqualTo(Double.valueOf(1.1d));
     }
 
     @Test
     public void yieldTrueValue() throws ScriptException {
-        assertThat(new JavaScript("true").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","true").exec(scope)).isEqualTo(true);
     }
 
     @Test
     public void yieldFalseValue() throws ScriptException {
-        assertThat(new JavaScript("false").exec(scope)).isEqualTo(false);
+        assertThat(new JavaScript("test","false").exec(scope)).isEqualTo(false);
     }
 
     @Test
     public void yieldNullValue() throws ScriptException {
-        assertThat(new JavaScript("null").exec(scope)).isNull();
+        assertThat(new JavaScript("test","null").exec(scope)).isNull();
     }
 
     @Test
     public void notFoundValue() throws ScriptException {
-        assertThat(new JavaScript("x = { a: 'b' }; x.c").exec(scope)).isNull();
+        assertThat(new JavaScript("test","x = { a: 'b' }; x.c").exec(scope)).isNull();
     }
 
     // ----- java → javascript type conversion ----------
@@ -111,8 +111,8 @@ public class JavaScriptTest {
         map.put("boo", "yah");
         map.put("foo", "bar");
         scope.put("map", map);
-        assertThat(new JavaScript("map").exec(scope)).isEqualTo(map);
-        assertThat(new JavaScript("map.foo == 'bar'").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","map").exec(scope)).isEqualTo(map);
+        assertThat(new JavaScript("test","map.foo == 'bar'").exec(scope)).isEqualTo(true);
     }
 
     @Test
@@ -123,23 +123,23 @@ public class JavaScriptTest {
         list.add("foo");
         list.add("bar");
         scope.put("list", list);
-        assertThat(new JavaScript("list").exec(scope)).isEqualTo(list);
-        assertThat(new JavaScript("list.length == 4").exec(scope)).isEqualTo(true);
-        assertThat(new JavaScript("list[2] == 'foo'").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","list").exec(scope)).isEqualTo(list);
+        assertThat(new JavaScript("test","list.length == 4").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","list[2] == 'foo'").exec(scope)).isEqualTo(true);
     }
 
     @Test
     public void javaIntegerToJavaScriptNumber() throws ScriptException {
         scope.put("intValue", Integer.valueOf(1234));
-        assertThat(new JavaScript("typeof intValue == 'number'").exec(scope)).isEqualTo(true);
-        assertThat(new JavaScript("intValue == 1234").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","typeof intValue == 'number'").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","intValue == 1234").exec(scope)).isEqualTo(true);
     }
 
     @Test
     public void javaDoubleToJavaScriptNumber() throws ScriptException {
         scope.put("doubleValue", Double.valueOf(12345.6789d));
-        assertThat(new JavaScript("typeof doubleValue == 'number'").exec(scope)).isEqualTo(true);
-        assertThat(new JavaScript("doubleValue == 12345.6789").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","typeof doubleValue == 'number'").exec(scope)).isEqualTo(true);
+        assertThat(new JavaScript("test","doubleValue == 12345.6789").exec(scope)).isEqualTo(true);
     }
 
     // ----- property assignment ----------
@@ -148,7 +148,7 @@ public class JavaScriptTest {
     @SuppressWarnings("unchecked")
     public void mapPropertyValue() throws ScriptException {
         scope.put("foo", null);
-        new JavaScript("foo = { baz: 'qux', boo: 'yah' }").exec(scope);
+        new JavaScript("test","foo = { baz: 'qux', boo: 'yah' }").exec(scope);
         Map<String, Object> map = (Map)scope.get("foo");
         assertThat(map.get("baz")).isEqualTo("qux");
         assertThat(map.get("boo")).isEqualTo("yah");
@@ -158,7 +158,7 @@ public class JavaScriptTest {
     @SuppressWarnings("unchecked")
     public void listPropertyValue() throws ScriptException {
         scope.put("foo", null);
-        new JavaScript("foo = [ 'foo', 'bar' ]").exec(scope);
+        new JavaScript("test","foo = [ 'foo', 'bar' ]").exec(scope);
         List<Object> list = (List)scope.get("foo");
         assertThat(list.size()).isEqualTo(2);
         assertThat(list.get(0)).isEqualTo("foo");
@@ -168,14 +168,14 @@ public class JavaScriptTest {
     @Test
     public void stringPropertyValue() throws ScriptException {
         scope.put("foo", null);
-        new JavaScript("foo = 'bar'").exec(scope);
+        new JavaScript("test","foo = 'bar'").exec(scope);
         assertThat(scope.get("foo")).isEqualTo("bar");
     }
 
     @Test
     public void integerPropertyValue() throws ScriptException {
         scope.put("foo", null);
-        new JavaScript("foo = 4.0").exec(scope);
+        new JavaScript("test","foo = 4.0").exec(scope);
         assertThat(scope.get("foo")).isEqualTo(Integer.valueOf(4));
     }
 
@@ -184,7 +184,7 @@ public class JavaScriptTest {
     @Test
     public void excludeTransientProperties() throws ScriptException {
         scope.put("foo", "bar");
-        assertThat(new JavaScript("zzz = foo").exec(scope)).isEqualTo("bar");
+        assertThat(new JavaScript("test","zzz = foo").exec(scope)).isEqualTo("bar");
         assertThat(scope.containsKey("zzz")).isEqualTo(false);
     }
 
@@ -192,16 +192,16 @@ public class JavaScriptTest {
 
     @Test(expectedExceptions=ScriptException.class)
     public void scriptThrowingException() throws ScriptException {
-        new JavaScript("throw 'NotGonnaDoIt'").exec(scope);
+        new JavaScript("test","throw 'NotGonnaDoIt'").exec(scope);
     }
 
     @Test(expectedExceptions=ScriptException.class)
     public void undefinedReference() throws ScriptException {
-        new JavaScript("x").exec(scope);
+        new JavaScript("test","x").exec(scope);
     }
 
     @Test(expectedExceptions=ScriptException.class)
     public void syntaxError() throws ScriptException {
-        new JavaScript("--").exec(scope);
+        new JavaScript("test","--").exec(scope);
     }
 }

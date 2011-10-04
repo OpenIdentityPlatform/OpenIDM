@@ -38,9 +38,11 @@ public interface ScriptFactory {
      * contains the media type of the script (e.g. {@code "text/javascript"}). Implementations
      * of script factories are free to define any other properties in the configuration node.
      *
+     * @param name unique name of the script. Value MUST be in rfc2396
+     * Uniform Resource Identifiers (URI) compliant format.
      * @param config the configuration node for the script; must be a map.
      * @return a new script instance, or {@code null} if the factory could not create it.
      * @throws JsonNodeException if the configuration object or script is malformed.
      */
-    Script newInstance(JsonNode config) throws JsonNodeException;
+    Script newInstance(String name, JsonNode config) throws JsonNodeException;
 }

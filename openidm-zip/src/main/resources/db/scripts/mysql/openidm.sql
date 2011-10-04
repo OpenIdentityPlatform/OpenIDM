@@ -161,7 +161,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `reconciling` VARCHAR(12) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,
-  `activitydate` VARCHAR(26) NULL ,
+  `activitydate` VARCHAR(29) NULL ,
   `situation` VARCHAR(24) NULL ,
   `activity` VARCHAR(24) NULL ,
   `status` VARCHAR(7) NULL ,
@@ -175,7 +175,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
-  `activitydate` VARCHAR(26) NULL ,
+  `activitydate` VARCHAR(29) NULL ,
   `activity` VARCHAR(24) NULL ,
   `message` TEXT NULL ,
   `subjectid` VARCHAR(511) NULL ,

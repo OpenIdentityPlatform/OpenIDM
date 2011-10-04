@@ -80,9 +80,9 @@ class ManagedObjectProperty {
     public ManagedObjectProperty(ManagedObjectService service, JsonNode config) throws JsonNodeException {
         this.service = service;
         name = config.get("name").required().asString();
-        onRetrieve = Scripts.newInstance(config.get("onRetrieve"));
-        onStore = Scripts.newInstance(config.get("onStore"));
-        onValidate = Scripts.newInstance(config.get("onValidate"));
+        onRetrieve = Scripts.newInstance("ManagedObjectProperty", config.get("onRetrieve"));
+        onStore = Scripts.newInstance("ManagedObjectProperty", config.get("onStore"));
+        onValidate = Scripts.newInstance("ManagedObjectProperty", config.get("onValidate"));
         JsonNode encryptionNode = config.get("encryption");
         if (!encryptionNode.isNull()) {
             try {

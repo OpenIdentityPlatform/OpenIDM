@@ -127,8 +127,9 @@ public class CryptoServiceImpl implements CryptoService {
                     KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
                     InputStream in = openStream(location);
                     if (null != in) {
-                        ks.load(in, password == null ? null : Main.unfold(password));
-                        keySelector = new SimpleKeyStoreSelector(ks, password);
+                        char[] clearPassword = Main.unfold(password);
+                        ks.load(in, password == null ? null : clearPassword);
+                        keySelector = new SimpleKeyStoreSelector(ks, new String(clearPassword));
                         Enumeration<String> aliases = ks.aliases();
                         while (aliases.hasMoreElements()) {
                             LOGGER.info("Available cryptography key: {}", aliases.nextElement());
