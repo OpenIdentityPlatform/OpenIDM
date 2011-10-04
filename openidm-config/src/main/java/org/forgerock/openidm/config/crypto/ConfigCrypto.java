@@ -19,6 +19,7 @@ package org.forgerock.openidm.config.crypto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +50,9 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.metadata.impl.ProviderTracker;
+import org.forgerock.openidm.metadata.impl.ProviderListener;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Bundle;
@@ -66,7 +70,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ConfigCrypto {
-    final static Logger logger = LoggerFactory.getLogger(JSONConfigInstaller.class);
+    final static Logger logger = LoggerFactory.getLogger(ConfigCrypto.class);
 
     static ServiceTracker cryptoTracker;
     static ConfigCrypto instance;
@@ -74,62 +78,31 @@ public class ConfigCrypto {
     BundleContext context;
     ObjectMapper mapper = new ObjectMapper();
     
-    // Map from bundle IDs to MetaDataProvider
-    Map<Long, MetaDataProvider> providers = new HashMap<Long, MetaDataProvider>();
-    
     String alias = "openidm-config-default"; 
     
     JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
     
-    private ConfigCrypto(BundleContext context) {
+    ProviderTracker providerTracker;
+    ProviderListener delayedHandler;
+    
+    private ConfigCrypto(BundleContext context, ProviderListener delayedHandler) {
         this.context = context;
+        this.delayedHandler = delayedHandler;
         alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default");
         logger.info("Using keystore alias {} to handle config encryption", alias);
-        
-        initMetaData(context);
+
+        providerTracker = new ProviderTracker(context, delayedHandler, false);
         
         // TODO: add bundle listeners to track new installs and remove uninstalls
     }
     
-    public synchronized static ConfigCrypto getInstance(BundleContext context) {
+    public synchronized static ConfigCrypto getInstance(BundleContext context, ProviderListener providerListener) {
         if (instance == null) {
-            instance = new ConfigCrypto(context);
+            instance = new ConfigCrypto(context, providerListener);
         }
         return instance;
     }
-    
-    private void initMetaData(BundleContext context) { 
-        Bundle[] bundles = context.getBundles();
-        for (Bundle bundle : bundles) {
-            if (logger.isTraceEnabled()) {
-                logger.trace("Scanning bundle {} for metadata file", bundle.getBundleId());
-            }
-            Enumeration<URL> entries = bundle.findEntries("org/forgerock/metadata", "bundle.json", true);
-            try { 
-                if (entries != null && entries.hasMoreElements()) {
-                    URL entryUrl = entries.nextElement();
-                    logger.trace("Found metadata file, load and parse {}", entryUrl);
-                    InputStream in = entryUrl.openStream();
-                    Map metaConfig = mapper.readValue(in, Map.class);
-                    in.close();
-                    String providerClazzName = (String) metaConfig.get("metaDataProvider");
-                    logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
-                    if (providerClazzName == null) {
-                        logger.trace("No MetaDataProvider class declared in meta data file {} for {}", entryUrl, bundle.getSymbolicName());
-                    } else {
-                        logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
-                        Class providerClazz = bundle.loadClass(providerClazzName);
-                        MetaDataProvider provider = (MetaDataProvider) providerClazz.newInstance();
-                        providers.put(Long.valueOf(bundle.getBundleId()), provider);
-                        logger.debug("Registered MetaDataProvider {} for {}", providerClazzName, bundle.getSymbolicName());
-                    }
-                }
-            } catch (Exception ex) {
-                logger.warn("Failed to obtain meta-data on handling configuration for {}", bundle.getSymbolicName(), ex);
-            }
-        }
-    }
-    
+
     /**
      * Check each provider for meta-data for a given pid until the first match is found
      * Requested each time configuration is changed so that meta data providers can handle additional plug-ins
@@ -138,13 +111,25 @@ public class ConfigCrypto {
      * @param factoryAlias the alias of the factory configuration instance
      * @return the list of properties to encrypt
      */
-    List<String> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonNode parsed) {
-        for (MetaDataProvider provider : providers.values()) {
-            List result = provider.getPropertiesToEncrypt(pidOrFactory, factoryAlias, parsed);
-            if (result != null) {
-                return result;
+    public List<String> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonNode parsed) 
+            throws WaitForMetaData {
+        Collection<MetaDataProvider> providers = providerTracker.getProviders();
+        WaitForMetaData lastWaitException = null;
+        for (MetaDataProvider provider : providers) {
+            try {
+                List result = provider.getPropertiesToEncrypt(pidOrFactory, factoryAlias, parsed);
+                if (result != null) {
+                    return result;
+                }
+            } catch (WaitForMetaData ex) {
+                // Continue to check if another meta data provider can resolve the meta data
+                lastWaitException = ex;
             }
         }
+        if (lastWaitException != null) {
+            throw lastWaitException;
+        }
+        
         return null;
     }
 
@@ -160,13 +145,14 @@ public class ConfigCrypto {
      * @throws InternalErrorException if parsing or encryption failed for technical, possibly transient reasons
      */
     public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary config)
-            throws InvalidException, InternalErrorException {
+            throws InvalidException, InternalErrorException, WaitForMetaData {
 
         JsonNode parsed = parse(config, pidOrFactory);
         return encrypt(pidOrFactory, instanceAlias, config, parsed);
     }
     
-    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonNode newConfig) {
+    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonNode newConfig) 
+            throws WaitForMetaData {
         
         JsonNode parsed = newConfig;
         Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig); // Default to existing
@@ -187,7 +173,6 @@ public class ConfigCrypto {
                     String nodeName = pointer.get(pointer.size() - 1);
                     
                     String cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
-                    //String alias = "openidm-sym-default"; // TODO: separate alias for config?
                     if (logger.isTraceEnabled()) {
                         logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointerStr, cipher, alias});
                     }

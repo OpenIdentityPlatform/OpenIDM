@@ -49,6 +49,8 @@ public interface MetaDataProvider {
      * that need to be encrypted if this MetaDataProvider is responsible for this configuration. 
      * Empty list if none should be encrypted.
      * Null if this provider is not responsible for this configuration.
+     * @throws WaitForMetaData thrown if this provider knows that the given configuration 
+     * has associated meta-data, but the meta-data is not yet available. 
      */
-    List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config);
+    List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) throws WaitForMetaData;
 }

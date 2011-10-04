@@ -56,6 +56,7 @@ import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
+import org.forgerock.openidm.metadata.WaitForMetaData;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -205,6 +206,10 @@ public class ConfigObjectService implements ObjectSet {
             logger.debug("Created new configuration for {} with {}", fullId, dict);
         } catch (ObjectSetException ex) {
             throw ex;
+        } catch (WaitForMetaData ex) {
+            logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", fullId, ex);
+            throw new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for " 
+                    + fullId + ", retry later.", ex);
         } catch (Exception ex) {
             logger.warn("Failure to create configuration for {}", fullId, ex);
             throw new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex);
@@ -374,7 +379,7 @@ public class ConfigObjectService implements ObjectSet {
     protected void activate(ComponentContext context) {
         logger.debug("Activating configuration management service");
         this.context = context;
-        this.configCrypto = ConfigCrypto.getInstance(context.getBundleContext());
+        this.configCrypto = ConfigCrypto.getInstance(context.getBundleContext(), null);
     }
 
     /**
