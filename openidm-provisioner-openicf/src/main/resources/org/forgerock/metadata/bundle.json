@@ -1,0 +1,3 @@
+{
+    "metaDataProvider" : "org.forgerock.openidm.provisioner.openicf.impl.ConnectorInfoProviderService"
+}

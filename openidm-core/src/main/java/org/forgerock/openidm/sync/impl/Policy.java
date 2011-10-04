@@ -71,7 +71,7 @@ class Policy {
             this.script = null;
         } else {
             this.action = null;
-            this.script = Scripts.newInstance(action);
+            this.script = Scripts.newInstance("Policy", action);
         }
     }
 

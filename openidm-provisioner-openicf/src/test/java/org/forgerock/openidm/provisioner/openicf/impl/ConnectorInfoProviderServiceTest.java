@@ -28,6 +28,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
@@ -371,11 +372,15 @@ public class ConnectorInfoProviderServiceTest {
         Assert.assertNotNull(inputStream);
         Map config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
-        List result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
-        assertThat(result).containsExactly("/configurationProperties/password",
+        List<JsonPointer> result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
+        String[] expected = new String[]{"/configurationProperties/password",
                 "/configurationProperties/credentials",
                 "/configurationProperties/privateKey",
-                "/configurationProperties/passphrase");
+                "/configurationProperties/passphrase"};
+        for (JsonPointer pointer : result) {
+            assertThat(expected).contains(pointer.toString());
+        }
+
         inputStream = ConnectorInfoProviderServiceTest.class.getResourceAsStream("/config/org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceXMLConnectorTest.json");
         Assert.assertNotNull(inputStream);
         config = (new ObjectMapper()).readValue(inputStream, Map.class);
@@ -384,8 +389,8 @@ public class ConnectorInfoProviderServiceTest {
         Assert.assertNull(result);
 
         result = testableConnectorInfoProvider.getPropertiesToEncrypt(ConnectorInfoProviderService.PID, null, connectorInfoProviderServiceConfiguration);
-        assertThat(result).hasSize(1).containsExactly("/remoteConnectorServers/0/key");
-
+        assertThat(result).hasSize(1);
+        Assert.assertEquals(result.get(0).toString(), "/remoteConnectorServers/0/key");
     }
 
     /**

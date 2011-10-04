@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.repo.jdbc.impl.JDBCRepoService;
 
@@ -36,29 +37,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Meta data provider to describe configuration 
+ * Meta data provider to describe configuration
  * requirements of this bundle
+ *
  * @author aegloff
  */
 public class ConfigMeta implements MetaDataProvider {
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);
 
-    Map<String, List> propertiesToEncrypt;
-    
+    Map<String, List<JsonPointer>> propertiesToEncrypt;
+
     public ConfigMeta() {
-        propertiesToEncrypt = new HashMap<String, List>();
-        List props = new ArrayList();
-        props.add("password");
+        propertiesToEncrypt = new HashMap<String, List<JsonPointer>>();
+        List<JsonPointer> props = new ArrayList<JsonPointer>();
+        props.add(new JsonPointer("password"));
         propertiesToEncrypt.put(JDBCRepoService.PID, props);
     }
-    
+
     /**
      * @inheritDoc
      */
-    public List getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) {
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) {
         if (propertiesToEncrypt.containsKey(pidOrFactory)) {
             return propertiesToEncrypt.get(pidOrFactory);
         }
         return null;
-    } 
+    }
 }

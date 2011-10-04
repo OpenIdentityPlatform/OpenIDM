@@ -233,9 +233,9 @@ public class ObjectSetRouterService extends ObjectSetRouter {
                 }
                 methods.add(method.asEnum(Method.class));
             }
-            condition = Scripts.newInstance(config.get("condition")); // optional
-            onRequest = Scripts.newInstance(config.get("onRequest")); // optional
-            onResponse = Scripts.newInstance(config.get("onResponse")); // optional
+            condition = Scripts.newInstance("ObjectSetRouterService", config.get("condition")); // optional
+            onRequest = Scripts.newInstance("ObjectSetRouterService", config.get("onRequest")); // optional
+            onResponse = Scripts.newInstance("ObjectSetRouterService", config.get("onResponse")); // optional
         }
 
         /**

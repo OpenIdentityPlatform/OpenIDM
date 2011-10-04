@@ -113,20 +113,20 @@ class ObjectMapping implements SynchronizationListener {
         name = config.get("name").required().asString();
         sourceObjectSet = config.get("source").required().asString();
         targetObjectSet = config.get("target").required().asString();
-        validSource = Scripts.newInstance(config.get("validSource"));
-        validTarget = Scripts.newInstance(config.get("validTarget"));
-        correlationQuery = Scripts.newInstance(config.get("correlationQuery"));
+        validSource = Scripts.newInstance("ObjectMapping", config.get("validSource"));
+        validTarget = Scripts.newInstance("ObjectMapping", config.get("validTarget"));
+        correlationQuery = Scripts.newInstance("ObjectMapping", config.get("correlationQuery"));
         for (JsonNode node : config.get("properties").expect(List.class)) {
             properties.add(new PropertyMapping(service, node));
         }
         for (JsonNode node : config.get("policies").expect(List.class)) {
             policies.add(new Policy(service, node));
         }
-        onCreateScript = Scripts.newInstance(config.get("onCreate"));
-        onUpdateScript = Scripts.newInstance(config.get("onUpdate"));
-        onDeleteScript = Scripts.newInstance(config.get("onDelete"));
-        onLinkScript = Scripts.newInstance(config.get("onLink"));
-        onUnlinkScript = Scripts.newInstance(config.get("onUnlink"));
+        onCreateScript = Scripts.newInstance("ObjectMapping", config.get("onCreate"));
+        onUpdateScript = Scripts.newInstance("ObjectMapping", config.get("onUpdate"));
+        onDeleteScript = Scripts.newInstance("ObjectMapping", config.get("onDelete"));
+        onLinkScript = Scripts.newInstance("ObjectMapping", config.get("onLink"));
+        onUnlinkScript = Scripts.newInstance("ObjectMapping", config.get("onUnlink"));
         LOGGER.debug("Instantiated {}", name);
     }
 
@@ -239,7 +239,6 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
-     * @param objectSet TODO.
      * @param id TODO.
      * @throws NullPointerException if {@code targetId} is {@code null}.
      * @throws SynchronizationException TODO.

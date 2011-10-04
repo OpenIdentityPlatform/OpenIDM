@@ -44,11 +44,11 @@ public class Scripts {
      * @return a new script instance, or {@code null} if {@code config} is {@code null}.
      * @throws JsonNodeException if the script configuration object or source is malformed.
      */
-    public static Script newInstance(JsonNode config) throws JsonNodeException {
+    public static Script newInstance(String name, JsonNode config) throws JsonNodeException {
         if (config == null || config.isNull()) {
             return null;
         }
-        Script script = JS_FACTORY.newInstance(config); // until OSGi support provided
+        Script script = JS_FACTORY.newInstance(name + config.getPointer().toString(), config); // until OSGi support provided
         if (script != null) {
             return script;
         }

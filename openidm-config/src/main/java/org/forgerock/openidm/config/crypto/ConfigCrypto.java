@@ -111,13 +111,13 @@ public class ConfigCrypto {
      * @param factoryAlias the alias of the factory configuration instance
      * @return the list of properties to encrypt
      */
-    public List<String> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonNode parsed) 
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonNode parsed)
             throws WaitForMetaData {
         Collection<MetaDataProvider> providers = providerTracker.getProviders();
         WaitForMetaData lastWaitException = null;
         for (MetaDataProvider provider : providers) {
             try {
-                List result = provider.getPropertiesToEncrypt(pidOrFactory, factoryAlias, parsed);
+                List<JsonPointer> result = provider.getPropertiesToEncrypt(pidOrFactory, factoryAlias, parsed);
                 if (result != null) {
                     return result;
                 }
@@ -157,34 +157,33 @@ public class ConfigCrypto {
         JsonNode parsed = newConfig;
         Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig); // Default to existing
         
-        List<String> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, parsed);
+        List<JsonPointer> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, parsed);
         if (logger.isTraceEnabled()) {
             logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props}); 
         }
         if (props != null) {
             boolean modified = false;
             CryptoService crypto = getCryptoService(context);
-            for (String pointerStr : props) {
-                logger.trace("Handling property to encrypt {}", pointerStr);
+            for (JsonPointer pointer : props) {
+                logger.trace("Handling property to encrypt {}", pointer);
 
-                JsonNode nodeToEncrypt = parsed.get(pointerStr);
-                if (!nodeToEncrypt.isNull() && !crypto.isEncrypted(nodeToEncrypt)) {
-                    JsonPointer pointer = new JsonPointer(pointerStr);
-                    String nodeName = pointer.get(pointer.size() - 1);
-                    
-                    String cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
+                JsonNode nodeToEncrypt = parsed.get(pointer);
+                if (null != nodeToEncrypt && !nodeToEncrypt.isNull() && !crypto.isEncrypted(nodeToEncrypt)) {
+
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointerStr, cipher, alias});
+                        logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointer,
+                                ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias});
                     }
                     
                     // Encrypt and replace node
                     try {
-                        JsonNode encryptedNode = crypto.encrypt(nodeToEncrypt, cipher, alias);                    
-                        parsed.put(nodeName, encryptedNode.asMap());
+                        JsonNode encryptedNode = crypto.encrypt(nodeToEncrypt,
+                                ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias);
+                        parsed.put(pointer,encryptedNode.getValue());
                         modified = true;
                     } catch (JsonCryptoException ex) {
                         throw new InternalErrorException("Failure during encryption of configuration " 
-                                + pidOrFactory + "-" + instanceAlias + " for property " + pointerStr
+                                + pidOrFactory + "-" + instanceAlias + " for property " + pointer.toString()
                                 + " : " + ex.getMessage(), ex);
                     }
                 }

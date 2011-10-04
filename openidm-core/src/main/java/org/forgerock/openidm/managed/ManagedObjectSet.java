@@ -111,11 +111,11 @@ class ManagedObjectSet implements ObjectSet {
         this.service = service;
         name = config.get("name").required().asString();
         schema = config.get("schema").expect(Map.class); // TODO: parse into json-schema object
-        onCreate = Scripts.newInstance(config.get("onCreate"));
-        onRead = Scripts.newInstance(config.get("onRead"));
-        onUpdate = Scripts.newInstance(config.get("onUpdate"));
-        onDelete = Scripts.newInstance(config.get("onDelete"));
-        onValidate = Scripts.newInstance(config.get("onValidate"));
+        onCreate = Scripts.newInstance("ManagedObjectSet", config.get("onCreate"));
+        onRead = Scripts.newInstance("ManagedObjectSet", config.get("onRead"));
+        onUpdate = Scripts.newInstance("ManagedObjectSet", config.get("onUpdate"));
+        onDelete = Scripts.newInstance("ManagedObjectSet", config.get("onDelete"));
+        onValidate = Scripts.newInstance("ManagedObjectSet", config.get("onValidate"));
         for (JsonNode property : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(service, property));
         }
