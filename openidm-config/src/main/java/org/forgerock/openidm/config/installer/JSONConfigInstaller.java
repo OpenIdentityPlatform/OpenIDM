@@ -60,6 +60,8 @@ import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.metadata.impl.ProviderListener;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -91,9 +93,11 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     private BundleContext context;
     private ConfigurationAdmin configAdmin;
     private ConfigCrypto configCrypto;
+    
+    private DelayedConfigHandler delayedConfigHandler = new DelayedConfigHandler();
 
     public void start(BundleContext ctx) {
-        configCrypto = ConfigCrypto.getInstance(ctx);
+        configCrypto = ConfigCrypto.getInstance(ctx, delayedConfigHandler);
         
         this.context = ctx;
         this.configAdmin = lookupConfigAdmin(context);
@@ -330,13 +334,21 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         boolean updated = false;
         try {
             Dictionary ht = loadConfigFile(f);
-    
             String pid[] = parsePid(f.getName());
-            Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
+            updated = setConfig(ht, pid, f);
+        } catch (Exception ex) {
+            logger.warn("Loading configuration file {} failed ", f, ex);
+        }
+        return updated;
+    }
     
-            Dictionary props = config.getProperties();
-            if (!isConfigSame(ht, props))
-            {
+    synchronized boolean setConfig(Dictionary ht, final String[] pid, final File f) throws Exception {
+        boolean updated = false;
+        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1]);
+
+        Dictionary props = config.getProperties();
+        if (!isConfigSame(ht, props)) {
+            try {
                 ht = configCrypto.encrypt(pid[0], pid[1], ht);
                 ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
                 if (pid != null && pid[1] != null) {
@@ -353,15 +365,23 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                             new Object[] {pid[0], pid[1], f.getName()});
                 }
                 config.update(ht);
-                updated = true;
+            } catch (WaitForMetaData ex) {
+                logger.debug("Wait for meta data for config {}-{}", pid[0], pid[1]);
+                DelayedConfig delayed = new DelayedConfig();
+                delayed.pidOrFactory = pid[0];
+                delayed.factoryAlias = pid[1];
+                delayed.file = f;
+                delayed.oldConfig = props;
+                delayed.newConfig = ht;
+                delayed.parsedConfig = configCrypto.parse(ht, pid[0] + "-" + pid[1]);
+                delayed.configInstaller = this;
+                delayed.configCrypto = configCrypto;
+                delayedConfigHandler.addConfig(delayed);
             }
-            else
-            {
-                logger.debug("File contents of configuration for {} from {} has not changed.", pid[1], f);
-                updated = false;
-            }
-        } catch (Exception ex) {
-            logger.warn("Loading configuration file {} failed ", f, ex);
+            updated = true;
+        } else {
+            logger.debug("File contents of configuration for {} from {} has not changed.", pid[1], f);
+            updated = false;
         }
         return updated;
     }
