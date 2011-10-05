@@ -258,13 +258,17 @@
         <sect2>
             <title>Situations</title>
             <para/>
-            <para>The following conditions are supported:</para>
+            <para>The following conditions are supported during the source syncronization:</para>
             <para/>
             <para>"CONFIRMED" (qualifies=1, link=1, target=1)</para>
-            <para>The mapping qualifies for a target object and there is an existing link to a target object. Detected during change events and reconciliation. Default action: "IGNORE".</para>
+            <para>The mapping qualifies for a target object and there is an existing link to a
+                target object. Detected during change events and reconciliation. Default action:
+                "UPDATE".</para>
             <para/>
             <para>"FOUND" (qualifies=1, link=0, target=1)</para>
-            <para>The mapping qualifies for a target object, there is no link to a target object, and there is a single correlated target object to link. Detected during change events and reconciliation. Default action: "LINK".</para>
+            <para>The mapping qualifies for a target object, there is no link to a target object,
+                and there is a single correlated target object to link. Detected during change
+                events and reconciliation. Default action: "UPDATE".</para>
             <para/>
             <para>"ABSENT" (qualifies=1, link=0, target=0)</para>
             <para>The mapping qualifies for a target object, there is no link to a target object, and there is no correlated target object to link. Detected during change events and reconciliation. Default action: "CREATE".</para>
@@ -276,10 +280,25 @@
             <para>The mapping is qualified for a target object and there is a qualified link to a target object, but the target object is missing. Only detected during reconciliation and synchronous operations. Default action: "EXCEPTION".</para>
             <para/>
             <para>"UNQUALIFIED" (qualifies=0, link=1)</para>
-            <para>The mapping is not qualified for a target object and there is a link to an existing target object. Detected during change events and reconciliation. Default action: "DELETE".</para>
+            <para>The mapping is not qualified for a target object and there is a link to an existing target object. Detected during change events and reconciliation. Default action: "DELETE".
+                <warning><para>Target syncronization has the same situation! when (qualifies=0, link=0 or source=0)</para></warning>
+            </para>
             <para/>
-            <para>"UNASSIGNED" (qualifies=0, link=0, target=1)</para>
+            <para>Not in use!!! "UNASSIGNED" (qualifies=0, link=0, target=1)</para>
             <para>There is target object for which there is no link. Only detected during reconciliation. Default action: "EXCEPTION".</para>
+            <para/>
+            <para/>
+            <para>The following conditions are supported during the target syncronization:</para>
+            <para/>
+            <para>In every case the target object must qualify otherwise the object is ignored!</para>
+            <para/>
+            <para>"CONFIRMED" (qualifies=1, link=1, source=1)</para>
+            <para>The mapping qualifies for a target object and there is an existing link to a
+                source object. Detected during only reconciliation. Default action:
+                "UPDATE".</para>
+            <para/>
+            <para>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</para>
+            <para>The mapping is not qualified for a target object and there is a link to an existing target object. Detected during change events and reconciliation. Default action: "DELETE".</para>            
             <para/>
         </sect2>
         <sect2>
@@ -452,4 +471,3 @@
         <para/>
     </sect1>
 </chapter>
-
