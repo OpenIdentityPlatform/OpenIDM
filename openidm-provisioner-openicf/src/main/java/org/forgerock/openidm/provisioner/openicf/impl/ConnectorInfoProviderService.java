@@ -336,12 +336,17 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 } catch (JsonNodeException e) {
                     TRACE.error("Invalid configuration remoteConnectorHosts must be list or null.", e);
                 }
-            } else if (pidOrFactory.startsWith(OpenICFProvisionerService.PID) && isOSGiServiceInstance) {
-                try {
-                    ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(config);
-                    ConnectorInfo ci = findConnectorInfo(connectorReference);
-                    if (null != ci) {
-                        ConfigurationProperties properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
+            } else if (pidOrFactory.equals(OpenICFProvisionerService.PID)) {
+                if (isOSGiServiceInstance) {
+                    ConfigurationProperties properties = null;
+                    try {
+                        ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(config);
+                        ConnectorInfo ci = findConnectorInfo(connectorReference);
+                        properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
+                    } catch (Exception e) {
+                        TRACE.error("Failed to parse the config of {}", pidOrFactory, e);
+                    }
+                    if (null != properties) {
                         JsonPointer configurationProperties = new JsonPointer(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES);
                         for (String name : properties.getPropertyNames()) {
                             ConfigurationProperty property = properties.getProperty(name);
@@ -353,10 +358,10 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                             }
                         }
                     } else {
-                        throw new WaitForMetaData(connectorReference.toString());
+                        throw new WaitForMetaData(pidOrFactory);
                     }
-                } catch (Exception e) {
-                    TRACE.error("Failed to parse the config of {}", pidOrFactory, e);
+                } else {
+                    throw new WaitForMetaData("Wait for the MetaDataProvider service instance");
                 }
             }
         }
