@@ -32,9 +32,9 @@ rem ECHO run.bat
 rem ECHO example "%~dp0run.bat"
 GOTO END
 :RUN
-java -Xmx1024m -jar bin/felix.jar
+java -Xmx1024m -Dfile.encoding=UTF-8 -jar bin/felix.jar
 GOTO END
 :DEBUG
-java -Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Xmx1024m -jar bin/felix.jar
+java -Dfile.encoding=UTF-8 -Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Xmx1024m -jar bin/felix.jar
 :END
 ENDLOCAL
