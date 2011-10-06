@@ -60,7 +60,8 @@ public class Activator implements BundleActivator {
         Hashtable<String, String> persistenceProp = new Hashtable<String, String>();
         persistenceProp.put("service.cmRanking", "0");
         RepoPersistenceManager persistenceMgr = new RepoPersistenceManager(context);
-        context.registerService(PersistenceManager.class.getName(), persistenceMgr, persistenceProp);
+        context.registerService(new String[] {PersistenceManager.class.getName(), ConfigPersisterMarker.class.getName()},
+                persistenceMgr, persistenceProp);
         logger.debug("Repository persistence manager service registered");
 
         // Register the optional "file view" handling of configuration
