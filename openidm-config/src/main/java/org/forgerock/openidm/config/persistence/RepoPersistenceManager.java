@@ -54,7 +54,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RepoPersistenceManager implements PersistenceManager {
+public class RepoPersistenceManager implements PersistenceManager, ConfigPersisterMarker {
 
     // The ID URI prefix for configuration
     private static final String CONFIG_CONTEXT_PREFIX = "config/";
@@ -77,67 +77,40 @@ public class RepoPersistenceManager implements PersistenceManager {
     public RepoPersistenceManager(final BundleContext ctx) {
         this.ctx = ctx;
         logger.debug("Bootstrapping Repository Persistence Manager");
-        bootstrapRepo(); // This happens asynchronously, i.e. repo may not be initialized when this returns
     }
     
-    void bootstrapRepo() {
-        try {
-            
-            Filter filter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + RepoBootService.class.getName() + ")");
-            final ServiceTracker repoTracker = new ServiceTracker(ctx, filter, null);
-            repoTracker.open();
-            
-            new Thread() {
-                public void run() {
-                    try {
-                        //Rapid development may require only memory store.
-                        boolean requireRepo = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
-                        while (requireRepo && (repo == null)) {
-
-                            logger.debug("Bootstrapping repository");
-                            repo = (RepoBootService) repoTracker.waitForService(5000);
-                            if (repo != null) {
-                                logger.debug("Bootstrap obtained repository");
-                            }
-                        }
-
-                        ConfigurationAdmin configAdmin = null;
-                        while (configAdmin == null) {
-                            logger.trace("Wait for Configuration Admin service ready");
-                            Filter admFilter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + ConfigurationAdmin.class.getName() + ")");
-                            final ServiceTracker adminTracker = new ServiceTracker(ctx, admFilter, null);
-                            adminTracker.open();
-                            configAdmin = (ConfigurationAdmin) adminTracker.waitForService(5000);
-                        }
-                        
-                        CryptoService crypto = null;
-                        while (configAdmin == null) {
-                            logger.trace("Wait for Cryptography service ready");
-                            Filter cryptoFilter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + CryptoService.class.getName() + ")");
-                            final ServiceTracker cryptoTracker = new ServiceTracker(ctx, cryptoFilter, null);
-                            cryptoTracker.open();
-                            crypto = (CryptoService) cryptoTracker.waitForService(5000);
-                        }
-                        
-                        logger.debug("Proceed to handling configuration files");
-                        // Proceed to configuration file handling once repo bootstrapped 
-                        // and configuration admin as well as crypto service is available
-
-                        // This code is never reached if the JDBC Repo configured in a JSON file. The JSONConfigInstaller
-                        // is never started. It does not init the JDBC Repo. Catch-22
-                        // If you use JDBC Repo you must bootstrap it via System properties first.
-                        ConfigBootstrapHelper.installAllConfig(configAdmin);
-                        logger.debug("Enabled handling of configuration files");
-                    } catch (InterruptedException ex) {
-                        logger.warn("Failed to bootstrap " + ex.getMessage(), ex);
-                    } catch (Exception ex) {
-                        logger.warn("Failed to bootstrap " + ex.getMessage(), ex);
+    /**
+     * Handle the system notifying that it's ready to install configs.
+     */
+    public void checkReady() throws BootstrapFailure {
+        //Rapid development may require only memory store.
+        boolean requireRepo = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
+        if (requireRepo) {
+            ServiceTracker repoTracker = null;
+            try {
+                Filter filter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + RepoBootService.class.getName() + ")");
+                repoTracker = new ServiceTracker(ctx, filter, null);
+                repoTracker.open();
+                if (repo == null) {
+                    logger.debug("Bootstrapping repository");
+                    repo = (RepoBootService) repoTracker.waitForService(5000);
+                    if (repo != null) {
+                        logger.debug("Bootstrap obtained repository");
                     }
                 }
-            }.start();
-        } catch (InvalidSyntaxException ex) {
-            logger.warn("Failed to bootstrap repo " + ex.getMessage(), ex);
-        }        
+            } catch (InterruptedException ex) {
+                logger.warn("Failed to bootstrap repo " + ex.getMessage(), ex);
+            } catch (InvalidSyntaxException ex) {
+                logger.warn("Failed to bootstrap repo " + ex.getMessage(), ex);
+            } finally {
+                if (repoTracker != null) {
+                    repoTracker.close();
+                }
+            }                
+            if (repo == null) {
+                throw new BootstrapFailure("Failed to acquire the bootstrap repository service to access configuration persistence.");
+            }
+        }
     }
 
     /**
@@ -342,6 +315,7 @@ public class RepoPersistenceManager implements PersistenceManager {
                     }
                 } else {
                     logger.trace("Creating: {} {} ", id, obj);
+                    // This may create a new (empty) configuration, which felix marks with _felix___cm__newConfiguration=true
                     repo.create(id, obj);
                     logger.debug("Stored new config in repository {} {}", pid, obj);
                 }

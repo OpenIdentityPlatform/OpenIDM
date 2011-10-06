@@ -117,7 +117,7 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Export-Package> org.forgerock.openidm.config.persistence;version=${openidm.version}
+                        <Export-Package>!org.forgerock.openidm.config, org.forgerock.openidm.config.persistence;version=${openidm.version}
                         </Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.config.persistence.Activator</Bundle-Activator>
                     </instructions>
