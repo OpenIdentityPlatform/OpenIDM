@@ -224,25 +224,6 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
-<<<<<<< HEAD
-     * @param node TODO.
-     * @return TODO.
-     * @throws SynchronizationException TODO.
-     */ 
-    private JsonNode decrypt(JsonNode node) throws SynchronizationException {
-        try {
-            return service.getCryptoService().decrypt(node); // makes a copy
-        } catch (JsonException je) {
-            throw new SynchronizationException(je);
-        }
-    }
-
-    /**
-     * TODO: Description.
-     *
-=======
-     * @param objectSet TODO.
->>>>>>> New encrypt/decrypt functions in openidm script object.
      * @param id TODO.
      * @throws NullPointerException if {@code targetId} is {@code null}.
      * @throws SynchronizationException TODO.
