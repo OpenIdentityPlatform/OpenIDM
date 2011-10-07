@@ -574,23 +574,24 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             JsonNode genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = config.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
-            tableHandlers = new HashMap<String, TableHandler>();
-            JsonNode defaultMapping = config.get("resourceMapping").get("default");
-            String defaultMainTable = defaultMapping.get("mainTable").defaultTo("genericobjects").asString();
-            String defaultPropTable = defaultMapping.get("propertiesTable").defaultTo("genericobjectproperties").asString();
-
+            tableHandlers = new HashMap<String, TableHandler>();           
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(config.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
-            defaultTableHandler = getGenericTableHandler(databaseType, defaultMainTable, defaultPropTable, dbSchemaName, genericQueries, maxBatchSize);
-
-            logger.debug("Using default table handler: {}", defaultTableHandler);
+            JsonNode defaultMapping = config.get("resourceMapping").get("default");
+            if (!defaultMapping.isNull()) {
+                defaultTableHandler = getGenericTableHandler(databaseType, defaultMapping, dbSchemaName, genericQueries, maxBatchSize);
+                logger.debug("Using default table handler: {}", defaultTableHandler);
+            }
 
             // Default the configuration table for bootstrap
+            JsonNode defaultTableProps = new JsonNode(new HashMap());
+            defaultTableProps.put("mainTable", "configobjects");
+            defaultTableProps.put("propertiesTable", "configobjectproperties");
+            defaultTableProps.put("searchableDefault", Boolean.FALSE);
             GenericTableHandler defaultConfigHandler = getGenericTableHandler(
                     databaseType,
-                    "configobjects",
-                    "configobjectproperties",
+                    defaultTableProps,
                     dbSchemaName,
                     genericQueries,
                     1);
@@ -606,8 +607,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     }
                     TableHandler handler = getGenericTableHandler(
                             databaseType,
-                            value.get("mainTable").required().asString(),
-                            value.get("propertiesTable").required().asString(),
+                            value,
                             dbSchemaName,
                             genericQueries,
                             maxBatchSize);
@@ -653,8 +653,8 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         }
     }
 
-    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, String mainTable, String propertiesTable,
-                                               String dbSchemaName, JsonNode queries, int maxBatchSize) {
+    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, 
+            JsonNode tableConfig, String dbSchemaName, JsonNode queries, int maxBatchSize) {
 
         GenericTableHandler handler = null;
 
@@ -662,16 +662,14 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         switch (databaseType) {
             case DB2:
                 handler = new DB2TableHandler(
-                        mainTable,
-                        propertiesTable,
+                        tableConfig,
                         dbSchemaName,
                         queries,
                         maxBatchSize);
                 break;
             default:
                 handler = new GenericTableHandler(
-                        mainTable,
-                        propertiesTable,
+                        tableConfig,
                         dbSchemaName,
                         queries,
                         maxBatchSize);

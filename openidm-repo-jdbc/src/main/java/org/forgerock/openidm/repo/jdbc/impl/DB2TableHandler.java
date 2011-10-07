@@ -33,8 +33,8 @@ import java.util.Map;
  */
 public class DB2TableHandler extends GenericTableHandler {
 
-    public DB2TableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
-        super(mainTableName, propTableName, dbSchemaName, queriesConfig, maxBatchSize);
+    public DB2TableHandler(JsonNode tableConfig, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
+        super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize);
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
