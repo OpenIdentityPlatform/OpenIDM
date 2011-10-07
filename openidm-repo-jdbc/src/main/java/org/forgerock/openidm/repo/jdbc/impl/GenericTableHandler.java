@@ -112,28 +112,33 @@ public class GenericTableHandler implements TableHandler {
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = new EnumMap<QueryDefinition, String>(QueryDefinition.class);
 
+        String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
+        String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
+        String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
+
         // objecttypes table
         result.put(QueryDefinition.CREATETYPEQUERYSTR, "INSERT INTO " + dbSchemaName + ".objecttypes (objecttype) VALUES (?)");
         result.put(QueryDefinition.READTYPEQUERYSTR, "SELECT id FROM " + dbSchemaName + ".objecttypes objtype WHERE objtype.objecttype = ?");
 
         // Main object table
-        result.put(QueryDefinition.READFORUPDATEQUERYSTR, "SELECT obj.* FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid  = ? FOR UPDATE");
-        result.put(QueryDefinition.READQUERYSTR, "SELECT obj.rev, obj.fullobject FROM " + dbSchemaName + ".objecttypes objtype, " + dbSchemaName + "." + mainTableName + " obj WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?");
-        result.put(QueryDefinition.CREATEQUERYSTR, "INSERT INTO " + dbSchemaName + "." + mainTableName + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?)");
-        result.put(QueryDefinition.UPDATEQUERYSTR, "UPDATE " + dbSchemaName + "." + mainTableName + " obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?");
-        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE obj FROM " + dbSchemaName + "." + mainTableName + " obj INNER JOIN " + dbSchemaName + ".objecttypes objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?");
+        result.put(QueryDefinition.READFORUPDATEQUERYSTR, "SELECT obj.* FROM " + mainTable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid  = ? FOR UPDATE");
+        result.put(QueryDefinition.READQUERYSTR, "SELECT obj.rev, obj.fullobject FROM " + typeTable + " objtype, " + mainTable + " obj WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?");
+        result.put(QueryDefinition.CREATEQUERYSTR, "INSERT INTO " + mainTable + " (objecttypes_id, objectid, rev, fullobject) VALUES (?,?,?,?)");
+        result.put(QueryDefinition.UPDATEQUERYSTR, "UPDATE " + mainTable + " obj SET obj.objectid = ?, obj.rev = ?, obj.fullobject = ? WHERE obj.id = ?");
+        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE obj FROM " + mainTable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ? AND obj.rev = ?");
 
         /* DB2 Script
         deleteQueryStr = "DELETE FROM " + dbSchemaName + "." + mainTableName + " obj WHERE EXISTS (SELECT 1 FROM " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?";
         */
 
         // Object properties table
-        result.put(QueryDefinition.PROPCREATEQUERYSTR, "INSERT INTO " + dbSchemaName + "." + propTableName + " ( " + mainTableName + "_id, propkey, proptype, propvalue) VALUES (?,?,?,?)");
-        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + propTableName + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + dbSchemaName + "." + mainTableName + " obj, " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
+        result.put(QueryDefinition.PROPCREATEQUERYSTR, "INSERT INTO " + propertyTable + " ( " + mainTableName + "_id, propkey, proptype, propvalue) VALUES (?,?,?,?)");
+        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + mainTable + " obj, " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
 
         // Default object queries
-        result.put(QueryDefinition.QUERYALLIDS, "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}");
-        
+        String tableVariable =  dbSchemaName == null ? "${_mainTable}" : "${_dbSchema}.${_mainTable}";
+        result.put(QueryDefinition.QUERYALLIDS, "SELECT obj.objectid FROM " + tableVariable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}");
+
         return result;
     }
 

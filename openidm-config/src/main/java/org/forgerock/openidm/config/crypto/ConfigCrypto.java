@@ -161,7 +161,7 @@ public class ConfigCrypto {
         if (logger.isTraceEnabled()) {
             logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props}); 
         }
-        if (props != null) {
+        if (props != null && !props.isEmpty()) {
             boolean modified = false;
             CryptoService crypto = getCryptoService(context);
             for (JsonPointer pointer : props) {

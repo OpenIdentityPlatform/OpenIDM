@@ -321,7 +321,19 @@ public class ConnectorInfoProviderServiceTest {
         APIConfiguration configuration = connectorInfo.createDefaultAPIConfiguration();
 
         Map<String, Object> configMap = new HashMap<String, Object>();
-        configMap.put("table", "users");
+        configMap.put("user", "root");
+        configMap.put("host", "localhost");
+        configMap.put("password", "");
+        configMap.put("port", "3306");
+        configMap.put("jdbcDriver", "com.mysql.jdbc.Driver");
+        configMap.put("jdbcUrlTemplate", "jdbc:mysql://%h:%p/%d");
+
+        configMap.put("database", "contractordb");
+        configMap.put("table", "people");
+
+        configMap.put("keyColumn", "UNIQUE_ID");
+        configMap.put("nativeTimestamps", true);
+        configMap.put("changeLogColumn", "CHANGE_TIMESTEMP");
 
 
         ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
@@ -386,7 +398,7 @@ public class ConnectorInfoProviderServiceTest {
         config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
         result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
-        Assert.assertNull(result);
+        assertThat(result).hasSize(0);
 
         result = testableConnectorInfoProvider.getPropertiesToEncrypt(ConnectorInfoProviderService.PID, null, connectorInfoProviderServiceConfiguration);
         assertThat(result).hasSize(1);
