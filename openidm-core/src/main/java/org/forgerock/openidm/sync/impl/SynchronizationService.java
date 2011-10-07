@@ -54,7 +54,6 @@ import org.forgerock.json.fluent.JsonPointer;
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.context.InvokeContext;
-import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.NotFoundException;
@@ -63,9 +62,9 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
-import org.forgerock.openidm.scope.ObjectSetFunctions;
 
 /**
  * TODO: Description.
@@ -115,21 +114,21 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         this.router = null;
     }
 
-    /** Cryptographic service. */
+    /** Scope factory service. */
     @Reference(
-        name="ref_SynchronizationService_CryptoService",
-        referenceInterface=CryptoService.class,
-        bind="bindCryptoService",
-        unbind="unbindCryptoService",
+        name = "ref_SynchronizationService_ScopeFactory",
+        referenceInterface = ScopeFactory.class,
+        bind = "bindScopeFactory",
+        unbind = "unbindScopeFactory",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
         policy = ReferencePolicy.STATIC
     )
-    protected CryptoService cryptoService;
-    protected void bindCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
+    private ScopeFactory scopeFactory;
+    protected void bindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = scopeFactory;
     }
-    protected void unbindCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
+    protected void unbindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = null;
     }
 
     @Activate
@@ -184,10 +183,9 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
      * TODO: Description.
      *
      * @return TODO.
-     * @throws SynchronizationException TODO.
      */
-    Map<String, Object> newScope()  throws SynchronizationException {
-        return ObjectSetFunctions.addToScope(new HashMap<String, Object>(), getRouter());
+    Map<String, Object> newScope() {
+        return scopeFactory.newInstance();
     }
 
     @Override
@@ -316,12 +314,5 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
             throw new ConflictException(se);
         }
         return result;
-    }
-
-    /**
-     * TODO: Description.
-     */
-    CryptoService getCryptoService() {
-        return cryptoService;
     }
 }

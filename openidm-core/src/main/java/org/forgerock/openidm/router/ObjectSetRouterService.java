@@ -57,7 +57,7 @@ import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetRouter;
-import org.forgerock.openidm.scope.ObjectSetFunctions;
+import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
@@ -116,6 +116,25 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         if (prefix != null && prefix instanceof String) { // service is specified as internally routable
             routes.remove((String)prefix);
         }
+    }
+
+    /** Scope factory service. */
+    @Reference(
+        name = "ref_ObjectSetRouterService_ScopeFactory",
+        referenceInterface = ScopeFactory.class,
+        bind = "bindScopeFactory",
+        unbind = "unbindScopeFactory",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC
+    )
+    private ScopeFactory scopeFactory;
+    protected void bindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = scopeFactory;
+        this.scopeFactory.setRouter(this);
+    }
+    protected void unbindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory.setRouter(null);
+        this.scopeFactory = null;
     }
 
     @Activate
@@ -250,7 +269,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          */
         private Map<String, Object> newScope(Method method, String id,
         Map<String, Object> object, Map<String, Object> params, Map<String, Object> result) {
-            Map<String, Object> scope = ObjectSetFunctions.addToScope(new HashMap<String, Object>(), ObjectSetRouterService.this);
+            Map<String, Object> scope = scopeFactory.newInstance();
             scope.put("method", method.toString().toLowerCase());
             scope.put("id", id);
             scope.put("object", object);
