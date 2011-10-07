@@ -25,6 +25,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -41,8 +42,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +58,8 @@ import java.util.Map;
 public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
 
+    GenericTableConfig cfg;
+    
     final String mainTableName;
     String propTableName;
     final String dbSchemaName;
@@ -80,9 +85,11 @@ public class GenericTableHandler implements TableHandler {
         QUERYALLIDS
     }
 
-    public GenericTableHandler(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
-        this.mainTableName = mainTableName;
-        this.propTableName = propTableName;
+    public GenericTableHandler(JsonNode tableConfig, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
+        cfg = GenericTableConfig.parse(tableConfig);
+        
+        this.mainTableName = cfg.mainTableName;
+        this.propTableName = cfg.propertiesTableName;
         this.dbSchemaName = dbSchemaName;
         if (maxBatchSize < 1) {
             this.maxBatchSize = 1;
@@ -107,7 +114,6 @@ public class GenericTableHandler implements TableHandler {
             logger.info("JDBC statement batching disabled.");
         }
     }
-
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = new EnumMap<QueryDefinition, String>(QueryDefinition.class);
@@ -224,17 +230,18 @@ public class GenericTableHandler implements TableHandler {
      * @throws SQLException if the insert failed
      */
     void writeNodeProperties(String fullId, long dbId, String localId, JsonNode node, Connection connection) throws SQLException {
-        Integer batchingCount = 0;
-        
-        PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
-        batchingCount = writeNodeProperties(fullId, dbId, localId, node, connection, propCreateStatement, batchingCount);
-        if (enableBatching && batchingCount > 0) {
-            int[] numUpdates = propCreateStatement.executeBatch(); 
-            logger.debug("Batch update of objectproperties updated: {}", numUpdates);
-            if (logger.isDebugEnabled()) {
-                logger.debug("Writing batch of objectproperties, updated: {}", Arrays.asList(numUpdates));
+        if (cfg.searchableDefault) {
+            Integer batchingCount = 0;
+            PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
+            batchingCount = writeNodeProperties(fullId, dbId, localId, node, connection, propCreateStatement, batchingCount);
+            if (enableBatching && batchingCount > 0) {
+                int[] numUpdates = propCreateStatement.executeBatch(); 
+                logger.debug("Batch update of objectproperties updated: {}", numUpdates);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Writing batch of objectproperties, updated: {}", Arrays.asList(numUpdates));
+                }
+                propCreateStatement.clearBatch();
             }
-            propCreateStatement.clearBatch();
         }
     }
     /**
@@ -259,45 +266,48 @@ public class GenericTableHandler implements TableHandler {
             PreparedStatement propCreateStatement, int batchingCount) throws SQLException {
         
         for (JsonNode entry : node) {
-            String propkey = entry.getPointer().toString();
-            if (entry.isMap() || entry.isList()) {
-                batchingCount = writeNodeProperties(fullId, dbId, localId, entry, connection, propCreateStatement, batchingCount);
-            } else {
-                String propvalue = null;
-                Object val = entry.getValue();
-                if (val != null) {
-                    propvalue = val.toString(); // TODO: proper type conversions?
-                }
-                String proptype = null;
-                if (propvalue != null) {
-                    proptype = entry.getValue().getClass().getName(); // TODO: proper type info
-                }
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
-                            new Object[]{propCreateStatement, dbId, localId, propkey, proptype, propvalue});
-                }
-                propCreateStatement.setLong(1, dbId);
-                propCreateStatement.setString(2, propkey);
-                propCreateStatement.setString(3, proptype);
-                propCreateStatement.setString(4, propvalue);
-                logger.debug("Executing: {}", propCreateStatement);
-                if (enableBatching) {
-                    propCreateStatement.addBatch();
-                    batchingCount++;
+            JsonPointer propPointer = entry.getPointer();
+            if (cfg.isSearchable(propPointer)) {
+                String propkey = propPointer.toString();
+                if (entry.isMap() || entry.isList()) {
+                    batchingCount = writeNodeProperties(fullId, dbId, localId, entry, connection, propCreateStatement, batchingCount);
                 } else {
-                    int numUpdate = propCreateStatement.executeUpdate();
+                    String propvalue = null;
+                    Object val = entry.getValue();
+                    if (val != null) {
+                        propvalue = val.toString(); // TODO: proper type conversions?
+                    }
+                    String proptype = null;
+                    if (propvalue != null) {
+                        proptype = entry.getValue().getClass().getName(); // TODO: proper type info
+                    }
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
+                                new Object[]{propCreateStatement, dbId, localId, propkey, proptype, propvalue});
+                    }
+                    propCreateStatement.setLong(1, dbId);
+                    propCreateStatement.setString(2, propkey);
+                    propCreateStatement.setString(3, proptype);
+                    propCreateStatement.setString(4, propvalue);
+                    logger.debug("Executing: {}", propCreateStatement);
+                    if (enableBatching) {
+                        propCreateStatement.addBatch();
+                        batchingCount++;
+                    } else {
+                        int numUpdate = propCreateStatement.executeUpdate();
+                    }
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Inserting objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[]{fullId, propkey, proptype, propvalue});
+                    }
                 }
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Inserting objectproperty id: {} propkey: {} proptype: {}, propvalue: {}", new Object[]{fullId, propkey, proptype, propvalue});
+                if (enableBatching && batchingCount >= maxBatchSize) {
+                    int[] numUpdates = propCreateStatement.executeBatch();
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Batch limit reached, update of objectproperties updated: {}", Arrays.asList(numUpdates));
+                    }
+                    propCreateStatement.clearBatch();
+                    batchingCount = 0;
                 }
-            }
-            if (enableBatching && batchingCount >= maxBatchSize) {
-                int[] numUpdates = propCreateStatement.executeBatch();
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Batch limit reached, update of objectproperties updated: {}", Arrays.asList(numUpdates));
-                }
-                propCreateStatement.clearBatch();
-                batchingCount = 0;
             }
         }
 
@@ -516,5 +526,51 @@ public class GenericTableHandler implements TableHandler {
 
     protected PreparedStatement getPreparedStatement(Connection connection, QueryDefinition queryDefinition) throws SQLException {
         return queries.getPreparedStatement(connection, queryMap.get(queryDefinition));
+    }
+}
+
+class GenericTableConfig {
+    public String mainTableName;
+    public String propertiesTableName;
+    public boolean searchableDefault;
+    public GenericPropertiesConfig properties;
+    
+    public boolean isSearchable(JsonPointer propPointer) {
+        Boolean explicit = properties.explicitlySearchable.get(propPointer);
+        if (explicit != null) {
+            return explicit.booleanValue();
+        } else {
+            return searchableDefault;
+        }
+    }
+    
+    public static GenericTableConfig parse(JsonNode tableConfig) {
+        GenericTableConfig cfg = new GenericTableConfig();
+        tableConfig.required();
+        cfg.mainTableName = tableConfig.get("mainTable").required().asString();
+        cfg.propertiesTableName = tableConfig.get("propertiesTable").required().asString();
+        cfg.searchableDefault = tableConfig.get("searchableDefault").defaultTo(Boolean.TRUE).asBoolean().booleanValue();
+        cfg.properties = GenericPropertiesConfig.parse(tableConfig.get("properties"));
+        
+        return cfg;
+    }
+}
+
+class GenericPropertiesConfig {
+    public Map<JsonPointer, Boolean> explicitlySearchable = new HashMap<JsonPointer, Boolean>();
+    public String mainTableName;
+    public String propertiesTableName;
+    public boolean searchableDefault;
+    public GenericPropertiesConfig properties;
+    
+    public static GenericPropertiesConfig parse(JsonNode propsConfig) {
+        GenericPropertiesConfig cfg = new GenericPropertiesConfig();
+        if (!propsConfig.isNull()) {
+            for (String propName : propsConfig.keys()) {
+                JsonNode detail = propsConfig.get(propName);
+                cfg.explicitlySearchable.put(new JsonPointer(propName), detail.get("searchable").asBoolean());
+            }
+        }
+        return cfg;
     }
 }
