@@ -50,8 +50,8 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetRouter;
+import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.sync.SynchronizationListener;
-import org.forgerock.openidm.scope.ObjectSetFunctions;
 
 /**
  * Provides access to managed objects.
@@ -124,6 +124,23 @@ public class ManagedObjectService extends ObjectSetRouter {
         this.cryptoService = null;
     }
 
+    /** Scope factory service. */
+    @Reference(
+        name = "ref_ManagedObjectService_ScopeFactory",
+        referenceInterface = ScopeFactory.class,
+        bind = "bindScopeFactory",
+        unbind = "unbindScopeFactory",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC
+    )
+    private ScopeFactory scopeFactory;
+    protected void bindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = scopeFactory;
+    }
+    protected void unbindScopeFactory(ScopeFactory scopeFactory) {
+        this.scopeFactory = null;
+    }
+
     /** TODO: Description. */
     private ComponentContext context;
 
@@ -177,10 +194,9 @@ public class ManagedObjectService extends ObjectSetRouter {
      * TODO: Description.
      *
      * @return TODO.
-     * @throws InternalServerErrorException TODO.
      */
-    Map<String, Object> newScope() throws InternalServerErrorException {
-        return ObjectSetFunctions.addToScope(new HashMap<String, Object>(), getRouter());
+    Map<String, Object> newScope() {
+        return scopeFactory.newInstance();
     }
 
     /**

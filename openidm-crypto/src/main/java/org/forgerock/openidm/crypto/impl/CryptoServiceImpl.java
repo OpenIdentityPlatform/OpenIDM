@@ -14,6 +14,8 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
+// TODO: Expose as a set of ROA actions.
+
 package org.forgerock.openidm.crypto.impl;
 
 // Java Standard Edition
@@ -61,7 +63,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * Cryptography Service

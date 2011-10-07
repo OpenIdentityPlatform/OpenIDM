@@ -224,6 +224,7 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
+<<<<<<< HEAD
      * @param node TODO.
      * @return TODO.
      * @throws SynchronizationException TODO.
@@ -239,6 +240,9 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * TODO: Description.
      *
+=======
+     * @param objectSet TODO.
+>>>>>>> New encrypt/decrypt functions in openidm script object.
      * @param id TODO.
      * @throws NullPointerException if {@code targetId} is {@code null}.
      * @throws SynchronizationException TODO.
@@ -249,7 +253,7 @@ class ObjectMapping implements SynchronizationListener {
             throw new NullPointerException();
         }
         try {
-            return decrypt(new JsonNode(service.getRouter().read(id)));
+            return new JsonNode(service.getRouter().read(id));
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
@@ -369,18 +373,16 @@ class ObjectMapping implements SynchronizationListener {
             if (value == null || value.getValue() == null) { // notification without the actual value
                 value = readObject(id);
             }
-            doSourceSync(id, decrypt(value)); // synchronous for now
+            doSourceSync(id, value); // synchronous for now
         }
     }
 
     @Override
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
         if (isSourceObject(id)) {
-            oldValue = decrypt(oldValue);
             if (newValue == null || newValue.getValue() == null) { // notification without the actual value
                 newValue = readObject(id);
             }
-            newValue = decrypt(newValue);
     // TODO: use old value to project incremental diff without fetch of source
             if (oldValue == null || oldValue.getValue() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
                 doSourceSync(id, newValue); // synchronous for now
@@ -554,6 +556,7 @@ class ObjectMapping implements SynchronizationListener {
          *
          * @throws SynchronizationException TODO.
          */
+        @SuppressWarnings("fallthrough")
         protected void performAction() throws SynchronizationException {
             Action action = (this.action == null ? Action.IGNORE : this.action);
             try {
@@ -781,6 +784,7 @@ class ObjectMapping implements SynchronizationListener {
          * @return TODO.
          * @throws SynchronizationException TODO.
          */
+        @SuppressWarnings("unchecked")
         private JsonNode correlateTarget() throws SynchronizationException {
             JsonNode result = null;
             if (correlationQuery != null) {
