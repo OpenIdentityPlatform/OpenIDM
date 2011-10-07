@@ -336,7 +336,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 } catch (JsonNodeException e) {
                     TRACE.error("Invalid configuration remoteConnectorHosts must be list or null.", e);
                 }
-            } else if (pidOrFactory.equals(OpenICFProvisionerService.PID)) {
+            } else if (OpenICFProvisionerService.PID.equals(pidOrFactory)) {
                 if (isOSGiServiceInstance) {
                     ConfigurationProperties properties = null;
                     try {
@@ -344,16 +344,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         ConnectorInfo ci = findConnectorInfo(connectorReference);
                         properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
                     } catch (Exception e) {
-                        TRACE.error("Failed to parse the config of {}", pidOrFactory, e);
+                        TRACE.error("Failed to parse the config of {}-{}", new Object[]{pidOrFactory, instanceAlias}, e);
                     }
                     if (null != properties) {
                         JsonPointer configurationProperties = new JsonPointer(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES);
+                        result = new ArrayList<JsonPointer>(properties.getPropertyNames().size());
                         for (String name : properties.getPropertyNames()) {
                             ConfigurationProperty property = properties.getProperty(name);
                             if (property.isConfidential()) {
-                                if (null == result) {
-                                    result = new ArrayList<JsonPointer>(properties.getPropertyNames().size());
-                                }
                                 result.add(configurationProperties.child(name));
                             }
                         }

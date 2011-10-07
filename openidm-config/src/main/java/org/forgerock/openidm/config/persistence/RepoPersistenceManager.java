@@ -88,10 +88,10 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         if (requireRepo) {
             ServiceTracker repoTracker = null;
             try {
-                Filter filter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + RepoBootService.class.getName() + ")");
-                repoTracker = new ServiceTracker(ctx, filter, null);
-                repoTracker.open();
                 if (repo == null) {
+                    Filter filter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + RepoBootService.class.getName() + ")");
+                    repoTracker = new ServiceTracker(ctx, filter, null);
+                    repoTracker.open();
                     logger.debug("Bootstrapping repository");
                     repo = (RepoBootService) repoTracker.waitForService(5000);
                     if (repo != null) {
@@ -113,6 +113,16 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         }
     }
 
+    private boolean isReady(int retries) {
+        boolean ready = true;
+        try {
+            checkReady();
+        } catch (BootstrapFailure e) {
+            ready = retries > 0 ? isReady(--retries) : false;
+        }
+        return ready;
+    }
+
     /**
      * Returns <code>true</code> if a persisted <code>Dictionary</code> exists
      * for the given <code>pid</code>. 
@@ -124,7 +134,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         
         boolean exists = false;
 
-        if (repo != null) {
+        if (isReady(0)) {
             String id = pidToId(pid);
             try {
                 Map existing = repo.read(id);
@@ -167,7 +177,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         Dictionary result = null;
         
         try {
-            if (repo != null) {
+            if (isReady(0)) {
                 String id = pidToId(pid);
                 Map existing = repo.read(id);
                 logger.debug("Config loaded {} {}", pid, existing);
@@ -199,10 +209,10 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * @throws IOException If an error occurrs getting the dictionaries.
      */
     public Enumeration getDictionaries() throws IOException {
-        if (repo == null) {
-            logger.debug("Config getDictionaries call from temporary store");
-        } else {
+        if (isReady(5)) {
             logger.debug("Config getDictionaries call from repository");
+        } else {
+            logger.debug("Config getDictionaries call from temporary store");
         }
         return new Enumeration() {
             java.util.Iterator memIter = tempStore.values().iterator();
@@ -278,7 +288,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         }
         
         try {
-            if (repo != null) {
+            if (isReady(0)) {
                 String id = pidToId(pid);
                 Map<String,Object> obj = dictToMap(properties);
                 Map<String,Object> existing = null;
@@ -345,7 +355,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             logger.debug("Deleted {} from temporary store", pid);
         }
         try {
-            if (repo != null) {
+            if (isReady(0)) {
                 String id = pidToId(pid);
                 boolean retry;
                 String rev = null;

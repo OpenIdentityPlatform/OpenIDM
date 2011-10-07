@@ -26,8 +26,6 @@ package org.forgerock.openidm.scheduler;
 import java.util.Map;
 import java.util.HashMap;
 
-import javax.naming.Context;
-
 import org.forgerock.openidm.context.InvokeContext;
 
 import org.osgi.util.tracker.ServiceTracker;
@@ -49,9 +47,7 @@ import org.quartz.JobExecutionException;
  */
 
 public class SchedulerServiceJob implements Job {
-    
-    ServiceTracker serviceTracker;
-    
+
     final static Logger logger = LoggerFactory.getLogger(SchedulerServiceJob.class);
 
     public SchedulerServiceJob() {
@@ -82,12 +78,13 @@ public class SchedulerServiceJob implements Job {
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
             try {
-                logger.info("Scheduled service found, invoking.");
+                logger.info("Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
                 setInvokeContext(scheduledServiceContext);
                 scheduledService.execute(scheduledServiceContext);
-                logger.info("Scheduled service invoke completed successfully.");
+                logger.info("Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
-                logger.warn("Scheduled service invokation reported failure: " + ex.getMessage(), ex);
+                logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
+                        new Object[]{context.getJobDetail().getFullName(), ex.getMessage()}, ex);
             } finally {
                 unsetInvokeContext();
             }

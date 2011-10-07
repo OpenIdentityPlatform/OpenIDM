@@ -118,28 +118,30 @@ public class ConfigObjectService implements ObjectSet {
                 result = new HashMap<String, Object>();
                 Configuration[] rawConfigs = configAdmin.listConfigurations(null);
                 List configList = new ArrayList();
-                for (Configuration conf : rawConfigs) {
-                    Map<String,Object> configEntry = new LinkedHashMap<String, Object>();
-                    
-                    String alias = null;
-                    Dictionary properties = conf.getProperties();
-                    if (properties != null) {
-                        alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
+                if (null != rawConfigs) {
+                    for (Configuration conf : rawConfigs) {
+                        Map<String, Object> configEntry = new LinkedHashMap<String, Object>();
+
+                        String alias = null;
+                        Dictionary properties = conf.getProperties();
+                        if (properties != null) {
+                            alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
+                        }
+                        String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
+                        String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
+                        String id = null;
+                        // If there is an alias for factory config is available, make a nicer ID then the internal PID
+                        if (factoryPid != null && alias != null) {
+                            id = factoryPid + "/" + alias;
+                        } else {
+                            id = pid;
+                        }
+
+                        configEntry.put("_id", id);
+                        configEntry.put("pid", pid);
+                        configEntry.put("factoryPid", factoryPid);
+                        configList.add(configEntry);
                     }
-                    String pid = ConfigBootstrapHelper.unqualifyPid(conf.getPid());
-                    String factoryPid = ConfigBootstrapHelper.unqualifyPid(conf.getFactoryPid());
-                    String id = null;
-                    // If there is an alias for factory config is available, make a nicer ID then the internal PID
-                    if (factoryPid != null && alias != null) {
-                        id = factoryPid + "/" + alias;
-                    } else {
-                        id = pid;
-                    }
-                    
-                    configEntry.put("_id", id);
-                    configEntry.put("pid", pid);
-                    configEntry.put("factoryPid", factoryPid);
-                    configList.add(configEntry);
                 }
                 result.put("configurations", configList);
                 logger.debug("Read list of configurations with {} entries", configList.size());

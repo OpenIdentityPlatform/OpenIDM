@@ -34,10 +34,13 @@ public class JSONPrettyPrint {
     
     public JSONPrettyPrint() {
         ObjectMapper mapper = new ObjectMapper();
-        Indenter indenter = new PrettyIndenter(); 
+        /*
+        Disable for now because the formatted value does not fit into the JDBC store.
+        Indenter indenter = new PrettyIndenter();
         DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
         prettyPrinter.indentObjectsWith(indenter);
-        writer = mapper.prettyPrintingWriter(prettyPrinter);
+        writer = mapper.prettyPrintingWriter(prettyPrinter);*/
+        writer = mapper.writer();
     }
     
     public ObjectWriter getWriter() {

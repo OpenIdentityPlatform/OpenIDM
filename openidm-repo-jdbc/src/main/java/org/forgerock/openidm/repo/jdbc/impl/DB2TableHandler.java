@@ -39,9 +39,11 @@ public class DB2TableHandler extends GenericTableHandler {
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
+        String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
+        String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
 
         // Main object table DB2 Script
-        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + dbSchemaName + "." + mainTableName + " obj WHERE EXISTS (SELECT 1 FROM " + dbSchemaName + ".objecttypes objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?");
+        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj WHERE EXISTS (SELECT 1 FROM " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?");
         return result;
     }
 }

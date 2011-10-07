@@ -570,7 +570,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             }
 
             // Table handling configuration
-            String dbSchemaName = config.get(CONFIG_DB_SCHEMA).defaultTo("openidm").asString();
+            String dbSchemaName = config.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
             JsonNode genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = config.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 

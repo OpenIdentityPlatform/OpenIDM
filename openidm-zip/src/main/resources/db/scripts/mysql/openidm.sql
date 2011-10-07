@@ -191,6 +191,18 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
 ENGINE = InnoDB;
 
 
+--
+-- Give permissions to the "openidm" userid logging in from any host.
+--
+GRANT ALL PRIVILEGES on `openidm`.* TO openidm IDENTIFIED BY 'openidm';
+--
+-- Give permissions to the "openidm" userid logging in from any host.
+--
+GRANT ALL PRIVILEGES on `openidm`.* TO openidm@'%' IDENTIFIED BY 'openidm';
+--
+-- Give permissions to the "openidm" userid logging in from the localhost.
+--
+GRANT ALL PRIVILEGES on `openidm`.* TO openidm@localhost IDENTIFIED BY 'openidm';
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

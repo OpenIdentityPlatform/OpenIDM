@@ -81,7 +81,8 @@ public class MappedTableHandler implements TableHandler {
         queries.setConfiguredQueries(tableName, tableName, dbSchemaName, queriesConfig, null);
         tokenReplacementPropNames = new ArrayList<String>();
         
-        readQueryStr = "SELECT * FROM " + dbSchemaName + "." + tableName + " WHERE objectid  = ?";
+        String mainTable = dbSchemaName == null ? tableName : dbSchemaName + "." + tableName;
+        readQueryStr = "SELECT * FROM " + mainTable + " WHERE objectid  = ?";
   // TODO: populate fields according to mapping      
         
         StringBuffer colNames = new StringBuffer();
@@ -115,9 +116,9 @@ public class MappedTableHandler implements TableHandler {
             updateAssign.append(colName).append(" = ${").append(entry.getKey()).append("}");
             isFirst = false;
         }
-        createQueryStr = "INSERT INTO " + dbSchemaName + "." + tableName + " (" + colNames + ") VALUES ( " + prepTokens + ")";
-        updateQueryStr = "UPDATE " + dbSchemaName + "." + tableName + " SET " + updateAssign + " WHERE objectid = ?";
-        deleteQueryStr = "DELETE FROM " + dbSchemaName + "." + tableName + " WHERE objectid = ? AND rev = ?";
+        createQueryStr = "INSERT INTO " + mainTable + " (" + colNames + ") VALUES ( " + prepTokens + ")";
+        updateQueryStr = "UPDATE " + mainTable + " SET " + updateAssign + " WHERE objectid = ?";
+        deleteQueryStr = "DELETE FROM " + mainTable + " WHERE objectid = ? AND rev = ?";
         
         logger.debug("Unprepared query strings {} {} {} {} {}", new Object[] {readQueryStr, createQueryStr, updateQueryStr, deleteQueryStr});
         

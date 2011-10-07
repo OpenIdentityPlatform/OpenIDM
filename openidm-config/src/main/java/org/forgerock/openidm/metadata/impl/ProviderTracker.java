@@ -16,54 +16,24 @@
 
 package org.forgerock.openidm.metadata.impl;
 
-import java.io.IOException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.osgi.ServiceTrackerListener;
+import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-
-import org.codehaus.jackson.impl.DefaultPrettyPrinter;
-import org.codehaus.jackson.impl.Indenter;
-import org.codehaus.jackson.map.ObjectWriter;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.PrettyPrinter;
-
-import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.openidm.config.InternalErrorException;
-import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.config.installer.JSONConfigInstaller;
-import org.forgerock.openidm.config.installer.JSONPrettyPrint;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.metadata.MetaDataProvider;
-import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
-import org.forgerock.openidm.osgi.ServiceTrackerListener;
-
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * Keep track of meta data providers, either declared in bundle meta-data, or 
@@ -83,7 +53,8 @@ public class ProviderTracker implements ServiceTrackerListener {
     // Map from origin identifiers to MetaDataProvider
     // Long type key are bundle identifiers
     // String keys are service pids
-    Map<Object, MetaDataProvider> providers = new HashMap<Object, MetaDataProvider>();
+    // This map MUST be thread safe to avoid the java.util.ConcurrentModificationException
+    Map<String, MetaDataProvider> providers = new ConcurrentSkipListMap<String, MetaDataProvider>();
     
     /**
      * Constructor
@@ -123,7 +94,7 @@ public class ProviderTracker implements ServiceTrackerListener {
                         logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
                         Class providerClazz = bundle.loadClass(providerClazzName);
                         MetaDataProvider provider = (MetaDataProvider) providerClazz.newInstance();
-                        addProvider(Long.valueOf(bundle.getBundleId()), provider, notifyDuringInit);
+                        addProvider(Long.valueOf(bundle.getBundleId()).toString(), provider, notifyDuringInit);
                         logger.debug("Registered MetaDataProvider {} for {}", providerClazzName, bundle.getSymbolicName());
                     }
                 }
@@ -133,7 +104,7 @@ public class ProviderTracker implements ServiceTrackerListener {
         }
     }
     
-    private void addProvider(Object originId, MetaDataProvider provider, boolean notify) {
+    private void addProvider(String originId, MetaDataProvider provider, boolean notify) {
         providers.put(originId, provider);
         if (providerListener != null && notify) {
             logger.debug("Notifying listener of added MetaDataProvider {}", originId);
@@ -170,6 +141,7 @@ public class ProviderTracker implements ServiceTrackerListener {
      * @return meta data providers
      */
     public Collection<MetaDataProvider> getProviders() {
+        //The returned value MUST be thread safe!
         return providers.values();
     }
 }
