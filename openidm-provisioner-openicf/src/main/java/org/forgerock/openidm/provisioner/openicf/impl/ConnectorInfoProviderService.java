@@ -342,7 +342,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     try {
                         ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(config);
                         ConnectorInfo ci = findConnectorInfo(connectorReference);
-                        properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
+                        if (null != ci) {
+                            properties = ci.createDefaultAPIConfiguration().getConfigurationProperties();
+                        }
                     } catch (Exception e) {
                         TRACE.error("Failed to parse the config of {}-{}", new Object[]{pidOrFactory, instanceAlias}, e);
                     }
