@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # clean up left over pid files if necessary
-function cleanupPidFile() {
+cleanupPidFile() {
   if [[ -a $OPENIDM_PID_FILE ]]; then
     rm -f "$OPENIDM_PID_FILE"
   fi
