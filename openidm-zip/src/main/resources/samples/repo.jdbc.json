@@ -25,12 +25,14 @@
     "resourceMapping" : {
         "default" : {
             "mainTable" : "genericobjects", 
-            "propertiesTable" : "genericobjectproperties"
+            "propertiesTable" : "genericobjectproperties",
+            "searchableDefault" : true
         },
         "genericMapping" : {
             "managed/*" : {
                 "mainTable" : "managedobjects", 
-                "propertiesTable" : "managedobjectproperties"
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : true            
             }
         },
         "explicitMapping" : {
