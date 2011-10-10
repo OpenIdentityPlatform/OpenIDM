@@ -114,13 +114,12 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     }
 
     private boolean isReady(int retries) {
-        boolean ready = true;
         try {
             checkReady();
         } catch (BootstrapFailure e) {
-            ready = retries > 0 ? isReady(--retries) : false;
+            if (retries > 0) isReady(--retries);
         }
-        return ready;
+        return repo != null;
     }
 
     /**
