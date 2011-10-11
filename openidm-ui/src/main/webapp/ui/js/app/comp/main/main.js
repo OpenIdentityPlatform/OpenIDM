@@ -1,0 +1,1 @@
+define(["./controllers/main","./views/main"]);

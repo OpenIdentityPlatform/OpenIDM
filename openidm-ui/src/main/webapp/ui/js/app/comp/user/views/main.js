@@ -1,0 +1,1 @@
+define(["./ChangePasswordDialogView", "./LoginView", "./ProfileView", "./RegistrationView","./ForgottenPasswordDialogView","./ResetPasswordDialogView"]);
