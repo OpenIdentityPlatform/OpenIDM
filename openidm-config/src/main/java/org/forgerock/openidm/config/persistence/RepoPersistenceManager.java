@@ -70,6 +70,8 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     
     private BundleContext ctx;
     private RepoBootService repo;
+    //Rapid development may require only memory store.
+    private final boolean requireRepository = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
     
     // Fall-back is in-memory store of configurations
     Map<String, Dictionary> tempStore = new HashMap<String, Dictionary>();
@@ -83,9 +85,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * Handle the system notifying that it's ready to install configs.
      */
     public void checkReady() throws BootstrapFailure {
-        //Rapid development may require only memory store.
-        boolean requireRepo = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
-        if (requireRepo) {
+        if (requireRepository) {
             ServiceTracker repoTracker = null;
             try {
                 if (repo == null) {
@@ -119,7 +119,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         } catch (BootstrapFailure e) {
             if (retries > 0) isReady(--retries);
         }
-        return repo != null;
+        return requireRepository ? repo != null : true;
     }
 
     /**
@@ -133,7 +133,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         
         boolean exists = false;
 
-        if (isReady(0)) {
+        if (isReady(0) && requireRepository) {
             String id = pidToId(pid);
             try {
                 Map existing = repo.read(id);
@@ -176,12 +176,19 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         Dictionary result = null;
         
         try {
-            if (isReady(0)) {
+            if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
                 Map existing = repo.read(id);
                 logger.debug("Config loaded {} {}", pid, existing);
                 result = mapToDict(existing);
-            } 
+            } else if (!requireRepository) {
+                result = tempStore.get(pid);
+                if (result == null) {
+                    throw new IOException("No entry for " + pid + " exists.");
+                }
+
+                logger.debug("Config loaded from temporary store {} {}", pid, result);
+            }
         } catch (NotFoundException ex) {
             result = tempStore.get(pid);
             if (result == null) {
@@ -225,7 +232,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     hasMore = memIter.hasNext();
                     
                     if (!hasMore) {
-                        if (repo != null && dbIter == null) {
+                        if (requireRepository && repo != null && dbIter == null) {
                             Map<String,Object> params = new HashMap<String,Object>();
                             params.put(QueryConstants.QUERY_ID, "query-all-ids");
                             Map<String, Object> result = repo.query("config", params);
@@ -287,7 +294,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         }
         
         try {
-            if (isReady(0)) {
+            if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
                 Map<String,Object> obj = dictToMap(properties);
                 Map<String,Object> existing = null;
@@ -354,7 +361,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             logger.debug("Deleted {} from temporary store", pid);
         }
         try {
-            if (isReady(0)) {
+            if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
                 boolean retry;
                 String rev = null;
