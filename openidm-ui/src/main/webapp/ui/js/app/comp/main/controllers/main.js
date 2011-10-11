@@ -1,0 +1,1 @@
+define(["./BreadcrumbsCtrl","./DialogsCtrl","./MainCtrl", "./MessagesCtrl"]);

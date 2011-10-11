@@ -1,0 +1,1 @@
+define(["./comp/main","./util/main"]);

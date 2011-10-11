@@ -1,57 +1,87 @@
 <div id='registration'>
-        <h2 class='floatLeft'>Register your account</h2><span class='floatRight'>Already have account? <a href='#' class='orange bold' title='Log in'>Log in</a></span>
+	<h2 class='floatLeft'>Register your account</h2>
+	<span class='floatRight'>Already have account? <a href='#'
+		class='orange bold' title='Log in'>Log in</a> </span>
 
-        <div class='clear'></div>
+	<div class='clear'></div>
 
-        <div class='shadowFrame'>
-          <form action='' method='post'>
-            <fieldset>
-              <p class='alignRight'>*Required</p>
+	<div class='shadowFrame'>
+		<form action='' method='post'>
+			<fieldset>
+				<div class='fields'>
+					<div class='field'>
+						<label>Email address</label> <input type='text' name='email' /> <span
+							class='error'>x</span>
+						<div class='validationMessage'></div>
+					</div>
 
-              <div class='fields'>
-                <div class='field'>
-                  <label>*First name</label>
-                  <input type='text' name='firstName' />
-                  <span></span>
-                  <div class='validationMessage'></div>
-                </div>
+					<div class='field'>
+						<label>First name</label> <input type='text' name='firstName' /> <span
+							class='error'>x</span>
+						<div class='validationMessage'></div>
+					</div>
 
-                <div class='field'>
-                  <label>*Last name</label> <input type='text' name='lastName' />
-                  <span></span>
-                  <div class='validationMessage'></div>
-                </div>
+					<div class='field'>
+						<label>Last name</label> <input type='text' name='lastName' /> <span
+							class='error'>x</span>
+						<div class='validationMessage'></div>
+					</div>
 
-                <div class='field'>
-                  <label>*Your email</label> <input type='text' name='email' />
-                  <span></span>
-                  <div class='validationMessage'></div>
-                </div>
+					<div class="groupField">
+						<div class="groupFieldInputs floatLeft">
+							<div class='field'>
+								<label>Password</label> <input type='password' name='password' value='' />
+								<div class='validationMessage'></div>
+							</div>
 
-                <div class='field'>
-                  <label>*Confirm email</label> <input type='text' name='emailConfirm' />
-                  <span></span>
-                  <div class='validationMessage'></div>
-                </div>
+							<div class='field'>
+								<label>Confirm Password</label> <input type='password'
+									name='passwordConfirm' value='' />
+								<div class='validationMessage'></div>
+							</div>
+						</div>
+						<div class="groupFieldErrors floatRight radious">
+							<div class="groupFieldErrorsRule">
+								<span class='error'>x</span> <label id="one-capital">At least one capital letter</label>
+							</div>
+							<div class="groupFieldErrorsRule">
+								<span class='error'>x</span> <label id="one-number">At least one	number</label>
+							</div>
+							<div class="groupFieldErrorsRule">
+								<span class='error'>x</span> <label id="min-8">At least 8 characters</label>
+							</div>
+							<div class="groupFieldErrorsRule">							
+								<span class='error'>x</span> <label id="not-equal-username">Cannot match login</label>
+							</div>
+							<div class="groupFieldErrorsRule">
+								<span class='error'>x</span> <label id="same">Confirmation matches password</label>
+							</div> 
+						</div>
+						<div class="clear"></div>
+						
+						<div class="field">
+							<label>Security question</label>
+							<select name="securityQuestion"></select>
+	            <div class="validationMessage"></div>
+						</div>
+						<div class="field">
+							<label>Security answer</label> <input type="text" name="securityAnswer"/>
+							<div class="validationMessage"></div>
+						</div>						
+						
+					</div>
 
-                <div class='field'>
-                  <label>*Password</label> <input type='password' name='password' value='' />
-                  <span></span>
-                  <div class='validationMessage'></div>
-                </div>
+					<div class='field'>
+						<input type='checkbox' class='check' name='terms' value='yes' /> <label
+							class='check'>I agree to the <a href='#' id="termOfUseLink"
+							class='ice' title='terms'>terms of use</a> </label>
+						<div class='validationMessage'></div>
+					</div>
 
-                <div class='field'>
-                  <label>*Confirm password</label> <input type='password' name='passwordConfirm' value='' />
-                  <span></span>
-                  <div class='validationMessage'></div>
-                </div>
-
-                <div class='field'>
-                  <input type='checkbox' class='check' name='terms' value='yes' />
-                  <label class='check'>I agree to the <a href='#' class='ice' title='terms'>terms of use</a></label>
-                </div>
-              </div><input type='submit' name='register' class='button gray' value='Register my account' />
-            </fieldset>
-          </form>
-        </div>
-
+				</div>
+				<input type='submit' name='register' class='button gray' value='Register' />
+			</fieldset>
+		</form>
+	</div>
+</div>
+&nbsp;

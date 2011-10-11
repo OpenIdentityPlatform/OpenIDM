@@ -1,44 +1,41 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-registerNS("openidm.app.components.nav");
+define(["app/comp/main/controllers/MessagesCtrl",
+        "app/comp/user/views/LoginView",
+        "app/comp/user/delegates/UserDelegate",
+        "app/comp/main/controllers/BreadcrumbsCtrl",
+        "app/comp/user/controllers/RegistrationCtrl",
+        "app/comp/user/controllers/ProfileCtrl",
+        "app/comp/user/controllers/ForgottenPasswordDialogCtrl"],
+        function (messagesCtrl,
+        		loginView,
+        		userDelegate,
+        		breadcrumbsCtrl,
+        		registrationCtrl,
+        		profileCtrl,
+        		forgotPasswordCtrl) {
+	var obj = {};
 
-openidm.app.components.nav.LoginCtrl = function() {
+	obj.messages = messagesCtrl;
+	obj.view = loginView;
+	obj.delegate = userDelegate;
+	obj.breadcrumbs = breadcrumbsCtrl;
+	obj.forgottenPasswordDialog = forgotPasswordCtrl;
+	obj.loggedUser = null;
 
-	var messages = openidm.app.components.nav.MessagesCtrl;
-	var view = openidm.app.components.nav.LoginView;
-	var delegate = openidm.app.components.data.UserDelegate;
-	var breadcrumbs = openidm.app.components.nav.BreadcrumbsCtrl;
-
-	var init = function() {
-		var self = this;
+	obj.init = function() {
 		console.log("LoginCtrl.init()");
 
-		view.renderLogin();
-		self.registerListeners();
+		obj.view.renderLogin();
+		obj.registerListeners();
 	}
 
-	var registerListeners = function() {
+	obj.registerListeners = function() {
 		var self = this;
 
 		console.log("LoginCtrl.registerListeners()");
 
-		view.getLoginButton().removeAttr('disabled');
+		obj.view.getLoginButton().removeAttr('disabled');
 
-		view.getLoginButton().bind('click', function(event) {
+		obj.view.getLoginButton().bind('click', function(event) {
 			event.preventDefault();
 
 			self.view.getLoginButton().unbind();
@@ -47,59 +44,89 @@ openidm.app.components.nav.LoginCtrl = function() {
 			self.afterLoginButtonClicked(event);
 		});
 
-		view.getLogoutButton().bind('click', function(event) {
+		obj.view.getLogoutButton().bind('click', function(event) {
 			event.preventDefault();
 			self.view.renderLogin();
 
-			openidm.app.components.main.MainCtrl.clearContent();
+			require("app/comp/main/controllers/MainCtrl").clearContent();
 			self.breadcrumbs.set('');
 		});
 
-		view.getRegisterButton().bind('click', function(event) {
+		obj.view.getProfileButton().unbind();
+		obj.view.getProfileButton().bind('click', function(event) {
 			event.preventDefault();
-			console.log('asdasd');
-			openidm.app.components.nav.RegistrationCtrl.init();
+
+			profileCtrl.init(function() {
+				profileCtrl.reloadUser();
+			});
+		});
+
+		obj.view.getRegisterButton().unbind();
+		obj.view.getRegisterButton().bind('click', function(event) {
+			event.preventDefault();
+
+			registrationCtrl.init();
 
 			self.breadcrumbs.set('Registration');
 		});
+		
+		$("#forgotPasswordLink").bind('click', function(event) {
+			self.forgottenPasswordDialog.init();
+		});
+		
+		obj.view.getLoginInput().bind('keyup', function(event) {
+			self.validateForm();
+		});
+		
+		obj.view.getPasswordInput().bind('keyup', function(event) {
+			self.validateForm();
+		});
+	},
+	
+	obj.validateForm = function() {
+		if( obj.view.getLogin() != "" && obj.view.getPassword() != "" ) {
+			obj.view.enableLoginButton();
+		} else {
+			obj.view.disableLoginButton();
+		}
 	}
-
-	var afterLoginButtonClicked = function(event) {
+	
+	obj.afterLoginButtonClicked = function(event) {
 		var self = this;
 
 		console.log("LoginCtrl.afterLoginButtonClicked()");
 
-		delegate.getUser(view.getLogin(), function(r) {
+		obj.delegate.getUser(obj.view.getLogin(), function(r) {
 			if (r.password == self.view.getPassword()) {
-				self.messages.displayMessage('info', 'You have been successfully logged in.');
-				self.breadcrumbs.set('My Profile');
-				self.view.renderLogged();
-				self.view.setUserName(self.view.getLogin());
-
-				openidm.app.components.nav.ProfileCtrl.init(function() {
-					openidm.app.components.nav.ProfileCtrl.setUser(r);
-				});
+				self.messages.displayMessage('info',
+				'You have been successfully logged in.');
+				self.loginUser(r);
 			} else {
-				self.messages.displayMessage('info', 'Incorrect password.');
+				self.messages.displayMessage('info', 'Login/password combination is invalid.');
 			}
 
 			self.registerListeners();
 			self.view.untoggle();
 		}, function(r) {
-			self.messages.displayMessage('info', 'Incorrect login.');
+			self.messages.displayMessage('info', 'Login/password combination is invalid.');
 			self.registerListeners();
 		});
 	}
 
-	console.log("LoginCtrl created");
+	obj.loginUser = function(user) {
+		var self = this;
 
-	return {
-		init: init,
-		registerListeners: registerListeners,
-		afterLoginButtonClicked: afterLoginButtonClicked,
-		view: view,
-		messages: messages,
-		breadcrumbs: breadcrumbs
+		obj.breadcrumbs.set('My Profile');
+		obj.view.renderLogged();
+		obj.view.setUserName(user.email);
+
+		obj.loggedUser = user;
+
+		profileCtrl.init(function() {
+			profileCtrl.setUser(self.loggedUser);
+		});
 	}
-} ();
 
+	console.debug("loginctrl created");
+	return obj;
+});
