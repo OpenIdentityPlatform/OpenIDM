@@ -53,7 +53,7 @@ public final class ResourceServlet
             throws ServletException, IOException {
         String target = req.getPathInfo();
         if (target == null || "/".equals(target)) {
-            res.sendRedirect(req.getServletPath() + "/index.xhtml");
+            res.sendRedirect(req.getServletPath() + "/index.html");
         } else if (target.startsWith("/org")) {
             res.sendError(HttpServletResponse.SC_NOT_FOUND);
         } else {

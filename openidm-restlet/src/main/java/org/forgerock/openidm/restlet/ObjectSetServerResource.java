@@ -339,9 +339,9 @@ public class ObjectSetServerResource extends ExtendedServerResource {
             List<Tag> match = conditions.getMatch();
             List<Tag> noneMatch = conditions.getNoneMatch();
             Map<String, Object> object = entityObject(entity);
-            if (match.size() == 0 && noneMatch.size() == 1 && noneMatch.get(0).equals(Tag.ALL)) { // unambiguous create
+            if (match.size() == 0 && noneMatch.size() == 1 && noneMatch.get(0) != null && noneMatch.get(0).equals(Tag.ALL)) { // unambiguous create
                 return create(object);
-            } else if (noneMatch.size() == 0 && match.size() == 1 && !match.get(0).equals(Tag.ALL)) { // unambiguous update
+            } else if (noneMatch.size() == 0 && match.size() == 1 && match.get(0) != null && !match.get(0).equals(Tag.ALL)) { // unambiguous update
                 return update(object);
             } else { // ambiguous whether object is being created or updated
                 try {
