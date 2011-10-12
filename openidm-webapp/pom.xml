@@ -296,6 +296,7 @@
                                 json-schema,
                                 openidm-audit,
                                 openidm-core,
+                                openidm-enhanced-config,
                                 openidm-provisioner-openicf,
                                 openidm-provisioner,
                                 openidm-repo,

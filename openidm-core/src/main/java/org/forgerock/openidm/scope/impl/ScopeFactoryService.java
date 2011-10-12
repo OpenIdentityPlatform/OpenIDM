@@ -107,8 +107,6 @@ public class ScopeFactoryService implements ScopeFactory {
     @Override
     public Map<String, Object> newInstance() {
 
-System.out.println("\n\n** router = " + router + "\n\n");
-
         HashMap<String, Object> openidm = new HashMap<String, Object>();
 
         // create(string id, object value)
@@ -192,7 +190,6 @@ System.out.println("\n\n** router = " + router + "\n\n");
 
         HashMap<String, Object> result = new HashMap<String, Object>();
         result.put("openidm", openidm);
-System.out.println("result = " + result);
 
         return result;
     }
