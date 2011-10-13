@@ -66,7 +66,7 @@ public class AttributeInfoHelper {
 //            }
             type = ConnectorUtil.findClassForName((String) typeString);
         } else {
-            throw new SchemaException("Type of [" + name + "] attribute MUST be non empty String or List<String> value");
+            throw new SchemaException(new JsonNode(typeString, new JsonPointer(Constants.TYPE)), "Type of [" + name + "] attribute MUST be non empty String or List<String> value");
         }
 
         //nativeType
