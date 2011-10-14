@@ -189,6 +189,7 @@
         <module>openidm-enhanced-config</module>
         <module>openidm-core</module>
         <module>openidm-crypto</module>
+        <module>openidm-jetty-fragment</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>
         <module>openidm-repo</module>
@@ -261,6 +262,7 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
                 <version>3.2.2</version>
+                <!--<version>4.0.1</version>-->
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>

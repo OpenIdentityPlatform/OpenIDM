@@ -10,56 +10,54 @@ DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
     <!-- One of each type!                                           -->
     <!-- =========================================================== -->
 
-    <!-- Use this connector for many frequently idle connections
-         and for threadless continuations.
-    -->
-    <Call name="addConnector">
-      <Arg>
-          <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
-            <Set name="host"><Property name="jetty.host" /></Set>
-            <Set name="maxIdleTime">300000</Set>
-            <Set name="Acceptors">2</Set>
-            <Set name="statsOn">false</Set>
-            <Set name="confidentialPort">8443</Set>
-	    <Set name="lowResourcesConnections">20000</Set>
-	    <Set name="lowResourcesMaxIdleTime">5000</Set>
-          </New>
-      </Arg>
-    </Call>
+    <Set name="connectors">
+        <Array type="org.eclipse.jetty.server.Connector">
+            <Item>
+                <!-- Use this connector for many frequently idle connections
+                     and for threadless continuations.
+                -->
+                <New class="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                    <Set name="host"><Property name="jetty.host" /></Set>
+                    <Set name="port">8080</Set>
+                    <Set name="maxIdleTime">300000</Set>
+                    <Set name="Acceptors">2</Set>
+                    <Set name="statsOn">false</Set>
+                    <Set name="confidentialPort">8443</Set>
+	            <Set name="lowResourcesConnections">20000</Set>
+	            <Set name="lowResourcesMaxIdleTime">5000</Set>
+                </New>
+            </Item>
+            <Item>
+                <New class="org.eclipse.jetty.server.ssl.SslSelectChannelConnector">
+                    <Set name="Port">8443</Set>
+                    <Set name="maxIdleTime">30000</Set>
+                    <Set name="keystoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+                    <Set name="keystore"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
+                    <Set name="password"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
+                    <Set name="keyPassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreKeyPassword"/></Set>
+                    <Set name="truststore"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
+                    <Set name="trustPassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
+                    <Set name="wantClientAuth">true</Set>
+                    <Set name="needClientAuth">false</Set>
+                </New>
+            </Item>
+        </Array>
+    </Set>
 
-    <Call name="addConnector">
-        <Arg>
-            <New class="org.eclipse.jetty.server.ssl.SslSocketConnector">
-                <Set name="Port">8443</Set>
-                <Set name="maxIdleTime">30000</Set>
-                <Set name="keystore"><SystemProperty name="jetty.home" default="."/>/samples/keystore.jceks
-                </Set>
-                <Set name="keystoreType">JCEKS</Set>
-                <Set name="password">changeit</Set>
-                <Set name="keyPassword">changeit</Set>
-                <Set name="truststore"><SystemProperty name="jetty.home" default="."/>/samples/truststore
-                </Set>
-                <Set name="trustPassword">changeit</Set>
-                <Set name="wantClientAuth">true</Set>
-                <Set name="needClientAuth">false</Set>
-            </New>
-        </Arg>
-    </Call>
-	
-	<!-- =========================================================== -->
+    <!-- =========================================================== -->
     <!-- Configure Authentication Realms                             -->
     <!-- Realms may be configured for the entire server here, or     -->
     <!-- they can be configured for a specific web app in a context  -->
-    <!-- configuration (see $(jetty.home)/contexts/test.xml for an   -->
-    <!-- example).                                                   -->
+    <!-- configuration.                                              -->
     <!-- =========================================================== -->
     <Call name="addBean">
         <Arg>
             <New class="org.eclipse.jetty.security.HashLoginService">
                 <Set name="name">openidm</Set>
-                <Set name="config"><SystemProperty name="jetty.home" default="."/>/conf/realm.properties</Set>
+                <Set name="config"><SystemProperty name="jetty.home" default="."/>/security/realm.properties</Set>
                 <Set name="refreshInterval">0</Set>
             </New>
         </Arg>
     </Call>
+
 </Configure>
