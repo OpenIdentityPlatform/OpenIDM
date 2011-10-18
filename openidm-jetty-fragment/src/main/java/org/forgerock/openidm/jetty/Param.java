@@ -52,8 +52,6 @@ public class Param {
      */
     public static String getKeystoreLocation() {
         String loc = JettyPropertyUtil.getPathProperty("openidm.keystore.location");
-
-        System.out.println("Jetty keystore loc: " + loc);
         return loc;
     }
     
@@ -61,7 +59,6 @@ public class Param {
      * @return OpenIDM keystore password, obfuscated in Jetty format.
      */
     public static String getKeystorePassword() {
-        System.out.println("Jetty keystore pwd: " + JettyPropertyUtil.getPropertyJettyObfuscated("openidm.keystore.password"));
         return JettyPropertyUtil.getPropertyJettyObfuscated("openidm.keystore.password");
     }
     
