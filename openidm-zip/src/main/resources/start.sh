@@ -2,7 +2,7 @@
 
 # clean up left over pid files if necessary
 cleanupPidFile() {
-  if [[ -a $OPENIDM_PID_FILE ]]; then
+  if [ -f $OPENIDM_PID_FILE ]; then
     rm -f "$OPENIDM_PID_FILE"
   fi
   trap - EXIT
