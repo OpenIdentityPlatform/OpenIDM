@@ -1,14 +1,14 @@
 #!/bin/sh
 
-function notRunning() {
+notRunning() {
   cleanupPidFile
   echo "OpenIDM is not running, not stopping."
   exit 1
 }
 
-function cleanupPidFile() {
+cleanupPidFile() {
   # clean up left over pid files if necessary
-  if [[ -a $OPENIDM_PID_FILE ]]; then
+  if [ -f $OPENIDM_PID_FILE ]; then
     rm -f "$OPENIDM_PID_FILE"
   fi
 }
@@ -37,20 +37,21 @@ PRGDIR=`dirname "$PRG"`
 # Only set OPENIDM_PID_FILE if not already set
 [ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE=$OPENIDM_HOME/.openidm.pid
 
-if [[ -a $OPENIDM_PID_FILE ]]; then
+if [ -f $OPENIDM_PID_FILE ]; then
   START_PID=`cat "$OPENIDM_PID_FILE"`
 fi
-if [[ -z "$START_PID" ]]; then
+if [ -z "$START_PID" ]; then
   notRunning
 fi
 
-EXISTING_CMD_RUNNING=`ps -p $START_PID -c -o comm= `
-EXISTING_START_RUNNING=`ps -p $START_PID -o command= | grep "start.sh"`
+EXISTING_CMD_RUNNING=`ps -p $START_PID c -o comm= `
+EXISTING_START_RUNNING=`ps -p $START_PID -o command= | grep "felix"`
 
 # Check if the pid file points to a running process that is the start script
-if [[ "$EXISTING_CMD_RUNNING" == "sh" && ! -z "$EXISTING_START_RUNNING" ]]; then
+if [ "$EXISTING_CMD_RUNNING" = "java" ] && [ "$EXISTING_START_RUNNING" ]; then
     echo "Stopping OpenIDM ($START_PID)"
     kill $START_PID
+    cleanupPidFile
     exit 0
 fi
 
