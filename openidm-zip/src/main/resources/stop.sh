@@ -44,11 +44,10 @@ if [ -z "$START_PID" ]; then
   notRunning
 fi
 
-EXISTING_CMD_RUNNING=`ps -p $START_PID c -o comm= `
-EXISTING_START_RUNNING=`ps -p $START_PID -o command= | grep "felix"`
+EXISTING_START_RUNNING=`ps -p $START_PID -o command= | grep "openidm"`
 
-# Check if the pid file points to a running process that is the start script
-if [ "$EXISTING_CMD_RUNNING" = "java" ] && [ "$EXISTING_START_RUNNING" ]; then
+# Check if the pid file points to a running process that is the openidm jvm
+if [ "$EXISTING_START_RUNNING" ]; then
     echo "Stopping OpenIDM ($START_PID)"
     kill $START_PID
     cleanupPidFile
