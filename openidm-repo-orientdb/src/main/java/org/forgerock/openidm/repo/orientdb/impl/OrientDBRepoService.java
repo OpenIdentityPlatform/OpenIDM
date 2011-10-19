@@ -416,6 +416,9 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
             retryCount++;
             try {
                 db = pool.acquire(dbURL, user, password);
+                if (retryCount > 1) {
+                    logger.info("Succeeded in acquiring connection from pool in retry attempt {}", retryCount);
+                }
                 retryCount = maxRetry;
             } catch (com.orientechnologies.orient.core.exception.ORecordNotFoundException ex) {
                 // TODO: remove work-around once OrientDB resolves this condition
@@ -425,8 +428,8 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
                             "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: " 
                             + ex.getMessage(), ex);
                 } else {
-                    logger.info("Pool acquire reported failure, retrying");
-                    logger.debug("Pool acquire failure detail ", ex);
+                    logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
+                    logger.trace("Pool acquire failure detail ", ex);
                     try {
                         Thread.sleep(100); // Give the DB time to complete what it's doing before retrying
                     } catch (InterruptedException iex) {
@@ -583,5 +586,6 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
             embeddedServer.deactivate();
         }
         logger.info("Repository stopped.");
+System.out.println("We got nicely shut down...");
     }
 }

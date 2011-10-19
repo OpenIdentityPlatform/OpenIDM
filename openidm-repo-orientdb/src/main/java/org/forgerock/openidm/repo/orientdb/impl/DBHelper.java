@@ -99,6 +99,8 @@ public class DBHelper {
         
         if (!success) {
             logger.warn("DB could not be verified.");
+        } else {
+            logger.info("DB verified on try {}", retryCount);
         }
         
         return pool;
@@ -109,9 +111,10 @@ public class DBHelper {
      * @return whether the basic access succeeded
      */
     private static boolean test(ODatabaseDocumentPool pool, String dbURL, String user, String password, boolean finalTry) {
+        ODatabaseDocumentTx db = null;
         try {
             logger.info("Verifying the DB.");
-            ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
+            db = pool.acquire(dbURL, user, password);
             java.util.Iterator iter = db.browseClass("config"); // Config always should exist
             if (iter.hasNext()) {
                 iter.next();
@@ -123,6 +126,10 @@ public class DBHelper {
                 logger.debug("DB exception in testing.", ex);
             }
             return false;
+        } finally {
+            if (db != null) {
+                db.close();
+            } 
         }
         return true;
     }
@@ -140,7 +147,7 @@ public class DBHelper {
             list.add(pool.acquire(dbURL, user, password));
         }
         for (ODatabaseDocumentTx entry : list) {
-            pool.release(entry);
+            entry.close();
         }
     }
     
