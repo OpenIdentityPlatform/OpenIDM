@@ -70,16 +70,11 @@ echo "Using LOGGING_CONFIG: $LOGGING_CONFIG"
 
 # Keep track of this pid
 echo $$ > $OPENIDM_PID_FILE
-trap 'cleanupPidFile' EXIT
 
 # start in normal mode
-java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
+exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
 	-classpath "$CLASSPATH" \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
 	-Dignore.openidm.system.server.environment="dev|test|qa|prod" \
 	org.apache.felix.main.Main "$@"
-
-cleanupPidFile
-exit 0 
-
