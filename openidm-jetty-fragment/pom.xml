@@ -60,8 +60,8 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                            <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
-                            <Export-Package></Export-Package>-->
+                        <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
+                        <Export-Package></Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
