@@ -46,6 +46,8 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) throws Exception {
         logger.debug("Crypto bundle starting");
         
+        // Force fragment to resolve
+        ensureJettyFragmentResolved(context);
         
         cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
         
@@ -66,5 +68,33 @@ public class Activator implements BundleActivator {
              cryptoSvc.deactivate(context);
          }
          logger.debug("Crypto bundle stopped");
+     }
+     
+     /**
+      * Ensures the Jetty Fragment bundle gets resolved and attached
+      * to the Jetty bundle.
+      * This is a work-around for the felix issue not consistently
+      * resolving the fragment.
+      */
+     public void ensureJettyFragmentResolved(BundleContext context) throws Exception {
+         org.osgi.framework.Bundle[] bundles = context.getBundles();
+         org.osgi.framework.Bundle jettyBundle= null;
+         for (org.osgi.framework.Bundle bundle : bundles) {
+             if ("org.ops4j.pax.web.pax-web-jetty-bundle".equals(bundle.getSymbolicName())) {
+                 jettyBundle = bundle;
+                 logger.trace("org.ops4j.pax.web.pax-web-jetty-bundle state: {}", bundle.getState());
+             }
+         }
+         for (org.osgi.framework.Bundle bundle : bundles) {
+             if ("org.forgerock.openidm.jetty-fragment".equals(bundle.getSymbolicName())) {
+                 Object expectNull = bundle.getResource("ForceResolve");
+                 logger.trace("Fragment state after attempted resolve: {}", bundle.getState());
+                 if (bundle.getState() != 4) {
+                     jettyBundle.update();
+                     jettyBundle.getResource("ForceResolve");
+                     logger.debug("Fragment state after Jetty bundle refresh {}", bundle.getState());
+                 }
+             }
+         }
      }
 }
