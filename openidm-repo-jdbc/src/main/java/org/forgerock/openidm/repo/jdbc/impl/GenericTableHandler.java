@@ -123,8 +123,8 @@ public class GenericTableHandler implements TableHandler {
         String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
 
         // objecttypes table
-        result.put(QueryDefinition.CREATETYPEQUERYSTR, "INSERT INTO " + dbSchemaName + ".objecttypes (objecttype) VALUES (?)");
-        result.put(QueryDefinition.READTYPEQUERYSTR, "SELECT id FROM " + dbSchemaName + ".objecttypes objtype WHERE objtype.objecttype = ?");
+        result.put(QueryDefinition.CREATETYPEQUERYSTR, "INSERT INTO " + typeTable + " (objecttype) VALUES (?)");
+        result.put(QueryDefinition.READTYPEQUERYSTR, "SELECT id FROM " + typeTable + " objtype WHERE objtype.objecttype = ?");
 
         // Main object table
         result.put(QueryDefinition.READFORUPDATEQUERYSTR, "SELECT obj.* FROM " + mainTable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid  = ? FOR UPDATE");
