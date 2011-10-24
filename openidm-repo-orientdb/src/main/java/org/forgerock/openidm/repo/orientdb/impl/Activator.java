@@ -44,37 +44,44 @@ import org.slf4j.LoggerFactory;
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
-     public void start(BundleContext context) {
-         logger.debug("OrientDB bundle starting");
+    // Bootstrap repository
+    OrientDBRepoService bootSvc;
+    
+    public void start(BundleContext context) {
+        logger.trace("OrientDB bundle starting");
+        
+        Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("orientdb", context);
          
-         Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("orientdb", context);
-         
-         if (repoConfig != null) {
-             logger.info("Bootstrapping OrientDB repository");
-             // Only take the configuration strictly needed for bootstrapping the repository
-             // Also, bootstrap property keys are lower case, Repo expects camel case
-             Map<String,Object> bootConfig = new HashMap<String,Object>();
-             bootConfig.put(OrientDBRepoService.CONFIG_DB_URL, repoConfig.get(OrientDBRepoService.CONFIG_DB_URL.toLowerCase()));
-             bootConfig.put(OrientDBRepoService.CONFIG_USER, repoConfig.get(OrientDBRepoService.CONFIG_USER.toLowerCase()));
-             bootConfig.put(OrientDBRepoService.CONFIG_PASSWORD, repoConfig.get(OrientDBRepoService.CONFIG_PASSWORD.toLowerCase()));
+        if (repoConfig != null) {
+            logger.info("Bootstrapping OrientDB repository");
+            // Only take the configuration strictly needed for bootstrapping the repository
+            // Also, bootstrap property keys are lower case, Repo expects camel case
+            Map<String,Object> bootConfig = new HashMap<String,Object>();
+            bootConfig.put(OrientDBRepoService.CONFIG_DB_URL, repoConfig.get(OrientDBRepoService.CONFIG_DB_URL.toLowerCase()));
+            bootConfig.put(OrientDBRepoService.CONFIG_USER, repoConfig.get(OrientDBRepoService.CONFIG_USER.toLowerCase()));
+            bootConfig.put(OrientDBRepoService.CONFIG_PASSWORD, repoConfig.get(OrientDBRepoService.CONFIG_PASSWORD.toLowerCase()));
              
-             // Init the bootstrap repo
-             RepoBootService bootSvc = OrientDBRepoService.getRepoBootService(bootConfig);
+            // Init the bootstrap repo
+            bootSvc = OrientDBRepoService.getRepoBootService(bootConfig);
              
-             // Register bootstrap repo
-             Hashtable<String, String> prop = new Hashtable<String, String>();
-             prop.put("service.pid", "org.forgerock.openidm.bootrepo.orientdb");
-             prop.put("openidm.router.prefix", "bootrepo");
-             prop.put("db.type", "OrientDB");
-             context.registerService(RepoBootService.class.getName(), bootSvc, prop);
-             logger.info("Registered bootstrap repo service");
-         } else {
-             logger.debug("No OrientDB configuration detected");
-         }
-         logger.debug("OrientDB bundle started");
-     }
+            // Register bootstrap repo
+            Hashtable<String, String> prop = new Hashtable<String, String>();
+            prop.put("service.pid", "org.forgerock.openidm.bootrepo.orientdb");
+            prop.put("openidm.router.prefix", "bootrepo");
+            prop.put("db.type", "OrientDB");
+            context.registerService(RepoBootService.class.getName(), bootSvc, prop);
+            logger.info("Registered bootstrap repo service");
+        } else {
+            logger.debug("No OrientDB configuration detected");
+        }
+        logger.trace("OrientDB bundle started");
+    }
 
-     public void stop(BundleContext context) {
-         logger.trace("OrientDB bundle stopped");
-     }
+    public void stop(BundleContext context) {
+        if (bootSvc != null) {
+            logger.trace("Cleaning up OrientDB bootstrap repository");
+            bootSvc.cleanup();
+        }
+        logger.trace("OrientDB bundle stopped");
+    }
 }
