@@ -39,7 +39,6 @@ import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.metadata.schema.OClass;
 import com.orientechnologies.orient.core.metadata.schema.OProperty;
-import com.orientechnologies.orient.core.metadata.schema.OProperty.INDEX_TYPE;
 import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -210,9 +209,21 @@ public class DBHelper {
                         
                         JsonNode indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
                         for (JsonNode index : indexes) {
-                            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
                             String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
                             String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
+                            
+                            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
+                            String[] propertyNames = null; 
+                            if (propertyName != null) {
+                                propertyNames = new String[] {propertyName};
+                            } else {
+                                List propNamesList = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
+                                if (propNamesList == null) {
+                                    throw new InvalidException("Invalid index configuration. Missing property name(s) on index configuration for property type "
+                                            + propertyType + " with index type " + indexType + " on " + orientClassName);
+                                }
+                                propertyNames = (String[]) propNamesList.toArray(new String[0]);
+                            }
                             
                             logger.info("Creating index on property {} of type {} with index type {} on {} for OrientDB class ", 
                                     new Object[] {propertyName, propertyType, indexType, orientClassName});
@@ -228,14 +239,13 @@ public class DBHelper {
                             }
                             
                             try {
-                                OProperty.INDEX_TYPE orientIndexType = OProperty.INDEX_TYPE.valueOf(indexType.toUpperCase());
-                                
+                                OClass.INDEX_TYPE orientIndexType = OClass.INDEX_TYPE.valueOf(indexType.toUpperCase());
                                 OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
-                                prop.createIndex(orientIndexType);
+                                orientClass.createIndex(propertyName + "Idx", orientIndexType, propertyNames);
                             } catch (IllegalArgumentException ex) {
                                 throw new InvalidException("Invalid index type '" + indexType + "' in configuration on property "
                                         + propertyName + " of type " + propertyType + " on " 
-                                        + orientClassName + " valid values: " + OProperty.INDEX_TYPE.values() 
+                                        + orientClassName + " valid values: " + OClass.INDEX_TYPE.values() 
                                         + " failure message: " + ex.getMessage(), ex);
                             }
                         }

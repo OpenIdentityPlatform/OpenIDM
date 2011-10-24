@@ -93,6 +93,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     public static final String CONFIG_ORIENTDB_CLASS = "orientdbClass";
     public static final String CONFIG_INDEX = "index";
     public static final String CONFIG_PROPERTY_NAME = "propertyName";
+    public static final String CONFIG_PROPERTY_NAMES = "propertyNames";
     public static final String CONFIG_PROPERTY_TYPE = "propertyType";
     public static final String CONFIG_INDEX_TYPE = "indexType";
     
