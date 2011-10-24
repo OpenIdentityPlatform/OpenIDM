@@ -1,0 +1,13 @@
+{
+    "enabled" : true,
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "script",
+    "invokeContext": {
+        "script" : {
+              "type" : "text/javascript",
+              "source" : "java.lang.System.out.println('It is working: ' + input.edit);"
+            },
+        "input": { "edit": 26}
+    }
+}
