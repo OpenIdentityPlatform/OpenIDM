@@ -503,7 +503,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * @param repoConfig the bootstrap configuration
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
-    static RepoBootService getRepoBootService(Map repoConfig) {
+    static OrientDBRepoService getRepoBootService(Map repoConfig) {
         OrientDBRepoService bootRepo = new OrientDBRepoService();
         JsonNode cfg = new JsonNode(repoConfig);
         bootRepo.init(cfg);
@@ -576,17 +576,25 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     @Deactivate
     void deactivate(ComponentContext compContext) { 
         logger.debug("Deactivating Service {}", compContext);
-        if (pool != null) {
-            try {
-                pool.close();
-            } catch (Exception ex) {
-                logger.warn("Closing pool reported exception ", ex);
-            }
-        }
+        cleanup();
         if (embeddedServer != null) {
             embeddedServer.deactivate();
         }
         logger.info("Repository stopped.");
-System.out.println("We got nicely shut down...");
     }
+
+    /**
+     * Cleanup and close the repository
+     */
+    void cleanup() {
+        if (pool != null) {
+            try {
+                pool.close();
+                logger.trace("Closed pool ", pool);
+            } catch (Exception ex) {
+                logger.warn("Closing pool reported exception ", ex);
+            }
+        }
+    }
+    
 }
