@@ -109,6 +109,16 @@
             <name>Public online Restlet repository</name>
             <url>http://maven.restlet.org</url>
         </repository>
+        <repository>
+            <id>com.springsource.repository.bundles.release</id>
+            <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/release</url>
+            </repository> <repository>
+            <id>com.springsource.repository.bundles.external</id> 
+            <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
+            <url>http://repository.springsource.com/maven/bundles/external</url>
+        </repository>
+
     </repositories>
 
 
@@ -189,7 +199,7 @@
         <module>openidm-core</module>
         <module>openidm-crypto</module>
         <module>openidm-enhanced-config</module>
-        <!--<module>openidm-external-rest</module>-->
+        <module>openidm-external-rest</module>
         <module>openidm-jetty-fragment</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>
