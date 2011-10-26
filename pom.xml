@@ -13,8 +13,7 @@
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
   Copyright © 2011 ForgeRock AS. All rights reserved.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock</groupId>
@@ -200,6 +199,7 @@
         <module>openidm-crypto</module>
         <module>openidm-enhanced-config</module>
         <module>openidm-external-rest</module>
+        <module>openidm-external-email</module>
         <module>openidm-jetty-fragment</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>
@@ -213,7 +213,7 @@
         <module>openidm-util</module>
 	<module>openidm-ui</module>
         <module>openidm-zip</module>
-    </modules>
+  </modules>
 
     <profiles>
         <profile>
@@ -453,29 +453,29 @@
         
                             <!-- Copy images, CSS for HTML -->
                             <preProcess>
-                                <copy todir='${docbkx-out}/html/admin-guide/images'>
-                                    <fileset dir='${docbkx-src}/admin-guide/images' />
+                                <copy todir="${docbkx-out}/html/admin-guide/images">
+                                    <fileset dir="${docbkx-src}/admin-guide/images"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/admin-guide'>
-                                    <fileset dir='src/main/resources' />
+                                <copy todir="${docbkx-out}/html/admin-guide">
+                                    <fileset dir="src/main/resources"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/dev-guide/images'>
-                                    <fileset dir='${docbkx-src}/dev-guide/images' />
+                                <copy todir="${docbkx-out}/html/dev-guide/images">
+                                    <fileset dir="${docbkx-src}/dev-guide/images"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/dev-guide'>
-                                    <fileset dir='src/main/resources' />
+                                <copy todir="${docbkx-out}/html/dev-guide">
+                                    <fileset dir="src/main/resources"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/install-guide/images'>
-                                    <fileset dir='${docbkx-src}/install-guide/images' />
+                                <copy todir="${docbkx-out}/html/install-guide/images">
+                                    <fileset dir="${docbkx-src}/install-guide/images"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/install-guide'>
-                                    <fileset dir='src/main/resources' />
+                                <copy todir="${docbkx-out}/html/install-guide">
+                                    <fileset dir="src/main/resources"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/release-notes/images'>
-                                    <fileset dir='${docbkx-src}/release-notes/images' />
+                                <copy todir="${docbkx-out}/html/release-notes/images">
+                                    <fileset dir="${docbkx-src}/release-notes/images"/>
                                 </copy>
-                                <copy todir='${docbkx-out}/html/release-notes'>
-                                    <fileset dir='src/main/resources' />
+                                <copy todir="${docbkx-out}/html/release-notes">
+                                    <fileset dir="src/main/resources"/>
                                 </copy>
                             </preProcess>
                         </configuration>
@@ -512,14 +512,10 @@
                         <configuration>
                             <detail>true</detail>
                             <tasks>
-                                <copy file='${basedir}/legalnotice.html'
-                                    todir='${basedir}/target/docbkx/html/admin-guide' />
-                                <copy file='${basedir}/legalnotice.html'
-                                    todir='${basedir}/target/docbkx/html/dev-guide' />
-                                <copy file='${basedir}/legalnotice.html'
-                                    todir='${basedir}/target/docbkx/html/install-guide' />
-                                <move file='${basedir}/legalnotice.html'
-                                    todir='${basedir}/target/docbkx/html/release-notes' />
+                                <copy file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/admin-guide"/>
+                                <copy file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/dev-guide"/>
+                                <copy file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/install-guide"/>
+                                <move file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/release-notes"/>
                             </tasks>
                         </configuration>
                     </execution>
