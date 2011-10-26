@@ -263,8 +263,8 @@ public class RestService implements ObjectSet {
                     type = "basic";
                 }
                 if ("basic".equalsIgnoreCase(type)) {
-                    String identifier = auth.get("identifier");
-                    String secret = auth.get("secret");
+                    String identifier = auth.get("user");
+                    String secret = auth.get("password");
                     logger.debug("Using basic authentication for {} secret supplied: {}", identifier, (secret != null));
                     ChallengeResponse challengeResponse = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, identifier, secret);
                     cr.setChallengeResponse(challengeResponse); 
