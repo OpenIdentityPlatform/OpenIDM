@@ -219,7 +219,11 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
             JsonNode params = new JsonNode(context).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
             if ("reconcile".equals(action)) { // "action": "reconcile"
-                reconcile(params.get("mapping").asString()); // "mapping": string (mapping name)
+                if (params.get("mapping").required().isString()) {
+                    reconcile(params.get("mapping").asString()); // "mapping": string (mapping name)
+                } else if (params.get("mapping").required().isMap()) {
+                    (new ObjectMapping(this, params.get("mapping"))).recon(UUID.randomUUID().toString());
+                }
             } else {
                 throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
                         + "valid action(s) are: 'reconcile'");

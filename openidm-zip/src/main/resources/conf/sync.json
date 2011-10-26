@@ -52,8 +52,8 @@
         },
         {
             "name": "managedUser_systemLdapAccounts",
-            "source": "managed/user",
-            "target": "system/ldap/account",
+            "source": "fixme_managed/user",
+            "target": "fixme_system/ldap/account",
             "correlationQuery" : {
                 "type": "text/javascript",
                 "file": "jscript/name_eq_name_correlationQuery.js"
