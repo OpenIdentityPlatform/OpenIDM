@@ -13,7 +13,6 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
-
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
@@ -41,6 +40,7 @@ import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
+
 /**
  * TODO: Description.
  *
@@ -49,52 +49,46 @@ import org.forgerock.openidm.sync.SynchronizationListener;
 class ObjectMapping implements SynchronizationListener {
 
     /** TODO: Description. */
-    private enum Status { SUCCESS, FAILURE }
-
+    private enum Status {SUCCESS, FAILURE}
+    
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
-
     /** TODO: Description. */
     private String name;
-
     /** TODO: Description. */
     private String sourceObjectSet;
-
     /** TODO: Description. */
     private String targetObjectSet;
-
     /** TODO: Description. */
     private Script validSource;
-
     /** TODO: Description. */
     private Script validTarget;
-
     /** TODO: Description. */
     private Script correlationQuery;
-
     /** TODO: Description. */
     private ArrayList<PropertyMapping> properties = new ArrayList<PropertyMapping>();
-
     /** TODO: Description. */
     private ArrayList<Policy> policies = new ArrayList<Policy>();
-
     /** TODO: Description. */
     private Script onCreateScript;
-
     /** TODO: Description. */
     private Script onUpdateScript;
-
     /** TODO: Description. */
     private Script onDeleteScript;
-
     /** TODO: Description. */
     private Script onLinkScript;
-
     /** TODO: Description. */
     private Script onUnlinkScript;
-
+    /** TODO: Description. */
+    private Script resultScript;
     /** TODO: Description. */
     private SynchronizationService service;
+    /** TODO: Description. */
+    private ReconStats sourceStats = null;
+    /** TODO: Description. */
+    private ReconStats targetStats = null;
+    /** TODO: Description. */
+    private ReconStats globalStats = null;
 
     /**
      * TODO: Description.
@@ -122,6 +116,7 @@ class ObjectMapping implements SynchronizationListener {
         onDeleteScript = Scripts.newInstance("ObjectMapping", config.get("onDelete"));
         onLinkScript = Scripts.newInstance("ObjectMapping", config.get("onLink"));
         onUnlinkScript = Scripts.newInstance("ObjectMapping", config.get("onUnlink"));
+        resultScript = Scripts.newInstance("ObjectMapping", config.get("result"));
         LOGGER.debug("Instantiated {}", name);
     }
 
@@ -186,29 +181,38 @@ class ObjectMapping implements SynchronizationListener {
 // TODO: Codify query-all-ids in ObjectSet or provide per-ObjectSet query for all IDs.
     private Iterable<String> queryAllIds(final String objectSet) throws SynchronizationException {
         return new Iterable<String>() {
+
             JsonNode list;
+
             {
                 HashMap<String, Object> query = new HashMap<String, Object>();
                 query.put(QueryConstants.QUERY_ID, "query-all-ids");
                 try {
-                    list = new JsonNode(service.getRouter().query(objectSet, query)).
-                     get(QueryConstants.QUERY_RESULT).required().expect(List.class);
+                    list = new JsonNode(service.getRouter().query(objectSet, query)).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
                 } catch (JsonNodeException jne) {
                     throw new SynchronizationException(jne);
                 } catch (ObjectSetException ose) {
                     throw new SynchronizationException(ose);
                 }
             }
-            @Override public Iterator<String> iterator() {
+
+            @Override
+            public Iterator<String> iterator() {
                 final Iterator<JsonNode> iterator = list.iterator();
                 return new Iterator<String>() {
-                    @Override public boolean hasNext() {
+
+                    @Override
+                    public boolean hasNext() {
                         return iterator.hasNext();
                     }
-                    @Override public String next() { // throws JsonNodeException
+
+                    @Override
+                    public String next() { // throws JsonNodeException
                         return iterator.next().get("_id").asString();
                     }
-                    @Override public void remove() {
+
+                    @Override
+                    public void remove() {
                         throw new UnsupportedOperationException();
                     }
                 };
@@ -322,6 +326,7 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
     }
+
     /**
      * TODO: Description.
      *
@@ -338,7 +343,7 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * Returns {@code true} if the specified object identifer is in this mapping's source
      * object set.
-     */ 
+     */
     private boolean isSourceObject(String id) {
         return (id.startsWith(sourceObjectSet + '/') && id.length() > sourceObjectSet.length() + 1);
     }
@@ -359,7 +364,7 @@ class ObjectMapping implements SynchronizationListener {
             if (newValue == null || newValue.getValue() == null) { // notification without the actual value
                 newValue = readObject(id);
             }
-    // TODO: use old value to project incremental diff without fetch of source
+            // TODO: use old value to project incremental diff without fetch of source
             if (oldValue == null || oldValue.getValue() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
                 doSourceSync(id, newValue); // synchronous for now
             } else {
@@ -383,14 +388,34 @@ class ObjectMapping implements SynchronizationListener {
             InvokeContext.getContext().popActivityId();
         }
     }
-    
+
+    private void doResults() throws SynchronizationException {
+        if (resultScript != null) {
+            Map<String, Object> scope = service.newScope();
+            scope.put("source", sourceStats.asMap());
+            scope.put("target", targetStats.asMap());
+            scope.put("global", globalStats.asMap());
+            try {
+                resultScript.exec(scope);
+            } catch (ScriptException se) {
+                LOGGER.debug("{} result script encountered exception", name, se);
+                throw new SynchronizationException(se);
+            }
+        }
+    }
+
     /**
      * TEMPORARY. Future version will have this break-down into discrete units of work.
      * @param reconId
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
+        sourceStats = new ReconStats(reconId);
+        globalStats = new ReconStats(reconId);
+
+        sourceStats.startAllIds();
         Iterator<String> i = queryAllIds(sourceObjectSet).iterator();
+        sourceStats.endAllIds();
         if (!i.hasNext()) {
             throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
         }
@@ -401,6 +426,7 @@ class ObjectMapping implements SynchronizationListener {
             op.sourceId = sourceId;
             entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
             op.sourceObject = readObject(entry.sourceId);
+            sourceStats.entries++;
             op.reconId = reconId;
             try {
                 op.sync();
@@ -428,11 +454,19 @@ class ObjectMapping implements SynchronizationListener {
                 logReconEntry(entry);
             }
         }
-        for (String targetId : queryAllIds(targetObjectSet)) {
+        sourceStats.end();
+        targetStats = new ReconStats(reconId);
+        targetStats.startAllIds();
+        Iterator<String> j = queryAllIds(targetObjectSet).iterator();
+        targetStats.endAllIds();
+
+        while (j.hasNext()) {
+            String targetId = j.next();
             TargetSyncOperation op = new TargetSyncOperation();
             ReconEntry entry = new ReconEntry(op);
             entry.targetId = qualifiedId(targetObjectSet, targetId);
             op.targetObject = readObject(entry.targetId);
+            targetStats.entries++;
             op.reconId = reconId;
             try {
                 op.sync();
@@ -460,6 +494,9 @@ class ObjectMapping implements SynchronizationListener {
                 logReconEntry(entry);
             }
         }
+        targetStats.end();
+        globalStats.end();
+        doResults();
 // TODO: cleanup orphan link objects (no matching source or target) here 
     }
 
@@ -484,19 +521,14 @@ class ObjectMapping implements SynchronizationListener {
 
         /** TODO: Description. */
         public String reconId;
-
         /** TODO: Description. */
         public JsonNode sourceObject;
-
         /** TODO: Description. */
         public JsonNode targetObject;
-
         /** TODO: Description. */
         public final Link linkObject = new Link(ObjectMapping.this);
-
         /** TODO: Description. */
         public Situation situation;
-
         /** TODO: Description. */
         public Action action;
 
@@ -537,67 +569,67 @@ class ObjectMapping implements SynchronizationListener {
             Action action = (this.action == null ? Action.IGNORE : this.action);
             try {
                 switch (action) {
-                case CREATE:
-                    if (sourceObject == null) {
-                        throw new SynchronizationException("no source object to create target from"); 
-                    }
-                    if (targetObject != null) {
-                        throw new SynchronizationException("target object already exists");
-                    }
-                    targetObject = new JsonNode(new HashMap<String, Object>());
-                    applyMappings(sourceObject, targetObject); // apply property mappings to target
-                    execScript("onCreate", onCreateScript);
-                    createTargetObject(targetObject);
-                    // falls through to link the newly created target
-                case UPDATE:
-                case LINK:
-                    if (targetObject == null) {
-                        throw new SynchronizationException("no target object to link");
-                    }
-                    if (linkObject._id == null) {
-                        // try to read again as it may have been created in a cascade
-                        linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
-                    }
-                    String targetId = targetObject.get("_id").required().asString();
-                    if (linkObject._id == null) {
-                        execScript("onLink", onLinkScript);
-                        linkObject.sourceId = sourceObject.get("_id").required().asString();
-                        linkObject.targetId = targetId;
-                        linkObject.reconId = reconId;
-                        linkObject.create();
-                    } else if (!targetId.equals(linkObject.targetId) || (reconId != null && !reconId.equals(linkObject.reconId))) {
-                        linkObject.targetId = targetId;
-                        linkObject.reconId = reconId;
-                        linkObject.update();
-                    }
-// TODO: Detect change of source id, and update link accordingly.
-                    if (action == Action.CREATE || action == Action.LINK) {
-                        break; // do not update target
-                    }
-                    if (sourceObject != null && targetObject != null) {
-                        JsonNode oldTarget = targetObject.copy();
-                        applyMappings(sourceObject, targetObject);
-                        execScript("onUpdate", onUpdateScript);
-                        if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
-                            updateTargetObject(targetObject);
+                    case CREATE:
+                        if (sourceObject == null) {
+                            throw new SynchronizationException("no source object to create target from");
                         }
-                    }
-                    break; // terminate UPDATE
-                case DELETE:
-                    if (targetObject != null) { // forgiving; does nothing if no target
-                        execScript("onDelete", onDeleteScript);
-                        deleteTargetObject(targetObject);
-                        targetObject = null;
-                    }
+                        if (targetObject != null) {
+                            throw new SynchronizationException("target object already exists");
+                        }
+                        targetObject = new JsonNode(new HashMap<String, Object>());
+                        applyMappings(sourceObject, targetObject); // apply property mappings to target
+                        execScript("onCreate", onCreateScript);
+                        createTargetObject(targetObject);
+                    // falls through to link the newly created target
+                    case UPDATE:
+                    case LINK:
+                        if (targetObject == null) {
+                            throw new SynchronizationException("no target object to link");
+                        }
+                        if (linkObject._id == null) {
+                            // try to read again as it may have been created in a cascade
+                            linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
+                        }
+                        String targetId = targetObject.get("_id").required().asString();
+                        if (linkObject._id == null) {
+                            execScript("onLink", onLinkScript);
+                            linkObject.sourceId = sourceObject.get("_id").required().asString();
+                            linkObject.targetId = targetId;
+                            linkObject.reconId = reconId;
+                            linkObject.create();
+                        } else if (!targetId.equals(linkObject.targetId) || (reconId != null && !reconId.equals(linkObject.reconId))) {
+                            linkObject.targetId = targetId;
+                            linkObject.reconId = reconId;
+                            linkObject.update();
+                        }
+// TODO: Detect change of source id, and update link accordingly.
+                        if (action == Action.CREATE || action == Action.LINK) {
+                            break; // do not update target
+                        }
+                        if (sourceObject != null && targetObject != null) {
+                            JsonNode oldTarget = targetObject.copy();
+                            applyMappings(sourceObject, targetObject);
+                            execScript("onUpdate", onUpdateScript);
+                            if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
+                                updateTargetObject(targetObject);
+                            }
+                        }
+                        break; // terminate UPDATE
+                    case DELETE:
+                        if (targetObject != null) { // forgiving; does nothing if no target
+                            execScript("onDelete", onDeleteScript);
+                            deleteTargetObject(targetObject);
+                            targetObject = null;
+                        }
                     // falls through to unlink the deleted target
-                case UNLINK:
-                    if (linkObject._id != null) { // forgiving; does nothing if no link exists
-                        execScript("onUnlink", onUnlinkScript);
-                        linkObject.delete();
-                    }
-                    break; // terminate DELETE and UNLINK
-                case EXCEPTION:
-                    throw new SynchronizationException(); // aborts change; recon reports
+                    case UNLINK:
+                        if (linkObject._id != null) { // forgiving; does nothing if no link exists
+                            execScript("onUnlink", onUnlinkScript);
+                            linkObject.delete();
+                        }
+                        break; // terminate DELETE and UNLINK
+                    case EXCEPTION:
+                        throw new SynchronizationException(); // aborts change; recon reports
                 }
             } catch (JsonNodeException jne) {
                 throw new SynchronizationException(jne);
@@ -621,7 +653,7 @@ class ObjectMapping implements SynchronizationListener {
                         if (o == null || !(o instanceof Boolean)) {
                             throw new SynchronizationException("Expecting boolean value from validSource");
                         }
-                        result = (Boolean)o;
+                        result = (Boolean) o;
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validSource script encountered exception", name, se);
                         throw new SynchronizationException(se);
@@ -651,7 +683,7 @@ class ObjectMapping implements SynchronizationListener {
                         if (o == null || !(o instanceof Boolean)) {
                             throw new SynchronizationException("Expecting boolean value from validTarget");
                         }
-                        result = (Boolean)o;
+                        result = (Boolean) o;
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validTarget script encountered exception", name, se);
                         throw new SynchronizationException(se);
@@ -728,8 +760,7 @@ class ObjectMapping implements SynchronizationListener {
                     } else {
                         situation = Situation.MISSING;
                     }
-                }
-                else { // source object not linked to target
+                } else { // source object not linked to target
                     JsonNode results = correlateTarget();
                     if (results == null) { // no correlationQuery defined
                         situation = Situation.ABSENT;
@@ -749,21 +780,21 @@ class ObjectMapping implements SynchronizationListener {
                         situation = Situation.AMBIGUOUS;
                     }
                 }
-            }
-            else { // mapping does not qualify for target
+            } else { // mapping does not qualify for target
                 if (linkObject._id != null) {
                     situation = Situation.UNQUALIFIED;
                 } else {
                     /*JsonNode results = correlateTarget();
                     if (null != results && results.size() == 1) {
-                        targetObject = readObject(qualifiedId(targetObjectSet,
-                                results.get((Integer) 0).required().get("_id").required().asString()));
-                        situation = Situation.UNASSIGNED;
+                    targetObject = readObject(qualifiedId(targetObjectSet,
+                    results.get((Integer) 0).required().get("_id").required().asString()));
+                    situation = Situation.UNASSIGNED;
                     } else {*/
-                        situation = null; // TODO: provide a situation for this?
+                    situation = null; // TODO: provide a situation for this?
                     /*}*/
                 }
             }
+            sourceStats.addSituation(sourceId, situation);
             LOGGER.debug("Mapping '{}' assessed situation of {} to be {}", new Object[]{name, sourceId, situation});
         }
 
@@ -784,7 +815,7 @@ class ObjectMapping implements SynchronizationListener {
                     if (query == null || !(query instanceof Map)) {
                         throw new SynchronizationException("Expected correlationQuery script to yield a Map");
                     }
-                    result = new JsonNode(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
+                    result = new JsonNode(queryTargetObjectSet((Map) query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {
                     LOGGER.debug("{} correlationQuery script encountered exception", name, se);
                     throw new SynchronizationException(se);
@@ -800,8 +831,10 @@ class ObjectMapping implements SynchronizationListener {
          * @return true if the {@code keys} has value not starting with "_" char
          */
         private boolean hasNonSpecialAttribute(Collection<String> keys) {
-            for (String attr: keys){
-                if (!attr.startsWith("_")) return true;
+            for (String attr : keys) {
+                if (!attr.startsWith("_")) {
+                    return true;
+                }
             }
             return false;
         }
@@ -846,6 +879,7 @@ class ObjectMapping implements SynchronizationListener {
                     situation = Situation.CONFIRMED;
                 }
             }
+            targetStats.addSituation(targetId, situation);
         }
     }
 
@@ -856,28 +890,21 @@ class ObjectMapping implements SynchronizationListener {
 
         /** TODO: Description. */
         public final SyncOperation op;
-        
         /** TODO: Description. */
         public Date timestamp;
-
         /** TODO: Description. */
         public Status status = ObjectMapping.Status.SUCCESS;
-
         /** TODO: Description. */
         public String sourceId;
-        
         /** TODO: Description. */
         public String targetId;
-        
         /** TODO: Description. */
         public String reconciling;
-
         /** TODO: Description. */
         public String message;
-
 // TODO: replace with proper formatter
         SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        
+
         public ReconEntry(SyncOperation op) {
             this.op = op;
         }
