@@ -18,12 +18,7 @@ package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // SLF4J
 import org.slf4j.Logger;
@@ -739,8 +734,14 @@ class ObjectMapping implements SynchronizationListener {
                     if (results == null) { // no correlationQuery defined
                         situation = Situation.ABSENT;
                     } else if (results.size() == 1) {
-                        targetObject = readObject(qualifiedId(targetObjectSet,
-                         results.get((Integer)0).required().get("_id").required().asString()));
+                        //TODO Optimize to get the entire object with one query if it's sufficeient
+                        JsonNode resultNode = results.get((Integer) 0).required();
+                        if (hasNonSpecialAttribute(resultNode.keys())) { //Assume this is a full object
+                            targetObject = resultNode;
+                        } else {
+                            targetObject = readObject(qualifiedId(targetObjectSet,
+                                    resultNode.get("_id").required().asString()));
+                        }
                         situation = Situation.FOUND;
                     } else if (results.size() == 0) {
                         situation = Situation.ABSENT;
@@ -753,7 +754,14 @@ class ObjectMapping implements SynchronizationListener {
                 if (linkObject._id != null) {
                     situation = Situation.UNQUALIFIED;
                 } else {
-                    situation = null; // TODO: provide a situation for this?
+                    /*JsonNode results = correlateTarget();
+                    if (null != results && results.size() == 1) {
+                        targetObject = readObject(qualifiedId(targetObjectSet,
+                                results.get((Integer) 0).required().get("_id").required().asString()));
+                        situation = Situation.UNASSIGNED;
+                    } else {*/
+                        situation = null; // TODO: provide a situation for this?
+                    /*}*/
                 }
             }
             LOGGER.debug("Mapping '{}' assessed situation of {} to be {}", new Object[]{name, sourceId, situation});
@@ -783,6 +791,19 @@ class ObjectMapping implements SynchronizationListener {
                 }
             }
             return result;
+        }
+
+        /**
+         * Primitive implementation to decide if the object is a "full" or a partial.
+         *
+         * @param keys attribute names of object
+         * @return true if the {@code keys} has value not starting with "_" char
+         */
+        private boolean hasNonSpecialAttribute(Collection<String> keys) {
+            for (String attr: keys){
+                if (!attr.startsWith("_")) return true;
+            }
+            return false;
         }
     }
 
