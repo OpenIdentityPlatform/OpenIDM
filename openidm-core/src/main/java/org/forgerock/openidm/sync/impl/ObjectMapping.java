@@ -794,7 +794,9 @@ class ObjectMapping implements SynchronizationListener {
                     /*}*/
                 }
             }
-            sourceStats.addSituation(sourceId, situation);
+            if (sourceStats != null){
+                sourceStats.addSituation(sourceId, situation);
+            }
             LOGGER.debug("Mapping '{}' assessed situation of {} to be {}", new Object[]{name, sourceId, situation});
         }
 
@@ -879,7 +881,9 @@ class ObjectMapping implements SynchronizationListener {
                     situation = Situation.CONFIRMED;
                 }
             }
-            targetStats.addSituation(targetId, situation);
+            if (targetStats != null){
+                targetStats.addSituation(targetId, situation);
+            }
         }
     }
 
