@@ -96,8 +96,8 @@ public class ConfigBootstrapHelper {
      * equivalent to the last part of its PID 
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
-    public static Map getRepoBootConfig(String repoType, BundleContext bundleContext) {
-        Map<String,Object> result = new HashMap<String,Object>();
+    public static JsonNode getRepoBootConfig(String repoType, BundleContext bundleContext) {
+        JsonNode result = new JsonNode(new HashMap<String,Object>());
         result.put(OPENIDM_REPO_TYPE, repoType);
         
         // System properties take precedence over configuration files
