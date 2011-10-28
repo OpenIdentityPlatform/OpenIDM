@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Property;
+import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
@@ -50,7 +51,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext context) {
         logger.trace("OrientDB bundle starting");
         
-        Map repoConfig = ConfigBootstrapHelper.getRepoBootConfig("orientdb", context);
+        JsonNode repoConfig = ConfigBootstrapHelper.getRepoBootConfig("orientdb", context);
          
         if (repoConfig != null) {
             logger.info("Bootstrapping OrientDB repository");

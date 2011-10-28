@@ -39,6 +39,7 @@ import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -77,14 +78,15 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     ObjectMapper mapper = new ObjectMapper();
 
     // Keys in the JSON configuration
+    public static final String CONFIG_CONNECTION = "connection";
     public static final String CONFIG_JNDI_NAME = "jndiName";
     public static final String CONFIG_JTA_NAME = "jtaName";
     public static final String CONFIG_DB_TYPE = "dbType";
-    public static final String CONFIG_DB_DRIVER = "dbDriver";
-    public static final String CONFIG_DB_URL = "dbUrl";
-    public static final String CONFIG_USER = "user";
+    public static final String CONFIG_DB_DRIVER = "driverClass";
+    public static final String CONFIG_DB_URL = "jdbcUrl";
+    public static final String CONFIG_USER = "username";
     public static final String CONFIG_PASSWORD = "password";
-    public static final String CONFIG_DB_SCHEMA = "dbSchema";
+    public static final String CONFIG_DB_SCHEMA = "defaultCatalog";
     public static final String CONFIG_MAX_BATCH_SIZE = "maxBatchSize";
 
     private boolean useDataSource;
@@ -489,10 +491,9 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
      * @param context
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
-    static RepoBootService getRepoBootService(Map repoConfig, BundleContext context) {
+    static RepoBootService getRepoBootService(JsonNode repoConfig, BundleContext context) {
         JDBCRepoService bootRepo = new JDBCRepoService();
-        JsonNode cfg = new JsonNode(repoConfig);
-        bootRepo.init(cfg, context);
+        bootRepo.init(repoConfig, context);
         return bootRepo;
     }
 
@@ -520,9 +521,11 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 throw new RuntimeException("JDBC repository not enabled.");
             }
 
+            JsonNode connectionConfig = config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
+
             // Data Source configuration
-            jndiName = config.get(CONFIG_JNDI_NAME).asString();
-            String jtaName = config.get(CONFIG_JTA_NAME).asString();
+            jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
+            String jtaName = connectionConfig.get(CONFIG_JTA_NAME).asString();
             if (jndiName != null && jndiName.trim().length() > 0) {
                 // Get DB connection via JNDI
                 logger.info("Using DB connection configured via Driver Manager");
@@ -551,14 +554,14 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 }
             } else {
                 // Get DB Connection via Driver Manager
-                dbDriver = config.get(CONFIG_DB_DRIVER).asString();
+                dbDriver = connectionConfig.get(CONFIG_DB_DRIVER).asString();
                 if (dbDriver == null || dbDriver.trim().length() == 0) {
                     throw new InvalidException("Either a JNDI name (" + CONFIG_JNDI_NAME + "), " +
                             "or a DB driver lookup (" + CONFIG_DB_DRIVER + ") needs to be configured to connect to a DB.");
                 }
-                dbUrl = config.get(CONFIG_DB_URL).required().asString();
-                user = config.get(CONFIG_USER).required().asString();
-                password = config.get(CONFIG_PASSWORD).defaultTo("").asString();
+                dbUrl = connectionConfig.get(CONFIG_DB_URL).required().asString();
+                user = connectionConfig.get(CONFIG_USER).required().asString();
+                password = connectionConfig.get(CONFIG_PASSWORD).defaultTo("").asString();
                 logger.info("Using DB connection configured via Driver Manager with Driver {} and URL", dbDriver, dbUrl);
                 try {
                     Class.forName(dbDriver);
@@ -567,16 +570,18 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     throw new InvalidException("Could not find configured database driver "
                             + dbDriver + " to start repository ", ex);
                 }
+                ds = DataSourceFactory.newInstance(connectionConfig);
+                useDataSource = true;
             }
 
             // Table handling configuration
-            String dbSchemaName = config.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
-            JsonNode genericQueries = config.get("queries").get("genericTables");
-            int maxBatchSize = config.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
+            String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
+            JsonNode genericQueries = connectionConfig.get("queries").get("genericTables");
+            int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
             tableHandlers = new HashMap<String, TableHandler>();           
             //TODO Make safe the database type detection
-            DatabaseType databaseType = DatabaseType.valueOf(config.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
+            DatabaseType databaseType = DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
             JsonNode defaultMapping = config.get("resourceMapping").get("default");
             if (!defaultMapping.isNull()) {

@@ -76,6 +76,25 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.jolbox</groupId>
+            <artifactId>bonecp</artifactId>
+            <version>0.7.1.RELEASE</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>10.0.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency-->
 
         <!-- Test Dependencies -->
         <dependency>
@@ -127,12 +146,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>!org.testng.annotations,*</Import-Package>
+                        <Import-Package>!org.testng.annotations,!sun.misc,!org.w3c.dom,*</Import-Package>
                         <!-- Need to be able to dynamically find DB drivers -->
                         <DynamicImport-Package>*</DynamicImport-Package>
                         <Export-Package>org.forgerock.openidm.repo.jdbc.metadata;version=${openidm.version},org.forgerock.openidm.repo.jdbc;version=${openidm.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.jdbc.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.jdbc.impl.Activator</Bundle-Activator>
+                        <Embed-Dependency>bonecp;guava;scope=provided</Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>

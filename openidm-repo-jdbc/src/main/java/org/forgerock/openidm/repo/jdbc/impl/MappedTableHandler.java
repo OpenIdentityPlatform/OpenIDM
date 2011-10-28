@@ -180,11 +180,15 @@ public class MappedTableHandler implements TableHandler {
             if (rawValue instanceof String || rawValue == null) {
                 propValue = (String) rawValue;
             } else {
-                logger.warn("Value for col " + colPos + "  is not a STRING!!! " + rawValue.getClass() + " : " + rawValue);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Value for col " + colPos + "  is not a STRING!!! " + rawValue.getClass() + " : " + rawValue);
+                } else {
+                    logger.warn("Value for col " + colPos + "  is not a STRING!!! " + rawValue.getClass());
+                }
                 propValue = rawValue.toString(); // TODO: temp work-around
             }
 
-            createStatement.setString(colPos, (String) propValue); 
+            createStatement.setString(colPos, propValue);
             colPos++;
         }
         
