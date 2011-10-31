@@ -73,9 +73,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
             <version>1.4.4</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>
