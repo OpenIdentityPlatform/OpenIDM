@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.InvalidException;
 
 import org.slf4j.Logger;
@@ -65,7 +65,7 @@ public class DBHelper {
      * @throws org.forgerock.openidm.config.InvalidException
      */
     public static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
-            int minSize, int maxSize, JsonNode completeConfig) throws InvalidException {
+            int minSize, int maxSize, JsonValue completeConfig) throws InvalidException {
         logger.trace("Initializing DB Pool");
         
         // Enable transaction log
@@ -153,7 +153,7 @@ public class DBHelper {
     /**
      * Ensures the DB is present in the expected form.
      */
-    private static void checkDB(String dbURL, String user, String password, JsonNode completeConfig) throws InvalidException{
+    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig) throws InvalidException{
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
         ODatabaseDocumentTx db = null;
         try {
@@ -162,10 +162,10 @@ public class DBHelper {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
                 // Check if structure changed
-                JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
                 populateSample(db, completeConfig);
             } else { 
-                JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
                 logger.info("DB does not exist, creating {}", dbURL);
                 db.create(); 	       
                 populateSample(db, completeConfig);
@@ -178,18 +178,18 @@ public class DBHelper {
     }
 
     // TODO: Review the initialization mechanism
-    private static void populateSample(ODatabaseDocumentTx db, JsonNode completeConfig) throws InvalidException {
+    private static void populateSample(ODatabaseDocumentTx db, JsonValue completeConfig) throws InvalidException {
         
-        JsonNode dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+        JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
         if (dbStructure == null) {
             logger.warn("No database structure defined in the configuration." + completeConfig);
         } else {
-            JsonNode orientDBClasses = dbStructure.get(OrientDBRepoService.CONFIG_ORIENTDB_CLASS);
+            JsonValue orientDBClasses = dbStructure.get(OrientDBRepoService.CONFIG_ORIENTDB_CLASS);
             OSchema schema = db.getMetadata().getSchema();
             
             // Default always to create Config class for bootstrapping
             if (orientDBClasses == null || orientDBClasses.isNull()) {
-                orientDBClasses = new JsonNode(new java.util.HashMap());
+                orientDBClasses = new JsonValue(new java.util.HashMap());
             }
             
             Map cfgIndexes = new java.util.HashMap();
@@ -199,7 +199,7 @@ public class DBHelper {
             if (orientDBClasses != null) {
                 for (Object key : orientDBClasses.keys()) {
                     String orientClassName = (String) key;
-                    JsonNode orientClassConfig = (JsonNode) orientDBClasses.get(orientClassName);
+                    JsonValue orientClassConfig = (JsonValue) orientDBClasses.get(orientClassName);
                     if (schema.existsClass(orientClassName)) {
                         // TODO: update indexes too if changed
                         logger.trace("OrientDB class {} already exists, skipping", orientClassName);
@@ -207,8 +207,8 @@ public class DBHelper {
                         logger.info("Creating OrientDB class {}", orientClassName);
                         OClass orientClass = schema.createClass(orientClassName, db.getStorage().addCluster(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL));
                         
-                        JsonNode indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
-                        for (JsonNode index : indexes) {
+                        JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
+                        for (JsonValue index : indexes) {
                             String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
                             String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
                             

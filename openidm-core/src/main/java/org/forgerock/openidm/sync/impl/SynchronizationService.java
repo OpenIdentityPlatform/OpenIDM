@@ -47,8 +47,8 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
 // OpenIDM
@@ -134,13 +134,13 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
     @Activate
     protected void activate(ComponentContext context) {
         this.context = context;
-        JsonNode config = new JsonNode(new JSONEnhancedConfig().getConfiguration(context));
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         try {
-            for (JsonNode node : config.get("mappings").expect(List.class)) {
-                mappings.add(new ObjectMapping(this, node)); // throws JsonNodeException
+            for (JsonValue jv : config.get("mappings").expect(List.class)) {
+                mappings.add(new ObjectMapping(this, jv)); // throws JsonValueException
             }
-        } catch (JsonNodeException jne) {
-            throw new ComponentException("Configuration error", jne);
+        } catch (JsonValueException jve) {
+            throw new ComponentException("Configuration error", jve);
         }
     }
 
@@ -189,7 +189,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
     }
 
     @Override
-    public void onCreate(String id, JsonNode object) throws SynchronizationException {
+    public void onCreate(String id, JsonValue object) throws SynchronizationException {
 // TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onCreate(id, object);
@@ -197,7 +197,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
     }
 
     @Override
-    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
+    public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
 // TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onUpdate(id, oldValue, newValue);
@@ -216,7 +216,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
     public void execute(Map<String, Object> context) throws ExecutionException {
 // TODO: Deprecate this; use resource interface instead.
         try {
-            JsonNode params = new JsonNode(context).get(CONFIGURED_INVOKE_CONTEXT);
+            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
             if ("reconcile".equals(action)) { // "action": "reconcile"
                 if (params.get("mapping").required().isString()) {
@@ -228,8 +228,8 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
                 throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
                         + "valid action(s) are: 'reconcile'");
             }
-        } catch (JsonNodeException jne) {
-            throw new ExecutionException(jne);
+        } catch (JsonValueException jve) {
+            throw new ExecutionException(jve);
         } catch (SynchronizationException se) {
             throw new ExecutionException(se);
         }
@@ -287,7 +287,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
             throw new NotFoundException();
         }
         Map<String, Object> result = null;
-        JsonNode _params = new JsonNode(params, new JsonPointer("params"));
+        JsonValue _params = new JsonValue(params, new JsonPointer("params"));
         Action action = _params.get("_action").required().asEnum(Action.class);
         try {
             switch (action) {

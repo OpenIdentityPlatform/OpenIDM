@@ -25,7 +25,7 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
@@ -65,7 +65,7 @@ public class ObjectClassInfoHelperTest {
         InputStream inputStream = ObjectClassInfoHelperTest.class.getResourceAsStream("/config/SystemSchemaConfiguration.json");
         Assert.assertNotNull(inputStream);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode configuration = new JsonNode(mapper.readValue(inputStream, Map.class));
+        JsonValue configuration = new JsonValue(mapper.readValue(inputStream, Map.class));
 
         ObjectClassInfoHelper helper = new ObjectClassInfoHelper(configuration.get("objectTypes").get("__ACCOUNT__").asMap());
         Map<String, Object> source = new HashMap<String, Object>();

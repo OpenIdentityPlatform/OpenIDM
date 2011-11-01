@@ -52,8 +52,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.config.InvalidException;

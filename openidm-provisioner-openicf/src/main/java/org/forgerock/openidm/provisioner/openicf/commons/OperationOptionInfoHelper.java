@@ -26,8 +26,8 @@
 
 package org.forgerock.openidm.provisioner.openicf.commons;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.identityconnectors.framework.common.objects.OperationOptionInfo;
@@ -67,11 +67,11 @@ public class OperationOptionInfoHelper {
         attributes = Collections.emptySet();
     }
 
-    public OperationOptionInfoHelper(JsonNode configuration) throws JsonNodeException, SchemaException {
+    public OperationOptionInfoHelper(JsonValue configuration) throws JsonValueException, SchemaException {
         denied = configuration.get(OPERATION_OPTION_DENIED).defaultTo(false).asBoolean();
-        JsonNode onDenyNode = configuration.get(OPERATION_OPTION_ON_DENY);
-        onDeny = onDenyNode.isNull() ? OperationOptionInfoHelper.OnDenyAction.DO_NOTHING : onDenyNode.asEnum(OnDenyAction.class);
-        JsonNode operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
+        JsonValue onDenyValue = configuration.get(OPERATION_OPTION_ON_DENY);
+        onDeny = onDenyValue.isNull() ? OperationOptionInfoHelper.OnDenyAction.DO_NOTHING : onDenyValue.asEnum(OnDenyAction.class);
+        JsonValue operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
             attributes = new HashSet<AttributeInfoHelper>();
             for (Map.Entry<String, Object> entry : operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class).asMap().entrySet()) {
@@ -80,9 +80,9 @@ public class OperationOptionInfoHelper {
         } else {
             attributes = Collections.emptySet();
         }
-        JsonNode supportedObjectTypesNode = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
-        if (supportedObjectTypesNode.isList()) {
-            List<Object> source = supportedObjectTypesNode.asList();
+        JsonValue supportedObjectTypesValue = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
+        if (supportedObjectTypesValue.isList()) {
+            List<Object> source = supportedObjectTypesValue.asList();
             this.supportedObjectTypes = new HashSet<String>(source.size());
             for (Object o : source) {
                 if (o instanceof String) {
@@ -93,20 +93,20 @@ public class OperationOptionInfoHelper {
 
     }
 
-    public OperationOptionInfoHelper(JsonNode configuration, OperationOptionInfoHelper globalOption) throws JsonNodeException, SchemaException {
+    public OperationOptionInfoHelper(JsonValue configuration, OperationOptionInfoHelper globalOption) throws JsonValueException, SchemaException {
         denied = configuration.get(OPERATION_OPTION_DENIED).defaultTo(globalOption.isDenied()).asBoolean();
-        JsonNode onDenyNode = configuration.get(OPERATION_OPTION_ON_DENY);
-        onDeny = onDenyNode.isNull() ? globalOption.getOnDeny() : onDenyNode.asEnum(OnDenyAction.class);
+        JsonValue onDenyValue = configuration.get(OPERATION_OPTION_ON_DENY);
+        onDeny = onDenyValue.isNull() ? globalOption.getOnDeny() : onDenyValue.asEnum(OnDenyAction.class);
         attributes = new HashSet<AttributeInfoHelper>(globalOption.getAttributes());
-        JsonNode operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
+        JsonValue operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
             for (Map.Entry<String, Object> entry : operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class).asMap().entrySet()) {
                 attributes.add(new AttributeInfoHelper(entry.getKey(), true, (Map<String, Object>) entry.getValue()));
             }
         }
-        JsonNode supportedObjectTypesNode = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
-        if (supportedObjectTypesNode.isList()) {
-            List<Object> source = supportedObjectTypesNode.asList();
+        JsonValue supportedObjectTypesValue = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
+        if (supportedObjectTypesValue.isList()) {
+            List<Object> source = supportedObjectTypesValue.asList();
             this.supportedObjectTypes = new HashSet<String>(source.size());
             for (Object o : source) {
                 if (o instanceof String) {

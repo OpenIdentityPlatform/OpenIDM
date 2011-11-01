@@ -24,8 +24,8 @@ import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.Patch;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPatch;
 
 /**
@@ -36,7 +36,7 @@ import org.forgerock.json.fluent.JsonPatch;
 public class JsonPatchWrapper implements Patch {
 
     /** TODO: Description. */
-    private JsonNode diff;
+    private JsonValue diff;
 
     /**
      * TODO: Description.
@@ -44,7 +44,7 @@ public class JsonPatchWrapper implements Patch {
      * @param diff TODO.
      * @throws NullPointerException if {@code patch} is {@code null}.
      */
-    public JsonPatchWrapper(JsonNode diff) {
+    public JsonPatchWrapper(JsonValue diff) {
         if (diff == null) {
             throw new NullPointerException();
         }
@@ -54,13 +54,13 @@ public class JsonPatchWrapper implements Patch {
     @Override
     public void apply(Map<String, Object> object) throws ConflictException {
         try {
-            JsonNode node = new JsonNode(object);
-            JsonPatch.patch(node, diff);
-            if (node.getValue() != object) {
-                throw new ConflictException("replacing the root node is not supported");
+            JsonValue jv = new JsonValue(object);
+            JsonPatch.patch(jv, diff);
+            if (jv.getValue() != object) {
+                throw new ConflictException("replacing the root value is not supported");
             }
-        } catch (JsonNodeException jne) {
-            throw new ConflictException(jne);
+        } catch (JsonValueException jve) {
+            throw new ConflictException(jve);
         }
     }
 }

@@ -26,7 +26,7 @@ package org.forgerock.openidm.metadata;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 
 /**
@@ -53,5 +53,5 @@ public interface MetaDataProvider {
      * @throws WaitForMetaData thrown if this provider knows that the given configuration 
      * has associated meta-data, but the meta-data is not yet available. 
      */
-    List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) throws WaitForMetaData;
+    List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) throws WaitForMetaData;
 }

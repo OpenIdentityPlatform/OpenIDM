@@ -24,7 +24,7 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl.script;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.api.operations.ScriptOnConnectorApiOp;
 import org.identityconnectors.framework.api.operations.ScriptOnResourceApiOp;
@@ -73,7 +73,7 @@ public class ConnectorScript {
     }
 
     private void init(Map<String, Object> params) {
-        JsonNode _params = new JsonNode(params);
+        JsonValue _params = new JsonValue(params);
         getScriptContextBuilder().setScriptLanguage(_params.get(SCRIPT_TYPE).required().expect(String.class).asString());
         if (getScriptContextBuilder().getScriptLanguage().equalsIgnoreCase("SHELL")) {
             getOperationOptionsBuilder().setOption("variablePrefix", "OPENIDM_");

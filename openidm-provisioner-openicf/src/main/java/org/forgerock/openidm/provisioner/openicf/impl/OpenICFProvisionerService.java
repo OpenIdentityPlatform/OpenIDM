@@ -29,7 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -139,7 +139,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     protected void activate(ComponentContext context) {
         this.context = context;
         ConnectorInfo connectorInfo = null;
-        JsonNode jsonConfiguration = null;
+        JsonValue jsonConfiguration = null;
         ConnectorReference connectorReference = null;
         try {
             jsonConfiguration = getConfiguration(context);
@@ -216,15 +216,15 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public Map<String, Object> getStatus() {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         try {
-            JsonNode node = new JsonNode(result);
-            node.put("name", systemIdentifier.getName());
+            JsonValue jv = new JsonValue(result);
+            jv.put("name", systemIdentifier.getName());
 
             //TODO component.id and component.name can cause problems in JsonPath
-            node.put(ComponentConstants.COMPONENT_ID, context.getProperties().get(ComponentConstants.COMPONENT_ID));
-            node.put(ComponentConstants.COMPONENT_NAME, context.getProperties().get(ComponentConstants.COMPONENT_NAME));
+            jv.put(ComponentConstants.COMPONENT_ID, context.getProperties().get(ComponentConstants.COMPONENT_ID));
+            jv.put(ComponentConstants.COMPONENT_NAME, context.getProperties().get(ComponentConstants.COMPONENT_NAME));
             ConnectorFacade connectorFacade = getConnectorFacade(operationHelperBuilder.getRuntimeAPIConfiguration());
             connectorFacade.test();
-            node.put("ok", true);
+            jv.put("ok", true);
         } catch (Exception e) {
             result.put("error", e.getMessage());
         }
@@ -848,13 +848,13 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * @return The new updated stage object. This will be the {@code previousStage} at next call.
      * @throws IllegalArgumentException      if the value of {@code connectorData} can not be converted to {@link SyncToken}.
      * @throws UnsupportedOperationException if the {@link SyncApiOp} operation is not implemented in connector.
-     * @throws org.forgerock.json.fluent.JsonNodeException
+     * @throws org.forgerock.json.fluent.JsonValueException
      *                                       if the  {@code previousStage} is not Map.
-     * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonNode)} or any exception happed inside the connector.
+     * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonValue)} or any exception happed inside the connector.
      */
-    public JsonNode liveSynchronize(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener) {
-        JsonNode stage = previousStage != null ? previousStage.copy() : new JsonNode(new LinkedHashMap<String, Object>());
-        JsonNode connectorData = stage.get("connectorData");
+    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener) {
+        JsonValue stage = previousStage != null ? previousStage.copy() : new JsonValue(new LinkedHashMap<String, Object>());
+        JsonValue connectorData = stage.get("connectorData");
         SyncToken token = null;
         if (!connectorData.isNull()) {
             if (connectorData.isMap()) {
@@ -907,7 +907,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                                             if (null != syncDelta.getPreviousUid()) {
                                                 deltaObject.put("_previous-id", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                             }
-                                            synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonNode(deltaObject));
+                                            synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
                                             break;
                                         case DELETE:
                                             synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString());
@@ -952,8 +952,8 @@ public class OpenICFProvisionerService implements ProvisionerService {
     }
 
 
-    private JsonNode getConfiguration(ComponentContext componentContext) {
-        JsonNode config = (new JSONEnhancedConfig()).getConfigurationAsJson(componentContext);
+    private JsonValue getConfiguration(ComponentContext componentContext) {
+        JsonValue config = (new JSONEnhancedConfig()).getConfigurationAsJson(componentContext);
         if (null != cryptoService) {
             config = cryptoService.decrypt(config);
         }

@@ -42,9 +42,6 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
-
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.objset.BadRequestException;

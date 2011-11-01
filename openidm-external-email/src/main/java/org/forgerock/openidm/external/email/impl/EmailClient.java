@@ -34,8 +34,6 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.forgerock.json.fluent.JsonNode;
-
 /**
  *
  * @author gael

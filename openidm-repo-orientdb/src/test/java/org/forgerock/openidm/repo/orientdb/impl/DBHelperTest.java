@@ -29,7 +29,7 @@ import java.util.Map;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
 import static org.fest.assertions.Assertions.assertThat;
@@ -43,7 +43,7 @@ public class DBHelperTest {
         String user = "admin";
         String password = "admin";
         Map map = new HashMap();
-        JsonNode completeConfig = new JsonNode(map);
+        JsonValue completeConfig = new JsonValue(map);
         int minSize = 5;
         int maxSize = 20;
         ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize, completeConfig);

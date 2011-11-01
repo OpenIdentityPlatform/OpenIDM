@@ -39,8 +39,8 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.AuditService;
@@ -264,7 +264,7 @@ public class AuditServiceImpl implements AuditService {
     @Activate
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        JsonNode config = null;
+        JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             auditLoggers = getAuditLoggers(config, compContext);
@@ -277,7 +277,7 @@ public class AuditServiceImpl implements AuditService {
         logger.info("Audit service started.");
     }
 
-    Map<String, List<String>> getFilters(JsonNode config) {
+    Map<String, List<String>> getFilters(JsonValue config) {
         Map<String, List<String>> configFilters = new HashMap<String, List<String>>();
 
         Map<String, Object> eventTypes = config.get("eventTypes").asMap();
@@ -286,12 +286,12 @@ public class AuditServiceImpl implements AuditService {
         }
         for (Map.Entry<String, Object> eventType : eventTypes.entrySet()) {
             String eventTypeName = eventType.getKey();
-            JsonNode eventTypeNode = new JsonNode(eventType.getValue());
-            JsonNode filterActions = eventTypeNode.get("filter").get("actions");
+            JsonValue eventTypeValue = new JsonValue(eventType.getValue());
+            JsonValue filterActions = eventTypeValue.get("filter").get("actions");
             // TODO: proper filter mechanism
             if (!filterActions.isNull()) {
                 List<String> filter = new ArrayList<String>();
-                for (JsonNode action : filterActions) {
+                for (JsonValue action : filterActions) {
                     Enum actionEnum = action.asEnum(Action.class);
                     filter.add(actionEnum.toString());
                 }
@@ -301,7 +301,7 @@ public class AuditServiceImpl implements AuditService {
         return configFilters;
     }
 
-    List<AuditLogger> getAuditLoggers(JsonNode config, ComponentContext compContext) {
+    List<AuditLogger> getAuditLoggers(JsonValue config, ComponentContext compContext) {
         List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
         List logTo = config.get(CONFIG_LOG_TO).asList();
         for (Map entry : (List<Map>)logTo) {

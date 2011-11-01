@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
 // OpenIDM
@@ -72,28 +72,28 @@ class PropertyMapping {
      * @param value TODO.
      * @throws SynchronizationException TODO.
      */
-    private static void put(JsonNode targetObject, JsonPointer pointer, Object value) throws SynchronizationException {
+    private static void put(JsonValue targetObject, JsonPointer pointer, Object value) throws SynchronizationException {
         String[] tokens = pointer.toArray();
         if (tokens.length == 0) {
             throw new SynchronizationException("cannot replace root object");
         }
-        JsonNode node = targetObject;
+        JsonValue jv = targetObject;
         for (int n = 0; n < tokens.length - 1; n++) {
-            JsonNode child = node.get(tokens[n]);
-            if (child.isNull() && !node.isDefined(tokens[n])) { 
+            JsonValue child = jv.get(tokens[n]);
+            if (child.isNull() && !jv.isDefined(tokens[n])) { 
                 try {
-                    node.put(tokens[n], new HashMap());
-                } catch (JsonNodeException jne) {
-                    throw new SynchronizationException(jne);
+                    jv.put(tokens[n], new HashMap());
+                } catch (JsonValueException jve) {
+                    throw new SynchronizationException(jve);
                 }
-                child = node.get(tokens[n]);
+                child = jv.get(tokens[n]);
             }
-            node = child;
+            jv = child;
         }
         try {
-            node.put(tokens[tokens.length - 1], value);
-        } catch (JsonNodeException jne) {
-            throw new SynchronizationException(jne);
+            jv.put(tokens[tokens.length - 1], value);
+        } catch (JsonValueException jve) {
+            throw new SynchronizationException(jve);
         }
     }
 
@@ -102,9 +102,9 @@ class PropertyMapping {
      *
      * @param service
      * @param config TODO.
-     * @throws JsonNodeException TODO.
+     * @throws JsonValueException TODO.
      */
-    public PropertyMapping(SynchronizationService service, JsonNode config) throws JsonNodeException {
+    public PropertyMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
         this.service = service;
         condition = Scripts.newInstance("PropertyMapping", config.get("condition"));
         targetPointer = config.get("target").required().asPointer();
@@ -120,7 +120,7 @@ class PropertyMapping {
      * @param targetObject TODO.
      * @throws SynchronizationException TODO.
      */
-    public void apply(JsonNode sourceObject, JsonNode targetObject) throws SynchronizationException {
+    public void apply(JsonValue sourceObject, JsonValue targetObject) throws SynchronizationException {
         if (condition != null) { // optional property mapping condition
             Map<String, Object> scope = service.newScope();
             try {
@@ -129,9 +129,9 @@ class PropertyMapping {
                 if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
                     return; // property mapping is not applicable; do not apply
                 }
-            } catch (JsonNodeException jne) {
-                LOGGER.warn("Unexpected JSON node exception", jne);
-                throw new SynchronizationException(jne);
+            } catch (JsonValueException jve) {
+                LOGGER.warn("Unexpected JSON value exception", jve);
+                throw new SynchronizationException(jve);
             } catch (ScriptException se) {
                 LOGGER.warn("Property mapping " + targetPointer + " condition script encountered exception", se);
                 throw new SynchronizationException(se);
@@ -139,9 +139,9 @@ class PropertyMapping {
         }
         Object result = null;
         if (sourcePointer != null) { // optional source property
-            JsonNode node = sourceObject.get(sourcePointer);
-            if (node != null) { // null indicates no value
-                result = node.getValue();
+            JsonValue jv = sourceObject.get(sourcePointer);
+            if (jv != null) { // null indicates no value
+                result = jv.getValue();
             }
         }
         if (transform != null) { // optional property mapping script

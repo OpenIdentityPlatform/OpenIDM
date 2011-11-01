@@ -16,12 +16,12 @@
 
 package org.forgerock.openidm.script;
 
-// JSON-Fluent
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+// JSON Fluent
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 /**
- * Instantiates a script object, based-on the supplied configuration node. Each scripting
+ * Instantiates a script object, based-on the supplied configuration value. Each scripting
  * language implementation should implement this interface and add its class name to the
  * {@code META-INF/services/org.forgerock.openidm.script.ScriptFactory} file.
  *
@@ -30,19 +30,20 @@ import org.forgerock.json.fluent.JsonNodeException;
 public interface ScriptFactory {
 
     /**
-     * Returns a new script object for the provided script configuration node. If the
+     * Returns a new script object for the provided script configuration value. If the
      * factory does not match the configuration (e.g. different {@code "type"} property,
      * then {@code null} is returned.
      * <p>
-     * The configuration node must be a map, and have a {@code "type"} string property, which
-     * contains the media type of the script (e.g. {@code "text/javascript"}). Implementations
-     * of script factories are free to define any other properties in the configuration node.
+     * The configuration value must contain a {@code Map}, and have a {@code "type"} string
+     * member, which contains the media type of the script (e.g. {@code "text/javascript"}).
+     * Implementations of script factories are free to define any other properties in the
+     * configuration value.
      *
      * @param name unique name of the script. Value MUST be in rfc2396
      * Uniform Resource Identifiers (URI) compliant format.
-     * @param config the configuration node for the script; must be a map.
+     * @param config the configuration value for the script; must contain a {@code Map}.
      * @return a new script instance, or {@code null} if the factory could not create it.
-     * @throws JsonNodeException if the configuration object or script is malformed.
+     * @throws JsonValueException if the configuration object or script is malformed.
      */
-    Script newInstance(String name, JsonNode config) throws JsonNodeException;
+    Script newInstance(String name, JsonValue config) throws JsonValueException;
 }

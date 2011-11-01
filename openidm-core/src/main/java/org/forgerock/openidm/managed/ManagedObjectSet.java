@@ -32,8 +32,8 @@ import org.osgi.framework.ServiceReference;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
 // OpenIDM
@@ -74,7 +74,7 @@ class ManagedObjectSet implements ObjectSet {
     private String name;
 
     /** The schema to use to validate the structure and content of the managed object. */
-    private JsonNode schema;
+    private JsonValue schema;
 
     /** Script to execute when the creation of an object is being requested. */
     private Script onCreate;
@@ -105,9 +105,9 @@ class ManagedObjectSet implements ObjectSet {
      *
      * @param service
      * @param config configuration object to use to initialize managed object set.
-     * @throws JsonNodeException if the configuration is malformed.
+     * @throws JsonValueException if the configuration is malformed.
      */
-    public ManagedObjectSet(ManagedObjectService service, JsonNode config) throws JsonNodeException {
+    public ManagedObjectSet(ManagedObjectService service, JsonValue config) throws JsonValueException {
         this.service = service;
         name = config.get("name").required().asString();
         schema = config.get("schema").expect(Map.class); // TODO: parse into json-schema object
@@ -116,7 +116,7 @@ class ManagedObjectSet implements ObjectSet {
         onUpdate = Scripts.newInstance("ManagedObjectSet", config.get("onUpdate"));
         onDelete = Scripts.newInstance("ManagedObjectSet", config.get("onDelete"));
         onValidate = Scripts.newInstance("ManagedObjectSet", config.get("onValidate"));
-        for (JsonNode property : config.get("properties").expect(List.class)) {
+        for (JsonValue property : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(service, property));
         }
         LOGGER.debug("Instantiated managed object set: {}", name);
@@ -153,15 +153,15 @@ class ManagedObjectSet implements ObjectSet {
      *
      * @param type the type of script being executed.
      * @param script the script to execute, or {@code null} to execute nothing.
-     * @param node the JSON node whose value is to be populated in the script scope.
+     * @param value the object to be populated in the script scope.
      * @throws ForbiddenException if the script throws an exception.
      * @throws InternalServerErrorException if any other exception is encountered.
      */
-    private void execScript(String type, Script script, JsonNode node)
+    private void execScript(String type, Script script, JsonValue value)
     throws ForbiddenException, InternalServerErrorException {
         if (script != null) {
             Map<String, Object> scope = service.newScope();
-            scope.put("object", node.getValue());
+            scope.put("object", value.getValue());
             try {
                 script.exec(scope); // allows direct modification to the object
             } catch (ScriptThrownException ste) {
@@ -178,19 +178,19 @@ class ManagedObjectSet implements ObjectSet {
      * Executes all of the necessary trigger scripts when an object is retrieved from the
      * repository.
      *
-     * @param node the JSON node that was retrieved from the repository.
+     * @param value the JSON value that was retrieved from the repository.
      * @throws ForbiddenException if a validation trigger throws an exception.
      * @throws InternalServerErrorException if any other exception occurs.
      */
-    private void onRetrieve(JsonNode node) throws ForbiddenException, InternalServerErrorException {
-        execScript("onRetrieve", onRetrieve, node);
+    private void onRetrieve(JsonValue value) throws ForbiddenException, InternalServerErrorException {
+        execScript("onRetrieve", onRetrieve, value);
         for (ManagedObjectProperty property : properties) {
-            property.onRetrieve(node);
+            property.onRetrieve(value);
         }
 // TODO: schema validation here (w. optimization), using on-the-fly decryption transformations
-        execScript("onValidate", onValidate, node);
+        execScript("onValidate", onValidate, value);
         for (ManagedObjectProperty property : properties) {
-            property.onValidate(node);
+            property.onValidate(value);
         }
     }
 
@@ -198,32 +198,32 @@ class ManagedObjectSet implements ObjectSet {
      * Executes all of the necessary trigger scripts when an object is to be stored in the
      * repository.
      *
-     * @param node the JSON node to be stored in the repository.
+     * @param value the JSON value to be stored in the repository.
      * @throws ForbiddenException if a validation trigger throws an exception.
      * @throws InternalServerErrorException if any other exception occurs.
      */
-    private void onStore(JsonNode node) throws ForbiddenException, InternalServerErrorException {
+    private void onStore(JsonValue value) throws ForbiddenException, InternalServerErrorException {
         for (ManagedObjectProperty property : properties) {
-            property.onValidate(node);
+            property.onValidate(value);
         }
-        execScript("onValidate", onValidate, node);
+        execScript("onValidate", onValidate, value);
 // TODO: schema validation here (w. optimizations)
         for (ManagedObjectProperty property : properties) {
-            property.onStore(node); // includes per-property encryption
+            property.onStore(value); // includes per-property encryption
         }
-        execScript("onStore", onStore, node);
+        execScript("onStore", onStore, value);
     }
 
     /**
      * TODO: Description.
      *
-     * @param node TODO.
+     * @param value TODO.
      * @return TODO.
      * @throws InternalServerErrorException TODO.
      */ 
-    private JsonNode decrypt(JsonNode node) throws InternalServerErrorException {
+    private JsonValue decrypt(JsonValue value) throws InternalServerErrorException {
         try {
-            return service.getCryptoService().decrypt(node); // makes a copy, which we can modify
+            return service.getCryptoService().decrypt(value); // makes a copy, which we can modify
         } catch (JsonException je) {
             throw new InternalServerErrorException(je);
         }
@@ -236,36 +236,36 @@ class ManagedObjectSet implements ObjectSet {
      * @return TODO.
      * @throws InternalServerErrorException TODO.
      */ 
-    private JsonNode decrypt(Map<String, Object> object) throws InternalServerErrorException {
-        return decrypt(new JsonNode(object));
+    private JsonValue decrypt(Map<String, Object> object) throws InternalServerErrorException {
+        return decrypt(new JsonValue(object));
     }
 
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Create name={} id={}", name, id);
-        JsonNode node = decrypt(object); // decrypt any incoming encrypted properties
-        execScript("onCreate", onCreate, node);
-        onStore(node); // includes per-property encryption
-        JsonNode _id = node.get("_id");
+        JsonValue jv = decrypt(object); // decrypt any incoming encrypted properties
+        execScript("onCreate", onCreate, jv);
+        onStore(jv); // includes per-property encryption
+        JsonValue _id = jv.get("_id");
         if (_id.isString()) {
             id = _id.asString(); // override requested ID with one specified in object
         }
         if (id == null) { // default is to assign a UUID identifier
             id = UUID.randomUUID().toString();
-            node.put("_id", id);
+            jv.put("_id", id);
         }
-        service.getRouter().create(repoId(id), node.asMap());
-        ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, node.asMap(), Status.SUCCESS);
+        service.getRouter().create(repoId(id), jv.asMap());
+        ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, jv.asMap(), Status.SUCCESS);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onCreate(managedId(id), node);
+                listener.onCreate(managedId(id), jv);
             }
         } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);
         }
-        // workaround until JsonNode works its way into the ObjectSet API
-        object.put("_id", node.get("_id").getValue());
-        object.put("_rev", node.get("_rev").getValue());
+        // workaround until JsonValue works its way into the ObjectSet API
+        object.put("_id", jv.get("_id").getValue());
+        object.put("_rev", jv.get("_rev").getValue());
     }
 
     @Override
@@ -274,14 +274,14 @@ class ManagedObjectSet implements ObjectSet {
         if (id == null) {
             throw new ForbiddenException("cannot read entire object set");
         }
-        JsonNode node = new JsonNode(service.getRouter().read(repoId(id)));
-        onRetrieve(node);
-        execScript("onRead", onRead, node);
-        ActivityLog.log(service.getRouter(), Action.READ, "", managedId(id), node.asMap(), null, Status.SUCCESS);
-        return node.asMap();
+        JsonValue jv = new JsonValue(service.getRouter().read(repoId(id)));
+        onRetrieve(jv);
+        execScript("onRead", onRead, jv);
+        ActivityLog.log(service.getRouter(), Action.READ, "", managedId(id), jv.asMap(), null, Status.SUCCESS);
+        return jv.asMap();
     }
 
-    private void update(String id, String rev, JsonNode oldValue, JsonNode newValue) throws ObjectSetException {
+    private void update(String id, String rev, JsonValue oldValue, JsonValue newValue) throws ObjectSetException {
         if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
             return; // do nothing
         }
@@ -316,9 +316,9 @@ class ManagedObjectSet implements ObjectSet {
         if (id == null) {
             throw new ForbiddenException("cannot update entire object set");
         }
-        JsonNode _new = decrypt(object); // decrypt any incoming encrypted properties
+        JsonValue _new = decrypt(object); // decrypt any incoming encrypted properties
         Map<String, Object> encrypted = service.getRouter().read(repoId(id));
-        JsonNode decrypted = decrypt(encrypted);
+        JsonValue decrypted = decrypt(encrypted);
         update(id, rev, decrypted, _new);
         ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), encrypted, _new.asMap(), Status.SUCCESS);
         object.put("_id", _new.get("_id").getValue());
@@ -354,8 +354,8 @@ class ManagedObjectSet implements ObjectSet {
         if (id == null) {
             throw new ForbiddenException("cannot patch entire object set");
         }
-        JsonNode oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
-        JsonNode newValue = oldValue.copy();
+        JsonValue oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
+        JsonValue newValue = oldValue.copy();
         patch.apply(newValue.asMap());
         update(id, rev, oldValue, newValue);
         ActivityLog.log(service.getRouter(), Action.PATCH, "Patch " + patch, managedId(id), null, null, Status.SUCCESS);
@@ -374,12 +374,13 @@ class ManagedObjectSet implements ObjectSet {
      * Applies a patch document to an object, or by finding an object in the object set itself
      * via query parameters. As this is an action, the patch document to be applied is in the
      * {@code _entity} parameter.
-     * @param id
-     * @param params
-     * @return
-     * @throws org.forgerock.openidm.objset.ObjectSetException
+     *
+     * @param id TODO.
+     * @param params TODO.
+     * @return TODO.
+     * @throws ObjectSetException TODO.
      */
-    private JsonNode patchAction(String id, JsonNode params) throws ObjectSetException {
+    private JsonValue patchAction(String id, JsonValue params) throws ObjectSetException {
         String _id = id; // identifier provided in path
         if (_id == null) {
             _id = params.get("_id").asString(); // identifier provided as query parameter 
@@ -387,7 +388,7 @@ class ManagedObjectSet implements ObjectSet {
         String _rev = params.get("_rev").asString();
         if (_id == null) { // identifier not provided in URI; this is patch-by-query
             try {
-                JsonNode results = new JsonNode(service.getRouter().query(repoId(null),
+                JsonValue results = new JsonValue(service.getRouter().query(repoId(null),
                  params.asMap()), new JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
                 if (!results.isList()) {
                     throw new InternalServerErrorException("expecting list result from query");
@@ -396,17 +397,17 @@ class ManagedObjectSet implements ObjectSet {
                 } else if (results.size() > 1) {
                     throw new ConflictException("query yielded more than one result");
                 }
-                JsonNode result = results.get(0);
+                JsonValue result = results.get(0);
                 _id = result.get("_id").required().asString();
                 if (_rev == null) { // don't override an explicitly supplied revision
                     _rev = result.get("_rev").asString();
                 }
-            } catch (JsonNodeException jne) {
-                throw new InternalServerErrorException(jne);
+            } catch (JsonValueException jve) {
+                throw new InternalServerErrorException(jve);
             }
         }
         patch(_id, _rev, new JsonPatchWrapper(decrypt(params.get("_entity"))));
-        return new JsonNode(null); // empty response (and lack of exception) indicates success
+        return new JsonValue(null); // empty response (and lack of exception) indicates success
     }
 
     /**
@@ -415,7 +416,7 @@ class ManagedObjectSet implements ObjectSet {
      * If the {@code _action} parameter is {@code patch}, then the request is handled as
      * a partial modification to an object, either explicitly (identifier is supplied) or by
      * query (query parameters specify the query to perform to yield a single object to patch.
-     */ 
+     */
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         LOGGER.debug("action name={} id={}", name, id);
@@ -424,7 +425,7 @@ class ManagedObjectSet implements ObjectSet {
         if (_action == null) {
             throw new BadRequestException("expecting _action parameter");
         } else if (_action.equals("patch")) {
-            result = patchAction(id, new JsonNode(params, new JsonPointer("parameters"))).asMap();
+            result = patchAction(id, new JsonValue(params, new JsonPointer("parameters"))).asMap();
         } else {
             throw new BadRequestException("unsupported _action parameter");
         }

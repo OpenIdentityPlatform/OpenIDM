@@ -26,7 +26,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.felix.scr.annotations.*;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -491,7 +491,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
      * @param context
      * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
      */
-    static RepoBootService getRepoBootService(JsonNode repoConfig, BundleContext context) {
+    static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) {
         JDBCRepoService bootRepo = new JDBCRepoService();
         bootRepo.init(repoConfig, context);
         return bootRepo;
@@ -500,7 +500,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     @Activate
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        JsonNode config = null;
+        JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
@@ -513,7 +513,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         logger.info("Repository started.");
     }
 
-    void init(JsonNode config, BundleContext bundleContext) throws InvalidException {
+    void init(JsonValue config, BundleContext bundleContext) throws InvalidException {
         try {
             String enabled = config.get("enabled").asString();
             if ("false".equals(enabled)) {
@@ -521,7 +521,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 throw new RuntimeException("JDBC repository not enabled.");
             }
 
-            JsonNode connectionConfig = config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
+            JsonValue connectionConfig = config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
 
             // Data Source configuration
             jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
@@ -576,21 +576,21 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
             // Table handling configuration
             String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
-            JsonNode genericQueries = config.get("queries").get("genericTables");
+            JsonValue genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
             tableHandlers = new HashMap<String, TableHandler>();           
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
-            JsonNode defaultMapping = config.get("resourceMapping").get("default");
+            JsonValue defaultMapping = config.get("resourceMapping").get("default");
             if (!defaultMapping.isNull()) {
                 defaultTableHandler = getGenericTableHandler(databaseType, defaultMapping, dbSchemaName, genericQueries, maxBatchSize);
                 logger.debug("Using default table handler: {}", defaultTableHandler);
             }
 
             // Default the configuration table for bootstrap
-            JsonNode defaultTableProps = new JsonNode(new HashMap());
+            JsonValue defaultTableProps = new JsonValue(new HashMap());
             defaultTableProps.put("mainTable", "configobjects");
             defaultTableProps.put("propertiesTable", "configobjectproperties");
             defaultTableProps.put("searchableDefault", Boolean.FALSE);
@@ -602,10 +602,10 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     1);
             tableHandlers.put("config", defaultConfigHandler);
 
-            JsonNode genericMapping = config.get("resourceMapping").get("genericMapping");
+            JsonValue genericMapping = config.get("resourceMapping").get("genericMapping");
             if (!genericMapping.isNull()) {
                 for (String key : genericMapping.keys()) {
-                    JsonNode value = genericMapping.get(key);
+                    JsonValue value = genericMapping.get(key);
                     if (key.endsWith("/*")) {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
@@ -622,11 +622,11 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 }
             }
 
-            JsonNode explicitQueries = config.get("queries").get("explicitTables");
-            JsonNode explicitMapping = config.get("resourceMapping").get("explicitMapping");
+            JsonValue explicitQueries = config.get("queries").get("explicitTables");
+            JsonValue explicitMapping = config.get("resourceMapping").get("explicitMapping");
             if (!explicitMapping.isNull()) {
                 for (Object keyObj : explicitMapping.keys()) {
-                    JsonNode value = explicitMapping.get((String) keyObj);
+                    JsonValue value = explicitMapping.get((String) keyObj);
                     String key = (String) keyObj;
                     if (key.endsWith("/*")) {
                         // For matching purposes strip the wildcard at the end
@@ -659,7 +659,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     }
 
     GenericTableHandler getGenericTableHandler(DatabaseType databaseType, 
-            JsonNode tableConfig, String dbSchemaName, JsonNode queries, int maxBatchSize) {
+            JsonValue tableConfig, String dbSchemaName, JsonValue queries, int maxBatchSize) {
 
         GenericTableHandler handler = null;
 

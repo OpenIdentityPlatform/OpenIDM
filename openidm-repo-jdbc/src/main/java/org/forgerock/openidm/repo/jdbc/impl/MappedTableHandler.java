@@ -24,7 +24,7 @@
 package org.forgerock.openidm.repo.jdbc.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
@@ -69,7 +69,7 @@ public class MappedTableHandler implements TableHandler {
     String updateQueryStr;
     String deleteQueryStr;
     
-    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName, JsonNode queriesConfig) {
+    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName, JsonValue queriesConfig) {
         this.tableName = tableName;
         this.dbSchemaName = dbSchemaName;
         // Maintain a stable ordering
@@ -200,8 +200,9 @@ public class MappedTableHandler implements TableHandler {
         int val = createStatement.executeUpdate();
         
         logger.debug("Created object for id {} with rev {}", fullId, rev);
-        JsonNode node = new JsonNode(obj);
-        //writeNodeProperties(fullId, type, localId, node, connection);
+// FIXME: the following line doesn't make sense by itself
+        JsonValue jv = new JsonValue(obj);
+        //writeValueProperties(fullId, type, localId, jv, connection);
     }
 
    
@@ -234,13 +235,14 @@ public class MappedTableHandler implements TableHandler {
         int updateCount = updateStatement.executeUpdate();
         logger.info("Updated object id: {} rev: {} type: {} obj: {}", new Object[] {fullId, newRev, type,  objString});
         // TODO: do in transaction
-        JsonNode node = new JsonNode(obj);
+// FIXME: the following line doesn't make sense by itself
+        JsonValue jv = new JsonValue(obj);
         // TODO: only update what changed?
         //deletePropStatement.setString(1, type);
         //deletePropStatement.setString(2, localId);
         //logger.debug("Update del statement: {}", deletePropStatement);
         //int deleteCount = deletePropStatement.executeUpdate();
-        //writeNodeProperties(fullId, type, localId, node, connection);
+        //writeValueProperties(fullId, type, localId, jv, connection);
         
         /* NVCC handling to resolve
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);

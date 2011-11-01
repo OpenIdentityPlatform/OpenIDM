@@ -41,8 +41,8 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -152,18 +152,18 @@ public class ManagedObjectService extends ObjectSetRouter {
     @Activate
     protected void activate(ComponentContext context) {
         this.context = context;
-        JsonNode config = new JsonNode(new JSONEnhancedConfig().getConfiguration(context));
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         try {
-            for (JsonNode node : config.get("objects").expect(List.class)) {
-                ManagedObjectSet objectSet = new ManagedObjectSet(this, node); // throws JsonNodeException
+            for (JsonValue value : config.get("objects").expect(List.class)) {
+                ManagedObjectSet objectSet = new ManagedObjectSet(this, value); // throws JsonValueException
                 String name = objectSet.getName();
                 if (routes.containsKey(name)) {
-                    throw new JsonNodeException(node, "object " + name + " already defined");
+                    throw new JsonValueException(value, "object " + name + " already defined");
                 }
                 routes.put(name, objectSet);
             }
-        } catch (JsonNodeException jne) {
-            throw new ComponentException("Configuration error", jne);
+        } catch (JsonValueException jve) {
+            throw new ComponentException("Configuration error", jve);
         }
     }
 

@@ -46,8 +46,8 @@ import org.apache.felix.scr.annotations.Service;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonTransformer;
 
 // JSON Cryptography library
@@ -150,9 +150,9 @@ public class CryptoServiceImpl implements CryptoService {
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
             }
             LOGGER.info("CryptoService is initialized with {} keys.", keyCount);
-        } catch (JsonNodeException jne) {
-            LOGGER.error("Exception when loading CryptoService configuration", jne);
-            throw new ComponentException("Configuration error", jne);
+        } catch (JsonValueException jve) {
+            LOGGER.error("Exception when loading CryptoService configuration", jve);
+            throw new ComponentException("Configuration error", jve);
         }
     }
 
@@ -183,29 +183,29 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public JsonNode encrypt(JsonNode node, String cipher, String alias) throws JsonCryptoException, JsonException {
-        JsonNode result = null;
-        if (node != null) {
+    public JsonValue encrypt(JsonValue value, String cipher, String alias) throws JsonCryptoException, JsonException {
+        JsonValue result = null;
+        if (value != null) {
             JsonTransformer encryptionTransformer = getEncryptionTransformer(cipher, alias);
-            result = node.copy(); // make deep copy to encrypt; apply all existing transformations
+            result = value.copy(); // make deep copy to encrypt; apply all existing transformations
             encryptionTransformer.transform(result); // apply encryption transformation to copy
         }
         return result;
     }
 
     @Override
-    public JsonNode decrypt(JsonNode node) throws JsonException {
-        JsonNode result = null;
-        if (node != null) {
-            ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(node.getTransformers());
+    public JsonValue decrypt(JsonValue value) throws JsonException {
+        JsonValue result = null;
+        if (value != null) {
+            ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(value.getTransformers());
             transformers.addAll(getDecryptionTransformers());
-            result = new JsonNode(node.getValue(), node.getPointer(), transformers).copy();
+            result = new JsonValue(value.getValue(), value.getPointer(), transformers).copy();
         }
         return result;
     }
     
     @Override
-    public boolean isEncrypted(JsonNode node) {
-        return JsonCrypto.isJsonCrypto(node);
+    public boolean isEncrypted(JsonValue value) {
+        return JsonCrypto.isJsonCrypto(value);
     }
 }

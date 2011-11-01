@@ -39,7 +39,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -172,7 +172,7 @@ public class EmailServiceImpl implements EmailService {
     @Activate
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        JsonNode config = null;
+        JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             emailClient = new EmailClient(config.asMap());

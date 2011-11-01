@@ -24,7 +24,7 @@
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -225,12 +225,12 @@ public class GenericTableQueries {
      * 
      * query details
      */
-    public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonNode queriesConfig, 
+    public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonValue queriesConfig, 
             Map<QueryDefinition, String> defaultQueryMap) {
         queries = new HashMap<String, QueryInfo>();
         
         if (queriesConfig == null || queriesConfig.isNull()) {
-            queriesConfig = new JsonNode(new HashMap());
+            queriesConfig = new JsonValue(new HashMap());
         }
         // Default query-all-ids to allow bootstrapping of configuration
         if (!queriesConfig.isDefined(QueryConstants.QUERY_ALL_IDS) && defaultQueryMap != null) {

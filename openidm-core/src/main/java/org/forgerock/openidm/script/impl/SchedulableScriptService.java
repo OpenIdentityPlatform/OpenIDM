@@ -23,8 +23,8 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
@@ -58,21 +58,21 @@ public class SchedulableScriptService implements ScheduledService {
     public void execute(Map<String, Object> context) throws ExecutionException {
         try {
             String name = (String) context.get(INVOKER_NAME);
-            JsonNode params = new JsonNode(context).get(CONFIGURED_INVOKE_CONTEXT);
-            JsonNode scriptNode = params.get("script").expect(Map.class);
-            if (!scriptNode.isNull()) {
-                JsonNode input = params.get("input");
-                Script script = Scripts.newInstance(name, scriptNode);
+            JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
+            JsonValue scriptValue = params.get("script").expect(Map.class);
+            if (!scriptValue.isNull()) {
+                JsonValue input = params.get("input");
+                Script script = Scripts.newInstance(name, scriptValue);
                 execScript(name, script, input);
             } else {
-                throw new ExecutionException("Unknown script '" + name + "' configured in schedule. ");
+                throw new ExecutionException("Unknown script '" + name + "' configured in schedule.");
             }
-        } catch (JsonNodeException jne) {
-            throw new ExecutionException(jne);
+        } catch (JsonValueException jve) {
+            throw new ExecutionException(jve);
         }
     }
 
-    private void execScript(String name, Script script, JsonNode input) throws ExecutionException {
+    private void execScript(String name, Script script, JsonValue input) throws ExecutionException {
         if (script != null) {
             Map<String, Object> scope = scopeFactory.newInstance();
             scope.put("input", input.getValue());

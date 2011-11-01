@@ -30,8 +30,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 // ForgeRock JSON-Fluent
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 /**
  * @author Paul C. Bryan
@@ -50,8 +50,8 @@ public class ScriptTest {
     // ----- happy path ----------
 
     @Test
-    public void JavaScriptTest() throws JsonNodeException, ScriptException {
-        JsonNode config = new JsonNode(new HashMap<String, Object>());
+    public void JavaScriptTest() throws JsonValueException, ScriptException {
+        JsonValue config = new JsonValue(new HashMap<String, Object>());
         config.put("type", "text/javascript");
         config.put("source", "1 + 2");
         Script script = Scripts.newInstance("test", config);
@@ -59,16 +59,16 @@ public class ScriptTest {
     }
 
     @Test
-    public void FunctionTest() throws JsonNodeException, ScriptException {
-        JsonNode config = new JsonNode(new HashMap<String, Object>());
+    public void FunctionTest() throws JsonValueException, ScriptException {
+        JsonValue config = new JsonValue(new HashMap<String, Object>());
         config.put("type", "text/javascript");
         config.put("source", "x.add(1,2)");
         HashMap<String, Object> x = new HashMap<String, Object>();
         x.put("add", new Function() {
             @Override public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = new JsonNode(params);
-                int i1 = node.get(0).required().asInteger();
-                int i2 = node.get(1).required().asInteger();
+                JsonValue jv = new JsonValue(params);
+                int i1 = jv.get(0).required().asInteger();
+                int i2 = jv.get(1).required().asInteger();
                 return i1 + i2;
             }
         });
@@ -79,9 +79,9 @@ public class ScriptTest {
 
     // ---- exceptions ----------
 
-    @Test(expectedExceptions=JsonNodeException.class)
-    public void UnknownScriptTest() throws JsonNodeException, ScriptException {
-        JsonNode config = new JsonNode(new HashMap<String, Object>());
+    @Test(expectedExceptions=JsonValueException.class)
+    public void UnknownScriptTest() throws JsonValueException, ScriptException {
+        JsonValue config = new JsonValue(new HashMap<String, Object>());
         config.put("type", "definitely/unknown");
         config.put("source", "lather; rinse; repeat;");
         Scripts.newInstance("test", config); // should throw exception

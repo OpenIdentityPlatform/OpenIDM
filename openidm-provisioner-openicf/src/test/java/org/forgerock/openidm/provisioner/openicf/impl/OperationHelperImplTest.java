@@ -27,7 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -60,7 +60,7 @@ public class OperationHelperImplTest {
         InputStream inputStream = OperationHelperImplTest.class.getResourceAsStream(configurationFile);
         Assert.assertNotNull(inputStream, "Missing Configuration File at: " + configurationFile);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonConfiguration = new JsonNode(mapper.readValue(inputStream, Map.class));
+        JsonValue jsonConfiguration = new JsonValue(mapper.readValue(inputStream, Map.class));
 
         APIConfiguration config = new APIConfigurationImpl();
         builder = new OperationHelperBuilder("xml", jsonConfiguration, config);

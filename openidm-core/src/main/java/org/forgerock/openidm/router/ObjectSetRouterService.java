@@ -47,8 +47,8 @@ import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 // ForgeRock OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -140,13 +140,13 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     @Activate
     protected synchronized void activate(ComponentContext context) {
         this.context = context;
-        JsonNode config = new JsonNode(new JSONEnhancedConfig().getConfiguration(context));
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         try {
-            for (JsonNode node : config.get("filters").expect(List.class)) { // optional
-                filters.add(new Filter(node));
+            for (JsonValue jv : config.get("filters").expect(List.class)) { // optional
+                filters.add(new Filter(jv));
             }
-        } catch (JsonNodeException jne) {
-            throw new ComponentException("Configuration error", jne);
+        } catch (JsonValueException jve) {
+            throw new ComponentException("Configuration error", jve);
         }
     }
     @Deactivate
@@ -241,12 +241,12 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          * TODO: Description.
          *
          * @param config TODO.
-         * @throws JsonNodeException TODO.
+         * @throws JsonValueException TODO.
          */
-        public Filter(JsonNode config) throws JsonNodeException {
+        public Filter(JsonValue config) throws JsonValueException {
             pointer = config.getPointer().toString();
             pattern = config.get("pattern").asPattern();
-            for (JsonNode method : config.get("methods").expect(List.class)) {
+            for (JsonValue method : config.get("methods").expect(List.class)) {
                 if (methods == null) { // lazy initialization
                     methods = new HashSet<Method>();
                 }

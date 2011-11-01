@@ -23,7 +23,7 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 
 import java.util.Map;
 
@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class DB2TableHandler extends GenericTableHandler {
 
-    public DB2TableHandler(JsonNode tableConfig, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
+    public DB2TableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize) {
         super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize);
     }
 

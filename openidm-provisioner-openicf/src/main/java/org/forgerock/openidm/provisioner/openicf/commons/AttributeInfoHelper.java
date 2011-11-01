@@ -25,7 +25,7 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
@@ -66,7 +66,7 @@ public class AttributeInfoHelper {
 //            }
             type = ConnectorUtil.findClassForName((String) typeString);
         } else {
-            throw new SchemaException(new JsonNode(typeString, new JsonPointer(Constants.TYPE)), "Type of [" + name + "] attribute MUST be non empty String or List<String> value");
+            throw new SchemaException(new JsonValue(typeString, new JsonPointer(Constants.TYPE)), "Type of [" + name + "] attribute MUST be non empty String or List<String> value");
         }
 
         //nativeType
@@ -187,8 +187,8 @@ public class AttributeInfoHelper {
 
     public Attribute build(Object source, CryptoService cryptoService) throws Exception {
         try {
-            JsonNode decryptedNode = new JsonNode(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
-            return build(attributeInfo, decryptedNode.getValue());
+            JsonValue decryptedValue = new JsonValue(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
+            return build(attributeInfo, decryptedValue.getValue());
         } catch (Exception e) {
             logger.error("Failed to build {} attribute out of {}", name, source);
             throw e;
@@ -224,7 +224,7 @@ public class AttributeInfoHelper {
             if (null == cryptoService) {
                 throw new JsonCryptoException("Confidential attribute can not be encrypted. Reason: CryptoService is null");
             } else {
-                return cryptoService.encrypt(new JsonNode(resultValue), cipher, key).getValue();
+                return cryptoService.encrypt(new JsonValue(resultValue), cipher, key).getValue();
             }
         } else {
             return resultValue;

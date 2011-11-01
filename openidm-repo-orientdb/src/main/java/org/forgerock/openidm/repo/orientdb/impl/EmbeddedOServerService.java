@@ -30,7 +30,7 @@ import java.util.Map;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.repo.RepositoryService;
 
 import com.orientechnologies.orient.server.OServer;
@@ -56,7 +56,7 @@ public class EmbeddedOServerService {
 
     OServer orientDBServer;
 
-    void activate(JsonNode config) throws Exception {
+    void activate(JsonValue config) throws Exception {
         logger.trace("Activating Service with configuration {}", config);
         try {
             String enabled = config.get("embeddedServer").get("enabled").defaultTo("false").asString();
@@ -79,7 +79,7 @@ public class EmbeddedOServerService {
     }
 
     // TODO: make configurable
-    protected OServerConfiguration getOrientDBConfig(JsonNode config) {
+    protected OServerConfiguration getOrientDBConfig(JsonValue config) {
 
         OServerConfiguration configuration = new OServerConfiguration();
 

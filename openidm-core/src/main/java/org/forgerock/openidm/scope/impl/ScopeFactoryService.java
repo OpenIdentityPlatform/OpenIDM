@@ -42,8 +42,8 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
 // OpenIDM
@@ -100,8 +100,8 @@ public class ScopeFactoryService implements ScopeFactory {
      * @param params TODO.
      * @return TODO.
      */
-    private static JsonNode paramsNode(List<Object> params) {
-        return new JsonNode(params, new JsonPointer("params"));
+    private static JsonValue paramsValue(List<Object> params) {
+        return new JsonValue(params, new JsonPointer("params"));
     }
 
     @Override
@@ -113,8 +113,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("create", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                router.create(node.get(0).required().asString(), node.get(1).required().asMap());
+                JsonValue jv = paramsValue(params);
+                router.create(jv.get(0).required().asString(), jv.get(1).required().asMap());
                 return null; // no news is good news
             }
         });
@@ -123,9 +123,9 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("read", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
+                JsonValue jv = paramsValue(params);
                 try {
-                    return router.read(node.get(0).required().asString());
+                    return router.read(jv.get(0).required().asString());
                 } catch (NotFoundException nfe) {
                     return null; // indicates no such record without throwing exception
                 }
@@ -136,8 +136,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("update", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                router.update(node.get(0).required().asString(), node.get(1).asString(), node.get(2).required().asMap());
+                JsonValue jv = paramsValue(params);
+                router.update(jv.get(0).required().asString(), jv.get(1).asString(), jv.get(2).required().asMap());
                 return null; // no news is good news
             }
         });
@@ -146,8 +146,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("delete", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                router.delete(node.get(0).required().asString(), node.get(1).asString());
+                JsonValue jv = paramsValue(params);
+                router.delete(jv.get(0).required().asString(), jv.get(1).asString());
                 return null; // no news is good news
             }
         });
@@ -156,8 +156,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("query", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                return router.query(node.get(0).required().asString(), node.get(1).required().asMap());
+                JsonValue jv = paramsValue(params);
+                return router.query(jv.get(0).required().asString(), jv.get(1).required().asMap());
             }
         });
 
@@ -165,8 +165,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("action", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                return router.action(node.get(0).required().asString(), node.get(1).required().asMap());
+                JsonValue jv = paramsValue(params);
+                return router.action(jv.get(0).required().asString(), jv.get(1).required().asMap());
             }
         });
 
@@ -174,8 +174,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("encrypt", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                return cryptoService.encrypt(node.get(0).required(), node.get(1).required().asString(), node.get(2).required().asString()).getValue();
+                JsonValue jv = paramsValue(params);
+                return cryptoService.encrypt(jv.get(0).required(), jv.get(1).required().asString(), jv.get(2).required().asString()).getValue();
             }
         });
 
@@ -183,8 +183,8 @@ public class ScopeFactoryService implements ScopeFactory {
         openidm.put("decrypt", new Function() {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
-                JsonNode node = paramsNode(params);
-                return cryptoService.decrypt(node.get(0).required()).getValue();
+                JsonValue jv = paramsValue(params);
+                return cryptoService.decrypt(jv.get(0).required()).getValue();
             }
         });
 

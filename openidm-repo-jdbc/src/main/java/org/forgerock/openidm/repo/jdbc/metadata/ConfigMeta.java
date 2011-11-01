@@ -28,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.repo.jdbc.impl.JDBCRepoService;
@@ -57,7 +57,7 @@ public class ConfigMeta implements MetaDataProvider {
     /**
      * @inheritDoc
      */
-    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) {
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) {
         if (propertiesToEncrypt.containsKey(pidOrFactory)) {
             return propertiesToEncrypt.get(pidOrFactory);
         }

@@ -19,8 +19,8 @@ package org.forgerock.openidm.config;
 import java.util.Dictionary;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -47,7 +47,7 @@ public interface EnhancedConfig {
      * @throws InvalidException if the configuration is invalid
      * @throws InternalServerErrorException if a failure occurred in retrieving the configuration
      */
-    public JsonNode getConfigurationAsJson(ComponentContext compContext)
+    public JsonValue getConfigurationAsJson(ComponentContext compContext)
             throws InvalidException, InternalErrorException;
 
     /**
@@ -60,7 +60,7 @@ public interface EnhancedConfig {
      * empty map if no configuration properties exist.
      * @throws InvalidException
      */
-    public JsonNode getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid) 
+    public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid) 
             throws InvalidException, InternalErrorException;
 
 }

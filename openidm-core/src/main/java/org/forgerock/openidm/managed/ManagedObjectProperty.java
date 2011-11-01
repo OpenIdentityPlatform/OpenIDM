@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonTransformer;
 
 // JSON Cryptography library
@@ -75,22 +75,22 @@ class ManagedObjectProperty {
      *
      * @param service
      * @param config configuration object to use to initialize managed object property.
-     * @throws JsonNodeException if the configuration is malformed.
+     * @throws JsonValueException if the configuration is malformed.
      */
-    public ManagedObjectProperty(ManagedObjectService service, JsonNode config) throws JsonNodeException {
+    public ManagedObjectProperty(ManagedObjectService service, JsonValue config) throws JsonValueException {
         this.service = service;
         name = config.get("name").required().asString();
         onRetrieve = Scripts.newInstance("ManagedObjectProperty", config.get("onRetrieve"));
         onStore = Scripts.newInstance("ManagedObjectProperty", config.get("onStore"));
         onValidate = Scripts.newInstance("ManagedObjectProperty", config.get("onValidate"));
-        JsonNode encryptionNode = config.get("encryption");
-        if (!encryptionNode.isNull()) {
+        JsonValue encryptionValue = config.get("encryption");
+        if (!encryptionValue.isNull()) {
             try {
                 encryptionTransformer = service.getCryptoService().getEncryptionTransformer(
-                 encryptionNode.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
-                 encryptionNode.get("key").required().asString());
+                 encryptionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
+                 encryptionValue.get("key").required().asString());
             } catch (JsonCryptoException jce) {
-                throw new JsonNodeException(encryptionNode, jce);
+                throw new JsonValueException(encryptionValue, jce);
             }
         }
     }
@@ -106,7 +106,7 @@ class ManagedObjectProperty {
      * @param managedObject the managed object containing the property value.
      * @throws InternalServerErrorException if script execution fails.
      */
-    private void execScript(String type, Script script, JsonNode managedObject) throws InternalServerErrorException {
+    private void execScript(String type, Script script, JsonValue managedObject) throws InternalServerErrorException {
         if (script != null) {
             Map<String, Object> scope = service.newScope();
             scope.put("property", managedObject.get(name).getValue());
@@ -128,14 +128,14 @@ class ManagedObjectProperty {
     /**
      * Executes the script if it exists, to validate a property value.
      *
-     * @param node the JSON node containing the property value to be validated.
+     * @param value the JSON value containing the property value to be validated.
      * @throws ForbiddenException if validation of the property fails.
      * @throws InternalServerErrorException if any other exception occurs during execution.
      */
-    void onValidate(JsonNode node) throws ForbiddenException, InternalServerErrorException {
+    void onValidate(JsonValue value) throws ForbiddenException, InternalServerErrorException {
         if (onValidate != null) {
             Map<String, Object> scope = service.newScope();
-            scope.put("property", node.get(name).getValue());
+            scope.put("property", value.get(name).getValue());
             try {
                 onValidate.exec(scope);
             } catch (ScriptThrownException ste) {
@@ -152,28 +152,27 @@ class ManagedObjectProperty {
      * Performs tasks when a property has been retrieved from the repository, including:
      * executing the {@code onRetrieve} script.
      *
-     * @param node the JSON node that was retrieved from the repository.
+     * @param value the JSON value that was retrieved from the repository.
      * @throws InternalServerErrorException if an exception occurs processing the property.
      */
-    void onRetrieve(JsonNode node) throws InternalServerErrorException {
-        execScript("onRetrieve", onRetrieve, node);
+    void onRetrieve(JsonValue value) throws InternalServerErrorException {
+        execScript("onRetrieve", onRetrieve, value);
     }
 
     /**
      * Performs tasks when a property is to be stored in the repository, including:
      * executing the {@code onStore} script and encrypting the property.
      *
-     * @param node the JSON node to be stored in the repository.
+     * @param value the JSON value to be stored in the repository.
      * @throws InternalServerErrorException if an exception occurs processing the property.
-     * @param node
      */
-    void onStore(JsonNode node) throws InternalServerErrorException {
-        execScript("onStore", onStore, node);
-        if (encryptionTransformer != null && node.isDefined(name)) {
+    void onStore(JsonValue value) throws InternalServerErrorException {
+        execScript("onStore", onStore, value);
+        if (encryptionTransformer != null && value.isDefined(name)) {
             try {
-                JsonNode property = node.get(name).copy(); // deep copy; apply all transformations
+                JsonValue property = value.get(name).copy(); // deep copy; apply all transformations
                 encryptionTransformer.transform(property);
-                node.put(name, property.getValue());
+                value.put(name, property.getValue());
             } catch (JsonException je) {
                 String msg = name + " property encryption exception";
                 LOGGER.debug(msg, je);

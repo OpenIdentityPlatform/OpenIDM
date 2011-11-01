@@ -21,7 +21,7 @@ import java.util.List;
 
 // JSON Fluent library
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonTransformer;
 
 // JSON Cryptographic library
@@ -36,48 +36,48 @@ import org.forgerock.json.crypto.JsonCryptoException;
 public interface CryptoService {
     
     /**
-     * Returns a transformer that can encrypt JSON nodes.
+     * Returns a transformer that can encrypt JSON values.
      *
-     * @param cipher the cipher with which to encrypt a node.
-     * @param alias the key alias in the key store with which to encrypt a node.
-     * @return a transformer that can encrypt JSON nodes with the given cipher and key.
+     * @param cipher the cipher with which to encrypt a JSON value.
+     * @param alias the key alias in the key store with which to encrypt a JSON value.
+     * @return a transformer that can encrypt JSON values with the given cipher and key.
      * @throws JsonCryptoException if an invalid cipher and/or alias is provided.
      */
     JsonTransformer getEncryptionTransformer(String cipher, String alias) throws JsonCryptoException;
 
     /**
-     * Returns a list of decryption transformers that can decrypt JSON nodes.
+     * Returns a list of decryption transformers that can decrypt JSON values.
      *
-     * @return a list of transformers that can decrypt JSON nodes.
+     * @return a list of transformers that can decrypt JSON values.
      */
     List<JsonTransformer> getDecryptionTransformers();
 
     /**
-     * Encrypts a JSON node.
+     * Encrypts a JSON value.
      *
-     * @param node the JSON node to be encrypted.
-     * @param cipher the cipher with which to encrypt the node.
-     * @param alias the key alias in the key store with which to encrypt the node.
-     * @return a copy of the node, encrypted with the specified cipher and key.
+     * @param value the JSON value to be encrypted.
+     * @param cipher the cipher with which to encrypt the value.
+     * @param alias the key alias in the key store with which to encrypt the value.
+     * @return a copy of the value, encrypted with the specified cipher and key.
      * @throws JsonCryptoException if and invalid cipher and/or alias is provided.
-     * @throws JsonException if an exception occurred encrypting the node.
+     * @throws JsonException if an exception occurred encrypting the value.
      */
-    JsonNode encrypt(JsonNode node, String cipher, String alias) throws JsonCryptoException, JsonException;
+    JsonValue encrypt(JsonValue value, String cipher, String alias) throws JsonCryptoException, JsonException;
 
     /**
-     * Decrypts a JSON node and all of its children.
+     * Decrypts a JSON value and all of its children.
      *
-     * @param node the JSON node to be decrypted.
-     * @return a deep copy of the node, with all values decrypted.
-     * @throws JsonException if an exception occurred decrypting the node.
+     * @param value the JSON value to be decrypted.
+     * @return a deep copy of the value, with all values decrypted.
+     * @throws JsonException if an exception occurred decrypting the value.
      */
-    JsonNode decrypt(JsonNode node) throws JsonException;
+    JsonValue decrypt(JsonValue value) throws JsonException;
     
     /**
-     * Detects if a JSON node is encrypted in a format supported by this service
+     * Detects if a JSON value is encrypted in a format supported by this service
      *
-     * @param node the JSON node to check
-     * @return true if encrypted, false otherwise
+     * @param value the JSON value to check.
+     * @return true if encrypted, false otherwise.
      */
-    boolean isEncrypted(JsonNode node);
+    boolean isEncrypted(JsonValue value);
 }
