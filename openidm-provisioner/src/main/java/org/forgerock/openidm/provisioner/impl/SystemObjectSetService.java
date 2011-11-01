@@ -30,6 +30,7 @@ import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -63,25 +64,18 @@ import java.util.Set;
 @Component(name = "org.forgerock.openidm.provisioner", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
 @Service(value = {ObjectSet.class, ScheduledService.class})
 @Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
         @Property(name = "openidm.router.prefix", value = "system") // internal object set router
 })
 public class SystemObjectSetService implements ObjectSet, SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
     public static final String PROVISIONER_SERVICE_REFERENCE_NAME = "ProvisionerServiceReference";
-    public static final String SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME = "SynchronizationListenerServiceReference";
 
     @Reference(name = PROVISIONER_SERVICE_REFERENCE_NAME, referenceInterface = ProvisionerService.class, bind = "bind",
             unbind = "unbind", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
-
-    @Reference(name = SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, referenceInterface = SynchronizationListener.class,
-            bind = "bindSynchronizationListener", unbind = "unbindSynchronizationListener",
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
-            strategy = ReferenceStrategy.EVENT)
-    private Set<ServiceReference> synchronizationListeners = new HashSet<ServiceReference>(1);
 
     @Reference(referenceInterface = ObjectSet.class,
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
@@ -120,24 +114,6 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             }
         }
         TRACE.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
-    }
-
-    // Handle SynchronizationListener Service References
-
-    protected void bindSynchronizationListener(ServiceReference service) {
-        Object prefix = service.getProperty("openidm.router.prefix");
-        if (prefix instanceof String && "system".equalsIgnoreCase((String) prefix)) {
-            //Ignore self registration!!!
-            return;
-        }
-        synchronizationListeners.add(service);
-        TRACE.info("SynchronizationListener {} is bound.",
-                service.getProperty(ComponentConstants.COMPONENT_ID));
-    }
-
-    protected void unbindSynchronizationListener(ServiceReference service) {
-        synchronizationListeners.remove(service);
-        TRACE.info("SynchronizationListener {} is unbound.", service.getProperty(ComponentConstants.COMPONENT_ID));
     }
 
     /**
@@ -337,13 +313,14 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onCreate(String id, JsonNode value) throws SynchronizationException {
-        if (synchronizationListeners.isEmpty()) {
-            throw new SynchronizationException("No Available SynchronizationListener");
-        }
-        for (ServiceReference serviceReference : synchronizationListeners) {
-            SynchronizationListener service = (SynchronizationListener) context.locateService
-                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
-            service.onCreate(id, value);
+        try {
+            Map<String, Object> params = new HashMap<String, Object>(3);
+            params.put("_action", "ONCREATE");
+            params.put("id", id);
+            params.put("_entity", value.getValue());
+            getRouter().action("sync", params);
+        } catch (ObjectSetException e) {
+            throw new SynchronizationException(e);
         }
     }
 
@@ -357,13 +334,14 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
-        if (synchronizationListeners.isEmpty()) {
-            throw new SynchronizationException("No Available SynchronizationListener");
-        }
-        for (ServiceReference serviceReference : synchronizationListeners) {
-            SynchronizationListener service = (SynchronizationListener) context.locateService
-                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
-            service.onUpdate(id, oldValue, newValue);
+        try {
+            Map<String, Object> params = new HashMap<String, Object>(3);
+            params.put("_action", "ONUPDATE");
+            params.put("id", id);
+            params.put("_entity", newValue.getValue());
+            getRouter().action("sync", params);
+        } catch (ObjectSetException e) {
+            throw new SynchronizationException(e);
         }
     }
 
@@ -375,13 +353,13 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      *          if an exception occurs processing the notification.
      */
     public void onDelete(String id) throws SynchronizationException {
-        if (synchronizationListeners.isEmpty()) {
-            throw new SynchronizationException("No Available SynchronizationListener");
-        }
-        for (ServiceReference serviceReference : synchronizationListeners) {
-            SynchronizationListener service = (SynchronizationListener) context.locateService
-                    (SYNCHRONIZATIONLISTENER_SERVICE_REFERENCE_NAME, serviceReference);
-            service.onDelete(id);
+        try {
+            Map<String, Object> params = new HashMap<String, Object>(2);
+            params.put("_action", "ONDELETE");
+            params.put("id", id);
+            getRouter().action("sync", params);
+        } catch (ObjectSetException e) {
+            throw new SynchronizationException(e);
         }
     }
 

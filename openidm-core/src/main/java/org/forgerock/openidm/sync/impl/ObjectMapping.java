@@ -17,14 +17,19 @@ package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Collection;
 
 // SLF4J
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON-Fluent library
-import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonNode;
 import org.forgerock.json.fluent.JsonNodeException;
 import org.forgerock.json.fluent.JsonPatch;
@@ -32,7 +37,6 @@ import org.forgerock.json.fluent.JsonPatch;
 // ForgeRock OpenIDM
 import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;

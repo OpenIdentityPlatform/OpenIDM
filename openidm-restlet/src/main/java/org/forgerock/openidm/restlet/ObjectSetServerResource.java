@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 // SLF4J
+import org.restlet.representation.EmptyRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,13 +151,18 @@ public class ObjectSetServerResource extends ExtendedServerResource {
     private Map<String, Object> entityObject(Representation entity) throws BadRequestException {
         Map result = null;
         if (entity != null) {
-            JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
-             (JacksonRepresentation)entity : new JacksonRepresentation<Object>(entity, Object.class));
-            Object object = jr.getObject();
-            if (object == null || !(object instanceof Map)) {
+            if (entity instanceof EmptyRepresentation) {
                 throw new BadRequestException("Expecting a JSON object entity");
+            } else {
+                JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
+                        (JacksonRepresentation) entity : new JacksonRepresentation<Object>(entity, Object.class));
+                Object object = jr.getObject();
+                if (object instanceof Map) {
+                    result = (Map) object;
+                } else {
+                    throw new BadRequestException("Expecting a JSON object entity");
+                }
             }
-            result = (Map)object;
         }
         return result;
     }
@@ -383,11 +389,13 @@ public class ObjectSetServerResource extends ExtendedServerResource {
             } else {
                 HashMap<String, Object> params = new HashMap<String, Object>();
                 params.putAll(query.getValuesMap()); // copy values to cope with generics
-                JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
-                 (JacksonRepresentation)entity : new JacksonRepresentation<Object>(entity, Object.class));
-                Object object = jr.getObject();
-                if (object != null) {
-                    params.put("_entity", object);
+                if (!(entity instanceof EmptyRepresentation)) {
+                    JacksonRepresentation jr = (entity instanceof JacksonRepresentation ?
+                            (JacksonRepresentation) entity : new JacksonRepresentation<Object>(entity, Object.class));
+                    Object object = jr.getObject();
+                    if (object != null) {
+                        params.put("_entity", object);
+                    }
                 }
                 Map<String, Object> actionResult = objectSet.action(id, params);
                 if (actionResult != null) {
