@@ -576,7 +576,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
             // Table handling configuration
             String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
-            JsonNode genericQueries = connectionConfig.get("queries").get("genericTables");
+            JsonNode genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
             tableHandlers = new HashMap<String, TableHandler>();           
