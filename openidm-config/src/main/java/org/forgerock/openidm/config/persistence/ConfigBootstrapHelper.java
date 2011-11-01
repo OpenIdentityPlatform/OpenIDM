@@ -32,7 +32,7 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
@@ -96,8 +96,8 @@ public class ConfigBootstrapHelper {
      * equivalent to the last part of its PID 
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
-    public static JsonNode getRepoBootConfig(String repoType, BundleContext bundleContext) {
-        JsonNode result = new JsonNode(new HashMap<String,Object>());
+    public static JsonValue getRepoBootConfig(String repoType, BundleContext bundleContext) {
+        JsonValue result = new JsonValue(new HashMap<String,Object>());
         result.put(OPENIDM_REPO_TYPE, repoType);
         
         // System properties take precedence over configuration files
@@ -137,7 +137,7 @@ public class ConfigBootstrapHelper {
                 
                 return null;
             }
-            JsonNode jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig, bundleContext, repoType);
+            JsonValue jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig, bundleContext, repoType);
             Map<String, Object> cfg = jsonCfg.asMap();
             for (Entry<String, Object> entry : cfg.entrySet()) {
                 result.put(entry.getKey().toLowerCase(), entry.getValue());

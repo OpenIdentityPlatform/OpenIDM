@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
 import org.forgerock.openidm.objset.NotFoundException;
@@ -93,17 +93,17 @@ class Link {
      * @param query TODO.
      * @throws SynchronizationException TODO.
      */
-    private void getLink(JsonNode query) throws SynchronizationException {
+    private void getLink(JsonValue query) throws SynchronizationException {
         try {
-            JsonNode results = new JsonNode(mapping.getService().getRouter().query(linkId(null),
+            JsonValue results = new JsonValue(mapping.getService().getRouter().query(linkId(null),
              query.asMap())).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
             if (results.size() == 1) {
-                fromJsonNode(results.get(0));
+                fromJsonValue(results.get(0));
             } else if (results.size() > 1) { // shouldn't happen if index is unique
                 throw new SynchronizationException("More than one link found");
             }
-        } catch (JsonNodeException jne) {
-            throw new SynchronizationException("Malformed link query response", jne);
+        } catch (JsonValueException jve) {
+            throw new SynchronizationException("Malformed link query response", jve);
         } catch (ObjectSetException ose) {
             throw new SynchronizationException("Link query failed", ose);
         }
@@ -112,15 +112,15 @@ class Link {
     /**
      * TODO: Description.
      *
-     * @param node TODO.
-     * @throws org.forgerock.json.fluent.JsonNodeException
+     * @param value TODO.
+     * @throws org.forgerock.json.fluent.JsonValueException
      */
-    private void fromJsonNode(JsonNode node) throws JsonNodeException {
-        _id = node.get("_id").required().asString();
-        _rev = node.get("_rev").asString(); // optional
-        sourceId = node.get("sourceId").required().asString();
-        targetId = node.get("targetId").required().asString();
-        reconId = node.get("reconId").asString(); // optional
+    private void fromJsonValue(JsonValue jv) throws JsonValueException {
+        _id = jv.get("_id").required().asString();
+        _rev = jv.get("_rev").asString(); // optional
+        sourceId = jv.get("sourceId").required().asString();
+        targetId = jv.get("targetId").required().asString();
+        reconId = jv.get("reconId").asString(); // optional
     }
 
     /**
@@ -128,12 +128,12 @@ class Link {
      *
      * @return TODO.
      */
-    private JsonNode toJsonNode() {
-        JsonNode node = new JsonNode(new HashMap<String, Object>());
-        node.put("sourceId", sourceId);
-        node.put("targetId", targetId);
-        node.put("reconId", reconId);
-        return node;
+    private JsonValue toJsonValue() {
+        JsonValue jv = new JsonValue(new HashMap<String, Object>());
+        jv.put("sourceId", sourceId);
+        jv.put("targetId", targetId);
+        jv.put("reconId", reconId);
+        return jv;
     }
 
     /**
@@ -159,7 +159,7 @@ class Link {
     void getLinkForSource(String sourceId) throws SynchronizationException {
         clear();
         if (sourceId != null) {
-            JsonNode query = new JsonNode(new HashMap<String, Object>());
+            JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(QueryConstants.QUERY_ID, "links-for-sourceId");
             query.put("sourceId", sourceId);
             getLink(query);
@@ -178,7 +178,7 @@ class Link {
     void getLinkForTarget(String targetId) throws SynchronizationException {
         clear();
         if (targetId != null) {
-            JsonNode query = new JsonNode(new HashMap<String, Object>());
+            JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(QueryConstants.QUERY_ID, "links-for-targetId");
             query.put("targetId", targetId);
             getLink(query);
@@ -192,15 +192,15 @@ class Link {
      */
     void create() throws SynchronizationException {
         _id = UUID.randomUUID().toString(); // client-assigned identifier
-        JsonNode node = toJsonNode();
+        JsonValue jv = toJsonValue();
         try {
-            mapping.getService().getRouter().create(linkId(_id), node.asMap());
+            mapping.getService().getRouter().create(linkId(_id), jv.asMap());
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to create link", ose);
             throw new SynchronizationException(ose);
         }
-        this._id = node.get("_id").required().asString();
-        this._rev = node.get("_rev").asString(); // optional
+        this._id = jv.get("_id").required().asString();
+        this._rev = jv.get("_rev").asString(); // optional
     }
 
     /**
@@ -229,13 +229,13 @@ class Link {
         if (_id == null) {
             throw new SynchronizationException("Attempt to update non-existent link");
         }
-        JsonNode node = toJsonNode();
+        JsonValue jv = toJsonValue();
         try {
-            mapping.getService().getRouter().update(linkId(_id), _rev, node.asMap());
+            mapping.getService().getRouter().update(linkId(_id), _rev, jv.asMap());
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to update link", ose);
             throw new SynchronizationException(ose);
         }
-        this._rev = node.get("_rev").asString(); // optional
+        this._rev = jv.get("_rev").asString(); // optional
     }
 }

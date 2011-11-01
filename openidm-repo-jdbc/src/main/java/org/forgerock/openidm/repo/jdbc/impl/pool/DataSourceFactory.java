@@ -26,7 +26,7 @@ package org.forgerock.openidm.repo.jdbc.impl.pool;
 import com.jolbox.bonecp.BoneCPDataSource;
 import org.codehaus.jackson.map.DeserializationConfig;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +39,11 @@ import javax.sql.DataSource;
 public class DataSourceFactory {
     private final static Logger logger = LoggerFactory.getLogger(DatabaseShutdownHook.class);
 
-    public static DataSource newInstance(JsonNode configNode) {
+    public static DataSource newInstance(JsonValue config) {
         //TODO Make CP implementation independent
         ObjectMapper mapper = new ObjectMapper();
         mapper.getDeserializationConfig().set(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        BoneCPDataSource ds = mapper.convertValue(configNode.asMap(), BoneCPDataSource.class);
+        BoneCPDataSource ds = mapper.convertValue(config.asMap(), BoneCPDataSource.class);
         ds.setConnectionHook(new DatabaseShutdownHook());
         ds.setTransactionRecoveryEnabled(true);// Important: This should be enabled
         ds.setAcquireRetryAttempts(10);//default is 5

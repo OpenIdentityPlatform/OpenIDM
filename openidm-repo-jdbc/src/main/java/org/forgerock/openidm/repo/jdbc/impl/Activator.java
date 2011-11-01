@@ -25,7 +25,7 @@ package org.forgerock.openidm.repo.jdbc.impl;
 
 import java.util.Hashtable;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.framework.BundleActivator;
@@ -44,7 +44,7 @@ public class Activator implements BundleActivator {
      public void start(BundleContext context) {
          logger.debug("JDBC bundle starting", context);
          
-         JsonNode repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
+         JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
          
          if (repoConfig != null) {
              logger.info("Bootstrapping JDBC repository");

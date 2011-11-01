@@ -2,8 +2,8 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openicf.framework.api.osgi.ConnectorManager;
 import org.forgerock.openidm.config.EnhancedConfig;
@@ -96,7 +96,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     @Activate
     protected void activate(ComponentContext context) {
         TRACE.trace("Activating Service with configuration {}", context.getProperties());
-        JsonNode configuration = getConfiguration(context);
+        JsonValue configuration = getConfiguration(context);
 
         // Create a single instance of ConnectorInfoManagerFactory
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
@@ -105,19 +105,19 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             String connectorLocation = configuration.get(PROPERTY_OPENICF_CONNECTOR_URL).defaultTo(DEFAULT_CONNECTORS_LOCATION).asString();
             // Initialise Local ConnectorInfoManager
             initialiseLocalManager(factory, connectorLocation);
-        } catch (JsonNodeException e) {
+        } catch (JsonValueException e) {
             TRACE.error("Invalid configuration {}", configuration.getValue(), e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
 
 
-        JsonNode remoteConnectorHosts = null;
+        JsonValue remoteConnectorHosts = null;
         try {
             remoteConnectorHosts = configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS).expect(List.class);
             if (!remoteConnectorHosts.isNull()) {
                 initialiseRemoteManager(factory, remoteConnectorHosts);
             }
-        } catch (JsonNodeException e) {
+        } catch (JsonValueException e) {
             TRACE.error("Invalid configuration remoteConnectorHosts must be list or null. {}", remoteConnectorHosts, e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
@@ -125,7 +125,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         TRACE.info("Component is activated.");
     }
 
-    protected void initialiseRemoteManager(ConnectorInfoManagerFactory factory, JsonNode remoteConnectorHosts) throws JsonNodeException {
+    protected void initialiseRemoteManager(ConnectorInfoManagerFactory factory, JsonValue remoteConnectorHosts) throws JsonValueException {
         for (Object o : remoteConnectorHosts.asList()) {
             if (o instanceof Map) {
                 Map<String, Object> info = (Map<String, Object>) o;
@@ -321,19 +321,19 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonNode config) throws WaitForMetaData {
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) throws WaitForMetaData {
         List<JsonPointer> result = null;
         if (null != pidOrFactory && null != config) {
             if (PID.equals(pidOrFactory)) {
                 try {
-                    JsonNode remoteConnectorHosts = config.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS).expect(List.class);
+                    JsonValue remoteConnectorHosts = config.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_SERVERS).expect(List.class);
                     if (!remoteConnectorHosts.isNull()) {
                         result = new ArrayList<JsonPointer>(remoteConnectorHosts.size());
-                        for (JsonNode hostConfig : remoteConnectorHosts) {
+                        for (JsonValue hostConfig : remoteConnectorHosts) {
                             result.add(hostConfig.get(ConnectorUtil.OPENICF_KEY).getPointer());
                         }
                     }
-                } catch (JsonNodeException e) {
+                } catch (JsonValueException e) {
                     TRACE.error("Invalid configuration remoteConnectorHosts must be list or null.", e);
                 }
             } else if (OpenICFProvisionerService.PID.equals(pidOrFactory)) {
@@ -463,8 +463,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         return files;
     }
 
-    private JsonNode getConfiguration(ComponentContext componentContext) {
+    private JsonValue getConfiguration(ComponentContext componentContext) {
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-        return new JsonNode(enhancedConfig.getConfiguration(componentContext));
+        return new JsonValue(enhancedConfig.getConfiguration(componentContext));
     }
 }

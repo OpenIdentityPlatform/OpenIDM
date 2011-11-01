@@ -24,7 +24,7 @@
 package org.forgerock.openidm.repo.jdbc.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
@@ -85,7 +85,7 @@ public class GenericTableHandler implements TableHandler {
         QUERYALLIDS
     }
 
-    public GenericTableHandler(JsonNode tableConfig, String dbSchemaName, JsonNode queriesConfig, int maxBatchSize) {
+    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize) {
         cfg = GenericTableConfig.parse(tableConfig);
         
         this.mainTableName = cfg.mainTableName;
@@ -215,8 +215,8 @@ public class GenericTableHandler implements TableHandler {
         long dbId = keys.getLong(1);
 
         logger.debug("Created object for id {} with rev {}", fullId, rev);
-        JsonNode node = new JsonNode(obj);
-        writeNodeProperties(fullId, dbId, localId, node, connection);
+        JsonValue jv = new JsonValue(obj);
+        writeValueProperties(fullId, dbId, localId, jv, connection);
     }
 
     /**
@@ -225,15 +225,15 @@ public class GenericTableHandler implements TableHandler {
      * @param fullId the full URI of the resource the belongs to
      * @param dbId the generated identifier to link the properties table with the main table (foreign key)
      * @param localId the local identifier of the resource these properties belong to
-     * @param node the JSON node with the properties to write
+     * @param value the JSON value with the properties to write
      * @param connection the DB connection
      * @throws SQLException if the insert failed
      */
-    void writeNodeProperties(String fullId, long dbId, String localId, JsonNode node, Connection connection) throws SQLException {
+    void writeValueProperties(String fullId, long dbId, String localId, JsonValue value, Connection connection) throws SQLException {
         if (cfg.searchableDefault) {
             Integer batchingCount = 0;
             PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
-            batchingCount = writeNodeProperties(fullId, dbId, localId, node, connection, propCreateStatement, batchingCount);
+            batchingCount = writeValueProperties(fullId, dbId, localId, value, connection, propCreateStatement, batchingCount);
             if (enableBatching && batchingCount > 0) {
                 int[] numUpdates = propCreateStatement.executeBatch(); 
                 logger.debug("Batch update of objectproperties updated: {}", numUpdates);
@@ -255,22 +255,22 @@ public class GenericTableHandler implements TableHandler {
      * @param fullId the full URI of the resource the belongs to
      * @param dbId the generated identifier to link the properties table with the main table (foreign key)
      * @param localId the local identifier of the resource these properties belong to
-     * @param node the JSON node with the properties to write
+     * @param value the JSON value with the properties to write
      * @param connection the DB connection
      * @param propCreateStatement the prepared properties insert statement
      * @param batchingCount the current number of statements that have been batched and not yet executed on the prepared statement
      * @return status of the current batchingCount, i.e. how many statements are not yet executed in the PreparedStatement
      * @throws SQLException if the insert failed
      */
-    private int writeNodeProperties(String fullId, long dbId, String localId, JsonNode node, Connection connection, 
+    private int writeValueProperties(String fullId, long dbId, String localId, JsonValue value, Connection connection, 
             PreparedStatement propCreateStatement, int batchingCount) throws SQLException {
         
-        for (JsonNode entry : node) {
+        for (JsonValue entry : value) {
             JsonPointer propPointer = entry.getPointer();
             if (cfg.isSearchable(propPointer)) {
                 String propkey = propPointer.toString();
                 if (entry.isMap() || entry.isList()) {
-                    batchingCount = writeNodeProperties(fullId, dbId, localId, entry, connection, propCreateStatement, batchingCount);
+                    batchingCount = writeValueProperties(fullId, dbId, localId, entry, connection, propCreateStatement, batchingCount);
                 } else {
                     String propvalue = null;
                     Object val = entry.getValue();
@@ -458,7 +458,7 @@ public class GenericTableHandler implements TableHandler {
             throw new InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
         }
 
-        JsonNode node = new JsonNode(obj);
+        JsonValue jv = new JsonValue(obj);
         // TODO: only update what changed?
         logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
         deletePropStatement.setString(1, type);
@@ -466,7 +466,7 @@ public class GenericTableHandler implements TableHandler {
         logger.debug("Update properties del statement: {}", deletePropStatement);
         int deleteCount = deletePropStatement.executeUpdate();
         logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
-        writeNodeProperties(fullId, dbId, localId, node, connection);
+        writeValueProperties(fullId, dbId, localId, jv, connection);
 
     }
 
@@ -544,7 +544,7 @@ class GenericTableConfig {
         }
     }
     
-    public static GenericTableConfig parse(JsonNode tableConfig) {
+    public static GenericTableConfig parse(JsonValue tableConfig) {
         GenericTableConfig cfg = new GenericTableConfig();
         tableConfig.required();
         cfg.mainTableName = tableConfig.get("mainTable").required().asString();
@@ -563,11 +563,11 @@ class GenericPropertiesConfig {
     public boolean searchableDefault;
     public GenericPropertiesConfig properties;
     
-    public static GenericPropertiesConfig parse(JsonNode propsConfig) {
+    public static GenericPropertiesConfig parse(JsonValue propsConfig) {
         GenericPropertiesConfig cfg = new GenericPropertiesConfig();
         if (!propsConfig.isNull()) {
             for (String propName : propsConfig.keys()) {
-                JsonNode detail = propsConfig.get(propName);
+                JsonValue detail = propsConfig.get(propName);
                 cfg.explicitlySearchable.put(new JsonPointer(propName), detail.get("searchable").asBoolean());
             }
         }

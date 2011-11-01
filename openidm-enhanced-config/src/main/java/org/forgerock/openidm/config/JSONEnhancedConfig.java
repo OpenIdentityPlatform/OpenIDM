@@ -24,8 +24,8 @@ import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -63,14 +63,14 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      */
     public Map<String, Object> getConfiguration(ComponentContext compContext) throws InvalidException, InternalErrorException { 
 
-        JsonNode confNode = getConfigurationAsJson(compContext);
-        return confNode.asMap();
+        JsonValue confValue = getConfigurationAsJson(compContext);
+        return confValue.asMap();
     }
     
     /**
      * {@inheritDoc}
      */
-    public JsonNode getConfigurationAsJson(ComponentContext compContext) throws InvalidException, InternalErrorException {
+    public JsonValue getConfigurationAsJson(ComponentContext compContext) throws InvalidException, InternalErrorException {
         
         Dictionary dict = null;
         if (compContext != null) {
@@ -78,7 +78,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         }
         String servicePid = (String) compContext.getProperties().get(Constants.SERVICE_PID);
         
-        JsonNode conf = getConfiguration(dict, compContext.getBundleContext(), servicePid);
+        JsonValue conf = getConfiguration(dict, compContext.getBundleContext(), servicePid);
         
         return conf;
     }
@@ -86,18 +86,18 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     /**
      * {@inheritDoc}
      */
-    public JsonNode getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid) 
+    public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid) 
                 throws InvalidException, InternalErrorException {
         return getConfiguration(dict, context, servicePid, true);
     }
         
     /**
      * {@see getConfiguration(Dictionary<String, Object>, BundleContext, String) }
-     * @param decrypt true if any encrypted nodes should be decrypted in the result
+     * @param decrypt true if any encrypted values should be decrypted in the result
      */
-    public JsonNode getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid, boolean decrypt) 
+    public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid, boolean decrypt) 
                 throws InvalidException, InternalErrorException {        
-        JsonNode node = new JsonNode(new HashMap<String, Object>());
+        JsonValue jv = new JsonValue(new HashMap<String, Object>());
         
         if (dict != null) {
             Map<String, Object> parsedConfig = null;
@@ -114,24 +114,24 @@ public class JSONEnhancedConfig implements EnhancedConfig {
             logger.trace("Parsed configuration {}", parsedConfig);
             
             try {
-                node = new JsonNode(parsedConfig);
-            } catch (JsonNodeException ex) {
+                jv = new JsonValue(parsedConfig);
+            } catch (JsonValueException ex) {
                 throw new InvalidException("Component configuration for " + servicePid + " is invalid: " + ex.getMessage(), ex);
             }
         }
-        logger.debug("Configuration for {}: {}", servicePid , node);
+        logger.debug("Configuration for {}: {}", servicePid , jv);
 
-        JsonNode decrypted = node;
-        if (decrypt && dict != null && !node.isNull() 
+        JsonValue decrypted = jv;
+        if (decrypt && dict != null && !jv.isNull() 
                 && context != null && context.getBundle() != null) { // todo: different way to handle mock unit tests
-            decrypted = decrypt(node, context);
+            decrypted = decrypt(jv, context);
         }
         
         return decrypted;
     }
     
-    private JsonNode decrypt(JsonNode node, BundleContext context) throws JsonException, InternalErrorException {
-        return getCryptoService(context).decrypt(node); // makes a decrypted copy
+    private JsonValue decrypt(JsonValue value, BundleContext context) throws JsonException, InternalErrorException {
+        return getCryptoService(context).decrypt(value); // makes a decrypted copy
     }
     
     private CryptoService getCryptoService(BundleContext context)

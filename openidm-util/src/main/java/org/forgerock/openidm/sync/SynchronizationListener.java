@@ -20,7 +20,7 @@ package org.forgerock.openidm.sync;
 import java.util.Map;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * Interface for implementations that wish to receive notifications of object changes,
@@ -41,7 +41,7 @@ public interface SynchronizationListener {
      * @param value the value of the created object.
      * @throws SynchronizationException if an exception occurs processing the notification.
      */
-    void onCreate(String id, JsonNode value) throws SynchronizationException;
+    void onCreate(String id, JsonValue value) throws SynchronizationException;
 
     /**
      * Called when a source object has been updated.
@@ -51,7 +51,7 @@ public interface SynchronizationListener {
      * @param newValue the value of the object after the update.
      * @throws SynchronizationException if an exception occurs processing the notification.
      */
-    void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException;
+    void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException;
 
     /**
      * Called when a source object has been deleted.

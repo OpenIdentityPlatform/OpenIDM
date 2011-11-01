@@ -42,8 +42,8 @@ import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.PrettyPrinter;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -323,7 +323,7 @@ public class RestService implements ObjectSet {
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
 
-        JsonNode config = null;
+        JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
@@ -342,7 +342,7 @@ public class RestService implements ObjectSet {
      * 
      * @param config the configuration
      */
-    void init (JsonNode config) {
+    void init (JsonValue config) {
     }
 
     /* Currently rely on deactivate/activate to be called by DS if config changes instead

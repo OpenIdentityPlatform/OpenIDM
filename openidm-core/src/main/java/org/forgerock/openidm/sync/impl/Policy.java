@@ -24,8 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
 import org.forgerock.openidm.script.Script;
@@ -60,12 +60,12 @@ class Policy {
      *
      * @param service
      * @param config TODO.
-     * @throws JsonNodeException TODO>
+     * @throws JsonValueException TODO.
      */
-    public Policy(SynchronizationService service, JsonNode config) throws JsonNodeException {
+    public Policy(SynchronizationService service, JsonValue config) throws JsonValueException {
         this.service = service;
         situation = config.get("situation").required().asEnum(Situation.class);
-        JsonNode action = config.get("action").required();
+        JsonValue action = config.get("action").required();
         if (action.isString()) {
             this.action = action.asEnum(Action.class);
             this.script = null;
@@ -93,7 +93,7 @@ class Policy {
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    public Action getAction(JsonNode source, JsonNode target, boolean sourceAction) throws SynchronizationException {
+    public Action getAction(JsonValue source, JsonValue target, boolean sourceAction) throws SynchronizationException {
         Action result = null;
         if (action != null) { // static action specified
             result = action;

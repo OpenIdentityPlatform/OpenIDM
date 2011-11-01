@@ -18,7 +18,7 @@ package org.forgerock.openidm.config.installer;
 import java.io.File;
 import java.util.Dictionary;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 
@@ -33,7 +33,7 @@ public class DelayedConfig {
     public File file;
     public Dictionary oldConfig;
     public Dictionary newConfig;
-    public JsonNode parsedConfig;
+    public JsonValue parsedConfig;
     public JSONConfigInstaller configInstaller;
     public ConfigCrypto configCrypto;
 }

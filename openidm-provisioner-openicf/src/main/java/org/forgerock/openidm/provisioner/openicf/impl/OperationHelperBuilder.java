@@ -26,8 +26,8 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -55,7 +55,7 @@ public class OperationHelperBuilder {
     private Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers;
     private String systemName;
 
-    public OperationHelperBuilder(String system, JsonNode jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws SchemaException, JsonNodeException {
+    public OperationHelperBuilder(String system, JsonValue jsonConfiguration, APIConfiguration defaultAPIConfiguration) throws SchemaException, JsonValueException {
         runtimeAPIConfiguration = (APIConfigurationImpl) defaultAPIConfiguration;
         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, defaultAPIConfiguration);
         supportedObjectTypes = ConnectorUtil.getObjectTypes(jsonConfiguration);

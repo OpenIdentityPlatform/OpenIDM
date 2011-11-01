@@ -27,7 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -64,7 +64,7 @@ import static org.mockito.Mockito.when;
 public class ConnectorInfoProviderServiceTest {
 
     private Dictionary properties = null;
-    private JsonNode connectorInfoProviderServiceConfiguration = null;
+    private JsonValue connectorInfoProviderServiceConfiguration = null;
 
     protected ConnectorInfoProviderService testableConnectorInfoProvider = null;
 
@@ -79,7 +79,7 @@ public class ConnectorInfoProviderServiceTest {
             buffer.write(temp, 0, read);
         }
         String config = new String(buffer.toByteArray());
-        connectorInfoProviderServiceConfiguration = new JsonNode((new ObjectMapper()).readValue(config, Map.class));
+        connectorInfoProviderServiceConfiguration = new JsonValue((new ObjectMapper()).readValue(config, Map.class));
 
         properties = new Hashtable<String, Object>();
         properties.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, config);
@@ -227,7 +227,7 @@ public class ConnectorInfoProviderServiceTest {
                 "inetOrgPerson"
         ));
 
-        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+        ConnectorUtil.configureConfigurationProperties(new JsonValue(configMap), configuration.getConfigurationProperties());
 
         ObjectMapper mapper = new ObjectMapper();
         URL root = ObjectClassInfoHelperTest.class.getResource("/");
@@ -261,7 +261,7 @@ public class ConnectorInfoProviderServiceTest {
         configMap.put("host", "localhost");
 
 
-        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+        ConnectorUtil.configureConfigurationProperties(new JsonValue(configMap), configuration.getConfigurationProperties());
 
         ObjectMapper mapper = new ObjectMapper();
         URL root = ObjectClassInfoHelperTest.class.getResource("/");
@@ -294,7 +294,7 @@ public class ConnectorInfoProviderServiceTest {
         configMap.put("hostNameOrIpAddr", "localhost");
 
 
-        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+        ConnectorUtil.configureConfigurationProperties(new JsonValue(configMap), configuration.getConfigurationProperties());
 
         ObjectMapper mapper = new ObjectMapper();
         URL root = ObjectClassInfoHelperTest.class.getResource("/");
@@ -336,7 +336,7 @@ public class ConnectorInfoProviderServiceTest {
         configMap.put("changeLogColumn", "CHANGE_TIMESTEMP");
 
 
-        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+        ConnectorUtil.configureConfigurationProperties(new JsonValue(configMap), configuration.getConfigurationProperties());
 
         ObjectMapper mapper = new ObjectMapper();
         URL root = ObjectClassInfoHelperTest.class.getResource("/");
@@ -366,7 +366,7 @@ public class ConnectorInfoProviderServiceTest {
         configMap.put("port", "3308");
 
 
-        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+        ConnectorUtil.configureConfigurationProperties(new JsonValue(configMap), configuration.getConfigurationProperties());
 
         ObjectMapper mapper = new ObjectMapper();
         URL root = ObjectClassInfoHelperTest.class.getResource("/");
@@ -374,7 +374,7 @@ public class ConnectorInfoProviderServiceTest {
                 testableConnectorInfoProvider.createSystemConfiguration(configuration, true));
 
 
-        List valami = testableConnectorInfoProvider.getPropertiesToEncrypt(null, null, new JsonNode(testableConnectorInfoProvider.createSystemConfiguration(configuration, false)));
+        List valami = testableConnectorInfoProvider.getPropertiesToEncrypt(null, null, new JsonValue(testableConnectorInfoProvider.createSystemConfiguration(configuration, false)));
         Assert.assertFalse(valami.isEmpty());
     }
 
@@ -384,7 +384,7 @@ public class ConnectorInfoProviderServiceTest {
         Assert.assertNotNull(inputStream);
         Map config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
-        List<JsonPointer> result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
+        List<JsonPointer> result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonValue(config));
         String[] expected = new String[]{"/configurationProperties/password",
                 "/configurationProperties/credentials",
                 "/configurationProperties/privateKey",
@@ -397,7 +397,7 @@ public class ConnectorInfoProviderServiceTest {
         Assert.assertNotNull(inputStream);
         config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
-        result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonNode(config));
+        result = testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID, null, new JsonValue(config));
         assertThat(result).hasSize(0);
 
         result = testableConnectorInfoProvider.getPropertiesToEncrypt(ConnectorInfoProviderService.PID, null, connectorInfoProviderServiceConfiguration);
@@ -438,7 +438,7 @@ public class ConnectorInfoProviderServiceTest {
         //configMap.put("SearchContext", "");
 
 
-        ConnectorUtil.configureConfigurationProperties(new JsonNode(configMap), configuration.getConfigurationProperties());
+        ConnectorUtil.configureConfigurationProperties(new JsonValue(configMap), configuration.getConfigurationProperties());
 
         ObjectMapper mapper = new ObjectMapper();
         URL root = ObjectClassInfoHelperTest.class.getResource("/");

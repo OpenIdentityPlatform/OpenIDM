@@ -20,8 +20,8 @@ package org.forgerock.openidm.script;
 import java.util.ServiceLoader;
 
 // JSON-Fluent
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 // TODO: migrate to OSGi whiteboard pattern
 import org.forgerock.openidm.script.javascript.JavaScriptFactory;
@@ -42,9 +42,9 @@ public class Scripts {
      *
      * @param config configuration object for script.
      * @return a new script instance, or {@code null} if {@code config} is {@code null}.
-     * @throws JsonNodeException if the script configuration object or source is malformed.
+     * @throws JsonValueException if the script configuration object or source is malformed.
      */
-    public static Script newInstance(String name, JsonNode config) throws JsonNodeException {
+    public static Script newInstance(String name, JsonValue config) throws JsonValueException {
         if (config == null || config.isNull()) {
             return null;
         }
@@ -52,7 +52,7 @@ public class Scripts {
         if (script != null) {
             return script;
         }
-        JsonNode type = config.get("type");
-        throw new JsonNodeException(type, "script type " + type.asString() + " unsupported"); // no matching factory
+        JsonValue type = config.get("type");
+        throw new JsonValueException(type, "script type " + type.asString() + " unsupported"); // no matching factory
     }
 }

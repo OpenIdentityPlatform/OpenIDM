@@ -30,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // JSON-Fluent library
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPatch;
 
 // ForgeRock OpenIDM
@@ -99,9 +99,9 @@ class ObjectMapping implements SynchronizationListener {
      *
      * @param service
      * @param config TODO.
-     * @throws JsonNodeException TODO.
+     * @throws JsonValueException TODO.
      */
-    public ObjectMapping(SynchronizationService service, JsonNode config) throws JsonNodeException {
+    public ObjectMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
         this.service = service;
         name = config.get("name").required().asString();
         sourceObjectSet = config.get("source").required().asString();
@@ -109,11 +109,11 @@ class ObjectMapping implements SynchronizationListener {
         validSource = Scripts.newInstance("ObjectMapping", config.get("validSource"));
         validTarget = Scripts.newInstance("ObjectMapping", config.get("validTarget"));
         correlationQuery = Scripts.newInstance("ObjectMapping", config.get("correlationQuery"));
-        for (JsonNode node : config.get("properties").expect(List.class)) {
-            properties.add(new PropertyMapping(service, node));
+        for (JsonValue jv : config.get("properties").expect(List.class)) {
+            properties.add(new PropertyMapping(service, jv));
         }
-        for (JsonNode node : config.get("policies").expect(List.class)) {
-            policies.add(new Policy(service, node));
+        for (JsonValue jv : config.get("policies").expect(List.class)) {
+            policies.add(new Policy(service, jv));
         }
         onCreateScript = Scripts.newInstance("ObjectMapping", config.get("onCreate"));
         onUpdateScript = Scripts.newInstance("ObjectMapping", config.get("onUpdate"));
@@ -147,7 +147,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param value TODO.
      * @throws SynchronizationException TODO.
      */
-    private void doSourceSync(String id, JsonNode value) throws SynchronizationException {
+    private void doSourceSync(String id, JsonValue value) throws SynchronizationException {
         LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
         String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
@@ -186,15 +186,15 @@ class ObjectMapping implements SynchronizationListener {
     private Iterable<String> queryAllIds(final String objectSet) throws SynchronizationException {
         return new Iterable<String>() {
 
-            JsonNode list;
+            JsonValue list;
 
             {
                 HashMap<String, Object> query = new HashMap<String, Object>();
                 query.put(QueryConstants.QUERY_ID, "query-all-ids");
                 try {
-                    list = new JsonNode(service.getRouter().query(objectSet, query)).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
-                } catch (JsonNodeException jne) {
-                    throw new SynchronizationException(jne);
+                    list = new JsonValue(service.getRouter().query(objectSet, query)).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
+                } catch (JsonValueException jve) {
+                    throw new SynchronizationException(jve);
                 } catch (ObjectSetException ose) {
                     throw new SynchronizationException(ose);
                 }
@@ -202,7 +202,7 @@ class ObjectMapping implements SynchronizationListener {
 
             @Override
             public Iterator<String> iterator() {
-                final Iterator<JsonNode> iterator = list.iterator();
+                final Iterator<JsonValue> iterator = list.iterator();
                 return new Iterator<String>() {
 
                     @Override
@@ -211,7 +211,7 @@ class ObjectMapping implements SynchronizationListener {
                     }
 
                     @Override
-                    public String next() { // throws JsonNodeException
+                    public String next() { // throws JsonValueException
                         return iterator.next().get("_id").asString();
                     }
 
@@ -232,12 +232,12 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      * @return
      */
-    private JsonNode readObject(String id) throws SynchronizationException {
+    private JsonValue readObject(String id) throws SynchronizationException {
         if (id == null) {
             throw new NullPointerException();
         }
         try {
-            return new JsonNode(service.getRouter().read(id));
+            return new JsonValue(service.getRouter().read(id));
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
@@ -253,7 +253,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param target TODO.
      * @throws SynchronizationException TODO.
      */
-    private void createTargetObject(JsonNode target) throws SynchronizationException {
+    private void createTargetObject(JsonValue target) throws SynchronizationException {
         StringBuilder sb = new StringBuilder();
         sb.append(targetObjectSet);
         if (target.get("_id").isString()) {
@@ -263,8 +263,8 @@ class ObjectMapping implements SynchronizationListener {
         LOGGER.trace("Create target object {}", id);
         try {
             service.getRouter().create(id, target.asMap());
-        } catch (JsonNodeException jne) {
-            throw new SynchronizationException(jne);
+        } catch (JsonValueException jve) {
+            throw new SynchronizationException(jve);
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to create target object", ose);
             throw new SynchronizationException(ose);
@@ -294,13 +294,13 @@ class ObjectMapping implements SynchronizationListener {
      * @param target TODO.
      * @throws SynchronizationException TODO.
      */
-    private void updateTargetObject(JsonNode target) throws SynchronizationException {
+    private void updateTargetObject(JsonValue target) throws SynchronizationException {
         try {
             String id = qualifiedId(targetObjectSet, target.get("_id").required().asString());
             LOGGER.trace("Update target object {}", id);
             service.getRouter().update(id, target.get("_rev").asString(), target.asMap());
-        } catch (JsonNodeException jne) {
-            throw new SynchronizationException(jne);
+        } catch (JsonValueException jve) {
+            throw new SynchronizationException(jve);
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to update target object", ose);
             throw new SynchronizationException(ose);
@@ -314,14 +314,14 @@ class ObjectMapping implements SynchronizationListener {
      * @param target TODO.
      * @throws SynchronizationException TODO.
      */
-    private void deleteTargetObject(JsonNode target) throws SynchronizationException {
+    private void deleteTargetObject(JsonValue target) throws SynchronizationException {
         if (target.get("_id").isString()) { // forgiving delete
             try {
                 String id = qualifiedId(targetObjectSet, target.get("_id").required().asString());
                 LOGGER.trace("Delete target object {}", id);
                 service.getRouter().delete(id, target.get("_rev").asString());
-            } catch (JsonNodeException jne) {
-                throw new SynchronizationException(jne);
+            } catch (JsonValueException jve) {
+                throw new SynchronizationException(jve);
             } catch (NotFoundException nfe) {
                 // forgiving delete
             } catch (ObjectSetException ose) {
@@ -338,7 +338,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param target TODO.
      * @throws SynchronizationException TODO.
      */
-    private void applyMappings(JsonNode source, JsonNode target) throws SynchronizationException {
+    private void applyMappings(JsonValue source, JsonValue target) throws SynchronizationException {
         for (PropertyMapping property : properties) {
             property.apply(source, target);
         }
@@ -353,7 +353,7 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     @Override
-    public void onCreate(String id, JsonNode value) throws SynchronizationException {
+    public void onCreate(String id, JsonValue value) throws SynchronizationException {
         if (isSourceObject(id)) {
             if (value == null || value.getValue() == null) { // notification without the actual value
                 value = readObject(id);
@@ -363,7 +363,7 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     @Override
-    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
+    public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         if (isSourceObject(id)) {
             if (newValue == null || newValue.getValue() == null) { // notification without the actual value
                 newValue = readObject(id);
@@ -512,7 +512,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void logReconEntry(ReconEntry entry) throws SynchronizationException {
         try {
-            service.getRouter().create("audit/recon", entry.toJsonNode().asMap());
+            service.getRouter().create("audit/recon", entry.toJsonValue().asMap());
         } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
@@ -526,9 +526,9 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public String reconId;
         /** TODO: Description. */
-        public JsonNode sourceObject;
+        public JsonValue sourceObject;
         /** TODO: Description. */
-        public JsonNode targetObject;
+        public JsonValue targetObject;
         /** TODO: Description. */
         public final Link linkObject = new Link(ObjectMapping.this);
         /** TODO: Description. */
@@ -580,7 +580,7 @@ class ObjectMapping implements SynchronizationListener {
                         if (targetObject != null) {
                             throw new SynchronizationException("target object already exists");
                         }
-                        targetObject = new JsonNode(new HashMap<String, Object>());
+                        targetObject = new JsonValue(new HashMap<String, Object>());
                         applyMappings(sourceObject, targetObject); // apply property mappings to target
                         execScript("onCreate", onCreateScript);
                         createTargetObject(targetObject);
@@ -611,7 +611,7 @@ class ObjectMapping implements SynchronizationListener {
                             break; // do not update target
                         }
                         if (sourceObject != null && targetObject != null) {
-                            JsonNode oldTarget = targetObject.copy();
+                            JsonValue oldTarget = targetObject.copy();
                             applyMappings(sourceObject, targetObject);
                             execScript("onUpdate", onUpdateScript);
                             if (JsonPatch.diff(oldTarget, targetObject).size() > 0) { // only update if target changes
@@ -635,8 +635,8 @@ class ObjectMapping implements SynchronizationListener {
                     case EXCEPTION:
                         throw new SynchronizationException(); // aborts change; recon reports
                 }
-            } catch (JsonNodeException jne) {
-                throw new SynchronizationException(jne);
+            } catch (JsonValueException jve) {
+                throw new SynchronizationException(jve);
             }
         }
 
@@ -765,17 +765,17 @@ class ObjectMapping implements SynchronizationListener {
                         situation = Situation.MISSING;
                     }
                 } else { // source object not linked to target
-                    JsonNode results = correlateTarget();
+                    JsonValue results = correlateTarget();
                     if (results == null) { // no correlationQuery defined
                         situation = Situation.ABSENT;
                     } else if (results.size() == 1) {
                         //TODO Optimize to get the entire object with one query if it's sufficeient
-                        JsonNode resultNode = results.get((Integer) 0).required();
-                        if (hasNonSpecialAttribute(resultNode.keys())) { //Assume this is a full object
-                            targetObject = resultNode;
+                        JsonValue resultValue = results.get((Integer) 0).required();
+                        if (hasNonSpecialAttribute(resultValue.keys())) { //Assume this is a full object
+                            targetObject = resultValue;
                         } else {
                             targetObject = readObject(qualifiedId(targetObjectSet,
-                                    resultNode.get("_id").required().asString()));
+                                    resultValue.get("_id").required().asString()));
                         }
                         situation = Situation.FOUND;
                     } else if (results.size() == 0) {
@@ -788,7 +788,7 @@ class ObjectMapping implements SynchronizationListener {
                 if (linkObject._id != null) {
                     situation = Situation.UNQUALIFIED;
                 } else {
-                    /*JsonNode results = correlateTarget();
+                    /*JsonValue results = correlateTarget();
                     if (null != results && results.size() == 1) {
                     targetObject = readObject(qualifiedId(targetObjectSet,
                     results.get((Integer) 0).required().get("_id").required().asString()));
@@ -811,8 +811,8 @@ class ObjectMapping implements SynchronizationListener {
          * @throws SynchronizationException TODO.
          */
         @SuppressWarnings("unchecked")
-        private JsonNode correlateTarget() throws SynchronizationException {
-            JsonNode result = null;
+        private JsonValue correlateTarget() throws SynchronizationException {
+            JsonValue result = null;
             if (correlationQuery != null) {
                 Map<String, Object> queryScope = service.newScope();
                 queryScope.put("source", sourceObject.asMap());
@@ -821,7 +821,7 @@ class ObjectMapping implements SynchronizationListener {
                     if (query == null || !(query instanceof Map)) {
                         throw new SynchronizationException("Expected correlationQuery script to yield a Map");
                     }
-                    result = new JsonNode(queryTargetObjectSet((Map) query)).get(QueryConstants.QUERY_RESULT).required();
+                    result = new JsonValue(queryTargetObjectSet((Map)query)).get(QueryConstants.QUERY_RESULT).required();
                 } catch (ScriptException se) {
                     LOGGER.debug("{} correlationQuery script encountered exception", name, se);
                     throw new SynchronizationException(se);
@@ -922,18 +922,18 @@ class ObjectMapping implements SynchronizationListener {
          *
          * @return TODO.
          */
-        private JsonNode toJsonNode() {
-            JsonNode node = new JsonNode(new HashMap<String, Object>());
-            node.put("reconId", op.reconId);
-            node.put("reconciling", reconciling);
-            node.put("sourceObjectId", sourceId);
-            node.put("targetObjectId", targetId);
-            node.put("timestamp", isoFormatter.format(timestamp));
-            node.put("situation", (op.situation == null ? null : op.situation.toString()));
-            node.put("action", (op.action == null ? null : op.action.toString()));
-            node.put("status", (status == null ? null : status.toString()));
-            node.put("message", message);
-            return node;
+        private JsonValue toJsonValue() {
+            JsonValue jv = new JsonValue(new HashMap<String, Object>());
+            jv.put("reconId", op.reconId);
+            jv.put("reconciling", reconciling);
+            jv.put("sourceObjectId", sourceId);
+            jv.put("targetObjectId", targetId);
+            jv.put("timestamp", isoFormatter.format(timestamp));
+            jv.put("situation", (op.situation == null ? null : op.situation.toString()));
+            jv.put("action", (op.action == null ? null : op.action.toString()));
+            jv.put("status", (status == null ? null : status.toString()));
+            jv.put("message", message);
+            return jv;
         }
     }
 }

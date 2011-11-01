@@ -26,8 +26,8 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 
@@ -44,7 +44,7 @@ public class SimpleSystemIdentifier implements SystemIdentifier {
 
     private String name;
 
-    public SimpleSystemIdentifier(JsonNode configuration) throws JsonNodeException {
+    public SimpleSystemIdentifier(JsonValue configuration) throws JsonValueException {
         name = configuration.get("name").required().expect(String.class).asString();
     }
 

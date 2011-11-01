@@ -24,8 +24,8 @@
  */
 package org.forgerock.openidm.provisioner.openicf.commons;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -273,7 +273,7 @@ public class ConnectorUtil {
      * @param target
      * @throws UnsupportedOperationException when the property value can not be converted to String.
      */
-    public static void configureResultsHandlerConfiguration(JsonNode source, ResultsHandlerConfiguration target) throws JsonNodeException {
+    public static void configureResultsHandlerConfiguration(JsonValue source, ResultsHandlerConfiguration target) throws JsonValueException {
         if (!source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).isNull()) {
             target.setEnableNormalizingResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER).asBoolean());
         }
@@ -309,7 +309,7 @@ public class ConnectorUtil {
      * @param target
      * @throws UnsupportedOperationException when the property value can not be converted to String.
      */
-    public static void configureObjectPoolConfiguration(JsonNode source, ObjectPoolConfiguration target) throws JsonNodeException {
+    public static void configureObjectPoolConfiguration(JsonValue source, ObjectPoolConfiguration target) throws JsonValueException {
         Map<String, Object> poolConfiguration = source.asMap();
         if (null != poolConfiguration.get(OPENICF_MAX_OBJECTS)) {
             target.setMaxObjects(coercedTypeCasting(poolConfiguration.get(OPENICF_MAX_OBJECTS), int.class));
@@ -337,9 +337,9 @@ public class ConnectorUtil {
         return result;
     }
 
-    public static void configureTimeout(JsonNode source, APIConfiguration target) throws JsonNodeException {
+    public static void configureTimeout(JsonValue source, APIConfiguration target) throws JsonValueException {
         for (OperationType e : OperationType.values()) {
-            JsonNode value = source.get(e.name());
+            JsonValue value = source.get(e.name());
             try {
                 if (!value.isNull()) {
                     target.setTimeout(e.getValue(), coercedTypeCasting(value.asNumber(), int.class));
@@ -401,7 +401,7 @@ public class ConnectorUtil {
     }
 
 
-    public static void configureConfigurationProperties(JsonNode source, ConfigurationProperties target) throws JsonNodeException {
+    public static void configureConfigurationProperties(JsonValue source, ConfigurationProperties target) throws JsonValueException {
         source.required();
         if (null != target) {
             List<String> configPropNames = target.getPropertyNames();
@@ -438,20 +438,20 @@ public class ConnectorUtil {
     }
 
 
-    public static void configureDefaultAPIConfiguration(JsonNode source, APIConfiguration target) throws JsonNodeException {
-        JsonNode poolConfigOption = source.get(OPENICF_POOL_CONFIG_OPTION);
+    public static void configureDefaultAPIConfiguration(JsonValue source, APIConfiguration target) throws JsonValueException {
+        JsonValue poolConfigOption = source.get(OPENICF_POOL_CONFIG_OPTION);
         if (poolConfigOption.isMap()) {
             configureObjectPoolConfiguration(poolConfigOption, target.getConnectorPoolConfiguration());
         }
-        JsonNode resultsHandlerConfigOption = source.get(OPENICF_RESULTSHANDLER_CONFIG_OPTION);
+        JsonValue resultsHandlerConfigOption = source.get(OPENICF_RESULTSHANDLER_CONFIG_OPTION);
         if (resultsHandlerConfigOption.isMap()) {
             configureResultsHandlerConfiguration(resultsHandlerConfigOption, target.getResultsHandlerConfiguration());
         }
-        JsonNode operationTimeout = source.get(OPENICF_OPERATION_TIMEOUT);
+        JsonValue operationTimeout = source.get(OPENICF_OPERATION_TIMEOUT);
         if (operationTimeout.isMap()) {
             configureTimeout(operationTimeout, target);
         }
-        JsonNode configurationProperties = source.get(OPENICF_CONFIGURATION_PROPERTIES);
+        JsonValue configurationProperties = source.get(OPENICF_CONFIGURATION_PROPERTIES);
         configureConfigurationProperties(configurationProperties, target.getConfigurationProperties());
     }
 
@@ -496,7 +496,7 @@ public class ConnectorUtil {
      * @throws IllegalArgumentException when one of the three required parameter is null.
      * @throws IOException              when the property value can not be converted to String.
      */
-    public static ConnectorKey getConnectorKey(JsonNode configuration) throws JsonNodeException {
+    public static ConnectorKey getConnectorKey(JsonValue configuration) throws JsonValueException {
         String bundleName = configuration.get(OPENICF_BUNDLENAME).asString();
         String bundleVersion = configuration.get(OPENICF_BUNDLEVERSION).asString();
         String connectorName = configuration.get(OPENICF_CONNECTOR_NAME).asString();
@@ -544,8 +544,8 @@ public class ConnectorUtil {
     }
 
 
-    public static ConnectorReference getConnectorReference(JsonNode configuration) throws JsonNodeException {
-        JsonNode connectorRef = configuration.get(OPENICF_CONNECTOR_REF);
+    public static ConnectorReference getConnectorReference(JsonValue configuration) throws JsonValueException {
+        JsonValue connectorRef = configuration.get(OPENICF_CONNECTOR_REF);
         connectorRef.expect(Map.class);
         ConnectorKey key = getConnectorKey(connectorRef);
         String connectorHost = connectorRef.get(OPENICF_CONNECTOR_HOST_REF).defaultTo(ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER).asString();
@@ -559,8 +559,8 @@ public class ConnectorUtil {
     }
 
 
-    public static Map<String, ObjectClassInfoHelper> getObjectTypes(JsonNode configuration) throws JsonNodeException, SchemaException {
-        JsonNode objectTypes = configuration.get(OPENICF_OBJECT_TYPES);
+    public static Map<String, ObjectClassInfoHelper> getObjectTypes(JsonValue configuration) throws JsonValueException, SchemaException {
+        JsonValue objectTypes = configuration.get(OPENICF_OBJECT_TYPES);
         Map<String, ObjectClassInfoHelper> result = new HashMap<String, ObjectClassInfoHelper>(objectTypes.expect(Map.class).asMap().size());
         for (Map.Entry<String, Object> entry : objectTypes.asMap().entrySet()) {
             result.put(entry.getKey(), new ObjectClassInfoHelper((Map<String, Object>) entry.getValue()));
@@ -590,12 +590,12 @@ public class ConnectorUtil {
 
     }
 
-    public static Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> getOperationOptionConfiguration(JsonNode configuration) throws JsonNodeException, SchemaException {
+    public static Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> getOperationOptionConfiguration(JsonValue configuration) throws JsonValueException, SchemaException {
         Set<String> objectTypes = configuration.get(OPENICF_OBJECT_TYPES).keys();
         Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionConfigurationMap =
                 new HashMap<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>>(objectTypes.size());
 
-        JsonNode operationOptions = configuration.get(OPENICF_OPERATION_OPTIONS);
+        JsonValue operationOptions = configuration.get(OPENICF_OPERATION_OPTIONS);
 
         if (operationOptions.expect(Map.class).isNull()) {
             for (String type : objectTypes) {
@@ -609,16 +609,16 @@ public class ConnectorUtil {
             for (OperationType entry : OperationType.values()) {
                 OperationOptionInfoHelper defaultOperationOptionInfoHelper = null;
 
-                JsonNode operation = operationOptions.get(entry.name()).expect(Map.class);
+                JsonValue operation = operationOptions.get(entry.name()).expect(Map.class);
                 if (operation.isNull()) {
                     defaultOperationOptionInfoHelper = new OperationOptionInfoHelper();
                 } else {
                     defaultOperationOptionInfoHelper = new OperationOptionInfoHelper(operation);
                 }
 
-                JsonNode objectFeatures = operation.get(OPENICF_OBJECT_FEATURES).expect(Map.class);
+                JsonValue objectFeatures = operation.get(OPENICF_OBJECT_FEATURES).expect(Map.class);
                 for (String type : objectTypes) {
-                    JsonNode objectFeature = objectFeatures.get(type);
+                    JsonValue objectFeature = objectFeatures.get(type);
 
                     Map<Class<? extends APIOperation>, OperationOptionInfoHelper> config = operationOptionConfigurationMap.get(type);
                     if (null == config) {
@@ -733,12 +733,12 @@ public class ConnectorUtil {
      *
      * @param token
      * @return
-     * @throws JsonNodeException        if {@code syncToken} is null or {@code nativeType} is not String
+     * @throws JsonValueException        if {@code syncToken} is null or {@code nativeType} is not String
      * @throws IllegalArgumentException if the value of {@code syncToken} can not be converted to expected type.
      */
-    public static SyncToken convertToSyncToken(JsonNode token) {
-        JsonNode nativeType = token.get(OPENICF_NATIVE_TYPE);
-        JsonNode tokenValue = token.get(OPENICF_SYNC_TOKEN).required();
+    public static SyncToken convertToSyncToken(JsonValue token) {
+        JsonValue nativeType = token.get(OPENICF_NATIVE_TYPE);
+        JsonValue tokenValue = token.get(OPENICF_SYNC_TOKEN).required();
         SyncToken result = null;
         if (null == nativeType) {
             result = new SyncToken(tokenValue.getValue());

@@ -38,8 +38,8 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.PrettyPrinter;
 
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.config.InvalidException;
@@ -111,7 +111,7 @@ public class ConfigCrypto {
      * @param factoryAlias the alias of the factory configuration instance
      * @return the list of properties to encrypt
      */
-    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonNode parsed)
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonValue parsed)
             throws WaitForMetaData {
         Collection<MetaDataProvider> providers = providerTracker.getProviders();
         WaitForMetaData lastWaitException = null;
@@ -147,14 +147,14 @@ public class ConfigCrypto {
     public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary config)
             throws InvalidException, InternalErrorException, WaitForMetaData {
 
-        JsonNode parsed = parse(config, pidOrFactory);
+        JsonValue parsed = parse(config, pidOrFactory);
         return encrypt(pidOrFactory, instanceAlias, config, parsed);
     }
     
-    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonNode newConfig) 
+    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonValue newConfig) 
             throws WaitForMetaData {
         
-        JsonNode parsed = newConfig;
+        JsonValue parsed = newConfig;
         Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig); // Default to existing
         
         List<JsonPointer> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, parsed);
@@ -167,19 +167,19 @@ public class ConfigCrypto {
             for (JsonPointer pointer : props) {
                 logger.trace("Handling property to encrypt {}", pointer);
 
-                JsonNode nodeToEncrypt = parsed.get(pointer);
-                if (null != nodeToEncrypt && !nodeToEncrypt.isNull() && !crypto.isEncrypted(nodeToEncrypt)) {
+                JsonValue valueToEncrypt = parsed.get(pointer);
+                if (null != valueToEncrypt && !valueToEncrypt.isNull() && !crypto.isEncrypted(valueToEncrypt)) {
 
                     if (logger.isTraceEnabled()) {
                         logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointer,
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias});
                     }
                     
-                    // Encrypt and replace node
+                    // Encrypt and replace value
                     try {
-                        JsonNode encryptedNode = crypto.encrypt(nodeToEncrypt,
+                        JsonValue encryptedValue = crypto.encrypt(valueToEncrypt,
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias);
-                        parsed.put(pointer,encryptedNode.getValue());
+                        parsed.put(pointer,encryptedValue.getValue());
                         modified = true;
                     } catch (JsonCryptoException ex) {
                         throw new InternalErrorException("Failure during encryption of configuration " 
@@ -217,9 +217,9 @@ public class ConfigCrypto {
      * @throws InvalidException if the configuration was not valid JSON and could not be parsed
      * @throws InternalErrorException if parsing failed for technical, possibly transient reasons
      */
-    public JsonNode parse(Dictionary<String, Object> dict, String serviceName)
+    public JsonValue parse(Dictionary<String, Object> dict, String serviceName)
             throws InvalidException, InternalErrorException {
-        JsonNode node = new JsonNode(new HashMap<String, Object>());
+        JsonValue jv = new JsonValue(new HashMap<String, Object>());
         
         if (dict != null) {
             Map<String, Object> parsedConfig = null;
@@ -235,15 +235,15 @@ public class ConfigCrypto {
             }
 
             try {
-                node = new JsonNode(parsedConfig);
-            } catch (JsonNodeException ex) {
+                jv = new JsonValue(parsedConfig);
+            } catch (JsonValueException ex) {
                 throw new InvalidException("Component configuration for " + serviceName
                                 + " is invalid: " + ex.getMessage(), ex);
             }
         }
         logger.debug("Parsed configuration for {}", serviceName);
 
-        return node;
+        return jv;
     }
 
     private CryptoService getCryptoService(BundleContext context)

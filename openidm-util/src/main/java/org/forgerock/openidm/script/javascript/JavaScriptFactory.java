@@ -20,8 +20,8 @@ package org.forgerock.openidm.script.javascript;
 import java.io.File;
 
 // JSON-Fluent
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
 import org.forgerock.openidm.core.IdentityServer;
@@ -91,7 +91,7 @@ public class JavaScriptFactory implements ScriptFactory {
     }
 
     @Override
-    public Script newInstance(String name, JsonNode config) throws JsonNodeException {
+    public Script newInstance(String name, JsonValue config) throws JsonValueException {
         String type = config.get("type").asString();
         if (type != null && type.equalsIgnoreCase("text/javascript")) {
             boolean sharedScope = config.get("sharedScope").defaultTo(true).asBoolean();
@@ -99,18 +99,18 @@ public class JavaScriptFactory implements ScriptFactory {
                 try {
                     initDebugListener();
                     return new JavaScript(name, config.get("source").asString(), sharedScope);
-                } catch (ScriptException se) { // re-cast to show exact node of failure 
-                    throw new JsonNodeException(config.get("source"), se);
+                } catch (ScriptException se) { // re-cast to show exact value of failure 
+                    throw new JsonValueException(config.get("source"), se);
                 }
             } else if (config.isDefined("file")) { // TEMPORARY
                 try {
                     initDebugListener();
                     return new JavaScript(name, IdentityServer.getFileForPath(config.get("file").asString()), sharedScope);
-                } catch (ScriptException se) { // re-cast to show exact node of failure 
-                    throw new JsonNodeException(config.get("file"), se);
+                } catch (ScriptException se) { // re-cast to show exact value of failure 
+                    throw new JsonValueException(config.get("file"), se);
                 }
             } else {
-                throw new JsonNodeException(config, "expected 'source' or 'file' property");
+                throw new JsonValueException(config, "expected 'source' or 'file' property");
             }
         }
         return null;

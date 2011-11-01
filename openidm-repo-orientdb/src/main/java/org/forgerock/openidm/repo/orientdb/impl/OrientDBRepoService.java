@@ -41,8 +41,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
@@ -505,7 +505,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      */
     static OrientDBRepoService getRepoBootService(Map repoConfig) {
         OrientDBRepoService bootRepo = new OrientDBRepoService();
-        JsonNode cfg = new JsonNode(repoConfig);
+        JsonValue cfg = new JsonValue(repoConfig);
         bootRepo.init(cfg);
         return bootRepo;
     }
@@ -514,7 +514,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     void activate(ComponentContext compContext) throws Exception { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
 
-        JsonNode config = null;
+        JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
@@ -538,7 +538,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
      * 
      * @param config the configuration
      */
-    void init (JsonNode config) {
+    void init (JsonValue config) {
         try {
             File dbFolder = IdentityServer.getFileForPath("db/openidm");
             dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + dbFolder.getAbsolutePath()).asString();

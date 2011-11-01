@@ -25,8 +25,8 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -72,7 +72,7 @@ import java.util.Map;
 public class ConnectorUtilTest {
 
     private APIConfiguration runtimeAPIConfiguration = null;
-    private JsonNode jsonConfiguration;
+    private JsonValue jsonConfiguration;
 
     @BeforeTest
     public void beforeTest() throws Exception {
@@ -90,7 +90,7 @@ public class ConnectorUtilTest {
         String config = new String(buffer.toByteArray());
         ObjectMapper mapper = new ObjectMapper();
         Map map = mapper.readValue(config, Map.class);
-        jsonConfiguration = new JsonNode(map);
+        jsonConfiguration = new JsonValue(map);
         Assert.assertNotNull(jsonConfiguration);
     }
 
@@ -106,7 +106,7 @@ public class ConnectorUtilTest {
         Map<String, Object> target = new LinkedHashMap<String, Object>();
         ConnectorUtil.createSystemConfigurationFromAPIConfiguration(runtimeAPIConfiguration, target);
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
-        ConnectorUtil.configureDefaultAPIConfiguration(new JsonNode(target), clonedConfiguration);
+        ConnectorUtil.configureDefaultAPIConfiguration(new JsonValue(target), clonedConfiguration);
         //Assert.assertEquals(clonedConfiguration, runtimeAPIConfiguration);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -143,7 +143,7 @@ public class ConnectorUtilTest {
         InputStream inputStream = ConnectorUtilTest.class.getResourceAsStream("/config/SystemSchemaConfiguration.json");
         Assert.assertNotNull(inputStream);
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode configuration = new JsonNode(mapper.readValue(inputStream, Map.class));
+        JsonValue configuration = new JsonValue(mapper.readValue(inputStream, Map.class));
         Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
         ObjectClassInfoHelper objectClassInfoHelper = org.mockito.Mockito.mock(ObjectClassInfoHelper.class);
         org.mockito.Mockito.when(objectClassInfoHelper.getObjectClass()).thenReturn(new ObjectClass("__ACCOUNT__"));
@@ -174,7 +174,7 @@ public class ConnectorUtilTest {
 
 
     @Test
-    public void testAPIConfiguration() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
+    public void testAPIConfiguration() throws JsonValueException, SchemaException, URISyntaxException, ObjectSetException {
         ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
         Assert.assertEquals(connectorReference.getConnectorHost(), ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER);
         ConnectorKey key = connectorReference.getConnectorKey();
@@ -195,7 +195,7 @@ public class ConnectorUtilTest {
     }
 
     @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__.*")
-    public void testUnsupportedObjectType() throws JsonNodeException, SchemaException, URISyntaxException, ObjectSetException {
+    public void testUnsupportedObjectType() throws JsonValueException, SchemaException, URISyntaxException, ObjectSetException {
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test", jsonConfiguration, runtimeAPIConfiguration);
         OperationHelper helper = operationHelperBuilder.build("__NONE__", null, null);
     }

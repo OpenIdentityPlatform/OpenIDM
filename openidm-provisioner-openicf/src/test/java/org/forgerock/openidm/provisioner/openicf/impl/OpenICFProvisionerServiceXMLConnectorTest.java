@@ -28,7 +28,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.fest.assertions.MapAssert;
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.provisioner.Id;
 import org.osgi.service.component.ComponentConstants;
 import org.testng.Assert;
@@ -72,7 +72,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
 
     @Test
     public void testGetStatus() throws Exception {
-        JsonNode status = new JsonNode(getService().getStatus());
+        JsonValue status = new JsonValue(getService().getStatus());
         status.expect(Map.class).get("name").required().asString().equals("XML");
         assertThat(status.asMap()).as("OK MUST be true").includes(MapAssert.entry("ok", true));
         assertThat(status.asMap()).includes(MapAssert.entry(ComponentConstants.COMPONENT_ID, 42));

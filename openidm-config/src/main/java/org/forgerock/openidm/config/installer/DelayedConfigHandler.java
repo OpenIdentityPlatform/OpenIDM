@@ -18,8 +18,6 @@ package org.forgerock.openidm.config.installer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.forgerock.json.fluent.JsonNode;
-
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.metadata.impl.ProviderListener;

@@ -40,8 +40,8 @@ import org.apache.felix.scr.annotations.Service;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
@@ -152,8 +152,8 @@ public class ConfigObjectService implements ObjectSet {
                 }
                 Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-                JsonNode node = enhancedConfig.getConfiguration(props, context.getBundleContext(), fullId, false);
-                result = node.asMap();
+                JsonValue value = enhancedConfig.getConfiguration(props, context.getBundleContext(), fullId, false);
+                result = value.asMap();
                 logger.debug("Read configuration for service {}", fullId);
             }
         } catch (ObjectSetException ex) {
@@ -199,7 +199,7 @@ public class ConfigObjectService implements ObjectSet {
                         + parsedId + ", configuration for this ID already exists.");
             }
 
-            Dictionary dict = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, null, new JsonNode(obj));
+            Dictionary dict = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, null, new JsonValue(obj));
             if (parsedId.isFactoryConfig()) {
                 dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS, parsedId.instanceAlias); // The alias for the PID as understood by fileinstall
             }
@@ -250,7 +250,7 @@ public class ConfigObjectService implements ObjectSet {
             if (existingConfig == null) {
                 throw new NotFoundException("No existing configuration found for " + fullId + ", can not update the configuration.");
             }
-            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonNode(obj));
+            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonValue(obj));
             config.update(existingConfig);
             logger.debug("Updated existing configuration for {} with {}", fullId, existingConfig);
         } catch (ObjectSetException ex) {

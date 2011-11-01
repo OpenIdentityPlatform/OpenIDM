@@ -25,8 +25,8 @@
 package org.forgerock.openidm.provisioner.impl;
 
 import org.apache.felix.scr.annotations.*;
-import org.forgerock.json.fluent.JsonNode;
-import org.forgerock.json.fluent.JsonNodeException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
@@ -139,7 +139,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         URI newId = identifier.resolveLocalId((String) object.get("_id")).getId();
         ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
         /*try {
-            onCreate(id, new JsonNode(object));
+            onCreate(id, new JsonValue(object));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -197,7 +197,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, object, Status.SUCCESS);
 
         /*try {
-            onUpdate(id, new JsonNode(oldValue), new JsonNode(object));
+            onUpdate(id, new JsonValue(oldValue), new JsonValue(object));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -263,7 +263,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, newValue, Status.SUCCESS);
 
         /*try {
-            onUpdate(id, new JsonNode(oldValue), new JsonNode(newValue));
+            onUpdate(id, new JsonValue(oldValue), new JsonValue(newValue));
         } catch (SynchronizationException e) {
             //TODO What to do with this exception
             throw new ObjectSetException(e);
@@ -312,7 +312,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.sync.SynchronizationException
      *          if an exception occurs processing the notification.
      */
-    public void onCreate(String id, JsonNode value) throws SynchronizationException {
+    public void onCreate(String id, JsonValue value) throws SynchronizationException {
         try {
             Map<String, Object> params = new HashMap<String, Object>(3);
             params.put("_action", "ONCREATE");
@@ -333,7 +333,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      * @throws org.forgerock.openidm.sync.SynchronizationException
      *          if an exception occurs processing the notification.
      */
-    public void onUpdate(String id, JsonNode oldValue, JsonNode newValue) throws SynchronizationException {
+    public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         try {
             Map<String, Object> params = new HashMap<String, Object>(3);
             params.put("_action", "ONUPDATE");
@@ -373,7 +373,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
      */
     public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
         try {
-            JsonNode params = new JsonNode(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
+            JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
             if ("liveSync".equals(action) || "activeSync".equals(action)) {
                 Id id = new Id(params.get("source").asString());
@@ -382,7 +382,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
                     try {
                         Map<String, Object> previousStage = getRouter().read(previousStageId);
                         Object rev = previousStage.get("_rev");
-                        getRouter().update(previousStageId, (String) rev, locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? new JsonNode(previousStage) : null, this).asMap());
+                        getRouter().update(previousStageId, (String) rev, locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? new JsonValue(previousStage) : null, this).asMap());
                     } catch (NotFoundException e) {
                         TRACE.info("PooledSyncStage object {} is not found. First execution.");
                         getRouter().create(previousStageId, locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
@@ -391,8 +391,8 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
                     throw new ExecutionException(e);
                 }
             }
-        } catch (JsonNodeException jne) {
-            throw new ExecutionException(jne);
+        } catch (JsonValueException jve) {
+            throw new ExecutionException(jve);
         } catch (ObjectSetException e) {
             throw new ExecutionException(e);
         }

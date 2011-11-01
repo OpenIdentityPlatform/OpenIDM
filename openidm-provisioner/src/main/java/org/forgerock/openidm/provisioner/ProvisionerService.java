@@ -26,7 +26,7 @@
 
 package org.forgerock.openidm.provisioner;
 
-import org.forgerock.json.fluent.JsonNode;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
@@ -73,5 +73,5 @@ public interface ProvisionerService extends ObjectSet {
      * @param synchronizationListener The listener to send the changes to.
      * @return The new updated stage object. This will be the {@code previousStage} at next call.
      */
-    public JsonNode liveSynchronize(String objectType, JsonNode previousStage, final SynchronizationListener synchronizationListener);
+    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener);
 }
