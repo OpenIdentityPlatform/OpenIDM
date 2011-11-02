@@ -65,7 +65,7 @@
   <title>Install the OpenIDM Services</title>
   <step>
    <para>Make sure you have the correct version of Java installed.</para>
-   <screen width='80'>$ java -version
+   <screen width='100' >$ java -version
 java version "1.6.0_24"
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
 Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
@@ -76,7 +76,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
   </step>
   <step>
    <para>Unpack the contents of the .zip file into the install location.</para>
-   <screen width='80'>$ cd /path/to
+   <screen width='100' >$ cd /path/to
 $ unzip ~/Downloads/openidm-*.zip 
 ...
   inflating: openidm/src/site/index.htm  
@@ -108,7 +108,7 @@ $ </screen>
   The following will start the Felix container, load all the OpenIDM services
   and start a command shell to allow you to manage the container. 
   </para>
-<screen width='80'>$ cd /path/to/openidm
+<screen width='100'>$ cd /path/to/openidm
 $ ./start.sh 
 Do you want to start in debug mode: [y]n
 
@@ -118,7 +118,7 @@ Listening for transport dt_socket at address: 5005
 <para>
 Windows
 </para>
-<screen width='80'>$ cd \path\to\openidm
+<screen width='100'>$ cd \path\to\openidm
 $ run.bat 
 Start in debug mode [1] default
 Start in normal mode [2]
@@ -134,7 +134,7 @@ Listening for transport dt_socket at address: 5005
    and their state enter the following (if startup was successful all states 
    should be active):
    </para>
-<screen width='80'>
+<screen width='100'>
 -&gt; scr list
 Id     State           Name
 [   8] [active       ] embedded-orientdb-server-component
@@ -196,7 +196,7 @@ Id     State           Name
          Or create your own user joe by sending a RESTful PUT. Here is a sample curl
          command to create the user joe in the repository.
      </para>
-     <screen width='80'>
+     <screen width='100' >
 $ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com"}'
 http://localhost:8080/openidm/managed/user/joe
 
@@ -213,7 +213,7 @@ $
         or from the command line using curl.
      </para>
 
-     <screen width='80'>
+     <screen width='100' >
 $ curl http://localhost:8080/openidm/managed/user/joe
 
 {"_id":"joe","_rev":"1","email":"joe@abc.com","name":"joe","lastname":"smith","firstname":"joe"}
@@ -229,7 +229,7 @@ $
 
   <step performance='optional'>
    <para>To stop the OpenIDM services enter the shutdown command in the shell</para>
-    <screen width='80'>
+    <screen width='100' >
 -&gt; shutdown
 ...
 $

@@ -4,82 +4,12 @@
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                       xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4 data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
    <ri:__ACCOUNT__>
-      <ri:ms-employed>123456</ri:ms-employed>
-      <ri:has-sixth-sense>true</ri:has-sixth-sense>
-      <ri:overtime-commission>50000.0</ri:overtime-commission>
-      <ri:last-logoff/>
-      <icf:__ENABLE__>true</icf:__ENABLE__>
-      <ri:account-created-timestamp>987654321</ri:account-created-timestamp>
-      <ri:hourly-wage>9.87654321E8</ri:hourly-wage>
-      <icf:__DISABLE_DATE__>987654321</icf:__DISABLE_DATE__>
-      <ri:permanent-employee>true</ri:permanent-employee>
-      <ri:email>mail@example.com</ri:email>
-      <ri:secret-pin>1234</ri:secret-pin>
-      <ri:years-employed>5</ri:years-employed>
-      <ri:is-deleted/>
-      <ri:jpegPhoto>[B@9f07597</ri:jpegPhoto>
-      <ri:age>21</ri:age>
-      <ri:userCertificate>[B@9b8119a</ri:userCertificate>
-      <ri:address>633 Stag Trail Rd, N Caldwell, NJ</ri:address>
-      <ri:address>1938 Sulivan Ln, Metropolis</ri:address>
-      <icf:__ENABLE_DATE__>987654321</icf:__ENABLE_DATE__>
-      <ri:max-storage>20</ri:max-storage>
-      <ri:employee-type>perm</ri:employee-type>
-      <ri:yearly-wage>987654321</ri:yearly-wage>
-      <ri:avg-wage/>
-      <ri:password-secret-answer>UGFzc3cwcmQ=</ri:password-secret-answer>
-      <icf:__UID__>105a2dc4-f6de-4777-8688-33b2da3a5cd7</icf:__UID__>
-      <ri:employee-number>123456</ri:employee-number>
-      <ri:gender>F</ri:gender>
-      <ri:office-square-feet>200.0</ri:office-square-feet>
-      <icf:__LAST_LOGIN_DATE__/>
-      <ri:lastname>Doe</ri:lastname>
-      <ri:firstname>Darth</ri:firstname>
-      <icf:__DESCRIPTION__>Test Description</icf:__DESCRIPTION__>
-      <icf:__GROUPS__>TestGroup1</icf:__GROUPS__>
-      <icf:__GROUPS__>TestGroup2</icf:__GROUPS__>
-      <ri:lastname-first-letter/>
-      <icf:__NAME__>DDOE</icf:__NAME__>
+     <icf:__UID__>1</icf:__UID__>
+       <icf:__NAME__>DDOE1</icf:__NAME__>
       <icf:__PASSWORD__>TestPassw0rd</icf:__PASSWORD__>
-   </ri:__ACCOUNT__>
-   <ri:__ACCOUNT__>
-      <ri:ms-employed>345678</ri:ms-employed>
-      <ri:has-sixth-sense>true</ri:has-sixth-sense>
-      <ri:overtime-commission>500000.0</ri:overtime-commission>
-      <ri:last-logoff/>
-      <icf:__ENABLE__>true</icf:__ENABLE__>
-      <ri:account-created-timestamp>123456789</ri:account-created-timestamp>
-      <ri:hourly-wage>9.87654321E8</ri:hourly-wage>
-      <icf:__DISABLE_DATE__>123456789</icf:__DISABLE_DATE__>
-      <ri:permanent-employee>true</ri:permanent-employee>
-      <ri:email>vader@forgerock.com</ri:email>
-      <ri:email>secret@forgerock.com</ri:email>
-      <ri:secret-pin>4321</ri:secret-pin>
-      <ri:years-employed>200</ri:years-employed>
-      <ri:is-deleted/>
-      <ri:jpegPhoto>[B@326147d9</ri:jpegPhoto>
-      <ri:age>450</ri:age>
-      <ri:userCertificate>[B@10b41166</ri:userCertificate>
-      <ri:address>Death Star command HQ</ri:address>
-      <ri:address>Outer space</ri:address>
-      <icf:__ENABLE_DATE__>123456789</icf:__ENABLE_DATE__>
-      <ri:max-storage>900</ri:max-storage>
-      <ri:employee-type>perm</ri:employee-type>
-      <ri:yearly-wage>98765432198</ri:yearly-wage>
-      <ri:avg-wage/>
-      <ri:password-secret-answer>UGFzc3cwcmQ=</ri:password-secret-answer>
-      <icf:__UID__>2feed300-b0ec-44c0-a0fe-814bdcebf6e2</icf:__UID__>
-      <ri:employee-number>2345678</ri:employee-number>
-      <ri:gender>M</ri:gender>
-      <ri:office-square-feet>9000000.0</ri:office-square-feet>
-      <icf:__LAST_LOGIN_DATE__/>
-      <ri:lastname>Vader</ri:lastname>
-      <ri:firstname>Darth</ri:firstname>
-      <icf:__DESCRIPTION__>Test Description</icf:__DESCRIPTION__>
-      <icf:__GROUPS__>TestGroup1</icf:__GROUPS__>
-      <icf:__GROUPS__>TestGroup2</icf:__GROUPS__>
-      <ri:lastname-first-letter/>
-      <icf:__NAME__>VDART</icf:__NAME__>
-      <icf:__PASSWORD__>TestPassw0rd</icf:__PASSWORD__>
-   </ri:__ACCOUNT__>
+      <ri:firstname>Darth1</ri:firstname>
+      <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+      <ri:email>mail1@example.com</ri:email>
+      <ri:lastname>Doe1</ri:lastname>
+    </ri:__ACCOUNT__>
 </icf:OpenICFContainer>

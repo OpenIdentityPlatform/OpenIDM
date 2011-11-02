@@ -34,7 +34,7 @@
     <sect1>
         <title>Introduction</title>
         <para/>
-        <para>A managed object in OpenIDM is an object represents the identity-related data managed by OpenIDM. Managed objects are stored by OpenIDM in its data store. All managed objects are JSON-based data structures.</para>
+        <para>A managed object in OpenIDM is an object which represents the identity-related data managed by OpenIDM. Managed objects are stored by OpenIDM in its data store. All managed objects are JSON-based data structures.</para>
         <para/>
     </sect1>
     <sect1>
