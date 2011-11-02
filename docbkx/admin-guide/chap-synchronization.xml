@@ -257,6 +257,10 @@
         </sect2>
         <sect2>
             <title>Situations</title>
+            <para>During Reconciliation OpenIDM builds three lists:</para>
+            <para>All valid objects from the source, all records from the appropriate link table and all valid objects on the target system. </para>
+            <para>Any valid object from the source list will be rated as qualifies=1. An object can be not valid because it is not on the source system or because it was filtered out by the script in the "validSource" property.</para>
+            <para>Any object for which there is not yet a link found in the link table will result in link=0 and any object which can not be found in the target system will get target=0</para>
             <para/>
             <para>The following conditions are supported during the source syncronization:</para>
             <para/>
