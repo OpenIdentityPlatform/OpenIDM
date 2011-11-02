@@ -1,136 +1,97 @@
 {
-    "mappings" : [
-        {
-            "name" : "systemLdapAccounts_managedUser",
-            "source" : "system/ldap/account",
+    "mappings" : [ {
+        "name" : "systemXmlfileAccounts_managedUser",
+        "source" : "system/xmlfile/account",
             "target" : "managed/user",
-            "validTarget": {
-                "type": "text/javascript",
-                "source": "target.employeeType == 'external'"
-            },
-            "properties" : [
-                { "source" : "name", "target" : "name" },
-                { "source" : "lastname", "target" : "lastname" },
-                { "source" : "firstname", "target" : "firstname" },
-                { "source" : "email", "target" : "email" },
-                { "source" : "__DESCRIPTION__", "target" : "description" },
-                { "source" : "__ENABLE__", "target" : "active" },
-                { "source" : "__GROUPS__", "target" : "groups" },
-                { "default" : "external", "target" : "employeeType" }
-            ],
-            "onCreate" : {
-                "type": "text/javascript",
-                "source": "target.ldapPassword = null;target.adPassword = null;target._id = source.name;"
-            }
-        },
-        {
-            "name": "managedUser_systemAdAccounts",
+        "properties" : [ {
+            "source" : "description",
+            "target" : "description"
+        }, {
+            "source" : "firstname",
+            "target" : "firstname"
+        }, {
+            "source" : "email",
+            "target" : "email"
+        }, {
+            "source" : "lastname",
+            "target" : "lastname"
+        }, {
+            "source" : "name",
+            "target" : "name"
+        } ],
+        "policies" : [ {
+            "situation" : "CONFIRMED",
+            "action" : "UPDATE"
+        }, {
+            "situation" : "FOUND",
+            "action" : "IGNORE"
+        }, {
+            "situation" : "ABSENT",
+            "action" : "CREATE"
+        }, {
+            "situation" : "AMBIGUOUS",
+            "action" : "IGNORE"
+        }, {
+            "situation" : "MISSING",
+            "action" : "IGNORE"
+        }, {
+            "situation" : "UNQUALIFIED",
+            "action" : "DELETE"
+        }, {
+            "situation" : "UNASSIGNED",
+            "action" : "IGNORE"
+        } ]
+    }, {
+        "name" : "managedUser_systemXmlfileAccounts",
             "source": "managed/user",
-            "target": "system/ad/account",
+        "target" : "system/xmlfile/account",
             "correlationQuery" : {
                 "type": "text/javascript",
-                "file": "jscript/name_eq_name_correlationQuery.js"
+            "source" : "var myarray = [source.name];var map = {'query' : { 'Equals': {'field' : 'name','values' : myarray}}};map;"
             },
-            "properties": [
-                { "source" : "name", "target" : "name" },
-                { "source" : "lastname", "target" : "lastname" },
-                { "source" : "firstname", "target" : "firstname" },
-                { "source" : "email", "target" : "email" },
-                {   "source" : "password",
-                    "target" : "__PASSWORD__",
-                    "condition" : {
-                        "type": "text/javascript",
-                        "file": "jscript/ldapPassword_to_ad_condition.js"
-                    }
-                },
-                { "default" : "defaultpwd", "target" : "IGNORE__PASSWORD__" }
-            ],
-            "onCreate" : {
-                "type": "text/javascript",
-                "source": "target.__PASSWORD__ = 'initial_Passw0rd'"
-            }
-        },
-        {
-            "name": "managedUser_systemLdapAccounts",
-            "source": "fixme_managed/user",
-            "target": "fixme_system/ldap/account",
-            "correlationQuery" : {
-                "type": "text/javascript",
-                "file": "jscript/name_eq_name_correlationQuery.js"
-            },
-            "validSource" : {
-                "type": "text/javascript",
-                "source": "source.adPassword != null"
-            },
-            "properties": [
-                {   "source" : "password",
-                    "target" : "__PASSWORD__",
-                    "condition" : {
-                        "type": "text/javascript",
-                        "file": "jscript/adPassword_to_ldap_condition.js"
-                    }
-                }
-            ],
-            "policies" : [
-                { "situation" : "CONFIRMED",
-                  "comment" : "IGNORE during initial reconciles, UPDATE when all initial links in place",
+        "properties" : [ {
+            "source" : "firstname",
+            "target" : "firstname"
+        }, {
+            "source" : "lastname",
+            "target" : "lastname"
+        }, {
+            "source" : "fullname",
+            "target" : "cn"
+        }, {
+            "source" : "name",
+            "target" : "name"
+        }, {
+            "source" : "description",
+            "target" : "description"
+        }, {
+            "source" : "userPassword",
+            "target" : "userPassword"
+        }, {
+            "source" : "email",
+            "target" : "email"
+        } ],
+        "policies" : [ {
+            "situation" : "CONFIRMED",
                   "action" : "UPDATE"
-                },
-                { "situation" : "FOUND",
-                  "comment" : "LINK during initial reconciles, UPDATE when all initial links in place",
-                  "action" : "UPDATE"
-                },
-                { "situation" : "ABSENT",
-                  "comment" : "IGNORE during initial reconciles",
-                  "action" : {
-                      "comment" : "CREATE if employee, IGNORE otherwise?",
-                      "type" : "text/javascript",
-                      "source" : "if (1>0) {'CREATE';} else {'IGNORE';}"
-                  }
-                },
-                { "situation" : "AMBIGUOUS", "action" : "EXCEPTION" },
-                { "situation" : "MISSING", "action" : "EXCEPTION" },
-                { "situation" : "UNQUALIFIED", "action" : "UNLINK" },
-                { "situation" : "UNASSIGNED", "action" : "EXCEPTION" }
-            ]
-        },
-        {
-            "name" : "systemOpenDJAccount_managedUser",
-            "source" : "system/OpenDJ/__ACCOUNT__",
-            "target" : "managed/user",
-            "validTarget": {
-                "type": "text/javascript",
-                "source": "target.employeeType == 'internal'"
-            },
-            "policies" : [
-                {
-                    "situation": "UNQUALIFIED",
-                    "action": "IGNORE"
-                }
-            ],
-            "properties" : [
-                { "source" : "__NAME__", "target" : "distinguishedName" },
-                { "source" : "uid", "target" : "name" },
-                { "source" : "givenName", "target" : "firstname" },
-                { "source" : "sn", "target" : "lastname" },
-                { "source" : "description", "target" : "description" },
-                { "source" : "employeeNumber", "target" : "employeeNumber" },
-                { "source" : "homePhone", "target" : "homePhone" },
-                { "source" : "initials", "target" : "initials" },
-                { "source" : "l", "target" : "location" },
-                { "source" : "mobile", "target" : "mobile" },
-                { "source" : "pager", "target" : "pager" },
-                { "source" : "mail", "target" : "email" },
-                { "source" : "postalAddress", "target" : "postalAddress" },
-                { "source" : "postalCode", "target" : "postalCode" },
-                { "source" : "st", "target" : "state" },
-                { "source" : "street", "target" : "street" },
-                { "source" : "telephoneNumber", "target" : "telephoneNumber" },
-                { "source" : "employeeType", "target" : "employeeType" },
-                { "source" : "departmentNumber", "target" : "departmentNumber" },
-                { "source" : "seeAlso", "target" : "seeAlso" },
-                { "default" : "internal", "target" : "employeeType" }
-            ]
-        }
-    ]
+        }, {
+            "situation" : "FOUND",
+            "action" : "LINK"
+        }, {
+            "situation" : "ABSENT",
+            "action" : "CREATE"
+        }, {
+            "situation" : "AMBIGUOUS",
+            "action" : "IGNORE"
+        }, {
+            "situation" : "MISSING",
+            "action" : "UNLINK"
+        }, {
+            "situation": "UNQUALIFIED",
+            "action" : "UNLINK"
+        }, {
+            "situation" : "UNASSIGNED",
+            "action": "IGNORE"
+        } ]
+    } ]
 }

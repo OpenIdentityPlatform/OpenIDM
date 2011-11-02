@@ -15,54 +15,75 @@
     "dbStructure" : {
         "orientdbClass" : {
             "managed_user" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
-                ]
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                } ]
             },
-            "link_systemLdapAccounts_managedUser" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
-                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
-                ]
+            "link_systemXmlfileAccounts_managedUser" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
             },
-            "link_managedUser_systemAdAccounts" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
-                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
-                ]
-            },
-            "link_managedUser_systemLdapAccounts" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
-                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
-                ]
-            },
-            "link_systemOpenDJAccount_managedUser" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
-                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
-                ]
+            "link_managedUser_systemXmlfileAccounts" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
             },
             "synchronisation_pooledSyncStage" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
-                    {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-                    {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
-                ]
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
             },
             "config" : {
-                "index" : [
-                    { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" }
-                ]
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                } ]
             }
         }
     },
