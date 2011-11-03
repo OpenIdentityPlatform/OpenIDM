@@ -273,7 +273,7 @@ public class ObjectSetServerResource extends ExtendedServerResource {
                 status = Status.SERVER_ERROR_INTERNAL;
             }
         } else {
-            LOGGER.debug("caught exception during operation on: " + id, throwable);
+            LOGGER.warn("Unexpected exception during operation on: " + id, throwable);
         }
         Map<String, Object> entity = new HashMap<String, Object>();
         entity.put("error", status.getName());
