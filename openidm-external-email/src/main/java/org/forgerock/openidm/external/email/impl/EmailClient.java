@@ -95,20 +95,15 @@ public class EmailClient {
         InternetAddress[] to = null;
         InternetAddress[] cc = null;
         InternetAddress[] bcc = null;
-        
 
-        String text = (String) params.get("_body");
-        if (text == null){
-            text = "<empty message>";
-        }
         String subject = (String) params.get("_subject");
-        if (subject == null){
+        if (subject == null) {
             subject = "<no subject>";
         }
 
         try {
             if (params.get("_from") != null) {
-                from = new InternetAddress((String)params.get("_from"));
+                from = new InternetAddress((String) params.get("_from"));
             } else {
                 from = new InternetAddress(fromAddr);
             }
@@ -117,14 +112,14 @@ public class EmailClient {
         }
 
         try {
-            to = InternetAddress.parse((String)params.get("_to"));
+            to = InternetAddress.parse((String) params.get("_to"));
         } catch (AddressException ae) {
             throw new RuntimeException("Bad To: header");
         }
 
         try {
             if (params.get("_cc") != null) {
-                cc = InternetAddress.parse((String)params.get("_cc"));
+                cc = InternetAddress.parse((String) params.get("_cc"));
             }
         } catch (AddressException ae) {
             throw new RuntimeException("Bad Cc: header");
@@ -132,7 +127,7 @@ public class EmailClient {
 
         try {
             if (params.get("_bcc") != null) {
-                bcc = InternetAddress.parse((String)params.get("_bcc"));
+                bcc = InternetAddress.parse((String) params.get("_bcc"));
             }
         } catch (AddressException ae) {
             throw new RuntimeException("Bad Bcc: header");
@@ -149,7 +144,23 @@ public class EmailClient {
                 message.setRecipients(Message.RecipientType.BCC, bcc);
             }
             message.setSubject(subject);
-            message.setText(text);
+
+            String type = (String) params.get("_type");
+            if (type == null) {
+                type = "text/plain";
+            }
+            Object body = params.get("_body");
+
+            if (type.equalsIgnoreCase("text/plain") || type.equalsIgnoreCase("text/html") || type.equalsIgnoreCase("text/xml")) {
+                if (body != null && body instanceof String) {
+                    message.setContent(body, type);
+                } else {
+                    message.setText("<empty message>");
+                }
+            } else {
+                // no idea what this is... let's throw
+                throw new RuntimeException("Unknown email type: " + type);
+            }
 
             Transport transport = session.getTransport("smtp");
 
