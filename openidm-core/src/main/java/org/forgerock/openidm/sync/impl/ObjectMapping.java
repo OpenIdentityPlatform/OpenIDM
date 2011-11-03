@@ -414,8 +414,8 @@ class ObjectMapping implements SynchronizationListener {
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
-        sourceStats = new ReconStats(reconId);
-        globalStats = new ReconStats(reconId);
+        sourceStats = new ReconStats(reconId,sourceObjectSet);
+        globalStats = new ReconStats(reconId,name);
 
         sourceStats.startAllIds();
         Iterator<String> i = queryAllIds(sourceObjectSet).iterator();
@@ -459,7 +459,7 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
         sourceStats.end();
-        targetStats = new ReconStats(reconId);
+        targetStats = new ReconStats(reconId,targetObjectSet);
         targetStats.startAllIds();
         Iterator<String> j = queryAllIds(targetObjectSet).iterator();
         targetStats.endAllIds();

@@ -39,6 +39,7 @@ import java.util.Map.Entry;
 public class ReconStats {
 
     private String reconId = "";
+    private String reconName = "";
     private long startTime = 0;
     private long endTime = 0;
     private long allIdsStartTime = 0;
@@ -49,8 +50,9 @@ public class ReconStats {
     private SimpleDateFormat sdformat = new SimpleDateFormat();
     public long entries = 0;
 
-    public ReconStats(String reconId) {
+    public ReconStats(String reconId, String reconName) {
         this.reconId = reconId;
+        this.reconName = reconName;
         ids.put(Situation.CONFIRMED, new ArrayList());
         ids.put(Situation.FOUND, new ArrayList());
         ids.put(Situation.ABSENT, new ArrayList());
@@ -92,6 +94,8 @@ public class ReconStats {
         results.put("duration", endTime - startTime);
         results.put("allIds", allIdsEndTime - allIdsStartTime);
         results.put("entries", entries);
+        results.put("reconId", reconId);
+        results.put("reconName", reconName);
 
         for (Entry<Situation, List<String>> e : ids.entrySet()) {
             Map<String, Object> res = new HashMap();
