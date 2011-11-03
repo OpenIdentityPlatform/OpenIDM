@@ -1,0 +1,93 @@
+{
+    "DEFAULT-dbUrl" : "local:./db/openidm",
+    "user" : "admin",
+    "poolMinSize" : 5,
+    "poolMaxSize" : 20,
+    "queries" : {
+        "query-all-ids" : "select _openidm_id from ${_resource}", 
+        "query-all" : "select ${fields} from ${_resource}", 
+        "query-by-native-ids" : "select ${fields} from ${native-ids}",
+        "for-username" : "SELECT * FROM ${_resource} WHERE name = '${uid}'",
+        "query-by-ids-experiment" : "select ${fields} from ${_resource} where _openidm_id = ${id1} or _openidm_id = ${id2}",
+        "links-for-sourceId": "SELECT * FROM ${_resource} WHERE sourceId = '${sourceId}'",
+        "links-for-targetId": "SELECT * FROM ${_resource} WHERE targetId = '${targetId}'"  
+    },
+    "dbStructure" : {
+        "orientdbClass" : {
+            "managed_user" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                } ]
+            },
+            "link_systemXmlfileAccounts_managedUser" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
+            },
+            "link_managedUser_systemXmlfileAccounts" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
+            },
+            "synchronisation_pooledSyncStage" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "sourceId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "targetId",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                }, {
+                    "propertyName" : "reconId",
+                    "propertyType" : "string",
+                    "indexType" : "notunique"
+                } ]
+            },
+            "config" : {
+                "index" : [ {
+                    "propertyName" : "_openidm_id",
+                    "propertyType" : "string",
+                    "indexType" : "unique"
+                } ]
+            }
+        }
+    },
+    "embeddedServer" : {
+        "enabled" : "true"
+    }
+}
