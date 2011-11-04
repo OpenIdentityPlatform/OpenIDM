@@ -1,0 +1,22 @@
+This directory contains samples to get you started as many different
+configuration and security files you may need for your use case.
+
+Here is a brief description of each directory.  Please refer to
+the README for each sample of the documentation for more 
+details.
+
+Sample1 - XML file connector sample
+
+Sample2 - OpenDJ connector sample
+
+Sample3 - ScriptSQL connector with mySQL
+
+Sample4 - CSV connector sample
+
+provisioners - example provisioner configuration files for different connectors
+
+jscript - example javascripts
+
+security - example security files
+
+misc - example configuration files
