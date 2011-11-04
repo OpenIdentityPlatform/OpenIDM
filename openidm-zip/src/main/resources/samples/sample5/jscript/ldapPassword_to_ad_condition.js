@@ -1,0 +1,1 @@
+object.password != null && object.adPassword != object.password
