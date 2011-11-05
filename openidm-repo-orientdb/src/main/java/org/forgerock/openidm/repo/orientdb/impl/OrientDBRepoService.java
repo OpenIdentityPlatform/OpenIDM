@@ -541,7 +541,10 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
     void init (JsonValue config) {
         try {
             File dbFolder = IdentityServer.getFileForPath("db/openidm");
-            dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + dbFolder.getAbsolutePath()).asString();
+            String orientDbFolder = dbFolder.getAbsolutePath();
+            orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
+            
+            dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
             System.out.println("dbURL: " + dbURL);
             user = config.get(CONFIG_USER).defaultTo("admin").asString();
             password = config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
