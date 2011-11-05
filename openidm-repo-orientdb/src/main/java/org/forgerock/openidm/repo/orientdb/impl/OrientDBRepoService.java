@@ -542,7 +542,7 @@ public class OrientDBRepoService implements RepositoryService, RepoBootService {
         try {
             File dbFolder = IdentityServer.getFileForPath("db/openidm");
             String orientDbFolder = dbFolder.getAbsolutePath();
-            orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
+            orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
             
             dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
             System.out.println("dbURL: " + dbURL);
