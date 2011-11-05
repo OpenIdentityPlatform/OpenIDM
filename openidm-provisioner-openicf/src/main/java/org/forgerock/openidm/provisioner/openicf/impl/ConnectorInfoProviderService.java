@@ -19,6 +19,7 @@ import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.api.*;
 import org.identityconnectors.framework.api.operations.SchemaApiOp;
 import org.identityconnectors.framework.api.operations.TestApiOp;
+import org.identityconnectors.framework.common.FrameworkUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.AbstractConnectorInfo;
 import org.identityconnectors.framework.impl.api.remote.RemoteConnectorInfoImpl;
@@ -122,7 +123,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
         isOSGiServiceInstance = true;
-        TRACE.info("Component is activated.");
+        TRACE.info("ConnectorInfoProvider with FrameworkVersion {} is activated.", FrameworkUtil.getFrameworkVersion());
     }
 
     protected void initialiseRemoteManager(ConnectorInfoManagerFactory factory, JsonValue remoteConnectorHosts) throws JsonValueException {

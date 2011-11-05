@@ -10,8 +10,8 @@
     "connectorRef" :
     {
         "connectorHostRef" : "#LOCAL",
-        "bundleName" : "org.forgerock.openicf.connectors.db.scriptedsql",
-        "bundleVersion" : "1.1.0.0-SNAPSHOT",
+        "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
+        "bundleVersion" : "1.1.0.0-EA",
         "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector"
     },
     "producerBufferSize" : 100,

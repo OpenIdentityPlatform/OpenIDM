@@ -2,8 +2,8 @@
    "name" : "Solaris",
    "connectorRef" :
       {
-         "bundleName" : "org.forgerock.openicf.connectors.os.solaris",
-         "bundleVersion" : "1.1.0.0-SNAPSHOT",
+         "bundleName" : "org.forgerock.openicf.connectors.os.openicf-solaris-connector",
+         "bundleVersion" : "1.1.0.0-EA",
          "connectorName" : "org.identityconnectors.solaris.SolarisConnector"
       },
    "producerBufferSize" : 100,

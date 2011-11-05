@@ -56,8 +56,8 @@
                 <exclude>com.orientechnologies:**</exclude>
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
-                <exclude>org.forgerock.openicf.connectors.file:xml:*</exclude>
-                <exclude>org.forgerock.openicf.connectors.ldap:ldap:*</exclude>
+                <exclude>org.forgerock.openicf.connectors.file:openicf-xml-connector:*</exclude>
+                <exclude>org.forgerock.openicf.connectors.ldap:openicf-ldap-connector:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-config</exclude>
                 <exclude>org.forgerock.openidm:openidm-crypto</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
@@ -82,8 +82,8 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.connectors.file:xml:*</include>
-                <include>org.forgerock.openicf.connectors.ldap:ldap:*</include>
+                <include>org.forgerock.openicf.connectors.file:openicf-xml-connector:*</include>
+                <include>org.forgerock.openicf.connectors.ldap:openicf-ldap-connector:*</include>
             </includes>
         </dependencySet>
         <dependencySet>
