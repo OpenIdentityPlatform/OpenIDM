@@ -35,12 +35,12 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework</artifactId>
-            <version>1.1.0.0-SNAPSHOT</version>
+            <version>1.1.0.0-EA</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-internal</artifactId>
-            <version>1.1.0.0-SNAPSHOT</version>
+            <version>1.1.0.0-EA</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.forgerock.openicf.framework</groupId>
@@ -51,13 +51,12 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
-            <version>1.1.0.0-SNAPSHOT</version>
+            <version>1.1.0.0-EA</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-schema</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
@@ -108,7 +107,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
-            <version>1.1.0.0-SNAPSHOT</version>
+            <version>1.1.0.0-EA</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -168,38 +167,38 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors.file</groupId>
-                                    <artifactId>xml</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <artifactId>openicf-xml-connector</artifactId>
+                                    <version>1.1.0.0-EA</version>
                                     <type>bundle</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors.ldap</groupId>
-                                    <artifactId>ldap</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <artifactId>openicf-ldap-connector</artifactId>
+                                    <version>1.1.0.0-EA</version>
                                     <type>bundle</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors.os</groupId>
-                                    <artifactId>solaris</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <artifactId>openicf-solaris-connector</artifactId>
+                                    <version>1.1.0.0-EA</version>
                                     <type>bundle</type>
                                 </artifactItem>
                                 <!--artifactItem>
                                     <groupId>org.forgerock.openicf.connectors.os</groupId>
-                                    <artifactId>vms</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <artifactId>openicf-vms-connector</artifactId>
+                                    <version>1.1.0.0-EA</version>
                                     <type>bundle</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors.db</groupId>
-                                    <artifactId>databasetable</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <artifactId>openicf-databasetable-connector</artifactId>
+                                    <version>1.1.0.0-EA</version>
                                     <type>bundle</type>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.connectors.db</groupId>
-                                    <artifactId>mysqluser</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <artifactId>openicf-mysqluser-connector</artifactId>
+                                    <version>1.1.0.0-EA</version>
                                     <type>bundle</type>
                                 </artifactItem-->
                             </artifactItems>
@@ -219,17 +218,17 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <version>1.1.0.0-EA</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework-internal</artifactId>
-                                    <version>1.1.0.0-SNAPSHOT</version>
+                                    <version>1.1.0.0-EA</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-all</artifactId>
-                                    <version>1.7.10</version>
+                                    <version>1.8.3</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.testOutputDirectory}/connectorServer/lib</outputDirectory>

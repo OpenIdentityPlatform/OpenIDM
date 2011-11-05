@@ -4,8 +4,8 @@
       {
          "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
          "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.file.csvfile",
-         "bundleVersion" : "1.1.0.0-SNAPSHOT"
+         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
+         "bundleVersion" : "1.1.0.0-EA"
       },
    "poolConfigOption" :
       {
