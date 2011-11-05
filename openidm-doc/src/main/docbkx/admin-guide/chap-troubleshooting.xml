@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-troubleshooting'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Troubleshooting</title>
+
+ <para>When things are not working check this guide for tips and answers.</para>
+
+ <section>
+  <title>Internal Server Error during recon or sync</title>
+  <para>
+  Error message returned form recon or syn
+  </para>
+  <para>
+  {"error":"Conflict","description":"Internal Server Error: org.forgerock.openidm.sync.SynchronizationException: Cowardly refusing to perform reconciliation with an empty source object set: Cowardly refusing to perform reconciliation with an empty source object set"}
+  </para> 
+  <para>
+  This error can be misleading. This usually means the connector 
+  is not able to communicate with the target source.
+  Check the settings for your connector. For example in the xml connector you get this error
+  if the filename for the source is invalid. Or in the LDAP connector if your connector
+  cannot contact the target LDAP server.
+  </para> 
+ </section>
+ <section>
+  <title>scr list shows sync service unsatisfied</title>
+  <para>
+  Looking at the console output of the logs in openidm/logs you see the following: 
+  </para>
+  <para>
+  WARNING: Loading configuration file /Users/jamie/ws/idm/openidm-zip/target/openidm/conf/sync.json failed
+org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.openidm.sync could not be parsed and may not be valid JSON : Unexpected character ('}' (code 125)): expected a value
+ at [Source: java.io.StringReader@3951f910; line: 24, column: 6]
+    at org.forgerock.openidm.config.crypto.ConfigCrypto.parse(ConfigCrypto.java:249)
+    at org.forgerock.openidm.config.crypto.ConfigCrypto.encrypt(ConfigCrypto.java:165)
+    at org.forgerock.openidm.config.installer.JSONConfigInstaller.setConfig(JSONConfigInstaller.java:340)
+  </para> 
+  <para>
+  You have a syntax error in your openidm/conf/sync.json
+  </para> 
+ </section>
+</chapter>
+
