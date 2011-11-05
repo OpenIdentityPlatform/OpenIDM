@@ -33,8 +33,11 @@
 
 <title>OpenIDM Sample</title>
 
- <para>In the current distribution of OpenIDM the sample is configured and enabled by default. This 
+ <para>In the current distribution of OpenIDM the sample 
+ in openidm/samples/sample1 is configured and enabled by default. This 
  chapter provides an overview of the sample and how it is configured.
+ To see a listing and an overview of the rest of the samples provided
+ take a look at the README found in openidm/samples.
  </para>
 
  <section>
@@ -75,9 +78,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
          <section>
           <title>Overview</title>
           <para> 
-          This sample consists of a XML flat file connector, configured as the 
-          authoritative source. A reconciliation task is configured to run
-          every 60 seconds synchronizing between the source and the target. 
+          This sample consists of an XML flat file connector 
+          with sample user data, configured as the 
+          authoritative source. A reconciliation task may be enabled to run
+          every 60 seconds synchronizing between the source and the target 
+          or you may choose to start the reconciliation task by using the REST
+          interface.
           </para>
           <para>
           A descriptive overview of the sample:
@@ -87,9 +93,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           <para>OpenIDM regularly scans for any scheduler configuration files in the conf directory.</para>
           </listitem>
           <listitem>
-          <para>A scheduled recon from the source to the target connector is found and scheduled
+          <para>If changed to enabled, a scheduled recon from the source to the 
+          target connector is found and scheduled
           to run every 60 seconds per the  
-          <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.</para>
+          <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
+          or the reconciliation is started on demand using the REST interface. 
+          </para>
           </listitem>
           <listitem>
           <para>The recon service reads in the mappings and any special actions for the source and target
@@ -109,7 +118,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
          <section>
           <title>Some Key Points About the Sample</title>
           <para>
-          In the sample, the source users are created in  the local repository. This is done as part of the
+          In the sample, the source users are created in the local repository. This is done as part of the
           sample to show how local users may be managed through the REST APIs. It is however 
           not required to have any users in the local repository.
           Sync and Recon may be done directly between external connectors without managed objects (users)
@@ -124,8 +133,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
           Where the configuration for the scheduler is shown below, the call to the REST interface would look like this: 
           </para>
           <screen width="100">
-curl -X POST -d '{"Hallo":"World"}' "http://localhost:8080/
-openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+curl -X POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
           </screen>
          </section>
 
@@ -167,9 +175,10 @@ openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
 }
   </screen>
           <para>
-          This scheduler entry will start a reconcile of the mapping named 
+          After changing the enabled field to true
+          this scheduler entry will start a reconcile of the mapping named 
           systemXmlAccounts_managedUser every minute. The details of the named mapping may 
-          be found in sync.json below.
+          be found in sync.json below. 
           </para>
           <para>
           For details on the scheduler configuration please refer to the
@@ -317,7 +326,7 @@ curl -X GET http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
           will see the new user in the source connector and create it in the
           local repository.
           To add a user copy the following into
-          <filename>data/xmlConnectorData.xml</filename>:
+          <filename>openidm/samples/sample1/data/xmlConnectorData.xml</filename>:
           </para>
          <screen width='100'>
 &lt;ri:__ACCOUNT__&gt;
@@ -397,8 +406,7 @@ curl -X GET http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
  User can also be added through the REST interface directly to the repository. Again the curl command in used here:
  </para>
  <screen width="100">
- curl -X PUT -d '
-{
+curl -X PUT -d '{
      "name":"james",
      "lastname":"Berg",
      "firstname":"James",
@@ -407,6 +415,21 @@ curl -X GET http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
      "description":"Created by OpenIDM REST.",
      "userPassword":"asdfkj23"
 }' http://localhost:8080/openidm/managed/user/james
+ </screen>
+<para>
+Windows
+</para>
+ <screen width="100">
+ curl -X PUT -d
+{
+     \"name\":\"james\",
+     \"lastname\":\"Berg\",
+     \"firstname\":\"James\",
+     \"email\":\"james2@examplerock.com\",
+     \"fullname\":\"hallo2\",
+     \"description\":\"Created by OpenIDM REST.\",
+     \"userPassword\":\"asdfkj23\"
+} http://localhost:8080/openidm/managed/user/james
  </screen>
  <para>
  The new user will first be created in the repository and then immediately provisioned to the external xml resource.
