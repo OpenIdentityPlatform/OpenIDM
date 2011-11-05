@@ -110,10 +110,6 @@ $ </screen>
   </para>
 <screen width='100'>$ cd /path/to/openidm
 $ ./start.sh 
-Do you want to start in debug mode: [y]n
-
-Listening for transport dt_socket at address: 5005
-...
 -&gt;</screen>
 <para>
 Windows
@@ -131,25 +127,33 @@ Listening for transport dt_socket at address: 5005
    <para>You can enter commands at the resulting <literal>-&gt;</literal> prompt
    such as <literal>help</literal> for usage, or <literal>ps</literal> to view
    the bundles installed. To see a list of all the OpenIDM core services
-   and their state enter the following (if startup was successful all states 
-   should be active):
+   and their state enter the following command. If startup was successful all states 
+   with the exception of email and repo.jdbc should be active. If any other services
+   are unsatisfied check the console or openidm/logs for any errors and refer to
+   <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-troubleshooting'>
+   the troubleshooting section in the Admin Guide</link>.
    </para>
 <screen width='100'>
 -&gt; scr list
 Id     State           Name
-[   8] [active       ] embedded-orientdb-server-component
+[  17] [active       ] org.forgerock.openidm.config.starter
+[   7] [active       ] org.forgerock.openidm.external.rest
+[   9] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  13] [active       ] org.forgerock.openidm.ui.simple
+[   5] [active       ] org.forgerock.openidm.router
+[  11] [active       ] org.forgerock.openidm.restlet
+[  12] [active       ] org.forgerock.openidm.scheduler
+[   6] [unsatisfied  ] org.forgerock.openidm.external.email
+[  15] [active       ] org.forgerock.openidm.repo.orientdb
+[   3] [active       ] org.forgerock.openidm.sync
+[   2] [active       ] org.forgerock.openidm.script
+[   1] [active       ] org.forgerock.openidm.scope
+[  16] [active       ] org.forgerock.openidm.config
 [   0] [active       ] org.forgerock.openidm.audit
-[   5] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[   3] [active       ] org.forgerock.openidm.router
-[  12] [active       ] org.forgerock.config
-[  11] [active       ] org.forgerock.openidm.scheduler
-[  10] [active       ] org.forgerock.openidm.restlet
-[   6] [active       ] org.forgerock.openidm.provisioner.openicf
-[   7] [active       ] org.forgerock.openidm.provisioner.openicf
-[   2] [active       ] org.forgerock.openidm.managed
-[   9] [active       ] org.forgerock.openidm.repo.orientdb
-[   4] [active       ] org.forgerock.openidm.provisioner
-[   1] [active       ] org.forgerock.openidm.sync
+[  14] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
+[   4] [active       ] org.forgerock.openidm.managed
+[  10] [active       ] org.forgerock.openidm.provisioner.openicf
+[   8] [active       ] org.forgerock.openidm.provisioner
 -&gt;
 </screen>       
   </step>
@@ -197,8 +201,19 @@ Id     State           Name
          command to create the user joe in the repository.
      </para>
      <screen width='100' >
-$ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com"}'
-http://localhost:8080/openidm/managed/user/joe
+$ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com",
+"userPassword":"11111111"}' http://localhost:8080/openidm/managed/user/joe
+
+{"_rev":"1","_id":"joe"}
+
+$
+     </screen>
+<para>
+Windows
+</para>
+     <screen width='100' >
+$ curl -X PUT -d {\"name\":\"joe",\"firstname\":\"joe\",\"lastname\":\"smith\",\"email\":\"joe@abc.com\",
+\"userPassword\":\"11111111\"} http://localhost:8080/openidm/managed/user/joe
 
 {"_rev":"1","_id":"joe"}
 
@@ -216,7 +231,8 @@ $
      <screen width='100' >
 $ curl http://localhost:8080/openidm/managed/user/joe
 
-{"_id":"joe","_rev":"1","email":"joe@abc.com","name":"joe","lastname":"smith","firstname":"joe"}
+{"lastname":"smith","userpassword":"11111111","firstname":"joe","_id":"joe","_rev":"0",
+"email":"joe@abc.com","name":"joe"}
 
 $
      </screen>
