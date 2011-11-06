@@ -30,7 +30,7 @@
       },
     "configurationProperties" : {
          "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
-         "xsdFilePath" : "samples/sample1/data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd",
+         "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
          "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml"
       },
     "objectTypes" : {
