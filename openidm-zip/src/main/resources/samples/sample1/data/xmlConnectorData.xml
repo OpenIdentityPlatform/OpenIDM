@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
-                      xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4"
+                      xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                      xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4 data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+                      xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
    <ri:__ACCOUNT__>
      <icf:__UID__>1</icf:__UID__>
        <icf:__NAME__>DDOE1</icf:__NAME__>

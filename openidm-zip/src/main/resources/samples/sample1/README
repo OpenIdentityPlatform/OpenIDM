@@ -3,3 +3,19 @@ XML connector sample
 Please refer to the sample documentation
 
 http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-sample
+
+Short description:
+In this example a very basic reconciliation between OpenIDM and an external XML based resource will be set up. The steps that have to be performed are:
+
+# Configure the OpenIDM internal repository (repo.orient.json)
+# Have an example xml file with at least one user ready
+# Configure the flow of objects and attributes from the external system into OpenIDM (sync.json)
+
+Alternatively all files from the sample can be copied to a fresh installation. In the openidm folder execute the following to copy all needed files:
+cp -r samples/sample1/conf .
+
+The following command will start a one time reconciliation which will create the users from the xml file in the OpenIDM repository of a running server:
+
+$ curl -X POST -d '{"Hallow":"World"}' "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+
+
