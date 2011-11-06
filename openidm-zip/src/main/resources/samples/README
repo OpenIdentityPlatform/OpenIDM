@@ -7,11 +7,17 @@ details.
 
 Sample1 - XML file connector sample
 
-Sample2 - OpenDJ connector sample
+Sample2 - OpenDJ connector sample; no back link
+
+Sample2b - OpenDJ connector sample; with back link
 
 Sample3 - ScriptSQL connector with mySQL
 
 Sample4 - CSV connector sample
+
+Sample5 - Attribute flow: LDAP -> OpenIDM -> AD with simulating xml resources
+
+Sample6 - Live Sync with OpenDJ
 
 provisioners - example provisioner configuration files for different connectors
 
