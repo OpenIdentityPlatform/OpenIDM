@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 // OSGi Framework
+import org.forgerock.openidm.core.IdentityServer;
 import org.osgi.service.component.ComponentContext;
 
 // Apache Felix Maven SCR Plugin
@@ -46,7 +47,7 @@ import org.apache.felix.scr.annotations.Service;
 
 // Restlet Framework
 import org.restlet.Restlet;
-import org.restlet.ext.servlet.ServletAdapter; 
+import org.restlet.ext.servlet.ServletAdapter;
 
 // ForgeRock OpenIDM Core
 import org.forgerock.openidm.objset.ObjectSet;
@@ -84,7 +85,7 @@ public class Servlet extends HttpServlet {
     /**
      * Provides automatic binding of {@link Restlet} objects that include the
      * {@code openidm.restlet.path} property.
-     */ 
+     */
     @Reference(
         name = "reference_Servlet_Restlet",
         referenceInterface = Restlet.class,
@@ -111,7 +112,7 @@ public class Servlet extends HttpServlet {
     /**
      * Provides automatic binding of {@link ObjectSet} objects that include the
      * {@code openidm.restlet.path} property.
-     */ 
+     */
     @Reference(
         name = "reference_Application_ObjectSet",
         referenceInterface = ObjectSet.class,
@@ -138,6 +139,7 @@ public class Servlet extends HttpServlet {
     @Activate
     protected synchronized void activate(ComponentContext context) {
         this.context = context;
+        productionMode = !IdentityServer.isDevelopmentProfileEnabled();
     }
 
     @Deactivate
@@ -162,11 +164,25 @@ public class Servlet extends HttpServlet {
         if (adapter == null) {
             throw new ServletException("No adapter to handle request");
         }
-        InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
-        try {
-            adapter.service(req, res);
-        } finally {
-            InvokeContext.getContext().popActivityId();
+        if (allowAccess(req, res)) {
+            InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
+            try {
+                adapter.service(req, res);
+            } finally {
+                InvokeContext.getContext().popActivityId();
+            }
+        }
+    }
+
+    //TODO Replace this quick and dirty implementation with proper authorization
+    private boolean productionMode = true;
+
+    private boolean allowAccess(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        if (productionMode && req.getRequestURI().matches(".*/system/.*")) {
+            res.sendError(HttpServletResponse.SC_FORBIDDEN, "OpenIDM does not allow access to /system in production mode.");
+            return false;
+        } else {
+            return true;
         }
     }
 }
