@@ -1,0 +1,13 @@
+The sample configuration connects to two local OpenDJ with the following paramers:
+
+In the sample config both provisioners point to the same ldap server but on different baseContexts!
+To change the example and use two independent ldap processes they need to listen to different ports and the provisioner configurations need to be changed accordingly.
+
+"host" : "localhost",
+"port" : 4389,
+"principal" : "cn=Directory Manager",
+"credentials" : "password",
+"baseContexts" : "ou=people,o=ad" -> AD (is represented by an OpenDJ)
+"baseContexts" : "ou=people,o=aaa" -> LDAP (is represented by an OpenDJ)
+
+The example configuration will pick up new and changed users from LDAP (i.e. ou=people,o=aaa) and send the updates to AD. For simplicity no flow from AD to LDAP is configured!

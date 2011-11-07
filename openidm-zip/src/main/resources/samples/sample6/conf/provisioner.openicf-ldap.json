@@ -1,0 +1,162 @@
+{
+   "_id" : "5b2857c0-8250-11e0-b278-0800200c9a66",
+   "_rev" : "686897696a7c876b7e",
+   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
+   "_schema_rev" : "696a687c897c87e79d",
+   "name" : "ldap",
+   "displayName" : "OpenDJ",
+   "typeString" : "ldap",
+   "hasId" : "true",
+   "connectorRef" :
+      {
+         "connectorHostRef" : "#LOCAL",
+         "connectorName" : "org.identityconnectors.ldap.LdapConnector",
+         "bundleName" : "org.forgerock.openicf.connectors.ldap.ldap",
+         "bundleVersion" : "1.1.0.0-SNAPSHOT"
+      },
+   "poolConfigOption" :
+      {
+         "maxObjects" : 10,
+         "maxIdle" : 10,
+         "maxWait" : 150000,
+         "minEvictableIdleTimeMillis" : 120000,
+         "minIdle" : 1
+      },
+   "operationTimeout" :
+      {
+         "CREATE" : -1,
+         "VALIDATE" : -1,
+         "TEST" : -1,
+         "SCRIPT_ON_CONNECTOR" : -1,
+         "SCHEMA" : -1,
+         "DELETE" : -1,
+         "UPDATE" : -1,
+         "SYNC" : -1,
+         "AUTHENTICATE" : -1,
+         "GET" : -1,
+         "SCRIPT_ON_RESOURCE" : -1,
+         "SEARCH" : -1
+      },
+   "configurationProperties" :
+      {
+         "accountSynchronizationFilter" : null,
+         "passwordAttributeToSynchronize" : null,
+         "synchronizePasswords" : false,
+         "removeLogEntryObjectClassFromFilter" : true,
+         "modifiersNamesToFilterOut" :
+            [
+            ],
+         "passwordDecryptionKey" : null,
+         "credentials" : "password",
+         "changeLogBlockSize" : 100,
+         "baseContextsToSynchronize" :
+            [
+               "ou=People,o=aaa"
+            ],
+         "attributesToSynchronize" :
+            [
+               "uid",
+               "sn",
+               "cn",
+               "givenName",
+               "mail",
+               "description"
+            ],
+         "changeNumberAttribute" : "changeNumber",
+         "passwordDecryptionInitializationVector" : null,
+         "filterWithOrInsteadOfAnd" : false,
+         "objectClassesToSynchronize" :
+            [
+               "inetOrgPerson"
+            ],
+         "port" : 4389,
+         "vlvSortAttribute" : "uid",
+         "passwordAttribute" : "userPassword",
+         "useBlocks" : true,
+         "maintainPosixGroupMembership" : false,
+         "failover" :
+            [
+            ],
+         "ssl" : false,
+         "principal" : "cn=Directory Manager",
+         "baseContexts" :
+            [
+               "ou=People,o=aaa"
+            ],
+         "readSchema" : true,
+         "accountObjectClasses" :
+            [
+               "top",
+               "person",
+               "organizationalPerson",
+               "inetOrgPerson"
+            ],
+         "accountUserNameAttributes" :
+            [
+               "uid",
+               "cn"
+            ],
+         "host" : "localhost",
+         "groupMemberAttribute" : "uniqueMember",
+         "accountSearchFilter" : null,
+         "passwordHashAlgorithm" : null,
+         "usePagedResultControl" : false,
+         "blockSize" : 100,
+         "uidAttribute" : "entryUUID",
+         "maintainLdapGroupMembership" : false,
+         "respectResourcePasswordPolicyChangeAfterReset" : false
+      },
+   "objectTypes" :
+      {
+         "account" :
+            {
+               "$schema" : "http://json-schema.org/draft-03/schema",
+               "id" : "__ACCOUNT__",
+               "type" : "object",
+               "nativeType" : "__ACCOUNT__",
+               "properties" :
+                  {
+                     "cn" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "cn",
+                           "nativeType" : "string"
+                        },
+                     "description" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "description",
+                           "nativeType" : "string"
+                        },
+                     "givenName" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "givenName",
+                           "nativeType" : "string"
+                        },    
+                     "mail" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "mail",
+                           "nativeType" : "string"
+                        },
+                      "sn" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "sn",
+                           "nativeType" : "string"
+                        },
+                     "uid" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "uid",
+                           "nativeType" : "string"
+                        }
+                      
+                  }
+            }
+      },
+   "operationOptions" :
+      {
+      }
+}

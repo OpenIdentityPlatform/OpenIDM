@@ -1,0 +1,10 @@
+{
+    "enabled" : false,
+    "type": "cron",
+    "schedule": "0/15 * * * * ?",
+    "invokeService": "sync",
+    "invokeContext": {
+        "action": "reconcile",
+        "mapping": "systemLdapAccounts_managedUser"
+    }
+}
