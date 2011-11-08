@@ -11,8 +11,8 @@
       {
          "connectorHostRef" : "#LOCAL",
          "connectorName" : "org.identityconnectors.ldap.LdapConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.ldap.ldap",
-         "bundleVersion" : "1.1.0.0-SNAPSHOT"
+         "bundleName" : "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+         "bundleVersion" : "1.1.0.0-EA"
       },
    "poolConfigOption" :
       {
