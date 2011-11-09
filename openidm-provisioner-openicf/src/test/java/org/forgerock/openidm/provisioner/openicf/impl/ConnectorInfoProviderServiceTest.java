@@ -26,6 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import java.io.UnsupportedEncodingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
@@ -51,6 +52,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -175,12 +177,13 @@ public class ConnectorInfoProviderServiceTest {
     }
 
 
-    private Map<String, String> getTestSystemConfiguration() {
+    private Map<String, String> getTestSystemConfiguration() throws Exception {
         URL root = ConnectorInfoProviderServiceTest.class.getResource("/connectorServer/");
         Assert.assertNotNull(root);
+        String rootPath = URLDecoder.decode(root.getPath(), "UTF-8");
         Map<String, String> systemProperties = new HashMap<String, String>(1);
-        systemProperties.put(ServerConstants.PROPERTY_SERVER_ROOT, root.getPath());
-        System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, root.getPath());
+        systemProperties.put(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
+        System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
         return systemProperties;
     }
 
