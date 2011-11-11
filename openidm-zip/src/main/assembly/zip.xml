@@ -64,6 +64,8 @@
                 <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
                 <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
                 <exclude>org.apache.felix:org.apache.felix.configadmin</exclude>
+                <exclude>org.ops4j.pax.web:pax-web-jetty-bundle</exclude>
+                <exclude>org.ops4j.pax.web:pax-web-extender-whiteboard</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -76,6 +78,8 @@
                 <include>org.forgerock.openidm:openidm-repo-orientdb</include>
                 <include>org.apache.felix:org.apache.felix.fileinstall</include>
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
+                <include>org.ops4j.pax.web:pax-web-jetty-bundle</include>
+                <include>org.ops4j.pax.web:pax-web-extender-whiteboard</include>
             </includes>
         </dependencySet>
         <dependencySet>
