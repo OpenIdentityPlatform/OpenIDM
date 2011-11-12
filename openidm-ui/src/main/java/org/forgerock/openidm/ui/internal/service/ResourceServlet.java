@@ -26,31 +26,66 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 
-// Apache Felix Maven SCR Plugin
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
-@Component(name = "org.forgerock.openidm.ui.simple",
-policy = ConfigurationPolicy.IGNORE)
-@Properties({
-    @Property(name = "service.description", value = "OpenIDM servlet"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "alias", value = "/openidmui")
-})
-@Service
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Servlet to handle the REST interface
+ *
+ * @author laszlo
+ * @author aegloff
+ */
+@Component(name = "org.forgerock.openidm.ui.simple", 
+        immediate = true,
+        policy = ConfigurationPolicy.IGNORE)
 public final class ResourceServlet
         extends HttpServlet {
-
+    final static Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
+    
     //TODO Decide where to put the web and the java resources. Now both are in root
     private final String path = "/ui";
+    
+    @Reference
+    HttpService httpService;
+    
+    @Reference(target="(openidm.contextid=shared)")
+    HttpContext httpContext;
 
+    ComponentContext context;
+    
+    @Activate
+    protected void activate(ComponentContext context) throws ServletException, NamespaceException {
+        this.context = context;
+        String alias = "/openidmui";
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        httpService.registerServlet(alias, this,  props, httpContext);
+        logger.debug("Registered UI servlet at {}", alias);
+    }    
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+        logger.debug("GET call on {}", req);
+        
         String target = req.getPathInfo();
         if (target == null || "/".equals(target)) {
             res.sendRedirect(req.getServletPath() + "/index.html");
@@ -62,7 +97,9 @@ public final class ResourceServlet
             }
 
             String resName = this.path + target;
-            URL url = getServletContext().getResource(resName);
+
+            // Look in the bundle rather than the servlet context, as we're using shared servlet contexts
+            URL url = context.getBundleContext().getBundle().getResource(resName);
 
             if (url == null) {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);
