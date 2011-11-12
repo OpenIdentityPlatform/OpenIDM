@@ -18,7 +18,9 @@ package org.forgerock.openidm.restlet;
 
 // Java Standard Edition
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,9 +30,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-// OSGi Framework
+// OpenIDM
 import org.forgerock.openidm.core.IdentityServer;
+
+// OSGi Framework
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.HttpContext;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 
 // Apache Felix Maven SCR Plugin
 import org.apache.felix.scr.annotations.Activate;
@@ -53,23 +60,23 @@ import org.restlet.ext.servlet.ServletAdapter;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.context.InvokeContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * TODO: Description.
+ * Servlet to handle the REST interface
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 @Component(
-    name = "org.forgerock.openidm.restlet",
+    name = "org.forgerock.openidm.restlet", immediate = true,
     policy = ConfigurationPolicy.IGNORE
 )
-@Properties({
-    @Property(name = "service.description", value = "OpenIDM servlet"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "alias", value = "/openidm")
-})
-@Service
 public class Servlet extends HttpServlet {
 
+    final static Logger logger = LoggerFactory.getLogger(Servlet.class);
+    
     /** TODO: Description. */
     private static final String PATH_PROPERTY = "openidm.restlet.path";
 
@@ -82,6 +89,15 @@ public class Servlet extends HttpServlet {
     /** TODO: Description. */
     private ComponentContext context;
 
+    /**
+     * OSGi http service. May be backed by an embedded felix; or may for example come from the java ee container.
+     */
+    @Reference 
+    HttpService httpService;
+    
+    @Reference(target="(openidm.contextid=shared)")
+    HttpContext httpContext;
+    
     /**
      * Provides automatic binding of {@link Restlet} objects that include the
      * {@code openidm.restlet.path} property.
@@ -137,9 +153,15 @@ public class Servlet extends HttpServlet {
     }
 
     @Activate
-    protected synchronized void activate(ComponentContext context) {
+    protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
         productionMode = !IdentityServer.isDevelopmentProfileEnabled();
+
+        String alias = "/openidm";
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        httpService.registerServlet(alias, this,  props, httpContext);
+        logger.debug("Registered UI servlet at {}", alias);
+        
     }
 
     @Deactivate
