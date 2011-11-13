@@ -209,6 +209,7 @@
         <module>openidm-repo-jdbc</module>
         <module>openidm-restlet</module>
         <module>openidm-scheduler</module>
+        <module>openidm-security-jetty</module>
         <module>openidm-shell</module>
         <module>openidm-system</module>
         <module>openidm-util</module>

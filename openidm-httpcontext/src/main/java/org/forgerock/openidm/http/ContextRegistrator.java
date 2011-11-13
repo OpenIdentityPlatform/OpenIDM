@@ -76,31 +76,32 @@ public final class ContextRegistrator {
         context.getBundleContext().registerService(HttpContext.class.getName(), httpContext, contextProps);
         logger.debug("Registered OpenIDM shared http context");
         
-        // TODO: factor out jetty specific handling into fragment
-        boolean enabled = false;
-        
-        // If embedded Jetty is used, enable security
-        if (enabled && httpService instanceof org.ops4j.pax.web.service.WebContainer) {
-            org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
-            String authMethod = "BASIC";
-            String realmName = "openidm";
-            String formLoginPage = null;
-            String formErrorPage = null;
-            webContainer.registerLoginConfig(authMethod, realmName, formLoginPage, formErrorPage, httpContext);
+        callSecurityConfigurators(context, httpContext);
+    }
     
-            String constraintName="openidm-core-login";
-            String url = "/*";
-            String mapping = null;
-            String dataConstraint = null;
-            boolean authentication = true;
-            java.util.List<String> roles = new java.util.ArrayList<String>();
-            //roles.add("*");
-            roles.add("admin");
-            roles.add("user");
-            
-            webContainer.registerConstraintMapping(constraintName, url, mapping, dataConstraint,
-                    authentication, roles, httpContext); 
-            logger.debug("Enabled Jetty security for OpenIDM shared context");
+    /**
+     * Call security configurators if present to enable security
+     */
+    private void callSecurityConfigurators(ComponentContext context, HttpContext httpContext) {
+        // TODO: dynamic discovery of security configurator(s)
+        String clazzName = "org.forgerock.openidm.http.internal.JettySecurityConfigurator";
+        Class configuratorClazz = null;
+        try {
+            configuratorClazz = context.getBundleContext().getBundle().loadClass(clazzName);
+            logger.debug("Loaded configurator class {}", clazzName);
+        } catch (ClassNotFoundException ex) {
+            logger.debug("Security configurator not present: {}", clazzName);
         }
-    }    
+        try {
+            if (configuratorClazz != null) {
+                Object instance = configuratorClazz.newInstance();
+                logger.debug("Instantiated configurator {}", instance);
+                SecurityConfigurator configurator = (SecurityConfigurator) instance;
+                configurator.activate(httpService, httpContext, context);
+                logger.debug("Completed security configurator {}", clazzName);
+            }
+        } catch (Exception ex) {
+            logger.warn("Failed to load security configurator class {}", clazzName, ex);
+        }
+    }
 }
