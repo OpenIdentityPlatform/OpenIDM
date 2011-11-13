@@ -22,7 +22,7 @@
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     <groupId>org.forgerock.openidm</groupId>
-    <artifactId>openidm-httpcontext</artifactId>
+    <artifactId>openidm-security-jetty</artifactId>
     <name>OpenIDM http context</name>
     <packaging>bundle</packaging>
     <build>
@@ -45,9 +45,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.http;version="${openidm.version}"</Export-Package>
                         <Import-Package>*</Import-Package>
-                        <Include-Resource>{maven-resources}</Include-Resource>
+                        <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
                     </instructions>
                 </configuration>
             </plugin>
@@ -56,19 +55,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-httpcontext</artifactId>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -79,6 +72,11 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-jetty-bundle</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
 </project>
