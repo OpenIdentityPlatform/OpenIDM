@@ -26,5 +26,18 @@ import org.osgi.service.http.HttpService;
  * @author aegloff
  */
 public interface SecurityConfigurator {
+
+    /**
+     * Let the security configurator apply its configuration 
+     * @param context the component context of the main bundle
+     * @param httpContext the shared http context to configure
+     */
     void activate(HttpService httpService, HttpContext httpContext,  ComponentContext context);
+
+    /**
+     * Deactivate security configurators if present to cleanup
+     * @param context the component context of the main bundle
+     * @param httpContext the shared http context to configure
+     */
+    void deactivate(HttpService httpService, HttpContext httpContext,  ComponentContext context);
 }

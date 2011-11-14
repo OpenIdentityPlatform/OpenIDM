@@ -65,5 +65,8 @@ public final class JettySecurityConfigurator implements SecurityConfigurator {
                     authentication, roles, httpContext); 
             logger.debug("Enabled Jetty security for OpenIDM shared context");
         }
-    }    
+    }
+
+    public void deactivate(HttpService httpService, HttpContext httpContext,  ComponentContext context) {
+    }
 }
