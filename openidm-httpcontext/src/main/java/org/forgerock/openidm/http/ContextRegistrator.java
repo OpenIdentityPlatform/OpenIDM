@@ -26,14 +26,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Enumeration;
+import java.util.List;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -63,28 +65,83 @@ public final class ContextRegistrator {
     @Reference
     HttpService httpService;
 
+    HttpContext httpContext;
+    
     ComponentContext context;
+    
+    List<SecurityConfigurator> securityConfigurators = new ArrayList<SecurityConfigurator>();
     
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
 
         // register the http context so other bundles can add filters etc.
-        HttpContext httpContext = httpService.createDefaultHttpContext();
+        httpContext = httpService.createDefaultHttpContext();
         Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
         contextProps.put("openidm.contextid", "shared");
         context.getBundleContext().registerService(HttpContext.class.getName(), httpContext, contextProps);
         logger.debug("Registered OpenIDM shared http context");
         
-        callSecurityConfigurators(context, httpContext);
+        // Apply the pluggable security configurations on the httpContext
+        initSecurityConfigurators();
+        activateSecurityConfigurators(context, httpContext);
+    }
+    
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+        deactivateSecurityConfigurators(context, httpContext);
+    }
+
+    /**
+     * Loads and instantiates the pluggable Security Configurators
+     * 
+     * To allow for pluggability with fragments a simple convention is used 
+     * to find security configurator(s); 
+     * 1. A properties file contains a property security.configurator.class of a class in 
+     *    the bundle fragment that implements SecurityConfigurator and has a no-arg constructor
+     * 2. The properties file is name <prefix>securityconfigurator.properties and placed 
+     *    somewhere in the bundle or attached fragments
+     */
+    private void initSecurityConfigurators() {
+
+        Enumeration<URL> entries = context.getBundleContext().getBundle().findEntries("/",
+                "*securityconfigurator.properties", true);
+        while (entries.hasMoreElements()) {
+            URL entry = entries.nextElement();
+            logger.trace("Handle properties file at {}", entry.getPath());
+
+            InputStream is = null;
+            java.util.Properties props = new java.util.Properties();
+            try {
+                is = entry.openStream();
+                props.load(is);
+            } catch (IOException ex) {
+                logger.warn("Failed to load security extension properties file", ex);
+                try {
+                    is.close();
+                } catch (Exception cex) {
+                    logger.warn("Failure during close of properties file.", cex);
+                }
+            }
+            logger.trace("Loaded {}: {}", entry.getPath(), props);
+            if (props != null) {
+                String clazzName = (String) props.get("security.configurator.class");
+                logger.debug("Initiating security configurator for class: {}", clazzName);
+                SecurityConfigurator configurator = instantiateSecurityConfigurator(clazzName);
+                if (configurator != null) {
+                    securityConfigurators.add(configurator);
+                }
+            }
+        }
     }
     
     /**
-     * Call security configurators if present to enable security
+     * @param class name of SecurityConfigurator to load and instantiate
+     * @return the security configurator instance if it was successfully instantiated, null if not.
+     * Logs any failures
      */
-    private void callSecurityConfigurators(ComponentContext context, HttpContext httpContext) {
-        // TODO: dynamic discovery of security configurator(s)
-        String clazzName = "org.forgerock.openidm.http.internal.JettySecurityConfigurator";
+    SecurityConfigurator instantiateSecurityConfigurator(String clazzName) {
+        SecurityConfigurator configurator = null;
         Class configuratorClazz = null;
         try {
             configuratorClazz = context.getBundleContext().getBundle().loadClass(clazzName);
@@ -96,12 +153,36 @@ public final class ContextRegistrator {
             if (configuratorClazz != null) {
                 Object instance = configuratorClazz.newInstance();
                 logger.debug("Instantiated configurator {}", instance);
-                SecurityConfigurator configurator = (SecurityConfigurator) instance;
-                configurator.activate(httpService, httpContext, context);
-                logger.debug("Completed security configurator {}", clazzName);
+                configurator = (SecurityConfigurator) instance;
             }
         } catch (Exception ex) {
             logger.warn("Failed to load security configurator class {}", clazzName, ex);
+        }
+        return configurator;
+    }
+
+    
+    /**
+     * Activate security configurators if present to enable security
+     * @param context the component context of the main bundle
+     * @param httpContext the shared http context to configure
+     */
+    private void activateSecurityConfigurators(ComponentContext context, HttpContext httpContext) {
+        for (SecurityConfigurator configurator : securityConfigurators) {
+            configurator.activate(httpService, httpContext, context);
+            logger.info("Activated security configurator {}", configurator.getClass().getName());
+        }
+    }
+    
+    /**
+     * Deactivate security configurators if present to cleanup
+     * @param context the component context of the main bundle
+     * @param httpContext the shared http context to configure
+     */
+    private void deactivateSecurityConfigurators(ComponentContext context, HttpContext httpContext) {
+        for (SecurityConfigurator configurator : securityConfigurators) {
+            configurator.deactivate(httpService, httpContext, context);
+            logger.debug("Deactivated security configurator {}", configurator.getClass().getName());
         }
     }
 }
