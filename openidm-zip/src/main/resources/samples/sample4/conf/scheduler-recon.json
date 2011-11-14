@@ -1,0 +1,10 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "30 0/1 * * * ?",
+    "invokeService" : "sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "systemHrAccounts_managedUser"
+    }
+}
