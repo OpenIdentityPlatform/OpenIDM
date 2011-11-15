@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.config.installer;
 
-import org.codehaus.jackson.impl.DefaultPrettyPrinter;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
 import org.codehaus.jackson.impl.Indenter;
 import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -37,6 +37,7 @@ public class JSONPrettyPrint {
         Indenter indenter = new PrettyIndenter();
         DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
         prettyPrinter.indentObjectsWith(indenter);
+        prettyPrinter.indentArraysWith(indenter);
         writer = mapper.prettyPrintingWriter(prettyPrinter);
     }
     
