@@ -37,7 +37,7 @@ import javax.sql.DataSource;
  * @version $Revision$ $Date$
  */
 public class DataSourceFactory {
-    private final static Logger logger = LoggerFactory.getLogger(DatabaseShutdownHook.class);
+    private final static Logger logger = LoggerFactory.getLogger(DataSourceFactory.class);
 
     public static DataSource newInstance(JsonValue config) {
         //TODO Make CP implementation independent
