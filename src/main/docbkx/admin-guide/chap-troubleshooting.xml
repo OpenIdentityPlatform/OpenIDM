@@ -67,5 +67,44 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   You have a syntax error in your openidm/conf/sync.json
   </para> 
  </section>
+ <section>
+  <title>Json Parsing Error</title>
+  <para>
+  During startup of openidm there might be some errors like:
+  </para>
+  <para>
+  "Configuration for org.forgerock.openidm.provisioner.openicf could not be parsed and may not be valid JSON : Unexpected character ('}' (code 125)): was expecting double-quote to start field name"
+  </para>
+  <para>
+  The error message ususall points precisely to the point where the json file has the syntax problem. The error above was caused by a excess comma in the json file: 
+  {"attributeName":{},{},}
+  The second comma is too much!
+  </para>
+  <para>
+  The situation usually results in the service the config-json belongs to is left in the "unsatisfied" state.
+  </para>
+ </section>
+ <section>
+  <title>Missing Link-Table</title>
+  <para>
+  When using OrientDB, each mapping needs a separate linking table defined in the repo.orientdb.json. If it is missing, then a huge error stack is thrown to the log, starting with:
+  </para>
+  <para>
+  Link query failed
+  followed by: 
+  Failed to resolve and parse the query SELECT * FROM ${_resource} WHERE sourceId = '${sourceId}' with params: {_resource=link_XXXsystemHrAccounts_managedUser, _query-id=links-for-sourceId, sourceId=DDOE}
+  And:
+  Error on parsing query at position...
+  And:
+  Class 'LINK_XXXSYSTEMHRACCOUNTS_MANAGEDUSER' was not found in current database...
+  </para>
+  <para>
+  The last hint, "Class ... was not found in current database" is finally telling the problem: there is no class (i.e. table) in the repository for the links of this mapping.
+  </para>
+  <para>
+  The naming convention for the table name is:
+  The string "link_" concatenated with the name of the mapping (as defined in the sync.json configuration).
+  </para>
+ </section>
 </chapter>
 
