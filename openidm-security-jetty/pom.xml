@@ -23,7 +23,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-security-jetty</artifactId>
-    <name>OpenIDM http context</name>
+    <name>OpenIDM fragment for jetty security</name>
     <packaging>bundle</packaging>
     <build>
          <plugins>
@@ -46,6 +46,8 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
+                        <!-- Allows to find the Jetty role classes -->
+                        <DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
                         <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
                     </instructions>
                 </configuration>

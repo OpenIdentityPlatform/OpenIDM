@@ -74,6 +74,7 @@ echo $$ > $OPENIDM_PID_FILE
 # start in normal mode
 exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
+        -Djava.security.auth.login.config=security/jaas-repo.conf \
 	-classpath "$CLASSPATH" \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
 	-Dignore.openidm.system.server.environment="dev|test|qa|prod" \

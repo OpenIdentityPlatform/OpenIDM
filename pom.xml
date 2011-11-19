@@ -201,6 +201,7 @@
         <module>openidm-external-rest</module>
         <module>openidm-external-email</module>
         <module>openidm-httpcontext</module>
+        <module>openidm-jaas-loginmodule-repo</module>
         <module>openidm-jetty-fragment</module>
         <module>openidm-provisioner</module>
         <module>openidm-provisioner-openicf</module>
