@@ -65,6 +65,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-jaas-loginmodule-repo</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-jetty-fragment</artifactId>
             <version>${openidm.version}</version>
         </dependency>

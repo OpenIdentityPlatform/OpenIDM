@@ -22,19 +22,39 @@
         <artifactId>openidm-project</artifactId>
         <version>2.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-jetty-fragment</artifactId>
-    <name>OpenIDM Jetty Fragment</name>
+    <artifactId>openidm-jaas-loginmodule-repo</artifactId>
+    <name>JAAS login module for Repository</name>
     <packaging>bundle</packaging>
     <dependencies>
+        <!-- CryptoService dependency -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-crypto</artifactId>
+            <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-httpcontext</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-fluent</artifactId>
         </dependency>
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jetty-bundle</artifactId>
             <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!-- Test Dependencies -->
         <dependency>
@@ -65,7 +85,9 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
+<!-- TODO: consider alternatives, including optional packages -->
+<!--                        <DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>-->
+                        <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
                         <Export-Package></Export-Package>
                     </instructions>
                 </configuration>

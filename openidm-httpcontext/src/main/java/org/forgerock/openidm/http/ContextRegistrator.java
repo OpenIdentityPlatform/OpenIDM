@@ -42,6 +42,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -67,9 +68,22 @@ public final class ContextRegistrator {
 
     HttpContext httpContext;
     
-    ComponentContext context;
+    static ComponentContext context;
     
     List<SecurityConfigurator> securityConfigurators = new ArrayList<SecurityConfigurator>();
+    
+    
+    /**
+     * Allow access for the fragments
+     * @return bundle context if activated, null otherwise
+     */
+    public static BundleContext getBundleContext() {
+        if (context != null) {
+            return context.getBundleContext();
+        } else {
+            return null;
+        }
+    }
     
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {

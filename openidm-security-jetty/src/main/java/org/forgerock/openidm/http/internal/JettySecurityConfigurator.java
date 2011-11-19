@@ -57,9 +57,8 @@ public final class JettySecurityConfigurator implements SecurityConfigurator {
             String dataConstraint = null;
             boolean authentication = true;
             java.util.List<String> roles = new java.util.ArrayList<String>();
+            roles.add("openidm-authorized");
             //roles.add("*");
-            roles.add("admin");
-            roles.add("user");
             
             webContainer.registerConstraintMapping(constraintName, url, mapping, dataConstraint,
                     authentication, roles, httpContext); 
