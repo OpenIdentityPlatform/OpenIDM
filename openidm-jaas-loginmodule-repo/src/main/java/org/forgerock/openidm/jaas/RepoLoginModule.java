@@ -13,7 +13,7 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
-package org.forgerock.openidm.jetty.jaas;
+package org.forgerock.openidm.jaas;
 
 import java.util.ArrayList;
 import java.util.Arrays;
