@@ -652,12 +652,21 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
         }
 
+        Connection testConn = null;
         try {
             // Check if we can get a connection
-            Connection testConn = getConnection();
+            testConn = getConnection();
         } catch (Exception ex) {
             logger.warn("JDBC Repository start-up experienced a failure getting a DB connection: " + ex.getMessage()
                     + ". If this is not temporary or resolved, Repository operation will be affected.", ex);
+        } finally {
+            if (testConn != null) {
+                try {
+                    testConn.close();
+                } catch (SQLException ex) {
+                    logger.warn("Failure during test connection close ", ex);
+                }
+            }
         }
     }
 
