@@ -74,7 +74,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";
-    
+
     ObjectMapper mapper = new ObjectMapper();
 
     // Keys in the JSON configuration
@@ -136,7 +136,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             connection.close();
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in read of {} with error code {}, sql state {}", 
+                logger.debug("SQL Exception in read of {} with error code {}, sql state {}",
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
@@ -191,13 +191,13 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in create of {} with error code {}, sql state {}", 
+                logger.debug("SQL Exception in create of {} with error code {}, sql state {}",
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             rollback(connection);
             boolean alreadyExisted = getTableHandler(type).isErrorType(ex, ErrorType.DUPLICATE_KEY);
             if (alreadyExisted) {
-                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
+                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
                         + ex.getMessage(), ex);
             }
             throw new InternalServerErrorException("Creating object failed " + ex.getMessage(), ex);
@@ -258,7 +258,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             logger.debug("Commited updated object for id: {}", fullId);
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in update of {} with error code {}, sql state {}", 
+                logger.debug("SQL Exception in update of {} with error code {}, sql state {}",
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             rollback(connection);
@@ -316,7 +316,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in delete of {} with error code {}, sql state {}", 
+                logger.debug("SQL Exception in delete of {} with error code {}, sql state {}",
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             rollback(connection);
@@ -397,7 +397,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             }
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in query of {} with error code {}, sql state {}", 
+                logger.debug("SQL Exception in query of {} with error code {}, sql state {}",
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
@@ -570,8 +570,11 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     throw new InvalidException("Could not find configured database driver "
                             + dbDriver + " to start repository ", ex);
                 }
-                ds = DataSourceFactory.newInstance(connectionConfig);
-                useDataSource = true;
+                Boolean enableConnectionPool = connectionConfig.get("enableConnectionPool").defaultTo(Boolean.FALSE).asBoolean();
+                if (enableConnectionPool) {
+                    ds = DataSourceFactory.newInstance(connectionConfig);
+                    useDataSource = true;
+                }
             }
 
             // Table handling configuration
@@ -579,7 +582,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             JsonValue genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 
-            tableHandlers = new HashMap<String, TableHandler>();           
+            tableHandlers = new HashMap<String, TableHandler>();
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
 
@@ -658,7 +661,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         }
     }
 
-    GenericTableHandler getGenericTableHandler(DatabaseType databaseType, 
+    GenericTableHandler getGenericTableHandler(DatabaseType databaseType,
             JsonValue tableConfig, String dbSchemaName, JsonValue queries, int maxBatchSize) {
 
         GenericTableHandler handler = null;

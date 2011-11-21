@@ -2,7 +2,11 @@
     "mappings" : [ {
         "name" : "systemXmlfileAccounts_managedUser",
         "source" : "system/xmlfile/account",
-            "target" : "managed/user",
+        "target" : "managed/user",
+        "correlationQuery" : {
+            "type": "text/javascript",
+            "source" : "var query = {'_query-id' : 'for-username', 'uid' :  source.name};query;"
+        },
         "properties" : [ {
             "source" : "description",
             "target" : "description"
@@ -18,6 +22,9 @@
         }, {
             "source" : "name",
             "target" : "name"
+        }, {
+            "source" : "name",
+            "target" : "_id"
         } ],
         "policies" : [ {
             "situation" : "CONFIRMED",
@@ -43,12 +50,12 @@
         } ]
     }, {
         "name" : "managedUser_systemXmlfileAccounts",
-            "source": "managed/user",
+        "source": "managed/user",
         "target" : "system/xmlfile/account",
-            "correlationQuery" : {
-                "type": "text/javascript",
+        "correlationQuery" : {
+            "type": "text/javascript",
             "source" : "var myarray = [source.name];var map = {'query' : { 'Equals': {'field' : 'name','values' : myarray}}};map;"
-            },
+        },
         "properties" : [ {
             "source" : "firstname",
             "target" : "firstname"

@@ -229,14 +229,9 @@
         </dependency>
         <!-- Commons logging used by http client -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.logging</artifactId>
-            <version>1.1.1</version> 
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>com.springsource.slf4j.org.apache.commons.logging</artifactId>
-            <version>1.6.1</version>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
         <!-- OpenICF -->
@@ -337,7 +332,7 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-jdk14</artifactId>
-                    <version>1.6.2</version>
+                    <version>${slf4j.version}</version>
                 </dependency>
             </dependencies>
         </profile>
