@@ -120,7 +120,7 @@ public final class ContextRegistrator {
 
         Enumeration<URL> entries = context.getBundleContext().getBundle().findEntries("/",
                 "*securityconfigurator.properties", true);
-        while (entries.hasMoreElements()) {
+        while (entries != null && entries.hasMoreElements()) {
             URL entry = entries.nextElement();
             logger.trace("Handle properties file at {}", entry.getPath());
 
