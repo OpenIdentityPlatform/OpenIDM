@@ -1,0 +1,9 @@
+The sample configuration connects to a local csv file. An example file is located at:
+
+.../openidm/samples/sample4/data/Hr.csv
+
+The idea of the sample is that the csv file is used as a feed for openidm. 
+Threrefor no update should be written to the csv file by openidm and sync.json contains only one mappingg, from the csv file into the managed user objects.
+
+uid is used as the unique id in the csv file and configured so in the provisioner configuration.
+
