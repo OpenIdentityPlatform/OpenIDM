@@ -56,7 +56,7 @@
   Looking at the console output of the logs in openidm/logs you see the following: 
   </para>
   <para>
-  WARNING: Loading configuration file /Users/jamie/ws/idm/openidm-zip/target/openidm/conf/sync.json failed
+WARNING: Loading configuration file /Users/jamie/ws/idm/openidm-zip/target/openidm/conf/sync.json failed
 org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.openidm.sync could not be parsed and may not be valid JSON : Unexpected character ('}' (code 125)): expected a value
  at [Source: java.io.StringReader@3951f910; line: 24, column: 6]
     at org.forgerock.openidm.config.crypto.ConfigCrypto.parse(ConfigCrypto.java:249)
@@ -72,12 +72,14 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   <para>
   During startup of openidm there might be some errors like:
   </para>
+  <screen width="100">
+  "Configuration for org.forgerock.openidm.provisioner.openicf could not be parsed 
+  and may not be valid JSON : Unexpected character ('}' (code 125)): 
+  was expecting double-quote to start field name"
+  </screen>
   <para>
-  "Configuration for org.forgerock.openidm.provisioner.openicf could not be parsed and may not be valid JSON : Unexpected character ('}' (code 125)): was expecting double-quote to start field name"
-  </para>
-  <para>
-  The error message ususall points precisely to the point where the json file has the syntax problem. The error above was caused by a excess comma in the json file: 
-  {"attributeName":{},{},}
+  The error message usually points precisely to the point where the json file has the syntax problem. The error above was caused by a excess comma in the json file: 
+  <screen>{"attributeName":{},{},}</screen>
   The second comma is too much!
   </para>
   <para>
@@ -89,15 +91,17 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   <para>
   When using OrientDB, each mapping needs a separate linking table defined in the repo.orientdb.json. If it is missing, then a huge error stack is thrown to the log, starting with:
   </para>
-  <para>
+  <screen width="100">
   Link query failed
   followed by: 
-  Failed to resolve and parse the query SELECT * FROM ${_resource} WHERE sourceId = '${sourceId}' with params: {_resource=link_XXXsystemHrAccounts_managedUser, _query-id=links-for-sourceId, sourceId=DDOE}
+  Failed to resolve and parse the query SELECT * FROM ${_resource} 
+  WHERE sourceId = '${sourceId}' with params: 
+  {_resource=link_XXXsystemHrAccounts_managedUser, _query-id=links-for-sourceId, sourceId=DDOE}
   And:
   Error on parsing query at position...
   And:
   Class 'LINK_XXXSYSTEMHRACCOUNTS_MANAGEDUSER' was not found in current database...
-  </para>
+  </screen>
   <para>
   The last hint, "Class ... was not found in current database" is finally telling the problem: there is no class (i.e. table) in the repository for the links of this mapping.
   </para>
@@ -111,9 +115,15 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   <para>
    The following error is thrown as a result of a reconciliation where the source systems configuration can not be found:
   </para>
-  <para>
-  {"error":"Conflict","description":"Internal Server Error: org.forgerock.openidm.sync.SynchronizationException: org.forgerock.openidm.objset.ObjectSetException: System: system/HR/account is not available.: org.forgerock.openidm.objset.ObjectSetException: System: system/HR/account is not available.: System: system/HR/account is not available."}
-  </para>
+  <screen width="100">
+  {"error":"Conflict","description":"Internal Server Error: 
+  org.forgerock.openidm.sync.SynchronizationException: 
+  org.forgerock.openidm.objset.ObjectSetException: 
+  System: system/HR/account is not available.: 
+  org.forgerock.openidm.objset.ObjectSetException: System: 
+  system/HR/account is not available.: 
+  System: system/HR/account is not available."}
+  </screen>
   <para>
    For provoking the error above the name of the resource, as defined in the "name" property of the provisioner.xxx.json was changed form HR to something different. 
   </para>
@@ -122,21 +132,21 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   </para>
  </section>
  <section>
-  <title></title>
+  <title>Bad Connector Host Reference in Provisioner Configuration</title>
   <para>
   An error upon loading a provisioner configuration might look like this:
   </para>
-  <para>
+  <screen width="100">
   Wait for meta data for config org.forgerock.openidm.provisioner.openicf-scriptedsql
-  </para>
+  </screen>
   <para>
   In this case the configuration is not loaded because some information is missing. One possible cause is a wrong value for "connectorHostRef" in the provisioner json. There rule is here (for local java connector servers):
   </para>
   <para>
-  If the connector jar is installed as a bundle, then the value must be: 
-  "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-  If installed as connector (i.e. under openidm/connectors) then the value must be like:
-  "connectorHostRef" : "#LOCAL",
+If the connector jar is installed as a bundle (i.e. under openidm/bundle), then the value must be: 
+  <screen width="100">"connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",</screen>
+If installed as connector (i.e. under openidm/connectors) then the value must be like:
+  <screen width="100">"connectorHostRef" : "#LOCAL",</screen>
   </para>
  </section>
 </chapter>
