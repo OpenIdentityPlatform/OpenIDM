@@ -106,5 +106,38 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   The string "link_" concatenated with the name of the mapping (as defined in the sync.json configuration).
   </para>
  </section>
+ <section>
+  <title>System Not available</title>
+  <para>
+   The following error is thrown as a result of a reconciliation where the source systems configuration can not be found:
+  </para>
+  <para>
+  {"error":"Conflict","description":"Internal Server Error: org.forgerock.openidm.sync.SynchronizationException: org.forgerock.openidm.objset.ObjectSetException: System: system/HR/account is not available.: org.forgerock.openidm.objset.ObjectSetException: System: system/HR/account is not available.: System: system/HR/account is not available."}
+  </para>
+  <para>
+   For provoking the error above the name of the resource, as defined in the "name" property of the provisioner.xxx.json was changed form HR to something different. 
+  </para>
+  <para>
+   The same error can also be the result of a not loaded provisioner config, for instance due to a misconfiguration; an example would be a wrong path to the data file of a csv connector. 
+  </para>
+ </section>
+ <section>
+  <title></title>
+  <para>
+  An error upon loading a provisioner configuration might look like this:
+  </para>
+  <para>
+  Wait for meta data for config org.forgerock.openidm.provisioner.openicf-scriptedsql
+  </para>
+  <para>
+  In this case the configuration is not loaded because some information is missing. One possible cause is a wrong value for "connectorHostRef" in the provisioner json. There rule is here (for local java connector servers):
+  </para>
+  <para>
+  If the connector jar is installed as a bundle, then the value must be: 
+  "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+  If installed as connector (i.e. under openidm/connectors) then the value must be like:
+  "connectorHostRef" : "#LOCAL",
+  </para>
+ </section>
 </chapter>
 
