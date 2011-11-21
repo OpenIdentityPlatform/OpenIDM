@@ -1,0 +1,42 @@
+{
+    "mappings" : [ {
+        "name" : "systemHrdb_managedUser",
+        "source" : "system/hrdb/account",
+        "target" : "managed/user",
+        "properties" : [ {
+            "source" : "email",
+            "target" : "email"
+        }, {
+            "source" : "uid",
+            "target" : "uid"
+        }, {
+            "source" : "lastName",
+            "target" : "lastName"
+        }, {
+            "source" : "firstName",
+            "target" : "firstName"
+        } ],
+        "policies" : [ {
+            "situation" : "CONFIRMED",
+            "action" : "UPDATE"
+        }, {
+            "situation" : "FOUND",
+            "action" : "UPDATE"
+        }, {
+            "situation" : "ABSENT",
+            "action" : "CREATE"
+        }, {
+            "situation" : "AMBIGUOUS",
+            "action" : "EXCEPTION"
+        }, {
+            "situation" : "MISSING",
+            "action" : "UNLINK"
+        }, {
+            "situation" : "UNQUALIFIED",
+            "action" : "IGNORE"
+        }, {
+            "situation" : "UNASSIGNED",
+            "action" : "IGNORE"
+        } ]
+    } ]
+}
