@@ -1,0 +1,16 @@
+The sample explains the flow of attributes from an LDAP to an AD resource with some attribute manipulation in between. 
+
+Both resources are simulated by the XML file adapter.
+
+The sync.json contains examples for:
+
+*) mapping of two resources
+*) validTarget filter
+*) setting "default" values for attributes 
+*) "onCreate" actions
+*) "onUpdate" actions
+*) "correlationQuery" to correlate user with external accounts
+
+Attribute flow:
+
+LDAP ---> OpenIDM ---> AD
