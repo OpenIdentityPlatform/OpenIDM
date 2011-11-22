@@ -165,4 +165,12 @@ public interface TableHandler {
      * @return true if the exception matches the error type passed
      */
     public boolean isErrorType(SQLException ex, ErrorType errorType);
+    
+    /**
+     * As whether a given exception should be retried
+     * @param ex the exception thrown by the database
+     * @param connection where the failure occured, used for additional context
+     * @return
+     */
+    public boolean isRetryable(SQLException ex, Connection connection);
 }

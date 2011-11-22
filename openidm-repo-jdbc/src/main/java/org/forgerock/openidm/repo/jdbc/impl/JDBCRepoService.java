@@ -97,6 +97,8 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
     private String user;
     private String password;
 
+    private int maxTxRetry = 5;
+
     Map<String, TableHandler> tableHandlers;
     TableHandler defaultTableHandler;
 
@@ -140,6 +142,9 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             throw new InternalServerErrorException("Reading object failed " + ex.getMessage(), ex);
+        } catch (ObjectSetException ex) {
+            logger.debug("ObjectSetException in read of {}", fullId, ex);
+            throw ex;
         } catch (IOException ex) {
             logger.debug("IO Exception in read of {}", fullId, ex);
             throw new InternalServerErrorException("Conversion of read object failed", ex);
@@ -180,44 +185,62 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         }
 
         Connection connection = null;
-        try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
-
-            getTableHandler(type).create(fullId, type, localId, obj, connection);
-
-            connection.commit();
-            logger.debug("Commited created object for id: {}", fullId);
-
-        } catch (SQLException ex) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in create of {} with error code {}, sql state {}",
-                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
-            }
-            rollback(connection);
-            boolean alreadyExisted = getTableHandler(type).isErrorType(ex, ErrorType.DUPLICATE_KEY);
-            if (alreadyExisted) {
-                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
-                        + ex.getMessage(), ex);
-            }
-            throw new InternalServerErrorException("Creating object failed " + ex.getMessage(), ex);
-        } catch (java.io.IOException ex) {
-            logger.debug("IO Exception in create of {}", fullId, ex);
-            rollback(connection);
-            throw new InternalServerErrorException("Conversion of object to create failed", ex);
-        } catch (RuntimeException ex) {
-            logger.debug("Runtime Exception in create of {}", fullId, ex);
-            rollback(connection);
-            throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during connection close ", ex);
+        boolean retry = false;
+        int tryCount = 0;
+        do {
+            retry = false;
+            ++tryCount;
+            try {
+                connection = getConnection();
+                connection.setAutoCommit(false);
+    
+                getTableHandler(type).create(fullId, type, localId, obj, connection);
+    
+                connection.commit();
+                logger.debug("Commited created object for id: {}", fullId);
+    
+            } catch (SQLException ex) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SQL Exception in create of {} with error code {}, sql state {}",
+                            new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                }
+                rollback(connection);
+                boolean alreadyExisted = getTableHandler(type).isErrorType(ex, ErrorType.DUPLICATE_KEY);
+                if (alreadyExisted) {
+                    throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
+                            + ex.getMessage(), ex);
+                }
+                if (getTableHandler(type).isRetryable(ex, connection)) {
+                    if (tryCount <= maxTxRetry) {
+                        retry = true;
+                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                    }
+                }
+                if (!retry) {
+                    throw new InternalServerErrorException("Creating object failed " + ex.getMessage(), ex);
+                }
+            } catch (ObjectSetException ex) {
+                logger.debug("ObjectSetException in create of {}", fullId, ex);
+                rollback(connection);
+                throw ex;    
+            } catch (java.io.IOException ex) {
+                logger.debug("IO Exception in create of {}", fullId, ex);
+                rollback(connection);
+                throw new InternalServerErrorException("Conversion of object to create failed", ex);
+            } catch (RuntimeException ex) {
+                logger.debug("Runtime Exception in create of {}", fullId, ex);
+                rollback(connection);
+                throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException ex) {
+                        logger.warn("Failure during connection close ", ex);
+                    }
                 }
             }
-        }
+        } while (retry);
     }
 
     /**
@@ -248,38 +271,66 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         }
 
         Connection connection = null;
-        try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
-
-            getTableHandler(type).update(fullId, type, localId, rev, obj, connection);
-
-            connection.commit();
-            logger.debug("Commited updated object for id: {}", fullId);
-        } catch (SQLException ex) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in update of {} with error code {}, sql state {}",
-                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
-            }
-            rollback(connection);
-            throw new InternalServerErrorException("Updating object failed " + ex.getMessage(), ex);
-        } catch (java.io.IOException ex) {
-            logger.debug("IO Exception in update of {}", fullId, ex);
-            rollback(connection);
-            throw new InternalServerErrorException("Conversion of object to update failed", ex);
-        } catch (RuntimeException ex) {
-            logger.debug("Runtime Exception in update of {}", fullId, ex);
-            rollback(connection);
-            throw new InternalServerErrorException("Updating object failed with unexpected failure: " + ex.getMessage(), ex);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during connection close ", ex);
+        Integer previousIsolationLevel = null;
+        boolean retry = false;
+        int tryCount = 0;
+        do {
+            retry = false;
+            ++tryCount;
+            try {
+                connection = getConnection();
+                previousIsolationLevel = new Integer(connection.getTransactionIsolation());
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                connection.setAutoCommit(false);
+    
+                getTableHandler(type).update(fullId, type, localId, rev, obj, connection);
+    
+                connection.commit();
+                logger.debug("Commited updated object for id: {}", fullId);
+            } catch (SQLException ex) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SQL Exception in update of {} with error code {}, sql state {}",
+                            new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                }
+                rollback(connection);
+                if (getTableHandler(type).isRetryable(ex, connection)) {
+                    if (tryCount <= maxTxRetry) {
+                        retry = true;
+                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                    }
+                }
+                if (!retry) {
+                   throw new InternalServerErrorException("Updating object failed " + ex.getMessage(), ex);
+                }
+            } catch (ObjectSetException ex) {
+                logger.debug("ObjectSetException in update of {}", fullId, ex);
+                rollback(connection);
+                throw ex;
+            } catch (java.io.IOException ex) {
+                logger.debug("IO Exception in update of {}", fullId, ex);
+                rollback(connection);
+                throw new InternalServerErrorException("Conversion of object to update failed", ex);
+            } catch (RuntimeException ex) {
+                logger.debug("Runtime Exception in update of {}", fullId, ex);
+                rollback(connection);
+                throw new InternalServerErrorException("Updating object failed with unexpected failure: " + ex.getMessage(), ex);
+            } finally {
+                if (connection != null) {
+                    try {
+                        if (previousIsolationLevel != null) {
+                            connection.setTransactionIsolation(previousIsolationLevel.intValue());
+                        }
+                    } catch (SQLException ex) {
+                        logger.warn("Failure in resetting connection isolation level ", ex);
+                    }
+                    try {
+                        connection.close();
+                    } catch (SQLException ex) {
+                        logger.warn("Failure during connection close ", ex);
+                    }
                 }
             }
-        }
+        } while (retry);
     }
 
     /**
@@ -302,38 +353,56 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
         }
 
         Connection connection = null;
-        try {
-            connection = getConnection();
-            connection.setAutoCommit(false);
-
-            getTableHandler(type).delete(fullId, type, localId, rev, connection);
-
-            connection.commit();
-            logger.debug("Commited deleted object for id: {}", fullId);
-        } catch (IOException ex) {
-            logger.debug("IO Exception in delete of {}", fullId, ex);
-            rollback(connection);
-            throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
-        } catch (SQLException ex) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SQL Exception in delete of {} with error code {}, sql state {}",
-                        new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
-            }
-            rollback(connection);
-            throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
-        } catch (RuntimeException ex) {
-            logger.debug("Runtime Exception in delete of {}", fullId, ex);
-            rollback(connection);
-            throw new InternalServerErrorException("Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during connection close ", ex);
+        boolean retry = false;
+        int tryCount = 0;
+        do {
+            retry = false;
+            ++tryCount;
+            try {
+                connection = getConnection();
+                connection.setAutoCommit(false);
+    
+                getTableHandler(type).delete(fullId, type, localId, rev, connection);
+    
+                connection.commit();
+                logger.debug("Commited deleted object for id: {}", fullId);
+            } catch (IOException ex) {
+                logger.debug("IO Exception in delete of {}", fullId, ex);
+                rollback(connection);
+                throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
+            } catch (SQLException ex) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SQL Exception in delete of {} with error code {}, sql state {}",
+                            new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
+                }
+                rollback(connection);
+                if (getTableHandler(type).isRetryable(ex, connection)) {
+                    if (tryCount <= maxTxRetry) {
+                        retry = true;
+                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                    }
+                }
+                if (!retry) {
+                    throw new InternalServerErrorException("Deleting object failed " + ex.getMessage(), ex);
+                }
+            } catch (ObjectSetException ex) {
+                logger.debug("ObjectSetException in delete of {}", fullId, ex);
+                rollback(connection);
+                throw ex;    
+            } catch (RuntimeException ex) {
+                logger.debug("Runtime Exception in delete of {}", fullId, ex);
+                rollback(connection);
+                throw new InternalServerErrorException("Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
+            } finally {
+                if (connection != null) {
+                    try {
+                        connection.close();
+                    } catch (SQLException ex) {
+                        logger.warn("Failure during connection close ", ex);
+                    }
                 }
             }
-        }
+        } while (retry);
     }
 
     /**
@@ -401,7 +470,10 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
             }
             throw new InternalServerErrorException("Querying failed: " + ex.getMessage(), ex);
-        } finally {
+        } catch (ObjectSetException ex) {
+            logger.debug("ObjectSetException in query of {}", fullId, ex);
+            throw ex;
+        }  finally {
             if (connection != null) {
                 try {
                     connection.close();
@@ -410,9 +482,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 }
             }
         }
-
         return result;
-
     }
 
     public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
@@ -523,6 +593,8 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
 
             JsonValue connectionConfig = config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
 
+            maxTxRetry = connectionConfig.get("maxTxRetry").defaultTo(5).asInteger().intValue();
+            
             // Data Source configuration
             jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
             String jtaName = connectionConfig.get(CONFIG_JTA_NAME).asString();
@@ -574,6 +646,9 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 if (enableConnectionPool) {
                     ds = DataSourceFactory.newInstance(connectionConfig);
                     useDataSource = true;
+                    logger.info("DataSource connection pool enabled.");
+                } else {
+                    logger.info("No DataSource connection pool enabled.");
                 }
             }
 
@@ -581,7 +656,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
             String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
             JsonValue genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
-
+            
             tableHandlers = new HashMap<String, TableHandler>();
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());

@@ -41,6 +41,14 @@ public class XOpenErrorMapping {
         boolean match = false;
         String sqlState = ex.getSQLState(); // ISO/ANSI or Open Group (X/Open) SQL Standard codes
         switch (errorType) {
+            case CONNECTION_FAILURE: {
+                // X/Open 08S01 is communication link failure
+                // Known to be retryable for MySQL
+                if ("08S01".equals(sqlState.trim())) {
+                    match = true;
+                }
+                break;
+            }
             case DUPLICATE_KEY: {
                 // X/Open 23000 is Integrity constraint violation
                 // Known to be used by Oracle, SQL Server, DB2, and MySQL
@@ -48,6 +56,13 @@ public class XOpenErrorMapping {
                     match = true;
                 }
                 break;
+            }
+            case DEADLOCK_OR_TIMEOUT: {
+                // X/Open 40001 is serialization failure such as timeout or deadlock
+                // Known to be retryable for MySQL
+                if ("40001".equals(sqlState.trim())) {
+                    match = true;
+                }
             }
         }
         return match;

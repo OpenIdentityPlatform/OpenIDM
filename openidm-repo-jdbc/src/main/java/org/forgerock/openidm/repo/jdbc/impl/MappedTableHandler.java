@@ -327,6 +327,15 @@ public class MappedTableHandler implements TableHandler {
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         return XOpenErrorMapping.isErrorType(ex, errorType);
     }
+
+ // TODO: make common to generic and explicit handlers
+    public boolean isRetryable(SQLException ex, Connection connection) {
+        if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     
     @Override
     public String toString() {
