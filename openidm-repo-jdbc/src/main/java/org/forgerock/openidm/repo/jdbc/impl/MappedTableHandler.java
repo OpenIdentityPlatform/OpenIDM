@@ -31,6 +31,7 @@ import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
+import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ import java.util.Map;
 public class MappedTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(MappedTableHandler.class);
 
+    SQLExceptionHandler sqlExceptionHandler;
+    
     final String tableName;
     String dbSchemaName;
 
@@ -69,12 +72,18 @@ public class MappedTableHandler implements TableHandler {
     String updateQueryStr;
     String deleteQueryStr;
     
-    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName, JsonValue queriesConfig) {
+    public MappedTableHandler(String tableName, Map mapping, String dbSchemaName, JsonValue queriesConfig, SQLExceptionHandler sqlExceptionHandler) {
         this.tableName = tableName;
         this.dbSchemaName = dbSchemaName;
         // Maintain a stable ordering
         this.mapping = new LinkedHashMap<String, String>();
         this.mapping.putAll(mapping);
+        
+        if (sqlExceptionHandler == null) {
+            this.sqlExceptionHandler = new DefaultSQLExceptionHandler();
+        } else {
+            this.sqlExceptionHandler = sqlExceptionHandler;
+        }
         
         queries = new GenericTableQueries();
         //TODO: replace with explicit table specific handling.
@@ -321,21 +330,22 @@ public class MappedTableHandler implements TableHandler {
         return queries.query(type, params, connection); 
     } 
 
-    /* (non-Javadoc)
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#isErrorType(SQLException, ErrorType)
-     */ 
+    // TODO: make common to generic and explicit handlers
+    /**
+     * @inheritDoc
+     */
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
-        return XOpenErrorMapping.isErrorType(ex, errorType);
+        return sqlExceptionHandler.isErrorType(ex, errorType);
     }
-
- // TODO: make common to generic and explicit handlers
+    
+    // TODO: make common to generic and explicit handlers
+    /**
+     * InheritDoc
+     */
     public boolean isRetryable(SQLException ex, Connection connection) {
-        if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)) {
-            return true;
-        } else {
-            return false;
-        }
+        return sqlExceptionHandler.isRetryable(ex, connection);
     }
+    
     
     @Override
     public String toString() {

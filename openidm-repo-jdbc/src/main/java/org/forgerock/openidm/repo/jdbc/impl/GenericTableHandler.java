@@ -32,6 +32,7 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
+import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
 import org.slf4j.Logger;
@@ -57,6 +58,8 @@ import java.util.Map;
  */
 public class GenericTableHandler implements TableHandler {
     final static Logger logger = LoggerFactory.getLogger(GenericTableHandler.class);
+    
+    SQLExceptionHandler sqlExceptionHandler;
 
     GenericTableConfig cfg;
     
@@ -85,7 +88,7 @@ public class GenericTableHandler implements TableHandler {
         QUERYALLIDS
     }
 
-    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize) {
+    public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
         
         this.mainTableName = cfg.mainTableName;
@@ -95,6 +98,12 @@ public class GenericTableHandler implements TableHandler {
             this.maxBatchSize = 1;
         } else {
             this.maxBatchSize = maxBatchSize;
+        }
+        
+        if (sqlExceptionHandler == null) {
+            this.sqlExceptionHandler = new DefaultSQLExceptionHandler();
+        } else {
+            this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
         queries = new GenericTableQueries();
@@ -333,16 +342,14 @@ public class GenericTableHandler implements TableHandler {
      * @inheritDoc
      */
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
-        return XOpenErrorMapping.isErrorType(ex, errorType);
+        return sqlExceptionHandler.isErrorType(ex, errorType);
     }
     
+    /**
+     * InheritDoc
+     */
     public boolean isRetryable(SQLException ex, Connection connection) {
-        if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)) {
-            // TODO: this is known retry-able for MySQL, review good defaults in general
-            return true;
-        } else {
-            return false;
-        }
+        return sqlExceptionHandler.isRetryable(ex, connection);
     }
     
     // Ensure type is in objecttypes table and get its assigned id
