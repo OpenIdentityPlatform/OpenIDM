@@ -28,6 +28,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.slf4j.Logger;
@@ -137,8 +138,9 @@ public class GenericTableQueries {
                     + " does not match any configured queries on the OrientDB repository service.");
         }
         
+        ResultSet rs = null;
         try {
-            ResultSet rs = foundQuery.executeQuery();
+            rs = foundQuery.executeQuery();
             ResultSetMetaData rsMetaData = rs.getMetaData();
             boolean hasFullObject = hasColumn(rsMetaData, "fullobject");
             boolean hasId = hasColumn(rsMetaData, "objectid");
@@ -171,6 +173,9 @@ public class GenericTableQueries {
         } catch (IOException ex) {
             throw new InternalServerErrorException("Failed to convert result objects for query " 
                     + foundQuery.toString() + " with params: " + params + " message: " + ex.getMessage(), ex);
+        } finally {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(foundQuery);
         }
         return result;
     }

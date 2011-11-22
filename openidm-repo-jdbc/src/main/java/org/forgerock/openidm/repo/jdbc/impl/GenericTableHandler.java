@@ -107,9 +107,9 @@ public class GenericTableHandler implements TableHandler {
         //if (!isBatchingSupported) {
         //    maxBatchSize = 1;
         //}
-        enableBatching = (maxBatchSize > 1);
+        enableBatching = (this.maxBatchSize > 1);
         if (enableBatching) {
-            logger.info("JDBC statement batching enabled, maximum batch size {}", maxBatchSize);
+            logger.info("JDBC statement batching enabled, maximum batch size {}", this.maxBatchSize);
         } else {
             logger.info("JDBC statement batching disabled.");
         }
@@ -156,23 +156,29 @@ public class GenericTableHandler implements TableHandler {
             throws NotFoundException, SQLException, IOException {
 
         Map<String, Object> result = null;
-        PreparedStatement readStatement = getPreparedStatement(connection, QueryDefinition.READQUERYSTR);
-
-        logger.trace("Populating prepared statement {} for {}", readStatement, fullId);
-        readStatement.setString(1, type);
-        readStatement.setString(2, localId);
-
-        logger.debug("Executing: {}", readStatement);
-        ResultSet rs = readStatement.executeQuery();
-        if (rs.next()) {
-            String rev = rs.getString("rev");
-            String objString = rs.getString("fullobject");
-            ObjectMapper mapper = new ObjectMapper();
-            result = (Map<String, Object>) mapper.readValue(objString, Map.class);
-            result.put("_rev", rev);
-            logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, result});
-        } else {
-            throw new NotFoundException("Object " + fullId + " not found in " + type);
+        PreparedStatement readStatement = null; 
+        ResultSet rs = null;
+        try {
+            readStatement = getPreparedStatement(connection, QueryDefinition.READQUERYSTR);
+            logger.trace("Populating prepared statement {} for {}", readStatement, fullId);
+            readStatement.setString(1, type);
+            readStatement.setString(2, localId);
+    
+            logger.debug("Executing: {}", readStatement);
+            rs = readStatement.executeQuery();
+            if (rs.next()) {
+                String rev = rs.getString("rev");
+                String objString = rs.getString("fullobject");
+                ObjectMapper mapper = new ObjectMapper();
+                result = (Map<String, Object>) mapper.readValue(objString, Map.class);
+                result.put("_rev", rev);
+                logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, result});
+            } else {
+                throw new NotFoundException("Object " + fullId + " not found in " + type);
+            }
+        } finally {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(readStatement);
         }
 
         return result;
@@ -190,33 +196,38 @@ public class GenericTableHandler implements TableHandler {
 
         connection.setAutoCommit(false);
 
-        PreparedStatement createStatement = queries.getPreparedStatement(connection, queryMap.get(QueryDefinition.CREATEQUERYSTR), true);
-
-        logger.debug("Create with fullid {}", fullId);
-        String rev = "0";
-        obj.put("_id", localId); // Save the id in the object
-        obj.put("_rev", rev); // Save the rev in the object, and return the changed rev from the create.
-        String objString = mapper.writeValueAsString(obj);
-
-        logger.trace("Populating statement {} with params {}, {}, {}, {}",
-                new Object[]{createStatement, typeId, localId, rev, objString});
-        createStatement.setLong(1, typeId);
-        createStatement.setString(2, localId);
-        createStatement.setString(3, rev);
-        createStatement.setString(4, objString);
-        logger.debug("Executing: {}", createStatement);
-        int val = createStatement.executeUpdate();
-
-        ResultSet keys = createStatement.getGeneratedKeys();
-        boolean validKeyEntry = keys.next();
-        if (!validKeyEntry) {
-            throw new InternalServerErrorException("Object creation for " + fullId + " failed to retrieve an assigned ID from the DB.");
+        PreparedStatement createStatement = null;
+        try {
+            createStatement = queries.getPreparedStatement(connection, queryMap.get(QueryDefinition.CREATEQUERYSTR), true);
+    
+            logger.debug("Create with fullid {}", fullId);
+            String rev = "0";
+            obj.put("_id", localId); // Save the id in the object
+            obj.put("_rev", rev); // Save the rev in the object, and return the changed rev from the create.
+            String objString = mapper.writeValueAsString(obj);
+    
+            logger.trace("Populating statement {} with params {}, {}, {}, {}",
+                    new Object[]{createStatement, typeId, localId, rev, objString});
+            createStatement.setLong(1, typeId);
+            createStatement.setString(2, localId);
+            createStatement.setString(3, rev);
+            createStatement.setString(4, objString);
+            logger.debug("Executing: {}", createStatement);
+            int val = createStatement.executeUpdate();
+    
+            ResultSet keys = createStatement.getGeneratedKeys();
+            boolean validKeyEntry = keys.next();
+            if (!validKeyEntry) {
+                throw new InternalServerErrorException("Object creation for " + fullId + " failed to retrieve an assigned ID from the DB.");
+            }
+            long dbId = keys.getLong(1);
+    
+            logger.debug("Created object for id {} with rev {}", fullId, rev);
+            JsonValue jv = new JsonValue(obj);
+            writeValueProperties(fullId, dbId, localId, jv, connection);
+        } finally {
+            CleanupHelper.loggedClose(createStatement);
         }
-        long dbId = keys.getLong(1);
-
-        logger.debug("Created object for id {} with rev {}", fullId, rev);
-        JsonValue jv = new JsonValue(obj);
-        writeValueProperties(fullId, dbId, localId, jv, connection);
     }
 
     /**
@@ -233,14 +244,18 @@ public class GenericTableHandler implements TableHandler {
         if (cfg.searchableDefault) {
             Integer batchingCount = 0;
             PreparedStatement propCreateStatement = getPreparedStatement(connection, QueryDefinition.PROPCREATEQUERYSTR);
-            batchingCount = writeValueProperties(fullId, dbId, localId, value, connection, propCreateStatement, batchingCount);
-            if (enableBatching && batchingCount > 0) {
-                int[] numUpdates = propCreateStatement.executeBatch(); 
-                logger.debug("Batch update of objectproperties updated: {}", numUpdates);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Writing batch of objectproperties, updated: {}", Arrays.asList(numUpdates));
+            try {
+                batchingCount = writeValueProperties(fullId, dbId, localId, value, connection, propCreateStatement, batchingCount);
+                if (enableBatching && batchingCount > 0) {
+                    int[] numUpdates = propCreateStatement.executeBatch(); 
+                    logger.debug("Batch update of objectproperties updated: {}", numUpdates);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Writing batch of objectproperties, updated: {}", Arrays.asList(numUpdates));
+                    }
+                    propCreateStatement.clearBatch();
                 }
-                propCreateStatement.clearBatch();
+            } finally {
+                CleanupHelper.loggedClose(propCreateStatement);
             }
         }
     }
@@ -321,6 +336,14 @@ public class GenericTableHandler implements TableHandler {
         return XOpenErrorMapping.isErrorType(ex, errorType);
     }
     
+    public boolean isRetryable(SQLException ex, Connection connection) {
+        if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)) {
+            // TODO: this is known retry-able for MySQL, review good defaults in general
+            return true;
+        } else {
+            return false;
+        }
+    }
     
     // Ensure type is in objecttypes table and get its assigned id
     long getTypeId(String type, Connection connection) throws SQLException, InternalServerErrorException {
@@ -352,16 +375,23 @@ public class GenericTableHandler implements TableHandler {
         long typeId = -1;
 
         Map<String, Object> result = null;
-        PreparedStatement readTypeStatement = getPreparedStatement(connection, QueryDefinition.READTYPEQUERYSTR);
-
-        logger.trace("Populating prepared statement {} for {}", readTypeStatement, type);
-        readTypeStatement.setString(1, type);
-
-        logger.debug("Executing: {}", readTypeStatement);
-        ResultSet rs = readTypeStatement.executeQuery();
-        if (rs.next()) {
-            typeId = rs.getLong("id");
-            logger.debug("Type: {}, id: {}", new Object[]{type, typeId});
+        ResultSet rs = null;
+        PreparedStatement readTypeStatement = null;
+        try {
+            readTypeStatement = getPreparedStatement(connection, QueryDefinition.READTYPEQUERYSTR);
+    
+            logger.trace("Populating prepared statement {} for {}", readTypeStatement, type);
+            readTypeStatement.setString(1, type);
+    
+            logger.debug("Executing: {}", readTypeStatement);
+            rs = readTypeStatement.executeQuery();
+            if (rs.next()) {
+                typeId = rs.getLong("id");
+                logger.debug("Type: {}, id: {}", new Object[]{type, typeId});
+            }
+        } finally {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(readTypeStatement);
         }
         return typeId;
     }
@@ -374,13 +404,15 @@ public class GenericTableHandler implements TableHandler {
      */
     boolean createTypeId(String type, Connection connection) throws SQLException {
         PreparedStatement createTypeStatement = getPreparedStatement(connection, QueryDefinition.CREATETYPEQUERYSTR);
-
-        logger.debug("Create objecttype {}", type);
-        createTypeStatement.setString(1, type);
-        logger.debug("Executing: {}", createTypeStatement);
-        int val = createTypeStatement.executeUpdate();
-
-        return (val == 1);
+        try {
+            logger.debug("Create objecttype {}", type);
+            createTypeStatement.setString(1, type);
+            logger.debug("Executing: {}", createTypeStatement);
+            int val = createTypeStatement.executeUpdate();
+            return (val == 1);
+        } finally {
+            CleanupHelper.loggedClose(createTypeStatement);
+        }
     }
 
     /**
@@ -395,8 +427,8 @@ public class GenericTableHandler implements TableHandler {
     public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException {
 
-        PreparedStatement readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
-
+        PreparedStatement readForUpdateStatement = null; // Statement currently implicitly closed when rs closes
+        readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
         logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
         readForUpdateStatement.setString(1, type);
         readForUpdateStatement.setString(2, localId);
@@ -424,50 +456,58 @@ public class GenericTableHandler implements TableHandler {
         String newRev = Integer.toString(revInt);
         obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
 
-        ResultSet rs = readForUpdate(fullId, type, localId, connection);
-        String existingRev = rs.getString("rev");
-        long dbId = rs.getLong("id");
-        long objectTypeDbId = rs.getLong("objecttypes_id");
-        logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
-
-        if (!existingRev.equals(rev)) {
-            throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
+        ResultSet rs = null;
+        PreparedStatement updateStatement = null;
+        PreparedStatement deletePropStatement = null;
+        try {
+            rs = readForUpdate(fullId, type, localId, connection);
+            String existingRev = rs.getString("rev");
+            long dbId = rs.getLong("id");
+            long objectTypeDbId = rs.getLong("objecttypes_id");
+            logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", new Object[]{fullId, existingRev, dbId, objectTypeDbId});
+    
+            if (!existingRev.equals(rev)) {
+                throw new PreconditionFailedException("Update rejected as current Object revision " + existingRev + " is different than expected by caller (" + rev + "), the object has changed since retrieval.");
+            }
+            updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
+            deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
+    
+            // Support changing object identifier
+            String newLocalId = (String) obj.get("_id");
+            if (newLocalId != null && !localId.equals(newLocalId)) {
+                logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
+            } else {
+                newLocalId = localId; // If it hasn't changed, use the existing ID
+                obj.put("_id", newLocalId); // Ensure the ID is saved in the object
+            }
+            String objString = mapper.writeValueAsString(obj);
+    
+            logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
+            updateStatement.setString(1, newLocalId);
+            updateStatement.setString(2, newRev);
+            updateStatement.setString(3, objString);
+            updateStatement.setLong(4, dbId);
+            logger.debug("Update statement: {}", updateStatement);
+            int updateCount = updateStatement.executeUpdate();
+            logger.trace("Updated rows: {} for {}", updateCount, fullId);
+            if (updateCount != 1) {
+                throw new InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
+            }
+    
+            JsonValue jv = new JsonValue(obj);
+            // TODO: only update what changed?
+            logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
+            deletePropStatement.setString(1, type);
+            deletePropStatement.setString(2, localId);
+            logger.debug("Update properties del statement: {}", deletePropStatement);
+            int deleteCount = deletePropStatement.executeUpdate();
+            logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
+            writeValueProperties(fullId, dbId, localId, jv, connection);
+        } finally {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(updateStatement);
+            CleanupHelper.loggedClose(deletePropStatement);
         }
-        PreparedStatement updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
-        PreparedStatement deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
-
-        // Support changing object identifier
-        String newLocalId = (String) obj.get("_id");
-        if (newLocalId != null && !localId.equals(newLocalId)) {
-            logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
-        } else {
-            newLocalId = localId; // If it hasn't changed, use the existing ID
-            obj.put("_id", newLocalId); // Ensure the ID is saved in the object
-        }
-        String objString = mapper.writeValueAsString(obj);
-
-        logger.trace("Populating prepared statement {} for {} {} {} {} {}", new Object[]{updateStatement, fullId, newLocalId, newRev, objString, dbId});
-        updateStatement.setString(1, newLocalId);
-        updateStatement.setString(2, newRev);
-        updateStatement.setString(3, objString);
-        updateStatement.setLong(4, dbId);
-        logger.debug("Update statement: {}", updateStatement);
-        int updateCount = updateStatement.executeUpdate();
-        logger.trace("Updated rows: {} for {}", updateCount, fullId);
-        if (updateCount != 1) {
-            throw new InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
-        }
-
-        JsonValue jv = new JsonValue(obj);
-        // TODO: only update what changed?
-        logger.trace("Populating prepared statement {} for {} {} {}", new Object[]{deletePropStatement, fullId, type, localId});
-        deletePropStatement.setString(1, type);
-        deletePropStatement.setString(2, localId);
-        logger.debug("Update properties del statement: {}", deletePropStatement);
-        int deleteCount = deletePropStatement.executeUpdate();
-        logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
-        writeValueProperties(fullId, dbId, localId, jv, connection);
-
     }
 
     /* (non-Javadoc)
@@ -480,33 +520,39 @@ public class GenericTableHandler implements TableHandler {
 
         // First check if the revision matches and select it for UPDATE
         ResultSet existing = null;
+        PreparedStatement deleteStatement = null;
         try {
-            existing = readForUpdate(fullId, type, localId, connection);
-        } catch (NotFoundException ex) {
-            throw new NotFoundException("Object does not exist for delete on: " + fullId);
-        }
-        String existingRev = existing.getString("rev");
-        if (!"*".equals(rev) && !rev.equals(existingRev)) {
-            throw new PreconditionFailedException("Delete rejected as current Object revision " + existingRev + " is different than "
-                    + "expected by caller " + rev + ", the object has changed since retrieval.");
-        }
-
-        // Proceed with the valid delete
-        PreparedStatement deleteStatement = getPreparedStatement(connection, QueryDefinition.DELETEQUERYSTR);
-        logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[]{deleteStatement, fullId, type, localId, rev});
-
-        // Rely on ON DELETE CASCADE for connected object properties to be deleted
-        deleteStatement.setString(1, type);
-        deleteStatement.setString(2, localId);
-        deleteStatement.setString(3, rev);
-        logger.debug("Delete statement: {}", deleteStatement);
-
-        int deletedRows = deleteStatement.executeUpdate();
-        logger.trace("Deleted {} rows for id : {} {}", deletedRows, localId);
-        if (deletedRows < 1) {
-            throw new InternalServerErrorException("Deleting object for " + fullId + " failed, DB reported " + deletedRows + " rows deleted");
-        } else {
-            logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
+            try {
+                existing = readForUpdate(fullId, type, localId, connection);
+            } catch (NotFoundException ex) {
+                throw new NotFoundException("Object does not exist for delete on: " + fullId);
+            }
+            String existingRev = existing.getString("rev");
+            if (!"*".equals(rev) && !rev.equals(existingRev)) {
+                throw new PreconditionFailedException("Delete rejected as current Object revision " + existingRev + " is different than "
+                        + "expected by caller " + rev + ", the object has changed since retrieval.");
+            }
+    
+            // Proceed with the valid delete
+            deleteStatement = getPreparedStatement(connection, QueryDefinition.DELETEQUERYSTR);
+            logger.trace("Populating prepared statement {} for {} {} {} {}", new Object[]{deleteStatement, fullId, type, localId, rev});
+    
+            // Rely on ON DELETE CASCADE for connected object properties to be deleted
+            deleteStatement.setString(1, type);
+            deleteStatement.setString(2, localId);
+            deleteStatement.setString(3, rev);
+            logger.debug("Delete statement: {}", deleteStatement);
+    
+            int deletedRows = deleteStatement.executeUpdate();
+            logger.trace("Deleted {} rows for id : {} {}", deletedRows, localId);
+            if (deletedRows < 1) {
+                throw new InternalServerErrorException("Deleting object for " + fullId + " failed, DB reported " + deletedRows + " rows deleted");
+            } else {
+                logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
+            }
+        } finally {
+            CleanupHelper.loggedClose(existing);
+            CleanupHelper.loggedClose(deleteStatement);
         }
     }
 

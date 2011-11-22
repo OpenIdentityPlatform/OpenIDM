@@ -28,5 +28,7 @@ package org.forgerock.openidm.repo.jdbc;
  * @author aegloff
  */
 public enum ErrorType  {
-    DUPLICATE_KEY
+    CONNECTION_FAILURE,
+    DUPLICATE_KEY,
+    DEADLOCK_OR_TIMEOUT
 }
