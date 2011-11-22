@@ -710,11 +710,15 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         // For matching purposes strip the wildcard at the end
                         key = key.substring(0, key.length() - 1);
                     }
-                    TableHandler handler = new MappedTableHandler(
+                    TableHandler handler = getMappedTableHandler(
+                            databaseType, 
+                            value,
                             value.get("table").required().asString(),
                             value.get("objectToColumn").required().asMap(),
                             dbSchemaName,
-                            explicitQueries);
+                            explicitQueries,
+                            maxBatchSize);
+
                     tableHandlers.put(key, handler);
                     logger.debug("For pattern {} added handler: {}", key, handler);
                 }
@@ -757,14 +761,42 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         tableConfig,
                         dbSchemaName,
                         queries,
-                        maxBatchSize);
+                        maxBatchSize,
+                        new DB2SQLExceptionHandler());
                 break;
             default:
                 handler = new GenericTableHandler(
                         tableConfig,
                         dbSchemaName,
                         queries,
-                        maxBatchSize);
+                        maxBatchSize,
+                        new DefaultSQLExceptionHandler());
+        }
+        return handler;
+    }
+    
+    MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig, String table, 
+            Map objectToColumn, String dbSchemaName, JsonValue explicitQueries, int maxBatchSize) {
+            
+        MappedTableHandler handler = null;
+
+        // TODO: make pluggable
+        switch (databaseType) {
+            case DB2:
+                handler = new MappedTableHandler(
+                        table,
+                        objectToColumn,
+                        dbSchemaName,
+                        explicitQueries,
+                        new DB2SQLExceptionHandler());
+                break;
+            default:
+                handler = new MappedTableHandler(
+                        table,
+                        objectToColumn,
+                        dbSchemaName,
+                        explicitQueries,
+                        new DefaultSQLExceptionHandler());
         }
         return handler;
     }

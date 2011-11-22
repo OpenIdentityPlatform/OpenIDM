@@ -23,34 +23,20 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import java.util.Map;
-
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ * DB2 handling of SQLExceptions
+ *
+ * @author aegloff
  */
-public class DB2TableHandler extends GenericTableHandler {
-
-    public DB2TableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
-        super(tableConfig, dbSchemaName, queriesConfig, maxBatchSize, sqlExceptionHandler);
-    }
-
-    protected Map<QueryDefinition, String> initializeQueryMap() {
-        Map<QueryDefinition, String> result = super.initializeQueryMap();
-        String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
-        String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
-
-        // Main object table DB2 Script
-        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj WHERE EXISTS (SELECT 1 FROM " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?");
-        return result;
-    }
+public class DB2SQLExceptionHandler extends DefaultSQLExceptionHandler {
     
+    /**
+     * @InheritDoc
+     */
+    @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         // Re-tryable DB2 error codes
         // -911 indicates DB2 rolled back already and expects a retry 
