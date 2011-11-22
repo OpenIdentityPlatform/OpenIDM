@@ -119,12 +119,15 @@ public class ConfigBootstrapHelper {
         File qualified = new File(confDir, ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX + REPO_FILE_PREFIX 
                 + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
         
+        File loadedFile = null;
         try {
             Dictionary rawConfig = null;
             if (unqualified.exists()) {
                 rawConfig = JSONConfigInstaller.loadConfigFile(unqualified);
+                loadedFile = unqualified;
             } else if (qualified.exists()) {
                 rawConfig = JSONConfigInstaller.loadConfigFile(qualified);
+                loadedFile = qualified;
             } else {
                 logger.debug("No configuration to boostrap {}", repoType);
                 
@@ -147,7 +150,7 @@ public class ConfigBootstrapHelper {
             throw new RuntimeException("Failed to load configuration file to boostrap repository " 
                     + ex.getMessage(), ex);
         }
-        logger.info("Bootstrapping with settings from configuration file {}", result);
+        logger.info("Bootstrapping with settings from configuration file {}", loadedFile);
         
         return result;
     }
