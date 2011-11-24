@@ -6,7 +6,7 @@
     "queries" : {
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
-        "credential-query" : "select _openidm_id, password from managed_user WHERE email = ${username}",
+        "credential-query" : "select _openidm_id, userPassword from managed_user WHERE email = ${username}",
         "credential-defaultuser-query" : "select _openidm_id, password, roles from internal_defaultuser WHERE _openidm_id = ${username}",
         "query-by-native-ids" : "select ${fields} from ${native-ids}",
         "for-username" : "SELECT * FROM ${_resource} WHERE name = '${uid}'",
