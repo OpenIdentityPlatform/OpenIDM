@@ -107,7 +107,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             // Initialise Local ConnectorInfoManager
             initialiseLocalManager(factory, connectorLocation);
         } catch (JsonValueException e) {
-            TRACE.error("Invalid configuration {}", configuration.getValue(), e);
+            TRACE.error("Invalid configuration {}", configuration.getObject(), e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
 

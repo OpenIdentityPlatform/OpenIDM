@@ -16,17 +16,19 @@
 
 package org.forgerock.openidm.patch;
 
-// Java Standard Edition
+// Java SE
 import java.util.Map;
 
-// ForgeRock OpenIDM
+// OpenIDM
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.Patch;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonPatch;
+
+// JSON Patch
+import org.forgerock.json.patch.JsonPatch;
 
 /**
  * TODO: Description.
@@ -56,7 +58,7 @@ public class JsonPatchWrapper implements Patch {
         try {
             JsonValue jv = new JsonValue(object);
             JsonPatch.patch(jv, diff);
-            if (jv.getValue() != object) {
+            if (jv.getObject() != object) {
                 throw new ConflictException("replacing the root value is not supported");
             }
         } catch (JsonValueException jve) {

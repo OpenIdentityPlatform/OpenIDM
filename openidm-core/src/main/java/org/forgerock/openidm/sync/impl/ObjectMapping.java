@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-// Java Standard Edition
+// Java SE
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,12 +29,14 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// JSON-Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonPatch;
 
-// ForgeRock OpenIDM
+// JSON Patch
+import org.forgerock.json.patch.JsonPatch;
+
+// OpenIDM
 import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -355,7 +357,7 @@ class ObjectMapping implements SynchronizationListener {
     @Override
     public void onCreate(String id, JsonValue value) throws SynchronizationException {
         if (isSourceObject(id)) {
-            if (value == null || value.getValue() == null) { // notification without the actual value
+            if (value == null || value.getObject() == null) { // notification without the actual value
                 value = readObject(id);
             }
             doSourceSync(id, value); // synchronous for now
@@ -365,11 +367,11 @@ class ObjectMapping implements SynchronizationListener {
     @Override
     public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         if (isSourceObject(id)) {
-            if (newValue == null || newValue.getValue() == null) { // notification without the actual value
+            if (newValue == null || newValue.getObject() == null) { // notification without the actual value
                 newValue = readObject(id);
             }
             // TODO: use old value to project incremental diff without fetch of source
-            if (oldValue == null || oldValue.getValue() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
+            if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
                 doSourceSync(id, newValue); // synchronous for now
             } else {
                 LOGGER.trace("There is nothing to update on {}", id);
@@ -666,7 +668,7 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
-            LOGGER.trace("isSourceValid of {} evaluated: {}", null != sourceObject ? sourceObject.get("_id").getValue() : "[NULL]", result);
+            LOGGER.trace("isSourceValid of {} evaluated: {}", null != sourceObject ? sourceObject.get("_id").getObject() : "[NULL]", result);
             return result;
         }
 
@@ -696,7 +698,7 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
-            LOGGER.trace("isTargetValid of {} evaluated: {}", null != targetObject ? targetObject.get("_id").getValue() : "[NULL]", result);
+            LOGGER.trace("isTargetValid of {} evaluated: {}", null != targetObject ? targetObject.get("_id").getObject() : "[NULL]", result);
             return result;
         }
 

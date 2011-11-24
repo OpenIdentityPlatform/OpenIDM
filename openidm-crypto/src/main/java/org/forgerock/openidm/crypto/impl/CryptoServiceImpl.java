@@ -18,7 +18,7 @@
 
 package org.forgerock.openidm.crypto.impl;
 
-// Java Standard Edition
+// Java SE
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -29,6 +29,10 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // OSGi Framework
 import org.osgi.framework.BundleContext;
@@ -44,16 +48,17 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonTransformer;
 
-// JSON Cryptography library
+// JSON Crypto
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
+import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
@@ -61,8 +66,6 @@ import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 // OpenIDM
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cryptography Service
@@ -74,19 +77,13 @@ public class CryptoServiceImpl implements CryptoService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
     
-    /**
-     * TODO: Description.
-     */
+    /** TODO: Description. */
     private BundleContext context;
 
-    /**
-     * TODO: Description.
-     */
+    /** TODO: Description. */
     private SimpleKeyStoreSelector keySelector;
 
-    /**
-     * TODO: Description.
-     */
+    /** TODO: Description. */
     private final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<JsonTransformer>();
 
     /**
@@ -164,17 +161,14 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public JsonTransformer getEncryptionTransformer(String cipher, String alias) throws JsonCryptoException {
-        Key key = null;
-        if (keySelector != null) {
-            key = keySelector.select(alias);
-        }
+    public JsonEncryptor getEncryptor(String cipher, String alias) throws JsonCryptoException {
+        Key key = keySelector.select(alias);
         if (key == null) {
             String msg = "Encryption key " + alias + " not found";
             LOGGER.error(msg);
             throw new JsonCryptoException(msg);
         }
-        return new JsonCryptoTransformer(new SimpleEncryptor(cipher, key, alias));
+        return new SimpleEncryptor(cipher, key, alias);
     }
 
     @Override
@@ -186,9 +180,7 @@ public class CryptoServiceImpl implements CryptoService {
     public JsonValue encrypt(JsonValue value, String cipher, String alias) throws JsonCryptoException, JsonException {
         JsonValue result = null;
         if (value != null) {
-            JsonTransformer encryptionTransformer = getEncryptionTransformer(cipher, alias);
-            result = value.copy(); // make deep copy to encrypt; apply all existing transformations
-            encryptionTransformer.transform(result); // apply encryption transformation to copy
+            result = getEncryptor(cipher, alias).encrypt(value);
         }
         return result;
     }
@@ -197,9 +189,10 @@ public class CryptoServiceImpl implements CryptoService {
     public JsonValue decrypt(JsonValue value) throws JsonException {
         JsonValue result = null;
         if (value != null) {
-            ArrayList<JsonTransformer> transformers = new ArrayList<JsonTransformer>(value.getTransformers());
-            transformers.addAll(getDecryptionTransformers());
-            result = new JsonValue(value.getValue(), value.getPointer(), transformers).copy();
+            result = new JsonValue(value);
+            result.getTransformers().addAll(0, getDecryptionTransformers());
+            result.applyTransformers();
+            result = result.copy();
         }
         return result;
     }

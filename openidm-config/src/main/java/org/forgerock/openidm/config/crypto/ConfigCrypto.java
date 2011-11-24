@@ -179,7 +179,7 @@ public class ConfigCrypto {
                     try {
                         JsonValue encryptedValue = crypto.encrypt(valueToEncrypt,
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias);
-                        parsed.put(pointer,encryptedValue.getValue());
+                        parsed.put(pointer, encryptedValue.getObject());
                         modified = true;
                     } catch (JsonCryptoException ex) {
                         throw new InternalErrorException("Failure during encryption of configuration " 

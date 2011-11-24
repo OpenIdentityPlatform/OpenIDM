@@ -317,7 +317,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             Map<String, Object> params = new HashMap<String, Object>(3);
             params.put("_action", "ONCREATE");
             params.put("id", id);
-            params.put("_entity", value.getValue());
+            params.put("_entity", value.getObject());
             getRouter().action("sync", params);
         } catch (ObjectSetException e) {
             throw new SynchronizationException(e);
@@ -338,7 +338,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             Map<String, Object> params = new HashMap<String, Object>(3);
             params.put("_action", "ONUPDATE");
             params.put("id", id);
-            params.put("_entity", newValue.getValue());
+            params.put("_entity", newValue.getObject());
             getRouter().action("sync", params);
         } catch (ObjectSetException e) {
             throw new SynchronizationException(e);
