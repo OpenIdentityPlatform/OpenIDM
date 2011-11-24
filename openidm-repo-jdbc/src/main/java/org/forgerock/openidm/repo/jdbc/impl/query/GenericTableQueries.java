@@ -24,6 +24,7 @@
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
@@ -143,8 +144,16 @@ public class GenericTableQueries {
             rs = foundQuery.executeQuery();
             ResultSetMetaData rsMetaData = rs.getMetaData();
             boolean hasFullObject = hasColumn(rsMetaData, "fullobject");
-            boolean hasId = hasColumn(rsMetaData, "objectid");
-            boolean hasRev = hasColumn(rsMetaData, "rev");
+            boolean hasId = false;
+            boolean hasRev = false;
+            boolean hasPropKey = false;
+            boolean hasPropValue = false;
+            if (!hasFullObject) {
+                hasId = hasColumn(rsMetaData, "objectid");
+                hasRev = hasColumn(rsMetaData, "rev");
+                hasPropKey = hasColumn(rsMetaData, "propkey");
+                hasPropValue = hasColumn(rsMetaData, "propvalue");
+            }
             while (rs.next()) {
                 if (hasFullObject) {
                     String objString = rs.getString("fullobject");
@@ -162,6 +171,14 @@ public class GenericTableQueries {
                     }
                     if (hasRev) {
                         obj.put("_rev", rs.getString("rev"));
+                    }
+                    // Results from query on individual searchable property
+                    if (hasPropKey && hasPropValue) {
+                        String propKey = rs.getString("propkey");
+                        Object propValue = rs.getObject("propvalue");
+                        JsonPointer pointer = new JsonPointer(propKey);
+                        JsonValue wrapped = new JsonValue(obj);
+                        wrapped.put(pointer, propValue);
                     }
                     result.add(obj);
                 }

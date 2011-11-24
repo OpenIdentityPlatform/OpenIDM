@@ -57,12 +57,14 @@ public class RepoLoginModule extends AbstractLoginModule {
     
     // JAAS login module configuration properties
     public final static String OPTION_QUERY_ID = "queryId";
+    public final static String OPTION_QUERY_ON_RESOURCE = "queryOnResource";
     public final static String OPTION_DEFAULT_ROLES = "defaultRoles";
     
     // Default property values
     public final static String QUERY_ID_DEFAULT = "credential-query";
     
     String queryId;
+    String queryOnResource;
     List defaultRoles = new ArrayList();
     
     public RepoLoginModule() {
@@ -79,6 +81,7 @@ public class RepoLoginModule extends AbstractLoginModule {
         if (queryId == null) {
             queryId = QUERY_ID_DEFAULT;
         }
+        queryOnResource = (String) options.get(OPTION_QUERY_ON_RESOURCE);
         
         String rawDefaultRoles = (String) options.get(OPTION_DEFAULT_ROLES);
         setDefaultRoles(rawDefaultRoles);
@@ -108,7 +111,7 @@ public class RepoLoginModule extends AbstractLoginModule {
         Map props = new HashMap();
         props.put(QueryConstants.QUERY_ID, queryId);
         props.put("username", username);
-        Map resultWrapper = getRepo().query("managed/user/", props);
+        Map resultWrapper = getRepo().query(queryOnResource, props);
 
         JsonValue jsonView = new JsonValue(resultWrapper);
         if (jsonView.get(QueryConstants.QUERY_RESULT).size() > 1) {
@@ -139,13 +142,16 @@ public class RepoLoginModule extends AbstractLoginModule {
                     }
                 }
             }
-            
-            credential = getCredential(retrCred, retrId, username, retrCredPropName);
-            roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
-            logger.debug("User information for {}: id: {} credential available: {} roles from repo: {} total roles: {}", 
-                    new Object[] {username, retrId, (retrCred != null), retrRoles, roleNames});
-
-            user = new UserInfo(username, credential, roleNames);
+            if (retrCred == null && retrCredPropName == null) {
+                logger.warn("Query for credentials did not contain expected result properties.");
+            } else {
+                credential = getCredential(retrCred, retrId, username, retrCredPropName);
+                roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
+                logger.debug("User information for {}: id: {} credential available: {} roles from repo: {} total roles: {}", 
+                        new Object[] {username, retrId, (retrCred != null), retrRoles, roleNames});
+    
+                user = new UserInfo(username, credential, roleNames);
+            }
         }
 
         return user;
