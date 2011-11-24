@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.managed;
 
-// Java Standard Edition
+// Java SE
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +27,10 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// OSGi Framework
+// OSGi
 import org.osgi.framework.ServiceReference;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -161,7 +161,7 @@ class ManagedObjectSet implements ObjectSet {
     throws ForbiddenException, InternalServerErrorException {
         if (script != null) {
             Map<String, Object> scope = service.newScope();
-            scope.put("object", value.getValue());
+            scope.put("object", value.getObject());
             try {
                 script.exec(scope); // allows direct modification to the object
             } catch (ScriptThrownException ste) {
@@ -264,8 +264,8 @@ class ManagedObjectSet implements ObjectSet {
             throw new InternalServerErrorException(se);
         }
         // workaround until JsonValue works its way into the ObjectSet API
-        object.put("_id", jv.get("_id").getValue());
-        object.put("_rev", jv.get("_rev").getValue());
+        object.put("_id", jv.get("_id").getObject());
+        object.put("_rev", jv.get("_rev").getObject());
     }
 
     @Override
@@ -321,8 +321,8 @@ class ManagedObjectSet implements ObjectSet {
         JsonValue decrypted = decrypt(encrypted);
         update(id, rev, decrypted, _new);
         ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), encrypted, _new.asMap(), Status.SUCCESS);
-        object.put("_id", _new.get("_id").getValue());
-        object.put("_rev", _new.get("_rev").getValue());
+        object.put("_id", _new.get("_id").getObject());
+        object.put("_rev", _new.get("_rev").getObject());
     }
 
     @Override

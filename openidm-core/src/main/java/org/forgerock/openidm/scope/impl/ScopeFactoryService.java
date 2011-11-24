@@ -16,14 +16,14 @@
 
 package org.forgerock.openidm.scope.impl;
 
-// OSGi Framework
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-
-// Java Standard Edition
+// Java SE
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+// OSGi
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 
 // SLF4J
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
@@ -175,7 +175,7 @@ public class ScopeFactoryService implements ScopeFactory {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
                 JsonValue jv = paramsValue(params);
-                return cryptoService.encrypt(jv.get(0).required(), jv.get(1).required().asString(), jv.get(2).required().asString()).getValue();
+                return cryptoService.encrypt(jv.get(0).required(), jv.get(1).required().asString(), jv.get(2).required().asString()).getObject();
             }
         });
 
@@ -184,7 +184,7 @@ public class ScopeFactoryService implements ScopeFactory {
             @Override
             public Object call(Map<String, Object> scope, Map<String, Object> _this, List<Object> params) throws Throwable {
                 JsonValue jv = paramsValue(params);
-                return cryptoService.decrypt(jv.get(0).required()).getValue();
+                return cryptoService.decrypt(jv.get(0).required()).getObject();
             }
         });
 

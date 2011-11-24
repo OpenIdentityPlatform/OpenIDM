@@ -248,12 +248,17 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-fluent</artifactId>
-                <version>1.0.0</version>
+                <version>1.1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-crypto-core</artifactId>
-                <version>1.0.0</version>
+                <version>1.1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -347,12 +352,12 @@
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-core-asl</artifactId>
-                <version>1.8.5</version>
+                <version>1.9.2</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
                 <artifactId>jackson-mapper-asl</artifactId>
-                <version>1.8.5</version>
+                <version>1.9.2</version>
             </dependency>
             <!-- Test Dependencies -->
             <dependency>

@@ -75,7 +75,7 @@ public class SchedulableScriptService implements ScheduledService {
     private void execScript(String name, Script script, JsonValue input) throws ExecutionException {
         if (script != null) {
             Map<String, Object> scope = scopeFactory.newInstance();
-            scope.put("input", input.getValue());
+            scope.put("input", input.getObject());
             try {
                 script.exec(scope);
             } catch (ScriptException se) {

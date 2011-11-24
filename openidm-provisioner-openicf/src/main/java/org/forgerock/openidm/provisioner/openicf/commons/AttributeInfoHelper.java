@@ -188,7 +188,7 @@ public class AttributeInfoHelper {
     public Attribute build(Object source, CryptoService cryptoService) throws Exception {
         try {
             JsonValue decryptedValue = new JsonValue(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
-            return build(attributeInfo, decryptedValue.getValue());
+            return build(attributeInfo, decryptedValue.getObject());
         } catch (Exception e) {
             logger.error("Failed to build {} attribute out of {}", name, source);
             throw e;
@@ -224,7 +224,7 @@ public class AttributeInfoHelper {
             if (null == cryptoService) {
                 throw new JsonCryptoException("Confidential attribute can not be encrypted. Reason: CryptoService is null");
             } else {
-                return cryptoService.encrypt(new JsonValue(resultValue), cipher, key).getValue();
+                return cryptoService.encrypt(new JsonValue(resultValue), cipher, key).getObject();
             }
         } else {
             return resultValue;

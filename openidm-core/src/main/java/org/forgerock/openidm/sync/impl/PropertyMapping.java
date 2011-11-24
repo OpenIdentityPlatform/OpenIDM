@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.sync.impl;
 
-// Java Standard Edition
+// Java SE
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -110,7 +110,7 @@ class PropertyMapping {
         targetPointer = config.get("target").required().asPointer();
         sourcePointer = config.get("source").asPointer(); // optional
         transform = Scripts.newInstance("PropertyMapping", config.get("transform"));
-        defaultValue = config.get("default").getValue();
+        defaultValue = config.get("default").getObject();
     }
 
     /**
@@ -141,7 +141,7 @@ class PropertyMapping {
         if (sourcePointer != null) { // optional source property
             JsonValue jv = sourceObject.get(sourcePointer);
             if (jv != null) { // null indicates no value
-                result = jv.getValue();
+                result = jv.getObject();
             }
         }
         if (transform != null) { // optional property mapping script

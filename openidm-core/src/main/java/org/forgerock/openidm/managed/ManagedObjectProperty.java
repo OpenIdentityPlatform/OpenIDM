@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.managed;
 
-// Java Standard Edition
+// Java SE
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,13 +24,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonTransformer;
 
-// JSON Cryptography library
+// JSON Crypto
+import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.JsonCryptoException;
 
 // OpenIDM
@@ -68,7 +68,7 @@ class ManagedObjectProperty {
     private Script onStore;
 
     /** TODO: Description. */
-    private JsonTransformer encryptionTransformer;
+    private JsonEncryptor encryptor;
 
     /**
      * Constructs a new managed object property.
@@ -86,7 +86,7 @@ class ManagedObjectProperty {
         JsonValue encryptionValue = config.get("encryption");
         if (!encryptionValue.isNull()) {
             try {
-                encryptionTransformer = service.getCryptoService().getEncryptionTransformer(
+                encryptor = service.getCryptoService().getEncryptor(
                  encryptionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
                  encryptionValue.get("key").required().asString());
             } catch (JsonCryptoException jce) {
@@ -109,7 +109,7 @@ class ManagedObjectProperty {
     private void execScript(String type, Script script, JsonValue managedObject) throws InternalServerErrorException {
         if (script != null) {
             Map<String, Object> scope = service.newScope();
-            scope.put("property", managedObject.get(name).getValue());
+            scope.put("property", managedObject.get(name).getObject());
             try {
                 script.exec(scope);
             } catch (ScriptException se) {
@@ -135,7 +135,7 @@ class ManagedObjectProperty {
     void onValidate(JsonValue value) throws ForbiddenException, InternalServerErrorException {
         if (onValidate != null) {
             Map<String, Object> scope = service.newScope();
-            scope.put("property", value.get(name).getValue());
+            scope.put("property", value.get(name).getObject());
             try {
                 onValidate.exec(scope);
             } catch (ScriptThrownException ste) {
@@ -168,13 +168,15 @@ class ManagedObjectProperty {
      */
     void onStore(JsonValue value) throws InternalServerErrorException {
         execScript("onStore", onStore, value);
-        if (encryptionTransformer != null && value.isDefined(name)) {
+        if (encryptor != null && value.isDefined(name)) {
             try {
-                JsonValue property = value.get(name).copy(); // deep copy; apply all transformations
-                encryptionTransformer.transform(property);
-                value.put(name, property.getValue());
-            } catch (JsonException je) {
+                value.put(name, encryptor.encrypt(value.get(name)).getObject()); // applies all transformations
+            } catch (JsonCryptoException jce) {
                 String msg = name + " property encryption exception";
+                LOGGER.debug(msg, jce);
+                throw new InternalServerErrorException(msg, jce);
+            } catch (JsonException je) {
+                String msg = name + " property transformation exception";
                 LOGGER.debug(msg, je);
                 throw new InternalServerErrorException(msg, je);
             }

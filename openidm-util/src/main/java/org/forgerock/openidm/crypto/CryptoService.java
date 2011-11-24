@@ -16,15 +16,16 @@
 
 package org.forgerock.openidm.crypto;
 
-// Java Standard Edition
+// Java SE
 import java.util.List;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonTransformer;
 
-// JSON Cryptographic library
+// JSON Crypto
+import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.JsonCryptoException;
 
 /**
@@ -34,17 +35,17 @@ import org.forgerock.json.crypto.JsonCryptoException;
  * @author aegloff
  */
 public interface CryptoService {
-    
-    /**
-     * Returns a transformer that can encrypt JSON values.
-     *
-     * @param cipher the cipher with which to encrypt a JSON value.
-     * @param alias the key alias in the key store with which to encrypt a JSON value.
-     * @return a transformer that can encrypt JSON values with the given cipher and key.
-     * @throws JsonCryptoException if an invalid cipher and/or alias is provided.
-     */
-    JsonTransformer getEncryptionTransformer(String cipher, String alias) throws JsonCryptoException;
 
+    /**
+     * TODO: Description.
+     *
+     * @param cipher the cipher with which to encrypt the value.
+     * @param alias the key alias in the key store with which to encrypt the value.
+     * @return TODO.
+     * @throws JsonCryptoException TODO.
+     */
+    JsonEncryptor getEncryptor(String cipher, String alias) throws JsonCryptoException;
+    
     /**
      * Returns a list of decryption transformers that can decrypt JSON values.
      *

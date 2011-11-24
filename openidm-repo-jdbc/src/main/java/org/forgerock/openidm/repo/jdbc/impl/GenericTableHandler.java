@@ -297,13 +297,13 @@ public class GenericTableHandler implements TableHandler {
                     batchingCount = writeValueProperties(fullId, dbId, localId, entry, connection, propCreateStatement, batchingCount);
                 } else {
                     String propvalue = null;
-                    Object val = entry.getValue();
+                    Object val = entry.getObject();
                     if (val != null) {
                         propvalue = val.toString(); // TODO: proper type conversions?
                     }
                     String proptype = null;
                     if (propvalue != null) {
-                        proptype = entry.getValue().getClass().getName(); // TODO: proper type info
+                        proptype = entry.getObject().getClass().getName(); // TODO: proper type info
                     }
                     if (logger.isTraceEnabled()) {
                         logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",

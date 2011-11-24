@@ -345,7 +345,7 @@ public class ConnectorUtil {
                     target.setTimeout(e.getValue(), coercedTypeCasting(value.asNumber(), int.class));
                 }
             } catch (IllegalArgumentException e1) {
-                TRACE.error("Type casting exception of {} from {} to int", new Object[]{value.getValue(), value.getValue().getClass().getCanonicalName()}, e);
+                TRACE.error("Type casting exception of {} from {} to int", new Object[]{value.getObject(), value.getObject().getClass().getCanonicalName()}, e);
             }
         }
     }
@@ -741,9 +741,9 @@ public class ConnectorUtil {
         JsonValue tokenValue = token.get(OPENICF_SYNC_TOKEN).required();
         SyncToken result = null;
         if (null == nativeType) {
-            result = new SyncToken(tokenValue.getValue());
+            result = new SyncToken(tokenValue.getObject());
         } else {
-            result = new SyncToken(coercedTypeCasting(tokenValue.getValue(), findClassForName(nativeType.asString())));
+            result = new SyncToken(coercedTypeCasting(tokenValue.getObject(), findClassForName(nativeType.asString())));
         }
         return result;
     }

@@ -58,9 +58,9 @@ public class Activator implements BundleActivator {
             // Only take the configuration strictly needed for bootstrapping the repository
             // Also, bootstrap property keys are lower case, Repo expects camel case
             Map<String,Object> bootConfig = new HashMap<String,Object>();
-            bootConfig.put(OrientDBRepoService.CONFIG_DB_URL, repoConfig.get(OrientDBRepoService.CONFIG_DB_URL.toLowerCase()).getValue());
-            bootConfig.put(OrientDBRepoService.CONFIG_USER, repoConfig.get(OrientDBRepoService.CONFIG_USER.toLowerCase()).getValue());
-            bootConfig.put(OrientDBRepoService.CONFIG_PASSWORD, repoConfig.get(OrientDBRepoService.CONFIG_PASSWORD.toLowerCase()).getValue());
+            bootConfig.put(OrientDBRepoService.CONFIG_DB_URL, repoConfig.get(OrientDBRepoService.CONFIG_DB_URL.toLowerCase()).getObject());
+            bootConfig.put(OrientDBRepoService.CONFIG_USER, repoConfig.get(OrientDBRepoService.CONFIG_USER.toLowerCase()).getObject());
+            bootConfig.put(OrientDBRepoService.CONFIG_PASSWORD, repoConfig.get(OrientDBRepoService.CONFIG_PASSWORD.toLowerCase()).getObject());
              
             // Init the bootstrap repo
             bootSvc = OrientDBRepoService.getRepoBootService(bootConfig);
