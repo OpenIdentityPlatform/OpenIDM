@@ -36,62 +36,10 @@
             "action" : "IGNORE"
         }, {
             "situation" : "UNQUALIFIED",
-            "action" : "DELETE"
+            "action" : "IGNORE"
         }, {
             "situation" : "UNASSIGNED",
             "action" : "IGNORE"
-        } ]
-    }, {
-        "name" : "managedUser_systemXmlfileAccounts",
-            "source": "managed/user",
-        "target" : "system/xmlfile/account",
-            "correlationQuery" : {
-                "type": "text/javascript",
-            "source" : "var myarray = [source.name];var map = {'query' : { 'Equals': {'field' : 'name','values' : myarray}}};map;"
-            },
-        "properties" : [ {
-            "source" : "firstname",
-            "target" : "firstname"
-        }, {
-            "source" : "lastname",
-            "target" : "lastname"
-        }, {
-            "source" : "fullname",
-            "target" : "cn"
-        }, {
-            "source" : "name",
-            "target" : "name"
-        }, {
-            "source" : "description",
-            "target" : "description"
-        }, {
-            "source" : "userPassword",
-            "target" : "userPassword"
-        }, {
-            "source" : "email",
-            "target" : "email"
-        } ],
-        "policies" : [ {
-            "situation" : "CONFIRMED",
-                  "action" : "UPDATE"
-        }, {
-            "situation" : "FOUND",
-            "action" : "LINK"
-        }, {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
-        }, {
-            "situation" : "AMBIGUOUS",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "MISSING",
-            "action" : "UNLINK"
-        }, {
-            "situation": "UNQUALIFIED",
-            "action" : "UNLINK"
-        }, {
-            "situation" : "UNASSIGNED",
-            "action": "IGNORE"
         } ]
     } ]
 }
