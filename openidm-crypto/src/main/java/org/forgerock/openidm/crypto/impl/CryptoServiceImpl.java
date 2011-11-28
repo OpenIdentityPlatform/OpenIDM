@@ -14,7 +14,7 @@
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
 
-// TODO: Expose as a set of ROA actions.
+// TODO: Expose as a set of resource actions.
 
 package org.forgerock.openidm.crypto.impl;
 
@@ -180,7 +180,8 @@ public class CryptoServiceImpl implements CryptoService {
     public JsonValue encrypt(JsonValue value, String cipher, String alias) throws JsonCryptoException, JsonException {
         JsonValue result = null;
         if (value != null) {
-            result = getEncryptor(cipher, alias).encrypt(value);
+            JsonEncryptor encryptor = getEncryptor(cipher, alias);
+            result =  new JsonCrypto(encryptor.getType(), encryptor.encrypt(value)).toJsonValue();
         }
         return result;
     }
