@@ -96,9 +96,12 @@ $ </screen>
    In the current build of OpenIDM the reconciliation sample is 
   enabled by default. The sample consists of a source and a target
    connector and a reconcilation task scheduled to run every minute.
-   To learn more about the sample please refer to 
-  Chapter 3.  To disable the sample you may set the "enabled" attribute to "false" in the
-  scheduler configuration file at
+   To learn more about the sample, refer to the <link
+   xlink:href="install-guide#chap-sample"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+   Sample</citetitle></link> chapter. To disable the sample you may set the
+   "enabled" attribute to <literal>false</literal> in the scheduler
+   configuration file at
    </para>
    <para>
    <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
@@ -130,8 +133,10 @@ Listening for transport dt_socket at address: 5005
    and their state enter the following command. If startup was successful all states 
    with the exception of email and repo.jdbc should be active. If any other services
    are unsatisfied check the console or openidm/logs for any errors and refer to
-   <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-troubleshooting'>
-   the troubleshooting section in the Admin Guide</link>.
+   the chapter on <link xlink:href="admin-guide#chap-troubleshooting"
+   xlink:role="http://docbook.org/xlink/role/olink"
+   ><citetitle>Troubleshooting</citetitle></link> in the
+   <citetitle>Administration Guide</citetitle>.
    </para>
 <screen width='100'>
 -&gt; scr list
@@ -193,10 +198,8 @@ Id     State           Name
      </link>
      </para>
      <para>
-       <para>
            The same URL can be used with the curl command line tool which is part of most os. For more info see:
          <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>
-       </para>
          Or create your own user joe by sending a RESTful PUT. Here is a sample curl
          command to create the user joe in the repository.
      </para>

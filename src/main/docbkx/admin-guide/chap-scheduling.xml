@@ -144,7 +144,7 @@ xmlns:ns="http://docbook.org/ns/docbook">
             </literallayout>
             
         </example>
-<caption><para>This is the caption</para></caption>
+<para>This is the caption</para>
         <para></para>
 
         <example>
