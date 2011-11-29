@@ -16,6 +16,7 @@
 package org.forgerock.openidm.script.impl;
 
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -25,6 +26,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
@@ -32,20 +34,21 @@ import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Description.
  *
- * @author nati
+ * @author Natalia Bakos
  */
 @Component(name = "org.forgerock.openidm.script",
         policy = ConfigurationPolicy.IGNORE,
         immediate = true)
 @Properties({
-        @Property(name = "service.description", value = "OpenIDM script service"),
-        @Property(name = "service.vendor", value = ServerConstants.SERVER_VENDOR_NAME)
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM script service"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
 })
 @Service
 public class SchedulableScriptService implements ScheduledService {
@@ -56,6 +59,7 @@ public class SchedulableScriptService implements ScheduledService {
 
     @Override
     public void execute(Map<String, Object> context) throws ExecutionException {
+        InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
         try {
             String name = (String) context.get(INVOKER_NAME);
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
@@ -69,6 +73,8 @@ public class SchedulableScriptService implements ScheduledService {
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
+        } finally {
+            InvokeContext.getContext().popActivityId();
         }
     }
 
