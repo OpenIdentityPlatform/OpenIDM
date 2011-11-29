@@ -430,36 +430,148 @@
                 <artifactId>docbkx-maven-plugin</artifactId>
                 <version>2.0.13</version>
                 <inherited>false</inherited>
+                <configuration>
+                    <sourceDirectory>${docbkx-src}</sourceDirectory>
+
+                    <!-- TODO: Profile for snapshot vs. final-->
+                    <draftMode>yes</draftMode>
+                    <draftWatermarkImage>http://docbook.sourceforge.net/release/images/draft.png</draftWatermarkImage>
+
+                    <includes>*/OpenIDM-*.xml</includes>
+                    <xincludeSupported>true</xincludeSupported>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>build-doc</id>
+                        <id>doc-epub</id>
                         <phase>pre-site</phase>
                         <goals>
                             <goal>generate-epub</goal>
-                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
+                            <epubCustomization>${dbstyle-dir}/epub/coredoc.xsl</epubCustomization>
+                            <!-- Resources required but not copied by DocBook.xsl. -->
+                            <preProcess>
+                                 <copy todir='${docbkx-out}/epub/admin-guide/OpenIDM-Admin-Guide/images'>
+                                       <fileset dir='${docbkx-src}/admin-guide/images' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/admin-guide/OpenIDM-Admin-Guide'>
+                                       <fileset dir='${basedir}/src/main/resources' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/dev-guide/OpenIDM-Dev-Guide/images'>
+                                       <fileset dir='${docbkx-src}/dev-guide/images' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/dev-guide/OpenIDM-Dev-Guide'>
+                                       <fileset dir='${basedir}/src/main/resources' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/install-guide/OpenIDM-Install-Guide/images'>
+                                       <fileset dir='${docbkx-src}/install-guide/images' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/install-guide/OpenIDM-Install-Guide'>
+                                       <fileset dir='${basedir}/src/main/resources' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/release-notes/OpenIDM-Release-Notes/images'>
+                                       <fileset dir='${docbkx-src}/release-notes/images' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/release-notes/OpenIDM-Release-Notes'>
+                                       <fileset dir='${basedir}/src/main/resources' />
+                                 </copy>
+                            </preProcess>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>doc-fo</id>
+                        <phase>pre-site</phase>
+                        <goals>
                             <goal>generate-pdf</goal>
                             <goal>generate-rtf</goal>
+                        </goals>
+                        <configuration>
+                            <foCustomization>${dbstyle-dir}/fo/coredoc.xsl</foCustomization>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>doc-manpages</id>
+                        <phase>pre-site</phase>
+                        <goals>
                             <goal>generate-manpages</goal>
                         </goals>
                         <configuration>
-                            <sourceDirectory>${docbkx-src}</sourceDirectory>
-        
-                            <!-- TODO: Profile for snapshot vs. final-->
-                            <draftMode>yes</draftMode>
-                            <draftWatermarkImage>http://docbook.sourceforge.net/release/images/draft.png</draftWatermarkImage>
-        
-                            <includes>*/OpenIDM-*.xml</includes>
-                            <xincludeSupported>true</xincludeSupported>
-        
-                            <!-- EPUB, HTML -->
+                            <foCustomization>${dbstyle-dir}/man/manpages.xsl</foCustomization>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-admin-guide</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Admin-Guide.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/admin-guide.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/admin-guide"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-dev-guide</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Dev-Guide.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/dev-guide.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/dev-guide"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-install-guide</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Install-Guide.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/install-guide.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/install-guide"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-release-notes</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Release-Notes.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/release-notes.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/release-notes"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-single-html</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
                             <chunkedOutput>false</chunkedOutput>
                             <htmlCustomization>${dbstyle-dir}/html/coredoc.xsl</htmlCustomization>
                             <htmlStylesheet>css/coredoc.css</htmlStylesheet>
-        
-                            <!-- PDF, RTF -->
-                            <foCustomization>${dbstyle-dir}/fo/coredoc.xsl</foCustomization>
-        
-                            <!-- Copy images, CSS for HTML -->
+                            <targetDatabaseDocument>${docbkx-src}/olinkdb-single-html-pages.xml</targetDatabaseDocument>
+
+                            <!-- Resources required but not copied by DocBook.xsl. -->
                             <preProcess>
                                 <copy todir="${docbkx-out}/html/admin-guide/images">
                                     <fileset dir="${docbkx-src}/admin-guide/images"/>
@@ -486,6 +598,12 @@
                                     <fileset dir="src/main/resources"/>
                                 </copy>
                             </preProcess>
+                            <postProcess>
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/admin-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes' />
+                            </postProcess>
                         </configuration>
                     </execution>
                 </executions>
@@ -508,29 +626,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <inherited>false</inherited>
-                <executions>
-                    <execution>
-                        <id>fix-legalnotice</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <detail>true</detail>
-                            <tasks>
-                                <copy file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/admin-guide"/>
-                                <copy file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/dev-guide"/>
-                                <copy file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/install-guide"/>
-                                <move file="${basedir}/legalnotice.html" todir="${basedir}/target/docbkx/html/release-notes"/>
-                            </tasks>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <inherited>false</inherited>
                 <executions>
@@ -545,8 +640,23 @@
                             <resources>
                                 <resource>
                                     <directory>${docbkx-out}/epub/admin-guide</directory>
+                                    <includes>
+                                        <include>**/*.epub</include>
+                                    </includes>
+                                </resource>
+                                <resource>
                                     <directory>${docbkx-out}/epub/dev-guide</directory>
+                                    <includes>
+                                        <include>**/*.epub</include>
+                                    </includes>
+                                </resource>
+                                <resource>
                                     <directory>${docbkx-out}/epub/install-guide</directory>
+                                    <includes>
+                                        <include>**/*.epub</include>
+                                    </includes>
+                                </resource>
+                                <resource>
                                     <directory>${docbkx-out}/epub/release-notes</directory>
                                     <includes>
                                         <include>**/*.epub</include>

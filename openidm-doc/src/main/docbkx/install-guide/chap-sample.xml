@@ -153,8 +153,10 @@ curl -X POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=syste
           </para>
           <para>
           For details on the OpenICF connector configuration files please refer
-          to the 
-          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-provisioning'>Provisioning Chapter in the Admin Guide</link>
+          to the <link xlink:href="admin-guide#chap-provisioning"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          ><citetitle>Provisioning</citetitle></link> chapter in the
+          <citetitle>Administration Guide</citetitle>.
           </para>
          </section>
          <section>
@@ -182,7 +184,10 @@ curl -X POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=syste
           </para>
           <para>
           For details on the scheduler configuration please refer to the
-          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-scheduling'>Scheduling Chapter in the Admin Guide.</link>
+          <link xlink:href="admin-guide#chap-scheduling"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          ><citetitle>Scheduling</citetitle></link> chapter in the
+          <citetitle>Administration Guide</citetitle>.
           </para>
          </section>
          <section>
@@ -261,11 +266,17 @@ curl -X POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=syste
           are considered part of the reconciliation. An onCreate script in a mapping
           can be used to set default values for the user when created in the target resource.
           For more details on scripting please refer to the 
-          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-scripting'>Scripting Chapter in the Admin Guide.</link>
+          <link xlink:href="admin-guide#chap-scripting"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          ><citetitle>Scripting</citetitle></link> chapter in the
+          <citetitle>Administration Guide</citetitle>.
           </para>
           <para>
-          For details on syncronization, reconciliation, and sync.json please refer to the
-          <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-synchronization'>Synchronization Chapter in the Admin Guide</link>
+          For details on synchronization, reconciliation, and sync.json please refer to the
+          <link xlink:href="admin-guide#chap-synchronization"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          ><citetitle>Synchronization</citetitle></link> chapter in the
+          <citetitle>Administration Guide</citetitle>.
           </para>
          </section>
          </section>
@@ -393,11 +404,17 @@ curl -X GET http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
          It is important to note the action taken based on an object's situation is 
          configured in <filename>conf/sync.json</filename>. The list of all possible
          situations and actions may be found in the 
-         <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-synchronization'>Synchronization Chapter in the Admin Guide</link> 
+         <link xlink:href="admin-guide#chap-synchronization"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          ><citetitle>Synchronization</citetitle></link> chapter in the
+          <citetitle>Administration Guide</citetitle>.
          </para>
          <para>
          For more details on auditing please refer to the
-         <link xlink:href='../admin-guide/OpenIDM-Admin-Guide.html#chap-auditing'>Auditing Chapter in the Admin Guide</link>
+         <link xlink:href="admin-guide#chap-auditing"
+          xlink:role="http://docbook.org/xlink/role/olink"
+          ><citetitle>Auditing</citetitle></link> chapter in the
+          <citetitle>Administration Guide</citetitle>.
          </para>
  </section>
  <section>

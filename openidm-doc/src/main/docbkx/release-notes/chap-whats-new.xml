@@ -47,16 +47,14 @@
  </itemizedlist>
 
  <para>For installation instructions and a sample to get familiar with the features
- please refer to the 
- <link 
- xlink:href='../install-guide/OpenIDM-Install-Guide.html' >installation guide.
- </link>
+ please refer to the <link xlink:href="install-guide#chap-install"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+ Guide</citetitle></link>.
  </para>
  <para>For an architectural overview and details on configuration please refer to the
- <link 
- xlink:href='../admin-guide/OpenIDM-Admin-Guide.html' >administration guide.
- </link>
+ <link xlink:href="admin-guide#chap-overview"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Administration
+ Guide</citetitle></link>.
  </para>
  
 </chapter>
-
