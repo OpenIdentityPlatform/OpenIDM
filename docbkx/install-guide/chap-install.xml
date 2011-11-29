@@ -188,7 +188,7 @@ Id     State           Name
    <para>Executing the REST Interfaces</para>
    <para>
        The following REST command will return a json file with all users in the OpenIDM
-       repository. If there are alredy some users in the repository, they were created as a result of the
+       repository. If there are already some users in the repository, they were created as a result of the
        sample reconciliation task. If the reconciliation task has not yet run your request will return an empty set.
        If sending the URL in the browser it depends on your browser settings how the result will be show.
    </para>
@@ -197,31 +197,25 @@ Id     State           Name
      http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
      </link>
      </para>
-     <para>
-           The same URL can be used with the curl command line tool which is part of most os. For more info see:
-         <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>
-         Or create your own user joe by sending a RESTful PUT. Here is a sample curl
-         command to create the user joe in the repository.
-     </para>
-     <screen width='100' >
-$ curl -X PUT -d '{"name":"joe","firstname":"joe","lastname":"smith","email":"joe@abc.com",
-"userPassword":"11111111"}' http://localhost:8080/openidm/managed/user/joe
+     <para>The same URL can be used with the <command>curl</command> command
+     line tool which is part of most operating systems. For more information on
+     <command>curl</command>, see <link xlink:href="http://curl.haxx.se/"
+     >http://curl.haxx.se/</link>.</para>
+     <para>Create your own user <literal>joe</literal> by sending a RESTful PUT.
+     Here is a sample <command>curl</command> command to create the user
+     <literal>joe</literal> in the repository.</para>
+     <screen>$ curl --user admin:admin -X PUT -d '{"name":"joe","firstname":"joe",
+ "lastname":"smith","email":"joe@abc.com","userPassword":"11111111"}'
+ http://localhost:8080/openidm/managed/user/joe
 
-{"_rev":"1","_id":"joe"}
+{"_rev":"0","_id":"joe"}</screen>
+    <para>Or, on Windows systems:</para>
+     <screen>
+C:\&gt;curl --user admin:admin -X PUT -d {\"name\":\"joe",\"firstname\":\"joe\",
+ \"lastname\":\"smith\",\"email\":\"joe@abc.com\",\"userPassword\":\"11111111\"}
+ http://localhost:8080/openidm/managed/user/joe
 
-$
-     </screen>
-<para>
-Windows
-</para>
-     <screen width='100' >
-$ curl -X PUT -d {\"name\":\"joe",\"firstname\":\"joe\",\"lastname\":\"smith\",\"email\":\"joe@abc.com\",
-\"userPassword\":\"11111111\"} http://localhost:8080/openidm/managed/user/joe
-
-{"_rev":"1","_id":"joe"}
-
-$
-     </screen>
+{"_rev":"0","_id":"joe"}</screen>
      <para>
        Now fetch the newly created user from the repository with a RESTful GET from
        the browser 
@@ -231,14 +225,10 @@ $
         or from the command line using curl.
      </para>
 
-     <screen width='100' >
-$ curl http://localhost:8080/openidm/managed/user/joe
+     <screen>$ curl --user admin:admin http://localhost:8080/openidm/managed/user/joe
 
-{"lastname":"smith","userpassword":"11111111","firstname":"joe","_id":"joe","_rev":"0",
-"email":"joe@abc.com","name":"joe"}
-
-$
-     </screen>
+{"lastname":"smith","userpassword":"11111111","firstname":"joe","_id":"joe",
+ "_rev":"0","email":"joe@abc.com","name":"joe"}</screen>
   </step>
 
  </procedure> 
