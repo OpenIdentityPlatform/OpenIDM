@@ -104,6 +104,17 @@ public class RepoLoginModule extends AbstractLoginModule {
      * Retrieve the user details from the OpenIDM repository
      */
     public UserInfo getUserInfo (String username) throws Exception {
+        logger.trace("Get user info for {}", username);
+        UserInfo userInfo = null;
+        try {
+            userInfo = getRepoUserInfo(username);
+        } catch (Exception ex) {
+            logger.warn("Failed to get user info for {}", username, ex);
+        }
+        return userInfo;
+    }
+    
+    private UserInfo getRepoUserInfo (String username) throws Exception {
         UserInfo user = null;
         Credential credential = null; 
         List roleNames = new ArrayList();
