@@ -38,10 +38,6 @@ public final class JettySecurityConfigurator implements SecurityConfigurator {
     final static Logger logger = LoggerFactory.getLogger(JettySecurityConfigurator.class);
     
     public JettySecurityConfigurator() {
-        // Ensure we can load and instantiate all the necessary classes,
-        org.eclipse.jetty.plus.jaas.JAASRole.class.getName();
-        org.eclipse.jetty.plus.jaas.callback.DefaultCallbackHandler.class.getName();
-        org.eclipse.jetty.plus.jaas.spi.UserInfo.class.getName();
     }
 
     public void activate(HttpService httpService, HttpContext httpContext,  ComponentContext context) {
