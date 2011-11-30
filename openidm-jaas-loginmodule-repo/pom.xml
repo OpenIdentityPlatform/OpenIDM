@@ -85,8 +85,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-<!-- TODO: consider alternatives, including optional packages -->
-<!--                        <DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>-->
                         <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
                         <Export-Package></Export-Package>
                     </instructions>
