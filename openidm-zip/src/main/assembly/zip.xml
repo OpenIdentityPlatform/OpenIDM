@@ -60,6 +60,8 @@
                 <exclude>org.forgerock.openicf.connectors.ldap:openicf-ldap-connector:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-config</exclude>
                 <exclude>org.forgerock.openidm:openidm-crypto</exclude>
+                <exclude>org.forgerock.openidm:openidm-jaas-loginmodule-repo</exclude>
+                <exclude>org.forgerock.openidm:openidm-jetty-fragment</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
                 <exclude>org.forgerock.openidm:openidm-security-jetty</exclude>
@@ -75,6 +77,8 @@
             <includes>
                 <include>org.forgerock.openidm:openidm-config</include>
                 <include>org.forgerock.openidm:openidm-crypto</include>
+                <include>org.forgerock.openidm:openidm-jaas-loginmodule-repo</include>
+                <include>org.forgerock.openidm:openidm-jetty-fragment</include>
                 <include>org.forgerock.openidm:openidm-repo-jdbc</include>
                 <include>org.forgerock.openidm:openidm-repo-orientdb</include>
                 <include>org.forgerock.openidm:openidm-security-jetty</include>

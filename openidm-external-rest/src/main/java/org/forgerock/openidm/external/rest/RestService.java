@@ -309,6 +309,7 @@ public class RestService implements ObjectSet {
                             + " Reported failure: " + ex.getMessage(), ex);
                 }
             }
+            cr.release();
         } catch (java.io.IOException ex) {
             throw new InternalServerErrorException("Failed to invoke " + params, ex);
         }

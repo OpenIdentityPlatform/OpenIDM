@@ -46,8 +46,6 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
-                        <!-- Allows to find the Jetty role classes -->
-                        <DynamicImport-Package>org.eclipse.jetty.*</DynamicImport-Package>
                         <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
                     </instructions>
                 </configuration>
@@ -63,6 +61,11 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-jetty-fragment</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
