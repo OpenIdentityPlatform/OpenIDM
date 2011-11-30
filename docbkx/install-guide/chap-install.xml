@@ -33,91 +33,101 @@
  <title>Installing OpenIDM Services</title>
 
  <para>This chapter covers the tasks required to install the OpenIDM services.</para>
- 
- <section>
+
+ <section xml:id="before-you-start">
   <title>Before You Run OpenIDM</title>
   
   <para>This section covers what you need to know before running OpenIDM.
   </para>
   
-  <section>
+  <section xml:id="java-prerequisites">
    <title>Java Environment</title>
    
-   <para>OpenIDM requires requires Oracle Java SE JDK 6, update 24 or
-   later.</para>
-   
+   <para>OpenIDM requires Oracle Java SE JDK 6 update 24 or later.</para>
+   <!-- TODO: When this doc has been reviewed, either the next sentence should
+              be removed, or this entire section should change to something
+              like: OpenIDM requires Java SE 6 JDK update 24 or later. OpenIDM
+              has been tested with both the Oracle JDK and also OpenJDK. -->
    <para>The equivalent version of OpenJDK should work too.</para>
   </section>
   
-  <section>
+  <section xml:id="application-container-prerequisites">
    <title>Application Container</title>
   
-   <para>The OpenIDM services run in an OSGi container with an embedded servlet 
-   container and an embedded noSQL database. By default the OSGi container is
-   Apache Felix, the servlet container is Jetty, and the noSQL database is
-   OrientDB. At this time the only supported configuration is running the services
-   in Apache Felix.
-   </para>
+   <para>OpenIDM services run in an OSGi container with an embedded Servlet
+   container, and an embedded noSQL database. By default the OSGi container is
+   Apache Felix. The default Servlet container is Jetty. The default noSQL
+   database is OrientDB. At this time the only supported configuration is
+   running the services in Apache Felix.</para>
   </section>
-  <section>
+ </section>
+
+  <section xml:id="installing-openidm">
    <title>Installing &amp; Running OpenIDM</title>
- <procedure>
-  <title>Install the OpenIDM Services</title>
-  <step>
-   <para>Make sure you have the correct version of Java installed.</para>
-   <screen width='100' >$ java -version
+   
+   <para>Follow the procedures in this section to install and run
+   OpenIDM.</para>
+
+   <procedure xml:id="install-openidm">
+    <title>To Install OpenIDM Services</title>
+    <para>Follow these steps to install OpenIDM.</para>
+    <step>
+     <para>Make sure you have the correct version of Java installed.</para>
+     <screen>$ java -version
 java version "1.6.0_24"
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
 Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
-  </step>
-  <step>
-   <para>Download OpenIDM from the <link
-   xlink:href='http://forgerock.org/openidm.html'>downloads page</link>.</para>
-  </step>
-  <step>
-   <para>Unpack the contents of the .zip file into the install location.</para>
-   <screen width='100' >$ cd /path/to
-$ unzip ~/Downloads/openidm-*.zip 
+    </step>
+    <step>
+     <para>Download OpenIDM from the <link
+     xlink:href='http://forgerock.org/openidm.html'>download page</link>.</para>
+    </step>
+    <step>
+     <para>Unpack the contents of the .zip file into the install location.</para>
+     <screen>$ cd /path/to
+$ unzip ~/Downloads/openidm-*.zip
 ...
-  inflating: openidm/src/site/index.htm  
-$ </screen>
-  </step>
-  <step performance="optional">
-  <para>By default the OpenIDM servlet container is listening on port 8080. To
-  change the default port you must modify 
-  the <literal>org.osgi.service.http.port</literal> property in
-  <filename>openidm/conf/config.properties</filename>.</para></step>
-</procedure>
+inflating: openidm/src/site/index.htm
+$</screen>
+    </step>
+    <step performance="optional">
+     <para>By default the OpenIDM servlet container listens on port 8080. To
+     change the default port, edit the
+     <literal>org.osgi.service.http.port</literal> property in the
+     <filename>openidm/conf/config.properties</filename> file.</para>
+    </step>
+   </procedure>
 
-<procedure>
-  <title>Start the OpenIDM Services</title>
-  <note>
-      <para>
-   In the current build of OpenIDM the reconciliation sample is 
-  enabled by default. The sample consists of a source and a target
-   connector and a reconcilation task scheduled to run every minute.
-   To learn more about the sample, refer to the <link
-   xlink:href="install-guide#chap-sample"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
-   Sample</citetitle></link> chapter. To disable the sample you may set the
-   "enabled" attribute to <literal>false</literal> in the scheduler
-   configuration file at
-   </para>
-   <para>
-   <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>
-   </para></note>
-  <step>
-  <para>
-  The following will start the Felix container, load all the OpenIDM services
-  and start a command shell to allow you to manage the container. 
-  </para>
-<screen width='100'>$ cd /path/to/openidm
+   <procedure xml:id="run-openidm">
+    <title>To Start OpenIDM Services</title>
+<!-- When I install OpenIDM, I notice "enabled" : false in the file mentioned
+     in this note, so I'm assuming that this note is out of date.
+    <note>
+     <para>OpenIDM currently comes with the reconciliation sample enabled by
+     default. The sample consists of a source and a target connector, and a
+     reconcilation task scheduled to run every minute. To learn more about the
+     sample, refer to the <link xlink:href="install-guide#chap-sample"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+     Sample</citetitle></link> chapter. To disable the sample, set the
+     <literal>enabled</literal> attribute to <literal>false</literal> in the
+     scheduler configuration file
+     <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.
+     </para>
+    </note> -->
+    <para>Follow these steps to run OpenIDM.</para>
+    <step>
+     <para>Start the Felix container, load all OpenIDM services, and start a
+     command shell to allow you to manage the container.</para>
+     <stepalternatives>
+      <step>
+       <para>On UNIX, Linux, and Mac OS X</para>
+       <screen>$ cd /path/to/openidm
 $ ./start.sh 
 -&gt;</screen>
-<para>
-Windows
-</para>
-<screen width='100'>$ cd \path\to\openidm
+      </step>
+      <step>
+       <para>On Windows</para>
+       <screen>$ cd \path\to\openidm
 $ run.bat 
 Start in debug mode [1] default
 Start in normal mode [2]
@@ -127,19 +137,14 @@ Chose a number (1-3):
 Listening for transport dt_socket at address: 5005
 ...
 -&gt;</screen>
-   <para>You can enter commands at the resulting <literal>-&gt;</literal> prompt
-   such as <literal>help</literal> for usage, or <literal>ps</literal> to view
-   the bundles installed. To see a list of all the OpenIDM core services
-   and their state enter the following command. If startup was successful all states 
-   with the exception of email and repo.jdbc should be active. If any other services
-   are unsatisfied check the console or openidm/logs for any errors and refer to
-   the chapter on <link xlink:href="admin-guide#chap-troubleshooting"
-   xlink:role="http://docbook.org/xlink/role/olink"
-   ><citetitle>Troubleshooting</citetitle></link> in the
-   <citetitle>Administration Guide</citetitle>.
-   </para>
-<screen width='100'>
--&gt; scr list
+      </step>
+     </stepalternatives>
+     <para>At the resulting <literal>-&gt;</literal> prompt, you can enter
+     commands such as <command>help</command> for usage, or
+     <command>ps</command> to view the bundles installed. To see a list of all
+     the OpenIDM core services and their states, enter the following
+     command.</para>
+     <screen>-&gt; scr list
 Id     State           Name
 [  17] [active       ] org.forgerock.openidm.config.starter
 [   7] [active       ] org.forgerock.openidm.external.rest
@@ -159,104 +164,137 @@ Id     State           Name
 [   4] [active       ] org.forgerock.openidm.managed
 [  10] [active       ] org.forgerock.openidm.provisioner.openicf
 [   8] [active       ] org.forgerock.openidm.provisioner
--&gt;
-</screen>       
-  </step>
-  <step>
-   <para>You may also manage the container and services from the Felix administration console. The console may be started with the following defaults:</para>
-   <itemizedlist>
-    <listitem>
-     <para>Console URL: <link
-     xlink:href='http://localhost:8080/system/console'
-     >http://localhost:8080/system/console</link>.</para>
-    </listitem>
-    <listitem>
-     <para>Username: <literal>admin</literal></para>
-    </listitem>
-    <listitem>
-     <para>Password: <literal>admin</literal></para>
-    </listitem>
-   </itemizedlist>
-   <para>
-   To see the OpenIDM core services and their respective states
-   click on the Components tab. Or select the Shell tab and 
-   enter <literal>scr list</literal>. To restart or shutdown the container go to the
-   System tab.
-   </para>
-  </step>	
-  <step>
-   <para>Executing the REST Interfaces</para>
-   <para>
-       The following REST command will return a json file with all users in the OpenIDM
-       repository. If there are already some users in the repository, they were created as a result of the
-       sample reconciliation task. If the reconciliation task has not yet run your request will return an empty set.
-       If sending the URL in the browser it depends on your browser settings how the result will be show.
-   </para>
-   <para>URL:
-     <link xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids" >
-     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
-     </link>
-     </para>
-     <para>The same URL can be used with the <command>curl</command> command
-     line tool which is part of most operating systems. For more information on
-     <command>curl</command>, see <link xlink:href="http://curl.haxx.se/"
-     >http://curl.haxx.se/</link>.</para>
-     <para>Create your own user <literal>joe</literal> by sending a RESTful PUT.
-     Here is a sample <command>curl</command> command to create the user
+-&gt;</screen>
+     <para>If startup was successful, all states except <literal>email</literal>
+     and <literal>repo.jdbc</literal> are active. If any other services remain
+     <literal>unsatisfied</literal>, check <filename>openidm/logs</filename>
+     for errors, and refer to the chapter on <link
+     xlink:href="admin-guide#chap-troubleshooting"
+     xlink:role="http://docbook.org/xlink/role/olink"
+     ><citetitle>Troubleshooting</citetitle></link> in the
+     <citetitle>Administration Guide</citetitle>.</para>
+    </step>
+    <step>
+     <para>Alternatively, you can manage the container and services from the
+     Felix administration console.</para>
+     <itemizedlist>
+      <para>Use these hints to connect to the console.</para>
+      <listitem>
+       <para>Default Console URL: <link xlink:show="new"
+       xlink:href='http://localhost:8080/system/console'
+       >http://localhost:8080/system/console</link>.</para>
+      </listitem>
+      <listitem>
+       <para>Default user name: <literal>admin</literal></para>
+      </listitem>
+      <listitem>
+       <para>Default password: <literal>admin</literal></para>
+      </listitem>
+     </itemizedlist>
+     <itemizedlist>
+      <para>Some basic hints on using the Felix administration console
+      follow.</para>
+      <listitem>
+       <para>Select the Components tab to see OpenIDM core services and their
+       respective states.</para>
+      </listitem>
+      <listitem>
+       <para>Select the Shell tab to access the <literal>-&gt;</literal>
+       prompt.</para>
+      </listitem>
+      <listitem>
+       <para>Select the System Information tab to stop or restart the
+       container.</para>
+      </listitem>
+     </itemizedlist>
+    </step>
+   </procedure>
+
+   <procedure xml:id="first-steps-with-rest">
+    <title>To Get Started With the OpenIDM REST Interface</title>
+    <para>OpenIDM provides RESTful access to users in the OpenIDM
+    repository.</para>
+    <step>
+     <para>Access the following URL to get a JSON file including all users in
+     the OpenIDM repository.</para>
+     <para><link xlink:show="new"
+     xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids">
+     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link></para>
+     <para>When you first install OpenIDM with an empty repository, no users
+     exist. What the result looks like depends on your browser settings.</para>
+     <para>You can use the URL with the <command>curl</command> command line
+     tool, included with most operating systems.<footnote><para>For more
+     information on <command>curl</command>, see <link
+     xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>.</para>
+     </footnote></para>
+    </step>
+    <step>
+     <para>Create a user <literal>joe</literal> by sending a RESTful PUT.</para>
+     <para>The following <command>curl</command> commands create the user
      <literal>joe</literal> in the repository.</para>
-     <screen>$ curl --user admin:admin -X PUT -d '{"name":"joe","firstname":"joe",
+     <stepalternatives>
+      <step>
+       <para>On UNIX, Linux, and Mac OS X</para>
+       <screen>$ curl --user admin:admin -X PUT -d '{"name":"joe","firstname":"joe",
  "lastname":"smith","email":"joe@abc.com","userPassword":"11111111"}'
  http://localhost:8080/openidm/managed/user/joe
 
 {"_rev":"0","_id":"joe"}</screen>
-    <para>Or, on Windows systems:</para>
-     <screen>
+      </step>
+      <step>
+       <para>On Windows</para>
+       <screen>
 C:\&gt;curl --user admin:admin -X PUT -d {\"name\":\"joe",\"firstname\":\"joe\",
  \"lastname\":\"smith\",\"email\":\"joe@abc.com\",\"userPassword\":\"11111111\"}
  http://localhost:8080/openidm/managed/user/joe
 
 {"_rev":"0","_id":"joe"}</screen>
-     <para>
-       Now fetch the newly created user from the repository with a RESTful GET from
-       the browser 
-     <link
-        xlink:href="http://localhost:8080/openidm/managed/user/joe"
-        >http://localhost:8080/openidm/managed/user/joe</link>
-        or from the command line using curl.
-     </para>
-
-     <screen>$ curl --user admin:admin http://localhost:8080/openidm/managed/user/joe
+      </step>
+     </stepalternatives>
+    </step>
+    <step>
+     <para>Fetch the newly created user from the repository with a RESTful
+     GET.</para>
+     <stepalternatives>
+      <step>
+       <para>Browse to <link xlink:show="new"
+       xlink:href="http://localhost:8080/openidm/managed/user/joe"
+       >http://localhost:8080/openidm/managed/user/joe</link>.</para>
+      </step>
+      <step>
+       <para>Use the <command>curl</command> command.</para>
+       <screen>$ curl --user admin:admin http://localhost:8080/openidm/managed/user/joe
 
 {"lastname":"smith","userpassword":"11111111","firstname":"joe","_id":"joe",
  "_rev":"0","email":"joe@abc.com","name":"joe"}</screen>
-  </step>
+      </step>
+     </stepalternatives>
+    </step>
+   </procedure>
 
- </procedure> 
-
-<procedure>
-  <title>Stop the OpenIDM Services</title>
-
-  <step performance='optional'>
-   <para>To stop the OpenIDM services enter the shutdown command in the shell</para>
-    <screen width='100' >
--&gt; shutdown
+   <procedure xml:id="stop-openidm">
+    <title>To Stop the OpenIDM Services</title>
+    <step>
+    <para>You can stop OpenIDM Services from the <literal>-&gt;</literal>
+    prompt, or through the Felix console.</para>
+     <stepalternatives>
+      <step>
+       <para>Either enter the <command>shutdown</command> command at the
+       <literal>-&gt;</literal> prompt.</para>
+       <screen>-&gt; shutdown
 ...
-$
-    </screen>
-  </step>
-
-   <step>
-   <para>Or start the Felix console
-   <link
-     xlink:href='http://localhost:8080/system/console'
-     >http://localhost:8080/system/console</link>
-   and click on the stop button under the System Information tab.
-   Please note this will stop the servlet container so the console
-   will no longer be accessible.
-   </para>
- </step>
- </procedure>
+$</screen>
+      </step>
+      <step>
+       <para>Or click Stop on the System Information tab of the Felix console,
+       by default <link xlink:show="new"
+       xlink:href='http://localhost:8080/system/console'
+       >http://localhost:8080/system/console</link>.</para>
+       <para>This stops the Servlet container as well, and the console is
+       no longer accessible.</para>
+      </step>
+     </stepalternatives>
+    </step>
+   </procedure>
  </section>
-</section>
 </chapter>
-
