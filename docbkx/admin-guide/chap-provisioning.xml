@@ -39,13 +39,11 @@
 
 
   
-<programlisting>
-<![CDATA[
+<programlisting language="javascript">
    {
       "connectorsLocation" : string,
       "remoteConnectorServers" : [remoteConnectorServer objects]
    }
-]]>
 </programlisting>
        
            <variablelist>
@@ -69,8 +67,7 @@
   <simplesect>
      <title>RemoteConnectorServer objects</title>
   
-  <programlisting>
-<![CDATA[
+  <programlisting language="javascript">
    {
       "name" : "testServer",
       "host" : "127.0.0.1",
@@ -84,7 +81,6 @@
             "BlindTrustManager"
          ]
    }
-]]>
   </programlisting>
             <variablelist>
                <varlistentry>
@@ -147,8 +143,7 @@
        <subtitle>OpenICF Provisioner Service</subtitle>
        <para>ad</para>
 
-  <programlisting>
-<![CDATA[
+  <programlisting language="javascript">
    {
       "name" : "xml",
       "connectorRef" : null,
@@ -158,19 +153,16 @@
       "objectTypes" : null,
       "operationOptions" : null
    }
-]]>
   </programlisting>
 <simplesect>
    <title>Connector Reference Object</title>      
-  <programlisting>
-<![CDATA[
+  <programlisting language="javascript">
    {
       "bundleName" : "org.forgerock.openicf.connectors.file.xml",
       "bundleVersion" : "1.1.0.0-SNAPSHOT",
       "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
       "connectorHostRef" : "host"
    }
-]]>
   </programlisting>
             <variablelist>
                <varlistentry>
@@ -205,8 +197,7 @@
 </simplesect> 
         <simplesect>
            <title>Pool Configuration Object</title>            
-  <programlisting>
-<![CDATA[
+  <programlisting language="javascript">
    {
       "maxObjects" : 10,
       "maxIdle" : 10,
@@ -214,14 +205,12 @@
       "minEvictableIdleTimeMillis" : 120000,
       "minIdle" : 1
    }
-]]>
   </programlisting>
         </simplesect> 
         <simplesect>
            <title>Operation Timeout Object</title>
-            <para>This configuration sets the timeout of the operations.</para>            
-  <programlisting>
-<![CDATA[
+            <para>This configuration sets the timeout of the operations.</para>
+  <programlisting  language="javascript">
    {
       "CREATE" : -1,
       "TEST" : -1,
@@ -236,7 +225,6 @@
       "SYNC" : -1,
       "SCHEMA" : -1
    }
-]]>
   </programlisting> 
         </simplesect> 
         <simplesect>
@@ -247,8 +235,7 @@
             <para>The configuration based on <link
                   xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
                   Schema</link> with some extensions. </para> 
-  <programlisting>
-<![CDATA[
+  <programlisting language="javascript">
    {
       "account" :
          {
@@ -289,7 +276,6 @@
                }
          }
    }
-]]>
   </programlisting>
            <table>
               <title>JSON Schema extensions</title>
@@ -354,8 +340,7 @@
         <simplesect>
            <title>Operation Options Object</title>
             <para>Operation option can define how to act on certain operation. </para>            
-  <programlisting>
-<![CDATA[
+  <programlisting language="javascript">
    {
       "SYNC" :
          {
@@ -390,7 +375,6 @@
                }
          }
    }
-]]>
   </programlisting>
             <variablelist>
                <varlistentry>
