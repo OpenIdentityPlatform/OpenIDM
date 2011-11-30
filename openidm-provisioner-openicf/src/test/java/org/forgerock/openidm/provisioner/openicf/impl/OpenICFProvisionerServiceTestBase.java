@@ -37,6 +37,7 @@ import org.testng.annotations.BeforeClass;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -71,9 +72,10 @@ public abstract class OpenICFProvisionerServiceTestBase {
 
 
         service = createInitialService();
-        Method bind = OpenICFProvisionerService.class.getDeclaredMethod("bind", ConnectorInfoProvider.class);
+        Field bind = OpenICFProvisionerService.class.getDeclaredField("connectorInfoProvider");
         if (null != bind) {
-            bind.invoke(service, getConnectorInfoProvider());
+            bind.setAccessible(true);
+            bind.set(service, getConnectorInfoProvider());
         }
         Method activate = OpenICFProvisionerService.class.getDeclaredMethod("activate", ComponentContext.class);
         if (null != activate) {

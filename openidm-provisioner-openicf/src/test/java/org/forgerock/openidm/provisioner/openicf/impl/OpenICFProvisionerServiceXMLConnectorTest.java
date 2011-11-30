@@ -29,6 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.fest.assertions.MapAssert;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.Id;
 import org.osgi.service.component.ComponentConstants;
 import org.testng.Assert;
@@ -87,8 +88,8 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         for (Map<String, Object> object : testInput) {
             String id = "system/xml/account/";
             getService().create(id, object);
-            assertThat((String) object.get("_id")).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
-            String newID = (String) object.get("_id");
+            assertThat((String) object.get(ServerConstants.OBJECT_PROPERTY_ID)).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            String newID = (String) object.get(ServerConstants.OBJECT_PROPERTY_ID);
             objectIDs.add(id+newID);
         }
     }
@@ -98,7 +99,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         for (String id : objectIDs) {
             Map<String, Object> connectorObject = getService().read(id);
             Assert.assertNotNull(connectorObject);
-            assertThat((String) connectorObject.get("_id")).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            assertThat((String) connectorObject.get(ServerConstants.OBJECT_PROPERTY_ID)).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
             //assertThat(connectorObject).includes(MapAssert.entry("_id", id));
         }
     }
@@ -119,7 +120,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
             assertThat(connectorObject).includes(MapAssert.entry("__DESCRIPTION__", "Test Description"));
             assertThat(connectorObject).includes(MapAssert.entry("firstname", "Darth"));
             //assertThat(connectorObject).includes(MapAssert.entry("lastname-first-letter", null));
-            assertThat((String) connectorObject.get("_id")).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
+            assertThat((String) connectorObject.get(ServerConstants.OBJECT_PROPERTY_ID)).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
 
             //assertThat(connectorObject.keySet()).excludes("__PASSWORD__", "secret-pin", "jpegPhoto", "yearly-wage");
             Assert.assertNotNull(connectorObject);

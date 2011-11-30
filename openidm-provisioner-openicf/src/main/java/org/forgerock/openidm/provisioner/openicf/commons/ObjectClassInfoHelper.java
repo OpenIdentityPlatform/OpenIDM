@@ -27,6 +27,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.provisioner.Id;
@@ -111,7 +112,7 @@ public class ObjectClassInfoHelper {
         String nameValue = name;
 
         if (null == nameValue) {
-            Object o = source.get("_id");
+            Object o = source.get(ServerConstants.OBJECT_PROPERTY_ID);
             if (null == o) {
                 o = source.get(nameAttribute);
             }
@@ -188,7 +189,7 @@ public class ObjectClassInfoHelper {
                 result.put(attributeInfo.getName(), attributeInfo.build(attribute, cryptoService));
             }
         }
-        result.put("_id", Id.escapeUid(source.getUid().getUidValue()));
+        result.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(source.getUid().getUidValue()));
         return result;
     }
 
