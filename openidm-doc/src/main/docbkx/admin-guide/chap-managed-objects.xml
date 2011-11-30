@@ -233,13 +233,10 @@
         <sect2>
             <title>Usage</title>
             <para/>
-            <para>
-                <code><![CDATA[
-  {
-    "objects": [ managed-object-config object, … ]
-  }]]>
-                </code>
-            </para>
+            <programlisting language="javascript">
+{
+  "objects": [ managed-object-config object, … ]
+}</programlisting>
         </sect2>
         <sect2>
             <title>Properties</title>
@@ -260,8 +257,7 @@
             <sect3>
                 <title>Usage</title>
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "name": string,
   "schema": json-schema object,
@@ -273,9 +269,7 @@
   "onRetrieve": script object,
   "onStore": script object,
   "properties": [ property-configuration object, … ]
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
             </sect3>
             <sect3>
@@ -360,14 +354,11 @@
             <sect3>
                 <title>Usage</title>
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "type": "text/javascript",
   "source": string
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
             </sect3>
             <sect3>
@@ -396,17 +387,14 @@
             <sect3>
                 <title>Usage</title>
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "name": string,
   "onValidate": script object,
   "onRetrieve": script object,
   "onStore": script object,
   "encryption": property-encryption object
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
                 <para/>
             </sect3>
@@ -457,14 +445,11 @@
             <sect3>
                 <title>Usage</title>
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "cipher": string,
   "key": string
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
                 <para/>
             </sect3>

@@ -160,7 +160,7 @@
     <sect1>
         <title>API</title>
         
-        <programlisting language="java"><![CDATA[
+        <programlisting language="java">
 package org.forgerock.openidm.distributedtask;
 
 
@@ -285,10 +285,7 @@ public interface LeaseManager {
 
     boolean renewLease(int leaseSeconds) throws LeaseExpiredException {}
 
-}
-]]>
-            </programlisting>
+}</programlisting>
     </sect1>
 
 </chapter>
-

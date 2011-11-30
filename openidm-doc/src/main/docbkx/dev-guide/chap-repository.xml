@@ -155,8 +155,7 @@
         <para/>
         <para>For example, assuming a managed object "managed/user"</para>
         <example>
-            <literallayout class="monospaced">
-                <code><![CDATA[
+            <programlisting language="javascript">
 {
     "_id" : "999",
     "_rev" : "0",
@@ -168,44 +167,39 @@
          "city":"Somewhere",
          "zip":"99999"
     }
-}]]>
-                </code>
-            </literallayout>
+}</programlisting>
         </example>
         <para/>
         <para>Example associated queries</para>
         <example>
-            <literallayout class="monospaced">
-                <code><![CDATA[
+            <programlisting language="javascript">
 queries: {
-      "my-query" : "select firstname, lastname from user where address.city = '${city}'"
-}]]>
-                </code>
-            </literallayout>
+    "my-query" : "select firstname, lastname from user where address.city = '${city}'"
+}</programlisting>
         </example>
         <para/>
         <para>The call to Managed Object API can look something equivalent to the following (e.g. from the REST API, or from recon code)</para>
         <para/>
-        <programlisting language="java"><![CDATA[
-    Map<String, String> params = new HashMap<String, String>();
-    params.put(QueryConstants.QUERY_ID, "my-query");
-    params.put("city", "Some");
+        <programlisting language="java">
+Map&lt;String, String&gt; params = new HashMap&lt;String, String&gt;();
+params.put(QueryConstants.QUERY_ID, "my-query");
+params.put("city", "Some");
 
-    Map<String, Object> result = query("managed/user", params);
+Map&lt;String, Object&gt; result = query("managed/user", params);
 
-    List<Map<String, Object>> records = (List<Map<String, Object>>) result.get(QueryConstants.QUERY_RESULT);
-    for (Map<String, Object> entry : records.entrySet()) {
-        entry.get("firstname");
-        entry.get("lastname");
-        entry.get("_id");
-        entry.get("_rev");
-    }
-    Long queryTimeMs = (String) result.get(QueryConstants.STATISTICS_QUERY_TIME);
-    Long conversionTimeMs = result.get(QueryConstants.STATISTICS_CONVERSION_TIME);
+List&lt;Map&lt;String, Object&gt;&gt; records = (List&lt;Map&lt;String, Object&gt;&gt;) result.get(QueryConstants.QUERY_RESULT);
+for (Map&lt;String, Object&gt; entry : records.entrySet()) {
+    entry.get("firstname");
+    entry.get("lastname");
+    entry.get("_id");
+    entry.get("_rev");
+}
+Long queryTimeMs = (String) result.get(QueryConstants.STATISTICS_QUERY_TIME);
+Long conversionTimeMs = result.get(QueryConstants.STATISTICS_CONVERSION_TIME);
 
-    // Not yet supported
-    // result.get(QueryConstants.PAGING_TOKEN_FIRST);
-    // result.get(QueryConstants.PAGING_TOKEN_LAST); ]]>
+// Not yet supported
+// result.get(QueryConstants.PAGING_TOKEN_FIRST);
+// result.get(QueryConstants.PAGING_TOKEN_LAST);
         </programlisting>
         <para/>
         <para>It may pass this query directly to the repository service, "as is". The specific repository service implementation, e.g. the repo-orientdb would have read in the query definitions. If necessary it can translate a common query format into something it natively understands, or - as in this example - use the native query directly. </para>

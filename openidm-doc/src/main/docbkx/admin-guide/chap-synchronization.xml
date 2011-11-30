@@ -40,13 +40,10 @@
             <title>Usage</title>
 
             <example>
-                <literallayout class="monospaced">
-                    <code><![CDATA[
+                <programlisting language="javascript">
 {
   "mappings": [ object-mapping object, … ]
-}]]>
-                    </code>
-                </literallayout>
+}</programlisting>
             </example>
 
         </sect2>
@@ -70,8 +67,7 @@
                 <title>Usage</title>
 
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "name": string,
   "source": string,
@@ -83,9 +79,7 @@
   "policies": [ policy object, … ],
   "onCreate": script object,
   "onUpdate": script object
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
             </sect3>
             <sect3>
@@ -171,16 +165,13 @@
             <sect3>
                 <title>Usage</title>
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "target": string,
   "source": string,
   "script": script object,
   "default": value
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
             </sect3>
             <sect3>
@@ -225,14 +216,11 @@
             <sect3>
                 <title>Usage</title>
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "situation": string,
   "action": string or script object
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
             </sect3>
             <sect3>
@@ -336,14 +324,11 @@
                 <title>Usage</title>
 
                 <example>
-                    <literallayout class="monospaced">
-                        <code><![CDATA[
+                    <programlisting language="javascript">
 {
   "type": "text/javascript",
   "source": string
-}]]>
-                        </code>
-                    </literallayout>
+}</programlisting>
                 </example>
 
 
@@ -383,15 +368,12 @@
             <title>Schema</title>
             <example>
                 <para>The structure of a link entry is:</para>
-                <literallayout class="monospaced">
-                    <code><![CDATA[
+                <programlisting language="javascript">
 {
   "sourceId": string,
   "targetId": string,
   "reconId": string or null
-}]]>
-                    </code>
-                </literallayout>
+}</programlisting>
             </example>
             <sect3>
                 <title>Properties</title>
