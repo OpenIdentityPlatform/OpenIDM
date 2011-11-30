@@ -29,6 +29,13 @@ import org.slf4j.LoggerFactory;
 public class OsgiJAASLoginService extends JAASLoginService {
     
     final static Logger logger = LoggerFactory.getLogger(OsgiJAASLoginService.class);
+    
+    public OsgiJAASLoginService() {
+        // Ensure we can load and instantiate all the necessary classes,
+        org.eclipse.jetty.plus.jaas.JAASRole.class.getName();
+        org.eclipse.jetty.plus.jaas.callback.DefaultCallbackHandler.class.getName();
+        org.eclipse.jetty.plus.jaas.spi.UserInfo.class.getName();
+    }
 
     /** 
      * @InheritDoc
