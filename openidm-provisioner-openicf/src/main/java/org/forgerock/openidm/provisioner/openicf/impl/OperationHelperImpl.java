@@ -27,6 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -142,7 +143,7 @@ public class OperationHelperImpl implements OperationHelper {
 
     public void resetUid(Uid uid, Map<String, Object> target) {
         if (null != uid && null != target) {
-            target.put("_id", Id.escapeUid(uid.getUidValue()));
+            target.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(uid.getUidValue()));
         }
     }
 

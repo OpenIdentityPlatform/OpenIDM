@@ -26,6 +26,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.identityconnectors.framework.api.operations.UpdateApiOp;
 import org.identityconnectors.framework.common.objects.ConnectorObject;
@@ -69,7 +70,7 @@ public class ObjectClassInfoHelperTest {
 
         ObjectClassInfoHelper helper = new ObjectClassInfoHelper(configuration.get("objectTypes").get("__ACCOUNT__").asMap());
         Map<String, Object> source = new HashMap<String, Object>();
-        source.put("_id", "ID_NAME");
+        source.put(ServerConstants.OBJECT_PROPERTY_ID, "ID_NAME");
         source.put("__NAME__", "NAME_NAME");
 
         ConnectorObject co = helper.build(UpdateApiOp.class, "rename", source, null);

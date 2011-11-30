@@ -66,7 +66,7 @@ import java.util.Set;
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = "openidm.router.prefix", value = "system") // internal object set router
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "system") // internal object set router
 })
 public class SystemObjectSetService implements ObjectSet, SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
@@ -136,7 +136,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         locateService(identifier).create(id, object);
         // Append the system created local identifier
-        URI newId = identifier.resolveLocalId((String) object.get("_id")).getId();
+        URI newId = identifier.resolveLocalId((String) object.get(ServerConstants.OBJECT_PROPERTY_ID)).getId();
         ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
         /*try {
             onCreate(id, new JsonValue(object));

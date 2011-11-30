@@ -32,6 +32,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.context.InvokeContext;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.provisioner.Id;
@@ -75,7 +76,7 @@ import java.util.*;
         description = "OpenIDM System Object Set Service", immediate = true)
 @Service(value = {ProvisionerService.class})
 @Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service")
 })
 public class OpenICFProvisionerService implements ProvisionerService {
@@ -93,47 +94,16 @@ public class OpenICFProvisionerService implements ProvisionerService {
     /**
      * ConnectorInfoProvider service.
      */
-    @Reference(
-            name = "ConnectorInfoProviderServiceReference",
-            referenceInterface = ConnectorInfoProvider.class,
-            bind = "bind",
-            unbind = "unbind",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC)
+    @Reference
     private ConnectorInfoProvider connectorInfoProvider = null;
 
-
-    protected void bind(ConnectorInfoProvider connectorInfoProvider) {
-        logger.info("ConnectorInfoProvider is bound.");
-        this.connectorInfoProvider = connectorInfoProvider;
-
-    }
-
-    protected void unbind(ConnectorInfoProvider connectorInfoProvider) {
-        this.connectorInfoProvider = null;
-        logger.info("ConnectorInfoProvider is unbound.");
-    }
 
     /**
      * Cryptographic service.
      */
-    @Reference(
-            name = "ref_OpenICFProvisionerService_CryptoService",
-            referenceInterface = CryptoService.class,
-            bind = "bindCryptoService",
-            unbind = "unbindCryptoService",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-            policy = ReferencePolicy.STATIC
-    )
+    @Reference
     protected CryptoService cryptoService = null;
 
-    protected void bindCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
-    }
-
-    protected void unbindCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
-    }
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -142,7 +112,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         JsonValue jsonConfiguration = null;
         ConnectorReference connectorReference = null;
         try {
-            jsonConfiguration = getConfiguration(context);
+            jsonConfiguration = (new JSONEnhancedConfig()).getConfigurationAsJson(context);
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
             connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
         } catch (Exception e) {
@@ -173,9 +143,10 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     logger.warn("Test of {} failed when service was activated! Remote system may be unavailable or the It can be configuration problem.", systemIdentifier, e);
                 }
             } else {
-                logger.debug("Test is not supported.");
+                logger.debug("Test is not supported on {}", connectorReference);
             }
         } catch (Throwable e) {
+            //TODO Do we need this catch?
             logger.error("ERROR - Test of {} failed.", systemIdentifier, e);
             throw new ComponentException("Connector test failed.", e);
         }
@@ -949,15 +920,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
             throw new RuntimeException(e);
         }
         return stage;
-    }
-
-
-    private JsonValue getConfiguration(ComponentContext componentContext) {
-        JsonValue config = (new JSONEnhancedConfig()).getConfigurationAsJson(componentContext);
-        if (null != cryptoService) {
-            config = cryptoService.decrypt(config);
-        }
-        return config;
     }
 
     ConnectorFacade getConnectorFacade(APIConfiguration runtimeAPIConfiguration) {
