@@ -80,7 +80,7 @@
   <screen>$ echo Terminal sessions are formatted like this.
 Terminal sessions are formatted like this.</screen>
 
-  <programlisting language='java'>class Test
+  <programlisting language="java">class Test
 {
     public static void main(String [] args)
     {
