@@ -439,6 +439,10 @@
 
                     <includes>*/OpenIDM-*.xml</includes>
                     <xincludeSupported>true</xincludeSupported>
+
+                    <sectionAutolabel>true</sectionAutolabel>
+                    <sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>
+                    
                 </configuration>
                 <executions>
                     <execution>
