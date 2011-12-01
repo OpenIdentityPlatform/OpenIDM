@@ -38,6 +38,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -67,10 +68,13 @@ import org.forgerock.openidm.script.Scripts;
  * Provides internal routing for a top-level object set.
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 @Component(
     name = "org.forgerock.openidm.router",
     policy = ConfigurationPolicy.OPTIONAL,
+    metatype = true,
+    configurationFactory = false,
     immediate = true
 )
 @Properties({
@@ -90,7 +94,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
     /** TODO: Description. */
     private ComponentContext context;
 
-    private final List<Filter> filters = new ArrayList<Filter>();
+    private List<Filter> filters = new ArrayList<Filter>();
 
     /** TODO: Description. */
     private enum Method { CREATE, READ, UPDATE, DELETE, QUERY, ACTION, ALL };
@@ -139,16 +143,43 @@ public class ObjectSetRouterService extends ObjectSetRouter {
 
     @Activate
     protected synchronized void activate(ComponentContext context) {
+        LOGGER.info("Activate router configuration, properties: {}", context.getProperties());
+        init(context);
+    }
+    
+    @Modified
+    protected synchronized void modified(ComponentContext context) {
+        LOGGER.debug("Modified router configuration, properties: {}", context.getProperties());
+        init(context);
+    }
+    
+    /**
+     * Initialize the router with configuration. Supports modifying router configuration.
+     */
+    private void init(ComponentContext context) {
+        String pid = (String) context.getProperties().get("service.pid");
+        String factoryPid = (String) context.getProperties().get("service.factoryPid");
+        if (factoryPid != null) {
+            LOGGER.warn("Factory config for router not allowed, ignoring config {}-{}", pid, factoryPid );
+            return;
+        }
         this.context = context;
-        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         try {
+            JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+            List<Filter> changedFilters = new ArrayList<Filter>();
             for (JsonValue jv : config.get("filters").expect(List.class)) { // optional
-                filters.add(new Filter(jv));
+                changedFilters.add(new Filter(jv));
             }
+            filters = changedFilters;
         } catch (JsonValueException jve) {
-            throw new ComponentException("Configuration error", jve);
+            // The router should stay up for basic support even with invalid config, do not throw Exception
+            LOGGER.warn("Router configuration error", jve);
+        } catch (Exception ex) {
+            // The router should stay up for basic support even with invalid config, do not throw Exception
+            LOGGER.warn("Failed to configure router", ex);
         }
     }
+    
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
         filters.clear();
