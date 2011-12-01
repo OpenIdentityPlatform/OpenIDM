@@ -61,14 +61,12 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
 
+import org.forgerock.openidm.objset.BadRequestException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
-import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.service.cm.*;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -165,6 +163,10 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
         
         String factoryPid = configurationEvent.getFactoryPid();
+        if ("org.forgerock.openidm.router".equalsIgnoreCase(factoryPid)) {
+            logger.warn("Factory router config is detected. OpenIDM prevents further processing of this config!");
+            return;
+        }
         String pid = configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED)
         {
@@ -478,6 +480,9 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             Configuration newConfiguration;
             if (factoryPid != null)
             {
+                if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
+                    throw new ConfigurationException(factoryPid, "router config can not be factory config");
+                }
                 newConfiguration = getConfigurationAdmin().createFactoryConfiguration(pid, null);
             }
             else
