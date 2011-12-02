@@ -162,7 +162,7 @@ public class EmailServiceImpl implements EmailService {
      */
     @Override
     public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
-        Map<String, Object> result = new HashMap();
+        Map<String, Object> result = new HashMap<String, Object>();
         logger.debug("External Email service action called for {} with {}", fullId, params);
         emailClient.send(params);
         result.put("status", "OK");
@@ -175,7 +175,7 @@ public class EmailServiceImpl implements EmailService {
         JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
-            emailClient = new EmailClient(config.asMap());
+            emailClient = new EmailClient(config);
             logger.debug("external email client enabled");
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start external email client service.", ex);
