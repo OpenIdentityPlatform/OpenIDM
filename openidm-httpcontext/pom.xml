@@ -45,8 +45,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.http;version="${openidm.version}"</Export-Package>
                         <Import-Package>*</Import-Package>
+                        <Export-Package>org.forgerock.openidm.http;version="${openidm.version}"</Export-Package>
                         <Include-Resource>{maven-resources}</Include-Resource>
                     </instructions>
                 </configuration>

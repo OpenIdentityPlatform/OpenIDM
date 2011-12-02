@@ -31,18 +31,33 @@ public class OsgiJAASLoginService extends JAASLoginService {
     final static Logger logger = LoggerFactory.getLogger(OsgiJAASLoginService.class);
     
     public OsgiJAASLoginService() {
-        // Ensure we can load and instantiate all the necessary classes,
-        org.eclipse.jetty.plus.jaas.JAASRole.class.getName();
-        org.eclipse.jetty.plus.jaas.callback.DefaultCallbackHandler.class.getName();
-        org.eclipse.jetty.plus.jaas.spi.UserInfo.class.getName();
+        /* 
+            The following packages and sample content must be loadable from the thread context classloader
+            org.eclipse.jetty.plus.jaas.JAASRole
+            org.eclipse.jetty.plus.jaas.callback.DefaultCallbackHandler
+            org.eclipse.jetty.plus.jaas.spi.UserInfo
+            
+            Dynamic import in fragment used for the following to allow thread context classloader to find the login module
+            org.forgerock.openidm.jaas.RepoLoginModule
+        */
     }
 
     /** 
      * @InheritDoc
      */
     public UserIdentity login(final String username, final Object credentials) {
-        logger.trace("Invoking login for {} with context cl {}", username,  Thread.currentThread().getContextClassLoader());
-        return super.login(username, credentials);
+
+        // JAAS heavily relies on thread context classloaders.
+        // Set it to the jetty bundle, which defines the Role classes etc.
+        // This requires that the login module is loadable from the jetty bundle
+        ClassLoader origTCCL = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(JAASLoginService.class.getClassLoader());
+            logger.trace("Invoking login for {} with context cl {}", username,  Thread.currentThread().getContextClassLoader());
+            return super.login(username, credentials);
+        } finally {
+            Thread.currentThread().setContextClassLoader(origTCCL);
+        }
     }
 }
 

@@ -16,10 +16,6 @@
  */
 package org.forgerock.openidm.http;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
@@ -86,7 +82,7 @@ public final class ContextRegistrator {
     }
     
     @Activate
-    protected void activate(ComponentContext context) throws ServletException, NamespaceException {
+    protected void activate(ComponentContext context) throws Exception {
         this.context = context;
 
         // register the http context so other bundles can add filters etc.
