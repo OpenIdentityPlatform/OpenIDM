@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.external.email.impl;
 
+import com.sun.mail.util.MailSSLSocketFactory;
 import java.util.Map;
 
 import java.util.Properties;
@@ -33,6 +34,7 @@ import javax.mail.Transport;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  *
@@ -49,27 +51,27 @@ public class EmailClient {
     private Properties props = new Properties();
     private Session session;
 
-    public EmailClient(Map config) throws RuntimeException {
-        if ((String) config.get("host") != null) {
-            host = (String) config.get("host");
+    public EmailClient(JsonValue config) throws RuntimeException {
+        if (config.get("host").asString() != null) {
+            host = config.get("host").asString();
             props.put("mail.smtp.host", host);
         }
-        if ((String) config.get("port") != null) {
-            port = (String) config.get("port");
+        if (config.get("port").asString() != null) {
+            port = config.get("port").asString();
             props.put("mail.smtp.port", port);
         }
-        if ((String) config.get("from") != null) {
-            fromAddr = (String) config.get("from");
+        if (config.get("from").asString() != null) {
+            fromAddr = config.get("from").asString();
         }
 
-        if (((String) config.get("mail.smtp.auth")).equalsIgnoreCase("true")) {
-            if ((String) config.get("username") != null) {
-                username = (String) config.get("username");
+        if (config.get("mail.smtp.auth").asString().equalsIgnoreCase("true")) {
+            if (config.get("username").asString() != null) {
+                username = config.get("username").asString();
             } else {
                 throw new RuntimeException("No username provided for SMTP auth");
             }
-            if ((String) config.get("password") != null) {
-                password = (String) config.get("password");
+            if (config.get("password").asString() != null) {
+                password = config.get("password").asString();
             } else {
                 throw new RuntimeException("No password provided for SMTP auth");
             }
@@ -77,8 +79,17 @@ public class EmailClient {
             smtpAuth = true;
         }
 
-        if (((String) config.get("mail.smtp.starttls.enable")).equalsIgnoreCase("true")) {
+        if (config.get("mail.smtp.starttls.enable").asString().equalsIgnoreCase("true")) {
             props.put("mail.smtp.starttls.enable", "true");
+            
+            // temporary hack to avoid cert check
+            try{
+                MailSSLSocketFactory sf = new MailSSLSocketFactory();
+                sf.setTrustAllHosts(true);
+                props.put("mail.smtp.ssl.socketFactory", sf);
+            }
+            catch (Exception e){
+            }
         }
 
         session = Session.getInstance(props);
