@@ -69,12 +69,6 @@ public class RepoLoginModule extends AbstractLoginModule {
     
     public RepoLoginModule() {
         super();
-        
-        // Ensure dependencies are generated and classes can be loaded
-        org.eclipse.jetty.plus.jaas.JAASRole.class.getName();
-        org.eclipse.jetty.plus.jaas.callback.DefaultCallbackHandler.class.getName();
-        org.eclipse.jetty.plus.jaas.spi.UserInfo.class.getName();
-        
         logger.trace("RepoLoginModule created");
     }
 

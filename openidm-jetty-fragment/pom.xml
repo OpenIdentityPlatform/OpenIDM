@@ -31,6 +31,13 @@
             <artifactId>openidm-crypto</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+<!-- Not necessary when using dynamic import
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-jaas-loginmodule-repo</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+-->
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jetty-bundle</artifactId>
@@ -65,6 +72,8 @@
                 <configuration>
                     <instructions>
                         <Import-Package>*</Import-Package>
+                        <!-- Avoid transient felix resolution issues with dynamic resolution -->
+                        <DynamicImport-Package>org.forgerock.openidm.jaas</DynamicImport-Package>
                         <Fragment-Host>org.ops4j.pax.web.pax-web-jetty-bundle</Fragment-Host>
                         <Export-Package></Export-Package>
                     </instructions>

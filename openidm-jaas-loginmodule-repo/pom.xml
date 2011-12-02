@@ -86,7 +86,7 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Fragment-Host>org.forgerock.openidm.httpcontext</Fragment-Host>
-                        <Export-Package></Export-Package>
+                        <Export-Package>org.forgerock.openidm.jaas;uses:="org.eclipse.jetty.http.security,org.eclipse.jetty.plus.jaas,org.eclipse.jetty.plus.jaas.callback,javax.security.auth.spi";version="${openidm.version}"</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
