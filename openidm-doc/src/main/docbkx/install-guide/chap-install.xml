@@ -122,13 +122,13 @@ $</screen>
       <step>
        <para>On UNIX, Linux, and Mac OS X</para>
        <screen>$ cd /path/to/openidm
-$ ./start.sh 
+$ ./start.sh
 -&gt;</screen>
       </step>
       <step>
        <para>On Windows</para>
        <screen>$ cd \path\to\openidm
-$ run.bat 
+$ run.bat
 Start in debug mode [1] default
 Start in normal mode [2]
 Show help [3]
@@ -148,7 +148,8 @@ Listening for transport dt_socket at address: 5005
 Id     State           Name
 [  17] [active       ] org.forgerock.openidm.config.starter
 [   7] [active       ] org.forgerock.openidm.external.rest
-[   9] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[   9] [active       ]
+ org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
 [  13] [active       ] org.forgerock.openidm.ui.simple
 [   5] [active       ] org.forgerock.openidm.router
 [  11] [active       ] org.forgerock.openidm.restlet
@@ -182,7 +183,7 @@ Id     State           Name
       <listitem>
        <para>Default Console URL: <link xlink:show="new"
        xlink:href='http://localhost:8080/system/console'
-       >http://localhost:8080/system/console</link>.</para>
+       >http://localhost:8080/system/console</link></para>
       </listitem>
       <listitem>
        <para>Default user name: <literal>admin</literal></para>
@@ -235,19 +236,32 @@ Id     State           Name
      <stepalternatives>
       <step>
        <para>On UNIX, Linux, and Mac OS X</para>
-       <screen>$ curl --user admin:admin -X PUT -d '{"name":"joe","firstname":"joe",
- "lastname":"smith","email":"joe@abc.com","userPassword":"11111111"}'
+       <screen>$ curl
+ --user admin:admin
+ --request PUT
+ --data '{
+ "name":"joe",
+ "firstname":"joe",
+ "lastname":"smith",
+ "email":"joe@abc.com",
+ "userPassword":"11111111"
+ }'
  http://localhost:8080/openidm/managed/user/joe
-
 {"_rev":"0","_id":"joe"}</screen>
       </step>
       <step>
        <para>On Windows</para>
-       <screen>
-C:\&gt;curl --user admin:admin -X PUT -d {\"name\":\"joe",\"firstname\":\"joe\",
- \"lastname\":\"smith\",\"email\":\"joe@abc.com\",\"userPassword\":\"11111111\"}
+       <screen>C:\&gt;curl
+ --user admin:admin
+ --request PUT
+ --data {
+ \"name\":\"joe",
+ \"firstname\":\"joe\",
+ \"lastname\":\"smith\",
+ \"email\":\"joe@abc.com\",
+ \"userPassword\":\"11111111\"
+ }
  http://localhost:8080/openidm/managed/user/joe
-
 {"_rev":"0","_id":"joe"}</screen>
       </step>
      </stepalternatives>
@@ -264,9 +278,15 @@ C:\&gt;curl --user admin:admin -X PUT -d {\"name\":\"joe",\"firstname\":\"joe\",
       <step>
        <para>Use the <command>curl</command> command.</para>
        <screen>$ curl --user admin:admin http://localhost:8080/openidm/managed/user/joe
-
-{"lastname":"smith","userpassword":"11111111","firstname":"joe","_id":"joe",
- "_rev":"0","email":"joe@abc.com","name":"joe"}</screen>
+ {
+ "lastname":"smith",
+ "userpassword":"11111111",
+ "firstname":"joe",
+ "_id":"joe",
+ "_rev":"0",
+ "email":"joe@abc.com",
+ "name":"joe"
+ }</screen>
       </step>
      </stepalternatives>
     </step>
