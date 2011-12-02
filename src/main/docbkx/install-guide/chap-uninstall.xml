@@ -38,17 +38,18 @@
   <title>To Remove OpenIDM Software</title>
   
   <step performance='optional'>
-   <para>Stop OpenIDM services if they are running.</para>
-   <para>Under the Shell tab of the console, enter <literal>shutdown</literal>
-   at the <literal>-&gt;</literal> prompt.</para>
+   <para>Stop OpenIDM services if they are running, by entering
+   <literal>shutdown</literal> at the <literal>-&gt;</literal> prompt either
+   on the command line, or on the System Information tab of the Felix
+   console.</para>
+   <screen>-> shutdown</screen>
   </step>
   
   <step>
    <para>Remove the file system directory where you installed OpenIDM
    software.</para>
    
-   <screen width='80'>$ rm -rf /path/to/openidm</screen>
+   <screen>$ rm -rf /path/to/openidm</screen>
   </step>
  </procedure>
 </chapter>
-

@@ -66,8 +66,8 @@
  <xinclude:include href="preface.xml" />
  
  <xinclude:include href='chap-install.xml' />
- <xinclude:include href='chap-uninstall.xml' />
  <xinclude:include href='chap-sample.xml' />
+ <xinclude:include href='chap-uninstall.xml' />
 
  <index />
  <?dbhtml-include href="../ga.html"?>
