@@ -217,10 +217,9 @@ Id     State           Name
     repository.</para>
     <step>
      <para>Access the following URL to get a JSON file including all users in
-     the OpenIDM repository.</para>
-     <para><link xlink:show="new"
+     the OpenIDM repository: <link xlink:show="new"
      xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids">
-     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link></para>
+     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
      <para>When you first install OpenIDM with an empty repository, no users
      exist. What the result looks like depends on your browser settings.</para>
      <para>You can use the URL with the <command>curl</command> command line
@@ -277,7 +276,9 @@ Id     State           Name
       </step>
       <step>
        <para>Use the <command>curl</command> command.</para>
-       <screen>$ curl --user admin:admin http://localhost:8080/openidm/managed/user/joe
+       <screen>$ curl
+ --user admin:admin
+ http://localhost:8080/openidm/managed/user/joe
  {
  "lastname":"smith",
  "userpassword":"11111111",
