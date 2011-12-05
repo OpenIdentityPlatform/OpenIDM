@@ -62,8 +62,8 @@
 
       <para>OSGi is a module system and service platform for the Java
       programming language that implements a complete and dynamic component
-      model. For a good introduction please refer to
-      <link xlink:href="http://www.osgi.org/About/WhyOSGi"></link>. 
+      model. For a good introduction please refer to the
+      <link xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site.
       While the OpenIDM services should be
       able to run in any OSGi container, it is currently running in
       <link xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>.</para>
@@ -90,7 +90,7 @@
       using the 
       <link xlink:href="http://www.quartz-scheduler.org">Quartz library</link>. 
       It is
-      typically used to schedule regular syncronizations and
+      typically used to schedule regular synchronizations and
       reconciliations.
       </para>
 <!--  Currently xref linkends must reference IDs within the same file.
@@ -201,7 +201,7 @@
     <title>Access Layer</title>
 
     <para>The access layer provides the user interfaces and public APIs for
-    accessing and managing the OpenIDM repository and it's functions.</para>
+    accessing and managing the OpenIDM repository and its functions.</para>
 
     <section>
       <title>RESTful Interfaces</title>

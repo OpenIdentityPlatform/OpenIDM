@@ -149,10 +149,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <filename>samples/sample1/data/xmlConnectorData.xml</filename>, which
      contains users in XML format.</para>
      <para>For details on the OpenICF connector configuration files see the
-     <link xlink:href="admin-guide#chap-provisioning"
+     <link xlink:href="reference#chap-provisioning"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Provisioning</citetitle></link> chapter in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Reference</citetitle>.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -187,10 +187,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
      <para>For details on the scheduler configuration please refer to the <link
-     xlink:href="admin-guide#chap-scheduling"
+     xlink:href="reference#chap-scheduling"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Scheduling</citetitle></link> chapter in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Reference</citetitle>.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -259,16 +259,16 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      reconciliation. You can use an <literal>onCreate</literal> script in a
      mapping to set default values for a user created in the target resource.
      For details on scripting see the <link
-     xlink:href="admin-guide#chap-scripting"
+     xlink:href="reference#chap-scripting"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Scripting</citetitle></link> chapter in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Reference</citetitle>.</para>
      <para>For details on synchronization, reconciliation, and
      <filename>sync.json</filename>, see the <link
-     xlink:href="admin-guide#chap-synchronization"
+     xlink:href="reference#chap-synchronization"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Synchronization</citetitle></link> chapter in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Reference</citetitle>.</para>
      </listitem>
    </varlistentry>
   </variablelist>
@@ -472,16 +472,16 @@ activity.csv recon.csv</screen>
   <para>You configure the action that OpenIDM takes based on an object's
   situation in the configuration file, <filename>conf/sync.json</filename>.
   For the list of all possible situations and actions, see the <link
-  xlink:href="admin-guide#chap-synchronization"
+  xlink:href="reference#chap-synchronization"
   xlink:role="http://docbook.org/xlink/role/olink"
   ><citetitle>Synchronization</citetitle></link> chapter in the
-  <citetitle>Administration Guide</citetitle>.</para>
+  <citetitle>Reference</citetitle>.</para>
 
   <para>For details on auditing, see the <link
-  xlink:href="admin-guide#chap-auditing"
+  xlink:href="reference#chap-auditing"
   xlink:role="http://docbook.org/xlink/role/olink"
   ><citetitle>Auditing</citetitle></link> chapter in the
-  <citetitle>Administration Guide</citetitle>.</para>
+  <citetitle>Reference</citetitle>.</para>
  </section>
  
  <section xml:id="sample-adding-users-rest">

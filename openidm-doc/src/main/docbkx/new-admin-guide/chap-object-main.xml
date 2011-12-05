@@ -23,28 +23,26 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter xml:id='chap-???'
+<chapter xml:id='chap-object-main'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
-    <title>Introduction to OpenIDM</title>
-    <para>The goal of OpenIDM is to manage and synchronize identity related objects 
-    between many different object repositories and to minimize the work of maintaining 
-    an organization's identities and user's access to different applications through role 
-    and group management. OpenIDM is able to maintain user as well as other objects like 
-    groups in external repositories.</para>
-    <sect1>
-        <title>OpenIDM Components</title>
-        <para>OpenIDM services run in an OSGi container with an embedded Servlet
-        container, and an embedded noSQL database. By default the OSGi container is
-        Apache Felix. The default Servlet container is Jetty. The default noSQL
-        database is OrientDB. At this time the only supported configuration is
-        running the services in Apache Felix.</para>
-        <para>The default database can easily be replaced by an other jdbc based 
-        database like mysql. Further more it is also possible to embed OpenIDM in a 
-        war file and deploy that to a web container.</para>
-    </sect1>
+ <title>Managing User Objects</title>
+
+ <para>This chapter covers ... TODO.</para>
+
+ <section xml:id="object-main-section-id">
+  <title>Section Title</title>
+
+  <para>This section covers ... TODO.</para>
+
+  <section xml:id="object-main-subsection-id">
+   <title>Subsection Title</title>
+
+   <para>This subsection covers ... TODO.</para>
+  </section>
+ </section>
 </chapter>
