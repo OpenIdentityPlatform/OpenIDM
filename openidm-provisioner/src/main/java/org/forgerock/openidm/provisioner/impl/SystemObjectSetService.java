@@ -25,6 +25,7 @@
 package org.forgerock.openidm.provisioner.impl;
 
 import org.apache.felix.scr.annotations.*;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.audit.util.Action;
@@ -35,6 +36,7 @@ import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
@@ -82,6 +84,9 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             policy = ReferencePolicy.STATIC,
             target = "(service.pid=org.forgerock.openidm.router)")
     private ObjectSet router;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private ConfigurationService configurationService;
 
     private ComponentContext context = null;
 
@@ -296,11 +301,17 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
     @Override // ObjectSet
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        Id identifier = new Id(id);
-
-        Map<String, Object> result = locateService(identifier).action(id, params);
-        ActivityLog.log(getRouter(), Action.ACTION, "Action parameters " + params, id, result, null, Status.SUCCESS);
-
+        JsonValue _params = new JsonValue(params, new JsonPointer("params"));
+        JsonValue _action = _params.get(ServerConstants.ACTION_NAME);
+        Map<String, Object> result = null;
+        if (_action.isNull() || !"CREATECONFIGURATION".equalsIgnoreCase(_action.asString())) {
+            Id identifier = new Id(id);
+            result = locateService(identifier).action(id, params);
+            ActivityLog.log(getRouter(), Action.ACTION, "Action parameters " + params, id, result, null, Status.SUCCESS);
+        } else if (null != configurationService) {
+            JsonValue _entity = _params.get(ServerConstants.ACTION_ENTITY);
+            result = configurationService.configure(_entity).asMap();
+        }
         return result;
     }
 
