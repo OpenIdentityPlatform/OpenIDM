@@ -59,6 +59,12 @@
     <a href="./doc/OpenIDM-Dev-Guide.pdf">PDF</a>,
     <a href="./doc/OpenIDM-Dev-Guide.rtf">RTF</a></dd>
 
+    <dt>Reference</dt>
+    <dd><a href="./doc/OpenIDM-Reference.epub">EPUB</a>,
+    <a href="./doc/reference/OpenIDM-Reference.html">HTML</a>,
+    <a href="./doc/OpenIDM-Reference.pdf">PDF</a>,
+    <a href="./doc/OpenIDM-Reference.rtf">RTF</a></dd>
+
     <!-- <dt>Javadoc</dt>
     <dd><a href="TODO">HTML</a></dd> -->
    </dl>
