@@ -480,6 +480,12 @@
                                  <copy todir='${docbkx-out}/epub/install-guide/OpenIDM-Install-Guide'>
                                        <fileset dir='${basedir}/src/main/resources' />
                                  </copy>
+                                 <copy todir='${docbkx-out}/epub/reference/OpenIDM-Reference/images'>
+                                       <fileset dir='${docbkx-src}/reference/images' />
+                                 </copy>
+                                 <copy todir='${docbkx-out}/epub/reference/OpenIDM-Reference'>
+                                       <fileset dir='${basedir}/src/main/resources' />
+                                 </copy>
                                  <copy todir='${docbkx-out}/epub/release-notes/OpenIDM-Release-Notes/images'>
                                        <fileset dir='${docbkx-src}/release-notes/images' />
                                  </copy>
@@ -557,6 +563,21 @@
                         </goals>
                     </execution>
                     <execution>
+                        <id>doc-olinkdb-reference</id>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Reference.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/reference.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/reference"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
                         <id>doc-olinkdb-release-notes</id>
                         <phase>process-resources</phase>
                         <configuration>
@@ -604,6 +625,12 @@
                                 <copy todir="${docbkx-out}/html/install-guide">
                                     <fileset dir="src/main/resources"/>
                                 </copy>
+                                <copy todir="${docbkx-out}/html/reference/images">
+                                    <fileset dir="${docbkx-src}/reference/images"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/reference">
+                                    <fileset dir="src/main/resources"/>
+                                </copy>
                                 <copy todir="${docbkx-out}/html/release-notes/images">
                                     <fileset dir="${docbkx-src}/release-notes/images"/>
                                 </copy>
@@ -615,6 +642,7 @@
                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/admin-guide' />
                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide' />
                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/reference' />
                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes' />
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
                                   <include name="**/**/*.html" />
@@ -696,6 +724,12 @@ $(".flat").live("dblclick", function() {
                                 </resource>
                                 <resource>
                                     <directory>${docbkx-out}/epub/install-guide</directory>
+                                    <includes>
+                                        <include>**/*.epub</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${docbkx-out}/epub/reference</directory>
                                     <includes>
                                         <include>**/*.epub</include>
                                     </includes>
