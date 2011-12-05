@@ -113,7 +113,7 @@
             <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/release</url>
             </repository> <repository>
-            <id>com.springsource.repository.bundles.external</id> 
+            <id>com.springsource.repository.bundles.external</id>
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository>
@@ -186,10 +186,12 @@
 
         <!-- version management -->
         <openidm.version>2.0.0-SNAPSHOT</openidm.version>
-        <slf4j.version>1.6.2</slf4j.version>
+        <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <!--<orientdb.version>1.0rc7-SNAPSHOT</orientdb.version>-->
         <orientdb.version>1.0rc6</orientdb.version>
+        <ci.build.number>${env.BUILD_NUMBER}</ci.build.number>
+        <ci.svn.revision>${env.SVN_REVISION}</ci.svn.revision>
     </properties>
 
     <modules>
@@ -214,9 +216,9 @@
         <module>openidm-shell</module>
         <module>openidm-system</module>
         <module>openidm-util</module>
-	<module>openidm-ui</module>
+        <module>openidm-ui</module>
         <module>openidm-zip</module>
-  </modules>
+    </modules>
 
     <profiles>
         <profile>
@@ -270,7 +272,7 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-            
+
             <!-- Core OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -368,7 +370,7 @@
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.2</version>
+                <version>6.3.1</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -384,12 +386,18 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.2</version>
+                    <version>1.7.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.3.4</version>
+                    <version>2.3.6</version>
+                    <configuration>
+                        <instructions>
+                            <Implementation-Build>${ci.build.number}</Implementation-Build>
+                            <SCM-Revision>${ci.build.number}</SCM-Revision>
+                        </instructions>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -441,7 +449,7 @@
 
                     <sectionAutolabel>true</sectionAutolabel>
                     <sectionLabelIncludesComponentLabel>true</sectionLabelIncludesComponentLabel>
-                    
+
                 </configuration>
                 <executions>
                     <execution>
@@ -725,7 +733,7 @@ $(".flat").live("dblclick", function() {
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.3.1</version>
+                <version>2.4</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -751,7 +759,7 @@ $(".flat").live("dblclick", function() {
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.3</version>
                 <configuration>
                     <aggregate>${openidm.parent.reports.aggregate}</aggregate>
                     <windowTitle>OpenIDM ${project.version} Reference</windowTitle>

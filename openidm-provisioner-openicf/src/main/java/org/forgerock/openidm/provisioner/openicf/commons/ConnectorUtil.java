@@ -65,7 +65,7 @@ public class ConnectorUtil {
     private static final String OPENICF_BUNDLENAME = "bundleName";
     private static final String OPENICF_BUNDLEVERSION = "bundleVersion";
     private static final String OPENICF_CONNECTOR_NAME = "connectorName";
-    private static final String OPENICF_CONNECTOR_HOST_REF = "connectorHostRef";
+    public static final String OPENICF_CONNECTOR_HOST_REF = "connectorHostRef";
     private static final String OPENICF_HOST = "host";
     private static final String OPENICF_PORT = "port";
     public static final String OPENICF_KEY = "key";

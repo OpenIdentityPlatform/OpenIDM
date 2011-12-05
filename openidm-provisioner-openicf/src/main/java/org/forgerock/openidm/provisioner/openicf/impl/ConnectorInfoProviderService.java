@@ -12,6 +12,9 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -51,7 +54,7 @@ import java.util.jar.JarInputStream;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service")
 })
-public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider {
+public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider, ConfigurationService {
     private final static Logger TRACE = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
 
 
@@ -200,6 +203,38 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
 //    protected void update(ComponentContext context) {
 //    }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    public JsonValue configure(JsonValue params) throws ObjectSetException {
+        JsonValue result = null;
+        if (params.isNull() || params.size() == 0) {
+            result = new JsonValue(new HashMap<String, Object>());
+            result.put(ConnectorUtil.OPENICF_CONNECTOR_REF, listAllConnectorInfo());
+        } else if (!params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull() && params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull()) {
+            //May throw IllegalArgumentException
+            ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
+            ConnectorInfo info = findConnectorInfo(ref);
+            if (null == info) {
+                throw new NotFoundException("Connector not found: " + ref.getConnectorKey());
+            }
+            result = params;
+            ConnectorUtil.createSystemConfigurationFromAPIConfiguration(info.createDefaultAPIConfiguration(), result.asMap());
+        } else if (!params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull() && !params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull()) {
+            //May throw IllegalArgumentException
+            ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
+            ConnectorInfo info = findConnectorInfo(ref);
+            if (null == info) {
+                throw new NotFoundException("Connector not found: " + ref.getConnectorKey());
+            }
+            APIConfiguration configuration = info.createDefaultAPIConfiguration();
+            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);
+            result = new JsonValue(createSystemConfiguration(configuration, false));
+        }
+        return result;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -246,6 +281,41 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             } catch (Exception e) {
                 TRACE.error("Remote Connector Server is not available for {}", entry, e);
             }
+        }
+        return Collections.unmodifiableList(result);
+    }
+
+
+    private List<Map<String, Object>> listAllConnectorInfo() {
+        ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
+        ConnectorInfoManager connectorInfoManager = factory.getLocalManager(getConnectorURLs());
+
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        for (ConnectorInfo info : connectorInfoManager.getConnectorInfos()) {
+            Map<String, Object> connectorReference = ConnectorUtil.getConnectorKey(info.getConnectorKey());
+            result.add(connectorReference);
+        }
+
+        if (null != osgiConnectorManager) {
+            for (ConnectorInfo info : osgiConnectorManager.getConnectorInfos()) {
+                Map<String, Object> connectorReference = ConnectorUtil.getConnectorKey(info.getConnectorKey());
+                connectorReference.put(ConnectorUtil.OPENICF_CONNECTOR_HOST_REF, ConnectorReference.OSGI_SERVICE_CONNECTOR_MANAGER);
+                result.add(connectorReference);
+            }
+        }
+
+        for (Map.Entry<String, RemoteFrameworkConnectionInfo> entry : remoteFrameworkConnectionInfo.entrySet()) {
+            try {
+                ConnectorInfoManager remoteConnectorInfoManager = factory.getRemoteManager(entry.getValue());
+                for (ConnectorInfo info : remoteConnectorInfoManager.getConnectorInfos()) {
+                    Map<String, Object> connectorReference = ConnectorUtil.getConnectorKey(info.getConnectorKey());
+                    connectorReference.put(ConnectorUtil.OPENICF_CONNECTOR_HOST_REF, entry.getKey());
+                    result.add(connectorReference);
+                }
+            } catch (Exception e) {
+                TRACE.error("Remote Connector Server is not available for {}", entry, e);
+            }
+
         }
         return Collections.unmodifiableList(result);
     }
