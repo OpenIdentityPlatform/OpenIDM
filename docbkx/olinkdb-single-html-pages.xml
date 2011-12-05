@@ -39,7 +39,7 @@
     <dir name="OpenIDM-Reference">
      <document targetdoc="reference"
                baseuri="../reference/OpenIDM-Reference.html">
-      &release-notes;
+      &reference;
      </document>
     </dir>
    </dir>
