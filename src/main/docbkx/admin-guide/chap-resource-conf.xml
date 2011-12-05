@@ -30,19 +30,594 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Configuring Resources</title>
+    <title>Resource Connector Configuration</title>
+    <section>
+    <title>Common Settings</title>
+    <section>
+        <title>Introduction</title>
+        <para>The topic of this chapter is to describe how to connect to different external resources, like flat file, LDAP, AD and others. 
+The configuration shown here is kept simple, especially concerning the number of attributes handled. Still it should be possible to extend the configuration to any projects need with the knowledge learned here. 
+Not all resources are suited for all OpenIDM operations. Still all of the resources shown here support the most of the CRUD functionalities plus reconciliation and live sync.</para>
+        <section>
+            <title>About Connections to Resources</title>
+            <para>Resources are the external systems, data bases, directory servers which usually hold user data which needs to be maintained and audited by an identity management system. 
+    OpenIDM connects to external resources through a connector frame work called OpenICF. The project for OpenICF is hosted [here|http://openicf.forgerock.org/].
+    The image below shows the architecture of how OpenIDM connects to external resources via the OpenICF server. In most cases the OpenICF server will start as part of OpenIDM.
+            </para>
+          <para>
+          <figure>
+            <inlinemediaobject>
+              <imageobject>
+                <imagedata fileref="images/OpenICFarc.png">
+                </imagedata>
+              </imageobject>
+            </inlinemediaobject>
+            <caption>The figure shows the basic architecture of OpenIDM with a connector server.</caption>
+            </figure>
+          </para>
+        </section>
+        <section>
+            <title>Local v.s. Remote Connector Server</title>
+            <para>The idea of OpenICF is to provide a common SPI to give identity 
+            related services access to different sources which contain information 
+            about users. Principally OpenIDF will always avoid agents on the external 
+            system and use the external system\'s native access protocol instead. 
+            A connection to a Db will be established with the DB's java connection 
+            libraries or JDBC driver. Connections to ldap servers are done over JNDI 
+            and to Operating systems it uses ssh. If an external service does not 
+            provide a connection library which can be executed inside the JVM, like 
+            Microsoft's ADSI, then a OpenICF can still use the native dll by a remote 
+            connector server. In the case of ADSI the connector server is established 
+            as a .net service.</para>
+        </section>
+    </section>
+    <section>
+        <title>Common Connector Properties</title>
+        <section>
+            <title>Connecting to a Local Connector Server</title>
+            <para>The top level properties of the OpenICF Provsioner Service are:</para>
+            <example>
+                <caption>Top Level Provisioner Service Properties</caption>
+                <programlisting>
+   {
+      "name" : {_See Below_,
+      ...}
+      "connectorRef" : {_See Below_,
+      ...}
+      "poolConfigOption" : {_See Below_,
+      ...}
+      "operationTimeout" : {_See Below_,
+      ...}
+      "configurationProperties" : {_See Below_,
+      ...}
+      "objectTypes" : {_See Below_,
+      ...}
+      "operationOptions" : {_See Below_
+      ...}
+   }                
+                </programlisting>
+            </example>
+            <section>
+                <title>The "name" Property</title>
+                <para>The name of the connector is used to reference the resource in all other configurations.</para>
+            </section>
+            <section>
+                <title>The "connectorRef"</title>
+                <para>It tells OpenIDM which java class, in which bundle to use as well as the version of the connector. Therefore it is possible to have different versions of the same connector installed in parallel.</para>
+                <example>
+                <caption>Example "connectroRef"</caption>
+                <programlisting>
+   {
+      "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "bundleName" : "org.forgerock.openicf.connectors.file.xml",
+      "bundleVersion" : "1.1.0.0-SNAPSHOT",
+      "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
+   }                
+                </programlisting>
+                </example>
+                <para>Where:</para>
+                <itemizedlist>
+                    <listitem>connectorHostRef: A pointer to the connector server. In case of a remote connector server it needs to point to the connector info provicer object, see the "connectorRef" for a Remote Connector below.
+                        <itemizedlist>
+                        <listitem>If the connector server is local and the connector jar is installed as a bundle (i.e. in the openidm/bundle folder) then the value must be "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager", like in the example above.</listitem>
+                        <listitem>If the connector server is local and the connector jar is installed as connector (i.e. in the openidm/connectors folder) the the value should be "#LOCAL"</listitem>
+                        </itemizedlist>
+                    </listitem>
+                    <listitem>bundleName: The ConnectorBundle-Name of the OpenICF connector.</listitem>
+                    <listitem>bundleVersion: The ConnectorBundle-Version of the OpenICF connector.</listitem>
+                    <listitem>connectorName: The Connector implementation class name.</listitem>
+                </itemizedlist>
+            </section>
+            <section>
+                <title>The "poolConfigOption"</title>
+                <para>The connection between OpenIDM and the OpenICF connector server is handled with a configurable connection pool. An example for pool settings are shown here:</para>
+                <example>
+                    <caption>Connection Pool Configuration between OpenIDM and the connector server</caption>
+                    <programlisting>
+   {
+      "maxObjects" : 10,
+      "maxIdle" : 10,
+      "maxWait" : 150000,
+      "minEvictableIdleTimeMillis" : 120000,
+      "minIdle" : 1
+   }                    
+                    </programlisting>
+                </example>
+            </section>
+            <section>
+                <title>The "operationTimeout"</title>
+                <para>Each operation which might be requested from the connector server can be set with a different time out. A value of -1 disables the time out.</para>
+                <example>
+                    <caption>Example Time Out configuration</caption>
+                    <programlisting>
+   {
+      "CREATE" : -1,
+      "TEST" : -1,
+      "AUTHENTICATE" : -1,
+      "SEARCH" : -1,
+      "VALIDATE" : -1,
+      "GET" : -1,
+      "UPDATE" : -1,
+      "DELETE" : -1,
+      "SCRIPT_ON_CONNECTOR" : -1,
+      "SCRIPT_ON_RESOURCE" : -1,
+      "SYNC" : -1,
+      "SCHEMA" : -1
+   }                    
+                    </programlisting>
+                </example>
+            </section>
+            <section>
+                <title>The "configurationProperties"</title>
+                <para>The configurationProperties property configures the connection between the connection server and the actual resource and is therefore highly resource type specific. A file base resource will need a file path where any network based resource will need a host name and port combination. Authentication parameters will be configured here as well as search paths (like base contexts) in hierarchical directories. Two rather different examples are shown below:</para>
+                <example>
+                <caption>Example for a File Base Resource</caption>
+                <programlisting>
+    {
+        "xsdIcfFilePath" : "data/resource-schema-1.xsd",
+        "xsdFilePath" : "data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd",
+        "xmlFilePath" : "data/xmlConnectorData.xml"
+    }                
+                </programlisting>
+                </example>
+                <example>
+                <caption>Example for an LDAP Based Resource (abbreviated)</caption>
+                <programlisting>
+    {
+        "host" : "localhost",
+        "port" : 2389,
+        "baseContexts" : [ "ou=People,o=aaa" ],
+        "principal" : "cn=Directory Manager",
+        "credentials" : {"password"},
+        "changeLogBlockSize" : 100,
+        "failover" : [ ],
+        "ssl" : false,
+        ...
 
- <para>This chapter covers ... TODO.</para>
+    }                
+                </programlisting>
+                </example>
+                <para>Comment: even required properties are skipped in the example above!</para>
+            </section>
+            <section>
+                <title>The "objectTypes"</title>
+                <para>Though OpenIDM focuses on User Identity management the concept of managing other types of objects is part of the scope. Example of other objects that should be maintained by OpenIDM, i.e. created, updated or deleted, are:</para>
+                <itemizedlist>
+                    <listitem>Group Objects like LDAP or AD Groups</listitem>
+                    <listitem>Organizational Units in a Directory</listitem>
+                    <listitem>Container in Active Directory</listitem>
+                </itemizedlist>
+                <para>An example for object type "account" is given below:</para>
+                <example>
+                <caption>Example Configuration for Object Type "account", i.e. User on external resources</caption>
+                <programlisting>
+{
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {... (_See Below_)}
+        }
+    }                
+                </programlisting>
+                </example>
+                <itemizedlist>
+                    <listitem>"$schema" will currently always point to "http://json-schema.org/draft-03/schema"</listitem>
+                    <listitem>"type" needs to be set to "object"</listitem>
+                    <listitem>"nativeType" is "__ACCOUNT__" in the case of users and "__GROUP__" for group objects. On an LDAP server a extra objectType can be created for each objectClass which is used.</listitem>
+                    <listitem>"properties" contains the definition of each attribute which should be handled for the objectType.</listitem>
+                </itemizedlist>
+                <para>Examples are shown below.</para>
+                <example>
+                <caption>Example properties of an Object of Type "account"</caption>
+                <programlisting>
+            {
+                "firstname" : {
+                    "type" : "string",
+                    "nativeName" : "firstname",
+                    "nativeType" : "string"
+                },
+                "__UID__" : {
+                    "type" : "string",
+                    "nativeName" : "__UID__"
+                },
+                "name" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "lastname" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "lastname",
+                    "nativeType" : "string"
+                }
+            }                
+                </programlisting>
+                </example>
+                <para>Properties for each attribute are:</para>
+                <itemizedlist>
+                <listitem>"type": a string containing the name of the type:</listitem>
+                    <itemizedlist>
+                        <listitem>"string" is used for single value attributes</listitem>
+                        <listitem>"array" is used for multi valued attributes. Needs a item type: "items" type and nativeType are usually "string".</listitem>
+                    </itemizedlist>
+                <listitem>nativeName: The native OpenICF attribute name. In most of the cases this will be also the attribute name on the resource, but there are exceptions, like the DN on an LDAP server is the "__NAME__" attribute here.</listitem>
+                <listitem>"nativeType": The native OpenICF attribute type.</listitem>
+                <listitem>"required": true or false. It is a boolean value, not a string!</listitem>
+                <listitem>"flags": one or several of
+                    <itemizedlist>
+                        <listitem>"NOT_CREATABLE",</listitem>
+                        <listitem>"NOT_UPDATEABLE",</listitem>
+                        <listitem>"NOT_READABLE",</listitem>
+                        <listitem>"NOT_RETURNED_BY_DEFAULT"</listitem>
+                    </itemizedlist>
+                </listitem>
+                </itemizedlist>
+                <para>Attribute names which start and end with "__" are usually special attributes and handled differently in OpenICF and are usually resource type specific. For instance the attribute "__NAME__" is required to make the naming attribute of the object on the external resource. In case of an LDAP server for instance it has to contain the DN when an object is to be created on the resource.</para>
+            </section>
 
- <section xml:id="resource-conf-section-id">
-  <title>Section Title</title>
+            <section>
+                <title>The "operationOptions"</title>
+                <para>Some of the operation which are possible with a connector may be inappropriate in some projects or situations. Therefore the operations can be denied for the specific resource instance to avoid for instance accidental update of a read only resource. </para>
+                <para>The deny might be configured for the entire resource configuration or on the object type level as shown in the example below:</para>
+                <example>
+                <caption>Deny of Operations on the Resources Instance or Object Type Level</caption>
+                <programlisting>
+      "SYNC" :
+         {
+            "denied" : true,
+            "onDeny" : "DO_NOTHING",
+            "objectFeatures" :
+               {
+                  "__ACCOUNT__" :
+                     {
+                        "denied" : true,
+                        "onDeny" : "THROW_EXCEPTION"
+                     },
+                  "__GROUP__" :
+                     {
+                        "denied" : false,
+                        "onDeny" : "DO_NOTHING"
+                     }
+               }
+         }                
+                </programlisting>
+                </example>
+                <para>The reaction on the deny event can be "DO_NOTHING" or "THROW_EXCEPTION". The list of operations is:</para>
+                <itemizedlist>
+                    <listitem>AUTHENTICATE</listitem>
+                    <listitem>CREATE</listitem>
+                    <listitem>DELETE</listitem>
+                    <listitem>GET</listitem>
+                    <listitem>RESOLVEUSERNAME</listitem>
+                    <listitem>SCHEMA</listitem>
+                    <listitem>SCRIPT_ON_CONNECTOR</listitem>
+                    <listitem>SCRIPT_ON_RESOURCE</listitem>
+                    <listitem>SEARCH</listitem>
+                    <listitem>SYNC</listitem>
+                    <listitem>TEST</listitem>
+                    <listitem>UPDATE</listitem>
+                    <listitem>VALIDATE</listitem>
+                </itemizedlist>
+            </section>
+        </section>            
+        <section>
+            <title>Connection to a Remote Connector Server</title>
+            <para>In the case of a connection to a remote connector server, a Connector Info Provider Service is needed with the following configuration. The configuration is stored in an extra json file with the name provisioner.openicf.connectorinfoprovider.json</para>
+            <para>An example for a connectorinfoprovider looks like this:</para>
+            <example>
+                <caption>Example Connector Info Provider Configuration</caption>
+                <programlisting>
+{
+   "connectorsLocation" : "connectors",
+   "remoteConnectorServers" :
+      [
+         {
+            "name" : "dotnet",
+            "host" : "127.0.0.1",
+            "port" : 8759,
+            "useSSL" : false,
+            "timeout" : 0,
+            "key" : "Passw0rd"
+         }
+  ...                
+                </programlisting>
+            </example>
+            <section>
+                <title>The "connectorRef" for a Remote Connector</title>
+                <para>Additionally to the connectorRef properties as mention in chapter "Connecting to a Local Connector Server, in case of a remote connector the "connector info provider object" must be referenced. This is done in the "connectorHostRef" property of "connectorRef" and must contain the "name" property of the "connectorinfoprovider". In the example above that is "dotnet".</para>
+            </section>
+        
+        </section>
+        <para>The top level properties of the OpenICF Provsioner Service are:</para>
+        
+    </section>
+    <section><title>XML File Resource</title>
+        <section><title>Example connectorRef</title>
+        <para>The following code example shows a typical part of the provisioner configuration for an XML file connector.</para>
+        <example>
+        <caption>Typical connectorRef for an XML resource configuration (provisioner-json)</caption>
+        <programlisting>
+    "connectorRef" : {
+        "connectorHostRef" : "#LOCAL",
+        "bundleName" : "org.forgerock.openicf.connectors.file.file.openicf-xml-connector",
+        "bundleVersion" : "1.1.0.0-EA",
+        "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
+    },        
+        </programlisting>
+        </example>
+        <para>The connectorHostRef is optional if the connector server is local.</para>
+        </section>
+        <section><title>Typical configurationProperties configuration</title>
+        <example>
+        <caption>configurationProperties of an XML connector configuration (provisioner-json)</caption>
+        <programlisting>
+    "configurationProperties" : {
+        "xsdIcfFilePath" : "data/resource-schema-1.xsd",
+        "xsdFilePath" : "data/resource-schema-extension.xsd",
+        "xmlFilePath" : "data/xmlConnectorData.xml"
+    },        
+        </programlisting>
+        </example>
+        <para>Where:</para>
+        <itemizedlist>
+            <listitem>xmlFilePath: references the xml file which contains the account entries</listitem>
+            <listitem>xsdIcfFilePath: references the xsd file with a schema common to all xml file resources; the file is not supposed to be changed</listitem>
+            <listitem>xsdFilePath: references a kind of custom schema; here any project individual attributes are defined</listitem>
+        </itemizedlist>
+        </section>
+    </section>
+    <section><title>Generic LDAP Connector</title>
+        <section><title>Example connectorRef</title>
+        <example>
+        <caption>Example connectorRef for an LDAP connector configuration (provisioner-json)</caption>
+        <programlisting>
+   "connectorRef" :
+      {
+         "connectorHostRef" : "#LOCAL",
+         "connectorName" : "org.identityconnectors.ldap.LdapConnector",
+         "bundleName" : "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+         "bundleVersion" : "1.1.0.0-EA"
+      },        
+        </programlisting>
+        </example>
+        <para>In case of a local or built in connector server the connectorHostRef is optional if the connector jar is in openidm/connectors.</para>
+        </section>
+        <section><title>Typical configurationProperties configuration</title>
+        <example>
+        <caption>configurationProperties of an XML connector configuration (provisioner-json)</caption>
+        <programlisting>
+      {
+         "accountSynchronizationFilter" : null,
+         "passwordAttributeToSynchronize" : null,
+         "synchronizePasswords" : false,
+         "removeLogEntryObjectClassFromFilter" : true,
+         "modifiersNamesToFilterOut" : [...],
+         "passwordDecryptionKey" : null,
+         "credentials" : "Passw0rd",
+         "changeLogBlockSize" : 100,
+         "baseContextsToSynchronize" : [...],
+         "attributesToSynchronize" : [...],
+         "changeNumberAttribute" : "changeNumber",
+         "passwordDecryptionInitializationVector" : null,
+         "filterWithOrInsteadOfAnd" : false,
+         "objectClassesToSynchronize" : ["inetOrgPerson"],
+         "port" : 1389,
+         "vlvSortAttribute" : "uid",
+         "passwordAttribute" : "userPassword",
+         "useBlocks" : true,
+         "maintainPosixGroupMembership" : false,
+         "failover" : [...],
+         "ssl" : false,
+         "principal" : "cn=Directory Manager",
+         "baseContexts" : ["dc=example,dc=com"],
+         "readSchema" : true,
+         "accountObjectClasses" : ["top","person","organizationalPerson","inetOrgPerson"],
+         "accountUserNameAttributes" : ["uid","cn"],
+         "host" : "localhost",
+         "groupMemberAttribute" : "uniqueMember",
+         "accountSearchFilter" : null,
+         "passwordHashAlgorithm" : null,
+         "usePagedResultControl" : false,
+         "blockSize" : 100,
+         "uidAttribute" : "entryUUID",
+         "maintainLdapGroupMembership" : false,
+         "respectResourcePasswordPolicyChangeAfterReset" : false
+      },        
+        </programlisting>
+        </example>
+        <para>Where:</para>
+        <itemizedlist>
+        <listitem>"accountSynchronizationFilter" : null-&gt;A filter used during synchronization actions to filter out ldap accounts</listitem>
+        <listitem>"accountObjectClasses" : ["top","person","organizationalPerson","inetOrgPerson"] -&gt; The object class or classes that will be used when creating new user objects in the LDAP tree. When entering more than one object class, each entry should be on its own line; do not use commas or semi-colons to separate multiple object classes. Some object classes may require that you specify all object classes in the class hierarchy.</listitem>
+        <listitem>"accountSearchFilter" : null -&gt; A search filter that any account needs to match in order to be returned.</listitem>
+        <listitem>"accountUserNameAttributes" : ["uid","cn"] -&gt; Attribute or attributes which holds the account''s user name. They will be used when authenticating to find the LDAP entry for the user name to authenticate.</listitem>
+        <listitem>"attributesToSynchronize" : [...] -&gt; List of attributes which should be used during object synchronization.This ignores updates from the change log if they do not update any of the named attributes. If empty, all changes will be used.</listitem>
+        <listitem>"baseContexts" : ["dc=example,dc=com"] -&gt; The base DNs for operations on the server.</listitem>
+        <listitem>"baseContextsToSynchronize" : [...] -&gt; the base contexts which will be taken into account durning synchronization</listitem>
+        <listitem>"blockSize" : 100 -&gt; The block size for simple paged results and VLV index searches. It is the maximum number of accounts that can be in a block when retrieving accounts in blocks.</listitem>
+        <listitem>"changeLogBlockSize" : 100 -&gt; The number of change log entries to fetch per query.</listitem>
+        <listitem>"changeNumberAttribute" : "changeNumber" -&gt; The name of the attribute which contains the last change number in the change log.</listitem>
+        <listitem>"credentials" : "Passw0rd" -&gt; The password of the user which is used to connect to the ldap server</listitem>
+        <listitem>"failover" : [...] -&gt; LDAP URL's to connect to if the main server specified through the host and port properties is not available.</listitem>
+        <listitem>"filterWithOrInsteadOfAnd" : false -&gt; Normally the the filter used to fetch change log entries is an and-based filter retrieving an interval of change entries. If this property is set, the filter will "or together" the required change numbers instead.</listitem>
+        <listitem>"groupMemberAttribute" : "uniqueMember" -&gt; The LDAP attribute holding the member for non-POSIX static groups.</listitem>
+        <listitem>"host" : "localhost" -&gt; The LDAP host server to connect to.</listitem>
+        <listitem>"maintainLdapGroupMembership" : false -&gt; If true, will modify group membership of renamed/deleted entries.</listitem>
+        <listitem>"maintainPosixGroupMembership" : false -&gt; If true, will modify POSIX group membership of renamed/deleted entries.</listitem>
+        <listitem>"modifiersNamesToFilterOut" : [...] -&gt; Useful to avoid loops caused by own changes.</listitem>
+        <listitem>"objectClassesToSynchronize" : ["inetOrgPerson"] -&gt; ObjectClasses to be used during synchronization. I.e. only objects with this objectClasses will be synchronized.</listitem>
+        <listitem>"passwordAttribute" : "userPassword" -&gt; The name of the attribute which the predefined PASSWORD attribute will be written to.</listitem>
+        <listitem>"passwordAttributeToSynchronize" : null -&gt; See above.</listitem>
+        <listitem>"passwordDecryptionInitializationVector" : null -&gt; Password Decryption Initialization Vector</listitem>
+        <listitem>"passwordDecryptionKey" : null -&gt; The key to decrypt passwords with when performing password synchronization.</listitem>
+        <listitem>"passwordHashAlgorithm" : null -&gt; If the server stores passwords in clear text, we will hash them with the algorithm specified here.</listitem>
+        <listitem>"port" : 1389 -&gt; The port the ldap server is listening on.</listitem>
+        <listitem>"principal" : "cn=Directory Manager" -&gt; The bind DN for performing operations on the server.</listitem>
+        <listitem>"readSchema" : true -&gt; Whether to read the schema from the server.</listitem>
+        <listitem>"removeLogEntryObjectClassFromFilter" : true -&gt; If this property is set (the default), the filter used to fetch change log entries does not contain the "changeLogEntry" object class, expecting that there are no entries of other object types in the change log.</listitem>
+        <listitem>"respectResourcePasswordPolicyChangeAfterReset" : false -&gt; If true, when binding check for the Password Expired control (and also Password Policy control) and throw exceptions (PasswordExpiredException, etc.) appropriately.</listitem>
+        <listitem>"ssl" : false -&gt; Whether the port is a secure SSL port.</listitem>
+        <listitem>"synchronizePasswords" : false -&gt; Whether passwords should be synchronized</listitem>
+        <listitem>"uidAttribute" : "entryUUID" -&gt; The LDAP attribute to map Uid to.</listitem>
+        <listitem>"useBlocks" : true -&gt; Whether to use block-based LDAP controls like simple paged results or VLV control.</listitem>
+        <listitem>"usePagedResultControl" : false -&gt; If true, simple paged search will be preferred over VLV index search when both are available.</listitem>
+        <listitem>"vlvSortAttribute" : "uid" -&gt; The attribute used as the sort key for the VLV index.</listitem>
+        </itemizedlist>
+        </section>
+    </section>
+    <section><title>Active Directory Connector</title>
+        <section><title>The .net Connection Server</title>
+        <para>In opposite to most other connectors, the AD connector is not written in java but .net. The reason is that OpenICF should connect to AD by ADSI, the native connection protocol of AD, which needs to have access to the ADSI dlls.</para>
+        </section>
+        <section><title>Installation of the .net Connector Server</title>
+        <para>Information on how to install a .net Connector Server can be found [here|http://openicf.forgerock.org/connector-framework-internal/connector_server.html].
+It is important to set the key as described in the [installation description|http://openicf.forgerock.org/connector-framework-internal/connector_server.html] after installation!</para>
+        </section>
+        <section><title>Example connectorRef</title>
+        <example>
+        <caption>Example connectorRef for an AD connector configuration (provisioner-json)</caption>
+        <programlisting>
+         "connectorHostRef" : "dotnet",
+         "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
+         "bundleName" : "ActiveDirectory.Connector",
+         "bundleVersion" : "1.0.0.6109"        
+        </programlisting>
+        </example>
+        <para>Where:</para>
+        <para>*connectorHostRef:* must point to an existing connector info provider configuration with this name. It is usually stored in its own file with the name "provisioner.openicf.connectorinfoprovider.json".
+The connectorHostRef is NOT optional in this case since the AD connector needs to be installed on a .net connector server which is always remote due to it's non java nature!</para>
+        <example>
+        <caption>Example of a connector info provider configuration (in a file named "provisioner.openicf.connectorinfoprovider.json")</caption>
+        <programlisting>
+   "connectorsLocation" : "connectors",
+   "remoteConnectorServers" :
+      [
+         {
+            "name" : "dotnet",
+            "host" : "10.0.0.10",
+            "port" : 8759,
+            "useSSL" : false,
+            "timeout" : 0,
+            "key" : "Passw0rd"
+         }
+      ]        
+        </programlisting>
+        </example>
+        </section>
+        <section><title>Typical configurationProperties configuration</title>
+        <example>
+        <caption>configurationProperties of an AD connector configuration (provisioner-json)</caption>
+        <programlisting>
+         "DirectoryAdminName" : "EXAMPLE\\Administrator",
+         "DirectoryAdminPassword" : "password",
+         "ObjectClass" : "User",
+         "Container" : "dc=example,dc=com",
+         "CreateHomeDirectory" : true,
+         "LDAPHostName" : "127.0.0.1",
+         "SearchChildDomains" : false,
+         "DomainName" : "example",
+         "SyncGlobalCatalogServer" : null,
+         "SyncDomainController" : null,
+         "SearchContext" : "dc=example,dc=com"        
+        </programlisting>
+        </example>
+        <para>Where:</para>
+        <itemizedlist>
+            <listitem>DirectoryAdminName: Account which will be used to authenticate; can be a domainname\user combination or just the user name</listitem>
+            <listitem>DirectoryAdminPassword: credentials for the connection</listitem>
+            <listitem>ObjectClass: AD objectclass for user objects. </listitem>
+            <listitem>Container: the basecontext for all searches</listitem>
+            <listitem>CreateHomeDirectory: whether a home directory should be created for new users</listitem>
+            <listitem>LDAPHostName: only used if a connection to a particular AD server should be enforced. </listitem>
+            <listitem>SearchChildDomains: true or false; settings of SyncGlobalCatalogServer and SyncDomainController depend on this setting</listitem>
+            <listitem>DomainName: name of the windows domain</listitem>
+            <listitem>SyncGlobalCatalogServer: Name of the global catalog server. This is needed only if searching child domains. </listitem>
+            <listitem>SyncDomainController: Domain controller to use during sync. Only used if not searching child domains. </listitem>
+            <listitem>SearchContext: Reserved for future use.</listitem>
+        </itemizedlist>
+        </section>
+    </section>
+    <section><title>CSV File Connector</title>
+        <para>The background for using this connector is very often initial or continues user import. In this case the CSV file serves as kind of the change log and often contains only the user records which have received a change. </para>
+        <section><title>Example connectorRef</title>
+        <para>The background for using this connector is very often initial or continues user import. In this case the CSV file serves as kind of the change log and often contains only the user records which have received a change. </para>
+        <example>
+        <caption>Typical connectorRef for an CSV resource configuration (provisioner-json)</caption>
+        <programlisting>
+    "connectorRef" : {
+        "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+        "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
+        "bundleName" : "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
+        "bundleVersion" : "1.1.0.0-EA"
+    },        
+        </programlisting>
+        </example>
+        <para>The connectorHostRef has to be set like above if the default connector jar is used since it resides in the openidm/bundle folder.</para>
+        </section>
+        <section><title>Typical configurationProperties configuration</title>
+        <example>
+        <caption>configurationProperties of an CSV connector configuration (provisioner-json)</caption>
+        <programlisting>
+    "configurationProperties" : {
+        "filePath" : "data/hr.csv",
+        "uniqueAttribute" : "uid"
+    },        
+        </programlisting>
+        </example>
+        <para>Where:</para>
+        <itemizedlist>
+        <listitem>filePath: references the CSV file which contains the account entries</listitem>
+        <listitem>uniqueAttribute: serves as kind of primary key in the CSV file</listitem>
+        </itemizedlist>
+        <para>Other useful options to set here are:</para>
+        <itemizedlist>
+        <listitem>encoding: default is "utf-8"</listitem>
+        <listitem>fieldDelimiter: default is ","</listitem>
+        <listitem>multivalueDelimiter: for multivalued attributes; default is ";"</listitem>
+        <listitem>usingMultivalue: boolean value; default is false</listitem>
+        <listitem>passwordAttribute: if authentication is used, this is the attribute which contains the password</listitem>
+        </itemizedlist>
+        </section>
+    </section>
+    <section>Scripted SQL Connectro<title></title>
+        <section><title>Example connectorRef</title>
+        <para>The Scripted SQL Connector opens a lot of flexibility since the actual db interaction is done by means of in customizable SQL scripts. There is one script of each of the following actions against the external data base:</para>
+        <itemizedlist>
+            <listitem>Create</listitem>
+            <listitem>Delete</listitem>
+            <listitem>Search</listitem>
+            <listitem>Sync</listitem>
+            <listitem>Test</listitem>
+            <listitem>Update</listitem>
+        </itemizedlist>
+        </section>
+        <section><title>Typical configurationProperties configuration</title>
+        </section>
+    </section>
 
-  <para>This section covers ... TODO.</para>
-
-  <section xml:id="resource-conf-subsection-id">
-   <title>Subsection Title</title>
-
-   <para>This subsection covers ... TODO.</para>
-  </section>
  </section>
 </chapter>
