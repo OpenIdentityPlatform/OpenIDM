@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-???'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+    <title>Introduction to OpenIDM</title>
+    <para>The goal of OpenIDM is to manage and synchronize identity related objects 
+    between many different object repositories and to minimize the work of maintaining 
+    an organization's identities and user's access to different applications through role 
+    and group management. OpenIDM is able to maintain user as well as other objects like 
+    groups in external repositories.</para>
+    <sect1>
+        <title>OpenIDM Components</title>
+        <para>OpenIDM services run in an OSGi container with an embedded Servlet
+        container, and an embedded noSQL database. By default the OSGi container is
+        Apache Felix. The default Servlet container is Jetty. The default noSQL
+        database is OrientDB. At this time the only supported configuration is
+        running the services in Apache Felix.</para>
+        <para>The default database can easily be replaced by an other jdbc based 
+        database like mysql. Further more it is also possible to embed OpenIDM in a 
+        war file and deploy that to a web container.</para>
+    </sect1>
+</chapter>
