@@ -23,7 +23,7 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<book xml:id='administrator-guide'
+<book xml:id='admin-guide'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
@@ -56,18 +56,19 @@
  <xinclude:include href="preface.xml" />
  <xinclude:include href='chap-intro-openidm.xml' />
  <xinclude:include href='chap-install.xml' />
- <!--xinclude:include href='chap-conf-folder.xml' /-->
- <!--xinclude:include href='chap-logs.xml' /-->
- <!--xinclude:include href='chap-repo-setup.xml' /-->
- <!--xinclude:include href='chap-object-main.xml' /-->
- <!--xinclude:include href='chap-resource-con.xml' /-->
- <!--xinclude:include href='chap-data-flow.xml' /-->
- <!--xinclude:include href='chap-scheduler-conf.xml' /-->
- <!--xinclude:include href='chap-pass-sync.xml' /-->
- <!--xinclude:include href='chap-security.xml' /-->
- <!--xinclude:include href='chap-activiti.xml' /-->
- <!--xinclude:include href='chap-auditing.xml' /-->
- <!--xinclude:include href='chap-debug.xml' /-->
+ <xinclude:include href='chap-conf-folder.xml' />
+ <xinclude:include href='chap-logs.xml' />
+ <xinclude:include href='chap-repo-setup.xml' />
+ <xinclude:include href='chap-object-main.xml' />
+ <xinclude:include href='chap-resource-conf.xml' />
+ <xinclude:include href='chap-data-flow.xml' />
+ <xinclude:include href='chap-scheduler-conf.xml' />
+ <xinclude:include href='chap-pass-sync.xml' />
+ <xinclude:include href='chap-security.xml' />
+ <xinclude:include href='chap-activiti.xml' />
+ <xinclude:include href='chap-auditing.xml' />
+ <xinclude:include href='chap-debug.xml' />
+ <xinclude:include href='chap-troubleshooting.xml' />
 
  <index />
  <?dbhtml-include href="../ga.html"?>

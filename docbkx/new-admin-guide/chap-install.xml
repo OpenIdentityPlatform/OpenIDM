@@ -31,24 +31,28 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
     <title>Installing and Starting OpenIDM Services</title>
+    
+    <!-- TODO: Any (new) information in this chapter belongs in the installation
+               guide rather than the admin guide. -->
+    
     <para>A short description of the install procedure follows below. For a more 
     detailed description including some sample configurations please consult the 
     install guide. For exact prerequisites like JVM versions please consult the 
     release notes.</para>
-    <sect1>
+    <section>
     <title>Install OpenIDM</title>
     <para>Installing OpenIDM is as simple as to download the openidm.zip file and 
     unzip the archive. The latest build can be fould here: <link
      xlink:href='http://forgerock.org/openidm.html'>download page.</link></para>
-    </sect1>
-    <sect1>
+    </section>
+    <section>
     <title>Uninstall OpenIDM</title>
     <para>To uninstall OpenIDM simply remove the extracted folder. Eventually drop the 
     database schema "openidm" if using an external jdbc repository. </para>
-    </sect1>
-    <sect1>
+    </section>
+    <section>
     <title>Start and Stop OpenIDM</title>
-        <sect2>
+        <section>
         <title>Start and Stop OpenIDM in Interactive Mode</title>
         <para>The simplest way to start OpenIDM is to execute the start.sh script 
         (or the run.bat on windows). This will start OpenIDM in a mode where it will 
@@ -57,24 +61,24 @@
         <programlisting>./start</programlisting>
         <para>To stop OpenIDM in this mode type the following on the OSGI console:</para>
         <programlisting>->shutdown</programlisting>
-        </sect2>
-        <sect2>
+        </section>
+        <section>
         <title>Start OpenIDM in the Background</title>
         <para>As prerequisite of starting OpenIDM in the background, the ConsoleHandler 
         of OSGI must be disabled. This can be done in one of the following ways:</para>
         <itemizedlist>
-        <listitem>In conf/logging.properties set java.util.logging.ConsoleHandler.level = OFF</listitem>
-        <listitem>The ConsoleHandler is removed from the list of handlers in the same file. </listitem>
+        <listitem><para>In conf/logging.properties set java.util.logging.ConsoleHandler.level = OFF</para></listitem>
+        <listitem><para>The ConsoleHandler is removed from the list of handlers in the same file.</para></listitem>
         </itemizedlist>
         <para>OpenIDM can then be started in the background with: </para>
         <programlisting>./start &amp;</programlisting>
         <para>Stopping the instanc will now be done with the stop command: </para>
         <programlisting>./stop</programlisting>
-        </sect2>
-    </sect1>
-    <sect1>
+        </section>
+    </section>
+    <section>
     <title>Use MySQL for the Repository</title>
     <para>Please see the chapter "Setting up the Repository" on how to connect to a 
     different repository database than the built in OrientDB.</para>
-    </sect1>
+    </section>
 </chapter>
