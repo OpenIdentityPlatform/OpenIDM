@@ -16,7 +16,7 @@ Tasks which Administrators need to perform:
         Logging configuration
             Verbosity
             Rotation
-    Set up Repository
+    Setting up the Repository
     Create/Update User/Objects in OpenIDM
     Connect to external resources/systems
         provisioner.json basics

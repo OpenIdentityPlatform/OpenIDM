@@ -66,6 +66,11 @@ ETag: "7769ac1c6493"
                 </example>
             </sect3>
         </sect2>
+        
+        <itemizedlist>
+        <listitem>In conf/logging.properties set java.util.logging.ConsoleHandler.level = OFF</listitem>
+        <listitem>The ConsoleHandler is removed from the list of handlers in the same file. </listitem>
+        </itemizedlist>        
     </sect1>
 
 </chapter>
