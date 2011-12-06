@@ -49,7 +49,7 @@
    article/appendix  nop
    article   nop
    book      toc,title,figure,equation
-   chapter   nop
+   chapter   toc,title
    part      toc,title
    preface   nop
    qandadiv  nop
