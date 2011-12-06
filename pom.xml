@@ -119,7 +119,19 @@
         </repository>
 
     </repositories>
-
+    <pluginRepositories>
+        <pluginRepository>
+            <id>docbkx.snapshots</id>
+            <name>Maven Plugin Snapshots</name>
+            <url>http://docbkx-tools.sourceforge.net/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <mailingLists>
         <mailingList>
@@ -436,7 +448,7 @@
             <plugin>
                 <groupId>com.agilejava.docbkx</groupId>
                 <artifactId>docbkx-maven-plugin</artifactId>
-                <version>2.0.14-SNAPSHOT</version>
+                <version>2.0.13</version>
                 <inherited>false</inherited>
                 <configuration>
                     <sourceDirectory>${docbkx-src}</sourceDirectory>
@@ -640,6 +652,11 @@
                                 </copy>
                             </preProcess>
                             <postProcess>
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/admin-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/reference' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes' />
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
                                   <include name="**/**/*.html" />
                                   <replacevalue>
