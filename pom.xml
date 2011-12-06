@@ -436,7 +436,7 @@
             <plugin>
                 <groupId>com.agilejava.docbkx</groupId>
                 <artifactId>docbkx-maven-plugin</artifactId>
-                <version>2.0.13</version>
+                <version>2.0.14-SNAPSHOT</version>
                 <inherited>false</inherited>
                 <configuration>
                     <sourceDirectory>${docbkx-src}</sourceDirectory>
@@ -453,6 +453,81 @@
 
                 </configuration>
                 <executions>
+                    <execution>
+                        <id>doc-olinkdb-admin-guide</id>
+                        <phase>pre-site</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Admin-Guide.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/admin-guide.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/admin-guide"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-dev-guide</id>
+                        <phase>pre-site</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Dev-Guide.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/dev-guide.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/dev-guide"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-install-guide</id>
+                        <phase>pre-site</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Install-Guide.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/install-guide.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/install-guide"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-reference</id>
+                        <phase>pre-site</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Reference.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/reference.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/reference"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>doc-olinkdb-release-notes</id>
+                        <phase>pre-site</phase>
+                        <configuration>
+                            <includes>*/OpenIDM-Release-Notes.xml</includes>
+                            <collectXrefTargets>only</collectXrefTargets>
+                            <targetsFilename>${basedir}/target/release-notes.target.db</targetsFilename>
+                            <postProcess>
+                                <delete dir="${docbkx-out}/html/release-notes"/>
+                            </postProcess>
+                        </configuration>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                    </execution>
                     <execution>
                         <id>doc-epub</id>
                         <phase>pre-site</phase>
@@ -519,81 +594,6 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>doc-olinkdb-admin-guide</id>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <includes>*/OpenIDM-Admin-Guide.xml</includes>
-                            <collectXrefTargets>only</collectXrefTargets>
-                            <targetsFilename>${basedir}/target/admin-guide.target.db</targetsFilename>
-                            <postProcess>
-                                <delete dir="${docbkx-out}/html/admin-guide"/>
-                            </postProcess>
-                        </configuration>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>doc-olinkdb-dev-guide</id>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <includes>*/OpenIDM-Dev-Guide.xml</includes>
-                            <collectXrefTargets>only</collectXrefTargets>
-                            <targetsFilename>${basedir}/target/dev-guide.target.db</targetsFilename>
-                            <postProcess>
-                                <delete dir="${docbkx-out}/html/dev-guide"/>
-                            </postProcess>
-                        </configuration>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>doc-olinkdb-install-guide</id>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <includes>*/OpenIDM-Install-Guide.xml</includes>
-                            <collectXrefTargets>only</collectXrefTargets>
-                            <targetsFilename>${basedir}/target/install-guide.target.db</targetsFilename>
-                            <postProcess>
-                                <delete dir="${docbkx-out}/html/install-guide"/>
-                            </postProcess>
-                        </configuration>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>doc-olinkdb-reference</id>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <includes>*/OpenIDM-Reference.xml</includes>
-                            <collectXrefTargets>only</collectXrefTargets>
-                            <targetsFilename>${basedir}/target/reference.target.db</targetsFilename>
-                            <postProcess>
-                                <delete dir="${docbkx-out}/html/reference"/>
-                            </postProcess>
-                        </configuration>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>doc-olinkdb-release-notes</id>
-                        <phase>process-resources</phase>
-                        <configuration>
-                            <includes>*/OpenIDM-Release-Notes.xml</includes>
-                            <collectXrefTargets>only</collectXrefTargets>
-                            <targetsFilename>${basedir}/target/release-notes.target.db</targetsFilename>
-                            <postProcess>
-                                <delete dir="${docbkx-out}/html/release-notes"/>
-                            </postProcess>
-                        </configuration>
-                        <goals>
-                            <goal>generate-html</goal>
-                        </goals>
-                    </execution>
-                    <execution>
                         <id>doc-single-html</id>
                         <phase>pre-site</phase>
                         <goals>
@@ -640,11 +640,6 @@
                                 </copy>
                             </preProcess>
                             <postProcess>
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/admin-guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/reference' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes' />
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
                                   <include name="**/**/*.html" />
                                   <replacevalue>
