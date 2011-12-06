@@ -80,7 +80,7 @@ class Link {
      * @return
      */
     private String linkId(String id) {
-        StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getName());
+        StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getLinkType().getName());
         if (id != null) {
             sb.append('/').append(id);
         }
@@ -148,39 +148,68 @@ class Link {
     }
 
     /**
-     * TODO: Description.
-     * <p>
-     * This method exects a {@code "sourceQuery"} defined with a parameter of
-     * {@code "sourceId"}.
+     * Gets the link for a given object mapping source
      *
-     * @param sourceId TODO.
+     * @param sourceId the object mapping source system identifier
      * @throws SynchronizationException if the query could not be performed.
      */
     void getLinkForSource(String sourceId) throws SynchronizationException {
+        if (mapping.getLinkType().useReverse()) {
+            getLinkFromSecond(sourceId);
+        } else {
+            getLinkFromFirst(sourceId);
+        }
+    }
+
+    /**
+     * Queries the links for a match on the first system (links can be bi-directional)
+     * <p>
+     * This method expects a {@code "links-for-sourceId"} defined with a parameter of
+     * {@code "sourceId"}.
+     *
+     * @param id The ID to look up the links
+     * @throws SynchronizationException if the query could not be performed.
+     */
+    private void getLinkFromFirst(String id) throws SynchronizationException {
         clear();
-        if (sourceId != null) {
+        if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
+// TODO: refactor link properties naming
             query.put(QueryConstants.QUERY_ID, "links-for-sourceId");
-            query.put("sourceId", sourceId);
+            query.put("sourceId", id);
             getLink(query);
         }
     }
 
     /**
-     * TODO: Description.
+     * Gets the link for a given object mapping source
+     *
+     * @param sourceId the object mapping source system identifier
+     * @throws SynchronizationException if the query could not be performed.
+     */
+    void getLinkForTarget(String targetId) throws SynchronizationException {
+        if (mapping.getLinkType().useReverse()) {
+            getLinkFromFirst(targetId);
+        } else {
+            getLinkFromSecond(targetId);
+        }
+    }
+    
+    /**
+     * Queries the links for a match on the second system (links can be bi-directional)
      * <p>
-     * This method exects a {@code "sourceQuery"} defined with a parameter of
-     * {@code "sourceId"}.
+     * This method expects a {@code "links-for-targetId"} defined with a parameter of
+     * {@code "targetId"}.
      *
      * @param targetId TODO.
      * @throws SynchronizationException TODO.
      */
-    void getLinkForTarget(String targetId) throws SynchronizationException {
+    void getLinkFromSecond(String id) throws SynchronizationException {
         clear();
-        if (targetId != null) {
+        if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(QueryConstants.QUERY_ID, "links-for-targetId");
-            query.put("targetId", targetId);
+            query.put("targetId", id);
             getLink(query);
         }
     }

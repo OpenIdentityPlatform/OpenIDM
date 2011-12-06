@@ -61,6 +61,10 @@ class ObjectMapping implements SynchronizationListener {
     private final static Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
     /** TODO: Description. */
     private String name;
+    /** The name of the links set to use. Defaults to mapping name. */
+    private String linkTypeName;
+    /** The link type to use */
+    LinkType linkType;
     /** TODO: Description. */
     private String sourceObjectSet;
     /** TODO: Description. */
@@ -106,6 +110,7 @@ class ObjectMapping implements SynchronizationListener {
     public ObjectMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
         this.service = service;
         name = config.get("name").required().asString();
+        linkTypeName = config.get("links").defaultTo(name).asString();
         sourceObjectSet = config.get("source").required().asString();
         targetObjectSet = config.get("target").required().asString();
         validSource = Scripts.newInstance("ObjectMapping", config.get("validSource"));
@@ -125,6 +130,10 @@ class ObjectMapping implements SynchronizationListener {
         resultScript = Scripts.newInstance("ObjectMapping", config.get("result"));
         LOGGER.debug("Instantiated {}", name);
     }
+    
+    public void initRelationships(SynchronizationService syncSvc, List<ObjectMapping> allMappings) {
+        linkType = LinkType.getLinkType(this, allMappings);
+    }
 
     /**
      * TODO: Description.
@@ -135,13 +144,40 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * TODO: Description.
-     * @return
+     * @return The name of the object mapping
      */
     public String getName() {
         return name;
     }
-
+    
+    /**
+     * @return The configured name of the link set to use for this object mapping
+     */
+    public String getLinkTypeName() {
+        return linkTypeName;
+    }
+    
+    /**
+     * @return The resolved name of the link set to use for this object mapping
+     */
+    public LinkType getLinkType() {
+        return linkType;
+    }
+    
+    /**
+     * @return The mapping source object set
+     */
+    public String getSourceObjectSet() {
+        return sourceObjectSet;
+    }
+    
+    /**
+     * @return The mapping target object set
+     */
+    public String getTargetObjectSet() {
+        return targetObjectSet;
+    }
+    
     /**
      * TODO: Description.
      *
