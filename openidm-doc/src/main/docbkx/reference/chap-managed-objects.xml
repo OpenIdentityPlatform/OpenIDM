@@ -30,449 +30,606 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
-    <title>Managed objects</title>
-    <sect1>
-        <title>Introduction</title>
-        <para/>
-        <para>A managed object in OpenIDM is an object which represents the identity-related data managed by OpenIDM. Managed objects are stored by OpenIDM in its data store. All managed objects are JSON-based data structures.</para>
-        <para/>
-    </sect1>
-    <sect1>
-        <title>Schema</title>
-        <para/>
-        <para>Managed objects have an associated schema to enforce a specific data structure. Schema is specified using the JSON Schema specification. This is currently an Internet Draft, with implementations in multiple programming languages. As this specification evolves, OpenIDM's implementation will evolve in parallel.</para>
-        <sect2>
-            <title>Reserved properties</title>
-            <para>Top-level properties in a managed object that begins with an underscore _ are reserved by OpenIDM for internal use, and are not an explicitly part of its schema. Internal properties are read-only, and are ignored when provided by the REST API client.The following properties exist for all managed objects in OpenIDM:</para>
-            <variablelist>
-                <varlistentry>
-                    <term>_id</term>
-                    <listitem>
-                        <para>string</para>
-                        <para>The unique identifier for the object. This value forms a part of the managed object's URI.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>_rev</term>
-                    <listitem>
-                        <para>string</para>
-                        <para>The revision of the object. This is the same value that is exposed as the object's ETag via the REST API. The content of this attribute is not defined. No consumer should make any assumptions of its content beyond equivalence comparison. This attribute may be provided by the underlying data store.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>_schema_id</term>
-                    <listitem>
-                        <para>string</para>
-                        <para>The a reference to the schema object that the managed object is associated with.</para>
-                    </listitem>
-                </varlistentry>
-                <varlistentry>
-                    <term>_schema_rev</term>
-                    <listitem>
-                        <para>string</para>
-                        <para>The revision of the schema that was used for validation when the object was last stored.</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </sect2>
-        <sect2>
-            <title>Schema validation</title>
-            <para/>
-            <para>Schema validation is performed unequivocally whenever an object is stored, and conditionally whenever an object is retrieved from the data store and exhibits a _schema_rev value that differs from the _rev of the schema that the OpenIDM instance currently has for that managed object type. Whenever a schema validation is performed, the _schema_rev of the object is updated to contain the _rev value of the current schema.</para>
-            <para/>
-            <para>PB: While the _schema_rev optimization above reduces schema validation overhead for object retrieval, there's still the issue of object and property validation triggers. One way to solve this could be to qualify these as schema validation and bake them into the computed ETag for the schema. I kinda like this solution, but should be discussed.</para>
-        </sect2>
-        <sect2>
-            <title>Derived properties</title>
-            <para/>
-            <para>Properties can be defined to be strictly derived from other properties within the object. This allows computed and composite values to be created in the object. Whenever an object undergoes a change, all derived properties are recomputed. The value of derived properties are stored in the data store, and are not recomputed upon retrieval.</para>
-            <para/>
-            <para>PB: Mechanism for defining a derived property will likely be through a JavaScript trigger.</para>
-            <para/>
-        </sect2>
-    </sect1>
-    <sect1>
-        <title>Data consistency</title>
-        <para/>
-        <para>Single-object operations shall be consistent within the scope of the operation performed, limited by capabilities of the underlying data store. Bulk operations shall not have any consistency guarantees. There are no plans to expose any transactional semantics in the managed object access API.</para>
-        <para/>
-        <para>All access through the REST API uses the ETag and associated conditional headers: If-Match, If-None-Match. In operations that modify model objects, conditional headers are mandatory.</para>
-        <para/>
-    </sect1>
-    <sect1>
-        <title>Triggers</title>
-        <para/>
-        <para>Triggers are user-definable functions that validate and/or modify object or property state.</para>
-        <sect2>
-            <title>State triggers</title>
-            <para/>
-            <para>Managed objects are resource-oriented. A set of triggers is defined to intercept the supported request methods on managed objects. Such triggers are intended to perform authorization, redact and/or modify objects before the action is performed. The object being operated on is in scope for each trigger, meaning that it the object is retrieved by the data store before the trigger is fired.</para>
-            <para/>
-            <para>If retrieval of the object fails, the failure occurs before any trigger is called. Triggers are executed before any optimistic concurrency mechanisms are invoked. The reason for this is to prevent a potential attacker from getting information about an object (including its presence in the data store) before authorization is applied.</para>
-            <para/>
-            <para>PB: Status codes and internationalization considerations are still TBD.</para>
-            <para/>
-            <para>onCreate</para>
-            <para>Called upon a request to create a new object. Throwing an exception causes the create to fail.</para>
-            <para/>
-            <para>onRead</para>
-            <para>Called upon a request to retrieve a whole object or portion of an object. Throwing an exception causes the object to not be included in the result. This method is also called when lists of objects are retrieved via requests to its container object; in this case, only the requested properties are included in the object. Allows for uniform access control for retrieval of objects, regardless of the method in which they were requested.</para>
-            <para/>
-            <para>onUpdate</para>
-            <para>Called upon a request to store an object. The "old" and "new" objects are in-scope for the trigger. The "old" object represents a complete object as retrieved from the data store. The trigger can elect to change "new" object properties. If as a result of the trigger the object's "old" and "new" values are identical (i.e. update is reverted), the update ends prematurely, though successfully. Throwing an exception causes the update to fail.</para>
-            <para/>
-            <para>onDelete</para>
-            <para>Called upon a request to delete an object. Throwing an exception causes the deletion to fail.</para>
-            <para/>
-        </sect2>
-        <sect2>
-            <title>Object storage triggers</title>
-            <para/>
-            <para>An object-scoped trigger applies to an entire object. Unless otherwise specified, the object itself is in scope for the trigger.</para>
-            <para/>
-            <para>validate</para>
-            <para>Validates an object after its retrieval and prior to its storage into the data store. Throws an exception in the event of a validation failure. i18n TBD.</para>
-            <para/>
-            <para>onRetrieval</para>
-            <para>Called when an object is retrieved from the data store. Typically used to transform an object after it has been retrieved (e.g. decryption, JIT data conversion).</para>
-            <para/>
-            <para>onStorage</para>
-            <para>Called just prior to when an object is stored into the data store. Typically used to transform an object just prior to its storage (e.g. encryption).</para>
-            <para/>
-        </sect2>
-        <sect2>
-            <title>Property storage triggers</title>
-            <para/>
-            <para>A property-scoped trigger applies to a specific property within an object. Only the property itself is in scope for the trigger—no other properties in the object should be accessed during execution of the trigger. Unless otherwise specified, the order of execution of property-scoped triggers is intentionally left undefined.</para>
-            <para/>
-            <para>validate</para>
-            <para>Validates a given property value after its retrieval from and prior to its storage into the data store. Throws an exception in the event of a validation failure. i18n of validation error TBD.</para>
-            <para/>
-            <para>onRetrieval</para>
-            <para>Called after an object is retrieved from the data store. Typically used to transforms a given property after its object's retrieval. </para>
-            <para/>
-            <para>onStorage</para>
-            <para>Called prior to when an object is stored into the data store.Typically used to transform a given property prior to its object's storage.</para>
-        </sect2>
-        <sect2>
-            <title>Storage trigger sequences</title>
-            <para/>
-            <para>The triggers are executed in the following orders.</para>
-            <sect3>
-                <title>Object retrieval sequence</title>
-                <para/>
-                <orderedlist>
-                    <listitem>
-                        <para>retrieve the raw object from the data store</para>
-                    </listitem>
-                    <listitem>
-                        <para>call object onRetrieval trigger</para>
-                    </listitem>
-                    <listitem>
-                        <para>per-property within the object (order undefined):</para>
-                    </listitem>
-                    <listitem>
-                        <para>call property onRetrieval trigger</para>
-                    </listitem>
-                    <listitem>
-                        <para>perform schema validation if _schema_rev doesn't match (see schema validation section above)</para>
-                    </listitem>
-                    <listitem>
-                        <para>call object validate trigger ← PB: overhead we may be able to avoid; see note in schema validation section</para>
-                    </listitem>
-                    <listitem>
-                        <para>per-property within the object (order undefined):</para>
-                    </listitem>
-                    <listitem>
-                        <para>call property validate trigger ← PB: overhead we may be able to avoid; see note in schema validation section</para>
-                    </listitem>
-                </orderedlist>
-            </sect3>
-            <sect3>
-                <title>Object storage sequence</title>
-                <para/>
-                <orderedlist>
-                    <listitem>
-                        <para>per-property within the object (order undefined):</para>
-                    </listitem>
-                    <listitem>
-                        <para>call property validate trigger</para>
-                    </listitem>
-                    <listitem>
-                        <para>call object validate trigger</para>
-                    </listitem>
-                    <listitem>
-                        <para>perform schema validation (see schema validation section above)</para>
-                    </listitem>
-                    <listitem>
-                        <para>per-property trigger within the object (order undefined):</para>
-                    </listitem>
-                    <listitem>
-                        <para>call property onStorage trigger</para>
-                    </listitem>
-                    <listitem>
-                        <para>call object onStorage trigger</para>
-                    </listitem>
-                    <listitem>
-                        <para>store the object with any resulting changes to the data store</para>
-                    </listitem>
-                </orderedlist>
-                <para/>
-            </sect3>
-        </sect2>
-    </sect1>
-    <sect1>
-        <title>Encryption</title>
-        <para/>
-        <para>Sensitive object properties can be encrypted prior to storage, typically through the property onStorage trigger. The trigger will have access to configuration data, which can include arbitrary customer-defined attributes, such as symmetric encryption key. Such attributes can be decrypted during retrieval from the data store through the property onRetrieval trigger.</para>
-        <para/>
-    </sect1>
-    <sect1>
-        <title>Configuration</title>
-        <para>Configuration of managed objects is provided through an array of :</para>
-        <sect2>
-            <title>Usage</title>
-            <para/>
-            <programlisting language="javascript">
-{
-  "objects": [ managed-object-config object, … ]
-}</programlisting>
-        </sect2>
-        <sect2>
-            <title>Properties</title>
-            <variablelist>
-                <varlistentry>
-                    <term>objects</term>
-                    <listitem>
-                        <para>array of managed-object-config objects, required</para>
-                        <para>Specifies the objects that the managed object service manages.</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </sect2>
-        <sect2>
-            <title>managed-object-config object</title>
-            <para/>
-            <para>Specifies the configuration of each managed object.</para>
-            <sect3>
-                <title>Usage</title>
-                <example>
-                    <programlisting language="javascript">
-{
-  "name": string,
-  "schema": json-schema object,
-  "onCreate": script object,
-  "onRead": script object,
-  "onUpdate": script object,
-  "onDelete": script object,
-  "onValidate": script object,
-  "onRetrieve": script object,
-  "onStore": script object,
-  "properties": [ property-configuration object, … ]
-}</programlisting>
-                </example>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>name</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>The name of the managed object. Used to identify the managed object in URIs and identifiers. </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>schema</term>
-                        <listitem>
-                            <para>json-schema object, optional</para>
-                            <para>The schema to use to validate the structure and content of the managed object. The schema-object format is specified by the JSON Schema specification.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onCreate</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when the creation of an object is being requested. The object to be created is provided in the root scope as an object property. The script may change the object. If an exception is thrown, the create will abort with an exception.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onRead</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when the read of an object is being requested. The object being read is provided in the root scope as an object property. The script may change the object. If an exception is thrown, the read will abort with an exception.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onUpdate</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when an update to an object is requested. The old value of the object being updated is provided in the root scope as an oldObject property. The new value of the object being updated is provided in the root scope as a newObject property. The script may change the newObject. If an exception is thrown, the update will abort with an exception.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onDelete</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when the deletion of an object is being requested. The object being deleted is provided in the root scope as an object property. If an exception is thrown, the deletion will abort with an exception.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onValidate</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when the object requires validation. The object to be validated is provided in the root scope as an object property. If an exception is thrown, the validation will fail.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onRetrieve</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger once an object is retrieved from the repository. The object that was retrieved is provided in the root scope as an object property. The script may change the object. If an exception is thrown, then object retrieval will fail.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onStore</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when an object is about to be stored in the repository. The object to be stored is provided in the root scope as an object property. The script may change the object. If an exception is thrown, then object storage will fail.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>properties</term>
-                        <listitem>
-                            <para>array of property-config objects, optional</para>
-                            <para>A list of property specifications.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>script object</title>
-            <para/>
-            <sect3>
-                <title>Usage</title>
-                <example>
-                    <programlisting language="javascript">
-{
-  "type": "text/javascript",
-  "source": string
-}</programlisting>
-                </example>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>type</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the type of script to be executed. Presently, only "text/javascript" is supported.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>source</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the source code of the script to be executed.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>property-config object</title>
-            <para/>
-            <sect3>
-                <title>Usage</title>
-                <example>
-                    <programlisting language="javascript">
-{
-  "name": string,
-  "onValidate": script object,
-  "onRetrieve": script object,
-  "onStore": script object,
-  "encryption": property-encryption object
-}</programlisting>
-                </example>
-                <para/>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>name</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>The name of the property being configured.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onValidate</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when the property requires validation. The property to be validated is provided in the root scope as the property property. If an exception is thrown, the validation will fail.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onRetrieve</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger once a property is retrieved from the repository. The property that was retrieved is provided in the root scope as the property property. The script may change the property value. If an exception is thrown, then object retrieval will fail.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onStore</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script object to trigger when a property is about to be stored in the repository. The property to be stored is provided in the root scope as the property property. The script may change the property value. If an exception is thrown, then object storage will fail.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>encryption</term>
-                        <listitem>
-                            <para>property-encryption object, optional</para>
-                            <para>Specifies the configuration for encryption of the property in the repository. If omitted or null, the property is not encrypted.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>property-encryption object</title>
-            <para/>
-            <sect3>
-                <title>Usage</title>
-                <example>
-                    <programlisting language="javascript">
-{
-  "cipher": string,
-  "key": string
-}</programlisting>
-                </example>
-                <para/>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>cipher</term>
-                        <listitem>
-                            <para>string, optional</para>
-                            <para>The cipher transformation used to encrypt the property. If omitted or null, the default cipher of "AES/CBC/PKCS5Padding" is used.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>key</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>The alias of the key in the OpenIDM cryptography service keystore used to encrypt the property.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-    </sect1>
-</chapter>
+ <title>Managed Objects</title>
 
+  <para>A <firstterm>managed object</firstterm> in OpenIDM is an object which
+  represents the identity-related data managed by OpenIDM. Managed objects are
+  stored by OpenIDM in its data store. All managed objects are JSON-based data
+  structures.</para>
+
+ <section xml:id="managed-object-schema">
+  <title>Schema</title>
+
+  <para>Managed objects have an associated schema to enforce a specific
+  data structure. Schema is specified using the <link xlink:show="new"
+  xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
+  Schema</link> specification. This is currently an Internet-Draft, with
+  implementations in multiple programming languages.</para>
+
+  <section xml:id="managed-object-reserved-properties">
+   <title>Reserved Properties</title>
+
+   <para>Top-level properties in a managed object that begin with an underscore
+   ( <literal>_</literal> ) are reserved by OpenIDM for internal use, and are
+   not explicitly part of its schema. Internal properties are read-only, and
+   are ignored when provided by the REST API client.</para>
+
+   <variablelist>
+    <para>The following properties exist for all managed objects in
+    OpenIDM.</para>
+    <varlistentry>
+     <term>_id</term>
+     <listitem>
+      <para>string</para>
+      <para>The unique identifier for the object. This value forms a part
+      of the managed object's URI.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>_rev</term>
+     <listitem>
+      <para>string</para>
+      <para>The revision of the object. This is the same value that is
+      exposed as the object's ETag through the REST API. The content of this
+      attribute is not defined. No consumer should make any assumptions
+      of its content beyond equivalence comparison. This attribute may
+      be provided by the underlying data store.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>_schema_id</term>
+     <listitem>
+      <para>string</para>
+      <para>The a reference to the schema object that the managed object
+      is associated with.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>_schema_rev</term>
+     <listitem>
+      <para>string</para>
+      <para>The revision of the schema that was used for validation when
+      the object was last stored.</para>
+     </listitem>
+    </varlistentry>
+  </variablelist>
+  </section>
+
+  <section xml:id="managed-object-schema-validation">
+   <title>Schema Validation</title>
+
+   <para>Schema validation is performed unequivocally whenever an object
+   is stored, and conditionally whenever an object is retrieved from the
+   data store and exhibits a <literal>_schema_rev</literal> value that
+   differs from the <literal>_rev</literal> of the schema that the OpenIDM
+   instance currently has for that managed object type. Whenever a schema
+   validation is performed, the <literal>_schema_rev</literal> of the object
+   is updated to contain the <literal>_rev</literal> value of the current
+   schema.</para>
+
+   <!--
+    PB: While the _schema_rev optimization above reduces schema
+    validation overhead for object retrieval, there's still the issue of
+    object and property validation triggers. One way to solve this could
+    be to qualify these as schema validation and bake them into the
+    computed ETag for the schema. I kinda like this solution, but should
+    be discussed.
+   -->
+  </section>
+
+  <section xml:id="managed-object-derived-properties">
+   <title>Derived Properties</title>
+
+   <para>Properties can be defined to be strictly derived from other
+   properties within the object. This allows computed and composite
+   values to be created in the object. Whenever an object undergoes a
+   change, all derived properties are recomputed. The value of derived
+   properties are stored in the data store, and are not recomputed upon
+   retrieval.</para>
+
+   <!-- PB: Mechanism for defining a derived property will likely be through a JavaScript trigger. -->
+  </section>
+ </section>
+
+ <section xml:id="managed-object-data-consistency">
+  <title>Data Consistency</title>
+
+  <para>Single-object operations shall be consistent within the scope of
+  the operation performed, limited by capabilities of the underlying
+  data store. Bulk operations shall not have any consistency
+  guarantees. OpenIDM does not expose any transactional semantics
+  in the managed object access API.</para>
+
+  <para>All access through the REST API uses the ETag and associated
+  conditional headers: <literal>If-Match</literal>,
+  <literal>If-None-Match</literal>. In operations that
+  modify model objects, conditional headers are mandatory.</para>
+ </section>
+
+ <section xml:id="managed-object-triggers">
+  <title>Triggers</title>
+
+  <para><firstterm>Triggers</firstterm> are user-definable functions that
+  validate or modify object or property state.</para>
+
+  <section xml:id="managed-object-state-triggers">
+   <title>State Triggers</title>
+
+   <para>Managed objects are resource-oriented. A set of triggers is
+   defined to intercept the supported request methods on managed
+   objects. Such triggers are intended to perform authorization, redact,
+   or modify objects before the action is performed. The object
+   being operated on is in scope for each trigger, meaning that it the
+   object is retrieved by the data store before the trigger is fired.</para>
+
+   <para>If retrieval of the object fails, the failure occurs before any
+   trigger is called. Triggers are executed before any optimistic
+   concurrency mechanisms are invoked. The reason for this is to
+   prevent a potential attacker from getting information about an
+   object (including its presence in the data store) before
+   authorization is applied.</para>
+
+   <!-- PB: Status codes and internationalization considerations are still TBD. -->
+
+   <variablelist>
+    <varlistentry>
+     <term>onCreate</term>
+     <listitem>
+      <para>Called upon a request to create a new object. Throwing an
+      exception causes the create to fail.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onRead</term>
+     <listitem>
+      <para>Called upon a request to retrieve a whole object or portion of
+      an object. Throwing an exception causes the object to not be
+      included in the result. This method is also called when lists of
+      objects are retrieved via requests to its container object; in this
+      case, only the requested properties are included in the object.
+      Allows for uniform access control for retrieval of objects,
+      regardless of the method in which they were requested.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onUpdate</term>
+     <listitem>
+      <para>Called upon a request to store an object. The "old" and "new"
+      objects are in-scope for the trigger. The "old" object represents a
+      complete object as retrieved from the data store. The trigger can
+      elect to change "new" object properties. If as a result of the
+      trigger the object's "old" and "new" values are identical (that is,
+      update is reverted), the update ends prematurely, though
+      successfully. Throwing an exception causes the update to fail.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onDelete</term>
+     <listitem>
+      <para>Called upon a request to delete an object. Throwing an
+      exception causes the deletion to fail.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="managed-object-storage-triggers">
+   <title>Object Storage Triggers</title>
+
+   <variablelist>
+   <para>An object-scoped trigger applies to an entire object. Unless
+   otherwise specified, the object itself is in scope for the trigger.</para>
+    <varlistentry>
+     <term>validate</term>
+     <listitem>
+      <para>Validates an object after its retrieval and prior to its
+      storage into the data store. Throws an exception in the event of a
+      validation failure.</para>
+      <!-- i18n TBD. -->
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onRetrieval</term>
+     <listitem>
+      <para>Called when an object is retrieved from the data store.
+      Typically used to transform an object after it has been retrieved
+      (for example decryption, JIT data conversion).</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term>onStorage</term>
+      <listitem>
+       <para>Called just prior to when an object is stored into the data
+       store. Typically used to transform an object just prior to its
+       storage (for example, encryption).</para>
+      </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="managed-object-property-storage-triggers">
+   <title>Property Storage Triggers</title>
+
+   <para>A property-scoped trigger applies to a specific property within
+    an object. Only the property itself is in scope for the trigger&#8212;no
+    other properties in the object should be accessed during execution
+    of the trigger. Unless otherwise specified, the order of execution
+    of property-scoped triggers is intentionally left undefined.</para>
+
+   <variablelist>
+    <varlistentry>
+     <term>validate</term>
+     <listitem>
+      <para>Validates a given property value after its retrieval from and
+      prior to its storage into the data store. Throws an exception in the
+      event of a validation failure.</para>
+      <!--  i18n of validation error TBD. -->
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onRetrieval</term>
+     <listitem>
+      <para>Called after an object is retrieved from the data store.
+      Typically used to transforms a given property after its object's
+      retrieval.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onStorage</term>
+     <listitem>
+      <para>Called prior to when an object is stored into the data
+      store. Typically used to transform a given property prior to its
+      object's storage.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="managed-object-storage-trigger-sequences">
+   <title>Storage Trigger Sequences</title>
+
+   <para>The triggers are executed in the following orders.</para>
+
+   <orderedlist xml:id="managed-object-retrieval-sequence">
+    <title>Object Retrieval Sequence</title>
+
+    <listitem>
+     <para>Retrieve the raw object from the data store</para>
+    </listitem>
+    <listitem>
+     <para>Call object <literal>onRetrieval</literal> trigger</para>
+    </listitem>
+    <listitem>
+     <para>Per-property within the object (order undefined):</para>
+     <itemizedlist>
+      <listitem>
+       <para>Call property <literal>onRetrieval</literal> trigger</para>
+      </listitem>
+      <listitem>
+       <para>Perform schema validation if <literal>_schema_rev</literal>
+       does not match (see the <link
+       linkend="managed-object-schema-validation"><citetitle>Schema
+       Validation</citetitle></link> section)</para>
+      </listitem>
+      <listitem>
+       <para>Call object validate trigger</para>
+       <!-- PB: overhead we may be able to avoid; see note in schema validation section -->
+      </listitem>
+     </itemizedlist> 
+    </listitem>
+    <listitem>
+     <para>Per-property within the object (order undefined):</para>
+     <itemizedlist>
+      <listitem>
+       <para>Call property validate trigger</para>
+       <!-- PB: overhead we may be able to avoid; see note in schema validation section -->
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </orderedlist>
+
+    <orderedlist xml:id="managed-object-storage-sequence">
+     <title>Object Storage Sequence</title>
+
+     <listitem>
+      <para>Per-property within the object (order undefined):</para>
+      <itemizedlist>
+       <listitem>
+        <para>Call property <literal>validate</literal> trigger</para>
+       </listitem>
+       <listitem>
+        <para>Call object <literal>validate</literal> trigger</para>
+       </listitem>
+       <listitem>
+        <para>Perform schema validation (see the <link
+        linkend="managed-object-schema-validation"><citetitle>Schema
+        Validation</citetitle></link> section)</para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+     <listitem>
+      <para>Per-property trigger within the object (order undefined):</para>
+      <itemizedlist>
+       <listitem>
+        <para>Call property <literal>onStorage</literal> trigger</para>
+       </listitem>
+       <listitem>
+        <para>Call object <literal>onStorage</literal> trigger</para>
+       </listitem>
+       <listitem>
+        <para>Store the object with any resulting changes to the data
+         store</para>
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </orderedlist>
+  </section>
+ </section>
+
+ <section xml:id="managed-object-encryption">
+  <title>Encryption</title>
+
+  <para>Sensitive object properties can be encrypted prior to storage,
+  typically through the property <literal>onStorage</literal> trigger. The
+  trigger has access to configuration data, which can include arbitrary
+  attributes that you define, such as a symmetric encryption key. Such
+  attributes can be decrypted during retrieval from the data store through
+  the property <literal>onRetrieval</literal> trigger.</para>
+ </section>
+
+ <section xml:id="managed-object-configuration">
+  <title>Configuration</title>
+
+  <para>Configuration of managed objects is provided through an array of
+  managed object configuration objects.</para>
+
+  <programlisting language="javascript">{
+  "objects": [ <replaceable>managed-object-config object</replaceable>, ... ]
+}</programlisting>
+
+  <variablelist>
+   <varlistentry>
+    <term>objects</term>
+    <listitem>
+     <para>array of managed-object-config objects, required</para>
+     <para>Specifies the objects that the managed object service
+      manages.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="managed-object-config-object-properties">
+   <title>Managed Object Config Object Properties</title>
+
+   <para>Specifies the configuration of each managed object.</para>
+
+   <programlisting language="javascript">{
+  "name"      : <replaceable>string</replaceable>,
+  "schema"    : <replaceable>json-schema object</replaceable>,
+  "onCreate"  : <replaceable>script object</replaceable>,
+  "onRead"    : <replaceable>script object</replaceable>,
+  "onUpdate"  : <replaceable>script object</replaceable>,
+  "onDelete"  : <replaceable>script object</replaceable>,
+  "onValidate": <replaceable>script object</replaceable>,
+  "onRetrieve": <replaceable>script object</replaceable>,
+  "onStore"   : <replaceable>script object</replaceable>,
+  "properties": [ <replaceable>property-configuration object</replaceable>, ... ]
+}</programlisting>
+
+   <varlistentry>
+    <term>name</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The name of the managed object. Used to identify the
+     managed object in URIs and identifiers.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>schema</term>
+    <listitem>
+     <para>json-schema object, optional</para>
+     <para>The schema to use to validate the structure and content of
+     the managed object. The schema-object format is specified by the
+     JSON Schema specification.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onCreate</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when the creation of an object
+     is being requested. The object to be created is provided in the
+     root scope as an object property. The script may change the
+     object. If an exception is thrown, the create aborts with an
+     exception.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onRead</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when the read of an object is
+     being requested. The object being read is provided in the root
+     scope as an object property. The script may change the object.
+     If an exception is thrown, the read aborts with an
+     exception.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onUpdate</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when an update to an object is
+     requested. The old value of the object being updated is provided
+     in the root scope as an <literal>oldObject</literal> property. The new
+     value of the object being updated is provided in the root scope as a
+     <literal>newObject</literal> property. The script may change the
+     <literal>newObject</literal>. If an exception is thrown, the update
+     aborts with an exception.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onDelete</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when the deletion of an object
+     is being requested. The object being deleted is provided in the
+     root scope as an object property. If an exception is thrown, the
+     deletion aborts with an exception.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onValidate</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when the object requires
+     validation. The object to be validated is provided in the root
+     scope as an object property. If an exception is thrown, the
+     validation fails.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onRetrieve</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger once an object is retrieved from
+     the repository. The object that was retrieved is provided in the
+     root scope as an object property. The script may change the
+     object. If an exception is thrown, then object retrieval
+     fails.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onStore</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when an object is about to be
+     stored in the repository. The object to be stored is provided in
+     the root scope as an object property. The script may change the
+     object. If an exception is thrown, then object storage
+     fails.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>properties</term>
+    <listitem>
+     <para>array of property-config objects, optional</para>
+     <para>A list of property specifications.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="managed-object-script-object-properties">
+   <title>Script Object Properties</title>
+
+   <programlisting language="javascript">{
+  "type"  : "text/javascript",
+  "source": <replaceable>string</replaceable>
+ }</programlisting>
+
+   <varlistentry>
+    <term>type</term>
+    <listitem>
+     <para>string, required</para>
+     <para>Specifies the type of script to be executed. Currently, only
+     <literal>"text/javascript"</literal> is supported.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>source</term>
+    <listitem>
+     <para>string, required</para>
+     <para>Specifies the source code of the script to be executed.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="managed-object-property-config-properties">
+   <title>Property Config Properties</title>
+
+   <programlisting language="javascript">{
+  "name"      : <replaceable>string</replaceable>,
+  "onValidate": <replaceable>script object</replaceable>,
+  "onRetrieve": <replaceable>script object</replaceable>,
+  "onStore"   : <replaceable>script object</replaceable>,
+  "encryption": <replaceable>property-encryption object</replaceable>
+}</programlisting>
+
+   <varlistentry>
+    <term>name</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The name of the property being configured.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onValidate</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when the property requires
+     validation. The property to be validated is provided in the root
+     scope as the <literal>property</literal> property. If an exception is
+     thrown, the validation fails.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onRetrieve</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger once a property is retrieved
+      from the repository. The property that was retrieved is provided
+      in the root scope as the <literal>property</literal> property. The
+      script may change the property value. If an exception is thrown, then
+      object retrieval fails.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onStore</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script object to trigger when a property is about to be
+      stored in the repository. The property to be stored is provided
+      in the root scope as the <literal>property</literal> property. The
+      script may change the property value. If an exception is thrown, then
+      object storage fails.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>encryption</term>
+    <listitem>
+     <para>property-encryption object, optional</para>
+     <para>Specifies the configuration for encryption of the property
+      in the repository. If omitted or null, the property is not
+      encrypted.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="managed-object-property-encryption-properties">
+   <title>Property Encryption Object</title>
+
+   <programlisting language="javascript">{
+  "cipher": <replaceable>string</replaceable>,
+  "key"   : <replaceable>string</replaceable>
+}</programlisting>
+
+   <varlistentry>
+    <term>cipher</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>The cipher transformation used to encrypt the property. If
+     omitted or null, the default cipher of
+     <literal>"AES/CBC/PKCS5Padding"</literal> is used.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>key</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The alias of the key in the OpenIDM cryptography service
+     keystore used to encrypt the property.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</chapter>

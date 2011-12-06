@@ -24,436 +24,638 @@
   !    
 -->
 <chapter xml:id='chap-synchronization'
- xmlns='http://docbook.org/ns/docbook'
- version='5.0' xml:lang='en'
- xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
-    <title>Synchronization</title>
-    <para>The synchronization engine is the core of OpenIDM.</para>
-    <para/>
-    <sect1>
-        <title>Configuration</title>
-        <para>Configuration of the synchronization service is provided through the following configuration object:</para>
-        <sect2>
-            <title>Usage</title>
+         xmlns="http://docbook.org/ns/docbook"
+         version="5.0"
+         xml:lang="en"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ <title>Synchronization</title>
 
-            <example>
-                <programlisting language="javascript">
-{
-  "mappings": [ object-mapping object, … ]
+ <para>The synchronization engine is the core of OpenIDM. You configure the
+ synchronization service through a <literal>mappings</literal> property
+ that specifies mappings between objects managed by the synchronization
+ engine.</para>
+
+ <programlisting language="javascript">{
+  "mappings": [ <replaceable>object-mapping object</replaceable>, ... ]
 }</programlisting>
-            </example>
 
-        </sect2>
-        <sect2>
-            <title>Properties</title>
-            <variablelist>
-                <varlistentry>
-                    <term>mappings</term>
-                    <listitem>
-                        <para>array of object-mapping objects, required</para>
-                        <para>Specifies the mappings between objects that the synchronization engine manages.</para>
-                    </listitem>
-                </varlistentry>
-            </variablelist>
-        </sect2>
-        <sect2>
-            <title>object-mapping object</title>
-            <para/>
-            <para>Specifies the configuration of each mapping.</para>
-            <sect3>
-                <title>Usage</title>
-
-                <example>
-                    <programlisting language="javascript">
-{
-  "name": string,
-  "source": string,
-  "target": string,
-  "validSource": script object,
-  "validTarget": script object,
-  "correlationQuery": script object,
-  "properties": [ property object, … ],
-  "policies": [ policy object, … ],
-  "onCreate": script object,
-  "onUpdate": script object
+ <section xml:id="sync-object-mapping">
+  <title>Object-Mapping Objects</title>
+  <para>An object-mapping object specifies the configuration for a mapping of
+  source objects to target objects.</para>
+  
+  <programlisting language="javascript"> {
+  "name"            : <replaceable>string</replaceable>,
+  "source"          : <replaceable>string</replaceable>,
+  "target"          : <replaceable>string</replaceable>,
+  "validSource"     : <replaceable>script object</replaceable>,
+  "validTarget"     : <replaceable>script object</replaceable>,
+  "correlationQuery": <replaceable>script object</replaceable>,
+  "properties"      : [ <replaceable>property object</replaceable>, ... ],
+  "policies"        : [ <replaceable>policy object</replaceable>, ... ],
+  "onCreate"        : <replaceable>script object</replaceable>,
+  "onUpdate"        : <replaceable>script object</replaceable>
 }</programlisting>
-                </example>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>name</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Uniquely names the object mapping. Used in the link object identifier.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>source</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the path of the source object set. Example: "managed/user".</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>target</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the path of the target object set. Example: "system/ldap/account".</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>validSource</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script that determines if a source object is valid to be mapped. The script yields a boolean value; true indicates the source object is valid; false can be used to defer mapping until some condition is met. In the root scope, the source object is provided in the "source" property. If the script is not specified, then all source objects are considered valid.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>validTarget</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script used during reconciliation that determines if a target object is valid to be mapped. The script yields a boolean value; true indicates the target object is valid; false indicates that the target object should not be included in reconciliation. In the root scope, the source object is provided in the "target" property. If the script is not specified, then all target objects are considered valid for mapping.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>correlationQuery</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script that yields a query object to query the target object set when a source object has no linked target. The source object is provided in the "source" property in the script scope.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>properties</term>
-                        <listitem>
-                            <para>array of property-mapping objects, optional</para>
-                            <para>Specifies mappings between source object properties and target object properties, with optional transformation scripts.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>policies</term>
-                        <listitem>
-                            <para>array of policy objects, optional</para>
-                            <para>Specifies a set of link conditions and associated actions to take in response. </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onCreate</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script to execute when a target object is to be created, after property mappings have been applied. In the root scope, the source object is provided in the "source" property, projected target object in the "target" property and the link situation that led to the create operation in "situation". The _id property in the target object can be modified, allowing the mapping to select an identifier; if not set then the identifier is expected to be set by the target object set. If the script throws an exception, then target object creation is aborted.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>onUpdate</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>A script to execute when a target object is to be updated, after property mappings have been applied. In the root scope, the source object is provided in the "source" property, projected target object in the "target" property, link situation that led to the update operation in "situation". If the script throws an exception, then target object update is aborted.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>property object</title>
-            <para/>
-            <para>Specifies how the value of a target property is determined.</para>
-            <sect3>
-                <title>Usage</title>
-                <example>
-                    <programlisting language="javascript">
-{
-  "target": string,
-  "source": string,
-  "script": script object,
-  "default": value
-}</programlisting>
-                </example>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>target</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the path of the property in the target object to map to.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>source</term>
-                        <listitem>
-                            <para>string, optional</para>
-                            <para>Specifies the path of the property in the source object to map from. If not specified, then the target property value will be derived from the script or default value.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>script</term>
-                        <listitem>
-                            <para>script object, optional</para>
-                            <para>An script to determine the target property value. The root scope contains value of the source property in the "source" property (if specified). The resulting value yielded by the script is stored in the target property. </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>default</term>
-                        <listitem>
-                            <para>any value, optional</para>
-                            <para>Specifies the value to assign to the target property if a non-null value is not established by "source" and/or "transform". If not specified, the default value is null.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
 
-        </sect2>
-        <sect2>
-            <title>policy object</title>
-            <para/>
-            <para>Specifies a link condition and the associated actions to take in response. </para>
-            <sect3>
-                <title>Usage</title>
-                <example>
-                    <programlisting language="javascript">
-{
-  "situation": string,
-  "action": string or script object
-}</programlisting>
-                </example>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>situation</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the situation for which an associated action is to be defined. For a set of valid situation and default actions, see the Situations section, below.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>action</term>
-                        <listitem>
-                            <para>string or script object, required</para>
-                            <para>Specifies the action to perform. If a script is specified, the script is executed and is expected to yield a string containing the action to perform. For a set of valid actions, see the Actions section, below.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>Situations</title>
-            <para>During Reconciliation OpenIDM builds three lists:</para>
-            <para>All valid objects from the source, all records from the appropriate link table and all valid objects on the target system. </para>
-            <para>Any valid object from the source list will be rated as qualifies=1. An object can be not valid because it is not on the source system or because it was filtered out by the script in the "validSource" property.</para>
-            <para>Any object for which there is not yet a link found in the link table will result in link=0 and any object which can not be found in the target system will get target=0</para>
-            <para/>
-            <para>The following conditions are supported during the source syncronization:</para>
-            <para/>
-            <para>"CONFIRMED" (qualifies=1, link=1, target=1)</para>
-            <para>The mapping qualifies for a target object and there is an existing link to a
-                target object. Detected during change events and reconciliation. Default action:
-                "UPDATE".</para>
-            <para/>
-            <para>"FOUND" (qualifies=1, link=0, target=1)</para>
-            <para>The mapping qualifies for a target object, there is no link to a target object,
-                and there is a single correlated target object to link. Detected during change
-                events and reconciliation. Default action: "UPDATE".</para>
-            <para/>
-            <para>"ABSENT" (qualifies=1, link=0, target=0)</para>
-            <para>The mapping qualifies for a target object, there is no link to a target object, and there is no correlated target object to link. Detected during change events and reconciliation. Default action: "CREATE".</para>
-            <para/>
-            <para>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</para>
-            <para>The mapping qualifies for a target object, there is no link to a target object, but there is more than one correlated target object to link. Detected during change events and reconciliation. Default action: "EXCEPTION".</para>
-            <para/>
-            <para>"MISSING" (qualifies=1, link=1, target=0)</para>
-            <para>The mapping is qualified for a target object and there is a qualified link to a target object, but the target object is missing. Only detected during reconciliation and synchronous operations. Default action: "EXCEPTION".</para>
-            <para/>
-            <para>"UNQUALIFIED" (qualifies=0, link=1)</para>
-            <para>The mapping is not qualified for a target object and there is a link to an existing target object. Detected during change events and reconciliation. Default action: "DELETE".
-                <warning><para>Target syncronization has the same situation! when (qualifies=0, link=0 or source=0)</para></warning>
-            </para>
-            <para/>
-            <para>Not in use!!! "UNASSIGNED" (qualifies=0, link=0, target=1)</para>
-            <para>There is target object for which there is no link. Only detected during reconciliation. Default action: "EXCEPTION".</para>
-            <para/>
-            <para/>
-            <para>The following conditions are supported during the target syncronization:</para>
-            <para/>
-            <para>In every case the target object must qualify otherwise the object is ignored!</para>
-            <para/>
-            <para>"CONFIRMED" (qualifies=1, link=1, source=1)</para>
-            <para>The mapping qualifies for a target object and there is an existing link to a
-                source object. Detected during only reconciliation. Default action:
-                "UPDATE".</para>
-            <para/>
-            <para>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</para>
-            <para>The mapping is not qualified for a target object and there is a link to an existing target object. Detected during change events and reconciliation. Default action: "DELETE".</para>            
-            <para/>
-        </sect2>
-        <sect2>
-            <title>Actions</title>
-            <para/>
-            <para>"CREATE"</para>
-            <para>A target object should be created and linked.</para>
-            <para/>
-            <para>"UPDATE"</para>
-            <para>A target object should be linked and updated.</para>
-            <para/>
-            <para>"DELETE"</para>
-            <para>The target object should be deleted and unlinked.</para>
-            <para/>
-            <para>"LINK"</para>
-            <para>The correlated target object should be linked.</para>
-            <para/>
-            <para>"UNLINK"</para>
-            <para>The linked target object should be unlinked.</para>
-            <para/>
-            <para>"EXCEPTION"</para>
-            <para>The link situation is flagged as an exception.</para>
-            <para/>
-            <para>"IGNORE"</para>
-            <para>No change to the link or target object state should be made.</para>
-        </sect2>
-        <sect2>
-            <title>script object</title>
-            <para/>
-            <sect3>
-                <title>Usage</title>
+  <variablelist xml:id="mapping-object-properties">
+   <title>Mapping Object Properties</title>
+   <varlistentry>
+    <term>name</term>
+    <listitem>
+     <para>string, required</para>
+     <para>Uniquely names the object mapping. Used in the link object
+      identifier.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>source</term>
+    <listitem>
+     <para>string, required</para>
+     <para>Specifies the path of the source object set. Example:
+      <literal>"managed/user"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>target</term>
+    <listitem>
+     <para>string, required</para>
+     <para>Specifies the path of the target object set. Example:
+      <literal>"system/ldap/account"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>validSource</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script that determines if a source object is valid to be
+      mapped. The script yields a boolean value: <literal>true</literal>
+      indicates the source object is valid; <literal>false</literal> can be
+      used to defer mapping until some condition is met. In the root scope,
+      the source object is provided in the <literal>"source"</literal>
+      property. If the script is not specified, then all source objects are
+      considered valid.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>validTarget</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script used during reconciliation that determines if a target
+      object is valid to be mapped. The script yields a boolean value:
+      <literal>true</literal> indicates the target object is valid;
+      <literal>false</literal> indicates that the target object should not be
+      included in reconciliation. In the root scope, the source object is
+      provided in the <literal>"target"</literal> property. If the script is
+      not specified, then all target objects are considered valid for
+      mapping.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>correlationQuery</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script that yields a query object to query the target object
+      set when a source object has no linked target. The source object is
+      provided in the <literal>"source"</literal> property in the script
+      scope.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>properties</term>
+    <listitem>
+     <para>array of property-mapping objects, optional</para>
+     <para>Specifies mappings between source object properties and target
+      object properties, with optional transformation scripts.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>policies</term>
+    <listitem>
+     <para>array of policy objects, optional</para>
+     <para>Specifies a set of link conditions and associated actions to
+      take in response.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onCreate</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script to execute when a target object is to be created,
+      after property mappings have been applied. In the root scope, the
+      source object is provided in the <literal>"source"</literal> property,
+      projected target object in the <literal>"target"</literal> property and
+      the link situation that led to the create operation in
+      <literal>"situation"</literal>. The <literal>_id</literal> property in
+      the target object can be modified, allowing the mapping to select an
+      identifier; if not set then the identifier is expected to be set by
+      the target object set. If the script throws an exception, then
+      target object creation is aborted.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onUpdate</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script to execute when a target object is to be updated,
+      after property mappings have been applied. In the root scope, the
+      source object is provided in the <literal>"source"</literal> property,
+      projected target object in the <literal>"target"</literal> property,
+      link situation that led to the update operation in
+      <literal>"situation"</literal>. If the script throws an exception,
+      then target object update is aborted.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  
+  <section xml:id="sync-property-objects">
+   <title>Property Objects</title>
 
-                <example>
-                    <programlisting language="javascript">
-{
-  "type": "text/javascript",
-  "source": string
+   <para>A property object specifies how the value of a target property is
+   determined.</para>
+   <programlisting language="javascript"> {
+  "target" : <replaceable>string</replaceable>,
+  "source" : <replaceable>string</replaceable>,
+  "script" : <replaceable>script object</replaceable>,
+  "default": <replaceable>value</replaceable>
 }</programlisting>
-                </example>
 
+   <variablelist xml:id="sync-property-object-properties">
+    <title>Property Object Properties</title>
+    <varlistentry>
+     <term>target</term>
+     <listitem>
+      <para>string, required</para>
+      <para>Specifies the path of the property in the target object to map
+       to.</para>
+     </listitem>
+    </varlistentry>
+     <varlistentry>
+      <term>source</term>
+      <listitem>
+       <para>string, optional</para>
+       <para>Specifies the path of the property in the source object to map
+        from. If not specified, then the target property value is derived
+        from the script or default value.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>script</term>
+      <listitem>
+       <para>script object, optional</para>
+       <para>An script to determine the target property value. The root
+        scope contains value of the source property in the
+        <literal>"source"</literal> property (if specified). The resulting
+        value yielded by the script is stored in the target property.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>default</term>
+      <listitem>
+       <para>any value, optional</para>
+       <para>Specifies the value to assign to the target property if a
+        non-null value is not established by <literal>"source"</literal> or
+        <literal>"transform"</literal>. If not specified, the default value is
+        <literal>null</literal>.</para>
+      </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
 
-                <para/>
-            </sect3>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>type</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the type of script to be executed. Presently, only "text/javascript" is supported.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>source</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>Specifies the source code of the script to be executed.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-    </sect1>
-    <sect1>
-        <title>Links</title>
-        <para>To maintain links between source and target objects in mappings, an object set is stored in the repository. The object set identifier follows this scheme:</para>
-        <para/>
-        <para>links/{mapping}</para>
-        <para/>
-        <para>{mapping}</para>
-        <para>This is the name of the mapping for which links are managed.</para>
-        <para/>
-        <sect2>
-            <title>Schema</title>
-            <example>
-                <para>The structure of a link entry is:</para>
-                <programlisting language="javascript">
-{
-  "sourceId": string,
-  "targetId": string,
-  "reconId": string or null
+  <section xml:id="sync-policy-objects">
+   <title>Policy Objects</title>
+
+   <para>A policy object specifies a link condition and the associated actions
+   to take in response.</para>
+
+   <programlisting language="javascript">{
+  "situation": <replaceable>string</replaceable>,
+  "action"   : <replaceable>string</replaceable> or <replaceable>script object</replaceable>
 }</programlisting>
-            </example>
-            <sect3>
-                <title>Properties</title>
-                <variablelist>
-                    <varlistentry>
-                        <term>sourceId</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>The value of an object's _id property, which identifies the source object that is linked to a target object.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>targetId</term>
-                        <listitem>
-                            <para>string, required</para>
-                            <para>The value of an object's _id property, which identifies the target object that is linked to a source object.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>reconId</term>
-                        <listitem>
-                            <para>string or null</para>
-                            <para>The identifier of the last reconciliation job that processed this link. Is used during reconciliation to detect orphan source and target objects.  </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </sect3>
-        </sect2>
-        <sect2>
-            <title>Queries</title>
-            <para/>
-            <para>The following queries will be required for a link object set.</para>
-            <para/>
-            <para>Find link(s) for a given source object identifier (step 1):</para>
-            <para>SELECT * FROM links/{mapping} WHERE sourceId = {value}</para>
-            <para>Note: While only one result makes sense, this query is intended to allow multiple results so that this scenario can be handled as an exception.</para>
-            <para/>
-            <para>Select link(s) for a given target object identifier (step 2):</para>
-            <para>SELECT * FROM links/{mapping} WHERE targetId = {value}</para>
-            <para>Note: While only one result makes sense, this query is intended to allow multiple results so that this scenario can be handled as an exception.</para>
-            <para/>
-            <para>Find orphan source and target links (step 3):</para>
-            <para>SELECT * FROM links/{mapping} WHERE reconId &lt;&gt; {value}</para>
-            <para/>
-        </sect2>
-    </sect1>
-    <sect1>
-        <title>Reconciliation</title>
-        <para>Reconciliation is performed on a per-mapping basis. The process of reconciliation for a given mapping is broken down into the following process:</para>
-        <orderedlist>
-            <listitem>
-                <para>Iterate through all objects for the object set specified as "source". For each source object: look for link to target object in link object set, perform correlation query (if defined). Conclude what the link condition is. Determine action to perform based on policy defined for condition. Perform action. Store reconId identifier in mapping to indicate that mapping was processed. Write results somewhere.</para>
-            </listitem>
-            <listitem>
-                <para>Iterate through all object identifiers for the object set specified as "target". For each identifier: find the target in the link object set. If reconId is "mine" then that target has already been processed correctly in step 1. If unrecognized reconId or link object does not exist, then source is missing. Determine action to perform based on policy defined for condition. Perform the action. Store reconId identifier in mapping (if applicable) to indicate that the mapping was processed. Write results somewhere.  </para>
-            </listitem>
-            <listitem>
-                <para>Iterate through all link objects. If "my" reconId, skip. If unrecognized reconId, then source and/or target are missing. Determine action to perform based on policy. Perform action. Store reconId identifer in mapping to indicate it was processed in this run.</para>
-            </listitem>
-        </orderedlist>
-        <para>This should catch and allow processing for all conditions.</para>
-        <para/>
-    </sect1>
-    <sect1>
-        <title>REST API</title>
-        <para>External synchronized objects should expose an API to request immediate synchronization. The form should be:</para>
-        <para/>
-        <para>Request</para>
-        <para>POST /openidm/system/xml/account/jsmith?action=sync HTTP/1.1</para>
-        <para>…</para>
-        <para/>
-        <para>Response (success)</para>
-        <para>HTTP/1.1 204 No Content</para>
-        <para>…</para>
-        <para/>
-        <para>Response (synchronization failure)</para>
-        <para>HTTP/1.1 409 Conflict</para>
-        <para>…</para>
-        <para/>
-        <para>[JSON representation of error]</para>
-        <para/>
-    </sect1>
+
+   <variablelist xml:id="sync-policy-object-properties">
+    <title>Policy Object Properties</title>
+    <varlistentry>
+     <term>situation</term>
+     <listitem>
+      <para>string, required</para>
+      <para>Specifies the situation for which an associated action is to be
+      defined. For a set of valid situation and default actions, see the
+      <link linkend="sync-situations">Situations</link> section.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>action</term>
+     <listitem>
+      <para>string or script object, required</para>
+      <para>Specifies the action to perform. If a script is specified, the
+       script is executed and is expected to yield a string containing the
+       action to perform. For a set of valid actions, see the <link
+       linkend="sync-actions">Actions</link> section.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <section xml:id="sync-situations">
+    <title>Situations</title>
+
+    <orderedlist>
+     <para>During reconciliation OpenIDM builds three lists.</para>
+     <listitem>
+      <para>All valid objects from the source</para>
+     </listitem>
+     <listitem>
+      <para>All records from the appropriate link table</para>
+     </listitem>
+     <listitem>
+      <para>All valid objects on the target system</para>
+     </listitem>
+    </orderedlist>
+
+    <para>Any valid object from the source list is rated as
+    <literal>qualifies=1</literal>. An object can be not valid because it
+    is not on the source system or because it was filtered out by the script
+    in the <literal>"validSource"</literal> property.</para>
+
+    <para>Any object for which there is not yet a link found in the link
+    table results in <literal>link=0</literal>. Any object which can not be
+    found in the target system gets <literal>target=0</literal>.</para>
+
+    <variablelist>
+     <para>The following conditions are supported during the source
+     synchronization.</para>
+     <varlistentry>
+      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
+      <listitem>
+       <para>The mapping qualifies for a target object, and a link to a target
+       object exists. Detected during change events and reconciliation. Default
+       action: "UPDATE".</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"FOUND" (qualifies=1, link=0, target=1)</term>
+      <listitem>
+       <para>The mapping qualifies for a target object, there is no link to a
+       target object, and there is a single correlated target object to link.
+       Detected during change events and reconciliation. Default action:
+       "UPDATE".</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"ABSENT" (qualifies=1, link=0, target=0)</term>
+      <listitem>
+       <para>The mapping qualifies for a target object, there is no link to a
+       target object, and there is no correlated target object to link.
+       Detected during change events and reconciliation. Default action:
+       "CREATE".</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
+      <listitem>
+       <para>The mapping qualifies for a target object, there is no link to a
+       target object, but there is more than one correlated target object to
+       link. Detected during change events and reconciliation. Default
+       action: "EXCEPTION".</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"MISSING" (qualifies=1, link=1, target=0)</term>
+      <listitem>
+       <para>The mapping is qualified for a target object, and there is a
+       qualified link to a target object, but the target object is missing.
+       Only detected during reconciliation and synchronous operations.
+       Default action: "EXCEPTION".</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"UNQUALIFIED" (qualifies=0, link=1)</term>
+      <listitem>
+       <para>The mapping is not qualified for a target object and there is a
+       link to an existing target object. Detected during change events and
+       reconciliation. Default action: "DELETE".</para>
+       <note>
+        <para>Target syncronization has the same situation when
+        (qualifies=0, link=0 or source=0).</para>
+       </note>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"UNASSIGNED" (qualifies=0, link=0, target=1) (not in use)</term>
+      <listitem>
+       <para>A target object exists for which there is no link. Only detected
+       during reconciliation. Default action: "EXCEPTION".</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+
+    <variablelist>
+     <para>The following conditions are supported during the target
+     syncronization. In each case, the target object must qualify. Otherwise
+     the object is ignored.</para>
+     <varlistentry>
+      <term>"CONFIRMED" (qualifies=1, link=1, source=1)</term>
+      <listitem>
+       <para>The mapping qualifies for a target object, and a link to a
+       source object exists. Detected during only reconciliation. Default
+       action: "UPDATE".</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</term>
+      <listitem>
+       <para>The mapping is not qualified for a target object, and there is a
+       link to an existing target object. Detected during change events and
+       reconciliation. Default action: "DELETE".</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+
+   <section xml:id="sync-actions">
+    <title>Actions</title>
+
+    <variablelist>
+     <para>The following actions are supported.</para>
+     <varlistentry>
+      <term>"CREATE"</term>
+      <listitem>
+       <para>Create and link a target object.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"UPDATE"</term>
+      <listitem>
+       <para>Link and update a target object.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"DELETE"</term>
+      <listitem>
+       <para>Delete and unlink the target object.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"LINK"</term>
+      <listitem>
+       <para>Link the correlated target object.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"UNLINK"</term>
+      <listitem>
+       <para>Unlink the linked target object.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"EXCEPTION"</term>
+      <listitem>
+       <para>Flag the link situation as an exception.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>"IGNORE"</term>
+      <listitem>
+       <para>Do not change the link or target object state.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+
+   <section xml:id="sync-script-objects">
+    <title>Script Object</title>
+
+    <para>Script objects take the following form.</para>
+
+    <programlisting language="javascript">{
+  "type"  : "text/javascript",
+  "source": <replaceable>string</replaceable>
+}</programlisting>
+
+    <variablelist>
+     <varlistentry>
+      <term>type</term>
+      <listitem>
+       <para>string, required</para>
+       <para>Specifies the type of script to be executed. Currently, OpenIDM
+        supports only <literal>"text/javascript"</literal>.</para>
+      </listitem>
+     </varlistentry>
+      <varlistentry>
+       <term>source</term>
+       <listitem>
+        <para>string, required</para>
+        <para>Specifies the source code of the script to be executed.</para>
+       </listitem>
+      </varlistentry>
+    </variablelist>
+   </section>
+  </section>
+ </section>
+
+ <section xml:id="sync-links">
+  <title>Links</title>
+
+  <para>To maintain links between source and target objects in mappings,
+  OpenIDM stores an object set in the repository. The object set identifier
+  follows this scheme.</para>
+
+  <literallayout class="monospaced">links/<replaceable>mapping</replaceable></literallayout>
+
+  <para>Here, <replaceable>mapping</replaceable> represents that name of the
+  mapping for which links are managed.</para>
+
+  <para>Link entries have the following structure.</para>
+
+  <programlisting language="javascript">{
+  "sourceId": <replaceable>string</replaceable>,
+  "targetId": <replaceable>string</replaceable>,
+  "reconId" : <replaceable>string</replaceable> or null
+}</programlisting>
+
+  <variablelist>
+   <varlistentry>
+    <term>sourceId</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The value of an object's <literal>_id</literal> property, which
+     identifies the source object that is linked to a target object.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>targetId</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The value of an object's <literal>_id</literal> property, which
+     identifies the target object that is linked to a source object.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>reconId</term>
+    <listitem>
+     <para>string or null</para>
+     <para>The identifier of the last reconciliation job that processed this
+     link. OpenIDM uses this during reconciliation to detect orphan source and
+     target objects.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="sync-queries">
+  <title>Queries</title>
+
+  <orderedlist>
+   <para>OpenIDM performs the following queries on a link object set.</para>
+   <listitem>
+    <para>Find link(s) for a given source object identifier.</para>
+    <literallayout class="monospaced">SELECT * FROM links/<replaceable
+    >mapping</replaceable> WHERE sourceId = <replaceable
+    >value</replaceable></literallayout>
+    <para>Although a single result makes sense, this query is intended to
+    allow multiple results so that this scenario can be handled as an
+    exception.</para>
+   </listitem>
+   <listitem>
+    <para>Select link(s) for a given target object identifier.</para>
+    <literallayout class="monospaced">SELECT * FROM links/<replaceable
+    >mapping</replaceable> WHERE targetId = <replaceable
+    >value</replaceable></literallayout>
+    <para>Although a single result makes sense, this query is intended to
+    allow multiple results so that this scenario can be handled as an
+    exception.</para>
+   </listitem>
+   <listitem>
+    <para>Find orphan source and target links.</para>
+    <literallayout class="monospaced">SELECT * FROM links/<replaceable
+    >mapping</replaceable> WHERE reconId &lt;&gt; = <replaceable
+    >value</replaceable></literallayout>
+   </listitem>
+  </orderedlist>
+ </section>
+
+ <section xml:id="sync-reconciliation">
+  <title>Reconciliation</title>
+
+  <orderedlist>
+  <para>OpenIDM performs reconciliation on a per-mapping basis. The process of
+  reconciliation for a given mapping includes these stages.</para>
+   <listitem>
+    <para>Iterate through all objects for the object set specified as
+    <literal>"source"</literal>. For each source object, carry out the
+    following steps.</para>
+    <orderedlist>
+     <listitem>
+      <para>Look for a link to a target object in the link object set, and
+      perform a correlation query (if defined).</para></listitem>
+     <listitem>
+      <para>Determine the link condition.</para>
+     </listitem>
+     <listitem>
+      <para>Determine the action to perform based on the policy defined for the
+      condition.</para>
+     </listitem>
+     <listitem>
+      <para>Perform the action.</para>
+     </listitem>
+     <listitem>
+      <para>Store the <literal>reconId</literal> identifier in the mapping to
+      indicate that the mapping was processed.</para>
+     </listitem>
+     <listitem>
+      <para>Write the results.</para>
+     </listitem>
+    </orderedlist>
+   </listitem>
+   <listitem>
+    <para>Iterate through all object identifiers for the object set specified
+    as <literal>"target"</literal>. For each identifier, carry out the
+    following steps.</para>
+    <orderedlist>
+     <listitem>
+      <para>Find the target in the link object set.</para>
+      <para>If the <literal>reconId</literal> is <literal>"mine"</literal> then
+      the target has already been processed correctly.</para>
+      <para>If the <literal>reconId</literal> is not recognized, or the link
+      object does not exist, then the source is missing.</para>
+     </listitem>
+     <listitem>
+      <para>Determine the action to perform based on the policy defined for the
+      condition.</para>
+     </listitem>
+     <listitem>
+      <para>Perform the action.</para>
+     </listitem>
+     <listitem>
+      <para>Store the <literal>reconId</literal> identifier in the mapping (if
+      applicable) to indicate that the mapping was processed.</para>
+     </listitem>
+     <listitem>
+      <para>Write the results.</para>
+     </listitem>
+    </orderedlist>
+   </listitem>
+   <listitem>
+    <para>Iterate through all link objects, carrying out the following
+    steps.</para>
+    <orderedlist>
+     <listitem>
+      <para>If the <literal>reconId</literal> is <literal>"my"</literal>, then
+      skip the object.</para>
+      <para>If the <literal>reconId</literal> is not recognized, then the
+      source or the target is missing.</para>
+     </listitem>
+     <listitem>
+      <para>Determine the action to perform based on the policy.</para>
+     </listitem>
+     <listitem>
+      <para>Perform the action.</para>
+     </listitem>
+     <listitem>
+      <para>Store the <literal>reconId</literal> identifer in the mapping to
+      indicate that it was processed in this run.</para>
+     </listitem>
+    </orderedlist>
+   </listitem>
+  </orderedlist>
+ </section>
+
+ <section xml:id="sync-rest-api">
+  <title>REST API</title>
+
+  <variablelist>
+   <para>External synchronized objects expose an API to request immediate
+   synchronization. This API includes the following requests and
+   responses.</para>
+   <varlistentry>
+    <term>Request</term>
+    <listitem>
+     <para>Example:</para>
+     <programlisting language="http">
+POST /openidm/system/xml/account/jsmith?action=sync HTTP/1.1</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Response (success)</term>
+    <listitem>
+     <para>Example:</para>
+     <programlisting language="http">
+HTTP/1.1 204 No Content
+...</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Response (synchronization failure)</term>
+    <listitem>
+     <para>Example:</para>
+     <programlisting language="http">
+HTTP/1.1 409 Conflict
+...
+<replaceable>[JSON representation of error]</replaceable></programlisting>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
 </chapter>

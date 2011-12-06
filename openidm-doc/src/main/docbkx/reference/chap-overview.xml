@@ -23,200 +23,215 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter version="5.0"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-         xml:id="chap-overview" xml:lang="en"
+<chapter xml:id="chap-overview"
          xmlns="http://docbook.org/ns/docbook"
+         version="5.0"
+         xml:lang="en"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns:xs="http://www.w3.org/2001/XMLSchema"
+         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
          xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xinclude="http://www.w3.org/2001/XInclude"
-         xmlns:ns="http://docbook.org/ns/docbook">
+         xmlns:xinclude="http://www.w3.org/2001/XInclude">
   <title>Architectural Overview</title>
 
-  <para>OpenIDM Architecture<emphasis role="bold" /></para>
+  <para>The following figure provides an overview of the OpenIDM architecture,
+  which is covered in more detail in subsequent sections of this chapter.</para>
 
-  <para>
-    <inlinemediaobject>
-      <imageobject>
-        <imagedata fileref="images/openidm2-architecture.png">
-          <info>
-            <author>
-              <personname />
-            </author>
+  <mediaobject xml:id="figure-openidm-architecture">
+   <alt>OpenIDM architecture</alt>
+   <imageobject>
+    <imagedata fileref="images/openidm2-architecture.png" format="PNG" />
+   </imageobject>
+   <textobject>
+    <para>OpenIDM consists of infrastructure modules running in an OSGi
+    framework, exposing core services through RESTful APIs to client
+    applications.</para>
+   </textobject>
+  </mediaobject>
 
-            <pubdate />
-          </info>
-        </imagedata>
-      </imageobject>
-    </inlinemediaobject>
-  </para>
+  <section xml:id="openidm-modular-framework">
+    <title>OpenIDM Modular Framework</title>
 
-  <section>
-    <title>OpenIDM Modularity Framework</title>
-
-    <para>The OpenIDM framework is based on OSGi.</para>
-
-    <section>
-      <title>OSGi</title>
-
-      <para>OSGi is a module system and service platform for the Java
-      programming language that implements a complete and dynamic component
-      model. For a good introduction please refer to the
-      <link xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site.
-      While the OpenIDM services should be
-      able to run in any OSGi container, it is currently running in
-      <link xlink:href="http://felix.apache.org/site/index.html">Apache Felix</link>.</para>
-    </section>
-
-    <section>
-      <title>Servlet</title>
-
-      <para>This is an optional layer providing RESTful HTTP access to the
-      managed objects and services. While the servlet layer may be provided by
-      many different engines, OpenIDM embeds Jetty by default.</para>
-    </section>
+    
+    <variablelist>
+     <para>The OpenIDM framework is based on OSGi.</para>
+     <varlistentry>
+      <term>OSGi</term>
+      <listitem>
+       <para>OSGi is a module system and service platform for the Java
+       programming language that implements a complete and dynamic component
+       model. For a good introduction, see the <link xlink:show="new"
+       xlink:href="http://www.osgi.org/About/WhyOSGi">OSGi</link> site.
+       While OpenIDM services are designed to run in any OSGi container,
+       OpenIDM currently runs in <link xlink:show="new"
+       xlink:href="http://felix.apache.org/site/index.html">Apache
+       Felix</link>.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Servlet</term>
+      <listitem>
+       <para>The optional Servlet layer provides RESTful HTTP access to the
+       managed objects and services. While the Servlet layer can be provided by
+       many different engines, OpenIDM embeds Jetty by default.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
   </section>
 
-  <section>
+  <section xml:id="openidm-infrastructure-modules">
     <title>Infrastructure Modules</title>
 
-    <para>The infrastructure modules provide the underlying features needed
-    for the core services.</para>
-
-    <section>
-      <title>Scheduler</title>
-      <para>The schedular is a cron like scheduling component implemented
-      using the 
-      <link xlink:href="http://www.quartz-scheduler.org">Quartz library</link>. 
-      It is
-      typically used to schedule regular synchronizations and
-      reconciliations.
-      </para>
-<!--  Currently xref linkends must reference IDs within the same file.
-      <para><xref linkend="chap-scheduling"/></para> -->
-    </section>
-
-    <section>
-      <title>Script Engine</title>
-
-      <para>The script engine is a pluggable module that provides the triggers
-      and plugin points for OpenIDM. At this time LINKJavaScript is the only
-      supported implementation. Other scripts and languages may be supported
-      in the future.</para>
-    </section>
-
-    <section>
-      <title>Audit Logging</title>
-
-      <para>Auditing logs all relevant system activity to the configured
-      log stores. This includes the data from reconciliation as a basis for
-      reporting, as well as detailed activity logs to capture operations on
-      the internal (managed) and external (system) objects.</para>
-<!--  Currently xref linkends must reference IDs within the same file.
-      <para> <xref linkend="chap-auditing"/> </para> -->
-    </section>
-
-    <section>
-      <title>Repository</title>
-
-      <para>The repository provides a common abstraction for a pluggable
-      persistence layer. Plugged in repositories could be NoSQL, relational
-      databases, LDAP, or even flat files. The repository API operates with a
-      JSON-based object model with RESTful principles consistent with the
-      other OpenIDM services. The default embedded implementation for the
-      repository is the NoSQL database OrientDB.</para>
-    </section>
+    <variablelist>
+     <para>OpenIDM infrastructure modules provide the underlying features
+     needed for core services.</para>
+     <varlistentry>
+      <term>Scheduler</term>
+      <listitem>
+       <para>The scheduler provides a <command>cron</command>-like scheduling
+       component implemented using the <link xlink:show="new"
+       xlink:href="http://www.quartz-scheduler.org">Quartz library</link>. Use
+       the scheduler, for example, to enable regular synchronizations and
+       reconciliations.</para>
+       <para>See the <link xlink:href="reference#chap-scheduling"
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Scheduling</citetitle></link> chapter for details.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Script Engine</term>
+      <listitem>
+       <para>The script engine is a pluggable module that provides the triggers
+       and plugin points for OpenIDM. OpenIDM currently implements a
+       <literal>LINKJavaScript</literal> engine.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Audit Logging</term>
+      <listitem>
+       <para>Auditing logs all relevant system activity to the configured
+       log stores. This includes the data from reconciliation as a basis for
+       reporting, as well as detailed activity logs to capture operations on
+       the internal (managed) and external (system) objects.</para>
+       <para>See the <link xlink:href="reference#chap-auditing"
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Auditing</citetitle></link> chapter for details.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Repository</term>
+      <listitem>
+       <para>The repository provides a common abstraction for a pluggable
+       persistence layer. Plugin repositories can include NoSQL and relational
+       databases, LDAP, and even flat files. The repository API operates using
+       a JSON-based object model with RESTful principles consistent with the
+       other OpenIDM services. The default, embedded implementation for the
+       repository is the NoSQL database OrientDB.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
   </section>
 
-  <section>
+  <section xml:id="openidm-core-services">
     <title>Core Services</title>
 
-    <para>The core services are the heart of the OpenIDM resource oriented
-    unified object model and architecture.</para>
-
-    <section>
-      <title>Object Model</title>
-
-      <para>Artifacts handled by OpenIDM are Java object representations of
-      the JavaScript object model as defined by JSON. This supports
-      interoperability and potential integration with a vast number of
-      applications, services and programming languages. As OpenIDM is a
-      Java-based product, these representations are instances of classes: Map,
-      List, String, Number, Boolean and null. OpenIDM can
-      serialize/deserialize these structures to/from JSON as required. OpenIDM
-      also exposes a set of triggers and functions that system administrators
-      can define in JavaScript which can natively read and modify these
-      JSON-based object model structures. In the future OpenIDM may support
-      other scripting and programming languages.</para>
-
-      </section>
-      <section>
-      <title>Managed Objects</title>
-
-      <para>A managed object is an object that represents the identity-related
-      data managed by OpenIDM. Managed objects are configurable JSON-based
-      data structures stored by OpenIDM in it's pluggable repository. While
-      the default configuration of managed objects is that of a user, any
-      object may be defined through configuration.</para>
-      </section>
-
-      <section>
-      <title>System Objects</title>
-
-      <para>System objects are a pluggable representation of objects on
-      external systems. They follow the same RESTful resource based design
-      principles as managed objects. There is a default implementation for the
-      OpenICF framework which allows any connector object to be represented as
-      a system object.</para>
-    </section>
-
-    <section>
-      <title>Mappings</title>
-
-      <para>The mappings define the policies between source and target
-      objects and their attributes during synchronization and reconciliation.
-      Mappings may also define triggers for validation, customization
-      filtering, and transformation of the source and target objects.</para>
-<!--  Currently xref linkends must reference IDs within the same file.
-      <para> <xref linkend="chap-synchronization"/> </para> -->
-    </section>
-
-    <section>
-      <title>Synchronization and Reconciliation</title>
-
-      <para>Reconciliation provides for on-demand, or scheduled comparison
-      of resources between the OpenIDM managed object repository and source or
-      target systems. The comparisons may result in different types of actions
-      depending on the mappings defined between the systems.</para>
-
-      <para>Synchronization provides for on-demand or scheduled create,
-      update, and delete of resources from a source to a target system.</para>
-<!--  Currently xref linkends must reference IDs within the same file.
-      <para> <xref linkend="chap-synchronization"/> </para> -->
-    </section>
+    <variablelist>
+     <para>The core services are the heart of the OpenIDM resource oriented
+     unified object model and architecture.</para>
+     <varlistentry>
+      <term>Object Model</term>
+      <listitem>
+       <para>Artifacts handled by OpenIDM are Java object representations of
+       the JavaScript object model as defined by JSON. The object model supports
+       interoperability and potential integration with a many applications,
+       services, and programming languages. As OpenIDM is a Java-based product,
+       these representations are instances of classes: <literal>Map</literal>,
+       <literal>List</literal>, <literal>String</literal>,
+       <literal>Number</literal>, <literal>Boolean</literal>, and
+       <literal>null</literal>.</para>
+       <para>OpenIDM can serialize and deserialize these structures to and from
+       JSON as required. OpenIDM also exposes a set of triggers and functions
+       that system administrators can define in JavaScript which can natively
+       read and modify these JSON-based object model structures. OpenIDM is
+       designed to support other scripting and programming languages.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Managed Objects</term>
+      <listitem>
+       <para>A <firstterm>managed object</firstterm> is an object that
+       represents the identity-related data managed by OpenIDM. Managed objects
+       are configurable, JSON-based data structures OpenIDM stores in its
+       pluggable repository. While the default configuration of managed objects
+       is that of a user, any object may be defined through
+       configuration.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>System Objects</term>
+      <listitem>
+       <para><firstterm>System objects</firstterm> are pluggable representations
+       of objects on external systems. They follow the same RESTful resource
+       based design principles as managed objects. There is a default
+       implementation for the OpenICF framework, which allows any connector
+       object to be represented as a system object.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Mappings</term>
+      <listitem>
+       <para>Mappings define policies between source and target objects and
+       their attributes during synchronization and reconciliation. Mappings
+       can also define triggers for validation, customization, filtering, and
+       transformation of source and target objects.</para>
+       <para>See the <link xlink:href="reference#chap-synchronization"
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Synchronization</citetitle></link> chapter for
+       details.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Synchronization &amp; Reconciliation</term>
+      <listitem>
+       <para><firstterm>Reconciliation</firstterm> provides for on-demand and
+       scheduled resource comparisons between the OpenIDM managed object
+       repository and source or target systems. Comparisons can result in
+       different actions depending on the mappings defined between the
+       systems.</para>
+       <para>Synchronization provides for creating, updating, and deleting
+       resources from a source to a target system either on demand or according
+       to a schedule.</para>
+       <para>See the <link xlink:href="reference#chap-synchronization"
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Synchronization</citetitle></link> chapter for
+       details.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
   </section>
 
-  <section>
+  <section xml:id="openidm-access-layer">
     <title>Access Layer</title>
 
-    <para>The access layer provides the user interfaces and public APIs for
-    accessing and managing the OpenIDM repository and its functions.</para>
-
-    <section>
-      <title>RESTful Interfaces</title>
-
-      <para>REST APIs for CRUD operations and invoking sync and recon are
-      provided for both HTTP and Java.</para>
-<!--  Currently xref linkends must reference IDs within the same file.
-      <para> <xref linkend="chap-rest"/> </para> -->
-    </section>
-
-    <section>
-      <title>User Interface</title>
-
-      <para>Password management, registration, self service and workflow
-      coming soon. Stay tuned.</para>
-    </section>
+    <variablelist>
+     <para>The access layer provides the user interfaces and public APIs for
+     accessing and managing the OpenIDM repository and its functions.</para>
+     <varlistentry>
+      <term>RESTful Interfaces</term>
+      <listitem>
+       <para>REST APIs for CRUD operations and invoking synchronization and
+       reconciliation are provided for both HTTP and Java.</para>
+       <para>See the <link xlink:href="reference#chap-rest"
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
+       API</citetitle></link> chapter for details.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>User Interfaces</term>
+      <listitem>
+       <para>User interfaces are to provide password management, registration,
+       self-service, and workflow services.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
   </section>
 </chapter>
