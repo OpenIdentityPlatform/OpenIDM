@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+
+
+  <process id="osgiProcess" name="Osgi process">
+
+    <startEvent id="start" />
+    <sequenceFlow sourceRef="start" targetRef="serviceTask"/>
+    <serviceTask id="serviceTask" activiti:delegateExpression="${openidm}" />
+    <sequenceFlow sourceRef="serviceTask" targetRef="scripttask1"/>
+    <scriptTask id="scripttask1" scriptFormat="groovy">
+      <script>
+        out:println "script task name " + openidm.read('workflow/activiti');
+      </script>
+    </scriptTask>
+    <sequenceFlow sourceRef="scripttask1" targetRef="end"/>
+    <endEvent id="end"/>
+
+  </process>
+
+</definitions>
