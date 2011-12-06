@@ -139,6 +139,9 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
             for (JsonValue jv : config.get("mappings").expect(List.class)) {
                 mappings.add(new ObjectMapping(this, jv)); // throws JsonValueException
             }
+            for (ObjectMapping mapping : mappings) {
+                mapping.initRelationships(this, mappings);
+            }
         } catch (JsonValueException jve) {
             throw new ComponentException("Configuration error", jve);
         }
@@ -222,7 +225,11 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
                 if (params.get("mapping").required().isString()) {
                     reconcile(params.get("mapping").asString()); // "mapping": string (mapping name)
                 } else if (params.get("mapping").required().isMap()) {
-                    (new ObjectMapping(this, params.get("mapping"))).recon(UUID.randomUUID().toString());
+                    ObjectMapping schedulerMapping = new ObjectMapping(this, params.get("mapping"));
+                    List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
+                    schedulerMapping.initRelationships(this, augmentedMappings);
+                        
+                    schedulerMapping.recon(UUID.randomUUID().toString());
                 }
             } else {
                 throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
