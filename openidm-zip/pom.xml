@@ -15,7 +15,7 @@
   Copyright © 2011 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
@@ -103,7 +103,7 @@
             <artifactId>openidm-scheduler</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-       <dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-security-jetty</artifactId>
             <version>${openidm.version}</version>
@@ -169,18 +169,18 @@
                 </exclusion>
             </exclusions>
         </dependency>
-<!--
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.http.jetty</artifactId>
-            <version>2.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.http.whiteboard</artifactId>
-            <version>2.0.4</version>
-        </dependency>
--->
+        <!--
+                <dependency>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.jetty</artifactId>
+                    <version>2.0.4</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>org.apache.felix.http.whiteboard</artifactId>
+                    <version>2.0.4</version>
+                </dependency>
+        -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -302,6 +302,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2.2</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
@@ -321,6 +322,16 @@
         </plugins>
     </build>
     <profiles>
+        <profile>
+            <id>activiti</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.forgerock.openidm</groupId>
+                    <artifactId>openidm-workflow-activiti</artifactId>
+                    <version>${openidm.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
         <profile>
             <id>jdk-logger</id>
             <activation>

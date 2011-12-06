@@ -23,7 +23,7 @@
         <version>2.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-jaas-loginmodule-repo</artifactId>
-    <name>JAAS login module for Repository</name>
+    <name>OpenIDM JAAS login module for Repository</name>
     <packaging>bundle</packaging>
     <dependencies>
         <!-- CryptoService dependency -->
