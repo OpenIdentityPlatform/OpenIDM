@@ -65,10 +65,9 @@
     <a href="./doc/OpenIDM-Reference.pdf">PDF</a>,
     <a href="./doc/OpenIDM-Reference.rtf">RTF</a></dd>
 
-    <!-- <dt>Javadoc</dt>
-    <dd><a href="TODO">HTML</a></dd> -->
+    <dt>API Specification (Javadoc)</dt>
+    <dd><a href="./apidocs/index.html">HTML</a></dd>
    </dl>
   </section>
  </body>
 </document>
-

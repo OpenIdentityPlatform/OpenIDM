@@ -62,6 +62,7 @@
   <item name="Administration Guide" href="./doc/admin-guide/OpenIDM-Admin-Guide.html" />
   <item name="Developer Guide" href="./doc/dev-guide/OpenIDM-Dev-Guide.html" />
   <item name="Reference" href="./doc/reference/OpenIDM-Reference.html" />
+  <item name="Javadoc" href="./apidocs/index.html" />
   </menu>
 
   <!-- TODO: Add QA pages -->
