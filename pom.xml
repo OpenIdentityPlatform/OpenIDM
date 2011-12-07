@@ -408,7 +408,7 @@
                     <configuration>
                         <instructions>
                             <Implementation-Build>${ci.build.number}</Implementation-Build>
-                            <SCM-Revision>${ci.build.number}</SCM-Revision>
+                            <SCM-Revision>${ci.svn.revision}</SCM-Revision>
                         </instructions>
                     </configuration>
                 </plugin>

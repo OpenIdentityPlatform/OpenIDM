@@ -27,14 +27,31 @@
     <packaging>bundle</packaging>
     <dependencies>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-core</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-external-rest</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet.ext.jackson</artifactId>
+            <version>${restlet.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.shell</artifactId>
             <version>0.10.0</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.12.1.GA</version>
+            <groupId>asm</groupId>
+            <artifactId>asm-all</artifactId>
+            <version>3.3.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -49,6 +66,11 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
             <scope>provided</scope>
         </dependency>
 
@@ -84,17 +106,16 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package/>
                         <Import-Package>
-                            org.osgi*,
-                            org.slf4j*,
                             org.apache.felix.service.command;version="[0.10.0,1)";status=provisional;mandatory:=status,
-                            !com.sun.jdi*
+                            *
                         </Import-Package>
+                        <Export-Package>org.forgerock.openidm.shell;version=${openidm.version}</Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.shell.felixgogo.Activator</Bundle-Activator>
-                        <Embed-Dependency>*;artifactId=javassist;inline=false</Embed-Dependency>
+                        <Embed-Dependency>*;artifactId=asm-all;inline=false</Embed-Dependency>
                         <_removeheaders>Bnd-LastModified, Built-By, Private-Package, Tool, Build-Jdk, Include-Resource
                         </_removeheaders>
+                        <Main-Class>org.forgerock.openidm.shell.impl.Main</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>

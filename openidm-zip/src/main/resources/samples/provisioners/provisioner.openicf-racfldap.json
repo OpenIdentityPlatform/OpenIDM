@@ -3,7 +3,7 @@
     "name" : "RACFLDAP",
     "connectorRef" :
     {
-	"connectorHostRef" : "#LOCAL",
+	    "connectorHostRef" : "#LOCAL",
         "bundleName" : "org.forgerock.openicf.connectors.mainframe.racf",
         "bundleVersion" : "1.1.0.0-SNAPSHOT",
         "connectorName" : "org.identityconnectors.racf.RacfConnector"

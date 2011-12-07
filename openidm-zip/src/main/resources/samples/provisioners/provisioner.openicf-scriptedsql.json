@@ -9,7 +9,6 @@
     "hasId" : "true",
     "connectorRef" :
     {
-        "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
         "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
         "bundleVersion" : "1.1.0.0-EA",
         "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector"
