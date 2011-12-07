@@ -38,6 +38,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-shell</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
         </dependency>
@@ -232,6 +237,18 @@
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- Eclipse JSDT -->
+        <dependency>
+            <groupId>org.eclipse.wst.jsdt.debug</groupId>
+            <artifactId>rhino.debugger</artifactId>
+            <version>1.0.300.v201109150503</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.wst.jsdt.debug</groupId>
+            <artifactId>transport</artifactId>
+            <version>1.0.100.v201109150330</version>
         </dependency>
 
         <!-- OpenICF -->

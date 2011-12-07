@@ -56,14 +56,14 @@
                 <exclude>com.orientechnologies:**</exclude>
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
-                <exclude>org.forgerock.openicf.connectors.file:openicf-xml-connector:*</exclude>
-                <exclude>org.forgerock.openicf.connectors.ldap:openicf-ldap-connector:*</exclude>
+                <exclude>org.forgerock.openicf.connectors.*:openicf-*</exclude>
                 <exclude>org.forgerock.openidm:openidm-config</exclude>
                 <exclude>org.forgerock.openidm:openidm-crypto</exclude>
                 <exclude>org.forgerock.openidm:openidm-jaas-loginmodule-repo</exclude>
                 <exclude>org.forgerock.openidm:openidm-jetty-fragment</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
                 <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
+                <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-security-jetty</exclude>
                 <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
                 <exclude>org.apache.felix:org.apache.felix.configadmin</exclude>
@@ -92,8 +92,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.connectors.file:openicf-xml-connector:*</include>
-                <include>org.forgerock.openicf.connectors.ldap:openicf-ldap-connector:*</include>
+                <include>org.forgerock.openicf.connectors.*:openicf-*</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -101,6 +100,14 @@
             <outputFileNameMapping>felix.jar</outputFileNameMapping>
             <includes>
                 <include>org.apache.felix:org.apache.felix.main</include>
+            </includes>
+            <outputDirectory>/openidm/bin</outputDirectory>
+        </dependencySet>
+        <dependencySet>
+            <unpack>false</unpack>
+            <outputFileNameMapping>openidm.jar</outputFileNameMapping>
+            <includes>
+                <include>org.forgerock.openidm:openidm-shell</include>
             </includes>
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>

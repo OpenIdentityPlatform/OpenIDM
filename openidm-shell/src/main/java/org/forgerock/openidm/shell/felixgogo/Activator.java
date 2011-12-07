@@ -1,20 +1,32 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
- *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
- *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ * $Id$
  */
 package org.forgerock.openidm.shell.felixgogo;
 
+import org.apache.felix.service.command.CommandProcessor;
+import org.forgerock.openidm.shell.CustomCommandScope;
+import org.forgerock.openidm.shell.felixgogo.debug.DebugCommands;
 import org.osgi.framework.*;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -64,9 +76,14 @@ public class Activator implements BundleActivator {
 
     public void start(BundleContext context) throws Exception {
         bc = context;
-        shellCommandsTracker = new ServiceTracker(bc, bc.createFilter(SHELL_COMMANDS_SERVICE_FILTER),
+        shellCommandsTracker = new ServiceTracker(bc, bc.createFilter("(objectClass=" + CustomCommandScope.class.getName() + ")"),
                 new ShellCommandsCustomizer());
         shellCommandsTracker.open();
+
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put(CommandProcessor.COMMAND_SCOPE, "debug");
+        props.put(CommandProcessor.COMMAND_FUNCTION, DebugCommands.functions);
+        bc.registerService(DebugCommands.class.getName(), new DebugCommands(bc), props);
     }
 
     public void stop(BundleContext bundleContext) throws Exception {
@@ -99,78 +116,33 @@ public class Activator implements BundleActivator {
     private class ShellCommandsCustomizer implements ServiceTrackerCustomizer {
 
         public Object addingService(ServiceReference reference) {
-            Object groupId = reference.getProperty(GROUP_ID_PROPERTY);
+            CustomCommandScope service = (CustomCommandScope) bc.getService(reference);
+            Object groupId = service.getScope();
             // if property value null or not String - ignore service
             if (groupId == null || !(groupId instanceof String)) {
                 LOG.warning(GROUP_ID_PROPERTY + " property is null or invalid. Ignore service");
                 return null;
             }
-            // get commands description property
-            Object commandsDescription = reference.getProperty(COMMANDS_DESCRIPTION_PROPERTY);
-            // if property value null or not String[][] - ignore service
-            if (commandsDescription == null) {
-                LOG.warning(COMMANDS_DESCRIPTION_PROPERTY + " property is null. Ignore service");
-                return null;
-            } else if (!(commandsDescription instanceof String[][] || commandsDescription instanceof String[])) {
-                LOG.warning(COMMANDS_DESCRIPTION_PROPERTY + " property has wrong format: not String[][] or String[]");
-                return null;
-            } else {
-                Object service = bc.getService(reference);
-                // get service ranking propety. if not null - use it on Command services registration
-                String[][] commands = parseCommands(commandsDescription);
-                Map<String, String> commandMap = new HashMap<String, String>();
-                for (String[] commandInfo : commands) {
-                    // if command info is invalid - ignore command
-                    if (commandInfo != null) {
-                        if (commandInfo.length != 2) {
-                            LOG.warning(COMMANDS_DESCRIPTION_PROPERTY + " property has wrong format: not String[][]");
-                            continue;
-                        }
-                        String commandName = commandInfo[0];
-                        String commandHelp = commandInfo[1];
-                        // if command info links to wrong method - ignore command
-                        if (isValidCommandMethod(service, commandName)) {
-                            commandMap.put(commandName, commandHelp);
-                        }
-                    }
+            // get service ranking propety. if not null - use it on Command services registration
+            Map<String, String> commandMap = service.getFunctionMap();
+            if (!commandMap.isEmpty()) {
+                Dictionary<String, Object> props = new Hashtable<String, Object>();
+                Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
+                Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+                if (ranking != null) {
+                    props.put(Constants.SERVICE_RANKING, ranking);
                 }
-                if (!commandMap.isEmpty()) {
-                    Dictionary<String, Object> props = new Hashtable<String, Object>();
-                    Integer ranking = (Integer) reference.getProperty(Constants.SERVICE_RANKING);
-                    Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
-                    if (ranking != null) {
-                        props.put(Constants.SERVICE_RANKING, ranking);
-                    }
-                    props.put("osgi.command.scope", groupId);
-                    props.put("osgi.command.function", commandMap.keySet().toArray(new String[commandMap.size()]));
-                    try {
-                        // generate class
-                        Object commandsProvider = FelixGogoCommandsServiceGenerator.generate(service, commandMap, serviceId.toString());
-                        commandRegistrations.put(reference,
-                                bc.registerService(commandsProvider.getClass().getName(), commandsProvider, props));
-                    } catch (Exception e) {
-                        LOG.log(Level.WARNING, "Unable to initialize group: " + groupId, e);
-                    }
-                    return service;
-                } else {
-                    return null;
+                props.put(CommandProcessor.COMMAND_SCOPE, groupId);
+                props.put(CommandProcessor.COMMAND_FUNCTION, commandMap.keySet().toArray(new String[commandMap.size()]));
+                try {
+                    // generate class
+                    Object commandsProvider = FelixGogoCommandsServiceGenerator.generate(service, commandMap, serviceId.toString());
+                    commandRegistrations.put(reference,
+                            bc.registerService(commandsProvider.getClass().getName(), commandsProvider, props));
+                } catch (Exception e) {
+                    LOG.log(Level.WARNING, "Unable to initialize group: " + groupId, e);
                 }
-            }
-        }
-
-        private String[][] parseCommands(Object commandsDescription) {
-            if (commandsDescription == null) {
-                return null;
-            } else if (commandsDescription instanceof String[][]) {
-                return (String[][]) commandsDescription;
-            } else if (commandsDescription instanceof String[]) {
-                String[] commands = (String[]) commandsDescription;
-                String[][] result = new String[commands.length][];
-                for (int i = 0; i < commands.length; i++) {
-                    String command = commands[i];
-                    result[i] = command.split("#");
-                }
-                return result;
+                return service;
             } else {
                 return null;
             }
