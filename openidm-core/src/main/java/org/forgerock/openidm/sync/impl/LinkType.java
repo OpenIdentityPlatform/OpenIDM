@@ -95,7 +95,6 @@ class LinkType {
         return Match.MATCH_REVERSE.equals(match);
     }
     
-    
     LinkType(String name, String firstObjectSet, String secondObjectSet, Match match) {
         this.name = name;
         this.firstObjectSet = firstObjectSet;
