@@ -38,9 +38,15 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
- * TODO: Description.
+ * Uni-directional view of a link.
+ * 
+ * Link Types and Links in the repository are bi-directional.
+ * 
+ * This view represents one direction of that Link to match the direction of the 
+ * current mapping context (source/target object set).
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 class Link {
 
@@ -118,8 +124,13 @@ class Link {
     private void fromJsonValue(JsonValue jv) throws JsonValueException {
         _id = jv.get("_id").required().asString();
         _rev = jv.get("_rev").asString(); // optional
-        sourceId = jv.get("sourceId").required().asString();
-        targetId = jv.get("targetId").required().asString();
+        if (mapping.getLinkType().useReverse()) {
+            sourceId = jv.get("targetId").required().asString();
+            targetId = jv.get("sourceId").required().asString();
+        } else {
+            sourceId = jv.get("sourceId").required().asString();
+            targetId = jv.get("targetId").required().asString();
+        }
         reconId = jv.get("reconId").asString(); // optional
     }
 
@@ -130,8 +141,13 @@ class Link {
      */
     private JsonValue toJsonValue() {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
-        jv.put("sourceId", sourceId);
-        jv.put("targetId", targetId);
+        if (mapping.getLinkType().useReverse()) {
+            jv.put("sourceId", targetId);
+            jv.put("targetId", sourceId);
+        } else {
+            jv.put("sourceId", sourceId);
+            jv.put("targetId", targetId);
+        }
         jv.put("reconId", reconId);
         return jv;
     }
