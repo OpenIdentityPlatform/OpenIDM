@@ -48,7 +48,7 @@
    appendix  nop
    article/appendix  nop
    article   nop
-   book      toc,title,figure,equation
+   book      toc,title
    chapter   toc,title
    part      toc,title
    preface   nop
