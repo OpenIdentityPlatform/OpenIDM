@@ -34,7 +34,8 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.GenericTableQueries;
+import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
+import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +70,7 @@ public class GenericTableHandler implements TableHandler {
     final String dbSchemaName;
 
     ObjectMapper mapper = new ObjectMapper();
-    final GenericTableQueries queries;
+    final TableQueries queries;
 
     Map<QueryDefinition, String> queryMap;
     
@@ -106,7 +108,7 @@ public class GenericTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        queries = new GenericTableQueries();
+        queries = new TableQueries(new GenericQueryResultMapper());
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(mainTableName, propTableName, dbSchemaName, queriesConfig, queryMap);
         
@@ -517,7 +519,7 @@ public class GenericTableHandler implements TableHandler {
         }
     }
 
-    /* (non-Javadoc)
+    /**
      * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */
     @Override
@@ -579,6 +581,57 @@ public class GenericTableHandler implements TableHandler {
 
     protected PreparedStatement getPreparedStatement(Connection connection, QueryDefinition queryDefinition) throws SQLException {
         return queries.getPreparedStatement(connection, queryMap.get(queryDefinition));
+    }
+}
+
+class GenericQueryResultMapper implements QueryResultMapper {
+    final static Logger logger = LoggerFactory.getLogger(GenericQueryResultMapper.class);
+    
+    public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params,  TableQueries tableQueries) 
+            throws SQLException, IOException {
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        ResultSetMetaData rsMetaData = rs.getMetaData();
+        boolean hasFullObject = tableQueries.hasColumn(rsMetaData, "fullobject");
+        boolean hasId = false;
+        boolean hasRev = false;
+        boolean hasPropKey = false;
+        boolean hasPropValue = false;
+        if (!hasFullObject) {
+            hasId = tableQueries.hasColumn(rsMetaData, "objectid");
+            hasRev = tableQueries.hasColumn(rsMetaData, "rev");
+            hasPropKey = tableQueries.hasColumn(rsMetaData, "propkey");
+            hasPropValue = tableQueries.hasColumn(rsMetaData, "propvalue");
+        }
+        while (rs.next()) {
+            if (hasFullObject) {
+                String objString = rs.getString("fullobject");
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> obj = (Map<String, Object>) mapper.readValue(objString, Map.class);
+
+                // TODO: remove data logging            
+                logger.trace("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  
+                
+                result.add(obj);
+            } else {
+                Map<String, Object> obj = new HashMap<String, Object>();
+                if (hasId) {
+                    obj.put("_id", rs.getString("objectid"));
+                }
+                if (hasRev) {
+                    obj.put("_rev", rs.getString("rev"));
+                }
+                // Results from query on individual searchable property
+                if (hasPropKey && hasPropValue) {
+                    String propKey = rs.getString("propkey");
+                    Object propValue = rs.getObject("propvalue");
+                    JsonPointer pointer = new JsonPointer(propKey);
+                    JsonValue wrapped = new JsonValue(obj);
+                    wrapped.put(pointer, propValue);
+                }
+                result.add(obj);
+            }
+        }
+        return result;
     }
 }
 
