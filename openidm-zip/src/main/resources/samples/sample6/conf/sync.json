@@ -5,12 +5,12 @@
             "source" : "system/ldap/account",
             "target" : "managed/user",
             "properties" : [
-                { "source" : "cn", "target" : "fullname" },
+                { "source" : "cn", "target" : "displayName" },
                 { "source" : "description", "target" : "description" },
-                { "source" : "givenName", "target" : "firstname" },
+                { "source" : "givenName", "target" : "givenName" },
                 { "source" : "mail", "target" : "email" },
-                { "source" : "sn", "target" : "lastname" },
-                { "source" : "uid", "target" : "uid" }
+                { "source" : "sn", "target" : "familyName" },
+                { "source" : "uid", "target" : "userName" }
             ],
             "policies" : [
                 { "situation" : "CONFIRMED", "action" : "UPDATE" },
@@ -27,10 +27,10 @@
             "source" : "managed/user",
             "target" : "system/ad/account",
             "properties" : [
-                { "source" : "firstname", "target" : "givenName" },
-                { "source" : "lastname", "target" : "sn" },
-                { "source" : "fullname", "target" : "cn" },
-                { "source" : "uid", "target" : "uid" },
+                { "source" : "givenName", "target" : "givenName" },
+                { "source" : "familyName", "target" : "sn" },
+                { "source" : "displayName", "target" : "cn" },
+                { "source" : "userName", "target" : "uid" },
                 { "source" : "description", "target" : "description" },
                 { "source" : "email", "target" : "mail" }
             ],

@@ -8,13 +8,13 @@
             "target" : "employeeNumber"
         }, {
             "source" : "mail",
-            "target" : "mail"
+            "target" : "email"
         }, {
             "source" : "uid",
-            "target" : "uid"
+            "target" : "userName"
         }, {
             "source" : "lastName",
-            "target" : "lastName"
+            "target" : "familyName"
         }, {
             "source" : "givenName",
             "target" : "givenName"

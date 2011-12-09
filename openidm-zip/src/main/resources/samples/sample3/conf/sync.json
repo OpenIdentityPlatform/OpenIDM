@@ -8,13 +8,13 @@
             "target" : "email"
         }, {
             "source" : "uid",
-            "target" : "uid"
+            "target" : "userName"
         }, {
             "source" : "lastName",
-            "target" : "lastName"
+            "target" : "familyName"
         }, {
             "source" : "firstName",
-            "target" : "firstName"
+            "target" : "givenName"
         } ],
         "policies" : [ {
             "situation" : "CONFIRMED",
