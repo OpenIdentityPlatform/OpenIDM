@@ -23,8 +23,8 @@
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
-            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType} AND firstid = ${firstId}",
-            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType} AND secondid = ${secondId}"
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}"
         }
     },
     "resourceMapping" : {
