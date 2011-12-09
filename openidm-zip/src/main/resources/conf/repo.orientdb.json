@@ -11,8 +11,8 @@
         "query-by-native-ids" : "select ${fields} from ${native-ids}",
         "for-username" : "SELECT * FROM ${_resource} WHERE name = '${uid}'",
         "query-by-ids-experiment" : "select ${fields} from ${_resource} where _openidm_id = ${id1} or _openidm_id = ${id2}",
-        "links-for-sourceId" : "SELECT * FROM ${_resource} WHERE sourceId = '${sourceId}'",
-        "links-for-targetId" : "SELECT * FROM ${_resource} WHERE targetId = '${targetId}'"
+        "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND firstId = '${firstId}'",
+        "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'"
     },
     "dbStructure" : {
         "orientdbClass" : {
@@ -34,7 +34,7 @@
                     }
                 ]
             },
-            "link_systemXmlfileAccounts_managedUser" : {
+            "link" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",
@@ -42,38 +42,19 @@
                         "indexType" : "unique"
                     },
                     {
-                        "propertyName" : "sourceId",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    },
-                    {
-                        "propertyName" : "targetId",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    },
-                    {
-                        "propertyName" : "reconId",
+                        "propertyName" : "linkType",
                         "propertyType" : "string",
                         "indexType" : "notunique"
-                    }
-                ]
-            },
-            "link_managedUser_systemXmlfileAccounts" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
                     },
                     {
-                        "propertyName" : "sourceId",
+                        "propertyName" : "firstId",
                         "propertyType" : "string",
-                        "indexType" : "unique"
+                        "indexType" : "notunique"
                     },
                     {
-                        "propertyName" : "targetId",
+                        "propertyName" : "secondId",
                         "propertyType" : "string",
-                        "indexType" : "unique"
+                        "indexType" : "notunique"
                     },
                     {
                         "propertyName" : "reconId",
