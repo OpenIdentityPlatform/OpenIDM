@@ -18,7 +18,7 @@ package org.forgerock.openidm.config;
 
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
@@ -97,7 +97,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      */
     public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context, String servicePid, boolean decrypt) 
                 throws InvalidException, InternalErrorException {        
-        JsonValue jv = new JsonValue(new HashMap<String, Object>());
+        JsonValue jv = new JsonValue(new LinkedHashMap<String, Object>());
         
         if (dict != null) {
             Map<String, Object> parsedConfig = null;
