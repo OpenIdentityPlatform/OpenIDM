@@ -1,7 +1,7 @@
 {
     "name" : "hrdb",
     "connectorRef" : {
-        "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+        "connectorHostRef" : "#LOCAL",
         "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
         "bundleVersion" : "1.1.0.0-EA",
         "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector"

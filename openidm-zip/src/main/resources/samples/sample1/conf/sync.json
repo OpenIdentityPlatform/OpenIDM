@@ -8,16 +8,16 @@
             "target" : "description"
         }, {
             "source" : "firstname",
-            "target" : "firstname"
+            "target" : "givenName"
         }, {
             "source" : "email",
             "target" : "email"
         }, {
             "source" : "lastname",
-            "target" : "lastname"
+            "target" : "familyName"
         }, {
             "source" : "name",
-            "target" : "name"
+            "target" : "userName"
         } ],
         "policies" : [ {
             "situation" : "CONFIRMED",

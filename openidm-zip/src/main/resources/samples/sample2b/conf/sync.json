@@ -5,22 +5,22 @@
             "target" : "managed/user",
         "properties" : [ {
             "source" : "cn",
-            "target" : "fullname"
+            "target" : "displayName"
         }, {
             "source" : "description",
             "target" : "description"
         }, {
             "source" : "givenName",
-            "target" : "firstname"
+            "target" : "givenName"
         }, {
             "source" : "mail",
             "target" : "email"
         }, {
             "source" : "sn",
-            "target" : "lastname"
+            "target" : "familyName"
         }, {
             "source" : "uid",
-            "target" : "uid"
+            "target" : "userName"
         } ],
         "policies" : [ {
             "situation" : "CONFIRMED",
@@ -53,16 +53,16 @@
             "file" : "jscript/ldapBackCorrelationQuery.js"
         },
         "properties" : [ {
-            "source" : "firstname",
+            "source" : "givenName",
             "target" : "givenName"
         }, {
-            "source" : "lastname",
+            "source" : "familyName",
             "target" : "sn"
         }, {
-            "source" : "fullname",
+            "source" : "displayName",
             "target" : "cn"
         }, {
-            "source" : "uid",
+            "source" : "userName",
             "target" : "uid"
         }, {
             "source" : "description",

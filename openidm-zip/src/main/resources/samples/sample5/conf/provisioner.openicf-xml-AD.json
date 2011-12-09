@@ -1,7 +1,7 @@
 {
     "name" : "ad",
     "connectorRef" : {
-        "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "connectorHostRef" : "#LOCAL",
         "bundleVersion" : "1.1.0.0-EA",
         "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
     },

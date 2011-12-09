@@ -9,13 +9,13 @@
         },
         "properties" : [ {
             "source" : "name",
-            "target" : "name"
+            "target" : "userName"
         }, {
             "source" : "lastname",
-            "target" : "lastname"
+            "target" : "familyName"
         }, {
             "source" : "firstname",
-            "target" : "firstname"
+            "target" : "givenName"
         }, {
             "source" : "email",
             "target" : "email"
@@ -30,10 +30,10 @@
             "target" : "groups"
         }, {
             "source" : "userPassword",
-            "target" : "userPassword"
+            "target" : "password"
         }, {
             "default" : "external",
-            "target" : "employeeType"
+            "target" : "userType"
         } ],
         "onCreate" : {
             "type" : "text/javascript",
@@ -52,13 +52,13 @@
             "file" : "jscript/name_eq_name_correlationQuery.js"
         },
         "properties" : [ {
-            "source" : "name",
+            "source" : "userName",
             "target" : "name"
         }, {
-            "source" : "lastname",
+            "source" : "familyName",
             "target" : "lastname"
         }, {
-            "source" : "firstname",
+            "source" : "givenName",
             "target" : "firstname"
         }, {
             "source" : "email",
@@ -145,26 +145,16 @@
         } ],
         "properties" : [ {
             "source" : "name",
-            "target" : "name"
+            "target" : "userName"
         }, {
             "source" : "lastname",
-            "target" : "lastname"
+            "target" : "familyName"
         }, {
             "source" : "firstname",
-            "target" : "firstname"
+            "target" : "givenName"
         }, {
             "source" : "email",
             "target" : "email"
-        }, {
-            "source" : "password",
-            "target" : "__PASSWORD__",
-            "condition" : {
-                "type" : "text/javascript",
-                "file" : "jscript/ldapPassword_to_ad_condition.js"
-            }
-        }, {
-            "default" : "defaultpwd",
-            "target" : "IGNORE__PASSWORD__"
         } ]
     } ]
 }

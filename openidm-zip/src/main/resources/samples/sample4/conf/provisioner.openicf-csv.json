@@ -1,7 +1,7 @@
 {
     "name" : "HR",
     "connectorRef" : {
-        "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+        "connectorHostRef" : "#LOCAL",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
         "bundleVersion" : "1.1.0.0-EA"

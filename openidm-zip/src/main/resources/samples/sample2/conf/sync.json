@@ -5,12 +5,12 @@
             "source" : "system/ldap/account",
             "target" : "managed/user",
             "properties" : [
-                { "source" : "cn", "target" : "fullname" },
+                { "source" : "cn", "target" : "displayName" },
                 { "source" : "description", "target" : "description" },
-                { "source" : "givenName", "target" : "firstname" },
+                { "source" : "givenName", "target" : "givenName" },
                 { "source" : "mail", "target" : "email" },
-                { "source" : "sn", "target" : "lastname" },
-                { "source" : "uid", "target" : "uid" }
+                { "source" : "sn", "target" : "familyName" },
+                { "source" : "uid", "target" : "userName" }
             ],
             "policies" : [
                 { "situation" : "CONFIRMED", "action" : "UPDATE" },
