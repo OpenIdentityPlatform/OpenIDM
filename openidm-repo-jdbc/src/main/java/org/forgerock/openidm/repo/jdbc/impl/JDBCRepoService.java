@@ -208,7 +208,7 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                 boolean alreadyExisted = getTableHandler(type).isErrorType(ex, ErrorType.DUPLICATE_KEY);
                 if (alreadyExisted) {
                     throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
-                            + ex.getMessage(), ex);
+                            + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")"+ ex.getMessage(), ex);
                 }
                 if (getTableHandler(type).isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
@@ -217,7 +217,8 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Creating object failed " + ex.getMessage(), ex);
+                    throw new InternalServerErrorException("Creating object failed "
+                            + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")" + ex.getMessage(), ex);
                 }
             } catch (ObjectSetException ex) {
                 logger.debug("ObjectSetException in create of {}", fullId, ex);
@@ -764,6 +765,14 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         maxBatchSize,
                         new DB2SQLExceptionHandler());
                 break;
+            case MYSQL:
+                handler = new GenericTableHandler(
+                        tableConfig,
+                        dbSchemaName,
+                        queries,
+                        maxBatchSize,
+                        new MySQLExceptionHandler());
+                break;
             default:
                 handler = new GenericTableHandler(
                         tableConfig,
@@ -789,6 +798,14 @@ public class JDBCRepoService implements RepositoryService, RepoBootService {
                         dbSchemaName,
                         explicitQueries,
                         new DB2SQLExceptionHandler());
+                break;
+            case MYSQL:
+                handler = new MappedTableHandler(
+                        table,
+                        objectToColumn,
+                        dbSchemaName,
+                        explicitQueries,
+                        new MySQLExceptionHandler());
                 break;
             default:
                 handler = new MappedTableHandler(

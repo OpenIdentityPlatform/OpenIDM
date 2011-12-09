@@ -52,6 +52,7 @@ public class XOpenErrorMapping {
             case DUPLICATE_KEY: {
                 // X/Open 23000 is Integrity constraint violation
                 // Known to be used by Oracle, SQL Server, DB2, and MySQL
+                // Failure may be for a different constraint than duplicate though.
                 if ("23000".equals(sqlState.trim())) {
                     match = true;
                 }

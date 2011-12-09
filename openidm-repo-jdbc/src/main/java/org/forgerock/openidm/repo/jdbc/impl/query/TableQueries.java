@@ -50,12 +50,18 @@ import java.util.Map;
  * @author aegloff
  *
  */
-public class GenericTableQueries {
+public class TableQueries {
 
-    final static Logger logger = LoggerFactory.getLogger(GenericTableQueries.class);
+    final static Logger logger = LoggerFactory.getLogger(TableQueries.class);
     
     // Pre-configured queries, key is query id
     Map<String, QueryInfo> queries = new HashMap<String, QueryInfo>();
+    
+    QueryResultMapper resultMapper;
+    
+    public TableQueries(QueryResultMapper resultMapper) {
+        this.resultMapper = resultMapper;
+    }
 
     /**
      * Get a prepared statement for the given connection and SQL. May come from a cache 
@@ -112,7 +118,7 @@ public class GenericTableQueries {
     public List<Map<String, Object>> query(final String type, Map<String, Object> params, Connection con) 
             throws BadRequestException, InternalServerErrorException {
         
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> result = null; 
         params.put(QueryConstants.RESOURCE_NAME, type); 
         
         //TODO: support QUERY_EXPRESSION
@@ -142,47 +148,7 @@ public class GenericTableQueries {
         ResultSet rs = null;
         try {
             rs = foundQuery.executeQuery();
-            ResultSetMetaData rsMetaData = rs.getMetaData();
-            boolean hasFullObject = hasColumn(rsMetaData, "fullobject");
-            boolean hasId = false;
-            boolean hasRev = false;
-            boolean hasPropKey = false;
-            boolean hasPropValue = false;
-            if (!hasFullObject) {
-                hasId = hasColumn(rsMetaData, "objectid");
-                hasRev = hasColumn(rsMetaData, "rev");
-                hasPropKey = hasColumn(rsMetaData, "propkey");
-                hasPropValue = hasColumn(rsMetaData, "propvalue");
-            }
-            while (rs.next()) {
-                if (hasFullObject) {
-                    String objString = rs.getString("fullobject");
-                    ObjectMapper mapper = new ObjectMapper();
-                    Map<String, Object> obj = (Map<String, Object>) mapper.readValue(objString, Map.class);
-
-                    // TODO: remove data logging            
-                    logger.trace("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  
-                    
-                    result.add(obj);
-                } else {
-                    Map<String, Object> obj = new HashMap<String, Object>();
-                    if (hasId) {
-                        obj.put("_id", rs.getString("objectid"));
-                    }
-                    if (hasRev) {
-                        obj.put("_rev", rs.getString("rev"));
-                    }
-                    // Results from query on individual searchable property
-                    if (hasPropKey && hasPropValue) {
-                        String propKey = rs.getString("propkey");
-                        Object propValue = rs.getObject("propvalue");
-                        JsonPointer pointer = new JsonPointer(propKey);
-                        JsonValue wrapped = new JsonValue(obj);
-                        wrapped.put(pointer, propValue);
-                    }
-                    result.add(obj);
-                }
-            }
+            result = resultMapper.mapQueryToObject(rs, queryId, type, params, this);
         } catch (SQLException ex) {
             throw new InternalServerErrorException("DB reported failure executing query " 
                     + foundQuery.toString() + " with params: " + params + " error code: " + ex.getErrorCode() 
@@ -197,7 +163,7 @@ public class GenericTableQueries {
         return result;
     }
     
-    boolean hasColumn (ResultSetMetaData rsMetaData, String columnName) throws SQLException {
+    public boolean hasColumn (ResultSetMetaData rsMetaData, String columnName) throws SQLException {
         for (int colPos = 1 ; colPos <= rsMetaData.getColumnCount(); colPos++) {
             if (columnName.equalsIgnoreCase(rsMetaData.getColumnName(colPos))) {
                 return true;
@@ -233,7 +199,8 @@ public class GenericTableQueries {
     }
     
     /**
-     * Set the pre-configured queries, which are identified by a query identifier and can be
+     * Set the pre-configured queries for generic tables, 
+     * which are identified by a query identifier and can be
      * invoked using this identifier
      * 
      * Success to set the queries does not mean they are valid as some can only be validated at
@@ -249,6 +216,38 @@ public class GenericTableQueries {
      */
     public void setConfiguredQueries(String mainTableName, String propTableName, String dbSchemaName, JsonValue queriesConfig, 
             Map<QueryDefinition, String> defaultQueryMap) {
+        Map<String, String> replacements = new HashMap<String, String>();
+        replacements.put("_mainTable", mainTableName);
+        replacements.put("_propTable", propTableName);
+        replacements.put("_dbSchema", dbSchemaName);
+        setConfiguredQueries(replacements, queriesConfig, defaultQueryMap);
+    }
+    
+    /**
+     * Set the pre-configured queries for explicitly mapped tables, 
+     * which are identified by a query identifier and can be
+     * invoked using this identifier
+     * 
+     * Success to set the queries does not mean they are valid as some can only be validated at
+     * query execution time.
+     * 
+     * @param tableName name of the explicitly mapped table
+     * @param dbSchemaName the database scheme the table is in
+     * @param queriesConfig queries configured in configuration (files)
+     * @param defaultQueryMap static default queries already defined for handling this table type
+     * 
+     * query details
+     */
+    public void setConfiguredQueries(String tableName, String dbSchemaName, JsonValue queriesConfig, 
+            Map<QueryDefinition, String> defaultQueryMap) {
+        Map<String, String> replacements = new HashMap<String, String>();
+        replacements.put("_table", tableName);
+        replacements.put("_dbSchema", dbSchemaName);
+        setConfiguredQueries(replacements, queriesConfig, defaultQueryMap);
+    }
+    
+    private void setConfiguredQueries(Map<String, String> replacements, JsonValue queriesConfig, 
+            Map<QueryDefinition, String> defaultQueryMap) {
         queries = new HashMap<String, QueryInfo>();
         
         if (queriesConfig == null || queriesConfig.isNull()) {
@@ -261,11 +260,6 @@ public class GenericTableQueries {
         
         for (String queryName : queriesConfig.keys()) {
             String rawQuery = queriesConfig.get(queryName).required().asString();
-            
-            Map<String, String> replacements = new HashMap<String, String>();
-            replacements.put("_mainTable", mainTableName);
-            replacements.put("_propTable", propTableName);
-            replacements.put("_dbSchema", dbSchemaName);
             
             TokenHandler tokenHandler = new TokenHandler();
             // Replace the table name tokens.
