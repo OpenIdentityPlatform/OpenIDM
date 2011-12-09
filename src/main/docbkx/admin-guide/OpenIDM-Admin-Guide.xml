@@ -70,7 +70,7 @@
  <xinclude:include href='chap-scheduler-conf.xml' />
  <xinclude:include href='chap-pass-sync.xml' />
  <xinclude:include href='chap-security.xml' />
- <xinclude:include href='chap-activiti.xml' />
+ <xinclude:include href='chap-workflow.xml' />
  <xinclude:include href='chap-auditing.xml' />
  <xinclude:include href='chap-best-pract.xml' />
  <xinclude:include href='chap-debug.xml' />
