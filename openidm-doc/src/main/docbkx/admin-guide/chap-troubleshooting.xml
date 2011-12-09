@@ -53,18 +53,18 @@
  <section>
   <title>scr list shows sync service unsatisfied</title>
   <para>
-  Looking at the console output of the logs in openidm/logs you see the following: 
+  Looking at the console output of the logs in <filename>openidm/logs</filename> you see the following: 
   </para>
   <para>
-WARNING: Loading configuration file /Users/jamie/ws/idm/openidm-zip/target/openidm/conf/sync.json failed
+<literal>WARNING: Loading configuration file /Users/jamie/ws/idm/openidm-zip/target/openidm/conf/sync.json failed
 org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.openidm.sync could not be parsed and may not be valid JSON : Unexpected character ('}' (code 125)): expected a value
  at [Source: java.io.StringReader@3951f910; line: 24, column: 6]
     at org.forgerock.openidm.config.crypto.ConfigCrypto.parse(ConfigCrypto.java:249)
     at org.forgerock.openidm.config.crypto.ConfigCrypto.encrypt(ConfigCrypto.java:165)
-    at org.forgerock.openidm.config.installer.JSONConfigInstaller.setConfig(JSONConfigInstaller.java:340)
+    at org.forgerock.openidm.config.installer.JSONConfigInstaller.setConfig(JSONConfigInstaller.java:340)</literal>
   </para> 
   <para>
-  You have a syntax error in your openidm/conf/sync.json
+  You have a syntax error in your <filename>openidm/conf/sync.json</filename>
   </para> 
  </section>
  <section>
@@ -143,9 +143,9 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   In this case the configuration is not loaded because some information is missing. One possible cause is a wrong value for "connectorHostRef" in the provisioner json. There rule is here (for local java connector servers):
   </para>
   <para>
-If the connector jar is installed as a bundle (i.e. under openidm/bundle), then the value must be: 
+If the connector jar is installed as a bundle (i.e. under <filename>openidm/bundle</filename>), then the value must be: 
   <screen width="100">"connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",</screen>
-If installed as connector (i.e. under openidm/connectors) then the value must be like:
+If installed as connector (i.e. under <filename>openidm/connectors</filename>) then the value must be like:
   <screen width="100">"connectorHostRef" : "#LOCAL",</screen>
   </para>
  </section>

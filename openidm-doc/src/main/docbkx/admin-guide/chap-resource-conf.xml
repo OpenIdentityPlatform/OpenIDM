@@ -30,22 +30,22 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
-    <title>Resource Connector Configuration</title>
-    <section>
-    <title>Common Settings</title>
-    <section>
-        <title>Introduction</title>
-        <para>The topic of this chapter is to describe how to connect to different external resources, like flat file, LDAP, AD and others. 
+ <title>Resource Connector Configuration</title>
+ <section>
+  <title>Common Settings</title>
+  <section>
+   <title>Introduction</title>
+   <para>The topic of this chapter is to describe how to connect to different external resources, like flat file, LDAP, AD and others. 
 The configuration shown here is kept simple, especially concerning the number of attributes handled. Still it should be possible to extend the configuration to any projects need with the knowledge learned here. 
 Not all resources are suited for all OpenIDM operations. Still all of the resources shown here support the most of the CRUD functionalities plus reconciliation and live sync.</para>
-        <section>
-            <title>About Connections to Resources</title>
-            <para>Resources are the external systems, data bases, directory servers which usually hold user data which needs to be maintained and audited by an identity management system. 
+   <section>
+    <title>About Connections to Resources</title>
+    <para>Resources are the external systems, data bases, directory servers which usually hold user data which needs to be maintained and audited by an identity management system. 
     OpenIDM connects to external resources through a connector frame work called OpenICF. The project for OpenICF is hosted [here|http://openicf.forgerock.org/].
     The image below shows the architecture of how OpenIDM connects to external resources via the OpenICF server. In most cases the OpenICF server will start as part of OpenIDM.
             </para>
-          <para>
-          <figure>
+    <para>
+     <figure>
             <mediaobject>
               <imageobject>
                 <imagedata fileref="images/OpenICFarc.png" format="PNG">
@@ -69,12 +69,12 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
             Microsoft's ADSI, then a OpenICF can still use the native dll by a remote 
             connector server. In the case of ADSI the connector server is established 
             as a .net service.</para>
-        </section>
-    </section>
-    <section>
-        <title>Common Connector Properties</title>
-        <section>
-            <title>Connecting to a Local Connector Server</title>
+  </section>
+ </section>
+ <section>
+  <title>Common Connector Properties</title>
+  <section>
+   <title>Connecting to a Local Connector Server</title>
             <para>The top level properties of the OpenICF Provisioner Service are:</para>
             <example>
                 <title>Top Level Provisioner Service Properties</title>
@@ -96,15 +96,15 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
       ...}
    }                
                 </programlisting>
-            </example>
-            <section>
-                <title>The "name" Property</title>
-                <para>The name of the connector is used to reference the resource in all other configurations.</para>
-            </section>
-            <section>
-                <title>The "connectorRef"</title>
-                <para>It tells OpenIDM which java class, in which bundle to use as well as the version of the connector. Therefore it is possible to have different versions of the same connector installed in parallel.</para>
-                <example>
+   </example>
+   <section>
+    <title>The "name" Property</title>
+    <para>The name of the connector is used to reference the resource in all other configurations.</para>
+   </section>
+   <section>
+    <title>The "connectorRef"</title>
+    <para>It tells OpenIDM which java class, in which bundle to use as well as the version of the connector. Therefore it is possible to have different versions of the same connector installed in parallel.</para>
+    <example>
                 <title>Example "connectroRef"</title>
                 <programlisting>
    {
@@ -114,9 +114,9 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
       "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
    }                
                 </programlisting>
-                </example>
-                <para>Where:</para>
-                <itemizedlist>
+    </example>
+    <para>Where:</para>
+    <itemizedlist>
                     <listitem><para>connectorHostRef: A pointer to the connector server. In case of a remote connector server it needs to point to the connector info provicer object, see the "connectorRef" for a Remote Connector below.</para>
                         <itemizedlist>
                         <listitem><para>If the connector server is local and the connector jar is installed as a bundle (i.e. in the openidm/bundle folder) then the value must be "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager", like in the example above.</para></listitem>
@@ -142,12 +142,12 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
       "minIdle" : 1
    }                    
                     </programlisting>
-                </example>
-            </section>
-            <section>
-                <title>The "operationTimeout"</title>
-                <para>Each operation which might be requested from the connector server can be set with a different time out. A value of -1 disables the time out.</para>
-                <example>
+    </example>
+   </section>
+   <section>
+    <title>The "operationTimeout"</title>
+    <para>Each operation which might be requested from the connector server can be set with a different time out. A value of -1 disables the time out.</para>
+    <example>
                     <title>Example Time Out configuration</title>
                     <programlisting>
    {
@@ -165,12 +165,12 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
       "SCHEMA" : -1
    }                    
                     </programlisting>
-                </example>
-            </section>
-            <section>
-                <title>The "configurationProperties"</title>
-                <para>The configurationProperties property configures the connection between the connection server and the actual resource and is therefore highly resource type specific. A file base resource will need a file path where any network based resource will need a host name and port combination. Authentication parameters will be configured here as well as search paths (like base contexts) in hierarchical directories. Two rather different examples are shown below:</para>
-                <example>
+    </example>
+   </section>
+   <section>
+    <title>The "configurationProperties"</title>
+    <para>The configurationProperties property configures the connection between the connection server and the actual resource and is therefore highly resource type specific. A file base resource will need a file path where any network based resource will need a host name and port combination. Authentication parameters will be configured here as well as search paths (like base contexts) in hierarchical directories. Two rather different examples are shown below:</para>
+    <example>
                 <title>Example for a File Base Resource</title>
                 <programlisting>
     {
@@ -179,8 +179,8 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
         "xmlFilePath" : "data/xmlConnectorData.xml"
     }                
                 </programlisting>
-                </example>
-                <example>
+    </example>
+    <example>
                 <title>Example for an LDAP Based Resource (abbreviated)</title>
                 <programlisting>
     {
@@ -196,13 +196,13 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
 
     }                
                 </programlisting>
-                </example>
-                <para>Comment: even required properties are skipped in the example above!</para>
-            </section>
-            <section>
-                <title>The "objectTypes"</title>
-                <para>Though OpenIDM focuses on User Identity management the concept of managing other types of objects is part of the scope. Example of other objects that should be maintained by OpenIDM, i.e. created, updated or deleted, are:</para>
-                <itemizedlist>
+    </example>
+    <para>Comment: even required properties are skipped in the example above!</para>
+   </section>
+   <section>
+    <title>The "objectTypes"</title>
+    <para>Though OpenIDM focuses on User Identity management the concept of managing other types of objects is part of the scope. Example of other objects that should be maintained by OpenIDM, i.e. created, updated or deleted, are:</para>
+    <itemizedlist>
                     <listitem><para>Group Objects like LDAP or AD Groups</para></listitem>
                     <listitem><para>Organizational Units in a Directory</para></listitem>
                     <listitem><para>Container in Active Directory</para></listitem>
@@ -219,10 +219,10 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
             "nativeType" : "__ACCOUNT__",
             "properties" : {... (_See Below_)}
         }
-    }                
-                </programlisting>
-                </example>
-                <itemizedlist>
+    }         
+     </programlisting>
+    </example>
+    <itemizedlist>
                     <listitem><para>"$schema" will currently always point to "http://json-schema.org/draft-03/schema"</para></listitem>
                     <listitem><para>"type" needs to be set to "object"</para></listitem>
                     <listitem><para>"nativeType" is "__ACCOUNT__" in the case of users and "__GROUP__" for group objects. On an LDAP server a extra objectType can be created for each objectClass which is used.</para></listitem>
@@ -305,10 +305,10 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
                      }
                }
          }                
-                </programlisting>
-                </example>
-                <para>The reaction on the deny event can be "DO_NOTHING" or "THROW_EXCEPTION". The list of operations is:</para>
-                <itemizedlist>
+     </programlisting>
+    </example>
+    <para>The reaction on the deny event can be "DO_NOTHING" or "THROW_EXCEPTION". The list of operations is:</para>
+    <itemizedlist>
                     <listitem><para>AUTHENTICATE</para></listitem>
                     <listitem><para>CREATE</para></listitem>
                     <listitem><para>DELETE</para></listitem>
@@ -346,13 +346,13 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
          }
   ...                
                 </programlisting>
-            </example>
-            <section>
-                <title>The "connectorRef" for a Remote Connector</title>
-                <para>Additionally to the connectorRef properties as mention in chapter "Connecting to a Local Connector Server, in case of a remote connector the "connector info provider object" must be referenced. This is done in the "connectorHostRef" property of "connectorRef" and must contain the "name" property of the "connectorinfoprovider". In the example above that is "dotnet".</para>
-            </section>
-        
-        </section>
+   </example>
+   <section>
+    <title>The "connectorRef" for a Remote Connector</title>
+    <para>Additionally to the connectorRef properties as mention in chapter "Connecting to a Local Connector Server, in case of a remote connector the "connector info provider object" must be referenced. This is done in the "connectorHostRef" property of "connectorRef" and must contain the "name" property of the "connectorinfoprovider". In the example above that is "dotnet".</para>
+   </section>
+
+  </section>
         <!--  TODO: Where does this orphaned paragraph belong? Not here in any case.
         <para>The top level properties of the OpenICF Provsioner Service are:</para>-->
         
@@ -370,9 +370,9 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
         "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
     },        
         </programlisting>
-        </example>
-        <para>The connectorHostRef is optional if the connector server is local.</para>
-        </section>
+   </example>
+   <para>The connectorHostRef is optional if the connector server is local.</para>
+  </section>
         <section><title>Typical configurationProperties configuration</title>
         <example>
         <title>configurationProperties of an XML connector configuration (provisioner-json)</title>
@@ -383,9 +383,9 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
         "xmlFilePath" : "data/xmlConnectorData.xml"
     },        
         </programlisting>
-        </example>
-        <para>Where:</para>
-        <itemizedlist>
+   </example>
+   <para>Where:</para>
+   <itemizedlist>
             <listitem><para>xmlFilePath: references the xml file which contains the account entries</para></listitem>
             <listitem><para>xsdIcfFilePath: references the xsd file with a schema common to all xml file resources; the file is not supposed to be changed</para></listitem>
             <listitem><para>xsdFilePath: references a kind of custom schema; here any project individual attributes are defined</para></listitem>
@@ -405,7 +405,7 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
          "bundleVersion" : "1.1.0.0-EA"
       },        
         </programlisting>
-        </example>
+   </example>
         <para>In case of a local or built in connector server the connectorHostRef is optional if the connector jar is in openidm/connectors.</para>
         </section>
         <section><title>Typical configurationProperties configuration</title>
@@ -450,9 +450,9 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
          "respectResourcePasswordPolicyChangeAfterReset" : false
       },        
         </programlisting>
-        </example>
-        <para>Where:</para>
-        <itemizedlist>
+   </example>
+   <para>Where:</para>
+   <itemizedlist>
         <listitem><para>"accountSynchronizationFilter" : null-&gt;A filter used during synchronization actions to filter out ldap accounts</para></listitem>
         <listitem><para>"accountObjectClasses" : ["top","person","organizationalPerson","inetOrgPerson"] -&gt; The object class or classes that will be used when creating new user objects in the LDAP tree. When entering more than one object class, each entry should be on its own line; do not use commas or semi-colons to separate multiple object classes. Some object classes may require that you specify all object classes in the class hierarchy.</para></listitem>
         <listitem><para>"accountSearchFilter" : null -&gt; A search filter that any account needs to match in order to be returned.</para></listitem>
@@ -498,7 +498,7 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
         <section><title>Installation of the .net Connector Server</title>
         <para>Information on how to install a .net Connector Server can be found [here|http://openicf.forgerock.org/connector-framework-internal/connector_server.html].
 It is important to set the key as described in the [installation description|http://openicf.forgerock.org/connector-framework-internal/connector_server.html] after installation!</para>
-        </section>
+  </section>
         <section><title>Example connectorRef</title>
         <example>
         <title>Example connectorRef for an AD connector configuration (provisioner-json)</title>
@@ -508,11 +508,11 @@ It is important to set the key as described in the [installation description|htt
          "bundleName" : "ActiveDirectory.Connector",
          "bundleVersion" : "1.0.0.6109"        
         </programlisting>
-        </example>
-        <para>Where:</para>
-        <para>*connectorHostRef:* must point to an existing connector info provider configuration with this name. It is usually stored in its own file with the name "provisioner.openicf.connectorinfoprovider.json".
+   </example>
+   <para>Where:</para>
+   <para>*connectorHostRef:* must point to an existing connector info provider configuration with this name. It is usually stored in its own file with the name "provisioner.openicf.connectorinfoprovider.json".
 The connectorHostRef is NOT optional in this case since the AD connector needs to be installed on a .net connector server which is always remote due to it's non java nature!</para>
-        <example>
+   <example>
         <title>Example of a connector info provider configuration (in a file named "provisioner.openicf.connectorinfoprovider.json")</title>
         <programlisting>
    "connectorsLocation" : "connectors",
@@ -528,8 +528,8 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
          }
       ]        
         </programlisting>
-        </example>
-        </section>
+   </example>
+  </section>
         <section><title>Typical configurationProperties configuration</title>
         <example>
         <title>configurationProperties of an AD connector configuration (provisioner-json)</title>
@@ -546,9 +546,9 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
          "SyncDomainController" : null,
          "SearchContext" : "dc=example,dc=com"        
         </programlisting>
-        </example>
-        <para>Where:</para>
-        <itemizedlist>
+   </example>
+   <para>Where:</para>
+   <itemizedlist>
             <listitem><para>DirectoryAdminName: Account which will be used to authenticate; can be a domainname\user combination or just the user name</para></listitem>
             <listitem><para>DirectoryAdminPassword: credentials for the connection</para></listitem>
             <listitem><para>ObjectClass: AD objectclass for user objects. </para></listitem>
@@ -577,7 +577,7 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
         "bundleVersion" : "1.1.0.0-EA"
     },        
         </programlisting>
-        </example>
+   </example>
         <para>The connectorHostRef has to be set like above if the default connector jar is used since it resides in the openidm/bundle folder.</para>
         </section>
         <section><title>Typical configurationProperties configuration</title>
@@ -589,9 +589,9 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
         "uniqueAttribute" : "uid"
     },        
         </programlisting>
-        </example>
-        <para>Where:</para>
-        <itemizedlist>
+   </example>
+   <para>Where:</para>
+   <itemizedlist>
         <listitem><para>filePath: references the CSV file which contains the account entries</para></listitem>
         <listitem><para>uniqueAttribute: serves as kind of primary key in the CSV file</para></listitem>
         </itemizedlist>
