@@ -23,26 +23,263 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter xml:id='chap-conf-folder'
- xmlns='http://docbook.org/ns/docbook'
- version='5.0' xml:lang='en'
- xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Introduction to OpenIDM Configuration</title>
+<chapter xml:id="chap-conf-folder" xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ <title>OpenIDM Configuration</title>
+ <section>
+  <title>Overview</title>
+  <para>OpenIDM stores its configuration in the plugged in repository. Configuration can be managed either via REST (and User Interfaces built on top of REST), or an optional file based view which can be particularly useful for development purposes.
+Note that the files are a way to install new or changed configuration, and to see what is in the OpenIDM repository; it is not the authoritative source for OpenIDM configuration and OpenIDM may reject to install a given configuration file for example. See the Notes section to understand or avoid limitations.</para>
+ </section>
+ <section>
+  <title>Configuration Types</title>
+  <para>Depending on the service you want to configure, the configuration may be structured in two different ways:</para>
+  <itemizedlist>
+   <listitem><para>1. Single instance configurations for services that only have at most one instance to configure</para></listitem>
+   <listitem><para>2. Multi instance configuration types where for a given service type there can be N number of configuration instances</para></listitem>
+  </itemizedlist>
+  <para>
+   <emphasis>List of single instance configuration</emphasis> services</para>
+  <itemizedlist>
+   <listitem><para>auidt</para></listitem>
+   <listitem><para>managed</para></listitem>
+   <listitem><para>repo.&lt;repo type&gt; such as repo.orientdb or repo.jdbc</para></listitem>
+   <listitem><para>sync</para></listitem>
+  </itemizedlist>
+  <para>These service names map to configuration files using the pattern &lt;service name&gt;.json, e.g.
+  audit.json</para>
+  <para>
+   <emphasis>List of multi instance configuration service types</emphasis>
+  </para>
+  <itemizedlist>
+   <listitem><para>scheduler</para></listitem>
+   <listitem><para>provisioner.openicf</para></listitem>
+  </itemizedlist>
+  <para>These service types are pre-defined types of services that can be configured for OpenIDM
+  These map to configuration files using the pattern &lt;service type&gt;-&lt;instance name&gt;.json, e.g.
+  scheduler-dailyrecon.json or scheduler-livesync.json
+  Instance names can be given an arbitrary name by the administrator to name a given configuration.</para>
+ </section>
 
- <para>This chapter covers ... TODO.</para>
-
- <section xml:id="conf-folder-section-id">
-  <title>Section Title</title>
-
-  <para>This section covers ... TODO.</para>
-
-  <section xml:id="conf-folder-subsection-id">
-   <title>Subsection Title</title>
-
-   <para>This subsection covers ... TODO.</para>
+ <section>
+  <title>Configuration via REST</title>
+  <para>The OpenIDM configuration is exposed at the <filename>"openidm/config"</filename> context, for example http://localhost:8080/openidm/config .</para>
+  <para>Create, Read, Update, Delete of configuration is supported, as well as listing all configurations. Services are identified by their name.</para>
+  <section>
+   <title>Identifier Conventions</title>
+   <para>The REST operations use a URL pattern of <filename>openidm/config/&lt;id&gt;</filename>, where the &lt;id&gt; is:</para>
+   <itemizedlist>
+    <listitem><para>For Single instance configuration the service name, i.e. <filename>openidm/config/&lt;service-name&gt;</filename></para></listitem>
+    <listitem><para>For Multi instance configuration the service type and instance name, i.e. <filename>openidm/config/&lt;service-type&gt;/&lt;instance-name&gt;</filename></para></listitem>
+   </itemizedlist>
+   <para>Examples:</para>
+   <itemizedlist>
+    <listitem><para>http://localhost:8080/openidm/config/audit</para></listitem>
+    <listitem><para>http://localhost:8080/openidm/config/scheduler/myschedule</para></listitem>
+   </itemizedlist>
+  </section>
+  <section>
+   <title>Listing All Configurations</title>
+   <para>GET on <filename>openidm/config</filename> will return a list a of all available configurations</para>
+   <para>The _id returned matches the conventions set out for identifiers n this document.</para>
+   <para>Here is an example issuing the above listing of all configurations using Curl.</para>
+   <example>
+    <programlisting>
+$ curl --user admin:admin --request GET http://localhost:8080/openidm/config    
+    </programlisting>
+   </example>
+  </section>
+  <section>
+   <title>Read Configuration</title>
+   <para>GET on <filename>openidm/config/&lt;id&gt;</filename>
+   </para>
+   <para>Examples:</para>
+   <example>
+    <programlisting>
+GET openidm/config/audit
+GET openidm/config/scheduler/myschedule
+  </programlisting>
+   </example>
+   <para>An example using curl reading the managed object configuration:</para>
+   <example>
+    <programlisting>
+$ curl --user admin:admin --request GET http://localhost:8080/openidm/config/managed  
+  </programlisting>
+   </example>
+  </section>
+ </section>
+ <section>
+  <title>Changing configuration directly in the repository (Database)</title>
+  <para>Changes directly to the repository should be avoided, and changes should be done via the REST or File mechanisms in order for proper logging and consistent behavior.
+ To ensure no ambiguity when restoring configuration in a database the file view (if enabled) should be removed whilst the system is shut down before starting again.</para>
+ </section>
+ <section>
+  <title>Configuration via File View</title>
+  <para>For development purposes the system also allows seeing and manipulating the configuration via a file based view/export, by default these are &lt;id&gt;.json files in the conf/ folder of openidm. The identifier convention is similar to the REST based identifier convention, except that service type and instance name are separated by a dash (-) rather than slash (/), e.g. scheduler-myschedule.json.</para>
+  <para>Details on configuring the view are documented in <link xlink:href="https://wikis.forgerock.org/confluence/display/openidm/Bootstrapping">Bootstrapping</link> .
+Changes made to the file are recognized and the system will try to apply the changes to the repository / system configuration. Similarly, the system will write the latest configuration values out to the files when changes are made via other mechanisms such as REST.</para>
+ </section>
+ <section>
+  <title>Notes</title>
+  <para>When using the file based view it is important to note that this mechanism is primarily a convenience for managing configuration in development. Because it is a view there are some current behaviors to note:</para>
+  <itemizedlist>
+   <listitem><para>To delete configuration one can delete a configuration file whilst the system is running. It does not currently recognize deleting a file whilst the system is down as a request to delete configuration.</para></listitem>
+   <listitem><para>The file based installation mode should only be used when the system is allowed to write configuration changes back to the original files.</para></listitem>
+  </itemizedlist>
+ </section>
+ <section>
+  <title>Explaining the OpenIDM directory structure</title>
+  <para>A listing of the install director of OpenIDM, typically "openidm", shows the structure below. OpenIDM is typically installed in /opt on most *NIX. The $OPENIDM environment variable should point to the installation directory. (e.g. export OPENIDM=/opt/openidm)</para>
+  <example>
+   <programlisting>
+$OPENIDM
+|
+|- bundle
+    |- init
+|- db
+       |- activiti
+|- openidm
+|- scripts
+|- utils     
+|- logs
+|- security
+|- audit
+|- conf
+    |- boot
+|- bin
+|- connectors
+|- script
+|- samples
+    |- misc
+    |- provisioners
+    |- schedulers
+    |- security
+|- sample1
+|- sample2
+|- sample2b
+|- sample3
+|- sample4
+|- sample5
+|- sample6
+|- stop.sh
+|- start.sh
+|- run.bat 
+  </programlisting>
+  </example>
+  <section>
+   <title>bundle</title>
+   <para>The <filename>openidm/bundle</filename> contains all the necessary building blocks of OpenIDM. Typically these are .jar files. In this directory all OSGi bundles or modules are stored. This is also the folder which upgrade scripts typically installs new or upgraded bundles.</para>
+  </section>
+  <section>
+   <title>db</title>
+   <para>The <filename>openidm/db</filename> is a place holder for the OpenIDM repository which contains a number of different folder depending on what features and functionalities are currently in use. The DB folder also contains a scripts folder with DDT files for supported JDBC repositories. The bundled NoSQL database OrientDB also provides a web based administration console in the utils folder.</para>
+  </section>
+  <section>
+   <title>logs</title>
+   <para>The <filename>openidm/logs</filename> folder contains the OpenIDM systems log. The log is being log rotated. The specific behavior of this logging is configured in <filename>openidm/conf/logging.properties</filename>.</para>
+  </section>
+  <section>
+   <title>security</title>
+   <para>The <filename>openidm/security</filename> provides the configuration and keystore placeholder.</para>
+  </section>
+  <section>
+   <title>audit</title>
+   <para>The <filename>openidm/audit</filename> is the default directory for various audit files such as the reconciliation log. </para>
+  </section>
+  <section>
+   <title>connectors</title>
+   <para>The <filename>openidm/connectors</filename> is the default directory connectors. The system will pick up and enable connectors of a certain type if it can locate a respective connector bundle in either this directory (or if its an OSGi enabled connector also in the <filename>openidm/bundle</filename> directory. By default the OpenICF LDAP and XML connector is packaged. More connectors can be downloaded from the OpenICF project web site - http://openicf.forgerock.org.</para>
+  </section>
+  <section>
+   <title>script</title>
+   <para>The <filename>openidm/script</filename> is a directory where custom rules written in any of the supported scripting language OpenIDM supports.</para>
+  </section>
+  <section>
+   <title>bin</title>
+   <para>The <filename>openidm/bin</filename> contains the bundled Apache Felix container.</para>
+  </section>
+  <section>
+   <title>samples</title>
+   <para>The <filename>openidm/samples</filename> intends at providing sample and tutorial configurations in clear and easy to use samples that can be customized and put into place for solving typical identity management related problems. A number of sub directories can be found here. See the individual READMEs for more details.</para>
+  </section>
+  <section>
+   <title>conf</title>
+   <para>The <filename>openidm/conf</filename> contains the majority of the configuration files needed for OpenIDM and is described in detail in the following section.</para>
+  </section>
+ </section>
+ <section>
+  <title>OpenIDM Configuration Files</title>
+  <para>Most configuration files used to set up and configure OpenIDM and its behavior can be found in the <filename>openidm/conf</filename> directory, with the bootstrap information in <filename>openidm/conf/boot</filename>.</para>
+  <section><title>Bootstrap Configuration (<filename>openidm/conf/boot/</filename>)</title>
+   <section>
+    <title>boot.properties</title>
+    <para>Contains the information to bootstrap OpenIDM and the remaining configuration. Points to a keystore to decrypt configuration, and if necessary can override the repository settings where the configuration gets stored.</para>
+   </section>
+  </section>
+  <section>
+   <title>Application Configuration (<filename>openidm/conf/</filename>)</title>
+   <para>It is only present if the file based configuration view is not disabled.</para>
+   <section>
+    <title>audit.json</title>
+    <para>audit.json is used to configure the Event Publisher pushing out audit events. In this file you can specify what type of events and to where they should be published. The Event Publisher can also be filtered to limit what gets pushed out.</para>
+   </section>
+   <section>
+    <title>managed.json</title>
+    <para>managed.json is used to describe the various managed objects managed by OpenIDM and also the applicable schema for each configured object.</para>
+   </section>
+   <section>
+    <title>repo.orientdb.json</title>
+    <para>When using the embedded NoSQL repository based on OrientDB, this file describes the behavior of the repository including defining necessary queries, indexes and database details. If using a RDMBS based repository this file can be removed.</para>
+   </section>
+   <section>
+    <title>repo.jdbc.json</title>
+    <para>When using the embedded NoSQL repository based on OrientDB, this file describes the behavior of the repository including defining necessary queries, indexes and database details. If using a RDMBS based repository this file can be removed.</para>
+   </section>
+   <section>
+    <title>repo.jdbc.json</title>
+    <para>If configuring OpenIDM to leverage a RDBMS repository via JDBC, this file specifies the repository details, queries and connectivity details.</para>
+   </section>
+   <section>
+    <title>provisioner.openicf-&lt;RESOURCE_NAME&gt;.json</title>
+    <para>Each connector instance typically has one provisioner.openicf configuration file. In this file, integration details such as network information, credentials and attribute schema is defined as well as which OpenICF features are supported.</para>
+   </section>
+   <section>
+    <title>router.json</title>
+    <para>The router.json allows you to specify filtered triggers and how to respond to when such a trigger occur such as responding to create, update, read, delete, query and action events by invoking e.g. a JavaScript.</para>
+   </section>
+   <section>
+    <title>scheduler-&lt;RESOURCE_NAME&gt;.json</title>
+    <para>The scheduler files defines how and when various events should occur. Currently you can specify reconciliation and liveSync (activeSynchronizer) events. A common naming convention is to include the type and mapping in the scheduler name, i.e.
+scheduler-&lt;TYPE&gt;_&lt;MAPPING&gt;.json</para>
+   </section>
+   <section>
+    <title>sync.json</title>
+    <para>sync.json is the main configuration file to describe all mappings that the OpenIDM discovery engine looks at. The discovery engine provides two features; Reconciliation and Synchronization. The sync.json provides configuration details for both features such as reconciliation policies, attribute mappings and transformations and responses to triggers.</para>
+   </section>
+  </section>
+  <section>
+   <title>Framework Configuration (<filename>openidm/conf</filename>)</title>
+   <para>The following configuration files are also located in the <filename>openidm/conf</filename> directory but configure the OSGI frame work services.</para>
+   <section>
+    <title>config.properties</title>
+    <para>An internal system configuration that typically does not need to be changed. config.properties is used to specify the behavior of the embedded OSGi container Felix.</para>
+   </section>
+   <section>
+    <title>logging.properties</title>
+    <para>logging.properties allows you to specify trace and logging settings of the system on a global level. For audit logging see the audit.json configuration instead.</para>
+   </section>
+   <section>
+    <title>realm.properties</title>
+    <para>Allows for configuration of the embedded Http server security realm (Jetty). This is a simple properties based example realm <link xlink:href="http://wiki.eclipse.org/Jetty/Tutorial/Realms#HashLoginService">(HashLoginService)</link> referenced from the default jetty.xml, and can be replaced.</para>
+   </section>
+   <section>
+    <title>system.properties</title>
+    <para>Specifies additional Java system properties used for system start-up. System.properties is a global place holder for advanced system configurations to OpenIDM or utilized customer libraries that use Java system properties.</para>
+   </section>
+   <section>
+    <title>jetty.xml</title>
+    <para>
+     <link xlink:href="https://wikis.forgerock.org/confluence/display/openidm/Embedded+Jetty">jetty.xml</link> allows for advanced configuration of the embedded Http server (Jetty) such as restrict access to the REST interface.</para>
+   </section>
   </section>
  </section>
 </chapter>
