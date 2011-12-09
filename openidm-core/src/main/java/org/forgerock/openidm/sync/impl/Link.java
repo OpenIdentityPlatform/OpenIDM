@@ -50,25 +50,27 @@ import org.forgerock.openidm.sync.SynchronizationException;
  */
 class Link {
 
-    /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(Link.class);
 
-    /** TODO: Description. */
+    // The mapping associated with this link view. 
+    // This link view is specific to the direction of this mapping context 
     private final ObjectMapping mapping;
 
-    /** TODO: Description. */
+    // The unique identifier of the link
     public String _id;
 
-    /** TODO: Description. */
+    // The MVCC revision of the link
     public String _rev;
-
-    /** TODO: Description. */
+   
+    // The id linked in the source object set of the mapping. 
+    // This link view is specific to the direction of the mapping context 
     public String sourceId;
 
-    /** TODO: Description. */
+    // The id linked in the target object set of the mapping. 
+    // This link view is specific to the direction of the mapping context 
     public String targetId;
 
-    /** TODO: Description. */
+    // The id of the last reconciliation to change the link for optimization purposes
     public String reconId;
 
     /**
@@ -86,7 +88,8 @@ class Link {
      * @return
      */
     private String linkId(String id) {
-        StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getLinkType().getName());
+        //StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getLinkType().getName());
+        StringBuilder sb = new StringBuilder("repo/link");
         if (id != null) {
             sb.append('/').append(id);
         }
@@ -125,11 +128,11 @@ class Link {
         _id = jv.get("_id").required().asString();
         _rev = jv.get("_rev").asString(); // optional
         if (mapping.getLinkType().useReverse()) {
-            sourceId = jv.get("targetId").required().asString();
-            targetId = jv.get("sourceId").required().asString();
+            sourceId = jv.get("secondId").required().asString();
+            targetId = jv.get("firstId").required().asString();
         } else {
-            sourceId = jv.get("sourceId").required().asString();
-            targetId = jv.get("targetId").required().asString();
+            sourceId = jv.get("firstId").required().asString();
+            targetId = jv.get("secondId").required().asString();
         }
         reconId = jv.get("reconId").asString(); // optional
     }
@@ -141,12 +144,13 @@ class Link {
      */
     private JsonValue toJsonValue() {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
+        jv.put("linkType", mapping.getLinkType().getName());
         if (mapping.getLinkType().useReverse()) {
-            jv.put("sourceId", targetId);
-            jv.put("targetId", sourceId);
+            jv.put("secondId", sourceId);
+            jv.put("firstId", targetId);
         } else {
-            jv.put("sourceId", sourceId);
-            jv.put("targetId", targetId);
+            jv.put("firstId", sourceId);
+            jv.put("secondId", targetId);
         }
         jv.put("reconId", reconId);
         return jv;
@@ -189,10 +193,10 @@ class Link {
     private void getLinkFromFirst(String id) throws SynchronizationException {
         clear();
         if (id != null) {
-            JsonValue query = new JsonValue(new HashMap<String, Object>());
-// TODO: refactor link properties naming
-            query.put(QueryConstants.QUERY_ID, "links-for-sourceId");
-            query.put("sourceId", id);
+            JsonValue query = new JsonValue(new HashMap<String, Object>());            
+            query.put(QueryConstants.QUERY_ID, "links-for-firstId");
+            query.put("linkType", mapping.getLinkType().getName());
+            query.put("firstId", id);
             getLink(query);
         }
     }
@@ -224,8 +228,9 @@ class Link {
         clear();
         if (id != null) {
             JsonValue query = new JsonValue(new HashMap<String, Object>());
-            query.put(QueryConstants.QUERY_ID, "links-for-targetId");
-            query.put("targetId", id);
+            query.put(QueryConstants.QUERY_ID, "links-for-secondId");
+            query.put("linkType", mapping.getLinkType().getName());
+            query.put("secondId", id);
             getLink(query);
         }
     }

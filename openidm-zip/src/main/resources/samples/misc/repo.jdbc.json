@@ -23,8 +23,8 @@
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
-            "links-for-sourceId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE sourceid = ${sourceId}",
-            "links-for-targetId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE targetid = ${targetId}"
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType} AND secondid = ${secondId}"
         }
     },
     "resourceMapping" : {
@@ -41,13 +41,14 @@
             }
         },
         "explicitMapping" : {
-            "xlink/*" : {
+            "link" : {
                 "table" : "links",
                 "objectToColumn" : {
-                    "_type" : "type",
-                    "_id" : "openidmid",
-                    "sourceId" : "sourceid",
-                    "targetId" : "targetid",
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "linkType" : "linktype",
+                    "firstId" : "firstid",
+                    "secondId" : "secondid",
                     "reconId" : "reconid"
                 }
             },
