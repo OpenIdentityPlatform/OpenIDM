@@ -135,8 +135,8 @@
   <para>The cron implementation which is used in OpenIDM is <link xlink:href='http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger'>Quartz</link></para>
   <section><title>The Format</title>
    <para>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the allowed values, along with various combinations of the allowed special characters for that field. The fields are as follows:</para>
-   <table frame="all"><title>Fields used in the schedule definition.</title>
-    <tgroup cols='4' align='center' colsep='1' rowsep='1'>
+   <table pgwide="1"><title>Fields used in the schedule definition.</title>
+    <tgroup cols='4'>
     <thead>
      <row>
       <entry>Field Name</entry><entry>Required</entry><entry>Allowed Values</entry><entry>Allowed Special Characters</entry>
@@ -144,31 +144,31 @@
     </thead>
     <tbody>
      <row>
-      <entry>Seconds</entry><entry>YES</entry><entry>0-59</entry><entry>,-*/</entry>
+      <entry>Seconds</entry><entry>YES</entry><entry>0-59</entry><entry><literal>,-*/</literal></entry>
      </row>
      <row>
-      <entry>Minutes</entry><entry>YES</entry><entry>0-59</entry><entry>,-*/</entry>
+      <entry>Minutes</entry><entry>YES</entry><entry>0-59</entry><entry><literal>,-*/</literal></entry>
      </row>
      <row>
-      <entry>Hours</entry><entry>YES</entry><entry>0-23</entry><entry>,-*/</entry>
+      <entry>Hours</entry><entry>YES</entry><entry>0-23</entry><entry><literal>,-*/</literal></entry>
      </row>
      <row>
-      <entry>Day of month</entry><entry>YES</entry><entry>1-31</entry><entry>,-*?/LW</entry>
+      <entry>Day of month</entry><entry>YES</entry><entry>1-31</entry><entry><literal>,-*?/LW</literal></entry>
      </row>
      <row>
-      <entry>Month</entry><entry>YES</entry><entry>1-12 or JAN-DEC</entry><entry>,-*/</entry>
+      <entry>Month</entry><entry>YES</entry><entry>1-12 or JAN-DEC</entry><entry><literal>,-*/</literal></entry>
      </row>
      <row>
-      <entry>Day of week</entry><entry>YES</entry><entry>1-7 or SUN-SAT</entry><entry>,-*?/L#</entry>
+      <entry>Day of week</entry><entry>YES</entry><entry>1-7 or SUN-SAT</entry><entry><literal>,-*?/L#</literal></entry>
      </row>
      <row>
-      <entry>Year</entry><entry>NO</entry><entry>empty, 1970-2099</entry><entry>,-*/</entry>
+      <entry>Year</entry><entry>NO</entry><entry>empty, 1970-2099</entry><entry><literal>,-*/</literal></entry>
      </row>
     </tbody>
     </tgroup>
    </table>
-   <para>So cron expressions can be as simple as this: * * * * ? *
-or more complex, like this: 0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2011-2015</para>
+   <para>So cron expressions can be as simple as this: <literal>* * * * ? *</literal>
+or more complex, like this: <literal>0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2011-2015</literal></para>
   </section>
   <section><title>Special Characters</title>
    <itemizedlist>
@@ -185,26 +185,27 @@ or more complex, like this: 0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2011-2015<
    <para>The legal characters and the names of months and days of the week are not case sensitive. MON is the same as mon.</para>
   </section>
   <section><title>Examples</title>
-   <para>Some example for schedule configurations:</para>
-   <informaltable frame="all">
-    <tgroup cols='2' align='left' colsep='1' rowsep='1'>
+   <para>Some examples for schedule configurations:</para>
+   <table pgwide="1">
+    <title>Cron Examples</title>
+    <tgroup cols='2'>
     <thead>
      <row><entry>Cron Expression</entry><entry>Meaning</entry></row>
     </thead>
     <tbody>
-     <row><entry>0 0 12 * * ?</entry><entry>Fire at 12pm (noon) every day</entry></row>
-     <row><entry>0 15 11 ? * *</entry><entry>Fire at 11:15am every day</entry></row>
-     <row><entry>0 15 11 * * ?</entry><entry>Fire at 11:15am every day</entry></row>
-     <row><entry>0 15 11 * * ? *</entry><entry>Fire at 11:15am every day</entry></row>
-     <row><entry>0 15 11 * * ? 2012</entry><entry>Fire at 11:15am every day during the year 2012</entry></row>
-     <row><entry>0 * 14 * * ?</entry><entry>Fire every minute starting at 2pm and ending at 2:59pm, every day</entry></row>
-     <row><entry>0 0/5 14 * * ?</entry><entry>Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day</entry></row>
-     <row><entry>0 0/5 14,18 * * ?</entry><entry>Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day</entry></row>
-     <row><entry>0 0-5 14 * * ?</entry><entry>Fire every minute starting at 2pm and ending at 2:05pm, every day</entry></row>
-     <row><entry>0 10,34 14 ? 4 WED</entry><entry>Fire at 2:10pm and at 2:34pm every Wednesday in the month of April.</entry></row>
+     <row><entry><literal>0 0 12 * * ?</literal></entry><entry>Fire at 12pm (noon) every day</entry></row>
+     <row><entry><literal>0 15 11 ? * *</literal></entry><entry>Fire at 11:15am every day</entry></row>
+     <row><entry><literal>0 15 11 * * ?</literal></entry><entry>Fire at 11:15am every day</entry></row>
+     <row><entry><literal>0 15 11 * * ? *</literal></entry><entry>Fire at 11:15am every day</entry></row>
+     <row><entry><literal>0 15 11 * * ? 2012</literal></entry><entry>Fire at 11:15am every day during the year 2012</entry></row>
+     <row><entry><literal>0 * 14 * * ?</literal></entry><entry>Fire every minute starting at 2pm and ending at 2:59pm, every day</entry></row>
+     <row><entry><literal>0 0/5 14 * * ?</literal></entry><entry>Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day</entry></row>
+     <row><entry><literal>0 0/5 14,18 * * ?</literal></entry><entry>Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day</entry></row>
+     <row><entry><literal>0 0-5 14 * * ?</literal></entry><entry>Fire every minute starting at 2pm and ending at 2:05pm, every day</entry></row>
+     <row><entry><literal>0 10,34 14 ? 4 WED</literal></entry><entry>Fire at 2:10pm and at 2:34pm every Wednesday in the month of April.</entry></row>
     </tbody>
     </tgroup>
-   </informaltable>
+   </table>
    <para>Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!</para>
    <section><title>Notes</title>
     <itemizedlist>
