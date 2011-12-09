@@ -128,6 +128,11 @@ h5
  font-size: 13px;
 }
 
+hr
+{
+ display: none;
+}
+
 ul
 {
     list-style-image: url("../images/bulletpoint.png");
@@ -139,6 +144,11 @@ ul
 div.navfooter,div.navheader,div.nukefooter
 {
     background-color: #fafafa;
+}
+
+div.navheader
+{
+ border-bottom: thin solid #ccc;
 }
 
 /* Do not repeat the title at the top of the page. */
@@ -194,9 +204,21 @@ img
     max-height: 480px;
 }
 
-ol
+ol,th,td
 {
     font-size: 12px;
+}
+
+.table-contents
+{
+ border-top: thin solid #ccc;
+ border-bottom: thin solid #ccc;
+ border-spacing: 5px;
+}
+
+.table-contents thead
+{
+ text-align: left;
 }
 
 /*
