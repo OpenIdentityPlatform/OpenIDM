@@ -186,7 +186,7 @@ or more complex, like this: 0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2011-2015<
   </section>
   <section><title>Examples</title>
    <para>Some example for schedule configurations:</para>
-   <table frame="all">
+   <informaltable frame="all">
     <tgroup cols='2' align='left' colsep='1' rowsep='1'>
     <thead>
      <row><entry>Cron Expression</entry><entry>Meaning</entry></row>
@@ -204,7 +204,7 @@ or more complex, like this: 0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2011-2015<
      <row><entry>0 10,34 14 ? 4 WED</entry><entry>Fire at 2:10pm and at 2:34pm every Wednesday in the month of April.</entry></row>
     </tbody>
     </tgroup>
-   </table>
+   </informaltable>
    <para>Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!</para>
    <section><title>Notes</title>
     <itemizedlist>
