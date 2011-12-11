@@ -1,40 +1,86 @@
-@ECHO OFF
-SETLOCAL
-:BEGIN
-CLS
-REM - THE BELOW LINE GIVES THE USER 3 CHOICES
-ECHO Start in debug mode [1] default
-ECHO Start in normal mode [2]
-ECHO Show help [3]
-set USERINP=1
-set /p USERINP=choose a number(1-3): %=%
-cls
-REM - THE NEXT THREE LINES ARE DIRECTING USER DEPENDING UPON INPUT
-IF %USERINP% ==3 GOTO SHOW
-IF %USERINP% ==2 GOTO RUN
-IF %USERINP% ==1 GOTO DEBUG
-GOTO END
-:SHOW
-ECHO To be able to start the OpenIDM with this command the Sun Java 6 MUST be
-ECHO installed on this computer and the PATH variable must contain
-ECHO this: '%%JAVA_HOME%%/bin' where the JAVA_HOME points to the Java 6
-ECHO install directory.
-ECHO.
-ECHO Current %%JAVA_HOME%% = %JAVA_HOME%
-ECHO.
-ECHO If you get this message: 
-ECHO         'java' is not recognized as an internal or external command,
-ECHO         operable program or batch file.
-ECHO then install the Sun Java 6 and set the PATH environment variable.
-ECHO.
-rem ECHO Usage of this command is
-rem ECHO run.bat
-rem ECHO example "%~dp0run.bat"
-GOTO END
-:RUN
-java -Xmx1024m -Dfile.encoding=UTF-8 -jar bin/felix.jar
-GOTO END
-:DEBUG
-java -Dfile.encoding=UTF-8 -Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Xmx1024m -jar bin/felix.jar
-:END
-ENDLOCAL
+@echo off
+setlocal
+
+rem Only set OPENIDM_HOME if not already set
+set "CURRENT_DIR=%cd%"
+if not "%OPENIDM_HOME%" == "" goto gotHome
+set "OPENIDM_HOME=%CURRENT_DIR%"
+if exist "%OPENIDM_HOME%\bin\felix.jar" goto okHome
+cd ..
+set "OPENIDM_HOME=%cd%"
+cd "%CURRENT_DIR%"
+:gotHome
+if exist "%OPENIDM_HOME%\bin\felix.jar" goto okHome
+echo The OPENIDM_HOME environment variable is not defined correctly
+echo This environment variable is needed to run this program
+goto end
+:okHome
+
+rem Only set OPENIDM_OPTS if not already set
+if not "%OPENIDM_OPTS%" == "" goto noOpenIDMOpts
+set OPENIDM_OPTS=-Xmx1024m -Dfile.encoding=UTF-8
+:noOpenIDMOpts
+
+rem Set JDK Logger config file if it is present and an override has not been issued
+if not "%LOGGING_CONFIG%" == "" goto noJuliConfig
+set LOGGING_CONFIG=-Dnop
+if not exist "%OPENIDM_HOME%\conf\logging.properties" goto noJuliConfig
+set LOGGING_CONFIG=-Djava.util.logging.config.file="%OPENIDM_HOME%\conf\logging.properties"
+:noJuliConfig
+set JAVA_OPTS=%JAVA_OPTS% %LOGGING_CONFIG%
+
+if not ""%1"" == ""jpda"" goto noJpda
+set JPDA=jpda
+if not "%JPDA_TRANSPORT%" == "" goto gotJpdaTransport
+set JPDA_TRANSPORT=dt_socket
+:gotJpdaTransport
+if not "%JPDA_ADDRESS%" == "" goto gotJpdaAddress
+set JPDA_ADDRESS=5005
+:gotJpdaAddress
+if not "%JPDA_SUSPEND%" == "" goto gotJpdaSuspend
+set JPDA_SUSPEND=n
+:gotJpdaSuspend
+if not "%JPDA_OPTS%" == "" goto gotJpdaOpts
+set JPDA_OPTS=-Djava.compiler=NONE -Xnoagent -Xdebug -Xrunjdwp:transport=%JPDA_TRANSPORT%,address=%JPDA_ADDRESS%,server=y,suspend=%JPDA_SUSPEND%
+:gotJpdaOpts
+shift
+:noJpda
+
+rem Ensure that any user defined CLASSPATH variables are not used on startup,
+rem but allow them to be specified here, in rare case when it is needed.
+set CLASSPATH="%OPENIDM_HOME%\bin\felix.jar"
+
+echo "Using OPENIDM_HOME:   %OPENIDM_HOME%"
+echo "Using OPENIDM_OPTS:   %OPENIDM_OPTS%"
+echo "Using LOGGING_CONFIG: %LOGGING_CONFIG%"
+
+rem Note the quoting as JAVA_HOME may contain spaces.
+set _RUNJAVA="%JAVA_HOME%\bin\java"
+
+if not "%OS%" == "Windows_NT" goto noTitle
+if "%TITLE%" == "" set TITLE=OpenIDM
+set _EXECJAVA=start "%TITLE%" %_RUNJAVA%
+goto gotTitle
+:noTitle
+set _EXECJAVA=start %_RUNJAVA%
+:gotTitle
+
+rem Get remaining unshifted command line arguments and save them in the
+set CMD_LINE_ARGS=
+:setArgs
+if ""%1""=="""" goto doneSetArgs
+set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
+shift
+goto setArgs
+:doneSetArgs
+
+set MAINCLASS=org.apache.felix.main.Main
+
+rem Execute Java with the applicable properties
+if not "%JPDA%" == "" goto doJpda
+call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS%  -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" -Djava.security.auth.login.config="%OPENIDM_HOME%\security\jaas-repo.conf" %MAINCLASS% %CMD_LINE_ARGS%
+goto end
+:doJpda
+call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS% %JPDA_OPTS% -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" -Djava.security.auth.login.config="%OPENIDM_HOME%\security\jaas-repo.conf" %MAINCLASS% %CMD_LINE_ARGS%
+
+:end
