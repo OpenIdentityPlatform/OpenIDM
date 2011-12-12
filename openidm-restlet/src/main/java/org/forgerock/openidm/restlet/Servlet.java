@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.restlet;
 
-// Java Standard Edition
+// Java SE
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -26,20 +26,16 @@ import java.util.UUID;
 
 // Java Servlet
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-// OpenIDM
-import org.forgerock.openidm.core.IdentityServer;
-
-// OSGi Framework
+// OSGi
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
-// Apache Felix Maven SCR Plugin
+// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -52,39 +48,43 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
-// Restlet Framework
-import org.restlet.Restlet;
-import org.restlet.ext.servlet.ServletAdapter;
-
-// ForgeRock OpenIDM Core
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.context.InvokeContext;
-
+// SLF4J
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Restlet
+import org.restlet.Restlet;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+
+// JSON Resource Restlet
+import org.forgerock.json.resource.restlet.JsonResourceRestlet;
+
+// Restlet Utilities
+import org.forgerock.restlet.RestletRouterServlet;
+
+// Deprecated
+import org.forgerock.openidm.objset.ObjectSetContext;
+
 /**
- * Servlet to handle the REST interface
+ * Servlet to handle the REST interface.
  *
  * @author Paul C. Bryan
  * @author aegloff
  */
 @Component(
-    name = "org.forgerock.openidm.restlet", immediate = true,
+    name = "org.forgerock.openidm.restlet",
+    immediate = true,
     policy = ConfigurationPolicy.IGNORE
 )
-public class Servlet extends HttpServlet {
+public class Servlet extends RestletRouterServlet {
 
-    final static Logger logger = LoggerFactory.getLogger(Servlet.class);
+    /** TODO: Description. */
+    final static Logger LOGGER = LoggerFactory.getLogger(Servlet.class);
     
     /** TODO: Description. */
     private static final String PATH_PROPERTY = "openidm.restlet.path";
-
-    /** TODO: Description. */
-    private final Application application = new Application();
-
-    /** TODO: Description. */
-    private ServletAdapter adapter;
 
     /** TODO: Description. */
     private ComponentContext context;
@@ -115,53 +115,50 @@ public class Servlet extends HttpServlet {
     protected synchronized void bindRestlet(Restlet restlet, Map<String, Object> properties) {
         Object path = properties.get(PATH_PROPERTY);
         if (path != null && path instanceof String) { // service is specified as internally routable
-            application.attach((String)path, restlet);
+            attach((String)path, restlet);
         }
     }
     protected synchronized void unbindRestlet(Restlet restlet, Map<String, Object> properties) {
         Object path = properties.get(PATH_PROPERTY);
         if (path != null && path instanceof String) { // service is specified as internally routable
-            application.detach(restlet);
+            detach(restlet);
         }
     }
 
     /**
-     * Provides automatic binding of {@link ObjectSet} objects that include the
+     * Provides automatic binding of {@code JsonResource} objects that include the
      * {@code openidm.restlet.path} property.
      */
     @Reference(
-        name = "reference_Application_ObjectSet",
-        referenceInterface = ObjectSet.class,
-        bind = "bindObjectSet",
-        unbind = "unbindObjectSet",
+        name = "reference_Servlet_JsonResource",
+        referenceInterface = JsonResource.class,
+        bind = "bindJsonResource",
+        unbind = "unbindJsonResource",
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
         policy = ReferencePolicy.DYNAMIC,
         strategy = ReferenceStrategy.EVENT
     )
-    protected HashMap<ObjectSet, ObjectSetFinder> finders = new HashMap<ObjectSet, ObjectSetFinder>();
-    protected synchronized void bindObjectSet(ObjectSet objectSet, Map<String, Object> properties) {
-        ObjectSetFinder finder = new ObjectSetFinder(objectSet);
-        finders.put(objectSet, finder);
-        bindRestlet(finder, properties);
+    protected HashMap<JsonResource, Restlet> restlets = new HashMap<JsonResource, Restlet>();
+    protected synchronized void bindJsonResource(JsonResource resource, Map<String, Object> properties) {
+        JsonResourceRestlet restlet = new JsonResourceRestlet(resource);
+        restlets.put(resource, restlet);
+        bindRestlet(restlet, properties);
     }
-    protected synchronized void unbindObjectSet(ObjectSet objectSet, Map<String, Object> properties) {
-        ObjectSetFinder finder = finders.get(objectSet);
-        if (finder != null) {
-            unbindRestlet(finder, properties);
-            finders.remove(objectSet);
+    protected synchronized void unbindJsonResource(JsonResource resource, Map<String, Object> properties) {
+        Restlet restlet = restlets.get(resource);
+        if (restlet != null) {
+            unbindRestlet(restlet, properties);
+            restlets.remove(resource);
         }
     }
 
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
-        productionMode = !IdentityServer.isDevelopmentProfileEnabled();
-
         String alias = "/openidm";
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         httpService.registerServlet(alias, this,  props, httpContext);
-        logger.debug("Registered UI servlet at {}", alias);
-        
+        LOGGER.debug("Registered servlet at {}", alias);
     }
 
     @Deactivate
@@ -170,41 +167,13 @@ public class Servlet extends HttpServlet {
     }
 
     @Override
-    public void init() throws ServletException {
-        super.init();
-        adapter = new ServletAdapter(getServletContext(), application);
-    }
-
-    @Override
-    public void destroy() {
-        adapter = null;
-        super.destroy();
-    }
-
-    @Override
-    protected void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        if (adapter == null) {
-            throw new ServletException("No adapter to handle request");
-        }
-        if (allowAccess(req, res)) {
-            InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
-            try {
-                adapter.service(req, res);
-            } finally {
-                InvokeContext.getContext().popActivityId();
-            }
-        }
-    }
-
-    //TODO Replace this quick and dirty implementation with proper authorization
-    private boolean productionMode = true;
-
-    private boolean allowAccess(HttpServletRequest req, HttpServletResponse res) throws IOException {
-        if (productionMode && req.getRequestURI().matches(".*/system/.*")) {
-            res.sendError(HttpServletResponse.SC_FORBIDDEN, "OpenIDM does not allow access to /system in production mode.");
-            return false;
-        } else {
-            return true;
+    protected void service(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException {
+        ObjectSetContext.clear();
+        try {
+            super.service(request, response);
+        } finally {
+            ObjectSetContext.clear();
         }
     }
 }

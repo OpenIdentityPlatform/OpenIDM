@@ -25,6 +25,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.delegate.JavaDelegate;
+
+// Deprecated
 import org.forgerock.openidm.objset.ObjectSet;
 
 /**

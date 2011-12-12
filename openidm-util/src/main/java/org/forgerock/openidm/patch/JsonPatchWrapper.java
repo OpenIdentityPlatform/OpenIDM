@@ -34,7 +34,9 @@ import org.forgerock.json.patch.JsonPatch;
  * TODO: Description.
  *
  * @author Paul C. Bryan
+ * @deprecated Implement {@code JsonResource} (or extend {@code SimpleJsonResource}) instead.
  */
+@Deprecated
 public class JsonPatchWrapper implements Patch {
 
     /** TODO: Description. */
@@ -51,6 +53,10 @@ public class JsonPatchWrapper implements Patch {
             throw new NullPointerException();
         }
         this.diff = diff;
+    }
+
+    public JsonValue getDiff() {
+        return diff;
     }
 
     @Override

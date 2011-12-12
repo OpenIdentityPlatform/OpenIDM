@@ -31,7 +31,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.*;
@@ -850,7 +849,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     final SyncToken[] lastToken = new SyncToken[]{token};
                     final String[] failedRecord = new String[1];
                     OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage.asMap());
-                    InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
                     try {
                         logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})", new Object[]{helper.getObjectClass().getObjectClassValue(), token});
                         operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
@@ -904,7 +902,6 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     } finally {
                         token = lastToken[0];
                         logger.debug("Synchronization is finished. New LatestSyncToken value: {}", token);
-                        InvokeContext.getContext().popActivityId();
                     }
                 }
                 if (null != token) {

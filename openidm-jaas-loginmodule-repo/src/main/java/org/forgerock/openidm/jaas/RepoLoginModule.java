@@ -45,6 +45,9 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Deprecated
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+
 /**
  * A JAAS login module that can authenticate and authorize against data in 
  * the OpenIDM repository
@@ -210,12 +213,11 @@ public class RepoLoginModule extends AbstractLoginModule {
         return existingRoleNames;
     }
     
-    RepositoryService getRepo() {
+    JsonResourceObjectSet getRepo() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference repoRef = ctx.getServiceReference(RepositoryService.class.getName());
-        RepositoryService repo = (RepositoryService) ctx.getService(repoRef);
-        return repo;
+        return new JsonResourceObjectSet((RepositoryService)ctx.getService(repoRef));
     }
     
     CryptoService getCrypto() {

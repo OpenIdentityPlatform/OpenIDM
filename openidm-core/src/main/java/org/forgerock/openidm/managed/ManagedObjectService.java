@@ -16,18 +16,18 @@
 
 package org.forgerock.openidm.managed;
 
-// Java Standard Edition
+// Java SE
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// OSGi Framework
+// OSGi
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
-// Apache Felix Maven SCR Plugin
+// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -40,18 +40,26 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceRouter;
 
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.sync.SynchronizationListener;
+
+// Deprecated
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
 
 /**
  * Provides access to managed objects.
@@ -69,12 +77,12 @@ import org.forgerock.openidm.sync.SynchronizationListener;
     @Property(name = "openidm.router.prefix", value = "managed")
 })
 @Service
-public class ManagedObjectService extends ObjectSetRouter {
+public class ManagedObjectService extends JsonResourceRouter {
 
     /** Internal object set router service. */
     @Reference(
-        name = "ref_ManagedObjectService_ObjectSetRouterService",
-        referenceInterface = ObjectSet.class,
+        name = "ref_ManagedObjectService_JsonResourceRouterService",
+        referenceInterface = JsonResource.class,
         bind = "bindRouter",
         unbind = "unbindRouter",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
@@ -82,13 +90,14 @@ public class ManagedObjectService extends ObjectSetRouter {
         target = "(service.pid=org.forgerock.openidm.router)"
     )
     protected ObjectSet router;
-    protected void bindRouter(ObjectSet router) {
-        this.router = router;
+    protected void bindRouter(JsonResource router) {
+        this.router = new JsonResourceObjectSet(router);
     }
-    protected void unbindRouter(ObjectSet router) {
+    protected void unbindRouter(JsonResource router) {
         this.router = null;
     }
 
+// TODO: Use router to send notifications to synchronization service.
     /** Synchronization listeners. */
     @Reference(
         name="ref_ManagedObjectService_SynchronizationListener",
@@ -196,7 +205,7 @@ public class ManagedObjectService extends ObjectSetRouter {
      * @return TODO.
      */
     Map<String, Object> newScope() {
-        return scopeFactory.newInstance();
+        return scopeFactory.newInstance(ObjectSetContext.get());
     }
 
     /**

@@ -13,20 +13,36 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
+
 package org.forgerock.openidm.script.impl;
 
+// Java SE
 import java.util.Map;
 import java.util.UUID;
 
+// SLF4J
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+// OSGi
+import org.osgi.framework.Constants;
+
+// Felix SCR
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.context.InvokeContext;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceContext;
+
+// OpenIDM
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
@@ -34,9 +50,6 @@ import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
-import org.osgi.framework.Constants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Description.
@@ -54,12 +67,25 @@ import org.slf4j.LoggerFactory;
 public class SchedulableScriptService implements ScheduledService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(SchedulableScriptService.class);
+
     @Reference
     public ScopeFactory scopeFactory;
 
+    /**
+     * Produces a new "scheduled" context, indicating that the request came as a
+     * scheduled task.
+     */
+// TODO: Standardize on a single scheduled task context structure.
+    private JsonValue newScheduledContext() {
+        return JsonResourceContext.newContext("scheduled", JsonResourceContext.newRootContext());
+    }
+
+    private Map<String, Object> newScope() {
+        return scopeFactory.newInstance(newScheduledContext());
+    }
+
     @Override
     public void execute(Map<String, Object> context) throws ExecutionException {
-        InvokeContext.getContext().pushActivityId(UUID.randomUUID().toString());
         try {
             String name = (String) context.get(INVOKER_NAME);
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
@@ -73,14 +99,12 @@ public class SchedulableScriptService implements ScheduledService {
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
-        } finally {
-            InvokeContext.getContext().popActivityId();
         }
     }
 
     private void execScript(String name, Script script, JsonValue input) throws ExecutionException {
         if (script != null) {
-            Map<String, Object> scope = scopeFactory.newInstance();
+            Map<String, Object> scope = newScope();
             scope.put("input", input.getObject());
             try {
                 script.exec(scope);

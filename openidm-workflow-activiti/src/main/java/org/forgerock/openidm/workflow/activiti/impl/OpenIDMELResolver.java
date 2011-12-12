@@ -26,7 +26,6 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.javax.el.ELContext;
 import org.activiti.engine.impl.javax.el.ELResolver;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,9 @@ import java.beans.FeatureDescriptor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+// Deprecated
+import org.forgerock.openidm.objset.ObjectSet;
 
 /**
  * @author $author$

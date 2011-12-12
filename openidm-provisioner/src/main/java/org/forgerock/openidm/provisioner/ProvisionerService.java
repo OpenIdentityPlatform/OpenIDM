@@ -27,10 +27,12 @@
 package org.forgerock.openidm.provisioner;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
 import java.util.Map;
+
+// Deprecated
+import org.forgerock.openidm.objset.ObjectSet;
 
 /**
  * @author $author$

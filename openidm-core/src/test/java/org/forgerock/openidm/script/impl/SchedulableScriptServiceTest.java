@@ -24,6 +24,7 @@ import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
 
+import org.forgerock.json.fluent.JsonValue;
 
 /**
  * TODO: Description.
@@ -33,9 +34,15 @@ import static org.mockito.Mockito.*;
 @Test
 public class SchedulableScriptServiceTest {
 
+    class IsJsonValue extends org.mockito.ArgumentMatcher<JsonValue> {
+        @Override public boolean matches(Object o) {
+            return (o instanceof JsonValue);
+        }
+    }
+
     public void testExecute() throws Exception {
         ScopeFactoryService scopeFS = mock(ScopeFactoryService.class);
-        when(scopeFS.newInstance()).thenReturn(new HashMap<String, Object>());
+        when(scopeFS.newInstance(argThat(new IsJsonValue()))).thenReturn(new HashMap<String, Object>());
         Map<String, Object> context = new HashMap<String, Object>();
         Map<String, Object> params = new HashMap<String, Object>();
         Map<String, Object> input = new HashMap<String, Object>();

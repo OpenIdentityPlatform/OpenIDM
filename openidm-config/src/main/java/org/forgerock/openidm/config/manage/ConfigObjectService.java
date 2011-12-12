@@ -36,15 +36,6 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
@@ -58,6 +49,18 @@ import org.osgi.service.component.ComponentContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+// Deprecated
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 
 /**
  * Provides access to OSGi configuration
@@ -75,7 +78,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "config")
 })
 @Service
-public class ConfigObjectService implements ObjectSet {
+public class ConfigObjectService extends ObjectSetJsonResource {
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
 
@@ -286,56 +289,6 @@ public class ConfigObjectService implements ObjectSet {
             logger.warn("Failure to delete configuration for {}", fullId, ex);
             throw new InternalServerErrorException("Failure to delete configuration for " + fullId + ": " + ex.getMessage(), ex);
         }
-    }
-
-    /**
-     * Currently not supported by this implementation.
-     * <p/>
-     * Applies a patch (partial change) to the specified object in the object set.
-     *
-     * @param id    the identifier of the object to be patched.
-     * @param rev   the version of the object to patch or {@code null} if not provided.
-     * @param patch the partial change to apply to the object.
-     * @throws ConflictException           if patch could not be applied object state or if version is required.
-     * @throws ForbiddenException          if access to the object is forbidden.
-     * @throws NotFoundException           if the specified object could not be found.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        logger.info("Patch not supported");
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Performs the query on the specified object and returns the associated results.
-     * <p/>
-     * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
-     * <p/>
-     * The returned map is structured as follow:
-     * - The top level map contains meta-data about the query, plus an entry with the actual result records.
-     * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
-     *
-     * @param fullId identifies the object to query.
-     * @param params the parameters of the query to perform.
-     * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException   if the specified object could not be found.
-     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
-     *                             configured, a query expression that is invalid, or missing query substitution tokens.
-     * @throws ForbiddenException  if access to the object or specified query is forbidden.
-     */
-    @Override
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        logger.info("Invoking query {} {}", fullId, params);
-        // TODO
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        logger.info("Call to action not supported for {} {}", id, params);
-        throw new UnsupportedOperationException();
     }
 
     /**

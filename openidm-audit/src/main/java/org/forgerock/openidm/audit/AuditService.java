@@ -23,12 +23,13 @@
  */
 package org.forgerock.openidm.audit;
 
-import org.forgerock.openidm.objset.ObjectSet;
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
 
 /**
  * OpenIDM audit service
  * @author aegloff
  */
-public interface AuditService extends ObjectSet {
+public interface AuditService extends JsonResource {
     public final static String ROUTER_PREFIX = "audit";
 }

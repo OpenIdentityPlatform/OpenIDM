@@ -28,9 +28,6 @@ package org.forgerock.openidm.shell.felixgogo.debug;
 import org.apache.felix.service.command.CommandSession;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -43,6 +40,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+
+// Deprecated
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.Patch;
+
 /**
  * @author $author$
  * @version $Revision$ $Date$
@@ -51,7 +57,7 @@ public class InteractiveObjectSetService implements ObjectSet, ServiceListener {
 
     private final static Logger TRACE = LoggerFactory.getLogger(InteractiveObjectSetService.class);
 
-    public static final String ROUTER_SERVICE_FILTER = "(&(objectClass=" + ObjectSet.class.getName() + ")(service.pid=org.forgerock.openidm.router))";
+    public static final String ROUTER_SERVICE_FILTER = "(&(objectClass=" + JsonResource.class.getName() + ")(service.pid=org.forgerock.openidm.router))";
 
     private ObjectSet router = null;
 
@@ -69,7 +75,7 @@ public class InteractiveObjectSetService implements ObjectSet, ServiceListener {
         this.session = session;
         ServiceReference ref = context.getServiceReference(ROUTER_SERVICE_FILTER);
         if (null != ref) {
-            router = (ObjectSet) context.getService(ref);
+            router = new JsonResourceObjectSet((JsonResource)context.getService(ref));
         }
         //TODO block the console read
         this.console = session.getConsole();

@@ -38,9 +38,6 @@ import java.util.Vector;
 import org.apache.felix.cm.PersistenceManager;
 
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
@@ -53,6 +50,12 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+// Deprecated
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
 
 public class RepoPersistenceManager implements PersistenceManager, ConfigPersisterMarker {
 
@@ -69,7 +72,9 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     final static Logger logger = LoggerFactory.getLogger(RepoPersistenceManager.class);
     
     private BundleContext ctx;
-    private RepoBootService repo;
+
+    private JsonResourceObjectSet repo;
+
     //Rapid development may require only memory store.
     private final boolean requireRepository = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
     
@@ -93,7 +98,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     repoTracker = new ServiceTracker(ctx, filter, null);
                     repoTracker.open();
                     logger.debug("Bootstrapping repository");
-                    repo = (RepoBootService) repoTracker.waitForService(5000);
+                    repo = new JsonResourceObjectSet((RepoBootService)repoTracker.waitForService(5000));
                     if (repo != null) {
                         logger.debug("Bootstrap obtained repository");
                     }
@@ -260,7 +265,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                         return memIter.next();
                     } else {
                         Map entry = (Map) dbIter.next();
-                        String entryId = (String) entry.get(RepositoryService.ID);
+                        String entryId = (String) entry.get("_id");
                         return load(entryId);
                     }
                 } catch (RuntimeException ex) {
@@ -304,12 +309,12 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     // Just detect that it doesn't exist
                 }
                 if (existing != null) {
-                    String rev = (String) existing.get(RepositoryService.REV);
+                    String rev = (String) existing.get("_rev");
                     
-                    existing.remove(RepositoryService.REV);
-                    existing.remove(RepositoryService.ID);
-                    obj.remove(RepositoryService.REV); // beware, this means _id and _rev should not be in config file
-                    obj.remove(RepositoryService.ID); // beware, this means _id and _rev should not be in config file
+                    existing.remove("_rev");
+                    existing.remove("_id");
+                    obj.remove("_rev"); // beware, this means _id and _rev should not be in config file
+                    obj.remove("_id"); // beware, this means _id and _rev should not be in config file
                     obj.remove(RepoPersistenceManager.BUNDLE_LOCATION);
                     obj.remove(RepoPersistenceManager.FELIX_FILEINSTALL_FILENAME);
                     if(!existing.equals(obj)) {
@@ -370,7 +375,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     try {
                         Map<String, Object> existing = repo.read(id);
                         if (existing != null) {
-                            rev = (String) existing.get(RepositoryService.REV);
+                            rev = (String) existing.get("_rev");
                             repo.delete(id, rev);
                             logger.debug("Deleted {}", pid);
                         }

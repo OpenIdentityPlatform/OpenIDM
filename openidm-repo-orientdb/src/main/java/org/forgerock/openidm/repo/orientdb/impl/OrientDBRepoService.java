@@ -46,15 +46,6 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService; 
@@ -67,19 +58,34 @@ import com.orientechnologies.orient.core.exception.OConcurrentModificationExcept
 import com.orientechnologies.orient.core.index.OIndexException;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+
+// Deprecated
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
+
 /**
  * Repository service implementation using OrientDB
  * @author aegloff
  */
 @Component(name = OrientDBRepoService.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
-@Service (value = {RepositoryService.class, ObjectSet.class}) // Omit the RepoBootService interface from the managed service
+@Service (value = {RepositoryService.class, JsonResource.class}) // Omit the RepoBootService interface from the managed service
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OrientDB"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.router.prefix", value = "repo"),
     @Property(name = "db.type", value = "OrientDB")
 })
-public class OrientDBRepoService implements RepositoryService, RepoBootService {
+public class OrientDBRepoService extends ObjectSetJsonResource implements RepositoryService, RepoBootService {
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.orientdb";

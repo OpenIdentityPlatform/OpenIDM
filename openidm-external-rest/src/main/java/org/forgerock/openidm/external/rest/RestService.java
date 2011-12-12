@@ -48,15 +48,6 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 //import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 
 import org.osgi.service.component.ComponentContext;
 
@@ -71,6 +62,18 @@ import org.restlet.resource.ClientResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Deprecated
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
+
 /**
  * External REST connectivity
  *
@@ -83,7 +86,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = "service.vendor", value = "ForgeRock AS"),
         @Property(name = "openidm.router.prefix", value = "external/rest")
 })
-public class RestService implements ObjectSet {
+public class RestService extends ObjectSetJsonResource {
     final static Logger logger = LoggerFactory.getLogger(RestService.class);
     public static final String PID = "org.forgerock.openidm.external.rest";
 

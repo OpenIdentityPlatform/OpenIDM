@@ -23,7 +23,8 @@
  */
 package org.forgerock.openidm.repo;
 
-import org.forgerock.openidm.objset.ObjectSet;
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
 
 /**
  * Common OpenIDM bootstrap repository interface
@@ -36,5 +37,5 @@ import org.forgerock.openidm.objset.ObjectSet;
  * 
  * @author aegloff
  */
-public interface RepoBootService extends ObjectSet {
+public interface RepoBootService extends JsonResource {
 }

@@ -30,7 +30,6 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.osgi.OsgiName;
 import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -56,13 +55,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+
+// Deprecated
+import org.forgerock.openidm.objset.*;
+
 /**
  * Repository service implementation using JDBC
  *
  * @author aegloff
  */
 @Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service(value = {RepositoryService.class, ObjectSet.class})
+@Service(value = {RepositoryService.class, JsonResource.class})
 // Omit the RepoBootService interface from the managed service
 @Properties({
         @Property(name = "service.description", value = "Repository Service using JDBC"),
@@ -70,7 +75,7 @@ import java.util.Map;
         @Property(name = "openidm.router.prefix", value = "repo"),
         @Property(name = "db.type", value = "JDBC")
 })
-public class JDBCRepoService implements RepositoryService, RepoBootService {
+public class JDBCRepoService extends ObjectSetJsonResource implements RepositoryService, RepoBootService {
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";

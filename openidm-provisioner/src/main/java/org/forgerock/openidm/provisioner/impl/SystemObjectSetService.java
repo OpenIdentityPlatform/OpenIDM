@@ -32,10 +32,6 @@ import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
@@ -57,6 +53,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceRouter;
+
+// Deprecated
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.Patch;
+
 /**
  * SystemObjectSetService implement the {@link ObjectSet}.
  *
@@ -64,13 +73,15 @@ import java.util.Set;
  * @version $Revision$ $Date$
  */
 @Component(name = "org.forgerock.openidm.provisioner", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
-@Service(value = {ObjectSet.class, ScheduledService.class})
+@Service(value = {JsonResource.class, ScheduledService.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "system") // internal object set router
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "system")
 })
-public class SystemObjectSetService implements ObjectSet, SynchronizationListener, ScheduledService {
+public class SystemObjectSetService extends ObjectSetJsonResource
+// TODO: Deprecate the following interfaces:
+ implements SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
     public static final String PROVISIONER_SERVICE_REFERENCE_NAME = "ProvisionerServiceReference";
 
@@ -79,11 +90,20 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
             strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
 
-    @Reference(referenceInterface = ObjectSet.class,
+    @Reference(referenceInterface = JsonResource.class,
+            name = "ref_SystemObjectSetService_JsonResourceRouterService",
+            bind = "bindRouter",
+            unbind = "unbindRouter",
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             policy = ReferencePolicy.STATIC,
             target = "(service.pid=org.forgerock.openidm.router)")
     private ObjectSet router;
+    protected void bindRouter(JsonResource router) {
+        this.router = new JsonResourceObjectSet(router);
+    }
+    protected void unbindRouter(JsonResource router) {
+        this.router = null;
+    }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConfigurationService configurationService;
@@ -121,6 +141,11 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         TRACE.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
     }
 
+    private void logActivity(String id, String msg, Object before, Object after) throws ObjectSetException {
+        ActivityLog.log(getRouter(), ObjectSetContext.get(),
+         msg, id, new JsonValue(before), new JsonValue(after), Status.SUCCESS);
+    }
+
     /**
      * Creates a new object in the object set.
      * <p/>
@@ -142,7 +167,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         locateService(identifier).create(id, object);
         // Append the system created local identifier
         URI newId = identifier.resolveLocalId((String) object.get(ServerConstants.OBJECT_PROPERTY_ID)).getId();
-        ActivityLog.log(getRouter(), Action.CREATE, "", newId.toString(), null, object, Status.SUCCESS);
+        logActivity(newId.toString(), "", null, object);
         /*try {
             onCreate(id, new JsonValue(object));
         } catch (SynchronizationException e) {
@@ -170,7 +195,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         Id identifier = new Id(id);
 
         Map<String, Object> object = locateService(identifier.expectObjectId()).read(id);
-        ActivityLog.log(getRouter(), Action.READ, "", id, object, null, Status.SUCCESS);
+        logActivity(id, "", object, null);
         return object;
     }
 
@@ -199,7 +224,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
 
         Map<String, Object> oldValue = service.read(id);
         service.update(id, rev, object);
-        ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, object, Status.SUCCESS);
+        logActivity(id, "", oldValue, object);
 
         /*try {
             onUpdate(id, new JsonValue(oldValue), new JsonValue(object));
@@ -230,7 +255,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         Map<String, Object> oldValue = service.read(id);
 
         service.delete(id, rev);
-        ActivityLog.log(getRouter(), Action.DELETE, "", id, oldValue, null, Status.SUCCESS);
+        logActivity(id, "", oldValue, null);
 
         /*try {
             onDelete(id);
@@ -265,7 +290,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         service.patch(id, rev, patch);
 
         Map<String, Object> newValue = service.read(id);
-        ActivityLog.log(getRouter(), Action.UPDATE, "", id, oldValue, newValue, Status.SUCCESS);
+        logActivity(id, "", oldValue, newValue);
 
         /*try {
             onUpdate(id, new JsonValue(oldValue), new JsonValue(newValue));
@@ -294,7 +319,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         Id identifier = new Id(id);
 
         Map<String, Object> result = locateService(identifier).query(id, params);
-        ActivityLog.log(getRouter(), Action.QUERY, "Query parameters " + params, id, result, null, Status.SUCCESS);
+        logActivity(id, "Query parameters" + params, result, null);
 
         return result;
     }
@@ -307,7 +332,7 @@ public class SystemObjectSetService implements ObjectSet, SynchronizationListene
         if (_action.isNull() || !"CREATECONFIGURATION".equalsIgnoreCase(_action.asString())) {
             Id identifier = new Id(id);
             result = locateService(identifier).action(id, params);
-            ActivityLog.log(getRouter(), Action.ACTION, "Action parameters " + params, id, result, null, Status.SUCCESS);
+            logActivity(id, "Action parameters " + params, result, null);
         } else if (null != configurationService) {
             JsonValue _entity = _params.get(ServerConstants.ACTION_ENTITY);
             result = configurationService.configure(_entity).asMap();
