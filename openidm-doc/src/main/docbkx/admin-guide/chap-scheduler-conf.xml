@@ -56,7 +56,7 @@
     "enabled" : true,
     "type": "cron",
     "schedule": "0 0/1 * * * ?",
-    "invokeService": "script",
+    "invokeService": "discovery-engine",
     "invokeContext": {
        "script" : {
              "type" : "text/javascript",
@@ -78,7 +78,7 @@
    <para>The schedule property accepts expression with a cron expression syntax. See the section about Cron Expressions for more detail and examples. The expression in the sample tells the scheduler to fire the scheduled task once every minute.</para>
   </section>
   <section><title>invokeService</title>
-   <para>Invoke service defines what type of event or action is scheduled to happen. Currently “script”, “provisioner”, “sync” are possible values.</para>
+   <para>Invoke service defines what type of event or action is scheduled to happen. Currently “discovery-engine” and “script” are possible values.</para>
   </section>
   <section><title>invokeContext</title>
    <para>invokeContext allows you to specifiy specific contextual information, such as the actual script (or a reference to a file based script) in the above sample. The discovery engine provides two mechanisms; reconciliation and synchronization. Both of these requires invokeContexts to be specified.</para>
@@ -89,7 +89,7 @@
     "enabled" : true,
     "type": "cron",
     "schedule": "0 0/1 * * * ?",
-    "invokeService": "sync",
+    "invokeService": "discovery-engine",
     "invokeContext": {
            "action": "reconcile",
            "mapping": "systemLdapAccount_managedUser"
@@ -105,7 +105,7 @@
     "enabled" : true,
     "type": "cron",
     "schedule": "0 0/1 * * * ?",
-    "invokeService": "provisioner",
+    "invokeService": "discovery-engine",
     "invokeContext": {
            "action": "liveSync",
            "source" : "system/OpenDJ/__ACCOUNT__"
