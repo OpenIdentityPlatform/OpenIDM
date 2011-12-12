@@ -31,8 +31,6 @@ import org.identityconnectors.framework.api.operations.ScriptOnResourceApiOp;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
 
-import java.util.Map;
-
 /**
  * Sample Class Doc
  * {
@@ -63,25 +61,19 @@ public class ConnectorScript {
     private ExecutionMode _execMode = null;
 
 
-    public ConnectorScript(Map<String, Object> params) {
-        init(params);
+    public ConnectorScript(JsonValue params) {
+        init(params.required());
     }
 
-    public ConnectorScript(Map<String, Object> params, OperationOptionsBuilder _operationOptionsBuilder) {
-        this._operationOptionsBuilder = _operationOptionsBuilder;
-        init(params);
-    }
-
-    private void init(Map<String, Object> params) {
-        JsonValue _params = new JsonValue(params);
-        getScriptContextBuilder().setScriptLanguage(_params.get(SCRIPT_TYPE).required().expect(String.class).asString());
+    private void init(JsonValue params) {
+        getScriptContextBuilder().setScriptLanguage(params.get(SCRIPT_TYPE).required().expect(String.class).asString());
         if (getScriptContextBuilder().getScriptLanguage().equalsIgnoreCase("SHELL")) {
             getOperationOptionsBuilder().setOption("variablePrefix", "OPENIDM_");
         }
-        getScriptContextBuilder().setScriptText(_params.get(SCRIPT_EXPRESSION).required().expect(String.class).asString());
-        setExecMode(_params.get(SCRIPT_EXECUTE_MODE).required().expect(String.class).asString());
+        getScriptContextBuilder().setScriptText(params.get(SCRIPT_EXPRESSION).required().expect(String.class).asString());
+        setExecMode(params.get(SCRIPT_EXECUTE_MODE).required().expect(String.class).asString());
         if (null == _execMode) {
-            throw new IllegalArgumentException("Script execute mode can not be determined from: " + _params.get("_script-execute-mode").asString());
+            throw new IllegalArgumentException("Script execute mode can not be determined from: " + params.get("_script-execute-mode").asString());
         }
     }
 

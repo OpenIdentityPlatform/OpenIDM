@@ -27,9 +27,8 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -155,7 +154,7 @@ public class ConnectorUtilTest {
         boolean authenticated = true;
         try {
             helper.isOperationPermitted(AuthenticationApiOp.class);
-        } catch (ForbiddenException e) {
+        } catch (JsonResourceException e) {
             authenticated = false;
         }
         Assert.assertFalse(authenticated, "Authentication - DENIED(Exception)");
@@ -163,7 +162,7 @@ public class ConnectorUtilTest {
         boolean operationSupported = true;
         try {
             helper.isOperationPermitted(ScriptOnResourceApiOp.class);
-        } catch (ForbiddenException e) {
+        } catch (JsonResourceException e) {
             operationSupported = false;
         }
         Assert.assertFalse(operationSupported, "ScriptOnResource - NotSupported(Exception)");
@@ -174,7 +173,7 @@ public class ConnectorUtilTest {
 
 
     @Test
-    public void testAPIConfiguration() throws JsonValueException, SchemaException, URISyntaxException, ObjectSetException {
+    public void testAPIConfiguration() throws JsonValueException, SchemaException, URISyntaxException, JsonResourceException {
         ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
         Assert.assertEquals(connectorReference.getConnectorHost(), ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER);
         ConnectorKey key = connectorReference.getConnectorKey();
@@ -194,8 +193,8 @@ public class ConnectorUtilTest {
         Assert.assertEquals(helper.getObjectClass().getObjectClassValue(), "__ACCOUNT__");
     }
 
-    @Test(expectedExceptions = ObjectSetException.class, expectedExceptionsMessageRegExp = ".*__NONE__.*")
-    public void testUnsupportedObjectType() throws JsonValueException, SchemaException, URISyntaxException, ObjectSetException {
+    @Test(expectedExceptions = JsonResourceException.class, expectedExceptionsMessageRegExp = ".*__NONE__.*")
+    public void testUnsupportedObjectType() throws JsonValueException, SchemaException, URISyntaxException, JsonResourceException {
         OperationHelperBuilder operationHelperBuilder = new OperationHelperBuilder("test", jsonConfiguration, runtimeAPIConfiguration);
         OperationHelper helper = operationHelperBuilder.build("__NONE__", null, null);
     }

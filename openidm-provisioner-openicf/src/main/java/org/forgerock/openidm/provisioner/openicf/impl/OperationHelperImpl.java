@@ -27,10 +27,10 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
@@ -90,7 +90,7 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
-    public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ForbiddenException {
+    public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws JsonResourceException {
         OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);
         String reason = "not supported.";
         if (null != operationOptionInfoHelper && (null == operationOptionInfoHelper.getSupportedObjectTypes() ||
@@ -103,11 +103,11 @@ public class OperationHelperImpl implements OperationHelper {
             }
             reason = "denied.";
         }
-        throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is " + reason);
+        throw new JsonResourceException(403, "Operation " + operation.getCanonicalName() + " is " + reason);
     }
 
 
-    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, Map<String, Object> source) throws Exception {
+    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception {
         return operations.get(operation).build(source, objectClassInfoHelper);
     }
 
@@ -123,25 +123,25 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
-    public ConnectorObject build(Class<? extends APIOperation> operation, Map<String, Object> source) throws Exception {
+    public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
         return objectClassInfoHelper.build(operation, null, source, cryptoService);
     }
 
 
-    public ConnectorObject build(Class<? extends APIOperation> operation, String id, Map<String, Object> source) throws Exception {
+    public ConnectorObject build(Class<? extends APIOperation> operation, String id, JsonValue source) throws Exception {
         //TODO do something with ID
         return objectClassInfoHelper.build(operation, id, source, cryptoService);
     }
 
 
-    public Map<String, Object> build(ConnectorObject source) throws Exception {
-        Map<String, Object> result = objectClassInfoHelper.build(source, cryptoService);
+    public JsonValue build(ConnectorObject source) throws Exception {
+        JsonValue result = objectClassInfoHelper.build(source, cryptoService);
         resetUid(source.getUid(), result);
         return result;
     }
 
 
-    public void resetUid(Uid uid, Map<String, Object> target) {
+    public void resetUid(Uid uid, JsonValue target) {
         if (null != uid && null != target) {
             target.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(uid.getUidValue()));
         }
@@ -159,7 +159,7 @@ public class OperationHelperImpl implements OperationHelper {
         if (null != uid) {
             try {
                 return systemObjectSetId.resolveLocalId(uid.getUidValue()).getQualifiedId();
-            } catch (ObjectSetException e) {
+            } catch (JsonResourceException e) {
                 // Should never happen in a copy constructor.
                 throw new UndeclaredThrowableException(e);
             }
@@ -194,7 +194,7 @@ public class OperationHelperImpl implements OperationHelper {
          */
         public boolean handle(ConnectorObject obj) {
             try {
-                return resultList.add(objectClassInfoHelper.build(obj, cryptoService));
+                return resultList.add(objectClassInfoHelper.build(obj, cryptoService).asMap());
             } catch (IOException e) {
                 throw new IllegalArgumentException(e);
             } catch (JsonCryptoException e) {

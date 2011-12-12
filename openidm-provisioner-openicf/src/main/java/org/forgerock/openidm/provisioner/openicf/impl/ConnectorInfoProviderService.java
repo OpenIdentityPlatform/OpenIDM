@@ -2,9 +2,10 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openicf.framework.api.osgi.ConnectorManager;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -12,8 +13,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -207,7 +206,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public JsonValue configure(JsonValue params) throws ObjectSetException {
+    public JsonValue configure(JsonValue params) throws JsonResourceException {
         JsonValue result = null;
         if (params.isNull() || params.size() == 0) {
             result = new JsonValue(new HashMap<String, Object>());
@@ -217,7 +216,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
             ConnectorInfo info = findConnectorInfo(ref);
             if (null == info) {
-                throw new NotFoundException("Connector not found: " + ref.getConnectorKey());
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
             }
             result = params;
             ConnectorUtil.createSystemConfigurationFromAPIConfiguration(info.createDefaultAPIConfiguration(), result.asMap());
@@ -226,7 +225,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
             ConnectorInfo info = findConnectorInfo(ref);
             if (null == info) {
-                throw new NotFoundException("Connector not found: " + ref.getConnectorKey());
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
             }
             APIConfiguration configuration = info.createDefaultAPIConfiguration();
             ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);

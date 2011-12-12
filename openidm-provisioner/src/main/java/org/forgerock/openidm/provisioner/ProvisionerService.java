@@ -27,18 +27,17 @@
 package org.forgerock.openidm.provisioner;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
 import java.util.Map;
 
-// Deprecated
-import org.forgerock.openidm.objset.ObjectSet;
 
 /**
  * @author $author$
  * @version $Revision$ $Date$
  */
-public interface ProvisionerService extends ObjectSet {
+public interface ProvisionerService extends JsonResource {
 
     /**
      * Gets the unique {@link SystemIdentifier} of this instance.

@@ -25,11 +25,12 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.provisioner.Id;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.framework.api.operations.APIOperation;
@@ -106,23 +107,23 @@ public class ObjectClassInfoHelper {
      * @param source
      * @param cryptoService
      * @return
-     * @throws PreconditionFailedException if ID value can not be determined from the {@code source}
+     * @throws JsonResourceException if ID value can not be determined from the {@code source}
      */
-    public ConnectorObject build(Class<? extends APIOperation> operation, String name, Map<String, Object> source, CryptoService cryptoService) throws Exception {
+    public ConnectorObject build(Class<? extends APIOperation> operation, String name, JsonValue source, CryptoService cryptoService) throws Exception {
         String nameValue = name;
 
         if (null == nameValue) {
-            Object o = source.get(ServerConstants.OBJECT_PROPERTY_ID);
-            if (null == o) {
+            JsonValue o = source.get(ServerConstants.OBJECT_PROPERTY_ID);
+            if (o.isNull()) {
                 o = source.get(nameAttribute);
             }
-            if (o instanceof String) {
-                nameValue = (String) o;
+            if (o.isString()) {
+                nameValue = o.asString();
             }
         }
 
         if (null == nameValue) {
-            throw new PreconditionFailedException("Required NAME attribute is missing");
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Required NAME attribute is missing");
         } else {
             nameValue = Id.unescapeUid(nameValue);
             logger.trace("Build ConnectorObject {} for {}", nameValue, operation.getSimpleName());
@@ -132,7 +133,7 @@ public class ObjectClassInfoHelper {
         builder.setObjectClass(objectClass);
         builder.setUid(nameValue);
         builder.setName(nameValue);
-        Set<String> keySet = source.keySet();
+        Set<String> keySet = source.required().asMap().keySet();
         if (CreateApiOp.class.isAssignableFrom(operation)) {
             for (AttributeInfoHelper attributeInfo : attributes) {
                 if (Name.NAME.equals(attributeInfo.getName()) || Uid.NAME.equals(attributeInfo.getName()) ||
@@ -175,14 +176,14 @@ public class ObjectClassInfoHelper {
         return result;
     }
 
-    public Map<String, Object> build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
+    public JsonValue build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
         if (null == source) {
             return null;
         }
         if (logger.isTraceEnabled()) {
             logger.trace("ConnectorObject source: {}", SerializerUtil.serializeXmlObject(source, false));
         }
-        Map<String, Object> result = new LinkedHashMap<String, Object>(source.getAttributes().size());
+        JsonValue result = new JsonValue(new LinkedHashMap<String, Object>(source.getAttributes().size()));
         for (AttributeInfoHelper attributeInfo : attributes) {
             Attribute attribute = source.getAttributeByName(attributeInfo.getAttributeInfo().getName());
             if (null != attribute) {

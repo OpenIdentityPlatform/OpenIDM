@@ -26,7 +26,7 @@
 package org.forgerock.openidm.provisioner;
 
 import org.apache.commons.lang.StringUtils;
-import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.json.resource.JsonResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 /**
- * Id is a util class to work with the {@code id} property in the {@link org.forgerock.openidm.objset.ObjectSet}
+ * Id is a util class to work with the {@code id} property in the {@link org.forgerock.json.resource.JsonResource}
  * interface.
  * <p/>
  * A valid ID MAY start with {@code system} and followed by the name of the end system, type of the
@@ -74,12 +74,12 @@ public class Id {
     private String objectType;
     private String localId = null;
 
-    public Id(String systemName, String objectType) throws ObjectSetException {
+    public Id(String systemName, String objectType) throws JsonResourceException {
         if (StringUtils.isBlank(systemName)) {
-            throw new ObjectSetException("System name can not be blank");
+            throw new JsonResourceException(400, "System name can not be blank");
         }
         if (StringUtils.isBlank(objectType)) {
-            throw new ObjectSetException("Object type can not be blank");
+            throw new JsonResourceException(400, "Object type can not be blank");
         }
         try {
             this.baseURI = new URI("");
@@ -95,15 +95,15 @@ public class Id {
 
     }
 
-    public Id(String systemName, String objectType, String localId) throws ObjectSetException {
+    public Id(String systemName, String objectType, String localId) throws JsonResourceException {
         if (StringUtils.isBlank(systemName)) {
-            throw new ObjectSetException("System name can not be blank");
+            throw new JsonResourceException(400, "System name can not be blank");
         }
         if (StringUtils.isBlank(objectType)) {
-            throw new ObjectSetException("Object type can not be blank");
+            throw new JsonResourceException(400, "Object type can not be blank");
         }
         if (StringUtils.isBlank(localId)) {
-            throw new ObjectSetException("Object id can not be blank");
+            throw new JsonResourceException(400, "Object id can not be blank");
         }
         try {
             this.baseURI = new URI("");
@@ -119,9 +119,9 @@ public class Id {
         }
     }
 
-    public Id(String id) throws ObjectSetException {
+    public Id(String id) throws JsonResourceException {
         if (StringUtils.isBlank(id)) {
-            throw new ObjectSetException("Id can not be blank");
+            throw new JsonResourceException(400, "Id can not be blank");
         }
         int index = id.indexOf(SYSTEM_BASE);
         String relativeId = id;
@@ -140,7 +140,7 @@ public class Id {
                         systemName = URLDecoder.decode(segments[0], CHARACTER_ENCODING_UTF_8);
                 }
             } else {
-                throw new ObjectSetException("Invalid number of tokens in ID " + id);
+                throw new JsonResourceException(400, "Invalid number of tokens in ID " + id);
             }
             this.baseURI = new URI("");
         } catch (UnsupportedEncodingException e) {
@@ -164,16 +164,16 @@ public class Id {
         return systemName;
     }
 
-    public Id expectObjectId() throws ObjectSetException {
+    public Id expectObjectId() throws JsonResourceException {
         if (StringUtils.isBlank(localId)) {
-            ObjectSetException ex = new ObjectSetException("This id instance does not qualified to identify a single unique object");
+            JsonResourceException ex = new JsonResourceException(400, "This id instance does not qualified to identify a single unique object");
             TRACE.error("Unqualified id: systemName={}, objectType={}, localId={}", new Object[]{systemName, objectType, localId}, ex);
             throw ex;
         }
         return this;
     }
 
-    public Id resolveLocalId(String uid) throws ObjectSetException {
+    public Id resolveLocalId(String uid) throws JsonResourceException {
         if (null == uid) {
             return new Id(systemName, objectType);
         } else {
