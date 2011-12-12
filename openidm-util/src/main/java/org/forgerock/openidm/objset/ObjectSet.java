@@ -42,7 +42,9 @@ import java.util.Map;
  * {@code _} prefix.
  *
  * @author Paul C. Bryan
+ * @deprecated Use JsonResource instead.
  */
+@Deprecated
 public interface ObjectSet {
 
     /** The {@code _id} property. */

@@ -47,18 +47,20 @@ import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.RepositoryService;
+
+// Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService;
-
 
 /**
  * Audit module
@@ -71,7 +73,7 @@ import org.forgerock.openidm.repo.RepositoryService;
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX)
 })
-public class AuditServiceImpl implements AuditService {
+public class AuditServiceImpl extends ObjectSetJsonResource implements AuditService {
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
 
     // Keys in the JSON configuration

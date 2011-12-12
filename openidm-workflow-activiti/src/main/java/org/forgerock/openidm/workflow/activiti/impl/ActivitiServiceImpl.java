@@ -36,7 +36,6 @@ import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -46,11 +45,17 @@ import org.slf4j.LoggerFactory;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
 
 import javax.transaction.TransactionManager;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+
+// Deprecated
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
 
 /**
  * Workflow service implementation
@@ -73,7 +78,7 @@ import javax.transaction.TransactionManager;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = ActivitiServiceImpl.ROUTER_PREFIX)
 })
-public class ActivitiServiceImpl implements ObjectSet {
+public class ActivitiServiceImpl extends ObjectSetJsonResource {
     final static Logger logger = LoggerFactory.getLogger(ActivitiServiceImpl.class);
     public final static String PID = "org.forgerock.openidm.workflow.activiti";
     public final static String ROUTER_PREFIX = "workflow/activiti";
@@ -83,11 +88,20 @@ public class ActivitiServiceImpl implements ObjectSet {
 
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
 
-    @Reference(referenceInterface = ObjectSet.class,
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC,
-            target = "(service.pid=org.forgerock.openidm.router)")
-    private ObjectSet router;
+    @Reference(referenceInterface = JsonResource.class,
+        name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC,
+        target = "(service.pid=org.forgerock.openidm.router)")
+        private ObjectSet router;
+        protected void bindRouter(JsonResource router) {
+            this.router = new JsonResourceObjectSet(router);
+        }
+        protected void unbindRouter(JsonResource router) {
+            this.router = null;
+        }
 
 
     @Reference(
@@ -142,47 +156,6 @@ public class ActivitiServiceImpl implements ObjectSet {
             }
         }
         return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external activiti service");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external activiti service");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external activiti service");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external activiti service");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO
-        return new HashMap<String, Object>();
     }
 
     /**

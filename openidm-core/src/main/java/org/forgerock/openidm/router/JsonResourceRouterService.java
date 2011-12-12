@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.router;
 
-// Java Standard Edition
+// Java SE
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,11 +29,11 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// OSGi Framework
+// OSGi
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
-// Apache Felix Maven SCR Plugin
+// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -47,17 +47,21 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
-// ForgeRock OpenIDM
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.JsonResourceFilter;
+import org.forgerock.json.resource.JsonResourceFilterChain;
+import org.forgerock.json.resource.JsonResourceRouter;
+
+// OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetRouter;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
@@ -78,30 +82,32 @@ import org.forgerock.openidm.script.Scripts;
     immediate = true
 )
 @Properties({
-    @Property(name = "service.description", value = "OpenIDM internal object set router"),
+    @Property(name = "service.description", value = "OpenIDM internal JSON resource router"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.restlet.path", value = "/")
 })
 @Service
-public class ObjectSetRouterService extends ObjectSetRouter {
+public class JsonResourceRouterService implements JsonResource {
 
     /** TODO: Description. */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ObjectSetRouterService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(JsonResourceRouterService.class);
 
     /** TODO: Description. */
     private static final String PREFIX_PROPERTY = "openidm.router.prefix";
 
     /** TODO: Description. */
-    private ComponentContext context;
-
-    private List<Filter> filters = new ArrayList<Filter>();
+    private final Router router = new Router();
 
     /** TODO: Description. */
-    private enum Method { CREATE, READ, UPDATE, DELETE, QUERY, ACTION, ALL };
+    private Chain chain = new Chain(router);
 
+    /** TODO: Description. */
+    private ComponentContext context;
+
+    /** TODO: Description. */
     @Reference(
-        name = "ref_ObjectSetRouterService_ObjectSet",
-        referenceInterface = ObjectSet.class,
+        name = "ref_JsonResourceRouterService_JsonResource",
+        referenceInterface = JsonResource.class,
         bind = "bind",
         unbind = "unbind",
         cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -109,22 +115,22 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         strategy = ReferenceStrategy.EVENT
     )
     protected int _dummy; // whiteboard pattern
-    protected synchronized void bind(ObjectSet route, Map<String, Object> properties) {
+    protected synchronized void bind(JsonResource resource, Map<String, Object> properties) {
         Object prefix = properties.get(PREFIX_PROPERTY);
         if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-            routes.put((String)prefix, route);
+            router.getRoutes().put((String)prefix, resource);
         }
     }
-    protected synchronized void unbind(ObjectSet route, Map<String, Object> properties) {
+    protected synchronized void unbind(JsonResource resource, Map<String, Object> properties) {
         Object prefix = properties.get(PREFIX_PROPERTY);
         if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-            routes.remove((String)prefix);
+            router.getRoutes().remove(prefix);
         }
     }
 
     /** Scope factory service. */
     @Reference(
-        name = "ref_ObjectSetRouterService_ScopeFactory",
+        name = "ref_JsonResourceRouterService_ScopeFactory",
         referenceInterface = ScopeFactory.class,
         bind = "bindScopeFactory",
         unbind = "unbindScopeFactory",
@@ -141,24 +147,19 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         this.scopeFactory = null;
     }
 
-    @Activate
-    protected synchronized void activate(ComponentContext context) {
-        LOGGER.info("Activate router configuration, properties: {}", context.getProperties());
-        init(context);
+    /**
+     * Returns {@code true} if the values are === equal.
+     */
+    private static boolean eq(Object o1, Object o2) {
+        return (o1 == o2 || (o1 != null && o1.equals(o2)));
     }
-    
-    @Modified
-    protected synchronized void modified(ComponentContext context) {
-        LOGGER.debug("Modified router configuration, properties: {}", context.getProperties());
-        init(context);
-    }
-    
+
     /**
      * Initialize the router with configuration. Supports modifying router configuration.
      */
     private void init(ComponentContext context) {
-        String pid = (String) context.getProperties().get("service.pid");
-        String factoryPid = (String) context.getProperties().get("service.factoryPid");
+        String pid = (String)context.getProperties().get("service.pid");
+        String factoryPid = (String)context.getProperties().get("service.factoryPid");
         if (factoryPid != null) {
             LOGGER.warn("Factory config for router not allowed, ignoring config {}-{}", pid, factoryPid );
             return;
@@ -166,98 +167,85 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         this.context = context;
         try {
             JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-            List<Filter> changedFilters = new ArrayList<Filter>();
+            Chain chain = new Chain(router);
             for (JsonValue jv : config.get("filters").expect(List.class)) { // optional
-                changedFilters.add(new Filter(jv));
+                chain.getFilters().add(new Filter(jv));
             }
-            filters = changedFilters;
+            this.chain = chain;
         } catch (JsonValueException jve) {
             // The router should stay up for basic support even with invalid config, do not throw Exception
             LOGGER.warn("Router configuration error", jve);
-        } catch (Exception ex) {
+        } catch (Exception e) {
             // The router should stay up for basic support even with invalid config, do not throw Exception
-            LOGGER.warn("Failed to configure router", ex);
+            LOGGER.warn("Failed to configure router", e);
         }
     }
-    
+
+    @Activate
+    protected synchronized void activate(ComponentContext context) {
+        LOGGER.info("Activate router configuration, properties: {}", context.getProperties());
+        init(context);
+    }
+
+    @Modified
+    protected synchronized void modified(ComponentContext context) {
+        LOGGER.debug("Modified router configuration, properties: {}", context.getProperties());
+        init(context);
+    }
+
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        filters.clear();
+        chain.getFilters().clear();
         this.context = null;
     }
 
-    private void onRequest(Method method, String id, Map<String, Object> object,
-    Map<String, Object> params) throws ObjectSetException {
-        for (Filter filter : filters) {
-            filter.onRequest(method, id, object, params);
+    @Override
+    public JsonValue handle(JsonValue request) throws JsonResourceException {
+        try {
+            return chain.handle(request); // dispatch to router, via filter chain
+        } catch (JsonResourceException jre) {
+            int code = jre.getCode();
+            if (code >= 500 && code <= 599) { // HTTP server error code
+                LOGGER.warn("JSON resource exception", jre);
+            }
+            throw jre;
         }
-    }
-
-    private void onResponse(Method method, String id, Map<String, Object> object,
-    Map<String, Object> params, Map<String, Object> result) throws ObjectSetException {
-        for (Filter filter : filters) {
-            filter.onResponse(method, id, object, params, result);
-        }
-    }
-
-    @Override
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        onRequest(Method.CREATE, id, object, null);
-        super.create(id, object);
-        onResponse(Method.CREATE, id, object, null, null);
-    }
-
-    @Override
-    public Map<String, Object> read(String id) throws ObjectSetException {
-        onRequest(Method.READ, id, null, null);
-        Map<String, Object> result = super.read(id);
-        onResponse(Method.READ, id, null, null, result);
-        return result;
-    }
-
-    @Override
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        onRequest(Method.UPDATE, id, object, null);
-        super.update(id, rev, object);
-        onResponse(Method.UPDATE, id, object, null, null);
-    }
-
-    @Override
-    public void delete(String id, String rev) throws ObjectSetException {
-        onRequest(Method.DELETE, id, null, null);
-        super.delete(id, rev);
-        onResponse(Method.DELETE, id, null, null, null); 
-    }
-
-    @Override
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        onRequest(Method.QUERY, id, null, params);
-        Map<String, Object> result = super.query(id, params);
-        onResponse(Method.QUERY, id, null, params, result);
-        return result;
-    }
-
-    @Override
-    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        onRequest(Method.ACTION, id, null, params);
-        Map<String, Object> result = super.action(id, params);
-        onResponse(Method.ACTION, id, null, params, result);
-        return result;
     }
 
     /**
      * TODO: Description.
      */
-    private class Filter {
+    private class Router extends JsonResourceRouter {
+        public Map<String, JsonResource> getRoutes() {
+            return routes;
+        }
+    }
+
+    /**
+     * TODO: Description.
+     */
+    private class Chain extends JsonResourceFilterChain {
+        public Chain(JsonResource resource) {
+            this.resource = resource;
+        }
+        public List<JsonResourceFilter> getFilters() {
+            return filters;
+        }
+    }
+
+    /**
+     * TODO: Description.
+     */
+    private class Filter implements JsonResourceFilter {
+
+        /** TODO: Description. */
+        private HashSet<String> methods;
 
         /** TODO: Description. */
         private Pattern pattern;
 
         /** TODO: Description. */
         private String pointer;
-
-        /** TODO: Description. */
-        private HashSet<Method> methods;
 
         /** TODO: Description. */
         private Script condition;
@@ -277,35 +265,31 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         public Filter(JsonValue config) throws JsonValueException {
             pointer = config.getPointer().toString();
             pattern = config.get("pattern").asPattern();
-            for (JsonValue method : config.get("methods").expect(List.class)) {
-                if (methods == null) { // lazy initialization
-                    methods = new HashSet<Method>();
-                }
-                methods.add(method.asEnum(Method.class));
+            List<String> methods = config.get("methods").asList(String.class);
+            if (methods != null) {
+                this.methods = new HashSet<String>(methods);
             }
-            condition = Scripts.newInstance("ObjectSetRouterService", config.get("condition")); // optional
-            onRequest = Scripts.newInstance("ObjectSetRouterService", config.get("onRequest")); // optional
-            onResponse = Scripts.newInstance("ObjectSetRouterService", config.get("onResponse")); // optional
+            String name = getClass().getName();
+            condition = Scripts.newInstance(name, config.get("condition"));
+            onRequest = Scripts.newInstance(name, config.get("onRequest"));
+            onResponse = Scripts.newInstance(name, config.get("onResponse"));
         }
 
         /**
          * TODO: Description.
          *
-         * @param method TODO.
-         * @param id TODO.
-         * @param object TODO.
-         * @param params TODO.
-         * @param result TODO.
-         * @return
+         * @param request TODO.
+         * @param response TODO.
+         * @return TODO.
          */
-        private Map<String, Object> newScope(Method method, String id,
-        Map<String, Object> object, Map<String, Object> params, Map<String, Object> result) {
-            Map<String, Object> scope = scopeFactory.newInstance();
-            scope.put("method", method.toString().toLowerCase());
-            scope.put("id", id);
-            scope.put("object", object);
-            scope.put("params", params);
-            scope.put("result", result);
+        private Map<String, Object> newScope(JsonValue request, JsonValue response) {
+            Map<String, Object> scope = scopeFactory.newInstance(request);
+            if (request != null) {
+                scope.put("request", request.getObject());
+            }
+            if (response != null) {
+                scope.put("response", response.getObject());
+            }
             return scope;
         }
 
@@ -316,10 +300,9 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          * @param id TODO.
          * @return TODO.
          */
-        private boolean matches(Method method, String id) {
-            boolean result = (id != null && (methods == null || methods.contains(Method.ALL) || methods.contains(method)) && pattern.matcher(id).matches());
-            LOGGER.debug("{} matches yielded {} on {}", new Object[]{pointer, Boolean.toString(result) , id});
-            return result;
+        private boolean matches(String method, String id) {
+            return ((methods == null || methods.contains(method))
+             && (pattern == null || (id != null && pattern.matcher(id).matches())));
         }
 
         /**
@@ -327,9 +310,9 @@ public class ObjectSetRouterService extends ObjectSetRouter {
          *
          * @param scope TODO
          * @return TODO.
-         * @throws InternalServerErrorException TODO.
+         * @throws JsonResourceException TODO.
          */
-        private boolean evalCondition(Map<String, Object> scope) throws InternalServerErrorException {
+        private boolean evalCondition(Map<String, Object> scope) throws JsonResourceException {
             boolean result = true; // default true unless script proves otherwise
             if (condition != null) {
                 try {
@@ -337,7 +320,7 @@ public class ObjectSetRouterService extends ObjectSetRouter {
                 } catch (ScriptException se) {
                     String msg = pointer + " condition script encountered exception";
                     LOGGER.debug(msg, se);
-                    throw new InternalServerErrorException(msg, se);
+                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
                 }
             }
             LOGGER.debug("{} evalCondition yielded {}", pointer, Boolean.toString(result));
@@ -347,28 +330,27 @@ public class ObjectSetRouterService extends ObjectSetRouter {
        /**
          * TODO: Description.
          *
-         * @param method
-        * @param id
-        * @param object
-        * @param params
-        * @throws ForbiddenException if the script throws an exception.
-         * @throws InternalServerErrorException if any other exception occurs during execution.
+         * @param request TODO.
+         * @throws JsonResourceException TODO.
          */
-        void onRequest(Method method, String id, Map<String, Object> object, Map<String, Object> params)
-        throws ForbiddenException, InternalServerErrorException {
-            if (onRequest != null && matches(method, id)) {
+        private void onRequest(JsonValue request) throws JsonResourceException {
+            if (onRequest != null
+             && matches(request.get("method").asString(), request.get("id").asString())) {
                 try {
-                    Map<String, Object> scope = newScope(method, id, object, params, null);
+                    Map<String, Object> scope = newScope(request, null);
                     if (evalCondition(scope)) {
                         LOGGER.debug("Calling {} onRequest script", pointer); 
                         onRequest.exec(scope);
                     }
                 } catch (ScriptThrownException ste) {
-                    throw new ForbiddenException(ste.getValue().toString()); // validation failed
+                    LOGGER.debug("Validation failed", ste);
+                    Object value = ste.getValue();
+                    throw new JsonResourceException(JsonResourceException.FORBIDDEN, 
+                     value == null ? null : value.toString());
                 } catch (ScriptException se) {
                     String msg = pointer + " onRequest script encountered exception";
                     LOGGER.debug(msg, se);
-                    throw new InternalServerErrorException(msg, se);
+                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
                 }
             }
         }
@@ -376,18 +358,15 @@ public class ObjectSetRouterService extends ObjectSetRouter {
         /**
          * TODO: Description.
          *
-         * @param method
-         * @param id
-         * @param object
-         * @param params
-         * @param result
-         * @throws InternalServerErrorException if any exception occurs during script execution.
+         * @param request TODO.
+         * @param response TODO.
+         * @throws JsonResourceException TODO.
          */
-        void onResponse(Method method, String id, Map<String, Object> object, Map<String, Object> params,
-        Map<String, Object> result) throws InternalServerErrorException {
-            if (onResponse != null && matches(method, id)) {
+        private void onResponse(JsonValue request, JsonValue response) throws JsonResourceException {
+            if (onResponse != null
+             && matches(request.get("method").asString(), request.get("id").asString())) {
                 try {
-                    Map<String, Object> scope = newScope(method, id, object, params, result);
+                    Map<String, Object> scope = newScope(request, response);
                     if (evalCondition(scope)) {
                         LOGGER.debug("Calling {} onResponse script", pointer); 
                         onResponse.exec(scope);
@@ -395,9 +374,19 @@ public class ObjectSetRouterService extends ObjectSetRouter {
                 } catch (ScriptException se) {
                     String msg = pointer + " onResponse script encountered exception";
                     LOGGER.debug(msg, se);
-                    throw new InternalServerErrorException(msg, se);
+                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
                 }
             }
+        }
+
+        @Override
+        public JsonValue filter(JsonValue request, JsonResource next) throws JsonResourceException {
+            onRequest(request);
+            JsonValue response = next.handle(request);
+            if (onResponse != null) {
+                onResponse(request, response);
+            }
+            return response;
         }
     }
 }

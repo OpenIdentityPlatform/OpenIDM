@@ -16,11 +16,14 @@
 
 package org.forgerock.openidm.scope;
 
-// Java Standard Edition
+// Java SE
 import java.util.Map;
 
-// OpenIDM
-import org.forgerock.openidm.objset.ObjectSet;
+// JSON Fluent
+import org.forgerock.json.fluent.JsonValue;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
 
 /**
  * Generates scopes for use in scripts.
@@ -32,10 +35,13 @@ public interface ScopeFactory {
     /**
      * Sets the router that the scope factory uses to expose resources to scripts.
      */
-    void setRouter(ObjectSet router);
+    void setRouter(JsonResource router);
 
     /**
      * Returns a new scope instance.
+     *
+     * @param context the current request context.
+     * @return the new scope instance.
      */
-    Map<String, Object> newInstance();
+    Map<String, Object> newInstance(JsonValue context);
 }

@@ -21,9 +21,8 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.external.email.impl;
 
-import org.forgerock.openidm.external.email.EmailService;
+package org.forgerock.openidm.external.email.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,8 +41,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+
+// Deprecated
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
 
 /**
@@ -55,111 +57,15 @@ import org.forgerock.openidm.objset.Patch;
 @Properties({
     @Property(name = "service.description", value = "Outbound Email Service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = EmailService.ROUTER_PREFIX)
+    @Property(name = "openidm.router.prefix", value = "external/email")
 })
-public class EmailServiceImpl implements EmailService {
+public class EmailServiceImpl extends ObjectSetJsonResource {
     final static Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     public static final String PID = "org.forgerock.openidm.external.email";
     
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     EmailClient emailClient;
 
-    /**
-     * Gets an object from the audit logs by identifier. The returned object is not validated
-     * against the current schema and may need processing to conform to an updated schema.
-     * <p>
-     * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} to enable optimistic concurrency
-     *
-     * @param fullId the identifier of the object to retrieve from the object set.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws BadRequestException if the passed identifier is invalid
-     * @return the requested object.
-     */
-    @Override
-    public Map<String, Object> read(String fullId) throws ObjectSetException {
-        // TODO
-        return new HashMap<String, Object>();
-    }
-
-    /**
-     * Creates a new object in the object set.
-     * <p>
-     * This method sets the {@code _id} property to the assigned identifier for the object,
-     * and the {@code _rev} property to the revised object version (For optimistic concurrency)
-     *
-     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param obj the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolved.
-     * @throws ForbiddenException if access to the object or object set is forbidden.
-     * @throws PreconditionFailedException if an object with the same ID already exists.
-     */
-    @Override
-    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external email service");
-    }
-
-    /**
-     * Notification service does not support update.
-     */
-    @Override
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external email service");
-    }
-
-    /**
-     * Notification service currently does not support delete.
-     *
-     * Deletes the specified object from the object set.
-     *
-     * @param fullId the identifier of the object to be deleted.
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws ConflictException if version is required but is {@code null}.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
-     */
-    @Override
-    public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external email service");
-    }
-
-    /**
-     * Notification service does not support patch.
-     */
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on external email service");
-    }
-
-    /**
-     * Performs the query on the specified object and returns the associated results.
-     * <p>
-     * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
-     *
-     * The returned map is structured as follow:
-     * - The top level map contains meta-data about the query, plus an entry with the actual result records.
-     * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
-     *
-     * @param fullId identifies the object to query.
-     * @param params the parameters of the query to perform.
-     * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
-     * configured, a query expression that is invalid, or missing query substitution tokens.
-     * @throws ForbiddenException if access to the object or specified query is forbidden.
-     */
-    @Override
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO
-        return new HashMap<String, Object>();
-    }
-
-    /**
-     * Notification service does not support actions on audit entries.
-     */
     @Override
     public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
         Map<String, Object> result = new HashMap<String, Object>();

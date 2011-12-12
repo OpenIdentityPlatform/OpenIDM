@@ -13,6 +13,7 @@
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
  */
+
 package org.forgerock.openidm.sync.impl;
 
 // Java SE
@@ -37,7 +38,6 @@ import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.patch.JsonPatch;
 
 // OpenIDM
-import org.forgerock.openidm.context.InvokeContext;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -55,48 +55,68 @@ import org.forgerock.openidm.sync.SynchronizationListener;
 class ObjectMapping implements SynchronizationListener {
 
     /** TODO: Description. */
-    private enum Status {SUCCESS, FAILURE}
+    private enum Status { SUCCESS, FAILURE }
     
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
+
     /** TODO: Description. */
     private String name;
+
     /** The name of the links set to use. Defaults to mapping name. */
     private String linkTypeName;
+
     /** The link type to use */
     LinkType linkType;
+
     /** TODO: Description. */
     private String sourceObjectSet;
+
     /** TODO: Description. */
     private String targetObjectSet;
+
     /** TODO: Description. */
     private Script validSource;
+
     /** TODO: Description. */
     private Script validTarget;
+
     /** TODO: Description. */
     private Script correlationQuery;
+
     /** TODO: Description. */
     private ArrayList<PropertyMapping> properties = new ArrayList<PropertyMapping>();
+
     /** TODO: Description. */
     private ArrayList<Policy> policies = new ArrayList<Policy>();
+
     /** TODO: Description. */
     private Script onCreateScript;
+
     /** TODO: Description. */
     private Script onUpdateScript;
+
     /** TODO: Description. */
     private Script onDeleteScript;
+
     /** TODO: Description. */
     private Script onLinkScript;
+
     /** TODO: Description. */
     private Script onUnlinkScript;
+
     /** TODO: Description. */
     private Script resultScript;
+
     /** TODO: Description. */
     private SynchronizationService service;
+
     /** TODO: Description. */
     private ReconStats sourceStats = null;
+
     /** TODO: Description. */
     private ReconStats targetStats = null;
+
     /** TODO: Description. */
     private ReconStats globalStats = null;
 
@@ -423,12 +443,7 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     public void recon(String reconId) throws SynchronizationException {
-        InvokeContext.getContext().pushActivityId(reconId);
-        try {
-            doRecon(reconId);
-        } finally {
-            InvokeContext.getContext().popActivityId();
-        }
+        doRecon(reconId);
     }
 
     private void doResults() throws SynchronizationException {

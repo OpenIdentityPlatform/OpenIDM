@@ -26,8 +26,6 @@ package org.forgerock.openidm.scheduler;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.forgerock.openidm.context.InvokeContext;
-
 import org.osgi.util.tracker.ServiceTracker;
 
 import org.slf4j.Logger;
@@ -79,23 +77,12 @@ public class SchedulerServiceJob implements Job {
         } else {
             try {
                 logger.info("Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
-                setInvokeContext(scheduledServiceContext);
                 scheduledService.execute(scheduledServiceContext);
                 logger.info("Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
                         new Object[]{context.getJobDetail().getFullName(), ex.getMessage()}, ex);
-            } finally {
-                unsetInvokeContext();
             }
         }
-    }
-    
-    private void setInvokeContext(Map scheduledServiceContext) {
-        InvokeContext.getContext().putRequester((String) scheduledServiceContext.get(ScheduledService.INVOKER_NAME));
-    }
-    
-    private void unsetInvokeContext() {
-        InvokeContext.getContext().removeRequester();
     }
 }

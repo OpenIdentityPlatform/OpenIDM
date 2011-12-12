@@ -40,15 +40,6 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.patch.JsonPatchWrapper;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
@@ -57,12 +48,25 @@ import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
+// Deprecated
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.patch.JsonPatchWrapper;
+
 /**
  * Provides access to a set of managed objects of a given type.
  *
  * @author Paul C. Bryan
  */
-class ManagedObjectSet implements ObjectSet {
+class ManagedObjectSet extends ObjectSetJsonResource {
 
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ManagedObjectSet.class);
@@ -240,6 +244,11 @@ class ManagedObjectSet implements ObjectSet {
         return decrypt(new JsonValue(object));
     }
 
+    private void logActivity(String id, String msg, JsonValue before, JsonValue after) throws ObjectSetException {
+        ActivityLog.log(service.getRouter(), ObjectSetContext.get(), msg,
+         managedId(id), before, after, Status.SUCCESS);
+     }
+
     @Override
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("Create name={} id={}", name, id);
@@ -255,7 +264,7 @@ class ManagedObjectSet implements ObjectSet {
             jv.put("_id", id);
         }
         service.getRouter().create(repoId(id), jv.asMap());
-        ActivityLog.log(service.getRouter(), Action.CREATE, "", managedId(id), null, jv.asMap(), Status.SUCCESS);
+        logActivity(id, null, null, jv);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
                 listener.onCreate(managedId(id), jv);
@@ -277,7 +286,7 @@ class ManagedObjectSet implements ObjectSet {
         JsonValue jv = new JsonValue(service.getRouter().read(repoId(id)));
         onRetrieve(jv);
         execScript("onRead", onRead, jv);
-        ActivityLog.log(service.getRouter(), Action.READ, "", managedId(id), jv.asMap(), null, Status.SUCCESS);
+        logActivity(id, null, jv, null);
         return jv.asMap();
     }
 
@@ -320,7 +329,7 @@ class ManagedObjectSet implements ObjectSet {
         Map<String, Object> encrypted = service.getRouter().read(repoId(id));
         JsonValue decrypted = decrypt(encrypted);
         update(id, rev, decrypted, _new);
-        ActivityLog.log(service.getRouter(), Action.UPDATE, "", managedId(id), encrypted, _new.asMap(), Status.SUCCESS);
+        logActivity(id, null, new JsonValue(encrypted), _new);
         object.put("_id", _new.get("_id").getObject());
         object.put("_rev", _new.get("_rev").getObject());
     }
@@ -336,7 +345,7 @@ class ManagedObjectSet implements ObjectSet {
             execScript("onDelete", onDelete, decrypt(encrypted));
         }
         service.getRouter().delete(repoId(id), rev);
-        ActivityLog.log(service.getRouter(), Action.DELETE, "", managedId(id), encrypted, null, Status.SUCCESS);
+        logActivity(id, null, new JsonValue(encrypted), null);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
                 listener.onDelete(managedId(id));
@@ -358,15 +367,14 @@ class ManagedObjectSet implements ObjectSet {
         JsonValue newValue = oldValue.copy();
         patch.apply(newValue.asMap());
         update(id, rev, oldValue, newValue);
-        ActivityLog.log(service.getRouter(), Action.PATCH, "Patch " + patch, managedId(id), null, null, Status.SUCCESS);
+        logActivity(id, "Patch " + patch, null, null);
     }
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
         LOGGER.debug("query name={} id={}", name, id);
         Map<String, Object> result = service.getRouter().query(repoId(id), params);
-        ActivityLog.log(service.getRouter(), Action.QUERY, "Query parameters " + params,
-         managedId(id), result, null, Status.SUCCESS);
+        logActivity(id, "Query parameters " + params, new JsonValue(result), null);
         return result;
     }
 

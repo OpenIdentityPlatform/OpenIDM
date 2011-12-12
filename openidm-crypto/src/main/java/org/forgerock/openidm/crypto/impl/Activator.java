@@ -54,6 +54,8 @@ public class Activator implements BundleActivator {
         // Register crypto service 
         Hashtable<String, String> prop = new Hashtable<String, String>();
         prop.put("service.pid", "org.forgerock.openidm.crypto");
+// FIXME: Weird... CryptoServiceImpl is not a JsonResource (or legacy ObjectSet).
+// Why are we trying to register a router prefix then? Reserving for future use?
         prop.put("openidm.router.prefix", "crypto");
         prop.put("service.description", "OpenIDM cryptography service");
         prop.put("service.vendor", "ForgeRock AS");

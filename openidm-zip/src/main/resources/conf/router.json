@@ -1,0 +1,12 @@
+{
+    "filters": [
+        {
+            "pattern": "^system/.*",
+            "methods": [ "action" ],
+            "onRequest": {
+                "type": "text/javascript",
+                "source": "if (request.parent.type === 'http') { throw 'Thou shalt not POST actions to system objects'; }"
+            }
+        }
+    ]
+}

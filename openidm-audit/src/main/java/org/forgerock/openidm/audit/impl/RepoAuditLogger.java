@@ -33,17 +33,20 @@ import org.slf4j.LoggerFactory;
 
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.repo.RepositoryService;
+
+// Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
-import org.forgerock.openidm.repo.RepositoryService;
 
 /**
  * Audit logger that logs to a repository
@@ -53,7 +56,8 @@ public class RepoAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
 
     BundleContext ctx;
-    RepositoryService repo;
+
+    JsonResourceObjectSet repo;
     
     String fullIdPrefix = AuditService.ROUTER_PREFIX + "/";
     
@@ -69,7 +73,7 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public Map<String, Object> read(String fullId) throws ObjectSetException {
-        RepositoryService svc = getRepoService();
+        JsonResourceObjectSet svc = getRepoService();
         Map<String, Object> result = null;
         try {
             result = svc.read(fullIdPrefix + fullId);
@@ -87,7 +91,7 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        RepositoryService svc = getRepoService();
+        JsonResourceObjectSet svc = getRepoService();
         Map<String, Object> result = null;
         try {
             result = svc.query(fullIdPrefix + fullId, params);
@@ -105,7 +109,7 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        RepositoryService svc = getRepoService();
+        JsonResourceObjectSet svc = getRepoService();
         try {
             svc.create(fullIdPrefix + fullId, obj);
         } catch (ObjectSetException ex) {
@@ -116,7 +120,7 @@ public class RepoAuditLogger implements AuditLogger {
         }
     }
 
-    private RepositoryService getRepoService() throws ServiceUnavailableException, InternalServerErrorException {
+    private JsonResourceObjectSet getRepoService() throws ServiceUnavailableException, InternalServerErrorException {
         if (repo == null) {
             if (ctx != null) {
                 try {
@@ -124,7 +128,7 @@ public class RepoAuditLogger implements AuditLogger {
                     serviceTracker.open();
                     int timeout = 10000;
                     logger.debug("Look for repository service for {} ms", Integer.valueOf(timeout));
-                    repo = (RepositoryService) serviceTracker.waitForService(timeout);
+                    repo = new JsonResourceObjectSet((RepositoryService)serviceTracker.waitForService(timeout));
                     logger.debug("Repository service found: {}", repo);
                     serviceTracker.close();
                 } catch (Exception ex) {

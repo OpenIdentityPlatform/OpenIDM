@@ -34,6 +34,7 @@ public class ScriptThrownException extends ScriptException {
      * message.
      */
     public ScriptThrownException(Object value) {
+        this.value = value;
     }
 
     /**

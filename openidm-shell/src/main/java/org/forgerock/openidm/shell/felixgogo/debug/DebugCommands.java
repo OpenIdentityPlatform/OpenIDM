@@ -27,13 +27,15 @@ package org.forgerock.openidm.shell.felixgogo.debug;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
 
 /**
  * @author $author$
@@ -61,7 +63,7 @@ public class DebugCommands {
             context.addServiceListener(debugRouter, InteractiveObjectSetService.ROUTER_SERVICE_FILTER);
             Dictionary<String, Object> props = new Hashtable<String, Object>();
             props.put(ServerConstants.ROUTER_PREFIX, params.length > 0 ? params[0] : "debugrouter");
-            ServiceRegistration srv = context.registerService(ObjectSet.class.getName(), debugRouter, props);
+            ServiceRegistration srv = context.registerService(JsonResource.class.getName(), debugRouter, props);
             boolean run = true;
             while (run) {
                 try {

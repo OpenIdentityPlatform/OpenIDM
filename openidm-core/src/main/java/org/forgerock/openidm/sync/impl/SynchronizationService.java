@@ -16,7 +16,7 @@
 
 package org.forgerock.openidm.sync.impl;
 
-// Java Standard Edition
+// Java SE
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -30,11 +30,11 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// OSGi Framework
+// OSGi
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
-// Apache Felix Maven SCR Plugin
+// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -46,25 +46,30 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
-// JSON Fluent library
+// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResource;
+
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.context.InvokeContext;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.scheduler.ExecutionException;
 import org.forgerock.openidm.scheduler.ScheduledService;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
+
+// Deprecated
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
 
 /**
  * TODO: Description.
@@ -82,10 +87,14 @@ import org.forgerock.openidm.sync.SynchronizationListener;
     @Property(name = "openidm.router.prefix", value = "sync")
 })
 @Service
-public class SynchronizationService implements ObjectSet, SynchronizationListener, ScheduledService {
+public class SynchronizationService extends ObjectSetJsonResource
+// TODO: Deprecate these interfaces:
+ implements SynchronizationListener, ScheduledService {
 
     /** TODO: Description. */
-    private enum Action { ONCREATE, ONUPDATE, ONDELETE, RECON }
+    private enum Action {
+        onCreate, onUpdate, onDelete, recon
+    }
 
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(SynchronizationService.class);
@@ -98,8 +107,8 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
 
     /** Object set router service. */
     @Reference(
-        name = "ref_SynchronizationService_ObjectSetRouterService",
-        referenceInterface = ObjectSet.class,
+        name = "ref_SynchronizationService_JsonResourceRouterService",
+        referenceInterface = JsonResource.class,
         bind = "bindRouter",
         unbind = "unbindRouter",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
@@ -107,10 +116,10 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         target = "(service.pid=org.forgerock.openidm.router)"
     )
     private ObjectSet router;
-    protected void bindRouter(ObjectSet router) {
-        this.router = router;
+    protected void bindRouter(JsonResource router) {
+        this.router = new JsonResourceObjectSet(router);
     }
-    protected void unbindRouter(ObjectSet router) {
+    protected void unbindRouter(JsonResource router) {
         this.router = null;
     }
 
@@ -188,10 +197,10 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
      * @return TODO.
      */
     Map<String, Object> newScope() {
-        return scopeFactory.newInstance();
+        return scopeFactory.newInstance(ObjectSetContext.get());
     }
 
-    @Override
+    @Override // SynchronizationListener
     public void onCreate(String id, JsonValue object) throws SynchronizationException {
 // TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
@@ -199,7 +208,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         }
     }
 
-    @Override
+    @Override // SynchronizationListener
     public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
 // TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
@@ -207,7 +216,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         }
     }
 
-    @Override
+    @Override // SynchronizationListener
     public void onDelete(String id) throws SynchronizationException {
 // TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
@@ -215,7 +224,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         }
     }
 
-    @Override
+    @Override // ScheduledService
     public void execute(Map<String, Object> context) throws ExecutionException {
 // TODO: Deprecate this; use resource interface instead.
         try {
@@ -247,7 +256,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
      *
      * @param mapping TODO.
      * @throws SynchronizationException TODO.
-     * @return
+     * @return TOOD.
      */
     public String reconcile(String mapping) throws SynchronizationException {
 // TODO: Deprecate this; use resource interface instead.
@@ -256,39 +265,7 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         return reconId;
     }
 
-
-    @Override
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        throw new ForbiddenException(); // nothing to create... yet
-    }
-
-    @Override
-    public Map<String, Object> read(String id) throws ObjectSetException {
-        throw new ForbiddenException(); // nothing to read... yet
-    }
-
-    @Override
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        throw new ForbiddenException(); // nothing to update... yet
-    }
-
-    @Override
-    public void delete(String id, String rev) throws ObjectSetException {
-        throw new ForbiddenException(); // nothing to delete... yet
-    }
-
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new ForbiddenException(); // nothing to patch... yet
-    }
-
-    @Override
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-// TODO: Allow polling of asynchronous reconciliation status.
-        throw new ForbiddenException(); // nothing to query... yet
-    }
-
-    @Override
+    @Override // ObjectSetJsonResource
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         if (id != null) { // operation on entire set only... for now
             throw new NotFoundException();
@@ -298,22 +275,22 @@ public class SynchronizationService implements ObjectSet, SynchronizationListene
         Action action = _params.get("_action").required().asEnum(Action.class);
         try {
             switch (action) {
-            case ONCREATE:
+            case onCreate:
                 id = _params.get("id").required().asString();
                 LOGGER.debug("Synchronization _action=onCreate, id={}", id);
                 onCreate(id, _params.get("_entity").expect(Map.class));
                 break;
-            case ONUPDATE:
+            case onUpdate:
                 id = _params.get("id").required().asString();
                 LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
                 onUpdate(id, null, _params.get("_entity").expect(Map.class));
                 break;
-            case ONDELETE:
+            case onDelete:
                 id = _params.get("id").required().asString();
                 LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
                 onDelete(id);
                 break;
-            case RECON:
+            case recon:
                 result = new HashMap<String, Object>();
                 String mapping = _params.get("mapping").required().asString();
                 LOGGER.debug("Synchronization _action=recon, mapping={}", mapping);
