@@ -25,8 +25,8 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.core.ServerConstants;

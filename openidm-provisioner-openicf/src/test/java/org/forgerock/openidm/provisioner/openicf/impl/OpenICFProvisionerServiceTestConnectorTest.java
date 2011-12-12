@@ -26,6 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
@@ -60,28 +61,28 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
     @Test
     public void testHelloWorldAction() throws Exception {
         Map<String, Object> action = getEmptyScript();
-        Map<String, Object> result = getService().action("system/Test/account", action);
-        assertThat(result).includes(entry("result", "Arthur Dent"));
+        JsonValue result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        assertThat(result.asMap()).includes(entry("result", "Arthur Dent"));
 
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "return testArgument");
         action.put("testArgument", "Zaphod Beeblebrox");
-        result = getService().action("system/Test/account", action);
-        assertThat(result).includes(entry("result", "Zaphod Beeblebrox"));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        assertThat(result.asMap()).includes(entry("result", "Zaphod Beeblebrox"));
 
         action.put(ConnectorScript.SCRIPT_VARIABLE_PREFIX, "openidm_");
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument");
         action.put("testArgument", "Ford Prefect");
-        result = getService().action("system/Test/account", action);
-        assertThat(result).includes(entry("result", "Ford Prefect"));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        assertThat(result.asMap()).includes(entry("result", "Ford Prefect"));
 
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument.length");
         action.put("testArgument", Arrays.asList("Ford Prefect", "Tricia McMillan"));
-        result = getService().action("system/Test/account", action);
-        assertThat(result).includes(entry("result", 2));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        assertThat(result.asMap()).includes(entry("result", 2));
 
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "throw new RuntimeException(\"Marvin\")");
-        result = getService().action("system/Test/account", action);
-        assertThat(result).includes(entry("error", "Marvin"));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        assertThat(result.asMap()).includes(entry("error", "Marvin"));
     }
 
 

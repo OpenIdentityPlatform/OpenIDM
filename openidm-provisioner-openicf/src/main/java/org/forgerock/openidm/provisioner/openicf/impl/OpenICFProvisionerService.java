@@ -30,10 +30,10 @@ import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.objset.*;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
@@ -51,7 +51,6 @@ import org.identityconnectors.framework.api.operations.*;
 import org.identityconnectors.framework.common.FrameworkUtil;
 import org.identityconnectors.framework.common.exceptions.*;
 import org.identityconnectors.framework.common.objects.*;
-import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.osgi.framework.Constants;
@@ -84,6 +83,15 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
 
     private final static Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
+
+    /**
+     * TODO: Description.
+     */
+    private enum Method {
+        create, read, update, delete, patch, query, action, liveSync
+    }
+
+
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
@@ -201,26 +209,46 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return result;
     }
 
+
     /**
-     * Creates a new object in the object set.
+     * TODO: Description.
      * <p/>
-     * This method sets the {@code _id} property to the assigned identifier for the object,
-     * and the {@code _rev} property to the revised object version if optimistic concurrency
-     * is supported.
-     *
-     * @param id     the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified id could not be resolve.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object or object set is forbidden.
+     * This method catches any thrown {@code JsonValueException}, and rethrows it as a
+     * {@link org.forgerock.json.resource.JsonResourceException#BAD_REQUEST}.
      */
     @Override
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
+    public JsonValue handle(JsonValue request) throws JsonResourceException {
+        Id id = new Id(request.get("id").required().asString());
+        String rev = request.get("rev").asString();
+        JsonValue value = request.get("value");
+        Method method = request.get("method").required().asEnum(Method.class);
+        switch (method) {
+            case create:
+                return create(id, value);
+            case read:
+                return read(id);
+            case update:
+                return update(id, rev, value);
+            case delete:
+                return delete(id, rev);
+            case patch:
+                throw JsonResourceException.BAD_REQUEST;
+            case query:
+                return query(id, value);
+            case action:
+                return action(id, value);
+            case liveSync:
+                throw JsonResourceException.BAD_REQUEST;
+            default:
+                throw JsonResourceException.BAD_REQUEST;
+        }
+    }
+
+
+    public JsonValue create(Id id, JsonValue object) throws JsonResourceException {
         String METHOD = "create";
         traceObject(METHOD, id, object);
-        Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object, cryptoService);
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), object, cryptoService);
 
         if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
             try {
@@ -228,170 +256,120 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, object);
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
+                return object;
             } catch (AlreadyExistsException e) {
                 logger.error("System object {} already exists", id, e);
-                throw new ConflictException(e);
+                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
             } catch (ConfigurationException e) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectionBrokenException e) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectionFailedException e) {
                 logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectorIOException e) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (OperationTimeoutException e) {
                 logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (PasswordExpiredException e) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new NotFoundException(e);
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
             } catch (InvalidCredentialException e) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new ForbiddenException(e);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (ConnectorSecurityException e) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectorException e) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (Exception e) {
                 logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ObjectSetException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } else {
             logger.debug("Operation {} of {} is not permitted", METHOD, id);
         }
+        return null;
     }
 
-    /**
-     * Reads an object from the object set.
-     * <p/>
-     * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} if optimistic concurrency is supported. If optimistic
-     * concurrency is not supported, then {@code _rev} must be absent or {@code null}.
-     *
-     * @param id the identifier of the object to retrieve from the object set.
-     * @return the requested object.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     */
-    @Override
-    public Map<String, Object> read(String id) throws ObjectSetException {
+    public JsonValue read(Id id) throws JsonResourceException {
         String METHOD = "read";
-        Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null, cryptoService);
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), null, cryptoService);
         try {
             ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
-            if (facade.getSupportedOperations().contains(GetApiOp.class)) {
-                if (helper.isOperationPermitted(GetApiOp.class)) {
-                    //ConnectorObject connectorObject = helper.build(GetApiOp.class, complexId.getLocalId(), null);
-                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null, null);
-                    ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());
-                    if (null != connectorObject) {
-                        return helper.build(connectorObject);
-                    }
-                } else {
-                    logger.debug("Operation {} of {} is not permitted", METHOD, id);
+            if (helper.isOperationPermitted(GetApiOp.class)) {
+                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null, null);
+                ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
+                if (null != connectorObject) {
+                    return helper.build(connectorObject);
                 }
-            } else if (facade.getSupportedOperations().contains(SearchApiOp.class)) {
-                if (helper.isOperationPermitted(SearchApiOp.class)) {
-                    //ConnectorObject connectorObject = helper.build(SearchApiOp.class, complexId.getLocalId(), null);
-                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null, null);
-                    Filter name = new EqualsFilter(new Name(complexId.getLocalId()));
-                    facade.search(helper.getObjectClass(), name, helper.getResultsHandler(), operationOptionsBuilder.build());
-
-                    if (!helper.getQueryResult().isEmpty()) {
-                        return helper.getQueryResult().get(0);
-                    }
-                } else {
-                    logger.debug("Operation {} of {} is not permitted", METHOD, id);
-                }
+            } else {
+                logger.debug("Operation {} of {} is not permitted", METHOD, id);
             }
         } catch (AlreadyExistsException e) {
             logger.error("System object {} already exists", id, e);
-            throw new ConflictException(e);
+            throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
         } catch (ConfigurationException e) {
             logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new InternalServerErrorException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         } catch (ConnectionBrokenException e) {
             logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new ServiceUnavailableException(e);
+            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
         } catch (ConnectionFailedException e) {
             logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-            throw new ServiceUnavailableException(e);
+            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
         } catch (ConnectorIOException e) {
             logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new ServiceUnavailableException(e);
+            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
         } catch (OperationTimeoutException e) {
             logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-            throw new ServiceUnavailableException(e);
+            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
         } catch (PasswordExpiredException e) {
             logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new InternalServerErrorException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         } catch (InvalidPasswordException e) {
             logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-            throw new InternalServerErrorException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         } catch (UnknownUidException e) {
             logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new NotFoundException(e);
+            throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
         } catch (InvalidCredentialException e) {
             logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-            throw new InternalServerErrorException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         } catch (PermissionDeniedException e) {
             logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-            throw new ForbiddenException(e);
+            throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
         } catch (ConnectorSecurityException e) {
             logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new InternalServerErrorException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         } catch (ConnectorException e) {
             logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new InternalServerErrorException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         } catch (Exception e) {
             logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-            throw new ObjectSetException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
         }
-        throw new NotFoundException(id);
+        throw new JsonResourceException(JsonResourceException.NOT_FOUND, id.toString());
     }
 
-    /**
-     * Updates an existing specified object in the object set.
-     * <p/>
-     * This method updates the {@code _rev} property to the revised object version on update
-     * if optimistic concurrency is supported.
-     *
-     * @param id     the identifier of the object to be updated.
-     * @param rev    the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to updated in the object set.
-     * @throws org.forgerock.openidm.objset.ConflictException
-     *          if version is required but is {@code null}.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.PreconditionFailedException
-     *          if version did not match the existing object in the set.
-     */
-    @Override
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+    public JsonValue update(Id id, String rev, JsonValue object) throws JsonResourceException {
         String METHOD = "update";
         traceObject(METHOD, id, object);
-        Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), object, cryptoService);
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), object, cryptoService);
 
         if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
             try {
@@ -403,7 +381,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     connectorObject = helper.build(UpdateApiOp.class, (String) newName, object);
                     attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
                 } else {
-                    connectorObject = helper.build(UpdateApiOp.class, complexId.getLocalId(), object);
+                    connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(), object);
                     attributeSet = new HashSet<Attribute>();
                     for (Attribute attribute : connectorObject.getAttributes()) {
                         if (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) {
@@ -415,183 +393,134 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
                 Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), attributeSet, operationOptionsBuilder.build());
                 helper.resetUid(uid, object);
+                return object;
             } catch (AlreadyExistsException e) {
                 logger.error("System object {} already exists", id, e);
-                throw new ConflictException(e);
+                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
             } catch (ConfigurationException e) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectionBrokenException e) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectionFailedException e) {
                 logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectorIOException e) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (OperationTimeoutException e) {
                 logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (PasswordExpiredException e) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new NotFoundException(e);
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
             } catch (InvalidCredentialException e) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new ForbiddenException(e);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (ConnectorSecurityException e) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectorException e) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (Exception e) {
                 logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ObjectSetException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } else {
             logger.debug("Operation {} of {} is not permitted", METHOD, id);
         }
+        return null;
     }
 
-    /**
-     * Deletes the specified object from the object set.
-     *
-     * @param id  the identifier of the object to be deleted.
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     * @throws org.forgerock.openidm.objset.ConflictException
-     *          if version is required but is {@code null}.
-     * @throws org.forgerock.openidm.objset.PreconditionFailedException
-     *          if version did not match the existing object in the set.
-     */
-    @Override
-    public void delete(String id, String rev) throws ObjectSetException {
+    public JsonValue delete(Id id, String rev) throws JsonResourceException {
         String METHOD = "delete";
-        Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null, cryptoService);
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), null, cryptoService);
 
         if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
             try {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null, null);
-                getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(complexId.getLocalId()), operationOptionsBuilder.build());
+                getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
             } catch (AlreadyExistsException e) {
                 logger.error("System object {} already exists", id, e);
-                throw new ConflictException(e);
+                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
             } catch (ConfigurationException e) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectionBrokenException e) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectionFailedException e) {
                 logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectorIOException e) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (OperationTimeoutException e) {
                 logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (PasswordExpiredException e) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new NotFoundException(e);
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
             } catch (InvalidCredentialException e) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new ForbiddenException(e);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (ConnectorSecurityException e) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectorException e) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (Exception e) {
                 logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ObjectSetException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } else {
             logger.debug("Operation {} of {} is not permitted", METHOD, id);
         }
+        return null;
     }
 
-    /**
-     * Applies a patch (partial change) to the specified object in the object set.
-     *
-     * @param id    the identifier of the object to be patched.
-     * @param rev   the version of the object to patch or {@code null} if not provided.
-     * @param patch the partial change to apply to the object.
-     * @throws org.forgerock.openidm.objset.ConflictException
-     *          if patch could not be applied object state or if version is required.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.PreconditionFailedException
-     *          if version did not match the existing object in the set.
-     */
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
 
-    }
-
-    /**
-     * Performs a query on the specified object and returns the associated results.
-     * <p/>
-     * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
-     *
-     * @param id     identifies the object to query.
-     * @param params the parameters of the query to perform.
-     * @return the query results object.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *                                  if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *                                  if access to the object or specified query is forbidden.
-     * @throws IllegalArgumentException
-     */
-    @Override
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
+    public JsonValue query(Id id, JsonValue params) throws JsonResourceException {
         String METHOD = "query";
-        Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), null, cryptoService);
-        Map<String, Object> result = new HashMap<String, Object>();
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), null, cryptoService);
+        JsonValue result = new JsonValue(new HashMap<String, Object>());
         if (helper.isOperationPermitted(SearchApiOp.class)) {
             try {
                 OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null, null);
                 Filter filter = null;
                 if (null != params) {
-                    Map<String, Object> query = (Map<String, Object>) params.get("query");
-                    String queryId = (String) params.get("_query-id");
+                    Map<String, Object> query = params.get("query").asMap();
+                    String queryId = params.get("_query-id").asString();
                     if (query != null) {
-                        filter = helper.build(query, (Map<String, Object>) params.get("params"));
+                        filter = helper.build(query, params.get("params").asMap());
                     } else if (queryId != null) {
                         if (queryId.equals("query-all-ids")) {
                             // TODO: optimize query for ids, for now default to query all
                             operationOptionsBuilder.setAttributesToGet(Uid.NAME);
                         } else {
                             // Unknown query id
-                            throw new BadRequestException("Unknown query id: " + queryId);
+                            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query id: " + queryId);
                         }
                     } else {
                         // Neither a query expression or query id defined,
@@ -602,46 +531,46 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 result.put("result", helper.getQueryResult());
             } catch (AlreadyExistsException e) {
                 logger.error("System object {} already exists", id, e);
-                throw new ConflictException(e);
+                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
             } catch (ConfigurationException e) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectionBrokenException e) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectionFailedException e) {
                 logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectorIOException e) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (OperationTimeoutException e) {
                 logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (PasswordExpiredException e) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new NotFoundException(e);
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
             } catch (InvalidCredentialException e) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new ForbiddenException(e);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (ConnectorSecurityException e) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectorException e) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (Exception e) {
                 logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ObjectSetException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } else {
             logger.debug("Operation {} of {} is not permitted", METHOD, id);
@@ -649,36 +578,21 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return result;
     }
 
-    /**
-     * {
-     * _script-type = Boo|SHELL|Groovy,
-     * _script-expression = xxx,
-     * _script-execute-on = onConnectorServer | onResource,
-     * _script-variable-prefix = openidm_,
-     * attr1 = x,
-     * }
-     *
-     * @param id     identifies the object to perform the action on.
-     * @param params the parameters of the action to perform.
-     * @return
-     * @throws ObjectSetException
-     */
-    @Override
-    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
+
+    public JsonValue action(Id id, JsonValue params) throws JsonResourceException {
         String METHOD = "action";
-        Id complexId = new Id(id);
-        OperationHelper helper = operationHelperBuilder.build(complexId.getObjectType(), params, cryptoService);
-        Map<String, Object> result = new HashMap<String, Object>();
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
+        JsonValue result = new JsonValue(new HashMap<String, Object>());
         ConnectorScript script = new ConnectorScript(params);
         if (helper.isOperationPermitted(script.getAPIOperation())) {
             try {
-                Object vpo = params.get(ConnectorScript.SCRIPT_VARIABLE_PREFIX);
+                JsonValue vpo = params.get(ConnectorScript.SCRIPT_VARIABLE_PREFIX);
                 String variablePrefix = null;
-                if (vpo instanceof String) {
-                    variablePrefix = (String) vpo;
+                if (!vpo.isNull() && vpo.isString()) {
+                    variablePrefix = vpo.asString();
                 }
 
-                for (Map.Entry<String, Object> entry : params.entrySet()) {
+                for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
                     if (entry.getKey().startsWith("_")) {
                         continue;
                     }
@@ -712,7 +626,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                         script.getScriptContextBuilder().addScriptArgument(entry.getKey(), newValue);
                     }
                 }
-                script.getScriptContextBuilder().addScriptArgument("openidm_id", id);
+                script.getScriptContextBuilder().addScriptArgument("openidm_id", id.toString());
 
                 Object scriptResult = null;
                 ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
@@ -731,46 +645,46 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 result.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
             } catch (AlreadyExistsException e) {
                 logger.error("System object {} already exists", id, e);
-                throw new ConflictException(e);
+                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
             } catch (ConfigurationException e) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectionBrokenException e) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectionFailedException e) {
                 logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectorIOException e) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (OperationTimeoutException e) {
                 logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ServiceUnavailableException(e);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (PasswordExpiredException e) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new NotFoundException(e);
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
             } catch (InvalidCredentialException e) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new ForbiddenException(e);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (ConnectorSecurityException e) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectorException e) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new InternalServerErrorException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (Exception e) {
                 logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new ObjectSetException(e);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } else {
             logger.debug("Operation {} of {} is not permitted", METHOD, id);
@@ -835,7 +749,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         }
         stage.remove("lastException");
         try {
-            final OperationHelper helper = operationHelperBuilder.build(objectType, stage.asMap(), cryptoService);
+            final OperationHelper helper = operationHelperBuilder.build(objectType, stage, cryptoService);
             if (helper.isOperationPermitted(SyncApiOp.class)) {
                 ConnectorFacade connector = getConnectorFacade(helper.getRuntimeAPIConfiguration());
                 SyncApiOp operation = (SyncApiOp) connector.getOperation(SyncApiOp.class);
@@ -848,7 +762,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 } else {
                     final SyncToken[] lastToken = new SyncToken[]{token};
                     final String[] failedRecord = new String[1];
-                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage.asMap());
+                    OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SyncApiOp.class, null, previousStage);
                     try {
                         logger.debug("Execute sync(ObjectClass:{}, SyncToken:{})", new Object[]{helper.getObjectClass().getObjectClassValue(), token});
                         operation.sync(helper.getObjectClass(), token, new SyncResultsHandler() {
@@ -872,7 +786,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                                 try {
                                     switch (syncDelta.getDeltaType()) {
                                         case CREATE_OR_UPDATE:
-                                            Map<String, Object> deltaObject = helper.build(syncDelta.getObject());
+                                            JsonValue deltaObject = helper.build(syncDelta.getObject());
                                             if (null != syncDelta.getPreviousUid()) {
                                                 deltaObject.put("_previous-id", Id.escapeUid(syncDelta.getPreviousUid().getUidValue()));
                                             }
@@ -908,7 +822,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
                     stage.put("connectorData", ConnectorUtil.convertFromSyncToken(token));
                 }
             }
-        } catch (ObjectSetException e) {
+        } catch (JsonResourceException e) {
             logger.error("Failed to get OperationHelper", e);
             throw new RuntimeException(e);
         } catch (Exception e) {
@@ -924,12 +838,12 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
     }
 
-    private void traceObject(String action, String id, Map<String, Object> source) {
+    private void traceObject(String action, Id id, JsonValue source) {
         if (logger.isTraceEnabled()) {
             if (null != source) {
                 try {
                     StringWriter writer = new StringWriter();
-                    mapper.writeValue(writer, source);
+                    mapper.writeValue(writer, source.getObject());
                     logger.info("Action: {}, Id: {}, Object: {}", new Object[]{action, id, writer});
                 } catch (IOException e) {
                     //Don't care

@@ -134,7 +134,7 @@ public class OperationOptionInfoHelper {
         return null != supportedObjectTypes ? Collections.unmodifiableSet(supportedObjectTypes) : null;
     }
 
-    public OperationOptionsBuilder build(Map<String, Object> source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
+    public OperationOptionsBuilder build(JsonValue source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
         OperationOptionsBuilder builder = new OperationOptionsBuilder();
         if (null != source) {
             //Get the explicit options object if defied.

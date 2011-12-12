@@ -25,12 +25,10 @@
 package org.forgerock.openidm.provisioner.impl;
 
 import org.apache.felix.scr.annotations.*;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.audit.util.Action;
-import org.forgerock.openidm.audit.util.ActivityLog;
-import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.Id;
@@ -41,33 +39,18 @@ import org.forgerock.openidm.scheduler.ScheduledService;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentConstants;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 // JSON Resource
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceRouter;
 
-// Deprecated
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetContext;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
 
 /**
- * SystemObjectSetService implement the {@link ObjectSet}.
+ * SystemObjectSetService implement the {@link JsonResource}.
  *
  * @author $author$
  * @version $Revision$ $Date$
@@ -79,49 +62,28 @@ import org.forgerock.openidm.objset.Patch;
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "system")
 })
-public class SystemObjectSetService extends ObjectSetJsonResource
-// TODO: Deprecate the following interfaces:
- implements SynchronizationListener, ScheduledService {
+public class SystemObjectSetService implements JsonResource,
+// TODO: Deprecate the following interfaces when the discovery-engine:
+        SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
-    public static final String PROVISIONER_SERVICE_REFERENCE_NAME = "ProvisionerServiceReference";
 
-    @Reference(name = PROVISIONER_SERVICE_REFERENCE_NAME, referenceInterface = ProvisionerService.class, bind = "bind",
-            unbind = "unbind", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
+    @Reference(referenceInterface = ProvisionerService.class,
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            bind = "bind",
+            unbind = "unbind",
+            policy = ReferencePolicy.DYNAMIC,
             strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
 
     @Reference(referenceInterface = JsonResource.class,
-            name = "ref_SystemObjectSetService_JsonResourceRouterService",
-            bind = "bindRouter",
-            unbind = "unbindRouter",
             cardinality = ReferenceCardinality.MANDATORY_UNARY,
             policy = ReferencePolicy.STATIC,
             target = "(service.pid=org.forgerock.openidm.router)")
-    private ObjectSet router;
-    protected void bindRouter(JsonResource router) {
-        this.router = new JsonResourceObjectSet(router);
-    }
-    protected void unbindRouter(JsonResource router) {
-        this.router = null;
-    }
+    private JsonResource router;
+
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConfigurationService configurationService;
-
-    private ComponentContext context = null;
-
-    @Activate
-    protected void activate(ComponentContext context) {
-        this.context = context;
-        TRACE.info("Component is activated.");
-    }
-
-    @Deactivate
-    protected void deactivate(ComponentContext context) {
-        this.context = null;
-        TRACE.info("Component is deactivated.");
-    }
-
 
     protected void bind(ProvisionerService service, Map properties) {
         provisionerServices.put(service.getSystemIdentifier(), service);
@@ -131,7 +93,6 @@ public class SystemObjectSetService extends ObjectSetJsonResource
     }
 
     protected void unbind(ProvisionerService service, Map properties) {
-        SystemIdentifier id = null;
         for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
             if (service.equals(entry.getValue())) {
                 provisionerServices.remove(entry.getKey());
@@ -141,203 +102,16 @@ public class SystemObjectSetService extends ObjectSetJsonResource
         TRACE.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
     }
 
-    private void logActivity(String id, String msg, Object before, Object after) throws ObjectSetException {
-        ActivityLog.log(getRouter(), ObjectSetContext.get(),
-         msg, id, new JsonValue(before), new JsonValue(after), Status.SUCCESS);
-    }
-
     /**
-     * Creates a new object in the object set.
-     * <p/>
-     * This method sets the {@code _id} property to the assigned identifier for the object,
-     * and the {@code _rev} property to the revised object version if optimistic concurrency
-     * is supported.
-     *
-     * @param id     the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param object the contents of the object to create in the object set.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified id could not be resolve.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object or object set is forbidden.
+     * {@inheritDoc}
      */
-    @Override // ObjectSet
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        Id identifier = new Id(id);
-
-        locateService(identifier).create(id, object);
-        // Append the system created local identifier
-        URI newId = identifier.resolveLocalId((String) object.get(ServerConstants.OBJECT_PROPERTY_ID)).getId();
-        logActivity(newId.toString(), "", null, object);
-        /*try {
-            onCreate(id, new JsonValue(object));
-        } catch (SynchronizationException e) {
-            //TODO What to do with this exception
-            throw new ObjectSetException(e);
-        }*/
-    }
-
-    /**
-     * Reads an object from the object set.
-     * <p/>
-     * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} if optimistic concurrency is supported. If optimistic
-     * concurrency is not supported, then {@code _rev} must be absent or {@code null}.
-     *
-     * @param id the identifier of the object to retrieve from the object set.
-     * @return the requested object.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     */
-    @Override // ObjectSet
-    public Map<String, Object> read(String id) throws ObjectSetException {
-        Id identifier = new Id(id);
-
-        Map<String, Object> object = locateService(identifier.expectObjectId()).read(id);
-        logActivity(id, "", object, null);
-        return object;
-    }
-
-    /**
-     * Updates an existing specified object in the object set.
-     * <p/>
-     * This method updates the {@code _rev} property to the revised object version on update
-     * if optimistic concurrency is supported.
-     *
-     * @param id     the identifier of the object to be updated.
-     * @param rev    the version of the object to update; or {@code null} if not provided.
-     * @param object the contents of the object to updated in the object set.
-     * @throws org.forgerock.openidm.objset.ConflictException
-     *          if version is required but is {@code null}.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.PreconditionFailedException
-     *          if version did not match the existing object in the set.
-     */
-    @Override // ObjectSet
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        Id identifier = new Id(id);
-        ProvisionerService service = locateService(identifier.expectObjectId());
-
-        Map<String, Object> oldValue = service.read(id);
-        service.update(id, rev, object);
-        logActivity(id, "", oldValue, object);
-
-        /*try {
-            onUpdate(id, new JsonValue(oldValue), new JsonValue(object));
-        } catch (SynchronizationException e) {
-            //TODO What to do with this exception
-            throw new ObjectSetException(e);
-        }*/
-    }
-
-    /**
-     * Deletes the specified object from the object set.
-     *
-     * @param id  the identifier of the object to be deleted.
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     * @throws org.forgerock.openidm.objset.ConflictException
-     *          if version is required but is {@code null}.
-     * @throws org.forgerock.openidm.objset.PreconditionFailedException
-     *          if version did not match the existing object in the set.
-     */
-    @Override // ObjectSet
-    public void delete(String id, String rev) throws ObjectSetException {
-        Id identifier = new Id(id);
-        ProvisionerService service = locateService(identifier.expectObjectId());
-        Map<String, Object> oldValue = service.read(id);
-
-        service.delete(id, rev);
-        logActivity(id, "", oldValue, null);
-
-        /*try {
-            onDelete(id);
-        } catch (SynchronizationException e) {
-            //TODO What to do with this exception
-            throw new ObjectSetException(e);
-        }*/
-    }
-
-    /**
-     * Applies a patch (partial change) to the specified object in the object set.
-     *
-     * @param id    the identifier of the object to be patched.
-     * @param rev   the version of the object to patch or {@code null} if not provided.
-     * @param patch the partial change to apply to the object.
-     * @throws org.forgerock.openidm.objset.ConflictException
-     *          if patch could not be applied object state or if version is required.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object is forbidden.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.PreconditionFailedException
-     *          if version did not match the existing object in the set.
-     */
-    @Override // ObjectSet
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        Id identifier = new Id(id);
-
-        ProvisionerService service = locateService(identifier.expectObjectId());
-
-        Map<String, Object> oldValue = service.read(id);
-        service.patch(id, rev, patch);
-
-        Map<String, Object> newValue = service.read(id);
-        logActivity(id, "", oldValue, newValue);
-
-        /*try {
-            onUpdate(id, new JsonValue(oldValue), new JsonValue(newValue));
-        } catch (SynchronizationException e) {
-            //TODO What to do with this exception
-            throw new ObjectSetException(e);
-        }*/
-    }
-
-    /**
-     * Performs a query on the specified object and returns the associated results.
-     * <p/>
-     * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
-     *
-     * @param id     identifies the object to query.
-     * @param params the parameters of the query to perform.
-     * @return the query results object.
-     * @throws org.forgerock.openidm.objset.NotFoundException
-     *          if the specified object could not be found.
-     * @throws org.forgerock.openidm.objset.ForbiddenException
-     *          if access to the object or specified query is forbidden.
-     */
-    @Override // ObjectSet
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        Id identifier = new Id(id);
-
-        Map<String, Object> result = locateService(identifier).query(id, params);
-        logActivity(id, "Query parameters" + params, result, null);
-
-        return result;
-    }
-
-    @Override // ObjectSet
-    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        JsonValue _params = new JsonValue(params, new JsonPointer("params"));
-        JsonValue _action = _params.get(ServerConstants.ACTION_NAME);
-        Map<String, Object> result = null;
-        if (_action.isNull() || !"CREATECONFIGURATION".equalsIgnoreCase(_action.asString())) {
-            Id identifier = new Id(id);
-            result = locateService(identifier).action(id, params);
-            logActivity(id, "Action parameters " + params, result, null);
-        } else if (null != configurationService) {
-            JsonValue _entity = _params.get(ServerConstants.ACTION_ENTITY);
-            result = configurationService.configure(_entity).asMap();
+    public JsonValue handle(JsonValue request) throws JsonResourceException {
+        if ("action".equalsIgnoreCase(request.get("method").asString()) &&
+                "CREATECONFIGURATION".equalsIgnoreCase(request.get(ServerConstants.ACTION_NAME).asString())) {
+            return configurationService.configure(request.get("value"));
+        } else {
+            return locateService(request).handle(request);
         }
-        return result;
     }
 
     /**
@@ -354,8 +128,12 @@ public class SystemObjectSetService extends ObjectSetJsonResource
             params.put("_action", "ONCREATE");
             params.put("id", id);
             params.put("_entity", value.getObject());
-            getRouter().action("sync", params);
-        } catch (ObjectSetException e) {
+            JsonValue request = new JsonValue(new HashMap<String, Object>(3));
+            request.put("method", "action");
+            request.put("type", "resource");
+            request.put("value", params);
+            router.handle(request);
+        } catch (JsonResourceException e) {
             throw new SynchronizationException(e);
         }
     }
@@ -375,8 +153,12 @@ public class SystemObjectSetService extends ObjectSetJsonResource
             params.put("_action", "ONUPDATE");
             params.put("id", id);
             params.put("_entity", newValue.getObject());
-            getRouter().action("sync", params);
-        } catch (ObjectSetException e) {
+            JsonValue request = new JsonValue(new HashMap<String, Object>(3));
+            request.put("method", "action");
+            request.put("type", "resource");
+            request.put("value", params);
+            router.handle(request);
+        } catch (JsonResourceException e) {
             throw new SynchronizationException(e);
         }
     }
@@ -393,8 +175,12 @@ public class SystemObjectSetService extends ObjectSetJsonResource
             Map<String, Object> params = new HashMap<String, Object>(2);
             params.put("_action", "ONDELETE");
             params.put("id", id);
-            getRouter().action("sync", params);
-        } catch (ObjectSetException e) {
+            JsonValue request = new JsonValue(new HashMap<String, Object>(3));
+            request.put("method", "action");
+            request.put("type", "resource");
+            request.put("value", params);
+            router.handle(request);
+        } catch (JsonResourceException e) {
             throw new SynchronizationException(e);
         }
     }
@@ -415,35 +201,54 @@ public class SystemObjectSetService extends ObjectSetJsonResource
                 Id id = new Id(params.get("source").asString());
                 String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
                 try {
+                    JsonValue previousStage = null;
                     try {
-                        Map<String, Object> previousStage = getRouter().read(previousStageId);
-                        Object rev = previousStage.get("_rev");
-                        getRouter().update(previousStageId, (String) rev, locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? new JsonValue(previousStage) : null, this).asMap());
-                    } catch (NotFoundException e) {
-                        TRACE.info("PooledSyncStage object {} is not found. First execution.");
-                        getRouter().create(previousStageId, locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
+                        JsonValue readRequest = new JsonValue(new HashMap());
+                        readRequest.put("type", "resource");
+                        readRequest.put("method", "read");
+                        readRequest.put("id", previousStageId);
+                        previousStage = router.handle(readRequest);
+
+                        JsonValue updateRequest = new JsonValue(new HashMap());
+                        updateRequest.put("type", "resource");
+                        updateRequest.put("method", "update");
+                        updateRequest.put("id", previousStageId);
+                        updateRequest.put("rev", previousStage.get("_rev"));
+                        updateRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? previousStage : null, this).asMap());
+                        router.handle(updateRequest);
+                    } catch (JsonResourceException e) {
+                        if (null == previousStage) {
+                            TRACE.info("PooledSyncStage object {} is not found. First execution.");
+                            JsonValue createRequest = new JsonValue(new HashMap());
+                            createRequest.put("type", "resource");
+                            createRequest.put("method", "create");
+                            createRequest.put("id", previousStageId);
+                            createRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
+                            router.handle(createRequest);
+                        }
                     }
-                } catch (ObjectSetException e) {
+                } catch (JsonResourceException e) {
                     throw new ExecutionException(e);
                 }
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
-        } catch (ObjectSetException e) {
+        } catch (JsonResourceException e) {
             throw new ExecutionException(e);
         }
     }
 
-    private ObjectSet getRouter() {
-        return router;
+    private ProvisionerService locateService(JsonValue request) throws JsonResourceException {
+        Id identifier = new Id(request.get("id").required().asString());
+        return locateService(identifier);
     }
 
-    private ProvisionerService locateService(Id id) throws ObjectSetException {
+    private ProvisionerService locateService(Id identifier) throws JsonResourceException {
         for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
-            if (entry.getKey().is(id)) {
+            if (entry.getKey().is(identifier)) {
                 return entry.getValue();
             }
         }
-        throw new ObjectSetException("System: " + id + " is not available.");
+        throw new JsonResourceException(404, "System: " + identifier + " is not available.");
     }
 }

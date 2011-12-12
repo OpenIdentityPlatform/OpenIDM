@@ -69,7 +69,7 @@ public class ObjectClassInfoHelperTest {
         JsonValue configuration = new JsonValue(mapper.readValue(inputStream, Map.class));
 
         ObjectClassInfoHelper helper = new ObjectClassInfoHelper(configuration.get("objectTypes").get("__ACCOUNT__").asMap());
-        Map<String, Object> source = new HashMap<String, Object>();
+        JsonValue source = new JsonValue(new HashMap<String, Object>());
         source.put(ServerConstants.OBJECT_PROPERTY_ID, "ID_NAME");
         source.put("__NAME__", "NAME_NAME");
 

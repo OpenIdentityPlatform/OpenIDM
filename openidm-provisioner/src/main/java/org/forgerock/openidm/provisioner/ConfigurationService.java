@@ -25,7 +25,7 @@
 package org.forgerock.openidm.provisioner;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.json.resource.JsonResourceException;
 
 /**
  * Configuration generation helper
@@ -39,7 +39,7 @@ public interface ConfigurationService {
      *
      * @param params
      * @return
-     * @throws ObjectSetException
+     * @throws JsonResourceException
      */
-    public JsonValue configure(JsonValue params) throws ObjectSetException;
+    public JsonValue configure(JsonValue params) throws JsonResourceException;
 }

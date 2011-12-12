@@ -28,9 +28,9 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -63,10 +63,10 @@ public class OperationHelperBuilder {
         this.systemName = Assertions.blankChecked(system, "systemName");
     }
 
-    public OperationHelper build(String objectType, Map<String, Object> object, CryptoService cryptoService) throws ObjectSetException {
+    public OperationHelper build(String objectType, JsonValue object, CryptoService cryptoService) throws JsonResourceException {
         ObjectClassInfoHelper objectClassInfoHelper = supportedObjectTypes.get(objectType);
         if (null == objectClassInfoHelper) {
-            throw new ObjectSetException("Unsupported object type: " + objectType
+            throw new JsonResourceException(400, "Unsupported object type: " + objectType
                     + " not in supported types" + supportedObjectTypes.keySet());
         }
         APIConfiguration _configuration = getRuntimeAPIConfiguration();

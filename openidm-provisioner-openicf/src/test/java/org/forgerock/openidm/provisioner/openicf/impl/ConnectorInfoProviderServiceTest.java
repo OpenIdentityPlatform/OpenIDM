@@ -26,12 +26,9 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import java.io.UnsupportedEncodingException;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;

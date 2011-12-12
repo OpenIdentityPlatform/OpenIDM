@@ -26,6 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
@@ -40,7 +41,9 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -116,5 +119,16 @@ public abstract class OpenICFProvisionerServiceTestBase {
 
     final protected ProvisionerService getService() {
         return service;
+    }
+
+    protected JsonValue buildRequest(String method, String id, String rev, Map<String, Object> value) {
+        JsonValue request = new JsonValue(new HashMap<String, Object>());
+        request.put("method", method);
+        request.put("id", id);
+        if (null != rev) {
+            request.put("rev", rev);
+        }
+        request.put("value", value);
+        return request;
     }
 }

@@ -1,6 +1,6 @@
 package org.forgerock.openidm.provisioner;
 
-import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.json.resource.JsonResourceException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -32,7 +32,7 @@ public class IdTest {
 
         idString = "system/Active+Directory/User+type/%3CGUID%3D500ac9a4c732df45bde6e5dbc784de04%3E";
 
-        Assert.assertEquals(id.getQualifiedId().toString(),idString);
+        Assert.assertEquals(id.getQualifiedId().toString(), idString);
 
         id = new Id(idString);
         Assert.assertEquals(id.getSystemName(), "Active Directory");
@@ -49,12 +49,12 @@ public class IdTest {
         Assert.assertEquals(actual.resolveLocalId("http://openidm.forgerock.org/openidm/managed/user/480ab4b0-764f-11e0-a1f0-0800200c9a66").getId().toString(), expected);
     }
 
-    @Test(expectedExceptions = ObjectSetException.class)
+    @Test(expectedExceptions = JsonResourceException.class)
     public void testMalformedURLPrefix() throws Exception {
         new Id("/system/xml/");
     }
 
-    @Test(expectedExceptions = ObjectSetException.class)
+    @Test(expectedExceptions = JsonResourceException.class)
     public void testExpectObjectId() throws Exception {
         Id id = new Id("/system/xml/");
         id.expectObjectId();
