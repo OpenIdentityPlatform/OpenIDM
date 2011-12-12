@@ -50,12 +50,4 @@ public interface CustomCommandScope {
      */
     public String getScope();
 
-    /**
-     * Execute the command scope in interactive mode
-     * TODO reconsider to have this command
-     *
-     * @param args
-     */
-    public void execute(String[] args);
-
 }

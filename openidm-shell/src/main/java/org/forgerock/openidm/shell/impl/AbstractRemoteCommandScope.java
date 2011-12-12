@@ -24,7 +24,7 @@
  */
 package org.forgerock.openidm.shell.impl;
 
-import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
 /**
@@ -33,9 +33,12 @@ import org.forgerock.openidm.shell.CustomCommandScope;
  */
 public abstract class AbstractRemoteCommandScope implements CustomCommandScope {
 
-    private ObjectSet router;
+    private JsonResource router;
 
-    protected ObjectSet getRouter() {
+    /**
+     * @return HttpRemoteJsonResource instance
+     */
+    protected JsonResource getRouter() {
         return router;
     }
 }
