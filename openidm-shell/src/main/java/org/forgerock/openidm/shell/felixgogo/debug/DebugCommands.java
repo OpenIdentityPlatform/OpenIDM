@@ -26,6 +26,7 @@ package org.forgerock.openidm.shell.felixgogo.debug;
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -33,9 +34,6 @@ import org.osgi.framework.ServiceRegistration;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
 
 /**
  * @author $author$

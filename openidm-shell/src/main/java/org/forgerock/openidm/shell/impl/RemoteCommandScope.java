@@ -51,12 +51,6 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
         return "remote";
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void execute(String[] args) {
-    }
-
 
     public void export(InputStream console, PrintStream out, String[] args) {
         out.println("Exported");

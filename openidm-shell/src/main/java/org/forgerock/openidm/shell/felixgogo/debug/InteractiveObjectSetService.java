@@ -28,6 +28,8 @@ package org.forgerock.openidm.shell.felixgogo.debug;
 import org.apache.felix.service.command.CommandSession;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
@@ -40,26 +42,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
-
-// Deprecated
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.Patch;
 
 /**
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class InteractiveObjectSetService implements ObjectSet, ServiceListener {
+public class InteractiveObjectSetService implements JsonResource, ServiceListener {
 
     private final static Logger TRACE = LoggerFactory.getLogger(InteractiveObjectSetService.class);
 
     public static final String ROUTER_SERVICE_FILTER = "(&(objectClass=" + JsonResource.class.getName() + ")(service.pid=org.forgerock.openidm.router))";
 
-    private ObjectSet router = null;
+    private JsonResource router = null;
 
     private CommandSession session;
     private final ObjectMapper mapper = new ObjectMapper();
@@ -75,7 +69,7 @@ public class InteractiveObjectSetService implements ObjectSet, ServiceListener {
         this.session = session;
         ServiceReference ref = context.getServiceReference(ROUTER_SERVICE_FILTER);
         if (null != ref) {
-            router = new JsonResourceObjectSet((JsonResource)context.getService(ref));
+            router = (JsonResource) context.getService(ref);
         }
         //TODO block the console read
         this.console = session.getConsole();
@@ -85,116 +79,30 @@ public class InteractiveObjectSetService implements ObjectSet, ServiceListener {
     /**
      * {@inheritDoc}
      */
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        console.append("CALL: create(").append(id).append(",");
-        if (null == object) {
+    public JsonValue handle(JsonValue request) throws JsonResourceException {
+        if (null == request) {
             console.println("null)");
         } else {
             try {
-                mapper.writerWithDefaultPrettyPrinter().writeValue(console, object);
+                mapper.writerWithDefaultPrettyPrinter().writeValue(console, request.getObject());
                 console.println(")");
             } catch (IOException e) {
                 console.append("Input object serialization exception: ").println(e.getMessage());
             }
         }
-
-        console.println("Available commands:");
-        console.println("input:router");
-        console.println("input:file");
-        console.println("input:console");
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Map<String, Object> read(String id) throws ObjectSetException {
-        //TODO the parent thread should read the exit command
-        if ("exit".equals(id)) {
+        if ("exit".equals(request.get("id").asString())) {
             parent.interrupt();
-            return new HashMap<String, Object>();
+            return new JsonValue(new HashMap<String, Object>());
         }
-        console.append("CALL: read(").append(id).println(")");
         try {
-            return readConsole().asMap();
+            return readConsole();
         } catch (Exception e) {
-            throw new ObjectSetException(e);
+            throw new JsonResourceException(500, "sdf", e);
         }
     }
 
-
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        console.append("CALL: update(").append(id).append(",").append(rev).append(",");
-        if (null == object) {
-            console.println("null)");
-        } else {
-            try {
-                mapper.writerWithDefaultPrettyPrinter().writeValue(console, object);
-                console.println(")");
-            } catch (IOException e) {
-                console.append("Input object serialization exception: ").println(e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void delete(String id, String rev) throws ObjectSetException {
-        console.append("CALL: delete(").append(id).append(",").append(rev).println(")");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        console.append("CALL: patch(").append(id).append(",").append(rev).println(",patch)");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        console.append("CALL: query(").append(id).append(",");
-        if (null == params) {
-            console.println("null)");
-        } else {
-            try {
-                mapper.writerWithDefaultPrettyPrinter().writeValue(console, params);
-                console.println(")");
-            } catch (IOException e) {
-                console.append("Input object serialization exception: ").println(e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        console.append("CALL: action(").append(id).append(",");
-        if (null == params) {
-            console.println("null)");
-        } else {
-            try {
-                mapper.writerWithDefaultPrettyPrinter().writeValue(console, params);
-                console.println(")");
-            } catch (IOException e) {
-                console.append("Input object serialization exception: ").println(e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    private ObjectSet getRouter() {
+    private JsonResource getRouter() {
         return router;
-    }
-
-    private void readCommand() {
-        Scanner in = new Scanner(keyboard);
-        String command = in.nextLine();
-
     }
 
     private void printInputHelp() {
@@ -267,11 +175,11 @@ public class InteractiveObjectSetService implements ObjectSet, ServiceListener {
         ServiceReference sr = event.getServiceReference();
         switch (event.getType()) {
             case ServiceEvent.REGISTERED: {
-                router = (ObjectSet) context.getService(sr);
+                router = (JsonResource) context.getService(sr);
                 break;
             }
             case ServiceEvent.MODIFIED: {
-                router = (ObjectSet) context.getService(sr);
+                router = (JsonResource) context.getService(sr);
                 break;
             }
             case ServiceEvent.UNREGISTERING: {

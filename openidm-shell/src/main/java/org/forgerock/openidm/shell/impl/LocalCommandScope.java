@@ -24,16 +24,17 @@
  */
 package org.forgerock.openidm.shell.impl;
 
+import org.apache.felix.service.command.CommandSession;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * @author $author$
@@ -49,6 +50,7 @@ public class LocalCommandScope implements CustomCommandScope {
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", "Validates all json configuration file in /conf folder.");
+        help.put("help", "List available commands.");
         return help;
 
     }
@@ -60,18 +62,23 @@ public class LocalCommandScope implements CustomCommandScope {
         return "local";
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void execute(String[] args) {
+    public void help(CommandSession session) {
+        ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
+        for (CustomCommandScope cmdScope : ldr) {
+            if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
+                for (Map.Entry<String, String> entry : cmdScope.getFunctionMap().entrySet()) {
+                    session.getConsole().append("\t").append(cmdScope.getScope()).append(":").append(entry.getKey()).append("\t").println(entry.getValue());
+                }
+            }
+        }
     }
 
-    public void validate(InputStream console, PrintStream out, String[] args) {
+    public void validate(CommandSession session) {
         File file = IdentityServer.getFileForPath("conf");
-        out.println("...................................................................");
+        session.getConsole().println("...................................................................");
         if (file.isDirectory()) {
-            out.println("[Validating] Load JSON configuration files from:");
-            out.append("[Validating] \t").println(file.getAbsolutePath());
+            session.getConsole().println("[Validating] Load JSON configuration files from:");
+            session.getConsole().append("[Validating] \t").println(file.getAbsolutePath());
             FileFilter filter = new FileFilter() {
                 public boolean accept(File f) {
                     return (f.isDirectory()) || (f.getName().endsWith(".json"));
@@ -84,13 +91,13 @@ public class LocalCommandScope implements CustomCommandScope {
                 //TODO pretty print
                 try {
                     mapper.readValue(subFile, Object.class);
-                    prettyPrint(out, subFile.getName(), null);
+                    prettyPrint(session.getConsole(), subFile.getName(), null);
                 } catch (Exception e) {
-                    prettyPrint(out, subFile.getName(), e);
+                    prettyPrint(session.getConsole(), subFile.getName(), e);
                 }
             }
         } else {
-            out.append("[Validating] ").append("Configuration directory not found at: ").println(file.getAbsolutePath());
+            session.getConsole().append("[Validating] ").append("Configuration directory not found at: ").println(file.getAbsolutePath());
         }
     }
 

@@ -24,14 +24,19 @@
  */
 package org.forgerock.openidm.shell.impl;
 
-import org.forgerock.openidm.objset.ObjectSet;
+import org.apache.felix.gogo.runtime.CommandProcessorImpl;
+import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
+import org.apache.felix.gogo.shell.Console;
+import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Converter;
+import org.apache.felix.service.command.Function;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
+import java.util.Map;
 import java.util.ServiceLoader;
 
 /**
@@ -39,83 +44,46 @@ import java.util.ServiceLoader;
  * @version $Revision$ $Date$
  */
 public class Main {
-    private static ObjectSet router;
+    protected static CommandProcessorImpl processor;
 
     public static void main(String[] args) throws Exception {
-        String[] cmd = parseCommandName(args);
-        String[] parameters = Arrays.copyOfRange(args, 1, Math.max(args.length, 1));
-        CustomCommandScope scope = findCommandScope(cmd[0]);
-        switch (cmd.length) {
-            case 2:
-                Method cmdMethod = findCommandMethod(scope.getClass(), cmd[1]);
-                if (null != cmdMethod) {
-                    cmdMethod.invoke(scope, System.in, System.out, parameters);
-                    System.exit(0);
-                }
-                throw new UnsupportedOperationException(cmd[1]);
-            case 1:
-                scope.execute(parameters);
-        }
-    }
-
-    private static String[] parseCommandName(String[] args) {
-        if (args.length > 0) {
-            String[] cmd = null;
-            String[] clauses = args[0].split(":");
-            if (0 == clauses.length || clauses.length > 2) {
-                throw new IllegalArgumentException("The passed command identifier has more then one ':'");
-            }
-            switch (clauses.length) {
-                case 2: {
-                    cmd = new String[2];
-                    // Do blank check StringUtils.isBlank()
-                    if ((null != clauses[1]) && (!"".equals(clauses[1].trim()))) {
-                        cmd[1] = clauses[1].trim();
-                    }
-                }
-                case 1: {
-                    if ((null == clauses[0]) || ("".equals(clauses[0].trim()))) {
-                        throw new IllegalArgumentException("The passed scope identifier has no command");
-                    } else {
-                        if (cmd == null) cmd = new String[1];
-                        cmd[0] = clauses[0].trim();
-                    }
-                }
-            }
-
-            return cmd;
+        initProcessor();
+        CommandSession session = processor.createSession(System.in, System.out, System.err);
+        session.put("prompt", "openidm# ");
+        session.put("_cwd", IdentityServer.getFileForPath("."));
+        // start shell
+        if (args.length == 0) {
+            Thread thread = new Thread(new Console(session), "OpenIDM shell");
+            thread.start();
         } else {
-            throw new IllegalArgumentException("Command required");
+            processor.eval(session, args);
         }
     }
 
-    private static CustomCommandScope findCommandScope(String groupId) throws NoSuchFieldException, IllegalAccessException {
-        CustomCommandScope scope = null;
+    private static void initProcessor() {
+        processor = new CommandProcessorImpl(new ThreadIOImpl());
+
+
+        // Setup the variables and commands exposed in an OSGi environment.
+        //processor.addConstant(CONTEXT, context);
+        processor.addCommand("osgi", processor, "addCommand");
+        processor.addCommand("osgi", processor, "removeCommand");
+        processor.addCommand("osgi", processor, "eval");
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
         for (CustomCommandScope cmdScope : ldr) {
-            if (cmdScope.getScope().equals(groupId)) {
-                if (cmdScope instanceof AbstractRemoteCommandScope) {
-                    Field bind = AbstractRemoteCommandScope.class.getDeclaredField("router");
-                    if (null != bind) {
-                        bind.setAccessible(true);
-                        bind.set(cmdScope, getRouter());
-                    }
+            if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
+                for (Map.Entry<String, String> entry : cmdScope.getFunctionMap().entrySet()) {
+                    Function target = new CommandProxy(cmdScope,
+                            entry.getKey());
+                    processor.addCommand(cmdScope.getScope(), target, entry.getKey());
                 }
-                scope = cmdScope;
-                break;
             }
         }
-        if (null == scope) {
-            throw new UnsupportedOperationException(groupId);
-        }
-        return scope;
-    }
 
-    private static ObjectSet getRouter() {
-        if (null == router) {
-            //TODO init RemoteObjectSetRouterService router
+        ServiceLoader<Converter> cldr = ServiceLoader.load(Converter.class);
+        for (Converter converter : cldr) {
+            processor.addConverter(converter);
         }
-        return router;
     }
 
     public static Method findCommandMethod(Class<? extends CustomCommandScope> commandsProvider, String methodName) {
