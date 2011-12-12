@@ -148,6 +148,7 @@ $OPENIDM
 |- bin
 |- connectors
 |- script
+|- workflow
 |- samples
     |- misc
     |- provisioners
@@ -192,6 +193,10 @@ $OPENIDM
   <section>
    <title>script</title>
    <para>The <filename>openidm/script</filename> is a directory where custom rules written in any of the supported scripting language OpenIDM supports.</para>
+  </section>
+  <section>
+   <title>workflow</title>
+   <para>The <filename>openidm/workflow</filename> is a directory where BPMN 2.0 workflows can be deployed. Typically as .bar files. For more information see the Chapter on Workflow and Business Process in OpenIDM.</para>
   </section>
   <section>
    <title>bin</title>
