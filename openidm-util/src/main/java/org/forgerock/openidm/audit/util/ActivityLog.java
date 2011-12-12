@@ -45,11 +45,12 @@ public class ActivityLog {
     private static String getRequester(JsonValue request) {
         String result = null;
         while (request != null && !request.isNull()) {
-            String user = request.get("security").get("user");
+            JsonValue user = request.get("security").get("user");
             if (user.isString()) {
                 result = user.asString();
                 break;
             }
+            request = request.get("parent");
         }
         return result;
     }
