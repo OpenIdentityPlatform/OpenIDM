@@ -25,16 +25,17 @@
 package org.forgerock.openidm.shell.impl;
 
 import org.apache.felix.service.command.CommandSession;
+import org.apache.felix.service.command.Descriptor;
+import org.apache.felix.service.command.Parameter;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.PrintStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ServiceLoader;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.KeyStore;
+import java.util.*;
 
 /**
  * @author $author$
@@ -51,6 +52,8 @@ public class LocalCommandScope implements CustomCommandScope {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", "Validates all json configuration file in /conf folder.");
         help.put("help", "List available commands.");
+        help.put("keytool", "Export or import SecretKeyEntry. Keytool does not allow to export or import SecretKeyEntries.");
+        help.put("exit", "Exit from the tool");
         return help;
 
     }
@@ -62,6 +65,7 @@ public class LocalCommandScope implements CustomCommandScope {
         return "local";
     }
 
+    //TODO Do not register it when it's running in OSGi. Use the org.apache.felix.gogo.command implementation
     public void help(CommandSession session) {
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
         for (CustomCommandScope cmdScope : ldr) {
@@ -70,6 +74,95 @@ public class LocalCommandScope implements CustomCommandScope {
                     session.getConsole().append("\t").append(cmdScope.getScope()).append(":").append(entry.getKey()).append("\t").println(entry.getValue());
                 }
             }
+        }
+    }
+
+    //TODO Do not register it when it's running in OSGi. Use the org.apache.felix.gogo.command implementation
+    public void exit() {
+        System.exit(0);
+    }
+
+    @Descriptor("")
+    public void keytool(CommandSession session,
+                        @Parameter(names = {"-i", "--import"}, presentValue = "true", absentValue = "false") boolean doImport,
+                        @Parameter(names = {"-e", "--export"}, presentValue = "true", absentValue = "false") boolean doExport,
+                        @Descriptor("Key alias") String alias) {
+        if (doImport ^ doExport) {
+            String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
+            String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
+            String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
+
+            try {
+                KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
+                if (location != null) {
+                    File configFile = IdentityServer.getFileForPath(location);
+                    if (configFile.exists()) {
+                        FileInputStream in = null;
+                        try {
+                            in = new FileInputStream(configFile);
+                            if (null != in) {
+                                session.getConsole().append("Use KeyStore from: ").println(configFile.getAbsolutePath());
+                                //TODO Don't use the System in OSGi.
+                                char[] passwordArray = System.console().readPassword("Please enter the password: ");
+                                char[] passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
+                                Arrays.fill(passwordArray, ' ');
+                                ks.load(in, passwordCopy);
+                                if (null != in) {
+                                    in.close();
+                                    in = null;
+                                }
+                                if (doExport) {
+                                    KeyStore.Entry key = ks.getEntry(alias, new KeyStore.PasswordProtection(passwordCopy));
+                                    if (key instanceof KeyStore.SecretKeyEntry) {
+                                        KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) key;
+                                        session.getConsole().append("[OK] ").println(secretKeyEntry);
+                                        StringBuilder sb = new StringBuilder(secretKeyEntry.getSecretKey().getAlgorithm());
+                                        sb.append(":").append(new BigInteger(1, secretKeyEntry.getSecretKey().getEncoded()).toString(16));
+                                        session.getConsole().println(sb);
+                                    } else {
+                                        session.getConsole().println("SecretKeyEntry with this alias is not in KeyStore");
+                                    }
+                                } else if (doImport) {
+                                    if (ks.containsAlias(alias)) {
+                                        session.getConsole().println("KeyStore contains a key with this alias");
+                                    } else {
+                                        session.getConsole().println("Enter the key: ");
+                                        Scanner scanner = new Scanner(session.getKeyboard());
+                                        String[] tokens = scanner.nextLine().split(":");
+                                        if (tokens.length == 2) {
+                                            byte[] encoded = new BigInteger(tokens[1], 16).toByteArray();
+                                            javax.crypto.SecretKey mySecretKey = new SecretKeySpec(encoded, tokens[0]);
+                                            KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(mySecretKey);
+                                            ks.setEntry(alias, skEntry, new KeyStore.PasswordProtection(passwordCopy));
+                                            FileOutputStream fos = null;
+                                            try {
+                                                fos = new FileOutputStream(configFile);
+                                                ks.store(fos, passwordCopy);
+                                            } finally {
+                                                if (fos != null) {
+                                                    fos.close();
+                                                }
+                                            }
+                                        } else {
+                                            session.getConsole().println("Invalid key input");
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (IOException ioe) {
+                            if (null != in) {
+                                in.close();
+                            }
+                        }
+                    } else {
+                        session.getConsole().append("KeyStore file: ").append(configFile.getAbsolutePath()).println(" does not exists.");
+                    }
+                }
+            } catch (Exception e) {
+                session.getConsole().println(e.getMessage());
+            }
+        } else {
+            session.getConsole().println("Import or Export have to be exclusively defined.");
         }
     }
 

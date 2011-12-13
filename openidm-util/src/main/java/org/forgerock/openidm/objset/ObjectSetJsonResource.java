@@ -17,6 +17,7 @@
 package org.forgerock.openidm.objset;
 
 // Java SE
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -244,6 +245,9 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         Map<String, Object> params = request.get("params").copy().asMap(); // copy; gonna add _entity to it
         Map<String, Object> value = request.get("value").asMap();
         if (value != null) {
+            if (null == params) {
+                params = new HashMap<String, Object>(1);
+            }
             params.put("_entity", value);
         }
         ObjectSetContext.push(request);

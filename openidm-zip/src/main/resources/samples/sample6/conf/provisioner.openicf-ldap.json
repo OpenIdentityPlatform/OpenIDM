@@ -1,12 +1,5 @@
 {
-   "_id" : "5b2857c0-8250-11e0-b278-0800200c9a66",
-   "_rev" : "686897696a7c876b7e",
-   "_schema_id" : "http://forgerock.com/schema/OpenICF/Resource",
-   "_schema_rev" : "696a687c897c87e79d",
    "name" : "ldap",
-   "displayName" : "OpenDJ",
-   "typeString" : "ldap",
-   "hasId" : "true",
    "connectorRef" :
       {
          "connectorHostRef" : "#LOCAL",
@@ -51,7 +44,7 @@
          "changeLogBlockSize" : 100,
          "baseContextsToSynchronize" :
             [
-               "ou=People,o=aaa"
+               "ou=People,dc=example,dc=com"
             ],
          "attributesToSynchronize" :
             [
@@ -69,10 +62,10 @@
             [
                "inetOrgPerson"
             ],
-         "port" : 4389,
+         "port" : 1389,
          "vlvSortAttribute" : "uid",
          "passwordAttribute" : "userPassword",
-         "useBlocks" : true,
+         "useBlocks" : false,
          "maintainPosixGroupMembership" : false,
          "failover" :
             [
@@ -81,7 +74,7 @@
          "principal" : "cn=Directory Manager",
          "baseContexts" :
             [
-               "ou=People,o=aaa"
+               "ou=People,dc=example,dc=com"
             ],
          "readSchema" : true,
          "accountObjectClasses" :
@@ -102,7 +95,7 @@
          "passwordHashAlgorithm" : null,
          "usePagedResultControl" : false,
          "blockSize" : 100,
-         "uidAttribute" : "entryUUID",
+         "uidAttribute" : "dn",
          "maintainLdapGroupMembership" : false,
          "respectResourcePasswordPolicyChangeAfterReset" : false
       },
@@ -158,5 +151,20 @@
       },
    "operationOptions" :
       {
+         "DELETE" :
+            {
+               "denied" : false,
+               "onDeny" : "DO_NOTHING"
+            },
+         "UPDATE" :
+            {
+               "denied" : false,
+               "onDeny" : "DO_NOTHING"
+            },
+         "CREATE" :
+            {
+               "denied" : false,
+               "onDeny" : "DO_NOTHING"
+            }
       }
 }

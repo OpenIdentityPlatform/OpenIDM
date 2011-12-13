@@ -106,8 +106,9 @@ public class SystemObjectSetService implements JsonResource,
      * {@inheritDoc}
      */
     public JsonValue handle(JsonValue request) throws JsonResourceException {
-        if ("action".equalsIgnoreCase(request.get("method").asString()) &&
-                "CREATECONFIGURATION".equalsIgnoreCase(request.get(ServerConstants.ACTION_NAME).asString())) {
+        JsonValue params = request.get("params");
+        if ("action".equalsIgnoreCase(request.get("method").asString()) && !params.isNull() &&
+                "CREATECONFIGURATION".equalsIgnoreCase(params.get(ServerConstants.ACTION_NAME).asString())) {
             return configurationService.configure(request.get("value"));
         } else {
             return locateService(request).handle(request);
@@ -127,11 +128,12 @@ public class SystemObjectSetService implements JsonResource,
             Map<String, Object> params = new HashMap<String, Object>(3);
             params.put("_action", "ONCREATE");
             params.put("id", id);
-            params.put("_entity", value.getObject());
             JsonValue request = new JsonValue(new HashMap<String, Object>(3));
             request.put("method", "action");
             request.put("type", "resource");
-            request.put("value", params);
+            request.put("id", "sync");
+            request.put("params", params);
+            request.put("value", value.getObject());
             router.handle(request);
         } catch (JsonResourceException e) {
             throw new SynchronizationException(e);
@@ -152,11 +154,12 @@ public class SystemObjectSetService implements JsonResource,
             Map<String, Object> params = new HashMap<String, Object>(3);
             params.put("_action", "ONUPDATE");
             params.put("id", id);
-            params.put("_entity", newValue.getObject());
             JsonValue request = new JsonValue(new HashMap<String, Object>(3));
             request.put("method", "action");
             request.put("type", "resource");
-            request.put("value", params);
+            request.put("id", "sync");
+            request.put("params", params);
+            request.put("value", newValue.getObject());
             router.handle(request);
         } catch (JsonResourceException e) {
             throw new SynchronizationException(e);
@@ -178,7 +181,8 @@ public class SystemObjectSetService implements JsonResource,
             JsonValue request = new JsonValue(new HashMap<String, Object>(3));
             request.put("method", "action");
             request.put("type", "resource");
-            request.put("value", params);
+            request.put("id", "sync");
+            request.put("params", params);
             router.handle(request);
         } catch (JsonResourceException e) {
             throw new SynchronizationException(e);

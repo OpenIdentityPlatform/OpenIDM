@@ -45,9 +45,12 @@ public class DB2TableHandler extends GenericTableHandler {
         Map<QueryDefinition, String> result = super.initializeQueryMap();
         String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
         String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
+        String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
 
         // Main object table DB2 Script
         result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj WHERE EXISTS (SELECT 1 FROM " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?");
+        //TODO Fix this CPU killer query
+        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + mainTable + " obj, " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
         return result;
     }
     
