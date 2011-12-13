@@ -136,7 +136,7 @@ $OPENIDM
 |- bundle
     |- init
 |- db
-       |- activiti
+    |- activiti
 |- openidm
 |- scripts
 |- utils     
