@@ -281,7 +281,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     public Map<String, Object> read(String id) throws ObjectSetException {
         LOGGER.debug("Read name={} id={}", name, id);
         if (id == null) {
-            throw new ForbiddenException("cannot read entire object set");
+            throw new ForbiddenException("Cannot read entire object set");
         }
         JsonValue jv = new JsonValue(service.getRouter().read(repoId(id)));
         onRetrieve(jv);
@@ -323,7 +323,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         LOGGER.debug("update {} ", "name=" + name + " id=" + id + " rev=" + rev);
         if (id == null) {
-            throw new ForbiddenException("cannot update entire object set");
+            throw new ForbiddenException("Cannot update entire object set");
         }
         JsonValue _new = decrypt(object); // decrypt any incoming encrypted properties
         Map<String, Object> encrypted = service.getRouter().read(repoId(id));
@@ -338,7 +338,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     public void delete(String id, String rev) throws ObjectSetException {
         LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
         if (id == null) {
-            throw new ForbiddenException("cannot delete entire object set");
+            throw new ForbiddenException("Cannot delete entire object set");
         }
         Map<String, Object> encrypted = service.getRouter().read(repoId(id));
         if (onDelete != null) {
@@ -361,7 +361,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
 // FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
         LOGGER.debug("patch name={} id={}", name, id);
         if (id == null) {
-            throw new ForbiddenException("cannot patch entire object set");
+            throw new ForbiddenException("Cannot patch entire object set");
         }
         JsonValue oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
         JsonValue newValue = oldValue.copy();
@@ -399,11 +399,11 @@ class ManagedObjectSet extends ObjectSetJsonResource {
                 JsonValue results = new JsonValue(service.getRouter().query(repoId(null),
                  params.asMap()), new JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
                 if (!results.isList()) {
-                    throw new InternalServerErrorException("expecting list result from query");
+                    throw new InternalServerErrorException("Expecting list result from query");
                 } else if (results.size() == 0) {
                     throw new NotFoundException();
                 } else if (results.size() > 1) {
-                    throw new ConflictException("query yielded more than one result");
+                    throw new ConflictException("Query yielded more than one result");
                 }
                 JsonValue result = results.get(0);
                 _id = result.get("_id").required().asString();
@@ -431,11 +431,11 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         Object _action = (String)params.get("_action");
         Map<String, Object> result;
         if (_action == null) {
-            throw new BadRequestException("expecting _action parameter");
+            throw new BadRequestException("Expecting _action parameter");
         } else if (_action.equals("patch")) {
             result = patchAction(id, new JsonValue(params, new JsonPointer("parameters"))).asMap();
         } else {
-            throw new BadRequestException("unsupported _action parameter");
+            throw new BadRequestException("Unsupported _action parameter");
         }
         return result;
     }
