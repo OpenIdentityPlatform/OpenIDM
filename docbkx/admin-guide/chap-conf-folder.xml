@@ -40,7 +40,7 @@ Note that the files are a way to install new or changed configuration, and to se
   <para>
    <emphasis>List of single instance configuration</emphasis> services</para>
   <itemizedlist>
-   <listitem><para>auidt</para></listitem>
+   <listitem><para>audit</para></listitem>
    <listitem><para>managed</para></listitem>
    <listitem><para>repo.&lt;repo type&gt; such as repo.orientdb or repo.jdbc</para></listitem>
    <listitem><para>sync</para></listitem>
