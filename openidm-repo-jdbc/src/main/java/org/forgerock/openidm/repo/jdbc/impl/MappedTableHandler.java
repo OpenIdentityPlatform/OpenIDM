@@ -134,7 +134,7 @@ public class MappedTableHandler implements TableHandler {
     }
     
     /**
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */
     @Override
     public Map<String, Object> read(String fullId, String type, String localId, Connection connection) 
@@ -187,7 +187,7 @@ public class MappedTableHandler implements TableHandler {
     }
 
     /**
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#create(java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.TableHandler#create(java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
      */    
     @Override
     public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection) 
@@ -226,7 +226,9 @@ public class MappedTableHandler implements TableHandler {
             // This is currently limited to STRING handling
             JsonValue rawValue = objVal.get(propPointer);
             String propValue = null;
-            if (rawValue.isString() || rawValue.isNull()) {
+            if (null == rawValue) {
+                propValue = null;
+            } else if (rawValue.isString() || rawValue.isNull()) {
                 propValue = rawValue.asString();
             } else {
                 if (logger.isTraceEnabled()) {
@@ -242,7 +244,7 @@ public class MappedTableHandler implements TableHandler {
     }
 
     /**
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.TableHandler#update(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
      */
      @Override
      public void update(String fullId, String type, String localId, String rev, Map<String, Object> obj, Connection connection)
@@ -292,7 +294,7 @@ public class MappedTableHandler implements TableHandler {
      }
      
     /**
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */
     @Override
     public void delete(String fullId, String type, String localId, String rev, Connection connection)
@@ -336,7 +338,7 @@ public class MappedTableHandler implements TableHandler {
     }
 
     /**
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */ 
     @Override
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 

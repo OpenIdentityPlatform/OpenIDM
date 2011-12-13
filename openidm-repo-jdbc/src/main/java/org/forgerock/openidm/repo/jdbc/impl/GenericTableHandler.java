@@ -150,8 +150,7 @@ public class GenericTableHandler implements TableHandler {
 
         // Object properties table
         result.put(QueryDefinition.PROPCREATEQUERYSTR, "INSERT INTO " + propertyTable + " ( " + mainTableName + "_id, propkey, proptype, propvalue) VALUES (?,?,?,?)");
-        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id = (SELECT obj.id FROM " + mainTable + " obj, " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ? AND obj.objectid  = ?)");
-
+        result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE prop FROM " + propertyTable + " prop INNER JOIN " + mainTable + " obj ON prop." + mainTableName + "_id = obj.id INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ? AND obj.objectid = ?");
         // Default object queries
         String tableVariable =  dbSchemaName == null ? "${_mainTable}" : "${_dbSchema}.${_mainTable}";
         result.put(QueryDefinition.QUERYALLIDS, "SELECT obj.objectid FROM " + tableVariable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}");
@@ -520,7 +519,7 @@ public class GenericTableHandler implements TableHandler {
     }
 
     /**
-     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
+     * @see org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler#delete(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */
     @Override
     public void delete(String fullId, String type, String localId, String rev, Connection connection)
