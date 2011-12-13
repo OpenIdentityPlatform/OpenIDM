@@ -125,10 +125,10 @@ public class SystemObjectSetService implements JsonResource,
      */
     public void onCreate(String id, JsonValue value) throws SynchronizationException {
         try {
-            Map<String, Object> params = new HashMap<String, Object>(3);
+            Map<String, Object> params = new HashMap<String, Object>(2);
             params.put("_action", "ONCREATE");
             params.put("id", id);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(3));
+            JsonValue request = new JsonValue(new HashMap<String, Object>(5));
             request.put("method", "action");
             request.put("type", "resource");
             request.put("id", "sync");
@@ -151,10 +151,10 @@ public class SystemObjectSetService implements JsonResource,
      */
     public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         try {
-            Map<String, Object> params = new HashMap<String, Object>(3);
+            Map<String, Object> params = new HashMap<String, Object>(2);
             params.put("_action", "ONUPDATE");
             params.put("id", id);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(3));
+            JsonValue request = new JsonValue(new HashMap<String, Object>(5));
             request.put("method", "action");
             request.put("type", "resource");
             request.put("id", "sync");
@@ -178,7 +178,7 @@ public class SystemObjectSetService implements JsonResource,
             Map<String, Object> params = new HashMap<String, Object>(2);
             params.put("_action", "ONDELETE");
             params.put("id", id);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(3));
+            JsonValue request = new JsonValue(new HashMap<String, Object>(4));
             request.put("method", "action");
             request.put("type", "resource");
             request.put("id", "sync");
