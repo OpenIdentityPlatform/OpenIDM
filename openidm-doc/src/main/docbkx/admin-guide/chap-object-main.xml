@@ -43,7 +43,7 @@
  <para>Depending on how you intend to use them, different objects are
  appropriate.</para>
 
- <table rules="none" frame="topbot" xml:id="table-object-types">
+ <table pgwide="1" xml:id="table-object-types">
   <title>OpenIDM Objects</title>
   <tgroup cols="3">
    <colspec colnum="1" colwidth="1*"/>
