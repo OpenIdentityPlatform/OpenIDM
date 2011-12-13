@@ -59,8 +59,11 @@ public class EmbeddedOServerService {
     void activate(JsonValue config) throws Exception {
         logger.trace("Activating Service with configuration {}", config);
         try {
-            String enabled = config.get("embeddedServer").get("enabled").defaultTo("false").asString();
-            if ("true".equalsIgnoreCase(enabled)) {
+            JsonValue enabled = config.get("embeddedServer").get("enabled");
+
+            // enabled flag should be Boolean, but allow for (deprecated) String representation for now.
+            if ((enabled.isBoolean() && Boolean.TRUE.equals(enabled.asBoolean())
+                    || enabled.isString() && "true".equalsIgnoreCase(enabled.asString()))) {
                 orientDBServer = OServerMain.create();
                 OServerConfiguration serverConfig = getOrientDBConfig(config);
                 orientDBServer.startup(serverConfig);
@@ -83,20 +86,31 @@ public class EmbeddedOServerService {
 
         OServerConfiguration configuration = new OServerConfiguration();
 
-        configuration.handlers = new ArrayList<OServerHandlerConfiguration>();
-        OServerHandlerConfiguration handler = new OServerHandlerConfiguration();
-        handler.clazz = "com.orientechnologies.orient.server.handler.distributed.ODistributedServerManager";
-        configuration.handlers.add(handler);
-        handler.parameters = new OServerParameterConfiguration[]{
-                new OServerParameterConfiguration("name", "default"),
-                new OServerParameterConfiguration("security.algorithm", "Blowfish"),
-                new OServerParameterConfiguration("network.multicast.address", "235.1.1.1"),
-                new OServerParameterConfiguration("network.multicast.port", "2424"),
-                new OServerParameterConfiguration("network.multicast.heartbeat", "10"),
-                new OServerParameterConfiguration("server.update.delay", "5000"),
-                new OServerParameterConfiguration("server.electedForLeadership", "true"),
-                new OServerParameterConfiguration("security.key", "hw3CgjSzqm8I/axu"),
-        };
+        Boolean clustered  = config.get("embeddedServer").get("clustered").defaultTo(Boolean.FALSE).asBoolean();
+        
+        if (clustered) {
+            configuration.handlers = new ArrayList<OServerHandlerConfiguration>();
+            OServerHandlerConfiguration handler = new OServerHandlerConfiguration();
+            handler.clazz = "com.orientechnologies.orient.server.handler.distributed.ODistributedServerManager";
+            configuration.handlers.add(handler);
+            
+            String clusterName = config.get("embeddedServer").get("clusterName").defaultTo("openidm").asString();
+            String multicastAddress = config.get("embeddedServer").get("clusterAddress").defaultTo("235.1.1.1").asString();
+            String multicastPort = config.get("embeddedServer").get("clusterPort").defaultTo("2424").asString();
+            String clusterSecurityKey = config.get("embeddedServer").get("clusterSecurityKey").defaultTo("hw3CgjSzqm8I/axu").asString();
+            
+            handler.parameters = new OServerParameterConfiguration[]{
+                    new OServerParameterConfiguration("name", clusterName),
+                    new OServerParameterConfiguration("security.algorithm", "Blowfish"),
+                    new OServerParameterConfiguration("network.multicast.address", multicastAddress),
+                    new OServerParameterConfiguration("network.multicast.port", multicastPort),
+                    new OServerParameterConfiguration("network.multicast.heartbeat", "10"),
+                    new OServerParameterConfiguration("server.update.delay", "5000"),
+                    new OServerParameterConfiguration("server.electedForLeadership", "true"),
+                    new OServerParameterConfiguration("security.key", clusterSecurityKey),
+            };
+            logger.info("OrientDB clustering enabled on {}:{} with cluster name {}", new Object[] {multicastAddress, multicastPort, clusterName});
+        }
 
         configuration.network = new OServerNetworkConfiguration();
         configuration.network.protocols = new ArrayList<OServerNetworkProtocolConfiguration>();
@@ -167,9 +181,10 @@ public class EmbeddedOServerService {
                 storage2
         };
 
-        // TODO: make configurable
+        // Defaulted to the same as the regular user
+        String rootPwd = config.get("embeddedServer").get("rootPwd").defaultTo(pwd).asString();
         configuration.users = new OServerUserConfiguration[]{
-                new OServerUserConfiguration("root", "3358BE3413F53E0D3DDA03C95C0A3F8357D0D160F8186EDA0C191CE9A4FA271B", "*")
+                new OServerUserConfiguration("root", pwd, "*")
         };
         configuration.properties = new OServerEntryConfiguration[]{
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
