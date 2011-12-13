@@ -23,23 +23,23 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter xml:id='chap-data-flow'
+<chapter xml:id='chap-synchronization'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Configuring Data Flows</title>
+ <title>Configuring Synchronization</title>
 
  <para>This chapter covers ... TODO.</para>
 
- <section xml:id="data-flow-section-id">
+ <section xml:id="synchronization-section-id">
   <title>Section Title</title>
 
   <para>This section covers ... TODO.</para>
 
-  <section xml:id="data-flow-subsection-id">
+  <section xml:id="synchronization-subsection-id">
    <title>Subsection Title</title>
 
    <para>This subsection covers ... TODO.</para>
