@@ -16,5 +16,5 @@
 package org.forgerock.openidm.audit.util;
 
 public enum Action {
-    CREATE, READ, UPDATE, DELETE, PATCH, QUERY, ACTION
+    create, read, update, delete, patch, query, action
 }

@@ -202,13 +202,24 @@ public class JsonResourceRouterService implements JsonResource {
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         try {
-            return chain.handle(request); // dispatch to router, via filter chain
+            JsonValue response = chain.handle(request); // dispatch to router, via filter chain
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Request: " + request.toString() + ", Response: {}" + response.toString());
+            }
+            return response;
         } catch (JsonResourceException jre) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Resource exception: " + jre.toJsonValue() +
+                 " processing request: " + request.toString(), jre);
+            }
             int code = jre.getCode();
-            if (code >= 500 && code <= 599) { // HTTP server error code
+            if (code >= 500 && code <= 599) { // HTTP server-side error
                 LOGGER.warn("JSON resource exception", jre);
             }
             throw jre;
+        } catch (RuntimeException re) {
+            LOGGER.debug("Runtime exception processing request: {}", request, re);
+            throw re;
         }
     }
 
