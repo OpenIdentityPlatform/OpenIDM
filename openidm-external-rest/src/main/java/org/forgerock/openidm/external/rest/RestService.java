@@ -23,7 +23,6 @@
  */
 package org.forgerock.openidm.external.rest;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -33,21 +32,12 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-
-import org.codehaus.jackson.impl.Indenter;
-import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.PrettyPrinter;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-//import org.forgerock.openidm.core.IdentityServer;
 
 import org.osgi.service.component.ComponentContext;
 
@@ -68,7 +58,6 @@ import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
@@ -394,7 +383,7 @@ public class RestService extends ObjectSetJsonResource {
                 String authenticationTokenPath = "openidm/j_security_check";
 
                 // Prepare the request
-                Request request = new Request(Method.POST, authenticationTokenPath
+                Request request = new Request(org.restlet.data.Method.POST, authenticationTokenPath
                         + authenticationTokenPath);
 
                 Form loginForm = new Form();
