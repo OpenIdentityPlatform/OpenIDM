@@ -50,7 +50,7 @@
         "target" : "system/ldap/account",
         "correlationQuery" : {
             "type" : "text/javascript",
-            "file" : "jscript/ldapBackCorrelationQuery.js"
+            "file" : "script/ldapBackCorrelationQuery.js"
         },
         "properties" : [ {
             "source" : "givenName",

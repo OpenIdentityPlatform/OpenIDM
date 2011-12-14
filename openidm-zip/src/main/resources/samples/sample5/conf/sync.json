@@ -49,7 +49,7 @@
         "target" : "system/ad/account",
         "correlationQuery" : {
             "type" : "text/javascript",
-            "file" : "jscript/name_eq_name_correlationQuery.js"
+            "file" : "script/name_eq_name_correlationQuery.js"
         },
         "properties" : [ {
             "source" : "userName",
@@ -68,7 +68,7 @@
             "target" : "userPassword",
             "condition" : {
                 "type" : "text/javascript",
-                "file" : "jscript/ldapPassword_to_ad_condition.js"
+                "file" : "script/ldapPassword_to_ad_condition.js"
             }
         }, {
             "default" : "defaultpwd",
@@ -88,7 +88,7 @@
         "target" : "fixme_system/ldap/account",
         "correlationQuery" : {
             "type" : "text/javascript",
-            "file" : "jscript/name_eq_name_correlationQuery.js"
+            "file" : "script/name_eq_name_correlationQuery.js"
         },
         "validSource" : {
             "type" : "text/javascript",
@@ -99,7 +99,7 @@
             "target" : "__PASSWORD__",
             "condition" : {
                 "type" : "text/javascript",
-                "file" : "jscript/adPassword_to_ldap_condition.js"
+                "file" : "script/adPassword_to_ldap_condition.js"
             }
         } ],
         "policies" : [ {
