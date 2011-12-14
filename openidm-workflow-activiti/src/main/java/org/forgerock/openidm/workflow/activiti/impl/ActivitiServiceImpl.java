@@ -165,17 +165,17 @@ public class ActivitiServiceImpl implements JsonResource {
         try {
             switch (request.get("method").required().asEnum(SimpleJsonResource.Method.class)) {
                 case create:
-
+                    return null;
                 case read:
                     return read();
                 case update:
-
+                    return null;
                 case delete:
-
+                    return null;
                 case patch:
-
+                    return null;
                 case query:
-
+                    return null;
                 case action:
                     return action(request);
                 default:
