@@ -17,7 +17,6 @@
 package org.forgerock.openidm.objset;
 
 // Java SE
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -56,33 +55,6 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ObjectSetJsonResource.class);
 
-    /**
-     * Returns a {@code JsonResourceException} that corresponds to the specified
-     * {@code ObjectSetException}.
-     *
-     * @param exception the object set exception to convert to JSON resource exception.
-     * @return the JSON resource exception corresponding to the object set exception.
-     */
-    private JsonResourceException convertException(ObjectSetException exception) {
-        JsonResourceException prototype;
-        if (exception instanceof BadRequestException) {
-            prototype = JsonResourceException.BAD_REQUEST;
-        } else if (exception instanceof ConflictException) {
-            prototype = JsonResourceException.CONFLICT;
-        } else if (exception instanceof ForbiddenException) {
-            prototype = JsonResourceException.FORBIDDEN;
-        } else if (exception instanceof NotFoundException) {
-            prototype = JsonResourceException.NOT_FOUND;
-        } else if (exception instanceof PreconditionFailedException) {
-            prototype = JsonResourceException.VERSION_MISMATCH;
-        } else if (exception instanceof ServiceUnavailableException) {
-            prototype = JsonResourceException.UNAVAILABLE;
-        } else {
-            prototype = JsonResourceException.INTERNAL_ERROR;
-        }
-        return new JsonResourceException(prototype, exception.getMessage(), exception.getCause());
-    }
-
     @Override // ObjectSet
     public void create(String id, Map<String, Object> object) throws ObjectSetException {
         throw new ForbiddenException();
@@ -95,8 +67,6 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         ObjectSetContext.push(request);
         try {
             create(id, object);
-        } catch (ObjectSetException ose) {
-            throw convertException(ose);
         } finally {
             ObjectSetContext.pop();
         }
@@ -120,8 +90,6 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         ObjectSetContext.push(request);
         try {
             response = new JsonValue(read(id));
-        } catch (ObjectSetException ose) {
-            throw convertException(ose);
         } finally {
             ObjectSetContext.pop();
         }
@@ -142,8 +110,6 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         ObjectSetContext.push(request);
         try {
             update(id, rev, object);
-        } catch (ObjectSetException ose) {
-            throw convertException(ose);
         } finally {
             ObjectSetContext.pop();
         }
@@ -166,8 +132,6 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         ObjectSetContext.push(request);
         try {
             delete(id, rev);
-        } catch (ObjectSetException ose) {
-            throw convertException(ose);
         } finally {
             ObjectSetContext.pop();
         }
@@ -195,17 +159,11 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         ObjectSetContext.push(request);
         try {
             patch(id, rev, patch);
-            try {
-                response.put("_id", id);
-                Map<String, Object> object = read(id);
-                if (object.containsKey("_rev")) {
-                    response.put("_rev", object.get("_rev"));
-                }
-            } catch (ObjectSetException ose1) {
-                LOGGER.warn("Deprecated ObjectSet patch renamed object; missing _rev in response");
+            response.put("_id", id);
+            Map<String, Object> object = read(id);
+            if (object.containsKey("_rev")) {
+                response.put("_rev", object.get("_rev"));
             }
-        } catch (ObjectSetException ose2) {
-            throw convertException(ose2);
         } finally {
             ObjectSetContext.pop();
         }
@@ -225,8 +183,6 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         ObjectSetContext.push(request);
         try {
             response = new JsonValue(query(id, params));
-        } catch (ObjectSetException ose) {
-            throw convertException(ose);
         } finally {
             ObjectSetContext.pop();
         }
@@ -245,16 +201,11 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         Map<String, Object> params = request.get("params").copy().asMap(); // copy; gonna add _entity to it
         Map<String, Object> value = request.get("value").asMap();
         if (value != null) {
-            if (null == params) {
-                params = new HashMap<String, Object>(1);
-            }
             params.put("_entity", value);
         }
         ObjectSetContext.push(request);
         try {
             result = new JsonValue(action(id, params));
-        } catch (ObjectSetException ose) {
-            throw convertException(ose);
         } finally {
             ObjectSetContext.pop();
         }

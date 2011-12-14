@@ -209,7 +209,7 @@ public class JsonResourceRouterService implements JsonResource {
             return response;
         } catch (JsonResourceException jre) {
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Resource exception: " + jre.toJsonValue() +
+                LOGGER.trace("Resource exception: " + jre.toJsonValue() + 
                  " processing request: " + request.toString(), jre);
             }
             int code = jre.getCode();

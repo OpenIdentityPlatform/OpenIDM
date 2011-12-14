@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during an operation on an object set when the server
  * is temporarily unable to handle the request.
@@ -30,26 +33,27 @@ public class ServiceUnavailableException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public ServiceUnavailableException() {
+        super(JsonResourceException.UNAVAILABLE);
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
     public ServiceUnavailableException(String message) {
-        super(message);
+        super(JsonResourceException.UNAVAILABLE, message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
     public ServiceUnavailableException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.UNAVAILABLE, cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
     public ServiceUnavailableException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.UNAVAILABLE, message, cause);
     }
 }

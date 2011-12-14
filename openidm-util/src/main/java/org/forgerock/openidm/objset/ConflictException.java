@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during a operation on an object set when such an operation
  * would result in a conflict. For example: when a patch conflicts with the object state, or
@@ -31,6 +34,7 @@ public class ConflictException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public ConflictException() {
+        super(JsonResourceException.CONFLICT);
     }
     
     /**
@@ -38,7 +42,7 @@ public class ConflictException extends ObjectSetException {
      * @param message
      */
     public ConflictException(String message) {
-        super(message);
+        super(JsonResourceException.CONFLICT, message);
     }
     
     /**
@@ -46,7 +50,7 @@ public class ConflictException extends ObjectSetException {
      * @param cause
      */
     public ConflictException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.CONFLICT, cause);
     }
 
     /**
@@ -55,6 +59,6 @@ public class ConflictException extends ObjectSetException {
      * @param cause
      */
     public ConflictException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.CONFLICT, message, cause);
     }
 }

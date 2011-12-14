@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during a operation on an object set when the requested
  * operation is malformed.
@@ -30,6 +33,7 @@ public class BadRequestException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public BadRequestException() {
+        super(JsonResourceException.BAD_REQUEST);
     }
     
     /**
@@ -37,7 +41,7 @@ public class BadRequestException extends ObjectSetException {
      * @param message
      */
     public BadRequestException(String message) {
-        super(message);
+        super(JsonResourceException.BAD_REQUEST, message);
     }
     
     /**
@@ -45,7 +49,7 @@ public class BadRequestException extends ObjectSetException {
      * @param cause
      */
     public BadRequestException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.BAD_REQUEST, cause);
     }
 
     /**
@@ -54,6 +58,7 @@ public class BadRequestException extends ObjectSetException {
      * @param cause
      */
     public BadRequestException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.BAD_REQUEST, message, cause);
     }
+
 }
