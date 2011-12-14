@@ -200,33 +200,45 @@ public class SynchronizationService extends ObjectSetJsonResource
         return scopeFactory.newInstance(ObjectSetContext.get());
     }
 
+    /**
+     * @deprecated Use {@code sync} resource interface.
+     */
     @Override // SynchronizationListener
+    @Deprecated // use resource interface
     public void onCreate(String id, JsonValue object) throws SynchronizationException {
-// TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onCreate(id, object);
         }
     }
 
+    /**
+     * @deprecated Use {@code sync} resource interface.
+     */
     @Override // SynchronizationListener
+    @Deprecated // use resource interface
     public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
-// TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onUpdate(id, oldValue, newValue);
         }
     }
 
+    /**
+     * @deprecated Use {@code sync} resource interface.
+     */
     @Override // SynchronizationListener
+    @Deprecated // use resource interface
     public void onDelete(String id) throws SynchronizationException {
-// TODO: Deprecate this; use resource interface instead.
         for (ObjectMapping mapping : mappings) {
             mapping.onDelete(id);
         }
     }
 
+    /**
+     * @deprecated Use {@code sync} resource interface.
+     */
     @Override // ScheduledService
+    @Deprecated // use resource interface
     public void execute(Map<String, Object> context) throws ExecutionException {
-// TODO: Deprecate this; use resource interface instead.
         try {
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
@@ -237,7 +249,6 @@ public class SynchronizationService extends ObjectSetJsonResource
                     ObjectMapping schedulerMapping = new ObjectMapping(this, params.get("mapping"));
                     List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
                     schedulerMapping.initRelationships(this, augmentedMappings);
-                        
                     schedulerMapping.recon(UUID.randomUUID().toString());
                 }
             } else {
@@ -252,14 +263,10 @@ public class SynchronizationService extends ObjectSetJsonResource
     }
 
     /**
-     * TODO: Description.
-     *
-     * @param mapping TODO.
-     * @throws SynchronizationException TODO.
-     * @return TOOD.
+     * @deprecated Use {@code sync} resource interface.
      */
+    @Deprecated
     public String reconcile(String mapping) throws SynchronizationException {
-// TODO: Deprecate this; use resource interface instead.
         String reconId = UUID.randomUUID().toString();
         getMapping(mapping).recon(reconId); // throws SynchronizationException
         return reconId;
