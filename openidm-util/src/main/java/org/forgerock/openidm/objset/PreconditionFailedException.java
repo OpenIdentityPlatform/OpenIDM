@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during a operation on an object set when the specified object
  * version does not match the version provided.
@@ -30,26 +33,27 @@ public class PreconditionFailedException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public PreconditionFailedException() {
+        super(JsonResourceException.VERSION_MISMATCH);
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
     public PreconditionFailedException(String message) {
-        super(message);
+        super(JsonResourceException.VERSION_MISMATCH, message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
     public PreconditionFailedException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.VERSION_MISMATCH, cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
     public PreconditionFailedException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.VERSION_MISMATCH, message, cause);
     }
 }

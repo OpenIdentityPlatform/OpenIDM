@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown when a specified object cannot be found during an operation on
  * an object set. 
@@ -30,26 +33,27 @@ public class NotFoundException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public NotFoundException() {
+        super(JsonResourceException.NOT_FOUND);
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
     public NotFoundException(String message) {
-        super(message);
+        super(JsonResourceException.NOT_FOUND, message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
     public NotFoundException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.NOT_FOUND, cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
     public NotFoundException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.NOT_FOUND, message, cause);
     }
 }

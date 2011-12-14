@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during an operation on an object set when the server
  * encountered an unexpected condition which prevented it from fulfilling the request.
@@ -30,26 +33,27 @@ public class InternalServerErrorException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public InternalServerErrorException() {
+        super(JsonResourceException.INTERNAL_ERROR);
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
     public InternalServerErrorException(String message) {
-        super(message);
+        super(JsonResourceException.INTERNAL_ERROR, message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
     public InternalServerErrorException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.INTERNAL_ERROR, cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
     public InternalServerErrorException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.INTERNAL_ERROR, message, cause);
     }
 }

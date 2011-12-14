@@ -72,15 +72,14 @@ public final class JsonResourceObjectSet implements ObjectSet {
      */
     private ObjectSetException convertException(JsonResourceException exception) {
         String message = exception.getMessage();
-        Throwable cause = exception.getCause();
         switch (exception.getCode()) {
-        case 400: return new BadRequestException(message, cause);
-        case 403: return new ForbiddenException(message, cause);
-        case 404: return new NotFoundException(message, cause);
-        case 409: return new ConflictException(message, cause);
-        case 412: return new PreconditionFailedException(message, cause);
-        case 503: return new ServiceUnavailableException(message, cause);
-        default: return new InternalServerErrorException(message, cause);
+        case 400: return new BadRequestException(message, exception);
+        case 403: return new ForbiddenException(message, exception);
+        case 404: return new NotFoundException(message, exception);
+        case 409: return new ConflictException(message, exception);
+        case 412: return new PreconditionFailedException(message, exception);
+        case 503: return new ServiceUnavailableException(message, exception);
+        default: return new InternalServerErrorException(message, exception);
         }
     }
 

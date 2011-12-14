@@ -16,6 +16,9 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown access to an object is forbidden during an operation on an
  * object set.
@@ -30,26 +33,27 @@ public class ForbiddenException extends ObjectSetException {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public ForbiddenException() {
+        super(JsonResourceException.FORBIDDEN);
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
     public ForbiddenException(String message) {
-        super(message);
+        super(JsonResourceException.FORBIDDEN, message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
     public ForbiddenException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.FORBIDDEN, cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
     public ForbiddenException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.FORBIDDEN, message, cause);
     }
 }

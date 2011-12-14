@@ -16,12 +16,15 @@
 
 package org.forgerock.openidm.objset;
 
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during an operation on an object set.
  *
  * @author Paul C. Bryan
  */
-public class ObjectSetException extends Exception {
+public class ObjectSetException extends JsonResourceException {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,26 +32,55 @@ public class ObjectSetException extends Exception {
      * Constructs a new exception with {@code null} as its detail message.
      */
     public ObjectSetException() {
+        super(JsonResourceException.INTERNAL_ERROR, (String)null);
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
     public ObjectSetException(String message) {
-        super(message);
+        super(JsonResourceException.INTERNAL_ERROR, message);
     }
     
     /**
      * Constructs a new exception with the specified cause.
      */
     public ObjectSetException(Throwable cause) {
-        super(cause);
+        super(JsonResourceException.INTERNAL_ERROR, cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
     public ObjectSetException(String message, Throwable cause) {
-        super(message, cause);
+        super(JsonResourceException.INTERNAL_ERROR, message, cause);
+    }
+
+    /**
+     * TODO: Description.
+     */
+    protected ObjectSetException(JsonResourceException prototype) {
+        super(prototype, (String)null);
+    }
+
+    /**
+     * TODO: Description.
+     */
+    protected ObjectSetException(JsonResourceException prototype, String message) {
+        super(prototype, message);
+    }
+
+    /**
+     * TODO: Description.
+     */
+    protected ObjectSetException(JsonResourceException prototype, Throwable cause) {
+        super(prototype, cause);
+    }
+
+    /**
+     * TODO: Description.
+     */
+    protected ObjectSetException(JsonResourceException prototype, String message, Throwable cause) {
+        super(prototype, message, cause);
     }
 }
