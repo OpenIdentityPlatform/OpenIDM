@@ -369,86 +369,14 @@
             <activation>
                 <property>
                     <name>logger</name>
-                    <value>log4j</value>
+                    <!--value>logback</value-->
                 </property>
             </activation>
-            <repositories>
-                <repository>
-                    <id>com.springsource.repository.bundles.release</id>
-                    <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-                    <url>http://repository.springsource.com/maven/bundles/release</url>
-                </repository>
-                <repository>
-                    <id>com.springsource.repository.bundles.external</id>
-                    <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-                    <url>http://repository.springsource.com/maven/bundles/external</url>
-                </repository>
-            </repositories>
             <dependencies>
                 <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <version>${slf4j.version}</version>
-                </dependency>
-                <!-- https://issues.apache.org/bugzilla/show_bug.cgi?id=50800 -->
-                <dependency>
-                    <groupId>org.apache.log4j</groupId>
-                    <artifactId>com.springsource.org.apache.log4j</artifactId>
-                    <version>1.2.16</version>
-                </dependency>
-                <dependency>
-                    <groupId>javax.mail</groupId>
-                    <artifactId>com.springsource.javax.mail</artifactId>
-                    <version>1.4.1</version>
-                </dependency>
-                <!-- JCL Support -->
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                    <version>${slf4j.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>pax-logger</id>
-            <activation>
-                <property>
-                    <name>logger</name>
-                    <value>pax</value>
-                </property>
-            </activation>
-            <repositories>
-                <repository>
-                    <id>com.springsource.repository.bundles.release</id>
-                    <name>SpringSource Enterprise Bundle Repository - SpringSource Bundle Releases</name>
-                    <url>http://repository.springsource.com/maven/bundles/release</url>
-                </repository>
-                <repository>
-                    <id>com.springsource.repository.bundles.external</id>
-                    <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
-                    <url>http://repository.springsource.com/maven/bundles/external</url>
-                </repository>
-            </repositories>
-            <dependencies>
-                <dependency>
-                    <groupId>org.ops4j.pax.logging</groupId>
-                    <artifactId>pax-logging-api</artifactId>
-                    <version>1.6.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.ops4j.pax.logging</groupId>
-                    <artifactId>pax-logging-service</artifactId>
-                    <version>1.6.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.log4j</groupId>
-                    <artifactId>com.springsource.org.apache.log4j</artifactId>
-                    <version>1.2.16</version>
-                </dependency>
-                <dependency>
-                    <groupId>javax.mail</groupId>
-                    <artifactId>com.springsource.javax.mail</artifactId>
-                    <version>1.4.1</version>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                    <version>1.0.0</version>
                 </dependency>
             </dependencies>
         </profile>

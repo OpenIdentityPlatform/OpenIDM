@@ -24,6 +24,7 @@
 package org.forgerock.openidm.workflow.activiti.impl;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.*;
 
@@ -34,10 +35,15 @@ import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
+import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +60,6 @@ import org.forgerock.json.resource.JsonResource;
 // Deprecated
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
 
 /**
  * Workflow service implementation
@@ -78,7 +82,7 @@ import org.forgerock.openidm.objset.ObjectSetJsonResource;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = ActivitiServiceImpl.ROUTER_PREFIX)
 })
-public class ActivitiServiceImpl extends ObjectSetJsonResource {
+public class ActivitiServiceImpl implements JsonResource {
     final static Logger logger = LoggerFactory.getLogger(ActivitiServiceImpl.class);
     public final static String PID = "org.forgerock.openidm.workflow.activiti";
     public final static String ROUTER_PREFIX = "workflow/activiti";
@@ -89,19 +93,21 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
 
     @Reference(referenceInterface = JsonResource.class,
-        name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)")
-        private ObjectSet router;
-        protected void bindRouter(JsonResource router) {
-            this.router = new JsonResourceObjectSet(router);
-        }
-        protected void unbindRouter(JsonResource router) {
-            this.router = null;
-        }
+            name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
+            bind = "bindRouter",
+            unbind = "unbindRouter",
+            cardinality = ReferenceCardinality.MANDATORY_UNARY,
+            policy = ReferencePolicy.STATIC,
+            target = "(service.pid=org.forgerock.openidm.router)")
+    private ObjectSet router;
+
+    protected void bindRouter(JsonResource router) {
+        this.router = new JsonResourceObjectSet(router);
+    }
+
+    protected void unbindRouter(JsonResource router) {
+        this.router = null;
+    }
 
 
     @Reference(
@@ -115,6 +121,17 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
     )
     private ProcessEngine processEngine = null;
 
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    private ConfigurationAdmin configurationAdmin = null;
+
+    /**
+     * Some need to register a TransactionManager or we need to create one.
+     */
+    @Reference
+    private TransactionManager transactionManager;
+
+    private OpenIDMProcessEngineFactory processEngineFactory = null;
+    private Configuration barInstallerConfiguration = null;
 
     //This method called before activate if there is a ProcessEngine service in the Service Registry
     protected void bind(ProcessEngine processEngine) {
@@ -140,12 +157,38 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
         openIDMELResolver.unbindService(delegate, props);
     }
 
+
     /**
      * {@inheritDoc}
      */
-    @Override
-    public Map<String, Object> read(String fullId) throws ObjectSetException {
-        Map<String, Object> result = new HashMap<String, Object>();
+    public JsonValue handle(JsonValue request) throws JsonResourceException {
+        try {
+            switch (request.get("method").required().asEnum(SimpleJsonResource.Method.class)) {
+                case create:
+
+                case read:
+                    return read();
+                case update:
+
+                case delete:
+
+                case patch:
+
+                case query:
+
+                case action:
+                    return action(request);
+                default:
+                    throw JsonResourceException.BAD_REQUEST;
+            }
+        } catch (JsonValueException jve) {
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
+        }
+    }
+
+
+    public JsonValue read() throws JsonResourceException {
+        JsonValue result = new JsonValue(new HashMap<String, Object>());
         List<ProcessDefinition> definitionList = processEngine.getRepositoryService().createProcessDefinitionQuery().list();
         if (definitionList != null && definitionList.size() > 0) {
             for (ProcessDefinition processDefinition : definitionList) {
@@ -158,15 +201,10 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
-        Map<String, Object> result = null;
-        JsonValue paramsValue = new JsonValue(params);
-        String action = paramsValue.get("_action").required().asString();
-        JsonValue workflowParams = paramsValue.get("_workflowParams");
+    public JsonValue action(JsonValue params) throws JsonResourceException {
+        JsonValue result = null;
+        String action = params.get("params").get("_action").required().asString();
+        JsonValue workflowParams = params.get("value");
 
         //POST openidm/workflow/activiti?_action=TestWorkFlow will trigger the process
         ProcessInstance instance = null;
@@ -176,7 +214,7 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
             instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, workflowParams.asMap());
         }
         if (null != instance) {
-            result = new HashMap<String, Object>();
+            result = new JsonValue(new HashMap<String, Object>());
             result.put("status", instance.isEnded() ? "ended" : "suspended");
             result.put("processInstanceId", instance.getProcessInstanceId());
             result.put("businessKey", instance.getBusinessKey());
@@ -186,14 +224,6 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
 
         return result;
     }
-
-    /**
-     * Some need to register a TransactionManager or we need to create one.
-     */
-    @Reference
-    private TransactionManager transactionManager;
-
-    private OpenIDMProcessEngineFactory processEngineFactory = null;
 
     @Activate
     void activate(ComponentContext compContext) {
@@ -255,6 +285,21 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
                 prop.put("openidm.activiti.engine", "true");
                 compContext.getBundleContext().registerService(ProcessEngine.class.getName(), processEngine, prop);
 
+                if (null != configurationAdmin) {
+                    barInstallerConfiguration = configurationAdmin.createFactoryConfiguration("org.apache.felix.fileinstall", null);
+                    Dictionary props = barInstallerConfiguration.getProperties();
+                    if (props == null) {
+                        props = new Hashtable();
+                    }
+                    props.put("felix.fileinstall.poll", "2000");
+                    props.put("felix.fileinstall.noInitialDelay", "true");
+                    //TODO java.net.URLDecoder.decode(IdentityServer.getFileForPath("workflow").getAbsolutePath(),"UTF-8")
+                    props.put("felix.fileinstall.dir", IdentityServer.getFileForPath("workflow").getAbsolutePath());
+                    props.put("felix.fileinstall.filter", ".*\\.bar");
+                    props.put("felix.fileinstall.bundles.new.start", "true");
+                    props.put("config.factory-pid", "activiti");
+                    barInstallerConfiguration.update(props);
+                }
                 logger.debug("Activiti ProcessEngine is enabled");
             } catch (RuntimeException ex) {
                 logger.warn("Configuration invalid, can not start Activiti ProcessEngine service.", ex);
@@ -270,6 +315,14 @@ public class ActivitiServiceImpl extends ObjectSetJsonResource {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext.getProperties());
+        if (null != barInstallerConfiguration) {
+            try {
+                barInstallerConfiguration.delete();
+            } catch (IOException e) {
+                logger.error("Can not delete org.apache.felix.fileinstall-activiti configuration", e);
+            }
+            barInstallerConfiguration = null;
+        }
         if (null != processEngineFactory) {
             try {
                 processEngineFactory.destroy();

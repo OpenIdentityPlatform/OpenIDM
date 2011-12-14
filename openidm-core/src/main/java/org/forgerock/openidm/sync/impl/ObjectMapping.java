@@ -482,10 +482,10 @@ class ObjectMapping implements SynchronizationListener {
             ReconEntry entry = new ReconEntry(op);
             op.sourceId = sourceId;
             entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
-            op.sourceObject = readObject(entry.sourceId);
             sourceStats.entries++;
             op.reconId = reconId;
             try {
+                op.sourceObject = readObject(entry.sourceId);
                 op.sync();
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
@@ -522,10 +522,10 @@ class ObjectMapping implements SynchronizationListener {
             TargetSyncOperation op = new TargetSyncOperation();
             ReconEntry entry = new ReconEntry(op);
             entry.targetId = qualifiedId(targetObjectSet, targetId);
-            op.targetObject = readObject(entry.targetId);
             targetStats.entries++;
             op.reconId = reconId;
             try {
+                op.targetObject = readObject(entry.targetId);
                 op.sync();
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
@@ -647,6 +647,7 @@ class ObjectMapping implements SynchronizationListener {
                             // try to read again as it may have been created in a cascade
                             linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
                         }
+
                         String targetId = targetObject.get("_id").required().asString();
                         if (linkObject._id == null) {
                             execScript("onLink", onLinkScript);
