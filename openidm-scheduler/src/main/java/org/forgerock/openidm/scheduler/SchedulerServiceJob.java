@@ -36,6 +36,15 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+// JSON Fluent
+import org.forgerock.json.fluent.JsonValue;
+
+// JSON Resource
+import org.forgerock.json.resource.JsonResourceContext;
+
+// Deprecated
+import org.forgerock.openidm.objset.ObjectSetContext;
+
 /**
  * Scheduler service job using Quartz
  * 
@@ -50,6 +59,24 @@ public class SchedulerServiceJob implements Job {
 
     public SchedulerServiceJob() {
         // Instances of Job must have a public no-argument constructor.
+    }
+
+    /**
+     * Generates a new scheduler service context, suitable for inclusion as a parent context
+     * to a resource via the router. For now, this is simply placed on the ObjectSetContext
+     * stack prior to the call to the scheduled service, but in the future should be sent in
+     * a request context via the router. This does not create a faux request context; that is
+     * incumbent on the invoked service to establish if necessary.
+     */
+    private JsonValue newSchedulerContext(Map<String, Object> ssc) {
+// TODO: Document my structure somewhere. Wiki?
+        JsonValue context = JsonResourceContext.newContext("scheduler", JsonResourceContext.newRootContext());
+        context.put("scheduled-time", ssc.get(ScheduledService.SCHEDULED_FIRE_TIME));
+        context.put("actual-time", ssc.get(ScheduledService.ACTUAL_FIRE_TIME));
+        context.put("next-time", ssc.get(ScheduledService.NEXT_FIRE_TIME));
+        context.put("invoke-service", ssc.get(ScheduledService.CONFIGURED_INVOKE_SERVICE));
+        context.put("invoke-context", ssc.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT));
+        return context;
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
@@ -77,7 +104,13 @@ public class SchedulerServiceJob implements Job {
         } else {
             try {
                 logger.info("Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
-                scheduledService.execute(scheduledServiceContext);
+// TODO: Migrate calls to router; pass context in request.
+                ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
+                try {
+                    scheduledService.execute(scheduledServiceContext);
+                } finally {
+                    ObjectSetContext.pop();
+                }
                 logger.info("Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",

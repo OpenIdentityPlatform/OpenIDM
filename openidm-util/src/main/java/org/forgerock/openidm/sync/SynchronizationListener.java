@@ -31,7 +31,9 @@ import org.forgerock.json.fluent.JsonValue;
  * should ignore object identifiers that they do not recognize.
  *
  * @author Paul C. Bryan
+ * @deprecated Use the {@code /sync} resource interface.
  */
+@Deprecated
 public interface SynchronizationListener {
     
     /**

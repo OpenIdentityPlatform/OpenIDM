@@ -51,6 +51,9 @@ import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
 
+// Deprecated
+import org.forgerock.openidm.objset.ObjectSetContext;
+
 /**
  * TODO: Description.
  *
@@ -71,21 +74,13 @@ public class SchedulableScriptService implements ScheduledService {
     @Reference
     public ScopeFactory scopeFactory;
 
-    /**
-     * Produces a new "scheduled" context, indicating that the request came as a
-     * scheduled task.
-     */
-// TODO: Standardize on a single scheduled task context structure.
-    private JsonValue newScheduledContext() {
-        return JsonResourceContext.newContext("scheduled", JsonResourceContext.newRootContext());
-    }
-
     private Map<String, Object> newScope() {
-        return scopeFactory.newInstance(newScheduledContext());
+        return scopeFactory.newInstance(ObjectSetContext.get());
     }
 
     @Override
     public void execute(Map<String, Object> context) throws ExecutionException {
+// TODO: Use resource interface.
         try {
             String name = (String) context.get(INVOKER_NAME);
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
