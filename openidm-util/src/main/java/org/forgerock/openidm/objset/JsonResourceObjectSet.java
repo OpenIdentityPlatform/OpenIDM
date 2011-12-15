@@ -71,6 +71,9 @@ public final class JsonResourceObjectSet implements ObjectSet {
      * @return TODO.
      */
     private ObjectSetException convertException(JsonResourceException exception) {
+        if (exception instanceof ObjectSetException) {
+            return (ObjectSetException)exception;
+        }
         String message = exception.getMessage();
         switch (exception.getCode()) {
         case 400: return new BadRequestException(message, exception);

@@ -267,6 +267,9 @@ public class JsonResourceRouterService implements JsonResource {
         /** TODO: Description. */
         private Script onResponse;
 
+        /** TODO: Description. */
+        private Script onFailure;
+
         /**
          * TODO: Description.
          *
@@ -284,24 +287,7 @@ public class JsonResourceRouterService implements JsonResource {
             condition = Scripts.newInstance(name, config.get("condition"));
             onRequest = Scripts.newInstance(name, config.get("onRequest"));
             onResponse = Scripts.newInstance(name, config.get("onResponse"));
-        }
-
-        /**
-         * TODO: Description.
-         *
-         * @param request TODO.
-         * @param response TODO.
-         * @return TODO.
-         */
-        private Map<String, Object> newScope(JsonValue request, JsonValue response) {
-            Map<String, Object> scope = scopeFactory.newInstance(request);
-            if (request != null) {
-                scope.put("request", request.getObject());
-            }
-            if (response != null) {
-                scope.put("response", response.getObject());
-            }
-            return scope;
+            onFailure = Scripts.newInstance(name, config.get("onFailure"));
         }
 
         /**
@@ -341,18 +327,14 @@ public class JsonResourceRouterService implements JsonResource {
        /**
          * TODO: Description.
          *
-         * @param request TODO.
+         * @param scope TODO.
          * @throws JsonResourceException TODO.
          */
-        private void onRequest(JsonValue request) throws JsonResourceException {
-            if (onRequest != null
-             && matches(request.get("method").asString(), request.get("id").asString())) {
+        private void onRequest(Map<String, Object> scope) throws JsonResourceException {
+            if (onRequest != null) {
+                LOGGER.debug("Calling {} onRequest script", pointer); 
                 try {
-                    Map<String, Object> scope = newScope(request, null);
-                    if (evalCondition(scope)) {
-                        LOGGER.debug("Calling {} onRequest script", pointer); 
-                        onRequest.exec(scope);
-                    }
+                    onRequest.exec(scope);
                 } catch (ScriptThrownException ste) {
                     LOGGER.debug("Validation failed", ste);
                     Object value = ste.getValue();
@@ -369,19 +351,14 @@ public class JsonResourceRouterService implements JsonResource {
         /**
          * TODO: Description.
          *
-         * @param request TODO.
-         * @param response TODO.
+         * @param scope TODO.
          * @throws JsonResourceException TODO.
          */
-        private void onResponse(JsonValue request, JsonValue response) throws JsonResourceException {
-            if (onResponse != null
-             && matches(request.get("method").asString(), request.get("id").asString())) {
+        private void onResponse(Map<String, Object> scope) throws JsonResourceException {
+            if (onResponse != null) {
+                LOGGER.debug("Calling {} onResponse script", pointer); 
                 try {
-                    Map<String, Object> scope = newScope(request, response);
-                    if (evalCondition(scope)) {
-                        LOGGER.debug("Calling {} onResponse script", pointer); 
-                        onResponse.exec(scope);
-                    }
+                    onResponse.exec(scope);
                 } catch (ScriptException se) {
                     String msg = pointer + " onResponse script encountered exception";
                     LOGGER.debug(msg, se);
@@ -390,12 +367,67 @@ public class JsonResourceRouterService implements JsonResource {
             }
         }
 
+        /**
+         * TODO: Description.
+         *
+         * @param scope TODO.
+         * @throws JsonResourceException TODO.
+         */
+        private void onFailure(Map<String, Object> scope) throws JsonResourceException {
+            if (onFailure != null) {
+                LOGGER.debug("Calling {} onFailure script", pointer); 
+                try {
+                    onFailure.exec(scope);
+                } catch (ScriptException se) {
+                    String msg = pointer + " onFailure script encountered exception";
+                    LOGGER.debug(msg, se);
+                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
+                }
+            }
+        }
+
+        /**
+         * Filters the JSON resource request and/or JSON resource response. If the
+         * {@code method}, {@code id} pattern and {@code condition} match, then the (optional)
+         * {@code onRequest}, {@code onResponse} and/or {@code onFailure} scripts are invoked.
+         * <p>
+         * This method creates a copy of the request value, so unlike the rules specified in
+         * the {@code JsonResourceFilter} class, the {@code onRequest} script is allowed to
+         * modify the request. The modified request is what will be passed on to the next
+         * filter/handler in the chain.
+         *
+         * @param request the JSON resource request.
+         * @param next the next filter or resource in chain.
+         * @return the JSON resource response.
+         * @throws JsonResourceException if there is an exception handling the request.
+         */
         @Override
         public JsonValue filter(JsonValue request, JsonResource next) throws JsonResourceException {
-            onRequest(request);
-            JsonValue response = next.handle(request);
-            if (onResponse != null) {
-                onResponse(request, response);
+            Map<String, Object> scope = null;
+            request = request.copy(); // allows modification of request by onRequest script
+            if (matches(request.get("method").asString(), request.get("id").asString())) {
+                scope = scopeFactory.newInstance(request);
+                scope.put("request", request.getObject());
+                if (!evalCondition(scope)) {
+                    scope = null; // do not filter
+                }
+            }
+            if (scope != null) {
+                onRequest(scope); // script can modify/replace request in scope
+            }
+            JsonValue response;
+            try {
+                response = next.handle(new JsonValue(scope.get("request"))); // use scope request
+            } catch (JsonResourceException jre) {
+                if (scope != null) {
+                    scope.put("exception", jre.toJsonValue().getObject());
+                    onFailure(scope);
+                }
+                throw jre;
+            }
+            if (scope != null) {
+                scope.put("response", response == null ? null : response.getObject());
+                onResponse(scope);
             }
             return response;
         }
