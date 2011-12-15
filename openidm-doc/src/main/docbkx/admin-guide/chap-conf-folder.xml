@@ -162,8 +162,8 @@ $OPENIDM
 |- sample5
 |- sample6
 |- stop.sh
-|- start.sh
-|- run.bat 
+|- startup.sh
+|- startup.bat 
   </programlisting>
   </example>
   <section>
