@@ -59,28 +59,28 @@ public class ObjectSetException extends JsonResourceException {
     /**
      * TODO: Description.
      */
-    protected ObjectSetException(JsonResourceException prototype) {
-        super(prototype, (String)null);
+    public ObjectSetException(int code) {
+        super(code);
     }
 
     /**
      * TODO: Description.
      */
-    protected ObjectSetException(JsonResourceException prototype, String message) {
-        super(prototype, message);
+    public ObjectSetException(int code, String message) {
+        super(code, message);
     }
 
     /**
      * TODO: Description.
      */
-    protected ObjectSetException(JsonResourceException prototype, Throwable cause) {
-        super(prototype, cause);
+    public ObjectSetException(int code, Throwable cause) {
+        super(code, cause);
     }
 
     /**
      * TODO: Description.
      */
-    protected ObjectSetException(JsonResourceException prototype, String message, Throwable cause) {
-        super(prototype, message, cause);
+    public ObjectSetException(int code, String message, Throwable cause) {
+        super(code, message, cause);
     }
 }

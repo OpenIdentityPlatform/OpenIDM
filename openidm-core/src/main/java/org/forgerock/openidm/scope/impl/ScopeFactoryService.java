@@ -152,7 +152,7 @@ public class ScopeFactoryService implements ScopeFactory {
                               p.get(0).required().asString()
                             ).getWrappedObject();
                         } catch (JsonResourceException jre) {
-                            if (jre.hasCode(JsonResourceException.NOT_FOUND)) {
+                            if (jre.getCode() == JsonResourceException.NOT_FOUND) {
                                 return null; // indicates no such record without throwing exception
                             } else {
                                 throw jre;
