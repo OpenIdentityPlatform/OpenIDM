@@ -122,13 +122,13 @@ $</screen>
       <step>
        <para>On UNIX, Linux, and Mac OS X</para>
        <screen>$ cd /path/to/openidm
-$ ./start.sh
+$ ./startup.sh
 -&gt;</screen>
       </step>
       <step>
        <para>On Windows</para>
        <screen>$ cd \path\to\openidm
-$ run.bat
+$ startup.bat
 Start in debug mode [1] default
 Start in normal mode [2]
 Show help [3]
