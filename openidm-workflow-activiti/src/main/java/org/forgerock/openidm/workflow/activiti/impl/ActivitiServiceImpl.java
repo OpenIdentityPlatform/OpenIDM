@@ -179,7 +179,7 @@ public class ActivitiServiceImpl implements JsonResource {
                 case action:
                     return action(request);
                 default:
-                    throw JsonResourceException.BAD_REQUEST;
+                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
             }
         } catch (JsonValueException jve) {
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);

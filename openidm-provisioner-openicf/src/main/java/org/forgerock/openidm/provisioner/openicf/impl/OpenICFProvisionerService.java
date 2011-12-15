@@ -232,15 +232,15 @@ public class OpenICFProvisionerService implements ProvisionerService {
             case delete:
                 return delete(id, rev);
             case patch:
-                throw JsonResourceException.BAD_REQUEST;
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
             case query:
                 return query(id, value);
             case action:
                 return action(id, value);
             case liveSync:
-                throw JsonResourceException.BAD_REQUEST;
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
             default:
-                throw JsonResourceException.BAD_REQUEST;
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
         }
     }
 
