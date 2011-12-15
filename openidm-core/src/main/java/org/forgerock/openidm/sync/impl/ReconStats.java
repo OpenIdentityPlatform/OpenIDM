@@ -49,17 +49,19 @@ public class ReconStats {
     private Map<Situation, List<String>> ids = new EnumMap<Situation, List<String>>(Situation.class);
     private SimpleDateFormat sdformat = new SimpleDateFormat();
     public long entries = 0;
+    public List<String> notValid = null;
 
     public ReconStats(String reconId, String reconName) {
         this.reconId = reconId;
         this.reconName = reconName;
-        ids.put(Situation.CONFIRMED, new ArrayList());
-        ids.put(Situation.FOUND, new ArrayList());
-        ids.put(Situation.ABSENT, new ArrayList());
-        ids.put(Situation.AMBIGUOUS, new ArrayList());
-        ids.put(Situation.MISSING, new ArrayList());
-        ids.put(Situation.UNQUALIFIED, new ArrayList());
-        ids.put(Situation.UNASSIGNED, new ArrayList());
+        ids.put(Situation.CONFIRMED, new ArrayList<String>());
+        ids.put(Situation.FOUND, new ArrayList<String>());
+        ids.put(Situation.ABSENT, new ArrayList<String>());
+        ids.put(Situation.AMBIGUOUS, new ArrayList<String>());
+        ids.put(Situation.MISSING, new ArrayList<String>());
+        ids.put(Situation.UNQUALIFIED, new ArrayList<String>());
+        ids.put(Situation.UNASSIGNED, new ArrayList<String>());
+        notValid = new ArrayList<String>();
         startTime = System.currentTimeMillis();
         startTimestamp = sdformat.format(new Date());
     }
@@ -83,6 +85,10 @@ public class ReconStats {
         }
     }
 
+    public void addNotValid(String id) {
+        notValid.add(id);
+    }
+
     public void addAction(String id, Action action) {
     }
 
@@ -96,6 +102,11 @@ public class ReconStats {
         results.put("entries", entries);
         results.put("reconId", reconId);
         results.put("reconName", reconName);
+
+        Map<String, Object> nv = new HashMap();
+        nv.put("count", notValid.size());
+        nv.put("ids", notValid);
+        results.put("NOTVALID", nv);
 
         for (Entry<Situation, List<String>> e : ids.entrySet()) {
             Map<String, Object> res = new HashMap();
