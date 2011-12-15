@@ -72,7 +72,7 @@
    </itemizedlist>
    <para>OpenIDM can then be started in the background with: </para>
    <programlisting>./start &amp;</programlisting>
-   <para>Stopping the instanc will now be done with the stop command: </para>
+   <para>Stopping the instance will now be done with the stop command: </para>
    <programlisting>./stop</programlisting>
   </section>
  </section>
