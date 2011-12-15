@@ -108,7 +108,7 @@
 
   <para>This example shows how to define a trigger to create Solaris home
   directories using a script. The script is located in a file,
-  <filename>/path/to/openidm/jscript/createUnixHomeDir.js</filename>.</para>
+  <filename>/path/to/openidm/script/createUnixHomeDir.js</filename>.</para>
 
   <programlisting language="javascript">{
   "filters" : [ {
@@ -116,7 +116,7 @@
       "methods" : [ "create" ],
       "onResponse" : {
         "type" : "text/javascript",
-        "file" : "jscript/createUnixHomeDir.js"
+        "file" : "script/createUnixHomeDir.js"
       }
   } ]
 }</programlisting>
