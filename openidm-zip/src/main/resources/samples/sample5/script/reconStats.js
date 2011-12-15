@@ -1,4 +1,5 @@
-// Jscript example for the "result" script that deals with the recon stats
+// Jscript example for the "result" script that deals with the recon stats. See:
+// https://wikis.forgerock.org/confluence/display/openidm/Reconciliation+reports
 // First build the HTML body with the recon statistics
 // Then use the external email service to email the report
 // 3 objects are passed to the script:
@@ -11,6 +12,9 @@
 // 
 // target: contains detailed information about target system processing
 // (system name, start date, end date, duration, situations/entries)
+// 
+// Author: Gael.Allioux@forgerock.com
+// Date: 11/30/2011
 
 var globalSummary = "<h2>Global Statistics</h2><p>\n"+
 "<b>Mapping Name:</b>" + global.reconName+"<br>\n"+
@@ -22,8 +26,9 @@ var sourceSummary = "<h2>Source System Statistics</h2><p>\n"+
 "<b>System Name:</b>" + source.reconName+"<br>\n"+
 "<b>Start Time:</b>" + source.startTime +"<br>\n"+
 "<b>End Time:</b>" + source.endTime+"<br>\n"+
-"<b>Duration:</b>" + source.duration/60000+" minutes<br>\n"+
-"<b>Entry List Query duration:</b>" + source.allIds/1000+" seconds<br>\n"+
+"<b>Duration:</b>" + Math.floor(source.duration/60000)+" minutes<br>\n"+
+"<b>Entries:</b>" + source.entries+" read<br>\n"+
+"<b>Entry List Query duration:</b>" + Math.floor(source.allIds/1000)+" seconds<br>\n"+
 "<h4> SITUATIONS </h4>\n"+
 " <ul><li>CONFIRMED: "+source.CONFIRMED.count+"\n"+
 " </li><li>MISSING: "+source.MISSING.count+"\n"+
@@ -31,14 +36,17 @@ var sourceSummary = "<h2>Source System Statistics</h2><p>\n"+
 " </li><li>ABSENT: "+source.ABSENT.count+"\n"+
 " </li><li>UNQUALIFIED: "+source.UNQUALIFIED.count+"\n"+
 " </li><li>UNASSIGNED: "+source.UNASSIGNED.count+"\n"+
-" </ul><br><br>";
+" </ul><br>\n"+
+" <b>Invalid entries:</b>" + source.NOTVALID.count+
+" <br><br>\n";
                 
 var targetSummary = "<h2>Target System Statistics</h2><p>\n"+
 "<b>System Name:</b>" + target.reconName+"<br>\n"+
 "<b>Start Time:</b>" + target.startTime +"<br>\n"+
 "<b>End Time:</b>" + target.endTime+"<br>\n"+
-"<b>Duration:</b>" + target.duration/60000+" minutes<br>\n"+
-"<b>Entry List Query duration:</b>" + target.allIds/1000+" seconds<br>\n"+
+"<b>Duration:</b>" + Math.floor(target.duration/60000)+" minutes<br>\n"+
+"<b>Entries:</b>" + target.entries+" read<br>\n"+
+"<b>Entry List Query duration:</b>" + Math.floor(target.allIds/1000)+" seconds<br>\n"+
 "<h4> SITUATIONS </h4>\n"+
 " <ul><li>CONFIRMED: "+target.CONFIRMED.count+"\n"+
 " </li><li>MISSING: "+target.MISSING.count+"\n"+
@@ -46,7 +54,9 @@ var targetSummary = "<h2>Target System Statistics</h2><p>\n"+
 " </li><li>ABSENT: "+target.ABSENT.count+"\n"+
 " </li><li>UNQUALIFIED: "+target.UNQUALIFIED.count+"\n"+
 " </li><li>UNASSIGNED: "+target.UNASSIGNED.count+"\n"+
-" </ul><br><br>";
+" </ul><br>\n"+
+" <b>Invalid entries:</b>" + target.NOTVALID.count+
+" <br><br>\n";
 
 var sourceIds = "<hr><h2>Detailed Source Statistics</h2><p>\n";
 

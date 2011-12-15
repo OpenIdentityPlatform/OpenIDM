@@ -851,6 +851,9 @@ class ObjectMapping implements SynchronizationListener {
                     situation = null; // TODO: provide a situation for this?
                     /*}*/
                 }
+                if (sourceStats != null) {
+                    sourceStats.addNotValid(sourceId);
+                }
             }
             if (sourceStats != null){
                 sourceStats.addSituation(sourceId, situation);
@@ -920,10 +923,13 @@ class ObjectMapping implements SynchronizationListener {
          */
         private void assessSituation() throws SynchronizationException {
             situation = null;
+            String targetId = (targetObject != null ? targetObject.get("_id").asString() : null);
             if (!isTargetValid()) { // target is not valid for this mapping; ignore it
+                if (targetStats != null) {
+                    targetStats.addNotValid(targetId);
+                }
                 return;
             }
-            String targetId = (targetObject != null ? targetObject.get("_id").asString() : null);
             if (targetId != null) {
                 linkObject.getLinkForTarget(targetId);
             }
