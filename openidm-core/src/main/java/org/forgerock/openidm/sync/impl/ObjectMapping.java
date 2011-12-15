@@ -936,7 +936,7 @@ class ObjectMapping implements SynchronizationListener {
             if (reconId != null && reconId.equals(linkObject.reconId)) {
                 return; // optimization: already handled in previous phase; ignore it
             } else if (linkObject._id == null || linkObject.sourceId == null) {
-                situation = Situation.UNQUALIFIED;
+                situation = Situation.UNASSIGNED;
             } else {
                 sourceObject = readObject(qualifiedId(sourceObjectSet, linkObject.sourceId));
                 if (sourceObject == null || !isSourceValid()) {
