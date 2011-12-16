@@ -73,7 +73,7 @@ enum Situation {
 
     /** TODO: Description. */
     private Action defaultAction;
-
+    
     /**
      * TODO: Description.
      *
@@ -82,7 +82,7 @@ enum Situation {
     Situation(Action defaultAction) {
         this.defaultAction = defaultAction;
     }
-
+    
     /**
      * TODO: Description.
      * @return
@@ -90,4 +90,5 @@ enum Situation {
     public Action getDefaultAction() {
         return defaultAction;
     }
+    
 }

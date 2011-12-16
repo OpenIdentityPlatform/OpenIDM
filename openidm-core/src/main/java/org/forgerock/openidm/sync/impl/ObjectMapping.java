@@ -36,9 +36,11 @@ import org.forgerock.json.fluent.JsonValueException;
 
 // JSON Patch
 import org.forgerock.json.patch.JsonPatch;
+import org.forgerock.json.resource.JsonResourceContext;
 
 // OpenIDM
 import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
@@ -51,6 +53,7 @@ import org.forgerock.openidm.sync.SynchronizationListener;
  * TODO: Description.
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 class ObjectMapping implements SynchronizationListener {
 
@@ -570,6 +573,21 @@ class ObjectMapping implements SynchronizationListener {
             throw new SynchronizationException(ose);
         }
     }
+    
+    /*
+     * Execute a sync engine action explicitly, without going through situation assessment.
+     * @param sourceObject the source object if applicable to the action
+     * @param targetObject the target object if applicable to the action
+     * @param situation an optional situation that was originally assessed. Null if not the result of an earlier situation assessment.
+     * @param action the explicit action to invoke
+     * @param reconId an optional identifier for the recon context if this is done in the context of reconciliation
+     */
+    public void explicitOp(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId) 
+            throws SynchronizationException {
+        ExplicitSyncOperation linkOp = new ExplicitSyncOperation();
+        linkOp.init(sourceObject, targetObject, situation, action, reconId);
+        linkOp.sync();
+    }
 
     /**
      * TODO: Description.
@@ -636,7 +654,22 @@ class ObjectMapping implements SynchronizationListener {
                         targetObject = new JsonValue(new HashMap<String, Object>());
                         applyMappings(sourceObject, targetObject); // apply property mappings to target
                         execScript("onCreate", onCreateScript);
+                        
+                        JsonValue context = ObjectSetContext.get();
+                        // Allow the early link creation as soon as the target identifier is known
+                        String sourceId = sourceObject.get("_id").required().asString();
+                        PendingLink.populate(context, ObjectMapping.this.name, sourceId, sourceObject, reconId, situation);
+                        
                         createTargetObject(targetObject);
+                        boolean wasLinked = PendingLink.wasLinked(context);
+                        if (wasLinked) {
+                            LOGGER.debug("Pending link for {} during {} has already been created, skipping additional link processing",
+                                    sourceId, reconId);
+                            break;
+                        } else {
+                            LOGGER.debug("Pending link for {} during {} not yet resolved, proceed to link processing", sourceId, reconId);
+                            PendingLink.clear(context); // We'll now handle link creation ourselves
+                        }
                     // falls through to link the newly created target
                     case UPDATE:
                     case LINK:
@@ -650,11 +683,7 @@ class ObjectMapping implements SynchronizationListener {
 
                         String targetId = targetObject.get("_id").required().asString();
                         if (linkObject._id == null) {
-                            execScript("onLink", onLinkScript);
-                            linkObject.sourceId = sourceObject.get("_id").required().asString();
-                            linkObject.targetId = targetId;
-                            linkObject.reconId = reconId;
-                            linkObject.create();
+                            createLink(sourceObject.get("_id").required().asString(), targetId, reconId);
                         } else if (!targetId.equals(linkObject.targetId) || (reconId != null && !reconId.equals(linkObject.reconId))) {
                             linkObject.targetId = targetId;
                             linkObject.reconId = reconId;
@@ -692,6 +721,16 @@ class ObjectMapping implements SynchronizationListener {
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
             }
+        }
+        
+        protected void createLink(String sourceId, String targetId, String reconId) throws SynchronizationException {
+            Link linkObject = new Link(ObjectMapping.this);
+            execScript("onLink", onLinkScript);
+            linkObject.sourceId = sourceId;
+            linkObject.targetId = targetId;
+            linkObject.reconId = reconId;
+            linkObject.create();
+            LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", new Object[] {sourceId, targetId, reconId});
         }
 
         /**
@@ -753,12 +792,12 @@ class ObjectMapping implements SynchronizationListener {
             LOGGER.trace("isTargetValid of {} evaluated: {}", null != targetObject ? targetObject.get("_id").getObject() : "[NULL]", result);
             return result;
         }
-
+        
         /**
-         * TODO: Description.
+         * Executes the given script with the appropriate context information
          *
-         * @param type TODO.
-         * @param script TODO.
+         * @param type The script hook name
+         * @param script The script to execute
          * @throws SynchronizationException TODO.
          */
         private void execScript(String type, Script script) throws SynchronizationException {
@@ -783,6 +822,29 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    /**
+     * Explicit execution of a sync operation where the appropriate 
+     * action is known without having to assess the situation and apply 
+     * policy to decide the action
+     */
+    private class ExplicitSyncOperation extends SyncOperation {
+
+        public void init(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId) {
+            this.reconId = reconId;
+            this.sourceObject = sourceObject;
+            this.targetObject = targetObject;
+            this.situation = situation;
+            this.action = action;
+        }
+        
+        @Override
+        public void sync() throws SynchronizationException {
+            LOGGER.debug("Initiate explicit operation call for situation: {}, action: {}", situation, action);
+            performAction();
+            LOGGER.debug("Complected explicit operation call for situation: {}, action: {}", situation, action);
+        }
+    }
+    
     /**
      * TODO: Description.
      */
