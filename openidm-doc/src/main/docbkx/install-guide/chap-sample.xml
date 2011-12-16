@@ -46,8 +46,14 @@
   xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
   OpenIDM Services</citetitle></link>.</para>
-  <para>If you want to query the internal noSQL database (OrientDB), download
-  and unzip <link xlink:href='http://code.google.com/p/orient/wiki/Download'
+
+  <para>OpenIDM comes with an internal noSQL database, OrientDB for use as
+  the internal repository out of the box. This makes it easy to get started
+  with OpenIDM. OrientDB is not yet supported for production use, however,
+  so use a supported JDBC database when moving to production.</para>
+
+  <para>If you want to query the internal noSQL database, download and unzip
+  <link xlink:href="http://code.google.com/p/orient/wiki/Download"
   xlink:show="new">OrientDB 1.0</link>. Once you have downloaded and unzipped
   OrientDB, you can find the shell console in the <filename>bin</filename>
   directory. Start OrientDB console using either <command>console.sh</command>
