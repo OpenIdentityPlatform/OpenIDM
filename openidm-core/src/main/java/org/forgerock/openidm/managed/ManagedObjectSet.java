@@ -433,6 +433,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         if (_action == null) {
             throw new BadRequestException("Expecting _action parameter");
         } else if (_action.equals("patch")) {
+            logActivity(id, "Action: " + _action, null, null);
             result = patchAction(id, new JsonValue(params, new JsonPointer("parameters"))).asMap();
         } else {
             throw new BadRequestException("Unsupported _action parameter");
