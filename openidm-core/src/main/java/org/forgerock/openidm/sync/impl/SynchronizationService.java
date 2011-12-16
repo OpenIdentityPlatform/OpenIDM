@@ -75,6 +75,7 @@ import org.forgerock.openidm.objset.ObjectSetJsonResource;
  * TODO: Description.
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 @Component(
     name = "org.forgerock.openidm.sync",
@@ -206,6 +207,7 @@ public class SynchronizationService extends ObjectSetJsonResource
     @Override // SynchronizationListener
     @Deprecated // use resource interface
     public void onCreate(String id, JsonValue object) throws SynchronizationException {
+        PendingLink.handlePendingLinks(mappings, id, object);
         for (ObjectMapping mapping : mappings) {
             mapping.onCreate(id, object);
         }
