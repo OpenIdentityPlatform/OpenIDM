@@ -30,19 +30,181 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Configuring Auditing</title>
+ <title>Audit Logging</title>
 
- <para>This chapter covers ... TODO.</para>
+ <para>OpenIDM auditing can publish and log all relevant system activity to
+ the targets you specify. Auditing can include data from reconciliation as
+ a basis for reporting, to detailed activity logs that capture operations on
+ internal (managed) objects and external (system) objects. Auditing provides
+ the data for all the relevant reports, including orphan account reports.
+ For instructions on setting up an external reporting engine with OpenIDM,
+ see the chapter on <link xlink:href="admin-guide#chap-reporting"
+ xlink:role="http://docbook.org/xlink/role/olink">generating reports</link>
+ for instructions.</para>
 
- <section xml:id="auditing-section-id">
-  <title>Section Title</title>
+ <para>The auditing interface allows you to push auditing data to files or
+ to the OpenIDM repository.</para>
 
-  <para>This section covers ... TODO.</para>
+ <section xml:id="audit-log-types">
+  <title>Audit Log Types</title>
 
-  <section xml:id="auditing-subsection-id">
-   <title>Subsection Title</title>
+  <variablelist>
+   <para>This section describes the types of audit log OpenIDM provides.</para>
+   <varlistentry>
+    <term>Activity Log</term>
+    <listitem>
+     <para>To this type, OpenIDM logs operations on internal (managed) and
+     external (system) objects.</para>
+     <para>Entries in the activity log contain identifiers both for the
+     reconciliation or synchronization action that triggered the activity,
+     and also for the original caller and the relationships between related
+     actions.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Reconciliation Log</term>
+    <listitem>
+     <para>To this type, OpenIDM logs the results of a reconciliation run,
+     including situations and the resulting actions taken. The activity log
+     contains details about the actions, where log entries display parent
+     activity identifiers,
+     <literal>recon/<replaceable>reconID</replaceable></literal>.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
 
-   <para>This subsection covers ... TODO.</para>
+  <para>Where an action happens the context of a higher level business
+  function, the log entry points to a parent activity for the context.
+  The relationships are hierarchical. For example, a synchronization operation
+  could result from scheduled reconciliation for an object type. OpenIDM also
+  logs the top level root activity with each entry, making it possible to
+  query related activities.</para>
+
+  <para>TODO: Show a concrete example.</para>
+ </section>
+
+ <section xml:id="audit-configuration">
+  <title>Audit Configuration</title>
+
+  <para>OpenIDM exposes the audit logging configuration under
+  <literal>http://<replaceable>host</replaceable>:<replaceable>port</replaceable>/openidm/config/audit</literal>
+  for the REST API, and in the file <filename>conf/audit.json</filename> where
+  you installed OpenIDM. The default <filename>conf/audit.json</filename> file
+  contains the following object.</para>
+
+  <programlisting language="javascript">
+{
+    "eventTypes": {
+        "activity": {
+            "filter": {
+                "actions": [
+                    "create",
+                    "update",
+                    "delete"
+                ]
+            }
+        },
+        "recon": {}
+    },
+    "logTo": [
+        {
+            "logType": "csv",
+            "location": "audit",
+            "recordDelimiter": ";"
+        },
+        {
+            "logType": "repository"
+        }
+    ]
+}</programlisting>
+
+  <section xml:id="audit-eventtypes">
+   <title>Event Types</title>
+
+   <para>The <literal>eventTypes</literal> configuration specifies what events
+   OpenIDM writes to audit logs. OpenIDM supports two
+   <literal>eventTypes</literal>: <literal>activity</literal> for the activity
+   log, and <literal>recon</literal> for the reconciliation log. The filter
+   for actions under activity logging shows the actions on managed or system
+   objects for which OpenIDM writes to the activity log.</para>
+
+   <variablelist>
+    <para>The <literal>filter</literal> <literal>actions</literal> list lets
+    you configure under what conditions OpenIDM writes to the activity
+    log.</para>
+    <varlistentry>
+     <term><literal>read</literal></term>
+     <listitem>
+      <para>When an object is read by using its identifier</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>create</literal></term>
+     <listitem>
+      <para>When an object is created.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>update</literal></term>
+     <listitem>
+      <para>When an object is updated.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>delete</literal></term>
+     <listitem>
+      <para>When an object is deleted.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>patch</literal></term>
+     <listitem>
+      <para>When an object is partially modified.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>query</literal></term>
+     <listitem>
+      <para>When a query is performed on an object.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>action</literal></term>
+     <listitem>
+      <para>When an action is performed on an object.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <variablelist>
+    <para>The <literal>logTo</literal> list lets you define where OpenIDM
+    writes the log.</para>
+    <varlistentry>
+     <term><literal>csv</literal></term>
+     <listitem>
+      <para>Write to a comma-separated variable format file in the location
+      specified relative to the directory where you installed OpenIDM.</para>
+      <para>Audit file names are fixed, <filename>activity.csv</filename> and
+      <filename>recon.csv.</filename></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>repository</literal></term>
+     <listitem>
+      <para>Write to the OpenIDM database repository.</para>
+      <para>OpenIDM stores entries under the <literal>audit/</literal> context,
+      such entries appear as
+      <literal>audit/activity/<replaceable>ID</replaceable></literal> and
+      <literal>audit/recon/<replaceable>ID</replaceable></literal>.</para>
+      <para>In the OrientDB repository, OpenIDM stores records in
+      <literal>audit_activity</literal> and
+      <literal>audit_recon</literal> tables.</para>
+      <para>In a JDBC repository, OpenIDM stores records in
+      <literal>auditactivity</literal> and
+      <literal>auditrecon</literal> tables.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
   </section>
  </section>
 </chapter>
