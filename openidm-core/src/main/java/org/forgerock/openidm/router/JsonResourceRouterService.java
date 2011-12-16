@@ -413,11 +413,15 @@ public class JsonResourceRouterService implements JsonResource {
                 }
             }
             if (scope != null) {
-                onRequest(scope); // script can modify/replace request in scope
+                onRequest(scope);
+                Object r = scope.get("request");
+                if (r != null && request != r) { // script replaced request in scope
+                    request = new JsonValue(r);
+                }
             }
             JsonValue response;
             try {
-                response = next.handle(new JsonValue(scope.get("request"))); // use scope request
+                response = next.handle(request);
             } catch (JsonResourceException jre) {
                 if (scope != null) {
                     scope.put("exception", jre.toJsonValue().getObject());
