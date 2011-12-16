@@ -114,7 +114,7 @@ public class SchedulerServiceJob implements Job {
                 logger.info("Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
-                        new Object[]{context.getJobDetail().getFullName(), ex.getMessage()}, ex);
+                        new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
             }
         }
     }
