@@ -32,17 +32,30 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Logging</title>
 
- <para>This chapter covers ... TODO.</para>
+ <para>This chapter briefly describes server logging. For audit information,
+ see the chapter on <link xlink:href="admin-guide#chap-auditing"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Audit
+ Logging</citetitle></link>.</para>
 
- <section xml:id="logs-section-id">
-  <title>Section Title</title>
+ <para>OpenIDM uses <link xlink:href="http://www.slf4j.org/" xlink:show="new"
+ >Simple Logging Facade for Java</link> to log server messages. You can
+ configure logging by editing the <filename>conf/logging.properties</filename>
+ file where you installed OpenIDM.</para>
 
-  <para>This section covers ... TODO.</para>
+ <para>The default configuration writes log messages in simple format to
+ <filename>logs/openidm*.log</filename> files where you installed
+ OpenIDM, rotating files when the size reaches 5 MB, and retaining up to 5
+ files. Also by default, OpenIDM writes all system and custom log messages
+ to the files.</para>
 
-  <section xml:id="logs-subsection-id">
-   <title>Subsection Title</title>
-
-   <para>This subsection covers ... TODO.</para>
-  </section>
- </section>
+ <para>You can update the configuration to attach loggers to individual
+ packages, setting the log level to using the following values.</para>
+ <programlisting language="none">
+SEVERE (highest value)
+WARNING
+INFO
+CONFIG
+FINE
+FINER
+FINEST (lowest value)</programlisting>
 </chapter>

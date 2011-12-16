@@ -30,19 +30,164 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Securing OpenIDM</title>
+ <title>Securing &amp; Hardening OpenIDM</title>
 
- <para>This chapter covers ... TODO.</para>
+ <para>After following the guidance in this chapter, make sure that you test
+ your installation to verify that it behaves as expected before putting it
+ into production.</para>
 
- <section xml:id="security-section-id">
-  <title>Section Title</title>
+ <para>Out of the box, OpenIDM is set up for ease of development and
+ deployment. When deploying OpenIDM in production, take the following
+ precautions.</para>
 
-  <para>This section covers ... TODO.</para>
+ <section xml:id="security-ssl-https">
+  <title>Use SSL and HTTPS</title>
 
-  <section xml:id="security-subsection-id">
-   <title>Subsection Title</title>
+  <para>Disable plain HTTP access, included for development convenience.
+  TODO: Show how.</para>
 
-   <para>This subsection covers ... TODO.</para>
+  <para>Use TLS/SSL to access OpenIDM, ideally with mutual authentication so
+  that only trusted systems can invoke each other. TLS/SSL protects data on
+  the wire. Mutual authentication with certificates imported into the
+  applications' trust and key stores provides some confidence for trusting
+  application access.</para>
+
+  <para>Augment this protect with message level security where
+  appropriate.</para>
+ </section>
+
+ <section xml:id="security-encrypt-data">
+  <title>Encrypt Data Internally &amp; Externally</title>
+
+  <!-- TODO: When using OpenIDM, must I do something here? Or does
+       OpenIDM do this for me? -->
+  <para>Beyond relying on end-to-end availability of TLS/SSL to protect
+  data, OpenIDM also supports explicit encryption of data that goes on the
+  wire. This can be important if the TLS/SSL termination happens prior to
+  the final end point.</para>
+
+  <para>OpenIDM also supports encryption of data it puts into the repository,
+  using a symmetric key. This protects against some attacks on the data
+  store.</para>
+
+  <para>OpenIDM automatically encrypts sensitive data in configuration files,
+  such as passwords. OpenIDM replaces clear text values when the system first
+  reads the configuration file. Take care with configuration files having
+  clear text values that OpenIDM has not yet read and updated.</para>
+ </section>
+
+ <section xml:id="security-messages">
+  <title>Use Message Level Security</title>
+
+  <para>OpenIDM supports message level security, forcing authentication before
+  granting access. The built in mechanism is based on Jetty security. An
+  alternative is to use an access manager such as OpenAM to control
+  authentication and authorization.</para>
+
+  <section xml:id="security-jetty">
+   <title>Secure Jetty</title>
+ 
+   <para>Install the <literal>openidm-security-jetty</literal> bundle, and
+   configure the <literal>openidm</literal> realm to authenticate users
+   appropriately.</para>
+ 
+   <para>TODO: Explain how.</para>
   </section>
+ 
+  <section xml:id="security-openam-integration">
+   <title>Protect Access With OpenAM</title>
+ 
+   <para>TODO</para>
+  </section>
+ </section>
+
+ <section xml:id="security-files">
+  <title>Protect Sensitive Files &amp; Directories</title>
+
+  <para>Protect OpenIDM files from access by unauthorized users.</para>
+
+  <para>In particular, prevent other users from reading files in at least the
+  <filename>conf/boot/</filename> and <filename>security/</filename>
+  directories where you install OpenIDM.</para>
+ </section>
+
+ <section xml:id="security-bootstrap">
+  <title>Obfuscate Bootstrap Information</title>
+
+  <para>OpenIDM uses the information in
+  <filename>conf/boot/boot.properties</filename> including the key store
+  password to start up. You can set an obfuscated version in the file, or
+  prompt for the password at start up time.</para>
+ </section>
+
+ <section xml:id="security-remove-dev-tools">
+  <title>Remove or Protect Development &amp; Debug Tools</title>
+
+  <para>Before deploying OpenIDM in production, remove or protect development
+  and debug tools, including the OSGi console exposed under
+  <literal>system/console</literal>. Authentication for this console is not
+  integrated with authentication for OpenIDM.</para>
+
+  <para>To remove the OSGi console, remove the web console bundle,
+  <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.</para>
+
+  <para>If you cannot remove the OSGi console, the protect it by overriding
+  the default admin:admin credentials. Create a file called
+  <filename>conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
+  where you install OpenIDM containing the user name and password to access the
+  console in Java properties file format.</para>
+
+  <programlisting language="none">
+username=<replaceable>user-name</replaceable>
+password=<replaceable>password</replaceable></programlisting>
+ </section>
+
+ <section xml:id="security-protect-repo">
+  <title>Protect the OpenIDM Repository</title>
+
+  <para>Use the JDBC repository. OrientDB is not yet supported for
+  production use.</para>
+
+  <para>Use a strong password for the JDBC connection. Do not rely on default
+  passwords.</para>
+
+  <para>Use a case sensitive database, particularly if you work with systems
+  with different identifiers that match except for case. Otherwise correlation
+  queries can pick up identifiers that should not be considered the same.</para>
+ </section>
+
+ <section xml:id="security-adjust-log-levels">
+  <title>Adjust Log Levels</title>
+
+  <para>Leave log levels at <literal>INFO</literal> in production to ensure
+  that you capture enough information to help diagnose issues.</para>
+
+  <para>At start up and shut down, <literal>INFO</literal> can produce many
+  messages. Yet, during stable operation, <literal>INFO</literal> generally
+  results in log messages only when coarse-grain operations such as
+  scheduled reconciliation start or stop.</para>
+ </section>
+
+ <section xml:id="security-run-as-service">
+  <title>Set Up Restart At System Boot</title>
+
+  <para>You can run OpenIDM in the background as a service (daemon), and
+  add startup and shutdown scripts to manage the service at system boot
+  and shutdown.</para>
+
+  <para>To avoid sending output to the console when you start or shutdown
+  OpenIDM, edit <filename>conf/logging.properties</filename> to turn off
+  logging to the console:</para>
+
+  <literallayout class="monospaced">java.util.logging.ConsoleHandler.level = OFF</literallayout>
+
+  <para>With logging to the console turned off, you can background OpenIDM
+  at start up and shutdown.</para>
+
+  <screen>$ sh startup.sh &amp;</screen>
+
+  <para>See your operating system documentation for details on adding a
+  service such as OpenIDM to be started at boot and shut down at system
+  shutdown.</para>
  </section>
 </chapter>
