@@ -131,7 +131,11 @@ public class EmbeddedOServerService {
         OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
         listener1.ipAddress = "127.0.0.1";
         listener1.portRange = "2424-2430";
-        listener1.protocol = "distributed";
+        if (clustered) {
+            listener1.protocol = "distributed";
+        } else {
+            listener1.protocol = "binary";
+        }
         configuration.network.listeners.add(listener1);
         OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
         listener2.ipAddress = "127.0.0.1";
