@@ -904,14 +904,24 @@ class ObjectMapping implements SynchronizationListener {
                 if (linkObject._id != null) {
                     situation = Situation.UNQUALIFIED;
                 } else {
-                    /*JsonValue results = correlateTarget();
-                    if (null != results && results.size() == 1) {
-                    targetObject = readObject(qualifiedId(targetObjectSet,
-                    results.get((Integer) 0).required().get("_id").required().asString()));
-                    situation = Situation.UNASSIGNED;
-                    } else {*/
-                    situation = null; // TODO: provide a situation for this?
-                    /*}*/
+                    JsonValue results = correlateTarget();
+                    if (results == null || results.size() == 0) { 
+                        situation = Situation.SOURCE_IGNORED; // source not valid for mapping, and no link or target exist
+                    } else if (results.size() == 1) {
+                        // TODO: Is it necessary to read the object for unqualified?
+                        //TODO Optimize to get the entire object with one query if it's sufficeient
+                        JsonValue resultValue = results.get((Integer) 0).required();
+                        if (hasNonSpecialAttribute(resultValue.keys())) { //Assume this is a full object
+                            targetObject = resultValue;
+                        } else {
+                            targetObject = readObject(qualifiedId(targetObjectSet,
+                                    resultValue.get("_id").required().asString()));
+                        }
+                        situation = Situation.UNQUALIFIED;
+                    } else if (results.size() > 1) {
+                        // TODO: How does object mapping handle multiple? How does AMBIGUOUS handle multiple?
+                        situation = Situation.UNQUALIFIED;
+                    }
                 }
                 if (sourceStats != null) {
                     sourceStats.addNotValid(sourceId);
@@ -987,6 +997,7 @@ class ObjectMapping implements SynchronizationListener {
             situation = null;
             String targetId = (targetObject != null ? targetObject.get("_id").asString() : null);
             if (!isTargetValid()) { // target is not valid for this mapping; ignore it
+                situation = Situation.TARGET_IGNORED;
                 if (targetStats != null) {
                     targetStats.addNotValid(targetId);
                 }
@@ -1001,7 +1012,9 @@ class ObjectMapping implements SynchronizationListener {
                 situation = Situation.UNASSIGNED;
             } else {
                 sourceObject = readObject(qualifiedId(sourceObjectSet, linkObject.sourceId));
-                if (sourceObject == null || !isSourceValid()) {
+                if (sourceObject == null) {
+                    situation = Situation.SOURCE_MISSING;
+                } else if (!isSourceValid()) {
                     situation = Situation.UNQUALIFIED;
                 } else { // proper link
                     situation = Situation.CONFIRMED;
