@@ -85,7 +85,6 @@ define(["app/comp/main/controllers/MessagesCtrl",
 		obj.view.getLogoutButton().bind('click', function(event) {
 			event.preventDefault();
 
-            //JFN logout
             obj.delegate.logoutUser();
 			self.view.renderLogin();
 
@@ -142,9 +141,7 @@ define(["app/comp/main/controllers/MessagesCtrl",
             document.cookie="idmUser=" + obj.view.getLogin();
             self.messages.displayMessage('info','You have been successfully logged in.');
         }, function(r) {
-            //self.messages.displayMessage('info', 'Login/password combination is invalid.');
-            self.messages.displayMessage('info','You have been successfully logged in.');
-            document.cookie="idmUser=" + obj.view.getLogin();
+            self.messages.displayMessage('info', 'Login/password combination is invalid.');
             self.registerListeners();
         });
 
