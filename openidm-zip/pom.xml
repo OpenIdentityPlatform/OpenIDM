@@ -103,6 +103,11 @@
             <artifactId>openidm-restlet</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-filter</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>

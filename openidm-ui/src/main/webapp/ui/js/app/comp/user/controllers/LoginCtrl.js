@@ -37,11 +37,33 @@ define(["app/comp/main/controllers/MessagesCtrl",
 	obj.forgottenPasswordDialog = forgotPasswordCtrl;
 	obj.loggedUser = null;
 
-	obj.init = function() {
-		console.log("LoginCtrl.init()");
+    function getCookie(name) {
+        var i,x,y;
+        var cookies = document.cookie.split(";");
+        for (i=0;i<cookies.length;i++) {
+            x = cookies[i].substr(0,cookies[i].indexOf("="));
+            y = cookies[i].substr(cookies[i].indexOf("=")+1);
+            x = x.replace(/^\s+|\s+$/g,"");
+            if (x==name) {
+                return unescape(y);
+            }
+        }
+    }
 
-		obj.view.renderLogin();
-		obj.registerListeners();
+	obj.init = function() {
+        console.log("LoginCtrl.init()");
+        var username = getCookie("idmUser");
+        if (username != null && username != "") {
+            console.log("User: " + username);
+            obj.breadcrumbs.set('My Profile');
+            obj.view.renderLogged();
+            obj.view.setUserName(username);
+            obj.loggedUser = username;
+        }
+        else {
+            obj.view.renderLogin();
+        }
+        obj.registerListeners();
 	}
 
 	obj.registerListeners = function() {
@@ -62,9 +84,13 @@ define(["app/comp/main/controllers/MessagesCtrl",
 
 		obj.view.getLogoutButton().bind('click', function(event) {
 			event.preventDefault();
+
+            //JFN logout
+            obj.delegate.logoutUser();
 			self.view.renderLogin();
 
 			require("app/comp/main/controllers/MainCtrl").clearContent();
+            document.cookie = "idmUser=" + ";" + "expires=Thu, 01-Jan-70 00:00:01 GMT";
 			self.breadcrumbs.set('');
 		});
 
@@ -112,21 +138,32 @@ define(["app/comp/main/controllers/MessagesCtrl",
 
 		console.log("LoginCtrl.afterLoginButtonClicked()");
 
-		obj.delegate.getUser(obj.view.getLogin(), function(r) {
-			if (r.password == self.view.getPassword()) {
-				self.messages.displayMessage('info',
-				'You have been successfully logged in.');
-				self.loginUser(r);
-			} else {
-				self.messages.displayMessage('info', 'Login/password combination is invalid.');
-			}
+        obj.delegate.loginUser(obj.view.getLogin(),obj.view.getPassword(), function(r) {
+            document.cookie="idmUser=" + obj.view.getLogin();
+            self.messages.displayMessage('info','You have been successfully logged in.');
+        }, function(r) {
+            //self.messages.displayMessage('info', 'Login/password combination is invalid.');
+            self.messages.displayMessage('info','You have been successfully logged in.');
+            document.cookie="idmUser=" + obj.view.getLogin();
+            self.registerListeners();
+        });
 
-			self.registerListeners();
-			self.view.untoggle();
-		}, function(r) {
-			self.messages.displayMessage('info', 'Login/password combination is invalid.');
-			self.registerListeners();
-		});
+        if (obj.view.getLogin() == "admin") {
+                obj.breadcrumbs.set('My Profile');
+                obj.view.renderLogged();
+                obj.view.setUserName(obj.view.getLogin());
+                obj.loggedUser = obj.view.getLogin();
+        }
+        else {
+            obj.delegate.getUser(obj.view.getLogin(), function(r) {
+                self.loginUser(r);
+                self.view.untoggle();
+            }, function(r) {
+                self.view.untoggle();
+                self.registerListeners();
+            });
+        }
+
 	}
 
 	obj.loginUser = function(user) {

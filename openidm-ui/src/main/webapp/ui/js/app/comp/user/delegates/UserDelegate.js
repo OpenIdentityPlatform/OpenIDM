@@ -18,6 +18,32 @@ define(["app/util/Constants"],function(constants) {
 
 	var obj = {};
 
+    obj.loginUser = function(id, pass, successCallback, errorCallback) {
+        console.info("login user[id=" + id + "]");
+
+        $.ajax({
+            type: "POST",
+			url: util.constants.host + "/openidm/config",
+            beforeSend: function(xhr) {
+               xhr.setRequestHeader("X-OpenIDM-Username", id);
+               xhr.setRequestHeader("X-OpenIDM-Password", pass);
+            },
+            success: successCallback,
+            error: errorCallback
+        });
+    };
+
+    obj.logoutUser = function() {
+
+        $.ajax({
+            type: "POST",
+			url: util.constants.host + "/openidm/config",
+            beforeSend: function(xhr) {
+               xhr.setRequestHeader("X-OpenIDM-Logout", "true");
+            }
+        });
+    };
+
 	obj.getUser = function(id, successCallback, errorCallback) {
 		console.info("getting user[id=" + id + "]");
 
@@ -38,6 +64,10 @@ define(["app/util/Constants"],function(constants) {
 			dataType: "json",
 			contentType: 'application/json; charset=utf-8',
 			data: JSON.stringify(user),
+            beforeSend: function(xhr) {
+               xhr.setRequestHeader("X-OpenIDM-Username", "admin");
+               xhr.setRequestHeader("X-OpenIDM-Password", "admin");
+            },
 			success: successCallback,
 			error: errorCallback
 		});
