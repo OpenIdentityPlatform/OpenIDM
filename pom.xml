@@ -225,6 +225,7 @@
         <module>openidm-repo-orientdb</module>
         <module>openidm-repo</module>
         <module>openidm-restlet</module>
+        <module>openidm-filter</module>
         <module>openidm-scheduler</module>
         <module>openidm-security-jetty</module>
         <module>openidm-shell</module>

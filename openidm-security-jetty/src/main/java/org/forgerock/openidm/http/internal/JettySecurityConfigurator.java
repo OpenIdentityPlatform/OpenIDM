@@ -43,6 +43,11 @@ import org.slf4j.LoggerFactory;
  */
 public final class JettySecurityConfigurator implements SecurityConfigurator {
     final static Logger logger = LoggerFactory.getLogger(JettySecurityConfigurator.class);
+
+    static String enabled = null;
+    static {
+         enabled = System.getProperty("openidm.jetty.jaas.enabled", "false");
+    }
     
     public JettySecurityConfigurator() {
     }
@@ -50,10 +55,9 @@ public final class JettySecurityConfigurator implements SecurityConfigurator {
     public void activate(HttpService httpService, HttpContext httpContext,  ComponentContext context) {
         
         // TODO: consider making configurable
-        boolean enabled = true;
 
         // If embedded Jetty is used, enable security
-        if (enabled && httpService instanceof org.ops4j.pax.web.service.WebContainer) {
+        if (enabled.equals("true") && httpService instanceof org.ops4j.pax.web.service.WebContainer) {
             org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
 /*
             String authMethod = "FORM";
