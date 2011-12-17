@@ -59,17 +59,38 @@ enum Situation {
     MISSING(Action.EXCEPTION),
 
     /**
-     * The mapping is not qualified for a target object and there is a link to an existing
-     * target object. Detected during source object changes and reconciliation.
+     * The mapping is not qualified for a target object and there is either a link and/or
+     * one or more matching target objects. Detected during source object changes and reconciliation.
      * Default action: {@code DELETE}.
      */
     UNQUALIFIED(Action.DELETE),
+    
+    /**
+     * The mapping is not qualified for a target object and there is no link or matching
+     * target object. Detected during source object changes and reconciliation.
+     * Default action: {@code IGNORE}.
+     */
+    SOURCE_IGNORED(Action.IGNORE),
 
+    /**
+     * The mapping is not qualified for a source object.
+     * Only detected during reconciliation.
+     * Default action: {@code IGNORE}.
+     */
+    TARGET_IGNORED(Action.IGNORE),
+    
     /**
      * There is target object for which there is no link. Only detected during reconciliation.
      * Default action: {@code EXCEPTION}.
      */
-    UNASSIGNED(Action.EXCEPTION);
+    UNASSIGNED(Action.EXCEPTION),
+
+    /**
+     * There is target object for which there is a link, but the source object does not exist. 
+     * Only detected during reconciliation.
+     * Default action: {@code EXCEPTION}.
+     */
+    SOURCE_MISSING(Action.EXCEPTION);
 
     /** TODO: Description. */
     private Action defaultAction;
