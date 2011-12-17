@@ -22,7 +22,7 @@ define(["app/util/Constants"],function(constants) {
         console.info("login user[id=" + id + "]");
 
         $.ajax({
-            type: "POST",
+            type: "GET",
 			url: util.constants.host + "/openidm/config",
             beforeSend: function(xhr) {
                xhr.setRequestHeader("X-OpenIDM-Username", id);
