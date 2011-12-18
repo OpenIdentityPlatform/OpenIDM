@@ -69,8 +69,10 @@ public class SchedulerServiceJob implements Job {
      * incumbent on the invoked service to establish if necessary.
      */
     private JsonValue newSchedulerContext(Map<String, Object> ssc) {
-// TODO: Document my structure somewhere. Wiki?
         JsonValue context = JsonResourceContext.newContext("scheduler", JsonResourceContext.newRootContext());
+        HashMap<String, Object> security = new HashMap<String, Object>();
+        security.put("user", ssc.get(ScheduledService.INVOKER_NAME));
+        context.put("security", security);
         context.put("scheduled-time", ssc.get(ScheduledService.SCHEDULED_FIRE_TIME));
         context.put("actual-time", ssc.get(ScheduledService.ACTUAL_FIRE_TIME));
         context.put("next-time", ssc.get(ScheduledService.NEXT_FIRE_TIME));
