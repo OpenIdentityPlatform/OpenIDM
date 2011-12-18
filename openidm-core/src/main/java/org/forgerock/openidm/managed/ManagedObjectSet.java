@@ -244,50 +244,30 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         return decrypt(new JsonValue(object));
     }
 
+    /**
+     * TODO: Description.
+     *
+     * @param id TODO.
+     * @param msg TODO.
+     * @param before TODO.
+     * @param after TODO.
+     * @throws ObjectSetException TODO.
+     */
     private void logActivity(String id, String msg, JsonValue before, JsonValue after) throws ObjectSetException {
         ActivityLog.log(service.getRouter(), ObjectSetContext.get(), msg,
          managedId(id), before, after, Status.SUCCESS);
-     }
-
-    @Override
-    public void create(String id, Map<String, Object> object) throws ObjectSetException {
-        LOGGER.debug("Create name={} id={}", name, id);
-        JsonValue jv = decrypt(object); // decrypt any incoming encrypted properties
-        execScript("onCreate", onCreate, jv);
-        onStore(jv); // includes per-property encryption
-        JsonValue _id = jv.get("_id");
-        if (_id.isString()) {
-            id = _id.asString(); // override requested ID with one specified in object
-        }
-        if (id == null) { // default is to assign a UUID identifier
-            id = UUID.randomUUID().toString();
-            jv.put("_id", id);
-        }
-        service.getRouter().create(repoId(id), jv.asMap());
-        logActivity(id, null, null, jv);
-        try {
-            for (SynchronizationListener listener : service.getListeners()) {
-                listener.onCreate(managedId(id), jv);
-            }
-        } catch (SynchronizationException se) {
-            throw new InternalServerErrorException(se);
-        }
-        // workaround until JsonValue works its way into the ObjectSet API
-        object.put("_id", jv.get("_id").getObject());
-        object.put("_rev", jv.get("_rev").getObject());
     }
 
-    @Override
-    public Map<String, Object> read(String id) throws ObjectSetException {
-        LOGGER.debug("Read name={} id={}", name, id);
-        if (id == null) {
-            throw new ForbiddenException("Cannot read entire object set");
+    /**
+     * TODO: Description.
+     *
+     * @param id TODO.
+     * @throws NotFoundException TODO.
+     */
+    private void noSubObjects(String id) throws ForbiddenException {
+        if (id != null && id.indexOf('/') >= 0) {
+            throw new ForbiddenException("Sub-objects are not supported");
         }
-        JsonValue jv = new JsonValue(service.getRouter().read(repoId(id)));
-        onRetrieve(jv);
-        execScript("onRead", onRead, jv);
-        logActivity(id, null, jv, null);
-        return jv.asMap();
     }
 
     private void update(String id, String rev, JsonValue oldValue, JsonValue newValue) throws ObjectSetException {
@@ -317,65 +297,6 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);
         }
-    }
-
-    @Override
-    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
-        LOGGER.debug("update {} ", "name=" + name + " id=" + id + " rev=" + rev);
-        if (id == null) {
-            throw new ForbiddenException("Cannot update entire object set");
-        }
-        JsonValue _new = decrypt(object); // decrypt any incoming encrypted properties
-        Map<String, Object> encrypted = service.getRouter().read(repoId(id));
-        JsonValue decrypted = decrypt(encrypted);
-        update(id, rev, decrypted, _new);
-        logActivity(id, null, new JsonValue(encrypted), _new);
-        object.put("_id", _new.get("_id").getObject());
-        object.put("_rev", _new.get("_rev").getObject());
-    }
-
-    @Override
-    public void delete(String id, String rev) throws ObjectSetException {
-        LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
-        if (id == null) {
-            throw new ForbiddenException("Cannot delete entire object set");
-        }
-        Map<String, Object> encrypted = service.getRouter().read(repoId(id));
-        if (onDelete != null) {
-            execScript("onDelete", onDelete, decrypt(encrypted));
-        }
-        service.getRouter().delete(repoId(id), rev);
-        logActivity(id, null, new JsonValue(encrypted), null);
-        try {
-            for (SynchronizationListener listener : service.getListeners()) {
-                listener.onDelete(managedId(id));
-            }
-        } catch (SynchronizationException se) {
-            throw new InternalServerErrorException(se);
-        }
-    }
-
-// TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-// FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
-        LOGGER.debug("patch name={} id={}", name, id);
-        if (id == null) {
-            throw new ForbiddenException("Cannot patch entire object set");
-        }
-        JsonValue oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
-        JsonValue newValue = oldValue.copy();
-        patch.apply(newValue.asMap());
-        update(id, rev, oldValue, newValue);
-        logActivity(id, "Patch " + patch, null, null);
-    }
-
-    @Override
-    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        LOGGER.debug("query name={} id={}", name, id);
-        Map<String, Object> result = service.getRouter().query(repoId(id), params);
-        logActivity(id, "Query parameters " + params, new JsonValue(result), null);
-        return result;
     }
 
     /**
@@ -418,6 +339,108 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         return new JsonValue(null); // empty response (and lack of exception) indicates success
     }
 
+    @Override
+    public void create(String id, Map<String, Object> object) throws ObjectSetException {
+        LOGGER.debug("Create name={} id={}", name, id);
+        noSubObjects(id);
+        JsonValue jv = decrypt(object); // decrypt any incoming encrypted properties
+        execScript("onCreate", onCreate, jv);
+        onStore(jv); // includes per-property encryption
+        JsonValue _id = jv.get("_id");
+        if (_id.isString()) {
+            id = _id.asString(); // override requested ID with one specified in object
+        }
+        if (id == null) { // default is to assign a UUID identifier
+            id = UUID.randomUUID().toString();
+            jv.put("_id", id);
+        }
+        service.getRouter().create(repoId(id), jv.asMap());
+        logActivity(id, null, null, jv);
+        try {
+            for (SynchronizationListener listener : service.getListeners()) {
+                listener.onCreate(managedId(id), jv);
+            }
+        } catch (SynchronizationException se) {
+            throw new InternalServerErrorException(se);
+        }
+        object.put("_id", jv.get("_id").getObject());
+        object.put("_rev", jv.get("_rev").getObject());
+    }
+
+    @Override
+    public Map<String, Object> read(String id) throws ObjectSetException {
+        LOGGER.debug("Read name={} id={}", name, id);
+        noSubObjects(id);
+        JsonValue jv = new JsonValue(service.getRouter().read(repoId(id)));
+        onRetrieve(jv);
+        execScript("onRead", onRead, jv);
+        logActivity(id, null, jv, null);
+        return jv.asMap();
+    }
+
+    @Override
+    public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
+        LOGGER.debug("update {} ", "name=" + name + " id=" + id + " rev=" + rev);
+        noSubObjects(id);
+        if (id == null) {
+            throw new ForbiddenException("Cannot update entire object set");
+        }
+        JsonValue _new = decrypt(object); // decrypt any incoming encrypted properties
+        Map<String, Object> encrypted = service.getRouter().read(repoId(id));
+        JsonValue decrypted = decrypt(encrypted);
+        update(id, rev, decrypted, _new);
+        logActivity(id, null, new JsonValue(encrypted), _new);
+        object.put("_id", _new.get("_id").getObject());
+        object.put("_rev", _new.get("_rev").getObject());
+    }
+
+    @Override
+    public void delete(String id, String rev) throws ObjectSetException {
+        LOGGER.debug("Delete {} ", "name=" + name + " id=" + id + " rev=" + rev);
+        noSubObjects(id);
+        if (id == null) {
+            throw new ForbiddenException("Cannot delete entire object set");
+        }
+        Map<String, Object> encrypted = service.getRouter().read(repoId(id));
+        if (onDelete != null) {
+            execScript("onDelete", onDelete, decrypt(encrypted));
+        }
+        service.getRouter().delete(repoId(id), rev);
+        logActivity(id, null, new JsonValue(encrypted), null);
+        try {
+            for (SynchronizationListener listener : service.getListeners()) {
+                listener.onDelete(managedId(id));
+            }
+        } catch (SynchronizationException se) {
+            throw new InternalServerErrorException(se);
+        }
+    }
+
+// TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
+    @Override
+    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
+// FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
+        LOGGER.debug("patch name={} id={}", name, id);
+        noSubObjects(id);
+        if (id == null) {
+            throw new ForbiddenException("Cannot patch entire object set");
+        }
+        JsonValue oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
+        JsonValue newValue = oldValue.copy();
+        patch.apply(newValue.asMap());
+        update(id, rev, oldValue, newValue);
+        logActivity(id, "Patch " + patch, null, null);
+    }
+
+    @Override
+    public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
+        LOGGER.debug("query name={} id={}", name, id);
+        noSubObjects(id);
+        Map<String, Object> result = service.getRouter().query(repoId(id), params);
+        logActivity(id, "Query parameters " + params, new JsonValue(result), null);
+        return result;
+    }
+
     /**
      * Processes action requests.
      * <p>
@@ -428,6 +451,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
         LOGGER.debug("action name={} id={}", name, id);
+        noSubObjects(id);
         Object _action = (String)params.get("_action");
         Map<String, Object> result;
         if (_action == null) {
@@ -443,7 +467,6 @@ class ManagedObjectSet extends ObjectSetJsonResource {
 
     /**
      * Returns the name of the managed object set.
-     * @return
      */
     public String getName() {
         return name;
