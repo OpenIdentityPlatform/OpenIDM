@@ -85,7 +85,7 @@ class PendingLink {
                     logger.debug("Matching mapping {} found for pending link to {}", mappingName, targetId);
                     mapping.explicitOp(sourceObject, targetObject, situation, Action.LINK, reconId);
                     pendingLinkContext.remove(PENDING_LINK);
-                    logger.info("Pending link for mapping {} between {}-{} created", new Object[] {mappingName, sourceId, targetId});
+                    logger.debug("Pending link for mapping {} between {}-{} created", new Object[] {mappingName, sourceId, targetId});
                     break;
                 }
             }

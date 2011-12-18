@@ -124,7 +124,6 @@ public final class JsonResourceObjectSet implements ObjectSet {
     public void update(String id, String rev, Map<String, Object> object) throws ObjectSetException {
         try {
             JsonValue response = getAccessor().update(id, rev, new JsonValue(object));
-System.out.println("RESPONSE = " + response);
             object.put("_id", response.get("_id").required().asString());
             JsonValue _rev = response.get("_rev");
             if (_rev.isString()) {
