@@ -53,6 +53,7 @@ import org.forgerock.json.fluent.JsonPointer;
 
 // JSON Resource
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceContext;
 
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -238,6 +239,41 @@ public class SynchronizationService extends ObjectSetJsonResource
     /**
      * @deprecated Use {@code sync} resource interface.
      */
+    @Deprecated
+    private JsonValue newFauxContext(JsonValue mapping) {
+        JsonValue context = JsonResourceContext.newContext("resource", ObjectSetContext.get());
+        context.put("method", "action");
+        context.put("id", "sync");
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("mapping", mapping == null ? null : mapping.getObject());
+        context.put("params", params);
+        return context;
+    }
+
+    /**
+     * @deprecated Use {@code sync} resource interface.
+     */
+    @Deprecated
+    private String reconcile(JsonValue mapping) throws SynchronizationException {
+        JsonValue context = ObjectSetContext.get();
+        String reconId = context.get("uuid").asString();
+        if (mapping.isString()) {
+            getMapping(mapping.asString()).recon(reconId); // throws SynchronizationException
+        } else if (mapping.isMap()) {
+// FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB 
+            ObjectMapping schedulerMapping = new ObjectMapping(this, mapping);
+            List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
+            schedulerMapping.initRelationships(this, augmentedMappings);
+            schedulerMapping.recon(reconId);
+        } else {
+            throw new SynchronizationException("Unknown mapping type");
+        }
+        return reconId;
+    }
+
+    /**
+     * @deprecated Use {@code sync} resource interface.
+     */
     @Override // ScheduledService
     @Deprecated // use resource interface
     public void execute(Map<String, Object> context) throws ExecutionException {
@@ -245,13 +281,12 @@ public class SynchronizationService extends ObjectSetJsonResource
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
             if ("reconcile".equals(action)) { // "action": "reconcile"
-                if (params.get("mapping").required().isString()) {
-                    reconcile(params.get("mapping").asString()); // "mapping": string (mapping name)
-                } else if (params.get("mapping").required().isMap()) {
-                    ObjectMapping schedulerMapping = new ObjectMapping(this, params.get("mapping"));
-                    List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
-                    schedulerMapping.initRelationships(this, augmentedMappings);
-                    schedulerMapping.recon(UUID.randomUUID().toString());
+                JsonValue mapping = params.get("mapping");
+                ObjectSetContext.push(newFauxContext(mapping));
+                try {
+                    reconcile(mapping);
+                } finally {
+                    ObjectSetContext.pop();
                 }
             } else {
                 throw new ExecutionException("Unknown action '" + action + "' configured in schedule. "
@@ -262,16 +297,6 @@ public class SynchronizationService extends ObjectSetJsonResource
         } catch (SynchronizationException se) {
             throw new ExecutionException(se);
         }
-    }
-
-    /**
-     * @deprecated Use {@code sync} resource interface.
-     */
-    @Deprecated
-    public String reconcile(String mapping) throws SynchronizationException {
-        String reconId = UUID.randomUUID().toString();
-        getMapping(mapping).recon(reconId); // throws SynchronizationException
-        return reconId;
     }
 
     @Override // ObjectSetJsonResource
@@ -301,7 +326,7 @@ public class SynchronizationService extends ObjectSetJsonResource
                 break;
             case recon:
                 result = new HashMap<String, Object>();
-                String mapping = _params.get("mapping").required().asString();
+                JsonValue mapping = _params.get("mapping").required();
                 LOGGER.debug("Synchronization _action=recon, mapping={}", mapping);
                 result.put("reconId", reconcile(mapping));
 // TODO: Make asynchronous, and provide polling mechanism for reconciliation status.
