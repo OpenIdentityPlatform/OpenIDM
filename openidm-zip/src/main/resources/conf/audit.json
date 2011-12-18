@@ -2,7 +2,7 @@
     "eventTypes": {
         "activity": {
             "filter": {
-                 "actions": [ "create", "update", "delete" ]
+                 "actions": [ "create", "update", "delete", "patch", "action" ]
             }
         },
         "recon": {
