@@ -71,13 +71,13 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
             as a .net service.</para>
   </section>
  </section>
- <section>
+ <section xml:id="connect-prop-id">
   <title>Common Connector Properties</title>
   <section>
    <title>Connecting to a Local Connector Server</title>
             <para>The top level properties of the OpenICF Provisioner Service are:</para>
             <example>
-                <title>Top Level Provisioner Service Properties</title>
+                <title>Top Level Provisioner Service Properties as defined in the file provisioiner.&lt;connectorName&gt;.conf</title>
                 <programlisting>
    {
       "name" : {_See Below_,
