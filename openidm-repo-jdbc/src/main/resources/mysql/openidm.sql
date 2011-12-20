@@ -140,8 +140,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `firstid` VARCHAR(255) NOT NULL ,
   `secondid` VARCHAR(255) NOT NULL ,
   `reconid` VARCHAR(36) NULL ,
-  INDEX `idx_links_source` (`linktype` ASC, `firstid` ASC) ,
-  INDEX `idx_links_target` (`linktype` ASC, `firstid` ASC) ,
+  INDEX `idx_links_first` (`linktype` ASC, `firstid` ASC) ,
+  INDEX `idx_links_second` (`linktype` ASC, `secondid` ASC) ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
@@ -151,10 +151,13 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `objectid` VARCHAR(38) NOT NULL ,
+  `entrytype` VARCHAR(7) NULL ,
+  `rootactionid` VARCHAR(511) NULL ,
   `reconid` VARCHAR(36) NULL ,
   `reconciling` VARCHAR(12) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
   `targetobjectid` VARCHAR(511) NULL ,
+  `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `situation` VARCHAR(24) NULL ,
   `activity` VARCHAR(24) NULL ,
@@ -169,19 +172,21 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `objectid` VARCHAR(38) NOT NULL ,
+  `rootactionid` VARCHAR(511) NULL ,
+  `parentactionid` VARCHAR(511) NULL ,
+  `activityid` VARCHAR(511) NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `activity` VARCHAR(24) NULL ,
   `message` TEXT NULL ,
   `subjectid` VARCHAR(511) NULL ,
   `subjectrev` VARCHAR(38) NULL ,
-  `rootactionid` VARCHAR(512) NULL ,
-  `parentactionid` VARCHAR(512) NULL ,
   `requester` TEXT NULL ,
   `approver` TEXT NULL ,
   `subjectbefore` MEDIUMTEXT NULL ,
   `subjectafter` MEDIUMTEXT NULL ,
   `status` VARCHAR(7) NULL ,
-  PRIMARY KEY (`objectid`) )
+  PRIMARY KEY (`objectid`) ,
+  INDEX `idx_auditactivity_rootactionid` (`rootactionid` ASC) )
 ENGINE = InnoDB;
 
 

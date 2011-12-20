@@ -56,6 +56,7 @@
                 "table" : "auditactivity",
                 "objectToColumn" : {
                     "_id" : "objectid",
+                    "activityId" : "activityid",
                     "timestamp" : "activitydate",
                     "action" : "activity",  
                     "message" : "message", 
@@ -74,6 +75,8 @@
                 "table" : "auditrecon",
                 "objectToColumn" : {
                     "_id" : "objectid",
+                    "entryType" : "entrytype",
+                    "rootActionId" : "rootactionid",
                     "action" : "activity",  
                     "message" : "message", 
                     "reconciling" : "reconciling",
@@ -82,6 +85,7 @@
                     "sourceObjectId" : "sourceobjectid",
                     "status" : "status",
                     "targetObjectId" : "targetobjectid",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
                     "timestamp" : "activitydate"
                 }
             }

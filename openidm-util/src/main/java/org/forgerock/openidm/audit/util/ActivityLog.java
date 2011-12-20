@@ -42,7 +42,7 @@ public class ActivityLog {
     // TODO: replace with proper formatter
     final static SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-    private static String getRequester(JsonValue request) {
+    public static String getRequester(JsonValue request) {
         String result = null;
         while (request != null && !request.isNull()) {
             JsonValue user = request.get("security").get("user");
@@ -90,13 +90,12 @@ public class ActivityLog {
             activity.put("message", message);
             activity.put("objectId", objectId);
             activity.put("rev", rev);
-// TODO: Change schema to support the id of the request itself, commented-out below:
-//            activity.put("activityId", request.get("uuid").getObject());
+            activity.put("activityId", request.get("uuid").getObject());
             activity.put("rootActionId", root.get("uuid").getObject());
             activity.put("parentActionId", parent.get("uuid").getObject());
             activity.put("requester", getRequester(request));
-            activity.put("before", before == null ? null : before.getObject());
-            activity.put("after", after == null ? null : after.getObject()); // how can we know for system objects?
+            activity.put("before", (before == null || before.isNull()) ? null : before.getObject().toString());
+            activity.put("after", (after == null || after.isNull()) ? null : after.getObject().toString()); // how can we know for system objects?
             activity.put("status", status == null ? null : status.toString());
             router.create("audit/activity", activity);
         } catch (ObjectSetException ex) {
