@@ -83,9 +83,11 @@ Note that the files are a way to install new or changed configuration, and to se
    <para>The _id returned matches the conventions set out for identifiers n this document.</para>
    <para>Here is an example issuing the above listing of all configurations using Curl.</para>
    <example>
-    <programlisting>
-$ curl --user admin:admin --request GET http://localhost:8080/openidm/config    
-    </programlisting>
+    <screen>$ curl
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
+ --request GET
+ http://localhost:8080/openidm/config</screen>
    </example>
   </section>
   <section>
@@ -101,9 +103,11 @@ GET openidm/config/scheduler/myschedule
    </example>
    <para>An example using curl reading the managed object configuration:</para>
    <example>
-    <programlisting>
-$ curl --user admin:admin --request GET http://localhost:8080/openidm/config/managed  
-  </programlisting>
+    <screen>$ curl
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
+ --request GET
+ http://localhost:8080/openidm/config/managed</screen>
    </example>
   </section>
  </section>

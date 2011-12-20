@@ -189,7 +189,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <para>You can also start reconciliation through the REST interface. The
      call to the REST interface is an HTTP POST such as the following.</para>
      <screen width="100">$ curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
      <para>For details on the scheduler configuration please refer to the <link
@@ -293,7 +294,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   and then waiting until the scheduled reconciliation happens, or by using the
   REST interface.</para>
   <screen width="100">$ curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
 {"reconId":"cc0c849b-1ed3-4822-aa47-f44a9fa24489"}</screen>
@@ -316,7 +318,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <link xlink:href="http://curl.haxx.se/"><command>curl</command></link>
   command to get the JSON file.</para>
   <screen>$ curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request GET
  http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
 {
@@ -340,7 +343,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   user URL, <link xlink:href="http://localhost:8080/openidm/managed/user/"
   xlink:show="new">http://localhost:8080/openidm/managed/user/</link>.</para>
 
-  <screen>$ curl --user admin:admin http://localhost:8080/openidm/managed/user/DDOE1
+  <screen>$ curl
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
+ http://localhost:8080/openidm/managed/user/DDOE1
 {
  "lastname":"Doe1",
  "firstname":"Darth1",
@@ -424,7 +430,8 @@ activity.csv recon.csv</screen>
   >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
 
   <screen>$ curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request GET
  http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
 {
@@ -498,9 +505,10 @@ activity.csv recon.csv</screen>
 
   <para>On UNIX, Linux, and Mac OS X</para>
   <screen>$ curl
-  --user admin:admin
-  --request PUT
-  --data '{
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
+ --request PUT
+ --data '{
   "name":"james",
   "lastname":"Berg",
   "firstname":"James",
@@ -508,13 +516,14 @@ activity.csv recon.csv</screen>
   "fullname":"hallo2",
   "description":"Created by OpenIDM REST.",
   "userPassword":"asdfkj23"
-  }'
-  http://localhost:8080/openidm/managed/user/james
+ }'
+ http://localhost:8080/openidm/managed/user/james
 {"_rev":"0","_id":"james"}</screen>
 
   <para>On Windows</para>
   <screen>C:\&gt;curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request PUT
  --data {
  \"name\":\"james\",
