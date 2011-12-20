@@ -218,8 +218,11 @@ public class JsonResourceRouterService implements JsonResource {
             }
             throw jre;
         } catch (RuntimeException re) {
-            LOGGER.debug("Runtime exception processing request: {}", request, re);
-            throw re;
+            LOGGER.warn("Uncaught runtime exception processing request: " + request, re);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
+        } catch (StackOverflowError sfe) {
+            LOGGER.warn("Uncaught stack overflow error processing request: " + request, sfe);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
         }
     }
 
