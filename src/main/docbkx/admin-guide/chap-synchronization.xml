@@ -81,7 +81,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    <para>OpenIDM does not defined any schema or set of Attributes to be stored in the repository. Any attribute which is configured as a target in a mapping pointing to the repository will be stored there. The schema of the repository database will be dynamically updated if a new attribute is mapped. Therefore OpenIDM can be used for both scenarios: the Metadirectory scenario, the minimum data scenario or any solution in between.</para>
   </section> 
   <section><title>Using SCIM</title>
-   <para>As mentioned int he chapter before, out of the box OpenIDM does not provide any predefined data schema for storing data in the repository. For compatibility reasons it is highly recommended to agree on a data model before a project is started. One possibility is to follow the attribute names as provided in the Simple Cloud Identity Management (<link href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html">SCIM</link>) specification.</para>
+   <para>As mentioned int he chapter before, out of the box OpenIDM does not provide any predefined data schema for storing data in the repository. For compatibility reasons it is highly recommended to agree on a data model before a project is started. One possibility is to follow the attribute names as provided in the Simple Cloud Identity Management (<link xlink:href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html">SCIM</link>) specification.</para>
    <para>The idea is to use any attribute name from SCIM if there is a suitable name defined. If not, then a new name needs to be chosen. A general challenge is that SCIM uses a rather hierarchical structure where in OpenIDM we currently prefer a flat structure. This may change in the near future.</para>
    <!--section><title>Mapping exsiting SCUM attributes</title>
     <itemizedlist>
@@ -100,8 +100,8 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   <section><title>Config Files Involved</title>
    <para>Before a value of an attribute from an external resource is stored in the OpenIDM repository or even another external resource, there are several configuration files involved at which the attribute name might be mapped, the attribute value might be changed or combined with other attribute.</para>
    <itemizedlist>
-    <listitem>provisioner.&lt;resource name&gt;.json - one file for each resource</listitem>
-    <listitem>sync.json - one file per OpenIDM installation</listitem>
+    <listitem><para>provisioner.&lt;resource name&gt;.json - one file for each resource</para></listitem>
+    <listitem><para>sync.json - one file per OpenIDM installation</para></listitem>
    </itemizedlist>
    <para>Further more not all attributes of a user on the external resource need to be synchronized. Not even all accounts need to be synchronized. Many of the configuration, especially attribute name mappping is done in the different provisioner.&lt;name&gt;.json files as described in chapter <olink targetdoc="chap-resource-conf.xml" targetptr="connect-prop-id">Resource Connector Configuration</olink>. The other main important configuration file is called sync.json and contains the core configuration of how objects and attributes which flow through OpenIDM need to be handled.</para>
    <section><title>Attribute Name Mapping in provisioner.&lt;resource name&gt;.json</title>
@@ -147,7 +147,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
      <para>OpenIDM will remember the connection of an object in the repository which belongs to an object in myLDAP, i.e. the tow objects represent the same user on the different systems, in a link table. On the first synchronization OpenIDM will create a type of link for the new mapping. In most cases it will be desirable that the two mappings use the same link information, since the connection of the two objects is the same for both directions. The rule is:</para>
      <itemizedlist>
       <listitem><para>If a mapping does not have a "links" property then a new type is created for the mapping during the first dynchronization.</para></listitem>
-      <listitem>If the second mapping should use the same link type, the it needs to have a "links" property with the name of the first mapping as the value.</listitem>
+      <listitem><para>If the second mapping should use the same link type, the it needs to have a "links" property with the name of the first mapping as the value.</para></listitem>
      </itemizedlist>
      <example xml:id="links-example-id">
       <title>Handling Links in Mappings</title>
@@ -264,21 +264,21 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
       <section><title>Available Values in Scripts in sync.json</title>
        <para>During synchronization between a source and a target resources there are always the the two objects "source" and "target" availabl. The source object contains all the attributes coming from the source and the target object contains the attributes which will be sent to the target. All attributes of these objects are accessible in the scripts with the syntax source.&lt;attribute name&gt;. The syntax is used for instance in the example <xref linkend="basic-ldap-mapping"/>. Especially for the target object it might be also interesting to write to the target. </para>
        <para>source, target, object, DB queries read</para>
-      </section>
       <example xml:id="jscript-examples-id">
        <title>Two examples on how to include java script in the properties part of a mapping in sync.json</title>
-       <programlisting>
-        "correlationQuery" : {
-            "type" : "text/javascript",
-            "file" : "script/ldapBackCorrelationQuery.js"
-        },       
-        "onUpdate" : {
-            "type" : "text/javascript",
-            "source" : "if ((source.email != null) &amp;&amp; (source.email.length > 0)) {target.mail = source.email;}"
-        }        
-       </programlisting>
+       <programlisting language="javascript">
+"correlationQuery" : {
+    "type" : "text/javascript",
+    "file" : "script/ldapBackCorrelationQuery.js"
+},       
+"onUpdate" : {
+    "type" : "text/javascript",
+    "source" : "if ((source.email != null) &amp;&amp; (source.email.length &gt; 0))
+        {target.mail = source.email;}"
+}</programlisting>
       </example>
       <para>If the java script is directly written in the mapping as a "source" property then the value is configured as a string and put into doubel quotes like "...". This makes the double quotes unusably inside the java script, for instance for strings. Single quotes need to be used instead as shown in the "displayName" property in example <xref linkend="basic-ldap-mapping"/>.</para>
+      </section>
      </section>
      <section><title>Using Encrypted Values</title>
       <para>Sometimes it is desirable to not only encrypt the user's passwords when stored in the repository but any other attribute. Examples might be answers to authentication questions as well as credit card or social security numbers.</para>
@@ -359,11 +359,9 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   </section>
   <section><title>Reaction on a given Situation</title>
    <para>In each mapping the appropriate action on a given situation can be defined.</para>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../shared/sec-syncActions.xml"/>
-  </section>
    <example>
     <title>A typical "policies" section of a Mapping in the configuration sync.json</title>
-    <programlisting>
+    <programlisting language="javascript">
         "policies" : [ {
             "situation" : "CONFIRMED",
             "action" : "UPDATE"
@@ -388,6 +386,8 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
         } ]    
     </programlisting>
    </example>
+   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../shared/sec-syncActions.xml"/>
+  </section>
  </section> 
  
  <section><title>Detailed Steps of the OpenIDM sync Engine</title>
@@ -419,7 +419,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   
   <example xml:id="advance-syncing-example-id">
    <title>An advanced sync.json configuration</title>
-   <programlisting linenumbering="true">
+   <programlisting linenumbering="numbered" language="javascript">
 {
     "mappings" : [ {
         "name" : "systemLdapAccount_managedUser",
@@ -443,7 +443,8 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
         }, {
             "transform" : {
                 "type" : "text/javascript",
-                "source" : "if (source.myGivenName) {source.myGivenName;} else {source.givenName;}"
+                "source" : "if (source.myGivenName) {source.myGivenName;}
+                    else {source.givenName;}"
             },
             "target" : "givenName"
         }, {
@@ -457,7 +458,8 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
             "source" : "cn",
             "target" : "fullname"
         }, {
-            "comment" : "Multi-valued in LDAP, single-valued in AD. Retrieve first non-empty value.",
+            "comment" : "Multi-valued in LDAP, single-valued in AD.
+                Retrieve first non-empty value.",
             "source" : "title",
             "transform" : {
                 "type" : "text/javascript",
@@ -467,7 +469,9 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
         }, {
             "condition" : {
                 "type" : "text/javascript",
-                "source" : "var clearObj = openidm.decrypt(object); ((clearObj.password != null) &amp;&amp; (clearObj.ldapPassword != clearObj.password))"
+                "source" : "var clearObj = openidm.decrypt(object);
+                    ((clearObj.password != null) &amp;&amp;
+                        (clearObj.ldapPassword != clearObj.password))"
             },
             "transform" : {
                 "type" : "text/javascript",
@@ -477,7 +481,8 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
         }],
         "onCreate" : {
             "type" : "text/javascript",
-            "source" : "target.ldapPassword = null; target.adPassword = null; target.password = null; target.ldapStatus = 'New Account'"
+            "source" : "target.ldapPassword = null; target.adPassword = null;
+                target.password = null; target.ldapStatus = 'New Account'"
         },
         "onUpdate" : {
             "type" : "text/javascript",
