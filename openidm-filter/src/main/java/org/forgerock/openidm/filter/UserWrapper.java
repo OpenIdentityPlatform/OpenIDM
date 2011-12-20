@@ -31,11 +31,11 @@ import org.slf4j.LoggerFactory;
 
 public class UserWrapper extends HttpServletRequestWrapper {
 
-    String username;
-    List<String> roles = null;
+    String username = null;
+    String roles = null;
     HttpServletRequest origReq = null;
 
-    public UserWrapper(String uname, List<String> userRoles, HttpServletRequest req) {
+    public UserWrapper(String uname, String userRoles, HttpServletRequest req) {
         super(req);
         username = uname;
         roles = userRoles;
@@ -53,10 +53,10 @@ public class UserWrapper extends HttpServletRequestWrapper {
 
     @Override
     public boolean isUserInRole(String role) { 
-        if (roles == null) {
+        if (roles == null || roles.indexOf(role) == -1) {
             return false;
-        }
-        return roles.contains(role);
+        } 
+        return true;
     }
 
     @Override
@@ -66,8 +66,10 @@ public class UserWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getHeader(String name){
-        if (roles.size() > 0 && name.equalsIgnoreCase("X-OpenIDM-Role")) {
-            return roles.get(0);
+        if (name.equalsIgnoreCase("X-OpenIDM-Roles")) {
+            return roles;
+        } else if (name.equalsIgnoreCase("X-OpenIDM-Password")) {
+            return null;
         } else {
             return ((HttpServletRequest)getRequest()).getHeader(name);
         } 
@@ -77,6 +79,7 @@ public class UserWrapper extends HttpServletRequestWrapper {
     public Enumeration getHeaderNames() {
         List<String> names = Collections.list(super.getHeaderNames());
         names.add("X-OpenIDM-Role");
+        names.remove("X-OpenIDM-Password");
         return Collections.enumeration(names);
     }
 }
