@@ -18,12 +18,15 @@ package org.forgerock.openidm.filter;
 
 // Java Standard Edition
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 
 import java.io.IOException;
+
+import javax.security.cert.X509Certificate;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,6 +68,9 @@ public class AuthFilter implements Filter {
     final static Logger logger  = LoggerFactory.getLogger(AuthFilter.class);
 
     private FilterConfig config = null;
+    
+    // A list of ports that allow authentication purely based on client ceritficates (SSL mutual auth)
+    List clientAuthOnly = new ArrayList();
 
     public void init(FilterConfig config) throws ServletException {
           this.config = config;
@@ -112,6 +118,42 @@ public class AuthFilter implements Filter {
             sess.setAttribute("X-OpenIDM-Role", roles.get(0));
         }
     }
+    
+    // This is currently Jetty specific
+    private boolean hasClientCert(ServletRequest request) {
+        X509Certificate[] certs = getClientCerts(request);
+        
+        // TODO: reduce the logging level
+        if (certs != null) {
+            Principal existingPrincipal = request instanceof HttpServletRequest ? ((HttpServletRequest)request).getUserPrincipal() : null;
+            logger.info("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
+            for (X509Certificate cert : certs) {
+                logger.info("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
+            }
+        }
+        
+        return (certs != null && certs.length > 0 && certs[0] != null);
+    }
+    
+    // This is currently Jetty specific
+    private X509Certificate[] getClientCerts(ServletRequest request) {
+        Object checkCerts = request.getAttribute("javax.servlet.request.X509Certificate");
+        if (checkCerts instanceof X509Certificate[]) {
+            return (X509Certificate[]) checkCerts;
+        } else {
+            logger.warn("Unknown certificate type retrieved {}", checkCerts);
+            return null;
+        }
+    }
+    
+    /**
+     * Whether to allow authentication purely based on client certificates
+     * Note that the checking of the certificates MUST be done by setting jetty up for client auth required.
+     * @return true if authentication via client certificate only is sufficient
+     */
+    private boolean allowClientCertOnly(ServletRequest request) {
+        return clientAuthOnly.contains(Integer.valueOf(request.getLocalPort()));
+    }
 
     // temporary limit to one role, should support a list of roles
     private void getRolesFromSession(HttpSession sess, List roles) {
@@ -135,6 +177,12 @@ public class AuthFilter implements Filter {
 
         String password = req.getHeader("X-OpenIDM-Password");
         if (username == null || password == null || username.equals("") || password.equals("")) {
+            
+            if (allowClientCertOnly(req) && hasClientCert(req)) {
+                roles.add("openidm-authorized");
+                return true;
+            }
+            
             logger.debug("Failed authentication, missing or empty headers");
             return false;
         }
@@ -150,6 +198,9 @@ public class AuthFilter implements Filter {
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
 
+        // TODO: make configurable. For testing purpose only.
+        clientAuthOnly.add(Integer.valueOf(8444));
+        
         org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
         String urlPatterns[] = {"/openidm/*"};
         String servletNames[] = null;
