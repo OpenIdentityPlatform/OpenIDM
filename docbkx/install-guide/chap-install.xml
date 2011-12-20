@@ -236,7 +236,8 @@ Id     State           Name
       <step>
        <para>On UNIX, Linux, and Mac OS X</para>
        <screen>$ curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request PUT
  --data '{
  "name":"joe",
@@ -251,7 +252,8 @@ Id     State           Name
       <step>
        <para>On Windows</para>
        <screen>C:\&gt;curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  --request PUT
  --data {
  \"name\":\"joe",
@@ -277,7 +279,8 @@ Id     State           Name
       <step>
        <para>Use the <command>curl</command> command.</para>
        <screen>$ curl
- --user admin:admin
+ --header "X-OpenIDM-Username: admin"
+ --header "X-OpenIDM-Password: admin"
  http://localhost:8080/openidm/managed/user/joe
  {
  "lastname":"smith",
