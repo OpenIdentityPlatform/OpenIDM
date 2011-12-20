@@ -61,6 +61,9 @@ public class ReconStats {
         ids.put(Situation.MISSING, new ArrayList<String>());
         ids.put(Situation.UNQUALIFIED, new ArrayList<String>());
         ids.put(Situation.UNASSIGNED, new ArrayList<String>());
+        ids.put(Situation.SOURCE_MISSING, new ArrayList<String>());
+        ids.put(Situation.SOURCE_IGNORED, new ArrayList<String>());
+        ids.put(Situation.TARGET_IGNORED, new ArrayList<String>());
         notValid = new ArrayList<String>();
         startTime = System.currentTimeMillis();
         startTimestamp = sdformat.format(new Date());
@@ -81,10 +84,15 @@ public class ReconStats {
 
     public void addSituation(String id, Situation situation) {
         if (situation != null) {
-            ids.get(situation).add(id);
+            List<String> situationIds = ids.get(situation);
+            if (situationIds != null) {
+                situationIds.add(id);
+            }
         }
     }
 
+    // TODO: phase out notValid and replace with source ignored, target ignored, unqualified
+    // situation processing
     public void addNotValid(String id) {
         notValid.add(id);
     }
@@ -92,7 +100,7 @@ public class ReconStats {
     public void addAction(String id, Action action) {
     }
 
-    public Map asMap() {
+    public Map<String, Object> asMap() {
         Map<String, Object> results = new HashMap();
 
         results.put("startTime", startTimestamp);
@@ -116,5 +124,35 @@ public class ReconStats {
         }
 
         return results;
+    }
+    
+    public static String simpleSummary(ReconStats globalStats, ReconStats sourceStats, ReconStats targetStats) {
+        Map<String, Integer> simpleSummary = new HashMap<String, Integer>();
+        updateSummary(simpleSummary, globalStats);
+        updateSummary(simpleSummary, sourceStats);
+        updateSummary(simpleSummary, targetStats);
+        
+        StringBuilder sb = new StringBuilder();
+        for (Entry<String, Integer> e : simpleSummary.entrySet()) {
+            sb.append(e.getKey());
+            sb.append(": ");
+            sb.append(e.getValue());
+            sb.append(" ");
+        }
+        return sb.toString();
+    }
+    
+    private static void updateSummary(Map<String, Integer> simpleSummary, ReconStats stat) {
+        if (stat != null) {
+            for (Entry<Situation, List<String>> e : stat.ids.entrySet()) {
+                String key = e.getKey().name();
+                Integer existing = simpleSummary.get(key);
+                if (existing == null) {
+                    existing = Integer.valueOf(0);
+                }
+                Integer updated = existing + e.getValue().size();
+                simpleSummary.put(key, updated);
+            }
+        }
     }
 }

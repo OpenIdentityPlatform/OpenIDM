@@ -39,6 +39,7 @@ import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.JsonResourceContext;
 
 // OpenIDM
+import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -237,54 +238,43 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * TODO: Description.
-     *
-     * @param objectSet TODO.
-     * @return TODO.
-     * @throws org.forgerock.openidm.sync.SynchronizationException
+     * Get all IDs for a given object set as a list 
+     * 
+     * @param objectSet the object set to query
+     * @return the list of (unqualified) ids
+     * @throws SynchronizationException if retrieving or processing the ids failed
+     */
+    private List<String> queryAllIds(final String objectSet) throws SynchronizationException {
+        List<String> ids = new ArrayList<String>();
+        HashMap<String, Object> query = new HashMap<String, Object>();
+        query.put(QueryConstants.QUERY_ID, "query-all-ids");
+        try {
+            JsonValue objList = new JsonValue(service.getRouter().query(objectSet, query)).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
+            for (JsonValue obj : objList) {
+                ids.add(obj.get("_id").asString());
+            }
+        } catch (JsonValueException jve) {
+            throw new SynchronizationException(jve);
+        } catch (ObjectSetException ose) {
+            throw new SynchronizationException(ose);
+        }
+        return ids;
+    }
+    
+    /**
+     * Get all IDs for a given object set as a iterable. 
+     * May allow for further optimizations over direct list access and is the preferred way to access. 
+     * 
+     * @param objectSet the object set to query
+     * @return the list of (unqualified) ids
+     * @throws SynchronizationException if retrieving or processing the ids failed
      */
 // TODO: Codify query-all-ids in ObjectSet or provide per-ObjectSet query for all IDs.
-    private Iterable<String> queryAllIds(final String objectSet) throws SynchronizationException {
-        return new Iterable<String>() {
-
-            JsonValue list;
-
-            {
-                HashMap<String, Object> query = new HashMap<String, Object>();
-                query.put(QueryConstants.QUERY_ID, "query-all-ids");
-                try {
-                    list = new JsonValue(service.getRouter().query(objectSet, query)).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
-                } catch (JsonValueException jve) {
-                    throw new SynchronizationException(jve);
-                } catch (ObjectSetException ose) {
-                    throw new SynchronizationException(ose);
-                }
-            }
-
-            @Override
-            public Iterator<String> iterator() {
-                final Iterator<JsonValue> iterator = list.iterator();
-                return new Iterator<String>() {
-
-                    @Override
-                    public boolean hasNext() {
-                        return iterator.hasNext();
-                    }
-
-                    @Override
-                    public String next() { // throws JsonValueException
-                        return iterator.next().get("_id").asString();
-                    }
-
-                    @Override
-                    public void remove() {
-                        throw new UnsupportedOperationException();
-                    }
-                };
-            }
-        };
+    private Iterable<String> queryAllIdsIterable(final String objectSet) throws SynchronizationException {
+        // For now we pull all into memory immediately
+        return queryAllIds(objectSet);
     }
-
+    
     /**
      * TODO: Description.
      *
@@ -470,19 +460,28 @@ class ObjectMapping implements SynchronizationListener {
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
+        JsonValue context = ObjectSetContext.get();
+        JsonValue rootContext = JsonResourceContext.getRootContext(context);
+        logReconStart(reconId, rootContext, context);
         sourceStats = new ReconStats(reconId,sourceObjectSet);
         globalStats = new ReconStats(reconId,name);
 
+        // Get all the source and target identifiers before we assess the situations
         sourceStats.startAllIds();
-        Iterator<String> i = queryAllIds(sourceObjectSet).iterator();
+        Iterator<String> sourceIds = queryAllIdsIterable(sourceObjectSet).iterator();
         sourceStats.endAllIds();
-        if (!i.hasNext()) {
+        if (!sourceIds.hasNext()) {
             throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
         }
-        while (i.hasNext()) {
-            String sourceId = i.next();
+        targetStats = new ReconStats(reconId,targetObjectSet);
+        targetStats.startAllIds();
+        List<String> remainingTargetIds = queryAllIds(targetObjectSet);
+        targetStats.endAllIds();
+        
+        while (sourceIds.hasNext()) {
+            String sourceId = sourceIds.next();
             SourceSyncOperation op = new SourceSyncOperation();
-            ReconEntry entry = new ReconEntry(op);
+            ReconEntry entry = new ReconEntry(op, rootContext);
             op.sourceId = sourceId;
             entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
             sourceStats.entries++;
@@ -505,25 +504,26 @@ class ObjectMapping implements SynchronizationListener {
                     entry.message = throwable.getMessage();
                 }
             }
+            String[] targetIds = op.getTargetIds();
+            for (String handledId : targetIds) {
+                remainingTargetIds.remove(handledId);
+            }
+            
             if (entry.status == Status.FAILURE || op.action != null) {
                 entry.timestamp = new Date();
                 entry.reconciling = "source";
                 if (op.targetObject != null) {
                     entry.targetId = qualifiedId(targetObjectSet, op.targetObject.get("_id").asString());
                 }
+                entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
                 logReconEntry(entry);
             }
         }
         sourceStats.end();
-        targetStats = new ReconStats(reconId,targetObjectSet);
-        targetStats.startAllIds();
-        Iterator<String> j = queryAllIds(targetObjectSet).iterator();
-        targetStats.endAllIds();
 
-        while (j.hasNext()) {
-            String targetId = j.next();
+        for (String targetId : remainingTargetIds) {
             TargetSyncOperation op = new TargetSyncOperation();
-            ReconEntry entry = new ReconEntry(op);
+            ReconEntry entry = new ReconEntry(op, rootContext);
             entry.targetId = qualifiedId(targetObjectSet, targetId);
             targetStats.entries++;
             op.reconId = reconId;
@@ -556,6 +556,7 @@ class ObjectMapping implements SynchronizationListener {
         }
         targetStats.end();
         globalStats.end();
+        logReconEnd(reconId, rootContext, context);
         doResults();
 // TODO: cleanup orphan link objects (no matching source or target) here 
     }
@@ -572,6 +573,24 @@ class ObjectMapping implements SynchronizationListener {
         } catch (ObjectSetException ose) {
             throw new SynchronizationException(ose);
         }
+    }
+    
+    private void logReconStart(String reconId, JsonValue rootContext, JsonValue context) throws SynchronizationException {
+        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_START);
+        reconStartEntry.timestamp = new Date();
+        reconStartEntry.reconId = reconId;
+        reconStartEntry.message = "Reconciliation initiated by " + ActivityLog.getRequester(context);
+        logReconEntry(reconStartEntry);
+    }
+    
+    private void logReconEnd(String reconId, JsonValue rootContext, JsonValue context) throws SynchronizationException {
+        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_END);
+        reconEndEntry.timestamp = new Date();
+        reconEndEntry.reconId = reconId;
+        String simpleSummary = ReconStats.simpleSummary(globalStats, sourceStats, targetStats);
+        reconEndEntry.message = simpleSummary;
+        logReconEntry(reconEndEntry);
+        LOGGER.info("Reconciliation completed. " + simpleSummary);
     }
     
     /*
@@ -853,11 +872,45 @@ class ObjectMapping implements SynchronizationListener {
         /** TODO: Description. */
         public String sourceId;
 
+        // If it can not uniquely identify a target, the list of ambiguous target ids
+        public List<String> ambiguousTargetIds;
+        
         @Override
         public void sync() throws SynchronizationException {
             assessSituation();
             determineAction(true);
             performAction();
+        }
+        
+        /**
+         * @return all found matching target identifer(s), or a 0 length array if none.
+         * More than one target identifier is possible for ambiguous matches
+         */
+        public String[] getTargetIds() {
+            String[] targetIds = null;
+            if (ambiguousTargetIds != null) {
+                targetIds = ambiguousTargetIds.toArray(new String[ambiguousTargetIds.size()]);
+            } else if (targetObject != null) {
+                targetIds = new String[] { targetObject.get("_id").required().asString() };
+            } else {
+                targetIds = new String[0];
+            }
+            return targetIds;
+        }
+        
+        /**
+         * @return the ambiguous target identifier(s), or an empty list if no ambiguous entries are present
+         */
+        public List getAmbiguousTargetIds() {
+            return ambiguousTargetIds;
+        }
+        
+        private void setAmbiguousTargetIds(JsonValue results) {
+            ambiguousTargetIds = new ArrayList<String>(results == null ? 0 : results.size());
+            for (JsonValue resultValue : results) {
+                String anId = resultValue.get("_id").required().asString();
+                ambiguousTargetIds.add(anId);
+            }
         }
 
         /**
@@ -885,19 +938,14 @@ class ObjectMapping implements SynchronizationListener {
                     if (results == null) { // no correlationQuery defined
                         situation = Situation.ABSENT;
                     } else if (results.size() == 1) {
-                        //TODO Optimize to get the entire object with one query if it's sufficeient
                         JsonValue resultValue = results.get((Integer) 0).required();
-                        if (hasNonSpecialAttribute(resultValue.keys())) { //Assume this is a full object
-                            targetObject = resultValue;
-                        } else {
-                            targetObject = readObject(qualifiedId(targetObjectSet,
-                                    resultValue.get("_id").required().asString()));
-                        }
+                        targetObject = getCorrelatedTarget(resultValue);
                         situation = Situation.FOUND;
                     } else if (results.size() == 0) {
                         situation = Situation.ABSENT;
                     } else {
                         situation = Situation.AMBIGUOUS;
+                        setAmbiguousTargetIds(results);
                     }
                 }
             } else { // mapping does not qualify for target
@@ -908,19 +956,13 @@ class ObjectMapping implements SynchronizationListener {
                     if (results == null || results.size() == 0) { 
                         situation = Situation.SOURCE_IGNORED; // source not valid for mapping, and no link or target exist
                     } else if (results.size() == 1) {
-                        // TODO: Is it necessary to read the object for unqualified?
-                        //TODO Optimize to get the entire object with one query if it's sufficeient
+                        // TODO: Consider if we can optimize out the read for unqualified conditions
                         JsonValue resultValue = results.get((Integer) 0).required();
-                        if (hasNonSpecialAttribute(resultValue.keys())) { //Assume this is a full object
-                            targetObject = resultValue;
-                        } else {
-                            targetObject = readObject(qualifiedId(targetObjectSet,
-                                    resultValue.get("_id").required().asString()));
-                        }
+                        targetObject = getCorrelatedTarget(resultValue);
                         situation = Situation.UNQUALIFIED;
                     } else if (results.size() > 1) {
-                        // TODO: How does object mapping handle multiple? How does AMBIGUOUS handle multiple?
                         situation = Situation.UNQUALIFIED;
+                        setAmbiguousTargetIds(results);
                     }
                 }
                 if (sourceStats != null) {
@@ -957,6 +999,25 @@ class ObjectMapping implements SynchronizationListener {
                 }
             }
             return result;
+        }
+        
+        /**
+         * Given a result entry from a correlation query get the full correlated target object
+         * @param resultValue an entry from the correlation query result list. 
+         * May already be the full target object, or just contain the id.
+         * @return the target object
+         * @throws SynchronizationException
+         */
+        private JsonValue getCorrelatedTarget(JsonValue resultValue) throws SynchronizationException {
+            // TODO: Optimize to get the entire object with one query if it's sufficient
+            JsonValue fullObj = null;
+            if (hasNonSpecialAttribute(resultValue.keys())) { //Assume this is a full object
+                fullObj = resultValue;
+            } else {
+                fullObj = readObject(qualifiedId(targetObjectSet,
+                        resultValue.get("_id").required().asString()));
+            }
+            return fullObj;
         }
 
         /**
@@ -1015,9 +1076,11 @@ class ObjectMapping implements SynchronizationListener {
                 if (sourceObject == null) {
                     situation = Situation.SOURCE_MISSING;
                 } else if (!isSourceValid()) {
-                    situation = Situation.UNQUALIFIED;
+                    situation = Situation.UNQUALIFIED; // Should not happen as done in source phase
+                    LOGGER.warn("Unexpected situation in target reconciliation {} {} {} {}", new Object[] {situation, sourceObject, targetObject, linkObject});
                 } else { // proper link
-                    situation = Situation.CONFIRMED;
+                    situation = Situation.CONFIRMED; // Should not happen as done in source phase
+                    LOGGER.warn("Unexpected situation in target reconciliation {} {} {} {}", new Object[] {situation, sourceObject, targetObject, linkObject});
                 }
             }
             if (targetStats != null){
@@ -1030,9 +1093,19 @@ class ObjectMapping implements SynchronizationListener {
      * TEMPORARY.
      */
     private class ReconEntry {
+        
+        public final static String RECON_START = "start";
+        public final static String RECON_END = "summary";
+        public final static String RECON_ENTRY = ""; // regular reconciliation entry has an empty entry type
 
+        /** Type of the audit log entry. Allows for marking recon start / summary records */
+        public String entryType = RECON_ENTRY;
         /** TODO: Description. */
         public final SyncOperation op;
+        /** The id identifying the reconciliation run */
+        public String reconId;
+        /** The root invocation context */
+        public final JsonValue rootContext;
         /** TODO: Description. */
         public Date timestamp;
         /** TODO: Description. */
@@ -1047,9 +1120,44 @@ class ObjectMapping implements SynchronizationListener {
         public String message;
 // TODO: replace with proper formatter
         SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        
+        // A comma delimited formatted representation of any ambiguous identifiers
+        protected String ambigiousTargetIds;
+        public void setAmbiguousTargetIds(List<String> ambiguousIds) {
+            if (ambiguousIds != null) {
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (String id : ambiguousIds) {
+                    if (!first) {
+                        sb.append(", ");
+                    }
+                    first = false;
+                    sb.append(id);
+                }
+                ambigiousTargetIds = sb.toString();
+            } else {
+                ambigiousTargetIds = "";
+            }
+        }
+        
+        private String getReconId() {
+            return (reconId == null && op != null) ? op.reconId : reconId;
+        }
 
-        public ReconEntry(SyncOperation op) {
+        /**
+         * Constructor that allows specifying the type of reconciliation log entry
+         */
+        public ReconEntry(SyncOperation op, JsonValue rootContext, String entryType) {
             this.op = op;
+            this.rootContext = rootContext;
+            this.entryType = entryType;
+        }
+        
+        /**
+         * Constructor for regular reconciliation log entries
+         */
+        public ReconEntry(SyncOperation op, JsonValue rootContext) {
+            this(op, rootContext, RECON_ENTRY);
         }
 
         /**
@@ -1059,13 +1167,16 @@ class ObjectMapping implements SynchronizationListener {
          */
         private JsonValue toJsonValue() {
             JsonValue jv = new JsonValue(new HashMap<String, Object>());
-            jv.put("reconId", op.reconId);
+            jv.put("entryType", entryType);
+            jv.put("rootActionId", rootContext.get("uuid").getObject());
+            jv.put("reconId", getReconId());
             jv.put("reconciling", reconciling);
             jv.put("sourceObjectId", sourceId);
             jv.put("targetObjectId", targetId);
+            jv.put("ambiguousTargetObjectIds", ambigiousTargetIds);
             jv.put("timestamp", isoFormatter.format(timestamp));
-            jv.put("situation", (op.situation == null ? null : op.situation.toString()));
-            jv.put("action", (op.action == null ? null : op.action.toString()));
+            jv.put("situation", ((op == null || op.situation == null) ? null : op.situation.toString()));
+            jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));
             jv.put("status", (status == null ? null : status.toString()));
             jv.put("message", message);
             return jv;
