@@ -30,197 +30,280 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Business Processes and Workflow (EXPERIMENTAL)</title>
- <section><title>Introduction</title>
-  <para>Key to any Identity Management solution is the ability to provide workflow driven provisioning activities, whether its for self-service actions such as request for entitlements, roles or resources, running sunrise/sunset processes, approvals with escalations or some maintenance task.</para>
-  <para>OpenIDM provides an embedded workflow and business process engine based on Activiti and the BPMN 2.0 standard which provides OpenIDM with a wide array of flexibility and capabilities.</para>
-  <para>More information about Activiti and the Activiti project can be found at http://www.activiti.org.</para>
+ <title>Business Processes &amp; Workflow</title>
+
+ <para>Key to any identity management solution is the ability to provide
+ workflow driven provisioning activities, whether for self-service actions
+ such as request for entitlements, roles or resources, running sunrise or
+ sunset processes, handling approvals with escalations, or performing
+ maintenance.</para>
+ 
+ <para>OpenIDM provides an embedded workflow and business process engine
+ based on Activiti and the Business Process Model and Notation (BPMN) 2.0
+ standard.</para>
+
+ <note>
+  <para>The embedded workflow and business process engine is currently
+  provided as part of a separate, experimental download,
+  <filename>openidm-<?eval ${project.version}?>-workflow-experimental.zip</filename>,
+  supported separately from the standard OpenIDM release.</para>
+
+  <!-- TODO: Confirm this approach for delivery -->
+  <para>You install
+  <filename>openidm-<?eval ${project.version}?>-workflow-experimental.zip</filename>
+  in the same way as standard OpenIDM. See the <link
+  xlink:href="install-guide#chap-install"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+  Guide</citetitle></link> for instructions. After starting OpenIDM, run
+  the <command>scr list</command> command at the console, and check that
+  bundle is active.</para>
+
+  <screen>-&gt; scr list
+...
+[   6] [active       ] org.forgerock.openidm.external.activiti
+...</screen>
+
+  <para>Contact ForgeRock at <link xlink:href="mailto:info@forgerock.com"
+  >info@forgerock.com</link> for details on support for the experimental
+  embedded workflow and business process engine.</para>
+ </note>
+
+ <para>More information about Activiti and the Activiti project can be found
+ at <link xlink:href="http://www.activiti.org" xlink:show="new"
+ >http://www.activiti.org</link>.</para>
+
+ <section xml:id="about-bmpm-2-activiti">
+  <title>About BPMN 2.0 &amp; Activity Tools</title>
+
+  <para>Business Process Model and Notation 2.0 is the result of consensus
+  among Business Process Management (BPM) system vendors. The <link
+  xlink:href="http://omg.org/" xlink:show="new">Object Management Group</link>
+  (OMG) has developed and maintained the <link xlink:show="new"
+  xlink:href="http://www.omg.org/spec/BPMN/">BPMN</link> standard since
+  2004.</para>
+
+  <para>The first version of the BPMN specification focused only on graphical
+  notation, and quickly became popular with the business analyst audience.
+  BPMN 1.x defines how constructs such as human tasks, executable scripts, and
+  automated decisions are visualized in a vendor-neutral, standard way. The
+  second version of BPMN extends that focus to include execution semantics,
+  and a common exchange format. Thus, BPMN 2.0 process definition models
+  can be exchanged not only between different graphical editors, but also
+  can be executed as is on any BPMN 2.0-compliant engine, such as the engine
+  embedded in OpenIDM.</para>
+
+  <para>Using BMPN 2.0, you can add artifacts describing workflow and business
+  process behavior to OpenIDM for provisioning and other purposes. For example,
+  you can craft the actual artifacts defining business processes and workflow
+  in a text editor such as <command>vi</command>, or using a special Eclipse
+  plugin. The Eclipse plugin provides visual design capabilities, simplifying
+  packaging and deployment of the artifact to OpenIDM. See the <link
+  xlink:href="http://docs.codehaus.org/display/ACT/Activiti+BPMN+2.0+Eclipse+Plugin"
+  xlink:show="new">Activiti BPMN 2.0 Eclipse Plugin</link> documentation for
+  instructions on installing Activiti Eclipse BPMN 2.0 Designer.</para>
+  
+  <para>Also read the Activiti <citetitle>User Guide</citetitle> section
+  covering <link xlink:href="http://www.activiti.org/userguide/#bpmnConstructs"
+  xlink:show="new"><citetitle>BPMN 2.0 Constructs</citetitle></link>, which
+  describes in detail the graphical notations and XML representations for
+  events, flows, gateways, tasks, and process constructs.</para>
  </section>
- <section><title>Experimentally Embedded</title>
-  <para>The workflow engine is currently experimentally embedded and in order to get access to its capabilities, OpenIDM needs to be built from source using a special build flag.</para>
-  <example>
-   <programlisting>
-$ mvn clean install -Pactiviti   
-   </programlisting>
-  </example>
-  <para>Verify that the BPMN 2.0 integration bundle gets built.</para>
-  <example>
-   <programlisting>
-INFO] Reactor Summary:
-[INFO]
-[INFO] OpenIDM project ................................... SUCCESS [10.624s]
-[INFO] OpenIDM System Fragment ........................... SUCCESS [9.785s]
-[INFO] OpenIDM utility classes ........................... SUCCESS [18.785s]
-[INFO] OpenIDM cryptography service ...................... SUCCESS [2.881s]
-[INFO] OpenIDM enhanced Configuration classes ............ SUCCESS [2.944s]
-[INFO] OpenIDM repository common ......................... SUCCESS [0.795s]
-[INFO] OpenIDM audit module .............................. SUCCESS [1.398s]
-[INFO] OpenIDM configuration support ..................... SUCCESS [2.621s]
-[INFO] OpenIDM scheduler ................................. SUCCESS [4.516s]
-[INFO] OpenIDM provisioner ............................... SUCCESS [1.917s]
-[INFO] OpenIDM core ...................................... SUCCESS [2.969s]
-[INFO] OpenIDM external REST service ..................... SUCCESS [1.100s]
-[INFO] OpenIDM external email service .................... SUCCESS [2.774s]
-[INFO] OpenIDM http context .............................. SUCCESS [0.692s]
-[INFO] JAAS login module for Repository .................. SUCCESS [1.156s]
-[INFO] OpenIDM Jetty Fragment ............................ SUCCESS [1.751s]
-[INFO] OpenIDM provisioner using OpenICF ................. SUCCESS [19.622s]
-[INFO] OpenIDM repository using OrientDB ................. SUCCESS [5.586s]
-[INFO] OpenIDM repository using JDBC ..................... SUCCESS [3.216s]
-[INFO] OpenIDM Restlet integration ....................... SUCCESS [0.947s]
-[INFO] OpenIDM fragment for jetty security ............... SUCCESS [0.899s]
-[INFO] OpenIDM Felix Gogo Shell .......................... SUCCESS [1.191s]
-[INFO] OpenIDM Web UI .................................... SUCCESS [1.853s]
-[INFO] OpenIDM Activiti BPMN 2.0 Integration ............. SUCCESS [4.645s]
-[INFO] OpenIDM ZIP file assembly ......................... SUCCESS [32.682s]
-[INFO] ------------------------------------------------------------------------   
-   </programlisting>
-  </example>
-  <para>Make sure you see:</para>
-  <programlisting>OpenIDM Activity BPMN 2.0 Integration ............. SUCCESS</programlisting>
-  <para>Next step is to install OpenIDM. Typically this is done in the /opt folder on *NIX systems.</para>
-  <para>Copy the trunk/openidm-zip/target/openidm-2.0.zip to /opt and unzip it.</para>
-  <programlisting>
-$ cp trunk/openidm-zip/target/openidm-2.0.zip /opt
-$ cd /opt
-$ unzip openidm-2.0.zip
-  </programlisting>
-  <para>Start OpenIDM by invoking the start.sh script and verify the running bundles from the console via the scr list command. The output should look similar to below:</para>
-  <example>
-   <programlisting>
-  -&gt; scr list
-    Id   State          Name
-  [  19] [active       ] org.forgerock.openidm.config.starter
-  [   6] [active       ] org.forgerock.openidm.external.activiti
-  [   8] [active       ] org.forgerock.openidm.external.rest
-  [  11] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-  [  15] [active       ] org.forgerock.openidm.ui.simple
-  [   5] [active       ] org.forgerock.openidm.router
-  [  14] [active       ] org.forgerock.openidm.scheduler
-  [  13] [active       ] org.forgerock.openidm.restlet
-  [   7] [unsatisfied  ] org.forgerock.openidm.external.email
-  [  17] [active       ] org.forgerock.openidm.repo.orientdb
-  [   3] [active       ] org.forgerock.openidm.sync
-  [   2] [active       ] org.forgerock.openidm.script
-  [   1] [active       ] org.forgerock.openidm.scope
-  [   9] [active       ] org.forgerock.openidm.http.contextregistrator
-  [  18] [active       ] org.forgerock.openidm.config
-  [   0] [active       ] org.forgerock.openidm.audit
-  [  16] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
-  [   4] [active       ] org.forgerock.openidm.managed
-  [  12] [active       ] org.forgerock.openidm.provisioner.openicf
-  [  10] [active       ] org.forgerock.openidm.provisioner
-   </programlisting>
-  </example>
- </section>
- <section><title>What is BPMN 2.0?</title>
-  <para>BPMN 2.0 is the result of consensus among Business Process Management (BPM) system vendors. This standard is called 'BPMN', which stands for 'Business Process Model and Notation', and is developed and maintained by the Object Management Group (OMG) since 2004.</para>
-  <para>The first version of the BPMN specification focused on graphical notation only, and became quickly popular within the business analyst audience. This means that the BPMN 1.x specification defines how concepts such as a human task, an executable script, automated decisions, etc. are visualized in a vendor-neutral standardized way. The second version (2.0), extends that focus to include execution semantics and a common exchange format. This means that BPMN 2.0 process definition models are not only exchangeable between graphical editors, but those models can also be executed as-is on any BPMN 2.0 compliant engine such as the one embedded in OpenIDM.</para>
-  <para>Using BPMN 2.0 notation, artifacts describing workflow or business process behavior can be added to OpenIDM for provisioning and other purposes. The actual artifacts defining the business process or workflow can be crafted in your favorite editor such as vi, or a special plug-in for Eclipse can be downloaded and installed. This plugin gives you visual designing capabilities and allows you to easily package and deploy the artifact to OpenIDM.</para>
- </section>
- <section><title>Setting up a Developer Environment</title>
-  <para>OpenIDM can leverage .bar packages containing the necessary workflow definitions. For this purpose there is a plug-in for Eclipse that allows you to model and develop workflows according to your requirements using all the BPMN 2.0 constructs along with the power and flexibility of OpenIDM.</para>
-  <para>This plugin is called the Activiti Eclipse BPMN 2.0 Designer project, and provides the ncessary functionality to design and deploy the processes in OpenIDM.</para>
-  <para>For more detailed information on this plugin and its community refer to the project website found at <link href='http://docs.codehaus.org/display/ACT/Activiti BPMN 2.0 Eclipse Plugin'>http://docs.codehaus.org/display/ACT/Activiti BPMN 2.0 Eclipse Plugin</link>.</para>
-  <para>The installation of the Activiti Eclipse BPMN 2.0 Designer is very simple and contains the following steps:</para>
+
+ <section xml:id="openidm-activity-limitations">
+  <title>Known Issues &amp; Limitations</title>
+
   <itemizedlist>
+   <para>The following are known issues and limitation for the experimental
+   embedded workflow and business process engine.</para>
    <listitem>
-    Download Eclipse Helios Classic http://www.eclipse.org/downloads/packages/eclipse-classic-361/heliossr1</listitem>
-   <listitem>Install the Activiti Eclipse BPMN 2.0 Designer plug-in via the update site http://activiti.org/designer/update</listitem>
-  </itemizedlist> 
-  <para>That's all, you should now be able to create your first Activiti Eclipse project and use with OpenIDM.</para>
+    <para>OpenIDM does not include a form generator, making it difficult to
+    include embedded forms. (OPENIDM-468)</para>
+   </listitem>
+   <listitem>
+    <!-- TODO: Issue ID? -->
+    <para>Error handling needs improvement. (OPENIDM-???)</para>
+   </listitem>
+   <listitem>
+    <para>This version depends on Activiti 5.8, which does not have the fix
+    for <link xlink:href="http://jira.codehaus.org/browse/ACT-583"
+    xlink:show="new">ACT-583</link>: Processes are not found in the bar file,
+    if they are below root.</para>
+    <para>To work around this issue, create a directory inside the .bar, and
+    put the BPMN XML artifact in the directory so that it is properly picked up
+    by the Process Engine.</para>
+   </listitem>
+  </itemizedlist>
  </section>
- <secton><title>BPMN 2.0 Constructs</title>
-  <link href='http://www.activiti.org/userguide/index.html#bpmnConstructs'> http://www.activiti.org/userguide/index.html#bpmnConstructs</link>
- </secton>
- <section><title>Invoking Workflows</title>
-  <para>Invoking Workflows or Business processes can be done from any of the trigger points that OpenIDM offers including reacting to situations discovered by Reconciliation. Invokation occurs by leveraging the openidm.action() API call.</para>
-  <example>
-   <programlisting>
+
+ <section xml:id="invoking-activiti-workflows">
+  <title>Invoking Activiti Workflows</title>
+
+  <para>You can invoke workflows and business processes from any trigger point
+  OpenIDM offers, including reacting to situations discovered during
+  reconciliation. Invocation relies on the <literal>openidm.action()</literal>
+  function.</para>
+
+  <programlisting language="javascript">
 /*
-* Calling 'myWorkflow' workflow
-*/
+ * Calling 'myWorkflow' workflow
+ */
 var map = {    
  "_action" : "myWorkflow",
  "_workflowParams" : {
     "foo" : "bar"
   }
 };
-openidm.action("workflow/activiti", map);
-   </programlisting>
-  </example>
+
+openidm.action("workflow/activiti", map);</programlisting>
  </section>
- <section><title>Sample EmailNotification Workflow</title>
-  <para>Lets build and deploy a simple Email Notification workflow. This sample assumes you have an SMTP server setup on localhost available on port 25.</para>
-  <para>Lets start by creating the emailNotification business process via developer environment described earlier in this chapter.</para>
-  <para>For our workflow we want to provide a set of parameters that can later be used when calling the workflow.</para>
-  <example>
-   <programlisting>
-${fromSender} = will allow us to specify from whom the email notification is.
-${toEmail} = will allow us to specify the recipient of the notification.
-   </programlisting>
-  </example>
-  <para>The workflow itself can be dragged and dropped by using the various BPMN components. In this very simple scenario, we will use a StartEvent, a MailTask and an EndEvent - and connect these to form a process with transitions from start to end.</para>
-  <mediaobject>
-   <imageobject>
-   </imageobject>
-  </mediaobject>
-  <para>Now lets adjust the generated XML code to use our variables as can be studied within the </para>
-  <example>
-   <programlisting>
-<![CDATA[<!--serviceTask> tag.
-<?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
- <process id="EmailNotification" name="emailNotification">
-   <documentation>Simple Email Notification Task</documentation>
-   <startEvent id="startevent1" name="Start"></startEvent>
-   <sequenceFlow id="flow1" name="" sourceRef="startevent1" targetRef="mailtask1"></sequenceFlow>
-   <endEvent id="endevent1" name="End"></endEvent>
-   <sequenceFlow id="flow2" name="" sourceRef="mailtask1" targetRef="endevent1"></sequenceFlow>
-   <serviceTask id="mailtask1" name="Email Notification" activiti:type="mail">
-     <extensionElements>
-       <activiti:field name="to" expression="${toEmail}"></activiti:field>
-       <activiti:field name="from" expression="no-reply@forgerock.com"></activiti:field>
-       <activiti:field name="subject" expression="Simple Email Notification"></activiti:field>
-       <activiti:field name="html">
-         <activiti:expression>Here is a simple Email Notification from ${fromSender}.></activiti:expression>
-       </activiti:field>
-     </extensionElements>
-   </serviceTask>
- </process>
- <bpmndi:BPMNDiagram id="BPMNDiagram_EmailNotification">
-   <bpmndi:BPMNPlane bpmnElement="EmailNotification" id="BPMNPlane_EmailNotification">
-     <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
-       <omgdc:Bounds height="35" width="35" x="170" y="250"></omgdc:Bounds>
-     </bpmndi:BPMNShape>
-     <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
-       <omgdc:Bounds height="35" width="35" x="410" y="250"></omgdc:Bounds>
-     </bpmndi:BPMNShape>
-     <bpmndi:BPMNShape bpmnElement="mailtask1" id="BPMNShape_mailtask1">
-       <omgdc:Bounds height="55" width="105" x="250" y="240"></omgdc:Bounds>
-     </bpmndi:BPMNShape>
-     <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
-       <omgdi:waypoint x="205" y="267"></omgdi:waypoint>
-       <omgdi:waypoint x="250" y="267"></omgdi:waypoint>
-     </bpmndi:BPMNEdge>
-     <bpmndi:BPMNEdge bpmnElement="flow2" id="BPMNEdge_flow2">
-       <omgdi:waypoint x="355" y="267"></omgdi:waypoint>
-       <omgdi:waypoint x="410" y="267"></omgdi:waypoint>
-     </bpmndi:BPMNEdge>
-   </bpmndi:BPMNPlane>
- </bpmndi:BPMNDiagram>
-</definitions-->]]>
-   </programlisting>
-  </example>
-  <para>Inside Eclipse, select the project name, right click and select "Create Deployment Artifacts". This will generate the necessary components and package them in a .BAR file. Which can be deployed in the $OPENIDM/workflow directory and dynamically be picked up by OpenIDM.</para>
-  <note>Note! Due to a bug, the content in the .bar needs to be restructured. The above BPMN XML artifact needs to be placed in a separate directory inside the .bar.</note>
-  <mediaobject>
-   <imageobject>
-   </imageobject>
-  </mediaobject>
-  <para>Now lets do a simple scheduled object (<filename>$OPENIDM/conf/schedule-EmailNotification.json</filename>) to invoke the workflow once every minute.</para>
-  <example>
-   <programlisting>
+
+ <section xml:id="sample-activiti-workflows">
+  <title>Example Activiti Workflows With OpenIDM</title>
+
+  <para>This section describes two example workflows, one using email
+  notification, the other involving a sunset process triggered during
+  reconciliation.</para>
+  
+  <!-- TODO: Rather than include the samples only in the doc, deliver the
+       samples with OpenIDM an describe the highlights in the documentation. -->
+  <section xml:id="example-activiti-email-notification-flow">
+   <title>Example Email Notification Workflow</title>
+
+   <para>This example uses the Activiti Eclipse BPMN 2.0 Designer to set up an
+   email notification business process. The example relies on an SMTP server
+   listening on <literal>localhost</literal>, port 25.</para>
+
+   <variablelist>
+    <para>The example sets up a workflow that can accept parameters used to
+    specify the sender and recipient of the mail.</para>
+    <varlistentry>
+     <term><literal>${fromSender}</literal></term>
+     <listitem>
+      <para>Used to specify the sender</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>${toEmail}</literal></term>
+     <listitem>
+      <para>Used to specify the recipient</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <para>Once you have defined the workflow, drag and drop components to create
+   the workflow. This simple example uses only a
+   <literal>StartEvent</literal>, <literal>MailTask</literal>, and
+   <literal>EndEvent</literal>.</para>
+
+   <mediaobject>
+    <alt>Email notification process</alt>
+    <imageobject>
+     <imagedata fileref="images/bpmn-email-notification.png" format="PNG" />
+    </imageobject>
+    <textobject>
+     <para>The email notification workflow has a start event, mail task, and
+     end event.</para>
+    </textobject>
+   </mediaobject>
+
+   <para>After creating the workflow, adjust the generated XML source code to
+   use the variables inside the <literal>&lt;serviceTask&gt;</literal>
+   tag shown in the following listing.</para>
+
+   <programlisting language="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;definitions
+ xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot;
+ xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+ xmlns:activiti=&quot;http://activiti.org/bpmn&quot;
+ xmlns:bpmndi=&quot;http://www.omg.org/spec/BPMN/20100524/DI&quot;
+ xmlns:omgdc=&quot;http://www.omg.org/spec/DD/20100524/DC&quot;
+ xmlns:omgdi=&quot;http://www.omg.org/spec/DD/20100524/DI&quot;
+ typeLanguage=&quot;http://www.w3.org/2001/XMLSchema&quot;
+ expressionLanguage=&quot;http://www.w3.org/1999/XPath&quot;
+ targetNamespace=&quot;http://www.activiti.org/test&quot;&gt;
+ &lt;process id=&quot;EmailNotification&quot; name=&quot;emailNotification&quot;&gt;
+   &lt;documentation&gt;Simple Email Notification Task&lt;/documentation&gt;
+   &lt;startEvent id=&quot;startevent1&quot; name=&quot;Start&quot;&gt;&lt;/startEvent&gt;
+   &lt;sequenceFlow id=&quot;flow1&quot; name=&quot;&quot; sourceRef=&quot;startevent1&quot;
+     targetRef=&quot;mailtask1&quot;&gt;&lt;/sequenceFlow&gt;
+   &lt;endEvent id=&quot;endevent1&quot; name=&quot;End&quot;&gt;&lt;/endEvent&gt;
+   &lt;sequenceFlow id=&quot;flow2&quot; name=&quot;&quot; sourceRef=&quot;mailtask1&quot;
+     targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
+   &lt;serviceTask id=&quot;mailtask1&quot; name=&quot;Email Notification&quot;
+     activiti:type=&quot;mail&quot;&gt;
+     &lt;extensionElements&gt;
+       &lt;activiti:field name=&quot;to&quot; expression=&quot;${toEmail}&quot;
+       &gt;&lt;/activiti:field&gt;
+       &lt;activiti:field name=&quot;from&quot; expression=&quot;no-reply@forgerock.com&quot;
+       &gt;&lt;/activiti:field&gt;
+       &lt;activiti:field name=&quot;subject&quot; expression=&quot;Simple Email Notification&quot;
+       &gt;&lt;/activiti:field&gt;
+       &lt;activiti:field name=&quot;html&quot;&gt;
+         &lt;activiti:expression&gt;&lt;![CDATA[Here is a simple Email Notification
+         from ${fromSender}.]]&gt;&lt;/activiti:expression&gt;
+       &lt;/activiti:field&gt;
+     &lt;/extensionElements&gt;
+   &lt;/serviceTask&gt;
+ &lt;/process&gt;
+ &lt;bpmndi:BPMNDiagram id=&quot;BPMNDiagram_EmailNotification&quot;&gt;
+   &lt;bpmndi:BPMNPlane bpmnElement=&quot;EmailNotification&quot;
+     id=&quot;BPMNPlane_EmailNotification&quot;&gt;
+     &lt;bpmndi:BPMNShape bpmnElement=&quot;startevent1&quot; id=&quot;BPMNShape_startevent1&quot;&gt;
+       &lt;omgdc:Bounds height=&quot;35&quot; width=&quot;35&quot; x=&quot;170&quot; y=&quot;250&quot;&gt;&lt;/omgdc:Bounds&gt;
+     &lt;/bpmndi:BPMNShape&gt;
+     &lt;bpmndi:BPMNShape bpmnElement=&quot;endevent1&quot; id=&quot;BPMNShape_endevent1&quot;&gt;
+       &lt;omgdc:Bounds height=&quot;35&quot; width=&quot;35&quot; x=&quot;410&quot; y=&quot;250&quot;&gt;&lt;/omgdc:Bounds&gt;
+     &lt;/bpmndi:BPMNShape&gt;
+     &lt;bpmndi:BPMNShape bpmnElement=&quot;mailtask1&quot; id=&quot;BPMNShape_mailtask1&quot;&gt;
+       &lt;omgdc:Bounds height=&quot;55&quot; width=&quot;105&quot; x=&quot;250&quot; y=&quot;240&quot;&gt;&lt;/omgdc:Bounds&gt;
+     &lt;/bpmndi:BPMNShape&gt;
+     &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow1&quot; id=&quot;BPMNEdge_flow1&quot;&gt;
+       &lt;omgdi:waypoint x=&quot;205&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+       &lt;omgdi:waypoint x=&quot;250&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+     &lt;/bpmndi:BPMNEdge&gt;
+     &lt;bpmndi:BPMNEdge bpmnElement=&quot;flow2&quot; id=&quot;BPMNEdge_flow2&quot;&gt;
+       &lt;omgdi:waypoint x=&quot;355&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+       &lt;omgdi:waypoint x=&quot;410&quot; y=&quot;267&quot;&gt;&lt;/omgdi:waypoint&gt;
+     &lt;/bpmndi:BPMNEdge&gt;
+   &lt;/bpmndi:BPMNPlane&gt;
+ &lt;/bpmndi:BPMNDiagram&gt;
+&lt;/definitions&gt;</programlisting>
+
+   <para>In Eclipse, select the project, then right click and select
+   Create deployment artifacts to generate the components and package them
+   in a .bar file for deployment in the <filename>workflow</filename>
+   directory where you installed OpenIDM. OpenIDM can pick up the new
+   workflow dynamically.</para>
+
+   <!-- TODO: Add specifics here... -->
+   <para>Before you deploy the .bar, work around the issue mentioned above
+   by adding the XML artifact in the right place in the .bar.</para>
+
+   <para>After you deploy the .bar, create a script in
+   <filename>script/invokeEmailNotification.js</filename> where you installed
+   OpenIDM. The script invokes the workflow.</para>
+
+   <programlisting language="javascript">
+/*
+ * Calling 'EmailNotification' workflow
+ */
+var map = {    
+ "_action" : "emailNotification",
+ "_workflowParams" : {
+    "fromSender" : "noreply@openidm",
+    "toEmail" : "john.doe@corp.com"
+  }
+};
+
+openidm.action("workflow/activiti", map);</programlisting>
+
+   <para>Also, create a schedule configuration object in
+   <filename>conf/schedule-EmailNotification.json</filename> where you
+   installed OpenIDM. The following schedule invokes the workflow once per
+   minute.</para>
+
+   <programlisting language="javascript">
 {
    "enabled" : true,
    "type" : "cron",
@@ -232,123 +315,193 @@ ${toEmail} = will allow us to specify the recipient of the notification.
            "file" : "script/invokeEmailNotification.js"
        },
    }
-}
-    </programlisting>
-   </example>
-   <para>Followed by a simple script invoking the workflow (<filename>$OPENIDM/script/invokeEmailNotification.js</filename>).</para>
-   <example>
-    <programlisting>
-/*
-* Calling 'EmailNotification' workflow
-*/
-var map = {    
- "_action" : "emailNotification",
- "_workflowParams" : {
-    "fromSender" : "noreply@openidm",
-    "toEmail" : "john.doe@corp.com"
-  }
-};
-openidm.action("workflow/activiti", map);
-    </programlisting>
-   </example>
+}</programlisting>
+
+   <para>TODO: Show and explain the result.</para>
   </section>
-  <section><title>Sample Sunset Workflow triggered via Reconciliation</title>
-   <para>A typical use-case is to allow for deferred deprovisioning or disabling, often in relation with external consultants having their contracts expired or up for renewal. OpenIDM supports these deferred execution of a workflow.</para>
-   <para>To understand this scenario in more detail, lets take a quick look at the target resource and authoritative source. As a prerequisite, we have configured and set up the CSV file connector against a file containing the following:</para>
-   <example>
-    <programlisting>
-firstName, uid, "lastName","email", "employeeNumber", password, "sunrise", "sunset", "active"
-"Darth", "DDOE", "Doe", "doe@forgerock.org", "123456", "Z29vZA==", "2011-11-30T10:17:00","2011-12-13T16:12:00", "TRUE"
-    </programlisting>
-   </example>
-   <para>We have also set up a simple XML connector to replicate the fields present in the authoratative CSV file on a 1-to-1 basis, including only a few attributes of interest to be pushed to the XML resource.</para>
-   <para>Notice that the authoritative source contains the field sunset containing a time and date string referring to some time in the future.</para>
-   <para>Lets start by defining a Sunset Workflow using our developer environment (Eclipse and the Activiti plugin).</para>
+  
+  <section xml:id="example-activiti-recon-sunset-flow">
+   <title>Example Sunset Workflow Triggered By Reconciliation</title>
+
+   <para>OpenIDM can allow deferred deprovisioning and disabling, such as
+   needed when an external consultant's contract expires or is up for
+   renewal. This example shows how OpenIDM can be used to handle such
+   scenarios.</para>
+
+   <!-- TODO: Finish the example, and then rewrite this section. Perhaps
+   all of this should be in one of the samples, rather than describing how
+   it all works in great detail here? -->
+   <para>To understand the scenario, consider the target resource and the
+   authoritative source.</para>
+
+   <para>Set up a CSV file connector to connect to an authoritative source
+   file containing the following.</para> <!-- TODO: Howto steps or link to howto -->
+   <!-- TODO: need a script or steps to generate dates for the example, because
+   the dates here will not be useful if you read the documentation in 2013, right? -->
+   <programlisting language="csv" width="112">
+firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","active"
+"Darth","DDOE","Doe","doe@forgerock.org","123456","Z29vZA==","2011-11-30T10:17:00","2011-12-23T16:12:00","TRUE"</programlisting>
+   <para>The authoritative source contains the field, <literal>sunset</literal>,
+   containing a time and date string referring to a time in the future.</para>
+
+   <para>Set up a simple XML connector to replicate fields in the authoritative
+   CSV source on a 1-to-1 basis.</para> <!-- TODO: Howto steps or link to howto -->
+
+   <para>Define a Sunset Workflow using Activiti Eclipse BPMN 2.0
+   Designer.</para>
+
    <mediaobject>
+    <alt>Sunset workflow process</alt>
     <imageobject>
+     <imagedata fileref="images/bpmn-sunset-flow.png" format="PNG" />
     </imageobject>
+    <textobject>
+     <para>The sunset workflow starts by saving the invoke context, prepares
+     the call to OpenIDM, reads the user, runs an email notification, disables
+     the account, and ends.</para>
+    </textobject>
    </mediaobject>
-   <example>
-    <programlisting language="xml">
-<![CDATA[<?xml version="1.0" encoding="UTF-8"?>
-<definitions id="definitions"
-            xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
-            xmlns:activiti="http://activiti.org/bpmn"
-            targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="
-            http://www.omg.org/spec/BPMN/20100524/MODEL http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd">
-    <process id="sunset" name="sunset usecase">
-       <startEvent id="start" />
-       <sequenceFlow sourceRef="start" targetRef="saveInvokeContext"/>
-       <scriptTask id="saveInvokeContext" scriptFormat="groovy" activiti:returnVariable="invokecontext">
-           <script>
-               <![CDATA[
-               invokecontext = org.forgerock.openidm.context.InvokeContext.getContext()
-              ] ]>
-           </script>
-       </scriptTask>
-       <sequenceFlow sourceRef="saveInvokeContext" targetRef="timerintermediatecatchevent1"/>
-       <intermediateCatchEvent id="timerintermediatecatchevent1" name="TimerCatchEvent">
-           <extensionElements>
-               <activiti:field name="t" expression="${time}"></activiti:field>
-           </extensionElements>
-           <timerEventDefinition>
-               <timeDate >${time}</timeDate>
-           </timerEventDefinition>
-       </intermediateCatchEvent>
-       <sequenceFlow sourceRef="timerintermediatecatchevent1" targetRef="idmCall"/>
-       <serviceTask id="idmCall" activiti:delegateExpression="${openidm}" activiti:async="true">
-           <extensionElements>
-               <activiti:field name="userName" expression="${userName}"></activiti:field>
-               <activiti:field name="system" expression="${system}"></activiti:field>
-           </extensionElements>
-       </serviceTask>
-       <sequenceFlow sourceRef="idmCall" targetRef="readUserAccount"/>
-       <scriptTask id="readUserAccount" scriptFormat="groovy" activiti:returnVariable="user" >
-           <script>
-               <![CDATA[
+
+   <para>Use the following XML artifact.</para>
+
+   <programlisting language="xml">
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;definitions id=&quot;definitions&quot;
+            xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot;
+            xmlns:activiti=&quot;http://activiti.org/bpmn&quot;
+            targetNamespace=&quot;Examples&quot;
+            xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+            xsi:schemaLocation=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL
+              http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd&quot;&gt;
+
+    &lt;process id=&quot;sunset&quot; name=&quot;sunset usecase&quot;&gt;
+       &lt;startEvent id=&quot;start&quot; /&gt;
+       &lt;sequenceFlow sourceRef=&quot;start&quot; targetRef=&quot;saveInvokeContext&quot;/&gt;
+       &lt;scriptTask id=&quot;saveInvokeContext&quot; scriptFormat=&quot;groovy&quot;
+         activiti:returnVariable=&quot;invokecontext&quot;&gt;
+           &lt;script&gt;
+               &lt;![CDATA[
+               invokecontext =
+                       org.forgerock.openidm.context.InvokeContext.getContext()
+              ]]&gt;
+           &lt;/script&gt;
+       &lt;/scriptTask&gt;
+       &lt;sequenceFlow sourceRef=&quot;saveInvokeContext&quot;
+         targetRef=&quot;timerintermediatecatchevent1&quot;/&gt;
+       
+       &lt;intermediateCatchEvent id=&quot;timerintermediatecatchevent1&quot;
+         name=&quot;TimerCatchEvent&quot;&gt;
+           &lt;extensionElements&gt;
+               &lt;activiti:field name=&quot;t&quot; expression=&quot;${time}&quot;
+               &gt;&lt;/activiti:field&gt;
+           &lt;/extensionElements&gt;
+           &lt;timerEventDefinition&gt;
+               &lt;timeDate &gt;${time}&lt;/timeDate&gt;
+           &lt;/timerEventDefinition&gt;
+       &lt;/intermediateCatchEvent&gt;
+       
+       &lt;sequenceFlow sourceRef=&quot;timerintermediatecatchevent1&quot;
+         targetRef=&quot;idmCall&quot;/&gt;
+       
+       
+       &lt;serviceTask id=&quot;idmCall&quot; activiti:delegateExpression=&quot;${openidm}&quot;
+         activiti:async=&quot;true&quot;&gt;
+           &lt;extensionElements&gt;
+               &lt;activiti:field name=&quot;userName&quot; expression=&quot;${userName}&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;system&quot; expression=&quot;${system}&quot;
+               &gt;&lt;/activiti:field&gt;
+           &lt;/extensionElements&gt;
+       &lt;/serviceTask&gt;
+       
+       &lt;sequenceFlow sourceRef=&quot;idmCall&quot; targetRef=&quot;readUserAccount&quot;/&gt;
+       &lt;scriptTask id=&quot;readUserAccount&quot; scriptFormat=&quot;groovy&quot;
+         activiti:returnVariable=&quot;user&quot; &gt;
+           &lt;script&gt;
+               &lt;![CDATA[
                out:println '********Sunset date for user ' + userName
-               org.forgerock.openidm.context.InvokeContext.getContext().putApprover(invokecontext.getApprover())
-               org.forgerock.openidm.context.InvokeContext.getContext().putRequester(invokecontext.getRequester())
-               org.forgerock.openidm.context.InvokeContext.getContext().pushActivityId(invokecontext.popActivityId())
-               
+               org.forgerock.openidm.context.InvokeContext.getContext().
+                       putApprover(invokecontext.getApprover())
+               org.forgerock.openidm.context.InvokeContext.getContext().
+                       putRequester(invokecontext.getRequester())
+               org.forgerock.openidm.context.InvokeContext.getContext().
+                       pushActivityId(invokecontext.popActivityId())
+
                user = openidm.read(system + userName);
-               ] ]>
-           </script>
-       </scriptTask>
-       <sequenceFlow sourceRef="readUserAccount" targetRef="sendMail"/>
-       <serviceTask id="sendMail" name="Email Notification" activiti:type="mail">
-           <extensionElements>
-               <activiti:field name="to" expression="${toEmail}"></activiti:field>
-               <activiti:field name="from" expression="no-reply@forgerock.com"></activiti:field>
-               <activiti:field name="subject" expression="Disabling User"></activiti:field>
-               <activiti:field name="text">
-                   <activiti:expression><![CDATA[The following user has been disabled:
-                   ${user}] ]>
-                   </activiti:expression>
-               </activiti:field>
-           </extensionElements>
-       </serviceTask>
-       <sequenceFlow sourceRef="sendMail" targetRef="disableAccount"/>
-       <scriptTask id="disableAccount" scriptFormat="groovy">
-           <script>
-               <![CDATA[
+               ]]&gt;
+           &lt;/script&gt;
+       &lt;/scriptTask&gt;
+       &lt;sequenceFlow sourceRef=&quot;readUserAccount&quot; targetRef=&quot;sendMail&quot;/&gt;
+
+       &lt;serviceTask id=&quot;sendMail&quot; name=&quot;Email Notification&quot;
+         activiti:type=&quot;mail&quot;&gt;
+           &lt;extensionElements&gt;
+               &lt;activiti:field name=&quot;to&quot; expression=&quot;${toEmail}&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;from&quot; expression=&quot;no-reply@forgerock.com&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;subject&quot; expression=&quot;Disabling User&quot;
+               &gt;&lt;/activiti:field&gt;
+               &lt;activiti:field name=&quot;text&quot;&gt;
+                   &lt;activiti:expression&gt;&lt;![CDATA[
+                   The following user has been disabled:
+                   ${user}]]&gt;
+                   &lt;/activiti:expression&gt;
+               &lt;/activiti:field&gt;
+           &lt;/extensionElements&gt;
+       &lt;/serviceTask&gt;
+
+       &lt;sequenceFlow sourceRef=&quot;sendMail&quot; targetRef=&quot;disableAccount&quot;/&gt;
+       &lt;scriptTask id=&quot;disableAccount&quot; scriptFormat=&quot;groovy&quot;&gt;
+           &lt;script&gt;
+               &lt;![CDATA[
                out:println '********Disabling user account ' + userName
                user['__ENABLE__'] = false
                openidm.update(system + userName, null, user)
-               ] ]>
-           </script>
-       </scriptTask>
-       <sequenceFlow sourceRef="disableAccount" targetRef="end"/>
-       <endEvent id="end"/>
-    </process>
-</definitions>]]>
-    </programlisting>
-   </example>
-   <para>Lets trigger the workflow that will launch the deferred action via a reconciliation task, reacting on the FOUND situation. Notice at this point, that the invoked script needs to return the proper action to the FOUND situation; in our case “LINK”.</para>
-   <para>The following scheduled reconciliation task will accomplish the invokation. (<link>$OPENIDM/conf/scheduler-reconcile_HR_XML.json</link>).</para>
-   <example>
-    <programlisting>
+               ]]&gt;
+           &lt;/script&gt;
+       &lt;/scriptTask&gt;
+       &lt;sequenceFlow sourceRef=&quot;disableAccount&quot; targetRef=&quot;end&quot;/&gt;
+       &lt;endEvent id=&quot;end&quot;/&gt;
+
+    &lt;/process&gt;
+&lt;/definitions&gt;</programlisting>
+
+   <para>Set up a deferred action during reconciliation by reacting to a
+   <literal>FOUND</literal> situation. When called, the script invoked must
+   return the proper action to the found situation, which in the case of this
+   example is <literal>LINK</literal>.</para>
+
+   <para>Add the following script to
+   <filename>script/triggerSunset.js</filename> where you installed OpenIDM,
+   invoked when reconciliation encounters a <literal>FOUND</literal>
+   situation.</para>
+
+   <programlisting language="javascript">
+/*
+ * Calling 'sunrise' workflow
+ */
+var map = {    
+ "_action" : "sunrise",
+ "_workflowParams" : {
+    "userName" : target.__UID__,
+    "system" : "system/xmlfile/account/",
+    "time" : source.sunset,
+    "toEmail" : "manager@corp.org",
+    "fromSender" : "noreply@openidm"
+ }
+};
+
+openidm.action("workflow/activiti", map);
+
+"LINK"</programlisting>
+
+   <para>Add the following schedule to
+   <filename>conf/scheduler-reconcile_HR_XML.json</filename> where you
+   installed OpenIDM to invoke the script.</para>
+
+   <programlisting language="javascript">
 {
     "enabled" : true,
     "type" : "cron",
@@ -362,7 +515,11 @@ firstName, uid, "lastName","email", "employeeNumber", password, "sunrise", "suns
            "target" : "system/xmlfile/account",
            "correlationQuery" : {
                "type" : "text/javascript",
-               "source" : "var myarray = [source.uid];var map = {'query' : { 'Equals': {'field' : 'name','values' : myarray}}};map;"
+               "source" : "var myarray = [source.uid];var map = {
+                   'query' : {
+                       'Equals': {'field' : 'name','values' : myarray}
+                   }
+               };map;"
            },
            "properties" : [
                {
@@ -387,13 +544,13 @@ firstName, uid, "lastName","email", "employeeNumber", password, "sunrise", "suns
                    "situation" : "CONFIRMED",
                    "action" : "IGNORE"
                },
-               {
+               <emphasis role="bold">{
                    "situation" : "FOUND",
                    "action" : {
                        "type" : "text/javascript",
                        "file" : "script/triggerSunset.js"
                    }
-               },
+               },</emphasis>
                {
                    "situation" : "ABSENT",
                    "action" : "IGNORE"
@@ -417,52 +574,9 @@ firstName, uid, "lastName","email", "employeeNumber", password, "sunrise", "suns
            ]
        }
     }
-}
-    </programlisting>
-   </example>
-   <para>Lets also quickly look at the invoked script. (<link>$OPENIDM/script/triggerSunset.js</link>).</para>
-   <example>
-    <programlisting>
-/*
-* Calling 'sunrise' workflow
-*/
-var map = {    
- "_action" : "sunrise",
- "_workflowParams" : {
-    "userName" : target.__UID__,
-    "system" : "system/xmlfile/account/",
-    "time" : source.sunset,
-    "toEmail" : "manager@corp.org",
-    "fromSender" : "noreply@openidm"
- }
-};
-openidm.action("workflow/activiti", map);
-    </programlisting>
-   </example>
-"LINK"
+}</programlisting>
+
+   <para>TODO: Show results</para>
   </section>
-  <section><title>Current and Known Limitations</title>
-   <para>Due to the fact that this is still experimental, the process of building OpenIDM with this support is still manual, however following the above steps should allow you to allow create workflows.</para>
-   <itemizedlist>
-    <listitem>
-     Currently we are missing a Form Generator which makes it a bit difficult to  include and leverage embedded forms.
-    </listitem>
-    <listitem>
-     Error handling needs improvements.
-    </listitem>
-    <listitem>
-     Our current OSGi module that the above embedding is based on is Activiti 5.8 which has a bug in the way workflows are picked up inside the .bar file. See http://jira.codehaus.org/browse/ACT-583 issue which is fixed in 5.9-SNAPSHOT.
-    </listitem>
-   </itemizedlist>
-   <note>Currently a workaround to fix the above behavior would be to create a directory inside the .bar and put the BPMN XML artifact in the directory, otherwise it will not be properly picked up by the Process Engine.</note>
-  </section>
-
-
-  
-  
-
- 
-
-
-
+ </section>
 </chapter>
