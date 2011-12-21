@@ -32,38 +32,14 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Setting Up the Repository</title>
 
- <para>OpenIDM is configured by default to leverage the embedded NoSQL repository based on OrientDB,
-however configuring OpenIDM to use a relational database as a repository is possible too.</para>
-
-
- <section xml:id="orientdb-configuration-id">
-  <title>OrientDB configuration</title>
- <para>No extra setup is needed to connect to the built in OrientDB which will automatically start and stop with starting and stopping the OpenIDM process.</para>
- 
-  <para>This should be share with the install guide!!! ... TODO.</para>
-  
-  <para>Due to a current limitation in OrientDB it was decided to split the links into different classes. These classes need to be defined in the configuration file <filename>openidm/conf/repo.orientdb.json</filename>.</para>
-  <para>The file needs to have an index definition for each mapping of the <filename>openidm/conf/sync.json</filename>. An example link definition is show below:</para>
-  <example>
-   <programlisting>
-"link_systemLdapAccounts_managedUser" : {
-    "index" : [
-        { "propertyName": "_openidm_id", "propertyType": "string", "indexType": "unique" },
-        {"propertyName" : "sourceId", "propertyType" : "string", "indexType" : "unique"},
-        {"propertyName" : "targetId", "propertyType" : "string", "indexType" : "unique"},
-        {"propertyName" : "reconId", "propertyType" : "string", "indexType" : "notunique"}
-    ]
-},   
-   </programlisting>
-  </example>
-  <para><filename>"link_systemLdapAccounts_managedUser"</filename> is the result of concatenating the string <filename>"link_"</filename> with the name of the mapping, <filename>"systemLdapAccounts_managedUser"</filename> in this case.</para>
+ <para>OpenIDM is configured by default to leverage the embedded NoSQL repository based on OrientDB, however configuring OpenIDM to use a relational database as a repository is possible too. This will be explained in the next chapter.</para>
  </section>
  <section xml:id="mysql-setup-id"><title>Setting up OpenIDM with MySQL</title>
   <para>Using OpenIDM with a MySQL database can be done by following this procedure:</para>
   <itemizedlist>
    <listitem><para>Get rid of <filename>repo.orientdb.json in openidm/conf/</filename></para></listitem> 
    <listitem><para>Copy the latest mysql java connector in <filename>openidm/bundle/</filename></para></listitem> 
-   <listitem><para>Get the repo.jdbc.json from <filename>openidm/samples/</filename></para></listitem>
+   <listitem><para>Get the repo.jdbc.json from <filename>openidm/samples/misc/</filename></para></listitem>
    <listitem><para>Import DDL form <filename>openidm/db/scripts/mysql/openidm.sql</filename> to your MySQL DB</para></listitem>
    <listitem><para>Eventually create a db user on mysql and grant it the needed rights</para></listitem>
    <listitem><para>Update the db connection params (login/password...) in the repo.jdbc.json</para></listitem>
