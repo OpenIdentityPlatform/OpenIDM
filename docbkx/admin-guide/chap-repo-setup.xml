@@ -40,7 +40,7 @@
    <listitem><para>Get rid of <filename>repo.orientdb.json in openidm/conf/</filename></para></listitem> 
    <listitem><para>Copy the latest mysql java connector in <filename>openidm/bundle/</filename></para></listitem> 
    <listitem><para>Get the repo.jdbc.json from <filename>openidm/samples/misc/</filename></para></listitem>
-   <listitem><para>Import DDL form <filename>openidm/db/scripts/mysql/openidm.sql</filename> to your MySQL DB</para></listitem>
+   <listitem><para>Import DDL from <filename>openidm/db/scripts/mysql/openidm.sql</filename> to your MySQL DB</para></listitem>
    <listitem><para>Eventually create a db user on mysql and grant it the needed rights</para></listitem>
    <listitem><para>Update the db connection params (login/password...) in the repo.jdbc.json</para></listitem>
   </itemizedlist>
