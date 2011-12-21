@@ -31,6 +31,7 @@
             <artifactId>openidm-crypto</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+
 <!-- Not necessary when using dynamic import
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
