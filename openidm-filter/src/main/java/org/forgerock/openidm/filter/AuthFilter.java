@@ -18,12 +18,15 @@ package org.forgerock.openidm.filter;
 
 // Java Standard Edition
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Date;
 import java.text.SimpleDateFormat;
 
@@ -78,6 +81,7 @@ import org.forgerock.openidm.audit.util.Status;
 /**
  * Auth Filter
  * @author Jamie Nelson
+ * @author aegloff
  */
 
 @Component(
@@ -94,13 +98,21 @@ public class AuthFilter implements Filter {
         authenticate, logout
     }
 
-    // A list of ports that allow authentication purely based on client ceritficates (SSL mutual auth)
-    List clientAuthOnly = new ArrayList();
+    // A list of ports that allow authentication purely based on client certificates (SSL mutual auth)
+    static Set<Integer> clientAuthOnly = new HashSet<Integer>();
 
     private FilterConfig config = null;
     public void init(FilterConfig config) throws ServletException {
           this.config = config;
-          clientAuthOnly.add(Integer.valueOf(8444));
+          
+          String clientAuthOnlyStr = System.getProperty("openidm.auth.clientauthonlyports");
+          if (clientAuthOnlyStr != null) {
+              String[] split = clientAuthOnlyStr.split(",");
+              for (String entry : split) {
+                  clientAuthOnly.add(Integer.valueOf(entry));
+              }
+          }
+          logger.info("Authentication disabled on ports: {}", clientAuthOnly);
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
