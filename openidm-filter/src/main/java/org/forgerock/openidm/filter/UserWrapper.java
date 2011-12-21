@@ -78,7 +78,7 @@ public class UserWrapper extends HttpServletRequestWrapper {
     @Override
     public Enumeration getHeaderNames() {
         List<String> names = Collections.list(super.getHeaderNames());
-        names.add("X-OpenIDM-Role");
+        names.add("X-OpenIDM-Roles");
         names.remove("X-OpenIDM-Password");
         return Collections.enumeration(names);
     }

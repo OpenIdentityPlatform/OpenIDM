@@ -45,6 +45,7 @@ import javax.servlet.FilterConfig;
 
 // OSGi Framework
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -64,6 +65,10 @@ import org.slf4j.LoggerFactory;
 // JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.InvalidException;
 
 // JSON Resource
 import org.forgerock.json.resource.JsonResource;
@@ -85,13 +90,17 @@ import org.forgerock.openidm.audit.util.Status;
  */
 
 @Component(
-    name = "org.forgerock.openidm.filter", immediate = true,
-    policy = ConfigurationPolicy.IGNORE
+    name = "org.forgerock.openidm.authentication", immediate = true,
+    policy = ConfigurationPolicy.OPTIONAL
 )
 
 public class AuthFilter implements Filter {
 
     final static Logger logger  = LoggerFactory.getLogger(AuthFilter.class);
+
+    // name of the header containing the client IPAddress, used for the audit record
+    // typically X-Forwarded-For
+    static String logClientIPHeader = null;
 
     final static SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     public enum Action {
@@ -138,9 +147,9 @@ public class AuthFilter implements Filter {
                 username = "openidm-cert";
                 roleList.add("openidm-authorized");
                 roleListString = roleListToString(roleList);
-                logAuth(request, username, roleListString, Action.authenticate, Status.SUCCESS); 
+                logAuth(req, username, roleListString, Action.authenticate, Status.SUCCESS); 
             } else {
-                logAuth(request, username, null, Action.authenticate, Status.FAILURE);
+                logAuth(req, username, null, Action.authenticate, Status.FAILURE);
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
@@ -149,10 +158,10 @@ public class AuthFilter implements Filter {
             username = req.getHeader("X-OpenIDM-Username");
             if (authenticateUser(req, username, roleList)) {
                 roleListString = roleListToString(roleList);
-                logAuth(request, username, roleListString, Action.authenticate, Status.SUCCESS); 
+                logAuth(req, username, roleListString, Action.authenticate, Status.SUCCESS); 
                 createSession(req, session, username, roleListString);
             } else {
-                logAuth(request, username, null, Action.authenticate, Status.FAILURE); 
+                logAuth(req, username, null, Action.authenticate, Status.FAILURE); 
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
@@ -164,7 +173,7 @@ public class AuthFilter implements Filter {
         chain.doFilter(new UserWrapper(username, roleListString, req), res);
     }
 
-    private static void logAuth(ServletRequest req, String username, String roles, Action action, Status status) {
+    private static void logAuth(HttpServletRequest req, String username, String roles, Action action, Status status) {
         try {
             Map<String,Object> entry = new HashMap<String,Object>();
             entry.put("timestamp", isoFormatter.format(new Date()));
@@ -176,7 +185,17 @@ public class AuthFilter implements Filter {
             } else {
                 entry.put("roles", roles);
             }
-            entry.put("ip", req.getRemoteAddr());
+            // check for header sent by load balancer for IPAddr of the client
+            String ipAddress;
+            if (logClientIPHeader == null ) {
+                ipAddress = req.getRemoteAddr();
+            } else {
+                ipAddress = req.getHeader(logClientIPHeader);
+                if (ipAddress == null) {
+                    ipAddress = req.getRemoteAddr();
+                }
+            }
+            entry.put("ip", ipAddress);
             router.create("audit/access", entry);
         } catch (ObjectSetException ose) {
             logger.warn("Failed to log entry for {}", username, ose);
@@ -283,12 +302,18 @@ public class AuthFilter implements Filter {
     
     @Reference(target="(openidm.contextid=shared)")
     HttpContext httpContext;
+
+    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    private ComponentContext context;
     
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
-
-        // TODO: make configurable. For testing purpose only.
-
+        this.context = context;
+        logger.info("Activating Auth Filter with configuration {}", context.getProperties());
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+        logClientIPHeader = (String)config.get("clientIPHeader").asString();
+        AuthModule.setConfig(config);
+        
         org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
         String urlPatterns[] = {"/openidm/*"};
         String servletNames[] = null;

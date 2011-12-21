@@ -55,37 +55,27 @@ public class AuthModule {
     // default properties set in config/system.properties
     static String queryId;
     static String queryOnResource;
-    static String defaultUserRoles;
-    static String defaultAdminRoles;
     static String adminUserName;
     static String adminPassword;
     static List defaultRoles;
     static List adminRoles;
 
-    static {
-        adminUserName = System.getProperty("openidm.admin.username", "admin");
-        adminPassword = System.getProperty("openidm.admin.password", "admin");
-        defaultAdminRoles = System.getProperty("openidm.admin.role", "openidm-admin");
-        defaultUserRoles = System.getProperty("openidm.user.role", "openidm-authorized");
-        queryId = System.getProperty("openidm.auth.queryId", "credential-query");
-        queryOnResource = System.getProperty("openidm.auth.queryOnResource", "managed/user");
-        defaultRoles = setDefaultRoles(defaultUserRoles);
-        adminRoles = setDefaultRoles(defaultAdminRoles);
+    // configuration conf/authentication.json
+
+    public static void setConfig(JsonValue config) {
+        adminUserName = (String)config.get("adminName").defaultTo("admin").asString();
+        adminPassword = (String)config.get("adminPassword").defaultTo("admin").asString();
+        adminRoles = config.get("defaultAdminRoles").asList();        
+        defaultRoles = config.get("defaultUserRoles").asList();        
+        queryId = (String)config.get("queryId").defaultTo("credential-query").asString();
+        queryOnResource = (String)config.get("queryOnResource").defaultTo("managed/user").asString();
+        logger.info("AuthModule config params adminName: {} adminRoles: {} userRoles: {} queryId: {} resource {}",
+            new Object[] {adminUserName, adminRoles.toString(), defaultRoles.toString(), queryId, queryOnResource} );
     }
     
-    private static List setDefaultRoles(String rawDefaultRoles) {
-        List result = new ArrayList();
-        if (rawDefaultRoles != null) {
-            String[] split = rawDefaultRoles.split(",");
-            result = Arrays.asList(split);
-        }
-        return result;
-    }
-
     public static boolean authenticate(String login, String password, List roles) {
 
-        // file based check from admin
-        // password set in config/system.properties
+        // file based check from admin in conf/authentication.json
         if (login.equals(adminUserName) && password.equals(adminPassword)) {
             roles.addAll(adminRoles);
             return true;
@@ -100,7 +90,7 @@ public class AuthModule {
                 logger.debug("Authentication failed for {} due to invalid credentials", login);
             }
         } catch (Exception ex) {
-            logger.warn("Authentication failed to get user info for {}", login, ex);
+            logger.warn("Authentication failed to get user info for {} {}", login, ex);
             return false;
         }
         return false;
