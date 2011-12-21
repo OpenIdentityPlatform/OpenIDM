@@ -33,7 +33,7 @@
  <title>Setting Up the Repository</title>
 
  <para>OpenIDM is configured by default to leverage the embedded NoSQL repository based on OrientDB, however configuring OpenIDM to use a relational database as a repository is possible too. This will be explained in the next chapter.</para>
- </section>
+
  <section xml:id="mysql-setup-id"><title>Setting up OpenIDM with MySQL</title>
   <para>Using OpenIDM with a MySQL database can be done by following this procedure:</para>
   <itemizedlist>
