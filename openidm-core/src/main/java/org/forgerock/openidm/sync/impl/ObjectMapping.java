@@ -1061,6 +1061,7 @@ class ObjectMapping implements SynchronizationListener {
                 situation = Situation.TARGET_IGNORED;
                 if (targetStats != null) {
                     targetStats.addNotValid(targetId);
+                    targetStats.addSituation(targetId, situation);
                 }
                 return;
             }
