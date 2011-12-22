@@ -199,9 +199,9 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         JsonValue result;
         String id = request.get("id").asString();
         Map<String, Object> params = request.get("params").copy().asMap(); // copy; gonna add _entity to it
-        Map<String, Object> value = request.get("value").asMap();
-        if (value != null) {
-            params.put("_entity", value);
+        JsonValue value = request.get("value");
+        if (!value.isNull()) {
+            params.put("_entity", value.getObject());
         }
         ObjectSetContext.push(request);
         try {
