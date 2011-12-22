@@ -1059,7 +1059,7 @@ class ObjectMapping implements SynchronizationListener {
             String targetId = (targetObject != null ? targetObject.get("_id").asString() : null);
             if (!isTargetValid()) { // target is not valid for this mapping; ignore it
                 situation = Situation.TARGET_IGNORED;
-                if (targetStats != null) {
+                if (targetStats != null && targetId != null) {
                     targetStats.addNotValid(targetId);
                     targetStats.addSituation(targetId, situation);
                 }
