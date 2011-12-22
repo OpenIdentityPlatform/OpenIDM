@@ -89,6 +89,7 @@ public class AuthModule {
         try {
             userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login);
             if (userInfo != null && userInfo.checkCredential(password)) {
+                roles.clear();
                 roles.addAll(userInfo.getRoleNames());
                 return true;
             } else {
@@ -197,9 +198,10 @@ public class AuthModule {
         } else if (retrRolesPropName != null) {
             logger.warn("Unknown roles type retrieved from query in property, expected Collection: {} type: {}",
                     retrRolesPropName, retrRoles.getClass());
+        } else {
+            // Default roles are only applied if no explicit roles are getting queried
+            existingRoleNames.addAll(defaultRoles);
         }
-        // Default roles are additive
-        existingRoleNames.addAll(defaultRoles);
         return existingRoleNames;
     }
     
