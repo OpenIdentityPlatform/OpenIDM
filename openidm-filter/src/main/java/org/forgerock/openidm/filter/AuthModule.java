@@ -19,6 +19,7 @@ package org.forgerock.openidm.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,16 +60,16 @@ public class AuthModule {
     static String queryOnInternalUserResource;
     static String adminUserName;
     static String adminPassword;
-    static List defaultRoles;
-    static List adminRoles;
+    static List<String> adminRoles;
+    static List<String> defaultRoles;
 
     // configuration conf/authentication.json
 
     public static void setConfig(JsonValue config) {
         adminUserName = (String)config.get("adminName").defaultTo("admin").asString();
         adminPassword = (String)config.get("adminPassword").defaultTo("admin").asString();
-        adminRoles = config.get("defaultAdminRoles").asList();        
-        defaultRoles = config.get("defaultUserRoles").asList();        
+        adminRoles = config.get("defaultAdminRoles").asList(String.class);
+        defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = (String)config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = (String)config.get("queryOnResource").defaultTo("managed/user").asString();
         internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
@@ -78,7 +79,7 @@ public class AuthModule {
             new Object[] {adminUserName, adminRoles.toString(), defaultRoles.toString(), queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
     }
     
-    public static boolean authenticate(String login, String password, List roles) {
+    public static boolean authenticate(String login, String password, List<String> roles) {
         
         /* TODO: confirm this facility should be removed.
         // file based check from admin in conf/authentication.json
@@ -102,7 +103,7 @@ public class AuthModule {
         try {
             userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login);
             if (userInfo != null && userInfo.checkCredential(password)) {
-                roles = userInfo.getRoleNames(); 
+                roles.addAll(userInfo.getRoleNames());
                 return true;
             } else {
                 logger.debug("Authentication failed for {} due to invalid credentials", login);
