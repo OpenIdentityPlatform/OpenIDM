@@ -252,7 +252,7 @@ public class DBHelper {
                             }
                         }
                         if ("internal_user".equals(orientClassName)) {
-                            populateDefaultUser(orientClassName, db, completeConfig);
+                            populateDefaultUsers(orientClassName, db, completeConfig);
                         }
                     }
                 }
@@ -263,21 +263,31 @@ public class DBHelper {
     }
     
     // Populates the default user, the pwd needs to be changed by the installer
-    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig) throws InvalidException {
+    private static void populateDefaultUsers(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig) throws InvalidException {
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
         String defaultAdminPwd = "{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},\"type\":\"x-simple-encryption\"}}";
         String defaultAdminRoles = "openidm-admin,openidm-authorized";
+        populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, defaultAdminPwd, defaultAdminRoles);
+        logger.trace("Created default user {}. Please change the assigned default password.", defaultAdminUser);
+        
+        String annonymousUser = "annonymous";
+        String annonymousPwd = "annonymous";
+        String annonymousRoles = "openidm-reg";
+        populateDefaultUser(defaultTableName, db, completeConfig, annonymousUser, annonymousPwd, annonymousRoles);
+        logger.trace("Created default user {} for registration purposes.", annonymousUser);
+    }    
+    
+    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig, String user, String pwd, String roles) throws InvalidException {        
         
         JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
-        defaultAdmin.put("_openidm_id", defaultAdminUser);
-        defaultAdmin.put("password", defaultAdminPwd);
-        defaultAdmin.put("roles", defaultAdminRoles);
+        defaultAdmin.put("_openidm_id", user);
+        defaultAdmin.put("password", pwd);
+        defaultAdmin.put("roles", roles);
         
         try {
             ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);
             newDoc.save();
-            logger.trace("Created default user {}. Please change the assigned default password.", defaultAdminUser);
         } catch (ConflictException ex) {
             throw new InvalidException("Unexpected failure during DB set-up of default user", ex);
         }
