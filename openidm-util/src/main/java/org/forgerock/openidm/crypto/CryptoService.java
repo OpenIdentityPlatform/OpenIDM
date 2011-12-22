@@ -73,6 +73,15 @@ public interface CryptoService {
      * @throws JsonException if an exception occurred decrypting the value.
      */
     JsonValue decrypt(JsonValue value) throws JsonException;
+
+    /**
+     * Decrypts a String if in a format supported by this service.
+     *
+     * @param value the Stringified value to be decrypted.
+     * @return The decrypted structure value, with all values decrypted.
+     * @throws JsonException if an exception occurred decrypting the value.
+     */
+    JsonValue decrypt(String value) throws JsonException;
     
     /**
      * Detects if a JSON value is encrypted in a format supported by this service
@@ -81,4 +90,12 @@ public interface CryptoService {
      * @return true if encrypted, false otherwise.
      */
     boolean isEncrypted(JsonValue value);
+    
+    /**
+     * Detects if a String is encrypted in a format supported by this service
+     *
+     * @param value the JSON value to check.
+     * @return true if encrypted, false otherwise.
+     */
+    boolean isEncrypted(String value);
 }

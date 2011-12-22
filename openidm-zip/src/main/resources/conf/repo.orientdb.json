@@ -9,12 +9,12 @@
         "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND firstId = '${firstId}'",
         "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'",
         "credential-query" : "select _openidm_id, password from managed_user WHERE email = ${username}",
-        "credential-defaultuser-query" : "select _openidm_id, password, roles from internal_defaultuser WHERE _openidm_id = ${username}",
+        "credential-internaluser-query" : "select _openidm_id, password, roles from internal_user WHERE _openidm_id = ${username}",
         "for-username" : "SELECT * FROM ${_resource} WHERE name = '${uid}'"
     },
     "dbStructure" : {
         "orientdbClass" : {
-            "internal_defaultuser" : {
+            "internal_user" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",

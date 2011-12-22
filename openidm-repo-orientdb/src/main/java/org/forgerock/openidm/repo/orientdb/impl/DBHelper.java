@@ -24,11 +24,13 @@
 package org.forgerock.openidm.repo.orientdb.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.objset.ConflictException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +155,7 @@ public class DBHelper {
     /**
      * Ensures the DB is present in the expected form.
      */
-    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig) throws InvalidException{
+    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig) throws InvalidException {
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
         ODatabaseDocumentTx db = null;
         try {
@@ -249,10 +251,35 @@ public class DBHelper {
                                         + " failure message: " + ex.getMessage(), ex);
                             }
                         }
+                        if ("internal_user".equals(orientClassName)) {
+                            populateDefaultUser(orientClassName, db, completeConfig);
+                        }
                     }
                 }
             }
             schema.save(); 
+            
+        }
+    }
+    
+    // Populates the default user, the pwd needs to be changed by the installer
+    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig) throws InvalidException {
+        String defaultAdminUser = "openidm-admin";
+        // Default password needs to be replaced after installation
+        String defaultAdminPwd = "{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},\"type\":\"x-simple-encryption\"}}";
+        String defaultAdminRoles = "openidm-admin,openidm-authorized";
+        
+        JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
+        defaultAdmin.put("_openidm_id", defaultAdminUser);
+        defaultAdmin.put("password", defaultAdminPwd);
+        defaultAdmin.put("roles", defaultAdminRoles);
+        
+        try {
+            ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);
+            newDoc.save();
+            logger.trace("Created default user {}. Please change the assigned default password.", defaultAdminUser);
+        } catch (ConflictException ex) {
+            throw new InvalidException("Unexpected failure during DB set-up of default user", ex);
         }
     }
 }

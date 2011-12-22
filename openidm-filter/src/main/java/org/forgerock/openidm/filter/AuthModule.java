@@ -55,6 +55,8 @@ public class AuthModule {
     // default properties set in config/system.properties
     static String queryId;
     static String queryOnResource;
+    static String internalUserQueryId;
+    static String queryOnInternalUserResource;
     static String adminUserName;
     static String adminPassword;
     static List defaultRoles;
@@ -69,20 +71,36 @@ public class AuthModule {
         defaultRoles = config.get("defaultUserRoles").asList();        
         queryId = (String)config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = (String)config.get("queryOnResource").defaultTo("managed/user").asString();
-        logger.info("AuthModule config params adminName: {} adminRoles: {} userRoles: {} queryId: {} resource {}",
-            new Object[] {adminUserName, adminRoles.toString(), defaultRoles.toString(), queryId, queryOnResource} );
+        internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
+        queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
+        
+        logger.info("AuthModule config params adminName: {} adminRoles: {} userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
+            new Object[] {adminUserName, adminRoles.toString(), defaultRoles.toString(), queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
     }
     
     public static boolean authenticate(String login, String password, List roles) {
-
+        
+        /* TODO: confirm this facility should be removed.
         // file based check from admin in conf/authentication.json
-        if (login.equals(adminUserName) && password.equals(adminPassword)) {
+        if (adminUserName != null && adminPassword != null && login.equals(adminUserName) && password.equals(adminPassword)) {
             roles.addAll(adminRoles);
             return true;
         }
+        */
+        
+        boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);
+        if (!authenticated) {
+            // Authenticate against the internal user table if authentication against managed users failed
+            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, login, password, roles);
+        }
+        return authenticated;
+    }
+
+        
+    private static boolean authPass(String passQueryId, String passQueryOnResource, String login, String password, List roles) {
         UserInfo userInfo = null;
         try {
-            userInfo = getRepoUserInfo(login);
+            userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login);
             if (userInfo != null && userInfo.checkCredential(password)) {
                 roles = userInfo.getRoleNames(); 
                 return true;
@@ -96,15 +114,15 @@ public class AuthModule {
         return false;
     }
 
-    private static UserInfo getRepoUserInfo (String username) throws Exception {
+    private static UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username) throws Exception {
         UserInfo user = null;
         Credential credential = null;
         List roleNames = new ArrayList();
 
         Map props = new HashMap();
-        props.put(QueryConstants.QUERY_ID, queryId);
+        props.put(QueryConstants.QUERY_ID, repoQueryId);
         props.put("username", username);
-        Map resultWrapper = getRepo().query(queryOnResource, props);
+        Map resultWrapper = getRepo().query(repoResource, props);
         JsonValue jsonView = new JsonValue(resultWrapper);
         if (jsonView.get(QueryConstants.QUERY_RESULT).size() > 1) {
             logger.warn("Query to match user credentials found more than one matching user for {}", username);
@@ -113,21 +131,26 @@ public class AuthModule {
             }
         } else if (jsonView.get(QueryConstants.QUERY_RESULT).size() > 0) {
             String retrId = null;
-            Object retrCred = null;
+            String retrCred = null;
             String retrCredPropName = null;
             Object retrRoles = null;
             String retrRolesPropName = null;
             JsonValue entry = jsonView.get(QueryConstants.QUERY_RESULT).get(0);
             int nonInternalCount = 0;
-            for (String key : entry.keys()) {
+            // Repo supports returning the map entries in the order of the query, 
+            // even though JSON itself does not guarantee order.
+            // TODO: support explicit role query for more flexiblity and to allow for not relying on this support
+            for (Map.Entry<String, Object> ordered : entry.asMap().entrySet()) {
+                String key = ordered.getKey();
                 if (key.equals("_id")) {
                     retrId = entry.get(key).asString(); // It is optional to include the record identifier
                 } else if (!key.startsWith("_")) {
-                    ++nonInternalCount;                    if (nonInternalCount == 1) {
+                    ++nonInternalCount;                    
+                    if (nonInternalCount == 1) {
                         retrCred = entry.get(key).asString(); // By convention the first property is the cred
                         retrCredPropName = key;
                     } else if (nonInternalCount == 2) {
-                        retrRoles = entry.get(key); // By convention the second property can define roles
+                        retrRoles = entry.get(key).getObject(); // By convention the second property can define roles
                         retrRolesPropName = key;
                     }
                 }
@@ -135,7 +158,7 @@ public class AuthModule {
             if (retrCred == null && retrCredPropName == null) {
                 logger.warn("Query for credentials did not contain expected result properties.");
             } else {
-                credential = getCredential(retrCred, retrId, username, retrCredPropName);
+                credential = getCredential(retrCred, retrId, username, retrCredPropName, true);
                 roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
                 logger.debug("User information for {}: id: {} credential available: {} roles from repo: {} total roles: {}",
                         new Object[] {username, retrId, (retrCred != null), retrRoles, roleNames});
@@ -147,9 +170,16 @@ public class AuthModule {
         return user;
     }
 
-    static Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName) {
+    static Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName, 
+            boolean allowStringifiedEncryption) {
         Credential credential = null;
         if (retrCred instanceof String) {
+            if (allowStringifiedEncryption) {
+                if (getCrypto().isEncrypted((String)retrCred)) {
+                    JsonValue jsonRetrCred = getCrypto().decrypt((String)retrCred);
+                    retrCred = jsonRetrCred == null ? null : jsonRetrCred.asString();
+                }
+            }
             credential = new Password((String) retrCred);
         } else if (retrCred != null) {
             if (retrCred instanceof Map) {
@@ -174,6 +204,9 @@ public class AuthModule {
     static List addRoles(List existingRoleNames, Object retrRoles, String retrRolesPropName, List defaultRoles) {
         if (retrRoles instanceof Collection) {
             existingRoleNames.addAll((Collection) retrRoles);
+        } else if (retrRoles instanceof String) {
+            List parsedRoles = parseCommaDelimitedRoles((String)retrRoles);
+            existingRoleNames.addAll(parsedRoles);
         } else if (retrRolesPropName != null) {
             logger.warn("Unknown roles type retrieved from query in property, expected Collection: {} type: {}",
                     retrRolesPropName, retrRoles.getClass());
@@ -182,6 +215,16 @@ public class AuthModule {
         existingRoleNames.addAll(defaultRoles);
         return existingRoleNames;
     }
+    
+    private static List parseCommaDelimitedRoles(String rawRoles) {
+        List result = new ArrayList();
+        if (rawRoles != null) {
+            String[] split = rawRoles.split(",");
+            result = Arrays.asList(split);
+        }
+        return result;
+    }
+
    
     static JsonResourceObjectSet getRepo() {
         // TODO: switch to service trackers
