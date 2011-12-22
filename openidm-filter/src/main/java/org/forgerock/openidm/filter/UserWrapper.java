@@ -16,36 +16,74 @@
 
 package org.forgerock.openidm.filter;
 
-// Java Standard Edition
+// Java SE
 import java.security.Principal;
 import java.util.ArrayList;  
-import java.util.List;  
-import java.util.Enumeration;
 import java.util.Collections;
-  
+import java.util.Enumeration;
+import java.util.List;
+import java.util.NoSuchElementException;
+
+// Servlet  
 import javax.servlet.http.HttpServletRequest;  
 import javax.servlet.http.HttpServletRequestWrapper;
 
+// SLF4J
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UserWrapper extends HttpServletRequestWrapper {
+/**
+ * Adapts the servlet request to implement OpenIDM's default authentication.
+ *
+ * @author Jamie Nelson
+ * @author Paul C. Bryan
+ */
+class UserWrapper extends HttpServletRequestWrapper {
 
-    String username = null;
-    String roles = null;
-    HttpServletRequest origReq = null;
+    /** The user principal name, as provided by the authentication filter. */
+    private final String username;
 
-    public UserWrapper(String uname, String userRoles, HttpServletRequest req) {
-        super(req);
-        username = uname;
-        roles = userRoles;
+    /** A (case-sensitive) list of roles, as provided by the authentication filter. */
+    private final List<String> roles;
+
+    /**
+     * Contructs a new user wrapper.
+     *
+     * @param request the HTTP servlet request being adapted.
+     * @param username the name of the authenticated user.
+     * @param roles the roles assigned to the authenticated user.
+     */
+    public UserWrapper(HttpServletRequest request, String username, List<String> roles) {
+        super(request);
+        this.username = username;
+        this.roles = roles;
     }
+
+    /**
+     * Returns {@code true} if the header should be suppressed by this filter.
+     */
+    private static boolean suppress(String header) {
+        // optimiziation: avoid lowercasing every header string
+        return (header.length() >= 10 && header.charAt(1) == '-' &&
+         header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-"));
+    }
+
+    private static Enumeration<String> emptyEnumeration() {
+        return new Enumeration<String>() {
+            @Override public boolean hasMoreElements() {
+                return false;
+            }
+            @Override public String nextElement() {
+                throw new NoSuchElementException();
+            }
+        };
+    }
+        
 
     @Override
     public Principal getUserPrincipal() {
         return new Principal() {
-            @Override
-            public String getName() {
+            @Override public String getName() {
                 return username;
             }
         };
@@ -53,10 +91,7 @@ public class UserWrapper extends HttpServletRequestWrapper {
 
     @Override
     public boolean isUserInRole(String role) { 
-        if (roles == null || roles.indexOf(role) == -1) {
-            return false;
-        } 
-        return true;
+        return (roles != null && roles.contains(role));
     }
 
     @Override
@@ -65,21 +100,35 @@ public class UserWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public String getHeader(String name){
-        if (name.equalsIgnoreCase("X-OpenIDM-Roles")) {
-            return roles;
-        } else if (name.equalsIgnoreCase("X-OpenIDM-Password")) {
-            return null;
-        } else {
-            return ((HttpServletRequest)getRequest()).getHeader(name);
-        } 
+    public long getDateHeader(String name) {
+        return (suppress(name) ? -1L : super.getDateHeader(name));
+    }
+
+    @Override
+    public String getHeader(String name) {
+        return (suppress(name) ? null : super.getHeader(name));
+    }
+
+    @Override
+    public Enumeration getHeaders(String name) {
+        return (suppress(name) ? emptyEnumeration() : super.getHeaders(name));
     }
 
     @Override
     public Enumeration getHeaderNames() {
-        List<String> names = Collections.list(super.getHeaderNames());
-        names.add("X-OpenIDM-Roles");
-        names.remove("X-OpenIDM-Password");
+        ArrayList<String> names = new ArrayList<String>();
+        Enumeration<String> e = super.getHeaderNames();
+        while (e.hasMoreElements()) {
+            String name = e.nextElement();
+            if (!suppress(name)) {
+                names.add(name);
+            }
+        }
         return Collections.enumeration(names);
+    }
+
+    @Override
+    public int getIntHeader(String name) {
+        return (suppress(name) ? -1 : super.getIntHeader(name));
     }
 }

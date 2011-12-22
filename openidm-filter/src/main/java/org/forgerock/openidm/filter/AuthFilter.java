@@ -96,13 +96,21 @@ import org.forgerock.openidm.audit.util.Status;
 
 public class AuthFilter implements Filter {
 
-    final static Logger logger  = LoggerFactory.getLogger(AuthFilter.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(AuthFilter.class);
+
+    /** Attribute in session containing authenticated username. */
+    public static final String USERNAME_ATTRIBUTE = "openidm.username";
+
+    /** Attribute in session and request containing assigned roles. */
+    public static final String ROLES_ATTRIBUTE = "openidm.roles";
+
+// FIXME: thread safety
+    private final static SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     // name of the header containing the client IPAddress, used for the audit record
     // typically X-Forwarded-For
     static String logClientIPHeader = null;
 
-    final static SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     public enum Action {
         authenticate, logout
     }
@@ -121,7 +129,7 @@ public class AuthFilter implements Filter {
                   clientAuthOnly.add(Integer.valueOf(entry));
               }
           }
-          logger.info("Authentication disabled on ports: {}", clientAuthOnly);
+          LOGGER.info("Authentication disabled on ports: {}", clientAuthOnly);
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -129,8 +137,7 @@ public class AuthFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         String username = null;
-        List roleList = new ArrayList();
-        String roleListString = null;
+        List<String> roles = new ArrayList<String>();
 
         HttpSession session = req.getSession(false);
         String logout = req.getHeader("X-OpenIDM-Logout");
@@ -138,53 +145,48 @@ public class AuthFilter implements Filter {
             if (session != null) {
                 session.invalidate();
             }
-            res.setStatus(HttpServletResponse.SC_OK);
+            res.setStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         // if we see the certficate port this request is for client auth only
         } else if (allowClientCertOnly(req)) {
-            logger.debug("Client certificate authentication request");
+            LOGGER.debug("Client certificate authentication request");
             if (hasClientCert(req)) {
-                username = "openidm-cert";
-                roleList.add("openidm-authorized");
-                roleListString = roleListToString(roleList);
-                logAuth(req, username, roleListString, Action.authenticate, Status.SUCCESS); 
+                username = "openidm-cert"; // FIXME
+                roles.add("openidm-authorized");
+                logAuth(req, username, roles, Action.authenticate, Status.SUCCESS); 
             } else {
                 logAuth(req, username, null, Action.authenticate, Status.FAILURE);
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         } else if (session == null) {
-            logger.debug("No session, authenticating user");
+            LOGGER.debug("No session, authenticating user");
             username = req.getHeader("X-OpenIDM-Username");
-            if (authenticateUser(req, username, roleList)) {
-                roleListString = roleListToString(roleList);
-                logAuth(req, username, roleListString, Action.authenticate, Status.SUCCESS); 
-                createSession(req, session, username, roleListString);
+            if (authenticateUser(req, username, roles)) {
+                logAuth(req, username, roles, Action.authenticate, Status.SUCCESS); 
+                createSession(req, session, username, roles);
             } else {
                 logAuth(req, username, null, Action.authenticate, Status.FAILURE); 
                 res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         } else {
-            username = (String)session.getAttribute("X-OpenIDM-Username");
-            roleListString = (String)session.getAttribute("X-OpenIDM-Roles");
+            username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
+            roles = (List)session.getAttribute(ROLES_ATTRIBUTE);
         }
-        logger.debug("Found valid session for {} with roles {}", username, roleListString);
-        chain.doFilter(new UserWrapper(username, roleListString, req), res);
+        LOGGER.debug("Found valid session for {} with roles {}", username, roles);
+        req.setAttribute(ROLES_ATTRIBUTE, roles);
+        chain.doFilter(new UserWrapper(req, username, roles), res);
     }
 
-    private static void logAuth(HttpServletRequest req, String username, String roles, Action action, Status status) {
+    private static void logAuth(HttpServletRequest req, String username, List<String> roles, Action action, Status status) {
         try {
             Map<String,Object> entry = new HashMap<String,Object>();
             entry.put("timestamp", isoFormatter.format(new Date()));
             entry.put("action", action.toString());
             entry.put("status", status.toString());
             entry.put("principal", username);
-            if (roles == null) {
-                entry.put("roles", "");
-            } else {
-                entry.put("roles", roles);
-            }
+            entry.put("roles", roles);
             // check for header sent by load balancer for IPAddr of the client
             String ipAddress;
             if (logClientIPHeader == null ) {
@@ -198,41 +200,23 @@ public class AuthFilter implements Filter {
             entry.put("ip", ipAddress);
             router.create("audit/access", entry);
         } catch (ObjectSetException ose) {
-            logger.warn("Failed to log entry for {}", username, ose);
+            LOGGER.warn("Failed to log entry for {}", username, ose);
         }
     }
 
-    private String roleListToString(List roles) {
-        String roleString = null;
-        if (roles !=null && roles.size() > 0) {
-            roleString = "";
-            // convert to a string in header format X-OpenIDM-Roles: role1;role2;role3
-            Iterator<String> iterator = roles.iterator();
-            while (iterator.hasNext()) {
-                roleString = roleString + iterator.next();
-                if (iterator.hasNext()) {
-                    roleString = roleString + ";";
-                }
-            }
-        }
-        return roleString;
-    }
-
-    private void createSession(HttpServletRequest req, HttpSession sess, String username, String roles) {
-
+    private void createSession(HttpServletRequest req, HttpSession sess, String username, List<String> roles) {
         if (req.getHeader("X-OpenIDM-NoSession") == null) {
             sess = req.getSession();
-            sess.setAttribute("X-OpenIDM-Username", username);
-            sess.setAttribute("X-OpenIDM-Roles", roles);
-            logger.debug("Created session for: {} with roles {}", username, roles);
+            sess.setAttribute(USERNAME_ATTRIBUTE, username);
+            sess.setAttribute(ROLES_ATTRIBUTE, roles);
+            LOGGER.debug("Created session for: {} with roles {}", username, roles);
         }
     }
 
-    private boolean authenticateUser(HttpServletRequest req, String username, List roles) {
-
+    private boolean authenticateUser(HttpServletRequest req, String username, List<String> roles) {
         String password = req.getHeader("X-OpenIDM-Password");
         if (username == null || password == null || username.equals("") || password.equals("")) {
-            logger.debug("Failed authentication, missing or empty headers");
+            LOGGER.debug("Failed authentication, missing or empty headers");
             return false;
         }
         return AuthModule.authenticate(username, password, roles);
@@ -245,9 +229,9 @@ public class AuthFilter implements Filter {
         // TODO: reduce the logging level
         if (certs != null) {
             Principal existingPrincipal = request instanceof HttpServletRequest ? ((HttpServletRequest)request).getUserPrincipal() : null;
-            logger.info("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
+            LOGGER.info("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
             for (X509Certificate cert : certs) {
-                logger.info("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
+                LOGGER.info("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
             }
         }
 
@@ -260,7 +244,7 @@ public class AuthFilter implements Filter {
         if (checkCerts instanceof X509Certificate[]) {
             return (X509Certificate[]) checkCerts;
         } else {
-            logger.warn("Unknown certificate type retrieved {}", checkCerts);
+            LOGGER.warn("Unknown certificate type retrieved {}", checkCerts);
             return null;
         }
     }
@@ -309,7 +293,7 @@ public class AuthFilter implements Filter {
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
-        logger.info("Activating Auth Filter with configuration {}", context.getProperties());
+        LOGGER.info("Activating Auth Filter with configuration {}", context.getProperties());
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         logClientIPHeader = (String)config.get("clientIPHeader").asString();
         AuthModule.setConfig(config);
