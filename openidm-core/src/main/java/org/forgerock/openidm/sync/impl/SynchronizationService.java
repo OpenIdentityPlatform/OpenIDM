@@ -154,7 +154,7 @@ public class SynchronizationService extends ObjectSetJsonResource
                 mapping.initRelationships(this, mappings);
             }
         } catch (JsonValueException jve) {
-            throw new ComponentException("Configuration error", jve);
+            throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
         }
     }
 
