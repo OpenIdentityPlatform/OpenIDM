@@ -58,36 +58,22 @@ public class AuthModule {
     static String queryOnResource;
     static String internalUserQueryId;
     static String queryOnInternalUserResource;
-    static String adminUserName;
-    static String adminPassword;
-    static List<String> adminRoles;
     static List<String> defaultRoles;
 
     // configuration conf/authentication.json
 
     public static void setConfig(JsonValue config) {
-        adminUserName = (String)config.get("adminName").defaultTo("admin").asString();
-        adminPassword = (String)config.get("adminPassword").defaultTo("admin").asString();
-        adminRoles = config.get("defaultAdminRoles").asList(String.class);
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = (String)config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = (String)config.get("queryOnResource").defaultTo("managed/user").asString();
         internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
         queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
         
-        logger.info("AuthModule config params adminName: {} adminRoles: {} userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
-            new Object[] {adminUserName, adminRoles, defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
+        logger.info("AuthModule config params userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
+            new Object[] {defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
     }
     
     public static boolean authenticate(String login, String password, List<String> roles) {
-        
-        /* TODO: confirm this facility should be removed.
-        // file based check from admin in conf/authentication.json
-        if (adminUserName != null && adminPassword != null && login.equals(adminUserName) && password.equals(adminPassword)) {
-            roles.addAll(adminRoles);
-            return true;
-        }
-        */
         
         boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);
         if (!authenticated) {
