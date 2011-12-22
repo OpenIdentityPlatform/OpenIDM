@@ -5,8 +5,8 @@
  */
 
 function contains(a, o) {
-    for (var e in a) {
-        if (e === o) {
+    for (var i = 0; i <= a.length; i++) {
+        if (a[i] === o) {
             return true;
         }
     }
