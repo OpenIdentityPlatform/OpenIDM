@@ -1,13 +1,6 @@
 {
-    "adminName" : "admin",
-    "adminPassword" : "admin",
-    "clientIPHeader" : "X-Forwarded-For",
     "queryId" : "credential-query",
     "queryOnResource" : "managed/user",
-    "defaultAdminRoles" : [
-        "openidm-admin",
-        "openidm-authorized"
-    ],
     "defaultUserRoles" : [
         "openidm-authorized"
     ]
