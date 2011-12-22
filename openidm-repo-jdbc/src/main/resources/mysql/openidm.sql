@@ -190,7 +190,43 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `openidm`.`internaluser`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`internaluser` (
+  `objectid` VARCHAR(254) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `pwd` VARCHAR(510) NULL ,
+  `roles` VARCHAR(1024) NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`auditaccess`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
+  `activity` VARCHAR(24) NULL ,
+  `ip` VARCHAR(40) NULL ,
+  `principal` TEXT NULL ,
+  `roles` VARCHAR(1024) NULL ,
+  `status` VARCHAR(7) NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `openidm`.`internaluser`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `openidm`;
+INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES ('openidm-admin', '0', '{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},\"type\":\"x-simple-encryption\"}}', 'openidm-admin,openidm-authorized');
+
+COMMIT;
