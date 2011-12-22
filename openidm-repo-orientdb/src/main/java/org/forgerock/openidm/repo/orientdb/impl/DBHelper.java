@@ -271,11 +271,11 @@ public class DBHelper {
         populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, defaultAdminPwd, defaultAdminRoles);
         logger.trace("Created default user {}. Please change the assigned default password.", defaultAdminUser);
         
-        String annonymousUser = "annonymous";
-        String annonymousPwd = "annonymous";
-        String annonymousRoles = "openidm-reg";
-        populateDefaultUser(defaultTableName, db, completeConfig, annonymousUser, annonymousPwd, annonymousRoles);
-        logger.trace("Created default user {} for registration purposes.", annonymousUser);
+        String anonymousUser = "anonymous";
+        String anonymousPwd = "anonymous";
+        String anonymousRoles = "openidm-reg";
+        populateDefaultUser(defaultTableName, db, completeConfig, anonymousUser, anonymousPwd, anonymousRoles);
+        logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }    
     
     private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig, String user, String pwd, String roles) throws InvalidException {        
