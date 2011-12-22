@@ -16,7 +16,7 @@
             "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND prop.propvalue = ${sourceId} AND objtype.objecttype = ${_resource}",
             "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND prop.propvalue = ${targetId} AND objtype.objecttype = ${_resource}",
             "credential-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/email' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
-            "credential-defaultuser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "for-username" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/name' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "links-for-sourceId-db2" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND CAST(prop.propvalue AS varchar(1024)) = ${sourceId} AND objtype.objecttype = ${_resource}",
             "links-for-targetId-db2" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND CAST(prop.propvalue AS varchar(1024))= ${targetId} AND objtype.objecttype = ${_resource}"
@@ -24,7 +24,8 @@
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
-            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}"
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}"
         }
     },
     "resourceMapping" : {
@@ -50,6 +51,14 @@
                     "firstId" : "firstid",
                     "secondId" : "secondid",
                     "reconId" : "reconid"
+                }
+            },
+            "internal/user" : {
+                "table" : "internaluser",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "password" : "pwd",
+                    "roles" : "roles"
                 }
             },
             "audit/activity" : {
@@ -86,6 +95,18 @@
                     "status" : "status",
                     "targetObjectId" : "targetobjectid",
                     "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
+                    "timestamp" : "activitydate"
+                }
+            },
+            "audit/access" : {
+                "table" : "auditaccess",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",
+                    "ip" : "ip",
+                    "principal" : "principal",
+                    "roles" : "roles",
+                    "status" : "status",
                     "timestamp" : "activitydate"
                 }
             }

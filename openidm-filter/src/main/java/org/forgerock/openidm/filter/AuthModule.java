@@ -76,7 +76,7 @@ public class AuthModule {
         queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
         
         logger.info("AuthModule config params adminName: {} adminRoles: {} userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
-            new Object[] {adminUserName, adminRoles.toString(), defaultRoles.toString(), queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
+            new Object[] {adminUserName, adminRoles, defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
     }
     
     public static boolean authenticate(String login, String password, List<String> roles) {
