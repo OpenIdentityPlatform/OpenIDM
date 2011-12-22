@@ -53,7 +53,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // Restlet
+import org.restlet.Request;
 import org.restlet.Restlet;
+
+// JSON Fluent
+import org.forgerock.json.fluent.JsonValue;
 
 // JSON Resource
 import org.forgerock.json.resource.JsonResource;
@@ -140,7 +144,7 @@ public class Servlet extends RestletRouterServlet {
     )
     protected HashMap<JsonResource, Restlet> restlets = new HashMap<JsonResource, Restlet>();
     protected synchronized void bindJsonResource(JsonResource resource, Map<String, Object> properties) {
-        JsonResourceRestlet restlet = new JsonResourceRestlet(resource);
+        Restlet restlet = new CustomRestlet(resource);
         restlets.put(resource, restlet);
         bindRestlet(restlet, properties);
     }
@@ -169,11 +173,23 @@ public class Servlet extends RestletRouterServlet {
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        ObjectSetContext.clear();
+        ObjectSetContext.clear(); // start with a fresh slate
         try {
             super.service(request, response);
         } finally {
-            ObjectSetContext.clear();
+            ObjectSetContext.clear(); // leave with a fresh slate
+        }
+    }
+
+    private class CustomRestlet extends JsonResourceRestlet {
+        public CustomRestlet(JsonResource resource) {
+            super(resource);
+        }
+        @Override public JsonValue newContext(Request request) {
+            JsonValue result = super.newContext(request);
+            JsonValue security = result.get("security");
+            security.put("openidm-roles", request.getAttributes().get("openidm.roles"));
+            return result;
         }
     }
 }
