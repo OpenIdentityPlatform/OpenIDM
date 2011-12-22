@@ -29,6 +29,7 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 // SLF4J
 import org.slf4j.Logger;
@@ -47,6 +48,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.codehaus.jackson.map.ObjectMapper;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonException;
@@ -85,6 +87,8 @@ public class CryptoServiceImpl implements CryptoService {
 
     /** TODO: Description. */
     private final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<JsonTransformer>();
+    
+    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * Opens a connection to the specified URI location and returns an input stream with which
@@ -199,7 +203,40 @@ public class CryptoServiceImpl implements CryptoService {
     }
     
     @Override
+    public JsonValue decrypt(String value) throws JsonException {
+        JsonValue jsonValue = parseStringified(value);
+        return decrypt(jsonValue);
+    }
+    
+    @Override
     public boolean isEncrypted(JsonValue value) {
         return JsonCrypto.isJsonCrypto(value);
+    }
+    
+    @Override
+    public boolean isEncrypted(String value) {
+        boolean encrypted = false;
+        // TODO: delegate the sanity check if String is a candidate for parsing to the crypto lib
+        boolean candidate = value != null && value.startsWith("{\"$crypto\":{") && value.endsWith("\"}}");
+        if (candidate) {
+            try {
+                JsonValue jsonValue = parseStringified(value);
+                encrypted = JsonCrypto.isJsonCrypto(jsonValue);
+            } catch (JsonException ex) {
+                encrypted = false; // IF we can't parse the string assume it's not in an encrypted format we support
+            }
+        }
+        return encrypted;
+    }
+    
+    private JsonValue parseStringified(String stringified) {
+        JsonValue jsonValue = null;
+        try {
+            Map parsedValue = (Map) mapper.readValue(stringified, Map.class);
+            jsonValue = new JsonValue(parsedValue);
+        } catch (IOException ex) {
+            throw new JsonException("String passed into parsing is not valid JSON", ex);
+        }
+        return jsonValue;
     }
 }
