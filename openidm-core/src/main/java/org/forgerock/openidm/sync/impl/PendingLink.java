@@ -132,7 +132,7 @@ class PendingLink {
      * @return true if the pending link was linked, false if it still needs linking
      */
     public static boolean wasLinked(JsonValue context) {
-        boolean wasLinked = !context.contains(PENDING_LINK);
+        boolean wasLinked = !context.isDefined(PENDING_LINK);
         return wasLinked;
     }
 
