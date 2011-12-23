@@ -55,6 +55,8 @@ public class Main {
     };
 
     public static void main(String[] arg) throws Exception {
+        System.err.println("This utility helps obfuscate passwords to prevent casual observation.");
+        System.err.println("It is not securely encrypted and needs further measures to prevent disclosure.");
         if (arg.length != 0 && arg.length != 1) {
             System.err.println("Usage - java  <password>");
             System.err.println("If the password is not specified, the user will be prompted for the password");
