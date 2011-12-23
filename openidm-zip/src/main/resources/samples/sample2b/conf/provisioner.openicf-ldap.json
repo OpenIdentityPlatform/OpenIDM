@@ -1,22 +1,19 @@
 {
     "name" : "ldap",
-    "connectorRef" :
-    {
+    "connectorRef" : {
         "connectorHostRef" : "#LOCAL",
         "connectorName" : "org.identityconnectors.ldap.LdapConnector",
         "bundleName" : "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
         "bundleVersion" : "1.1.0.0-EA"
     },
-    "poolConfigOption" :
-    {
+    "poolConfigOption" : {
         "maxObjects" : 10,
         "maxIdle" : 10,
         "maxWait" : 150000,
         "minEvictableIdleTimeMillis" : 120000,
         "minIdle" : 1
     },
-    "operationTimeout" :
-       {
+    "operationTimeout" : {
         "CREATE" : -1,
         "VALIDATE" : -1,
         "TEST" : -1,
@@ -30,24 +27,19 @@
         "SCRIPT_ON_RESOURCE" : -1,
         "SEARCH" : -1
     },
-    "configurationProperties" :
-       {
+    "configurationProperties" : {
          "accountSynchronizationFilter" : null,
          "passwordAttributeToSynchronize" : null,
          "synchronizePasswords" : false,
          "removeLogEntryObjectClassFromFilter" : true,
-         "modifiersNamesToFilterOut" :
-            [
-            ],
+        "modifiersNamesToFilterOut" : [ ],
          "passwordDecryptionKey" : null,
          "credentials" : "password",
          "changeLogBlockSize" : 100,
-         "baseContextsToSynchronize" :
-            [
+        "baseContextsToSynchronize" : [
                "ou=People,dc=example,dc=com"
             ],
-         "attributesToSynchronize" :
-            [
+        "attributesToSynchronize" : [
                "uid",
                "sn",
                "cn",
@@ -58,8 +50,7 @@
          "changeNumberAttribute" : "changeNumber",
          "passwordDecryptionInitializationVector" : null,
          "filterWithOrInsteadOfAnd" : false,
-         "objectClassesToSynchronize" :
-            [
+        "objectClassesToSynchronize" : [
                "inetOrgPerson"
             ],
          "port" : 1389,
@@ -67,25 +58,20 @@
          "passwordAttribute" : "userPassword",
          "useBlocks" : false,
          "maintainPosixGroupMembership" : false,
-         "failover" :
-            [
-            ],
+        "failover" : [ ],
          "ssl" : false,
          "principal" : "cn=Directory Manager",
-         "baseContexts" :
-            [
+        "baseContexts" : [
                "ou=People,dc=example,dc=com"
             ],
          "readSchema" : true,
-         "accountObjectClasses" :
-            [
+        "accountObjectClasses" : [
                "top",
                "person",
                "organizationalPerson",
                "inetOrgPerson"
             ],
-         "accountUserNameAttributes" :
-            [
+        "accountUserNameAttributes" : [
                "uid",
                "cn"
             ],
@@ -145,20 +131,16 @@
             }
         }
     },
-    "operationOptions" :
-       {
-         "DELETE" :
-            {
+    "operationOptions" : {
+        "DELETE" : {
                "denied" : false,
                "onDeny" : "DO_NOTHING"
             },
-         "UPDATE" :
-            {
+        "UPDATE" : {
                "denied" : false,
                "onDeny" : "DO_NOTHING"
             },
-         "CREATE" :
-            {
+        "CREATE" : {
                "denied" : false,
                "onDeny" : "DO_NOTHING"
             }

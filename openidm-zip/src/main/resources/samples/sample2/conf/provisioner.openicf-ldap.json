@@ -44,7 +44,7 @@
          "changeLogBlockSize" : 100,
          "baseContextsToSynchronize" :
             [
-               "ou=People,o=aaa"
+               "ou=People,dc=example,dc=com"
             ],
          "attributesToSynchronize" :
             [
@@ -62,10 +62,10 @@
             [
                "inetOrgPerson"
             ],
-         "port" : 4389,
+         "port" : 1389,
          "vlvSortAttribute" : "uid",
          "passwordAttribute" : "userPassword",
-         "useBlocks" : true,
+         "useBlocks" : false,
          "maintainPosixGroupMembership" : false,
          "failover" :
             [
@@ -74,7 +74,7 @@
          "principal" : "cn=Directory Manager",
          "baseContexts" :
             [
-               "ou=People,o=aaa"
+               "ou=People,dc=example,dc=com"
             ],
          "readSchema" : true,
          "accountObjectClasses" :
@@ -95,14 +95,12 @@
          "passwordHashAlgorithm" : null,
          "usePagedResultControl" : false,
          "blockSize" : 100,
-         "uidAttribute" : "entryUUID",
+         "uidAttribute" : "dn",
          "maintainLdapGroupMembership" : false,
          "respectResourcePasswordPolicyChangeAfterReset" : false
       },
-   "objectTypes" :
-      {
-         "account" :
-            {
+    "objectTypes" : {
+        "account" : {
                "$schema" : "http://json-schema.org/draft-03/schema",
                "id" : "__ACCOUNT__",
                "type" : "object",
@@ -144,8 +142,13 @@
                            "type" : "string",
                            "nativeName" : "uid",
                            "nativeType" : "string"
+                },
+                "dn" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string",
+                    "required" : true
                         }
-                      
                   }
             }
       },

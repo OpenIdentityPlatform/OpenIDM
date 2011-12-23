@@ -42,10 +42,10 @@
             "action" : "EXCEPTION"
         }, {
             "situation" : "UNQUALIFIED",
-            "action" : "DELETE"
+            "action" : "IGNORE"
         }, {
             "situation" : "UNASSIGNED",
-            "action" : "DELETE"
+            "action" : "IGNORE"
         } ]
     }, {
         "name" : "managedUser_systemLdapAccounts",
@@ -98,7 +98,7 @@
             "action" : "IGNORE"
         }, {
             "situation" : "UNQUALIFIED",
-            "action" : "DELETE"
+            "action" : "IGNORE"
         }, {
             "situation" : "UNASSIGNED",
             "action" : "IGNORE"

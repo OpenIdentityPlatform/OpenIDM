@@ -5,23 +5,23 @@
         "target" : "managed/user",
         "correlationQuery" : {
             "type": "text/javascript",
-            "source" : "var query = {'_query-id' : 'for-username', 'uid' :  source.name};query;"
+            "source" : "var query = {'_query-id' : 'for-userName', 'userName' :  source.name};query;"
         },
         "properties" : [ {
             "source" : "description",
             "target" : "description"
         }, {
             "source" : "firstname",
-            "target" : "firstname"
+            "target" : "givenName"
         }, {
             "source" : "email",
             "target" : "email"
         }, {
             "source" : "lastname",
-            "target" : "lastname"
+            "target" : "familyName"
         }, {
             "source" : "name",
-            "target" : "name"
+            "target" : "userName"
         }, {
             "source" : "name",
             "target" : "_id"
