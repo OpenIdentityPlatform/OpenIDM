@@ -412,6 +412,59 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   </section>
  </section>
  
+ <section><titl>Correlation Queries</titl>
+  <para>If user or object is created through a reconciliation or liveSync, the OpenIDM's sync engine will also create a link between the two objects. the link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
+  <para>Especially during the early phases of an identity management project there might be loads of users created from resource A when the next reconciliation with resource B is started. I this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
+  <para>In OpenIDM, or better to say OpenICF since this is the component wich executes the correlation query the syntax for the query depends on the direction of the synchronization. Direction here means whether the repository is the source or the target system.</para>
+  <section><title>Correlation query with the Repository as the Target</title>
+   <para>As a prerequisite to find an object in the repository, there needs to be a query defined in the file <link>openidm/conf/repo.jdbc.json</link> or <link>openidm/conf/repo.orientdb.json</link>, depending on which type of repository is used. An example for a generic query for a OrientDB repository is shown in <xref linkend="orient-query-example-id"/> and one for a JDBC based repository in <xref linkend="jdbc-query-example-id"/> respectively.</para>
+   <para>An example correlation rule to call the query looks like <xref linkend="correlation-toRepo-id"/>. The _query-id property has the name of the query in the repository configuration as a value, here "for-userName". The userName property will get the value of the variable "source.name" which will be put int the query at '${userName}'. </para>
+   <example xml:id="correlation-toRepo-id"><title>Correlation Query for Repository</title>
+    <programlisting language="javascript">
+            "correlationQuery" : {
+            "type": "text/javascript",
+            "source" : "var query = {'_query-id' : 'for-userName', 'userName' :  source.name};query;"
+        },
+    </programlisting>
+   </example>
+   <para>In the example below ${_resource} will be replaced by the table name which contains the users, if the correlation is for objects of type user. At the end of the day it is a simple query against a db table which can return zero, one or more than one objects. The situation of the user, like FOUND or AMBIGUOUS will be set according to the number of returned objects.</para>
+   <example xml:id="orient-query-example-id"><title>DB query for Correlation</title>
+    <programlisting language="javascript">
+"for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${userName}'"    
+    </programlisting>
+   </example>
+   <para>In the case of a JDBC repository the query is slightly more complex due to the indexing structure of the tables. In this case three tables need to be joined to formulate the optimum query. The following parameters are set by the system:</para>
+   <itemizedlist>
+    <listitem><para>${_dbSchema}: contains the name of the schema, usually openidm</para></listitem>
+    <listitem><para>${_mainTable}: contins the name of the main table for these objects, in case of user it is managedobjects</para></listitem>
+    <listitem><para>${_propTable}: the name of the associated property table, usually managedobjectproperties</para></listitem>
+    <listitem><para>The third table which will be joined is the objecttypes table </para></listitem>
+   </itemizedlist>
+   <example xml:id="jdbc-query-example-id"><title>DB query for Correlation</title>
+    <programlisting>
+"for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${userName} AND objtype.objecttype = ${_resource}"    
+    </programlisting>
+    <caption></caption>
+   </example>
+  </section>
+ 
+  <section><title>Correlation query with a resource as the Target</title>
+   <para>In the case when a resource is the target, then it is the connector which needs to execute the query for finding target objects.</para>
+   <para>The java script needs to return a map containing a generic query with the following elements:</para>
+   <itemizedlist>
+    <listitem><para>A condition like "Equals"</para></listitem>
+    <listitem><para>The name of the attribute to compare with on the resource: it is the value for the property "name", in the example below it is "uid"</para></listitem>
+    <listitem><para>The value from the source to be used in the seearch filter. It is set in the propety "value" and needs an array as a value. In the example it is [source.userName]</para></listitem>
+   </itemizedlist>
+   <example xml:base="back-correlation-example-id"><title>Correlation Query for Resources</title>
+    <programlisting language="javascript">
+var map = {"query": { "Equals": {"field" : "uid", "values" : [source.userName ]}}};
+map;    
+    </programlisting>
+   </example>
+  </section>
+ </section>
+  
  <section xml:id="advance-dataflow-id"><title>Advanced Data Flow Configuration</title>
   <para>correlation, onUnlink, onDelete, onStore, onRetreive, onValidate</para>
   <para>In <xref linkend="basic-flow-sec-id"/> the extra action which can be plugged in for two standard situations was mentiond: onCreate and on Update.In some cases it might be needed to execute special scripts on other actions as well. For instance if the user object on an external resource was deleted the action in OpenIDM is not necessarely a delete as well. Instead the user should for instance be deactivated. In this case the action would be set to "unlink" and an "onUnlink" script might be needed to deactivate the user in OpenIDM or even another external resource. See for instance <xref linkend="advance-syncing-example-id"/></para>
@@ -518,8 +571,9 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    </programlisting>
   </example>
   <section><title>Include data from a third resource</title>
-  <para>openidm.read(id) see Functions</para>
-  <para>TODO</para>
+  <para>At any time during the reconciliation it is possible to get information form any connected system. The function to call is:</para> 
+  <para>openidm.read(id)</para>
+   <para>TODO</para>
   </section>
  </section>
  
