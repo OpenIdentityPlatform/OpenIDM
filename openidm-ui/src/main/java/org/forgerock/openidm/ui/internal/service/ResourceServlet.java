@@ -51,6 +51,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Servlet to handle the REST interface
  *
+ * Based on apache felix org/apache/felix/http/base/internal/service/ResourceServlet.java
+ *
+ * Changes and additions by
  * @author laszlo
  * @author aegloff
  */
