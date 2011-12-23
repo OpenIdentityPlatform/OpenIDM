@@ -86,13 +86,13 @@
     </row>
     <row>
      <entry>Audit objects</entry>
-     <entry>TODO</entry>
-     <entry>TODO</entry>
+     <entry>Houses audit data in the OpenIDM internal repository.</entry>
+     <entry></entry>
     </row>
     <row>
      <entry>Links</entry>
-     <entry>TODO</entry>
-     <entry>TODO</entry>
+     <entry>Defines a relation between two objects.</entry>
+     <entry></entry>
     </row>
    </tbody>
   </tgroup>
@@ -497,11 +497,11 @@ val = openidm.read("config/custom/myconfig")</programlisting>
 
  <section xml:id="object-main-audit-objects">
   <title>Audit Objects</title>
-  <para>TODO</para>
+  <para>The Audit Objects houses audit data selected for local storage in the OpenIDM repository.</para>
  </section>
 
  <section xml:id="object-main-links">
   <title>Links</title>
-  <para>TODO</para>
+  <para>The link object defines a relation between one source object and a target object; typically in the case of a Managed Object to a System Object. This relation is established via any provisioning activity resulting in a new account on a target system or in case of applicable scenarios during reconciliation and synchronization yielding a LINK action.</para>
  </section>
 </chapter>
