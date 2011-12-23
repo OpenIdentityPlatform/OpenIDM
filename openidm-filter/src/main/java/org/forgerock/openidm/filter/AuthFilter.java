@@ -29,6 +29,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.StringTokenizer;
+
+import org.apache.commons.codec.binary.Base64;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
@@ -96,6 +99,7 @@ import org.forgerock.openidm.audit.util.Status;
 
 public class AuthFilter implements Filter {
 
+
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthFilter.class);
 
     /** Attribute in session containing authenticated username. */
@@ -104,8 +108,6 @@ public class AuthFilter implements Filter {
     /** Attribute in session and request containing assigned roles. */
     public static final String ROLES_ATTRIBUTE = "openidm.roles";
 
-// FIXME: thread safety
-    private final static SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     // name of the header containing the client IPAddress, used for the audit record
     // typically X-Forwarded-For
@@ -114,6 +116,12 @@ public class AuthFilter implements Filter {
     public enum Action {
         authenticate, logout
     }
+
+    private class AuthData {
+       String username;
+       List<String> roles = new ArrayList<String>();
+       boolean status = false;
+    };
 
     // A list of ports that allow authentication purely based on client certificates (SSL mutual auth)
     static Set<Integer> clientAuthOnly = new HashSet<Integer>();
@@ -136,51 +144,58 @@ public class AuthFilter implements Filter {
                                                         throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
-        String username = null;
-        List<String> roles = new ArrayList<String>();
+        AuthData authData = new AuthData();
 
-        HttpSession session = req.getSession(false);
-        String logout = req.getHeader("X-OpenIDM-Logout");
-        if (logout != null) {
-            if (session != null) {
-                session.invalidate();
+        try {
+            HttpSession session = req.getSession(false);
+            String logout = req.getHeader("X-OpenIDM-Logout");
+            String headerLogin = req.getHeader("X-OpenIDM-Username");
+            String basicAuth = req.getHeader("Authorization");
+            if (logout != null) {
+                if (session != null) {
+                    session.invalidate();
+                }
+                res.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                return;
+              // if we see the certficate port this request is for client auth only
+            } else if (allowClientCertOnly(req)) {
+                authData = hasClientCert(req);
+                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS); 
+            } else if (session == null && headerLogin != null) {
+                authData = authenticateUser(req);
+                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS); 
+                createSession(req, session, authData);
+            } else if (session == null && basicAuth != null) {
+                authData = doBasicAuth(basicAuth);
+                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
+                createSession(req, session, authData);
+            } else if (session != null) {
+                authData.username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
+                authData.roles = (List)session.getAttribute(ROLES_ATTRIBUTE);
+            } else {
+                authFailed(req, res, authData.username);
+                return;
             }
-            res.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (AuthException s) {
+            authFailed(req, res, s.getMessage());
             return;
-        // if we see the certficate port this request is for client auth only
-        } else if (allowClientCertOnly(req)) {
-            LOGGER.debug("Client certificate authentication request");
-            if (hasClientCert(req)) {
-                username = "openidm-cert"; // FIXME
-                roles.add("openidm-authorized");
-                logAuth(req, username, roles, Action.authenticate, Status.SUCCESS); 
-            } else {
-                logAuth(req, username, null, Action.authenticate, Status.FAILURE);
-                res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-        } else if (session == null) {
-            LOGGER.debug("No session, authenticating user");
-            username = req.getHeader("X-OpenIDM-Username");
-            if (authenticateUser(req, username, roles)) {
-                logAuth(req, username, roles, Action.authenticate, Status.SUCCESS); 
-                createSession(req, session, username, roles);
-            } else {
-                logAuth(req, username, null, Action.authenticate, Status.FAILURE); 
-                res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-        } else {
-            username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
-            roles = (List)session.getAttribute(ROLES_ATTRIBUTE);
         }
-        LOGGER.debug("Found valid session for {} with roles {}", username, roles);
-        req.setAttribute(ROLES_ATTRIBUTE, roles);
-        chain.doFilter(new UserWrapper(req, username, roles), res);
+        LOGGER.debug("Found valid session for {} with roles {}", authData.username, authData.roles);
+        req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
+        chain.doFilter(new UserWrapper(req, authData.username, authData.roles), res);
+    }
+ 
+    private void authFailed(HttpServletRequest req, HttpServletResponse res, 
+                                            String username) throws IOException {
+
+        logAuth(req, username, null, Action.authenticate, Status.FAILURE);
+        res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
-    private static void logAuth(HttpServletRequest req, String username, List<String> roles, Action action, Status status) {
+    private static void logAuth(HttpServletRequest req, String username, 
+                            List<String> roles, Action action, Status status) {
         try {
+            SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             Map<String,Object> entry = new HashMap<String,Object>();
             entry.put("timestamp", isoFormatter.format(new Date()));
             entry.put("action", action.toString());
@@ -204,42 +219,86 @@ public class AuthFilter implements Filter {
         }
     }
 
-    private void createSession(HttpServletRequest req, HttpSession sess, String username, List<String> roles) {
+    private AuthData doBasicAuth(String data) throws AuthException {
+
+        LOGGER.debug("HTTP basic authentication request");
+        AuthData ad = new AuthData();
+        StringTokenizer st = new StringTokenizer(data);
+        String isBasic = st.nextToken();
+        if (isBasic == null || !isBasic.equalsIgnoreCase("Basic")) {
+            throw new AuthException("");
+        }
+        String creds= st.nextToken();
+        if (creds == null) {
+            throw new AuthException("");
+        }
+        String dcreds = new String(Base64.decodeBase64(creds.getBytes()));
+        String[] t = dcreds.split(":");
+        if (t.length != 2) {
+            throw new AuthException("");
+        }
+        ad.username = t[0];
+        ad.status = AuthModule.authenticate(ad.username, t[1], ad.roles);
+        if (ad.status == false) {
+            throw new AuthException(ad.username);
+        }
+        return ad;
+    }
+
+    private void createSession(HttpServletRequest req, HttpSession sess, AuthData ad) {
         if (req.getHeader("X-OpenIDM-NoSession") == null) {
             sess = req.getSession();
-            sess.setAttribute(USERNAME_ATTRIBUTE, username);
-            sess.setAttribute(ROLES_ATTRIBUTE, roles);
-            LOGGER.debug("Created session for: {} with roles {}", username, roles);
+            sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
+            sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
+            LOGGER.debug("Created session for: {} with roles {}", ad.username, ad.roles);
         }
     }
 
-    private boolean authenticateUser(HttpServletRequest req, String username, List<String> roles) {
+    private AuthData authenticateUser(HttpServletRequest req) throws AuthException {
+
+        LOGGER.debug("No session, authenticating user");
+        AuthData ad = new AuthData();
         String password = req.getHeader("X-OpenIDM-Password");
-        if (username == null || password == null || username.equals("") || password.equals("")) {
+        ad.username = req.getHeader("X-OpenIDM-Username");
+        if (ad.username == null || password == null || ad.username.equals("") || password.equals("")) {
             LOGGER.debug("Failed authentication, missing or empty headers");
-            return false;
+            throw new AuthException();
         }
-        return AuthModule.authenticate(username, password, roles);
+        ad.status = AuthModule.authenticate(ad.username, password, ad.roles);
+        if (ad.status == false) {
+            throw new AuthException(ad.username);
+        }
+        return ad;
     }
 
     // This is currently Jetty specific
-    private boolean hasClientCert(ServletRequest request) {
+    private AuthData hasClientCert(ServletRequest request) throws AuthException {
+
+        LOGGER.debug("Client certificate authentication request");
+        AuthData ad = new AuthData();
         X509Certificate[] certs = getClientCerts(request);
 
         // TODO: reduce the logging level
         if (certs != null) {
             Principal existingPrincipal = request instanceof HttpServletRequest ? ((HttpServletRequest)request).getUserPrincipal() : null;
-            LOGGER.info("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
+            LOGGER.debug("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
             for (X509Certificate cert : certs) {
-                LOGGER.info("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
+                LOGGER.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
             }
         }
-
-        return (certs != null && certs.length > 0 && certs[0] != null);
+        ad.status = (certs != null && certs.length > 0 && certs[0] != null);
+        if (ad.status == false) {
+            throw new AuthException(ad.username);
+        }
+        ad.username = certs[0].getSubjectDN().getName();
+        ad.roles.add("openidm-authorized");
+        LOGGER.debug("Authentication client certificate subject {}", ad.username );
+        return ad;
     }
 
     // This is currently Jetty specific
     private X509Certificate[] getClientCerts(ServletRequest request) {
+
         Object checkCerts = request.getAttribute("javax.servlet.request.X509Certificate");
         if (checkCerts instanceof X509Certificate[]) {
             return (X509Certificate[]) checkCerts;
