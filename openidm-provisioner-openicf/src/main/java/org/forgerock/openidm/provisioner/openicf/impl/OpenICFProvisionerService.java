@@ -30,6 +30,7 @@ import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
@@ -66,6 +67,8 @@ import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.*;
 
+// TODO: Consider having this subclass SimpleJsonResource...
+
 /**
  * @author $author$
  * @version $Revision$ $Date$
@@ -88,9 +91,10 @@ public class OpenICFProvisionerService implements ProvisionerService {
      * TODO: Description.
      */
     private enum Method {
+// FIXME: DO NOT BREAK THE UNIFORM INTERFACE BETWEEN COMPONENTS BY INVENTING NEW METHODS.
+// Use the action method for liveSync instead.
         create, read, update, delete, patch, query, action, liveSync
     }
-
 
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
@@ -218,32 +222,37 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
-        Id id = new Id(request.get("id").required().asString());
-        String rev = request.get("rev").asString();
-        JsonValue value = request.get("value");
-        Method method = request.get("method").required().asEnum(Method.class);
-        switch (method) {
-            case create:
-                return create(id, value);
-            case read:
-                return read(id);
-            case update:
-                return update(id, rev, value);
-            case delete:
-                return delete(id, rev);
-            case patch:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
-            case query:
-                return query(id, value);
-            case action:
-                return action(id, value);
-            case liveSync:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
-            default:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
+        try {
+            Method method = request.get("method").required().asEnum(Method.class);
+            Id id = new Id(request.get("id").required().asString());
+            String rev = request.get("rev").asString();
+            JsonValue value = request.get("value");
+            JsonValue params = request.get("params");
+            switch (method) {
+                case create:
+                    return create(id, value.required());
+                case read:
+                    return read(id);
+                case update:
+                    return update(id, rev, value.required());
+                case delete:
+                    return delete(id, rev);
+                case query:
+// FIXME: According to the JSON resource specification (now published), query parameters are
+// required. There is a unit test that attempts to query all merely by executing query
+// without any parameters. As a result, the commented-out line below—which conforms to the
+// spec—breaks during unit testing.
+//                    return query(id, params.required());
+                    return query(id, params);
+                case action:
+                    return action(id, params.required(), value);
+                default:
+                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
+            }
+        } catch (JsonValueException jve) {
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
         }
     }
-
 
     public JsonValue create(Id id, JsonValue object) throws JsonResourceException {
         String METHOD = "create";
@@ -579,7 +588,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
     }
 
 
-    public JsonValue action(Id id, JsonValue params) throws JsonResourceException {
+    public JsonValue action(Id id, JsonValue params, JsonValue entity) throws JsonResourceException {
         String METHOD = "action";
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         JsonValue result = new JsonValue(new HashMap<String, Object>());

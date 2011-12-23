@@ -121,14 +121,20 @@ public abstract class OpenICFProvisionerServiceTestBase {
         return service;
     }
 
-    protected JsonValue buildRequest(String method, String id, String rev, Map<String, Object> value) {
+// TODO: Consider using JsonResourceAccessor instead of building each request.
+    protected JsonValue buildRequest(String method, String id, String rev, Map<String, Object> params, Map<String, Object> value) {
         JsonValue request = new JsonValue(new HashMap<String, Object>());
         request.put("method", method);
         request.put("id", id);
         if (null != rev) {
             request.put("rev", rev);
         }
-        request.put("value", value);
+        if (params != null) {
+            request.put("params", params);
+        }
+        if (value != null) {
+            request.put("value", value);
+        }
         return request;
     }
 }

@@ -61,27 +61,27 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
     @Test
     public void testHelloWorldAction() throws Exception {
         Map<String, Object> action = getEmptyScript();
-        JsonValue result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        JsonValue result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
         assertThat(result.asMap()).includes(entry("result", "Arthur Dent"));
 
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "return testArgument");
         action.put("testArgument", "Zaphod Beeblebrox");
-        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
         assertThat(result.asMap()).includes(entry("result", "Zaphod Beeblebrox"));
 
         action.put(ConnectorScript.SCRIPT_VARIABLE_PREFIX, "openidm_");
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument");
         action.put("testArgument", "Ford Prefect");
-        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
         assertThat(result.asMap()).includes(entry("result", "Ford Prefect"));
 
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument.length");
         action.put("testArgument", Arrays.asList("Ford Prefect", "Tricia McMillan"));
-        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
         assertThat(result.asMap()).includes(entry("result", 2));
 
         action.put(ConnectorScript.SCRIPT_EXPRESSION, "throw new RuntimeException(\"Marvin\")");
-        result = getService().handle(buildRequest("action", "system/Test/account", null, action));
+        result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
         assertThat(result.asMap()).includes(entry("error", "Marvin"));
     }
 
