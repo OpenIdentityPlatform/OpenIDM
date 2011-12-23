@@ -219,7 +219,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   <section><title>Example Mapping LDAP to Repo</title>
    <example xml:id="basic-ldap-mapping">
     <title>An example provisioner file which maps users from an LDAP resourced into the OpenIDM repository</title>
-    <programlisting>aa
+    <programlisting>
 {
     "mappings" : [
         {
