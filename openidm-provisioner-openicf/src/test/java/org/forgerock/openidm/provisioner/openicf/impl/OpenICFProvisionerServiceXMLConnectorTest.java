@@ -87,7 +87,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         List<Map<String, Object>> testInput = mapper.readValue(inputStream, List.class);
         for (Map<String, Object> object : testInput) {
             String id = "system/xml/account/";
-            JsonValue result = getService().handle(buildRequest("create", id, null, object));
+            JsonValue result = getService().handle(buildRequest("create", id, null, null, object));
             assertThat(result.get(ServerConstants.OBJECT_PROPERTY_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
             String newID = (String) object.get(ServerConstants.OBJECT_PROPERTY_ID);
             objectIDs.add(id + newID);
@@ -97,7 +97,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
     @Test(dependsOnMethods = {"testCreate"})
     public void testRead() throws Exception {
         for (String id : objectIDs) {
-            JsonValue connectorObject = getService().handle(buildRequest("read", id, null, null));
+            JsonValue connectorObject = getService().handle(buildRequest("read", id, null, null, null));
             Assert.assertNotNull(connectorObject);
             assertThat(connectorObject.get(ServerConstants.OBJECT_PROPERTY_ID).asString()).as("Result object must contain the new id").doesNotMatch(".*/(.*?)").matches("[\\w]{8}-[\\w]{4}-[\\w]{4}-[\\w]{4}-[\\w]{12}");
             //assertThat(connectorObject).includes(MapAssert.entry("_id", id));
@@ -113,8 +113,8 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
             updates.put("__DESCRIPTION__", "Test Description");
             updates.put("firstname", "Darth");
             updates.put("lastname-first-letter", null);
-            getService().handle(buildRequest("update", id, null, updates));
-            JsonValue connectorObject = getService().handle(buildRequest("read", id, null, null));
+            getService().handle(buildRequest("update", id, null, null, updates));
+            JsonValue connectorObject = getService().handle(buildRequest("read", id, null, null, null));
             assertThat(connectorObject.asMap()).excludes(MapAssert.entry("__PASSWORD__", "TestPassw0rd"));
             assertThat(connectorObject.asMap()).includes(MapAssert.entry("__GROUPS__", Arrays.asList("TestGroup1", "TestGroup2")));
             assertThat(connectorObject.asMap()).includes(MapAssert.entry("__DESCRIPTION__", "Test Description"));
@@ -129,7 +129,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
 
     @Test(dependsOnMethods = {"testCreate"})
     public void testDelete() throws Exception {
-        getService().handle(buildRequest("delete", objectIDs.get(0), null, null));
+        getService().handle(buildRequest("delete", objectIDs.get(0), null, null, null));
         objectIDs.remove(0);
     }
 
@@ -145,14 +145,14 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         ObjectMapper mapper = new ObjectMapper();
         List<Map<String, Object>> testInput = mapper.readValue(inputStream, List.class);
         for (Map<String, Object> object : testInput) {
-            JsonValue result = getService().handle(buildRequest("query", "system/xml/account/", null, object));
+            JsonValue result = getService().handle(buildRequest("query", "system/xml/account/", null, object, null));
             Assert.assertNotNull(result);
         }
     }
 
     @Test(dependsOnMethods = {"testCreate"})
     public void testQueryAll() throws Exception {
-        JsonValue result = getService().handle(buildRequest("query", "system/xml/account", null, null));
+        JsonValue result = getService().handle(buildRequest("query", "system/xml/account", null, null, null));
         Assert.assertNotNull(result);
         Object resultObject = result.get("result").getObject();
         if (resultObject instanceof List) {
