@@ -18,6 +18,7 @@
                 { "situation" : "ABSENT", "action" : "CREATE" },
                 { "situation" : "AMBIGUOUS", "action" : "IGNORE" },
                 { "situation" : "MISSING", "action" : "IGNORE" },
+                { "situation" : "SOURCE_MISSING", "action" : "IGNORE" },
                 { "situation" : "UNQUALIFIED", "action" : "DELETE" },
                 { "situation" : "UNASSIGNED", "action" : "IGNORE" }
             ]
@@ -44,6 +45,7 @@
                 { "situation" : "ABSENT", "action" : "CREATE" },
                 { "situation" : "AMBIGUOUS", "action" : "IGNORE" },
                 { "situation" : "MISSING", "action" : "IGNORE" },
+                { "situation" : "SOURCE_MISSING", "action" : "IGNORE" },
                 { "situation": "UNQUALIFIED", "action": "DELETE" },
                 { "situation" : "UNASSIGNED", "action" : "IGNORE" }
             ]

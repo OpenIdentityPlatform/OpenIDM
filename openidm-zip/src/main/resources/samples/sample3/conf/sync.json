@@ -32,6 +32,9 @@
             "situation" : "MISSING",
             "action" : "UNLINK"
         }, {
+            "situation" : "SOURCE_MISSING",
+            "action" : "IGNORE"
+        }, {
             "situation" : "UNQUALIFIED",
             "action" : "IGNORE"
         }, {

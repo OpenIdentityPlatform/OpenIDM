@@ -35,6 +35,9 @@
             "situation" : "MISSING",
             "action" : "IGNORE"
         }, {
+            "situation" : "SOURCE_MISSING",
+            "action" : "IGNORE"
+        }, {
             "situation" : "UNQUALIFIED",
             "action" : "IGNORE"
         }, {
