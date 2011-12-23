@@ -11,19 +11,30 @@
 const allowCert = false;
 
 function contains(a, o) {
-    for (var i = 0; i <= a.length; i++) {
-        if (a[i] === o) {
-            return true;
+    if (typeof(a) != 'undefined') {
+        for (var i = 0; i <= a.length; i++) {
+            if (a[i] === o) {
+                return true;
+            }
         }
     }
     return false;
 }
 
-// only inspect request where immediate parent is an HTTP request context
-if (typeof(request.parent) != 'undefined' && request.parent.type === 'http') {
-    var roles = request.parent.security['openidm-roles'];
-    if (typeof(roles) === 'undefined' || !contains(roles, 'openidm-admin') ||
-     (allowCert && contains(roles, "openidm-cert"))) {
-        throw "Access denied";
+function allow() {
+    if (typeof(request.parent) === 'undefined' || request.parent.type != 'http') {
+        return true;
     }
+    var roles = request.parent.security['openidm-roles'];
+    if (contains(roles, 'openidm-admin')) {
+        return true;
+    } else if (allowCert && contains(roles, 'openidm-cert')) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+if (!allow()) {
+    throw "Access denied";
 }
