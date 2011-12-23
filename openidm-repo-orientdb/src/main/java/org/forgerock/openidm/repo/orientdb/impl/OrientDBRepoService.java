@@ -551,7 +551,7 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
             
             dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
-            System.out.println("dbURL: " + dbURL);
+            logger.info("Use DB at dbURL: {}", dbURL);
             user = config.get(CONFIG_USER).defaultTo("admin").asString();
             password = config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
 
