@@ -84,8 +84,8 @@ Note that the files are a way to install new or changed configuration, and to se
    <para>Here is an example issuing the above listing of all configurations using Curl.</para>
    <example>
     <screen>$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/config</screen>
    </example>
@@ -104,8 +104,8 @@ GET openidm/config/scheduler/myschedule
    <para>An example using curl reading the managed object configuration:</para>
    <example>
     <screen>$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/config/managed</screen>
    </example>
