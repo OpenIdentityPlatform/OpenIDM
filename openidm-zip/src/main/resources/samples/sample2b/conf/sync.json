@@ -38,6 +38,9 @@
             "situation" : "MISSING",
             "action" : "UNLINK"
         }, {
+            "situation" : "SOURCE_MISSING",
+            "action" : "EXCEPTION"
+        }, {
             "situation" : "UNQUALIFIED",
             "action" : "DELETE"
         }, {
@@ -89,6 +92,9 @@
             "action" : "IGNORE"
         }, {
             "situation" : "MISSING",
+            "action" : "IGNORE"
+        }, {
+            "situation" : "SOURCE_MISSING",
             "action" : "IGNORE"
         }, {
             "situation" : "UNQUALIFIED",
