@@ -32,9 +32,9 @@
 
 Downloads
 
-    Downloads are available from the {{{http://maven.forgerock.org/repo/snapshots/org/forgerock/openidm/}ForgeRock Maven repository}}
+    Downloads are available from the {{{http://maven.forgerock.org/repo/releases/org/forgerock/openidm/}ForgeRock Maven repository}}
 
-    * OpenIDM Zip  {{{http://maven.forgerock.org/repo/snapshots/org/forgerock/openidm/openidm-zip/2.0.0-SNAPSHOT/}openidm-zip-2.0.0-SNAPSHOT.jar}}
+    * OpenIDM Zip  {{{http://maven.forgerock.org/repo/releases/org/forgerock/openidm/openidm-zip/2.0.0/}openidm-zip-2.0.0.zip}}
 
 
 
