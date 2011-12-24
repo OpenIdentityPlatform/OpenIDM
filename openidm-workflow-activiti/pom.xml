@@ -20,11 +20,11 @@
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.0</version>
     </parent>
     <artifactId>openidm-workflow-activiti</artifactId>
     <name>OpenIDM Activiti BPMN 2.0 Integration</name>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
     <packaging>bundle</packaging>
 
     <properties>
