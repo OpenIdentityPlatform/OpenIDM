@@ -412,7 +412,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   </section>
  </section>
  
- <section><titl>Correlation Queries</titl>
+ <section><title>Correlation Queries</title>
   <para>If user or object is created through a reconciliation or liveSync, the OpenIDM's sync engine will also create a link between the two objects. the link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
   <para>Especially during the early phases of an identity management project there might be loads of users created from resource A when the next reconciliation with resource B is started. I this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
   <para>In OpenIDM, or better to say OpenICF since this is the component wich executes the correlation query the syntax for the query depends on the direction of the synchronization. Direction here means whether the repository is the source or the target system.</para>
