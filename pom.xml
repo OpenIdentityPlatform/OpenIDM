@@ -22,7 +22,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>OpenIDM project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution. Experience shows that the most important features of an identity management product are: high flexibility in Business Process handling and compliance with open standards and interfaces. A highly flexible user interface combined with a very robust workflow engine make OpenIDM ready for any Identity Management project.</description>
@@ -197,7 +197,7 @@
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
 
         <!-- version management -->
-        <openidm.version>2.0.0</openidm.version>
+        <openidm.version>2.1.0-SNAPSHOT</openidm.version>
         <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <!--<orientdb.version>1.0rc7-SNAPSHOT</orientdb.version>-->
@@ -206,6 +206,34 @@
         <ci.svn.revision>${env.SVN_REVISION}</ci.svn.revision>
         <jackson.version>1.9.2</jackson.version>
         <restlet.version>2.0.9</restlet.version>
+
+        <!-- Commons JSON versions -->
+        <commons.json-fluent.version>1.1.0</commons.json-fluent.version>
+        <commons.json-patch.version>1.0.0</commons.json-patch.version>
+        <commons.json-crypto.version>1.1.0</commons.json-crypto.version>
+        <commons.json-resource.version>1.1.0</commons.json-resource.version>
+
+        <!-- OSGi bundles properties -->
+        <!--openidm.osgi.import.openidm.version>version="[$(version;==;${openidm.osgi.version.clean}),$(version;=+;${openidm.osgi.version.clean}))"</openidm.osgi.import.openidm.version-->
+        <openidm.osgi.import.openidm.version>version="[$(version;==;2.1.0),$(version;=+;2.1.0))"</openidm.osgi.import.openidm.version>
+        <openidm.osgi.import.json-fluent.version>version="[$(version;===;${commons.json-fluent.version}),$(version;==+;${commons.json-fluent.version}))"</openidm.osgi.import.json-fluent.version>
+        <openidm.osgi.import.json-patch.version>version="[$(version;===;${commons.json-patch.version}),$(version;==+;${commons.json-patch.version}))"</openidm.osgi.import.json-patch.version>
+        <openidm.osgi.import.json-crypto.version>version="[$(version;===;${commons.json-crypto.version}),$(version;==+;${commons.json-crypto.version}))"</openidm.osgi.import.json-crypto.version>
+        <openidm.osgi.import.json-resource.version>version="[$(version;===;${commons.json-resource.version}),$(version;==+;${commons.json-resource.version}))"</openidm.osgi.import.json-resource.version>
+        <openidm.osgi.import.default.version>[$(version;==;$(@)),$(version;+;$(@)))</openidm.osgi.import.default.version>
+        <openidm.osgi.import.before.defaults />
+        <openidm.osgi.import.defaults/>
+        <openidm.osgi.import.additional />
+        <openidm.osgi.import>
+            org.forgerock.openidm.*;${openidm.osgi.import.openidm.version},
+            org.forgerock.json.fluent.*;${openidm.osgi.import.json-fluent.version},
+            org.forgerock.json.patch.*;${openidm.osgi.import.json-patch.version},
+            org.forgerock.json.crypto.*;${openidm.osgi.import.json-crypto.version},
+            ${openidm.osgi.import.before.defaults},
+            ${openidm.osgi.import.defaults},
+            ${openidm.osgi.import.additional},
+            *
+        </openidm.osgi.import>
     </properties>
 
     <modules>
@@ -268,22 +296,22 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-fluent</artifactId>
-                <version>1.1.0</version>
+                <version>${commons.json-fluent.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-patch</artifactId>
-                <version>1.0.0</version>
+                <version>${commons.json-patch.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-crypto-core</artifactId>
-                <version>1.1.0</version>
+                <version>${commons.json-crypto.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-crypto-cli</artifactId>
-                <version>1.1.0</version>
+                <version>${commons.json-crypto.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -293,7 +321,7 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>org.forgerock.json.resource</artifactId>
-                <version>1.1.0</version>
+                <version>${commons.json-resource.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -465,9 +493,15 @@
                     <artifactId>maven-bundle-plugin</artifactId>
                     <configuration>
                         <instructions>
+                            <Import-Package>${openidm.osgi.import}</Import-Package>
+                            <_versionpolicy>${openidm.osgi.import.default.version}</_versionpolicy>
                             <Implementation-Build>${ci.build.number}</Implementation-Build>
                             <SCM-Revision>${ci.svn.revision}</SCM-Revision>
+                            <_removeheaders>Bnd-LastModified,Built-By,Private-Package,Tool,Build-Jdk,Include-Resource,Ignore-Package,Private-Package,Bundle-DocURL</_removeheaders>
                         </instructions>
+                        <versions>
+                            <openidm.osgi.version.clean>${openidm.version}</openidm.osgi.version.clean>
+                        </versions>
                     </configuration>
                 </plugin>
                 <plugin>

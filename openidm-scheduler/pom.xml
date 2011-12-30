@@ -20,7 +20,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-scheduler</artifactId>
     <name>OpenIDM scheduler</name>
@@ -104,7 +104,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
                         <Bundle-Activator>org.forgerock.openidm.scheduler.impl.Activator</Bundle-Activator>
                         <Private-Package>org.forgerock.openidm.scheduler.impl.*</Private-Package>
                         <Export-Package>!org.forgerock.openidm.scheduler.impl.*,

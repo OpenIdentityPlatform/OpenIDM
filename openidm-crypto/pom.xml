@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-crypto</artifactId>
     <name>OpenIDM cryptography service</name>
@@ -89,7 +89,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
                         <Export-Package>
                             org.forgerock.openidm.crypto.factory;version=${openidm.version},
                             org.forgerock.openidm.crypto.util;version=${openidm.version}
