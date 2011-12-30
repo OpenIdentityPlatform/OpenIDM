@@ -865,6 +865,29 @@ $(".flat").live("dblclick", function() {
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.forgerock.maven.plugins</groupId>
+                <artifactId>linktester-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                         <goals>
+                             <goal>check</goal>
+                         </goals>
+                         <phase>pre-site</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                         <include>**/OpenIDM-*.xml</include>
+                    </includes>
+                    <validating>true</validating>
+                    <xIncludeAware>true</xIncludeAware>
+                    <failOnError>false</failOnError>
+                    <outputFile>linktester.err</outputFile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <reporting>
