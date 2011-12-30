@@ -47,9 +47,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:svn:https://svn.forgerock.org/openidm/trunk</connection>
-        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk</developerConnection>
-        <url>http://sources.forgerock.org/browse/openidm/trunk</url>
+        <connection>scm:svn:https://svn.forgerock.org/openidm/tags/2.0.0</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/openidm/tags/2.0.0</developerConnection>
+        <url>http://sources.forgerock.org/browse/openidm/tags/2.0.0</url>
     </scm>
     <distributionManagement>
         <site>
@@ -171,7 +171,7 @@
 
     <ciManagement>
         <system>Jenkins</system>
-        <url>http://builds.forgerock.org/job/OpenIDM/</url>
+        <url>http://builds.forgerock.org/job/OpenIDM 2.0.0/</url>
         <notifiers>
             <notifier>
                 <type>mail</type>
