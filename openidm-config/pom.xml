@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-config</artifactId>
     <name>OpenIDM configuration support</name>
@@ -116,7 +116,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
                         <Export-Package>!org.forgerock.openidm.config, org.forgerock.openidm.config.persistence;version=${openidm.version}
                         </Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.config.persistence.Activator</Bundle-Activator>

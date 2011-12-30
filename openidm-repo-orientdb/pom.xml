@@ -20,11 +20,14 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-repo-orientdb</artifactId>
     <name>OpenIDM repository using OrientDB</name>
     <packaging>bundle</packaging>
+    <properties>
+        <openidm.osgi.import.before.defaults>!org.testng.annotations</openidm.osgi.import.before.defaults>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -131,7 +134,6 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <configuration>
                     <instructions>
                         <Embed-Dependency>orientdb*;orient*;persistence-api;scope=provided</Embed-Dependency>
-                        <Import-Package>!org.testng.annotations,*</Import-Package>
                         <Export-Package>org.forgerock.openidm.repo.orientdb.metadata;version=${openidm.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.repo.orientdb.impl.*</Private-Package>
                         <Bundle-Activator>org.forgerock.openidm.repo.orientdb.impl.Activator</Bundle-Activator>

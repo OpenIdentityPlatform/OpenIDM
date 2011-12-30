@@ -20,7 +20,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-repo</artifactId>
     <name>OpenIDM repository common</name>
@@ -56,8 +56,10 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.repo;version="${openidm.version}",org.forgerock.openidm.repo.util;version="${openidm.version}"</Export-Package>
-                        <Import-Package>*</Import-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.repo;version="${openidm.version}",
+                            org.forgerock.openidm.repo.util;version="${openidm.version}"
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
