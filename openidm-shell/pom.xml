@@ -26,7 +26,7 @@
     <name>OpenIDM Felix Gogo Shell</name>
     <packaging>bundle</packaging>
     <properties>
-        <openidm.osgi.import.defaults>org.apache.felix.service.command;version="[0.10.0,1)";status=provisional;mandatory:=status</openidm.osgi.import.defaults>
+        <openidm.osgi.import.defaults>!org.apache.felix.gogo.shell,!org.apache.felix.gogo.runtime*,org.apache.felix.service.command;version="[0.10.0,1)";status=provisional;mandatory:=status</openidm.osgi.import.defaults>
     </properties>
     <dependencies>
         <dependency>
@@ -117,6 +117,7 @@
                         <Bundle-Activator>org.forgerock.openidm.shell.felixgogo.Activator</Bundle-Activator>
                         <Embed-Dependency>*;artifactId=asm-all;inline=false</Embed-Dependency>                        
                         <Main-Class>org.forgerock.openidm.shell.impl.Main</Main-Class>
+                        <_failok>true</_failok>
                     </instructions>
                 </configuration>
             </plugin>
