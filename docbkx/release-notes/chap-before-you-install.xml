@@ -34,8 +34,7 @@
  <para>This chapter covers software and hardware prerequisites for installing
  and running OpenIDM software.</para>
 
- <para>OpenIDM requires a Java Development Kit 1.6. For better performance and
- security, use at least 1.6.0_22.</para>
+ <para>OpenIDM requires a Java SE JDK 6 update 24 or later.</para>
 
  <para>You need 30 MB disk space for a minimal evaluation installation.</para>
 </chapter>
