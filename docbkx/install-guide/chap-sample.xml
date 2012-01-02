@@ -186,11 +186,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
         "mapping": "systemXmlfileAccounts_managedUser"
     }
 }</programlisting>
+
      <para>You can also start reconciliation through the REST interface. The
      call to the REST interface is an HTTP POST such as the following.</para>
      <screen width="100">$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
      <para>For details on the scheduler configuration please refer to the <link
@@ -211,49 +212,78 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      between the XML file connector (source) and the local repository
      (target).</para>
      <programlisting language="javascript">{
-    "mappings" : [ {
-        "name" : "systemXmlfileAccounts_managedUser",
-        "source" : "system/xmlfile/account",
-            "target" : "managed/user",
-        "properties" : [ {
-            "source" : "description",
-            "target" : "description"
-        }, {
-            "source" : "firstname",
-            "target" : "firstname"
-        }, {
-            "source" : "email",
-            "target" : "email"
-        }, {
-            "source" : "lastname",
-            "target" : "lastname"
-        }, {
-            "source" : "name",
-            "target" : "name"
-        } ],
-        "policies" : [ {
-            "situation" : "CONFIRMED",
-            "action" : "UPDATE"
-        }, {
-            "situation" : "FOUND",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
-        }, {
-            "situation" : "AMBIGUOUS",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "MISSING",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "UNQUALIFIED",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "UNASSIGNED",
-            "action" : "IGNORE"
-        } ]
-    } ]
+    "mappings": [
+        {
+            "name": "systemXmlfileAccounts_managedUser",
+            "source": "system/xmlfile/account",
+            "target": "managed/user",
+            "correlationQuery": {
+                "type": "text/javascript",
+                "source": "var query = {'_query-id' : 'for-userName',
+                    'userName' :  source.name};query;"
+            },
+            "properties": [
+                {
+                    "source": "description",
+                    "target": "description"
+                },
+                {
+                    "source": "firstname",
+                    "target": "givenName"
+                },
+                {
+                    "source": "email",
+                    "target": "email"
+                },
+                {
+                    "source": "lastname",
+                    "target": "familyName"
+                },
+                {
+                    "source": "name",
+                    "target": "userName"
+                },
+                {
+                    "source": "name",
+                    "target": "_id"
+                }
+            ],
+            "policies": [
+                {
+                    "situation": "CONFIRMED",
+                    "action": "UPDATE"
+                },
+                {
+                    "situation": "FOUND",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "ABSENT",
+                    "action": "CREATE"
+                },
+                {
+                    "situation": "AMBIGUOUS",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "MISSING",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "SOURCE_MISSING",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "UNQUALIFIED",
+                    "action": "IGNORE"
+                },
+                {
+                    "situation": "UNASSIGNED",
+                    "action": "IGNORE"
+                }
+            ]
+        }
+    ]
 }</programlisting>
      <para>Source and target paths starting with <literal>managed</literal>,
      such as <literal>managed/user</literal>, always refer to objects in the
@@ -294,8 +324,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   and then waiting until the scheduled reconciliation happens, or by using the
   REST interface.</para>
   <screen width="100">$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
 {"reconId":"cc0c849b-1ed3-4822-aa47-f44a9fa24489"}</screen>
@@ -318,8 +348,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <link xlink:href="http://curl.haxx.se/"><command>curl</command></link>
   command to get the JSON file.</para>
   <screen>$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
 {
@@ -344,8 +374,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   xlink:show="new">http://localhost:8080/openidm/managed/user/</link>.</para>
 
   <screen>$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  http://localhost:8080/openidm/managed/user/DDOE1
 {
  "lastname":"Doe1",
@@ -430,8 +460,8 @@ activity.csv recon.csv</screen>
   >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
 
   <screen>$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
 {
@@ -505,8 +535,8 @@ activity.csv recon.csv</screen>
 
   <para>On UNIX, Linux, and Mac OS X</para>
   <screen>$ curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data '{
   "name":"james",
@@ -522,8 +552,8 @@ activity.csv recon.csv</screen>
 
   <para>On Windows</para>
   <screen>C:\&gt;curl
- --header "X-OpenIDM-Username: admin"
- --header "X-OpenIDM-Password: admin"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data {
  \"name\":\"james\",
