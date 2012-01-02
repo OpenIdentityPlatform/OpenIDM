@@ -69,6 +69,7 @@
  <xinclude:include href='chap-sample.xml' />
  <xinclude:include href='chap-uninstall.xml' />
 
- <index />
+<!-- Add the index back when we have more content
+ <index /> -->
  <?dbhtml-include href="../ga.html"?>
 </book>

@@ -121,8 +121,12 @@ $</screen>
      <stepalternatives>
       <step>
        <para>On UNIX, Linux, and Mac OS X</para>
-       <screen>$ cd /path/to/openidm
-$ ./startup.sh
+       <screen>$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
 -&gt;</screen>
       </step>
       <step>
@@ -145,26 +149,27 @@ Listening for transport dt_socket at address: 5005
      the OpenIDM core services and their states, enter the following
      command.</para>
      <screen>-&gt; scr list
-Id     State           Name
-[  17] [active       ] org.forgerock.openidm.config.starter
+   Id   State          Name
+[  16] [active       ] org.forgerock.openidm.config.starter
 [   7] [active       ] org.forgerock.openidm.external.rest
-[   9] [active       ]
+[  11] [active       ]
  org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[  13] [active       ] org.forgerock.openidm.ui.simple
-[   5] [active       ] org.forgerock.openidm.router
-[  11] [active       ] org.forgerock.openidm.restlet
-[  12] [active       ] org.forgerock.openidm.scheduler
+[   1] [active       ] org.forgerock.openidm.router
+[  18] [active       ] org.forgerock.openidm.scheduler
+[  13] [active       ] org.forgerock.openidm.restlet
 [   6] [unsatisfied  ] org.forgerock.openidm.external.email
 [  15] [active       ] org.forgerock.openidm.repo.orientdb
-[   3] [active       ] org.forgerock.openidm.sync
-[   2] [active       ] org.forgerock.openidm.script
-[   1] [active       ] org.forgerock.openidm.scope
-[  16] [active       ] org.forgerock.openidm.config
+[   5] [active       ] org.forgerock.openidm.sync
+[   3] [active       ] org.forgerock.openidm.script
+[   2] [active       ] org.forgerock.openidm.scope
+[   9] [active       ] org.forgerock.openidm.http.contextregistrator
+[  17] [active       ] org.forgerock.openidm.config
 [   0] [active       ] org.forgerock.openidm.audit
 [  14] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
 [   4] [active       ] org.forgerock.openidm.managed
-[  10] [active       ] org.forgerock.openidm.provisioner.openicf
-[   8] [active       ] org.forgerock.openidm.provisioner
+[  12] [active       ] org.forgerock.openidm.provisioner.openicf
+[   8] [active       ] org.forgerock.openidm.authentication
+[  10] [active       ] org.forgerock.openidm.provisioner
 -&gt;</screen>
      <para>If startup was successful, all states except <literal>email</literal>
      and <literal>repo.jdbc</literal> are active. If any other services remain
@@ -219,7 +224,8 @@ Id     State           Name
      <para>Access the following URL to get a JSON file including all users in
      the OpenIDM repository: <link xlink:show="new"
      xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids">
-     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
+     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>
+     (requires authentication).</para>
      <para>When you first install OpenIDM with an empty repository, no users
      exist. What the result looks like depends on your browser settings.</para>
      <para>You can use the URL with the <command>curl</command> command line
@@ -282,7 +288,7 @@ Id     State           Name
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  http://localhost:8080/openidm/managed/user/joe
- {
+{
  "lastname":"smith",
  "userpassword":"11111111",
  "firstname":"joe",
