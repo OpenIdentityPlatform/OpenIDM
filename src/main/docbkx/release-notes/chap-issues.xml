@@ -29,12 +29,93 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>OpenIDM Fixes, Limitations, and Known Issues</title>
+ <title>OpenIDM Fixes, Limitations, &amp; Known Issues</title>
 
  <para>OpenIDM issues are tracked at <link
  xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM'
  >https://bugster.forgerock.org/jira/browse/OPENIDM</link>.
  </para>
 
-</chapter>
+ <section xml:id="fixes">
+  <title>Fixes in This Release</title>
 
+  <itemizedlist>
+   <para>OpenIDM <?eval ${docTargetVersion}?> fixes the following issues.</para>
+
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-448'
+    >OPENIDM-448</link>: Reconciliation process is stopped when the first
+    readObject throws SynchronizationException</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-466'
+    >OPENIDM-466</link>: Wrong Logger Classname in DataSourceFactory.java</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-471'
+    >OPENIDM-471</link>: On Mac when using Safari, the simple authentication
+    always pops up even when registering a new user.</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-477'
+    >OPENIDM-477</link>: There is SQL locking issue when multiple thread try
+    to create or update object.</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-479'
+    >OPENIDM-479</link>: Start-up logs all repository configuration file
+    contents in clear text, replace with logging where configuration came
+    from</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-487'
+    >OPENIDM-487</link>: JAAS authentication fails on some platforms</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-490'
+    >OPENIDM-490</link>: Router config must be more resilient</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-515'
+    >OPENIDM-515</link>: Need to be able to match activity log entries to recon
+    log entries, and tell who initiated the action</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-517'
+    >OPENIDM-517</link>: OrientDB service gets stuck in &quot;activating&quot;
+    state at startup</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="limitations">
+  <title>Limitations</title>
+
+  <para>No limitations are identified for OpenIDM <?eval ${docTargetVersion}?>
+  at this time.</para>
+ </section>
+
+ <section xml:id="known-issues">
+  <title>Known Issues</title>
+ 
+  <itemizedlist>
+   <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
+   issues.</para>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-467"
+    >OPENIDM-467</link>: Cannot save JSON object in repository if it contains
+    a list</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+</chapter>

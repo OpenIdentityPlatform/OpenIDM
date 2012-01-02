@@ -10,7 +10,7 @@
   ! Suite 900, Mountain View, California, 94041, USA.
   !
   ! You can also obtain a copy of the license at
-  ! legal/CC-BY-NC-ND.txt.
+  ! trunk/opendj3/legal-notices/CC-BY-NC-ND.txt.
   ! See the License for the specific language governing permissions
   ! and limitations under the License.
   !
@@ -23,36 +23,19 @@
   !      Copyright 2011 ForgeRock AS
   !    
 -->
-<chapter xml:id='chap-compatibility'
+<chapter xml:id='chap-support'
  xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>OpenIDM Compatibility</title>
+ <title>Support</title>
 
- <para>This chapter covers both major changes to existing functionality, and
- also deprecated and removed functionality.</para>
-
- <section xml:id="major-changes">
-  <title>Major Changes to Existing Functionality</title>
-  
-  <para>TODO</para>
- </section>
-
- <section xml:id="deprecation">
-  <title>Deprecated Functionality</title>
-  
-  <para>No functionality is deprecated in OpenIDM <?eval ${docTargetVersion}?>.</para>
-  
-  <para>No functionality is planned to be deprecated at this time.</para>
- </section>
-
- <section xml:id="removed-functionality">
-  <title>Removed Functionality</title>
-  
-  <para>No functionality has been removed in OpenIDM <?eval ${docTargetVersion}?>.</para>
-  
-  <para>No functionality is planned to be removed at this time.</para>
- </section>
+ <para>You can purchase OpenIDM support subscriptions and training courses
+ from ForgeRock and from consulting partners around the world and in your
+ area. To contact ForgeRock, send mail to <link
+ xlink:href='mailto:info@forgerock.com'>info@forgerock.com</link>. To find a
+ partner in your area, see <link
+ xlink:href='http://www.forgerock.com/partners.html'
+ >http://www.forgerock.com/partners.html</link>.</para>
 </chapter>

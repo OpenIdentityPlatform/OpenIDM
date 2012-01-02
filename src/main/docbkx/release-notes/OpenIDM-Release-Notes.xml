@@ -30,7 +30,7 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <title>OpenIDM <?eval ${project.version}?> Release Notes</title>
+  <title>OpenIDM <?eval ${docTargetVersion}?> Release Notes</title>
   <copyright>
    <year>2011</year>
    <holder>ForgeRock AS</holder>
@@ -48,9 +48,12 @@
 
  <toc />
 
- <xinclude:include href='chap-whats-new.xml' />
- <xinclude:include href='chap-issues.xml' />
+ <xinclude:include href="chap-whats-new.xml" />
+ <xinclude:include href="chap-before-you-install.xml" />
+ <xinclude:include href="chap-issues.xml" />
+<!-- <xinclude:include href="chap-compatibility.xml" /> -->
+ <xinclude:include href="chap-feedback.xml" />
+ <xinclude:include href="chap-support.xml" />
 
- <index />
  <?dbhtml-include href="../ga.html"?>
 </book>

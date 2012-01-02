@@ -210,6 +210,7 @@
         <docbkx-out>${basedir}/target/docbkx</docbkx-out>
         <site-out>${basedir}/target/site</site-out>
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
+        <docTargetVersion>2.0.0</docTargetVersion>
 
         <!-- version management -->
         <openidm.version>2.1.0-SNAPSHOT</openidm.version>
