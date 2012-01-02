@@ -34,7 +34,11 @@
  <para>This chapter covers software and hardware prerequisites for installing
  and running OpenIDM software.</para>
 
- <para>OpenIDM requires a Java SE JDK 6 update 24 or later.</para>
+ <para>OpenIDM requires a Java SE JDK 6 update 24 or later. When using the
+ Oracle JDK, you also need Java Cryptography Extension (JCE)
+ <link xlink:show="new"
+ xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html"
+ >policy files</link>.</para>
 
  <para>You need 30 MB disk space for a minimal evaluation installation.</para>
 </chapter>
