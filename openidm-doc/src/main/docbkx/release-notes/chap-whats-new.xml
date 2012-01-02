@@ -29,32 +29,32 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>What's New in OpenIDM <?eval ${project.version}?></title>
+ <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
 
- <para>OpenIDM <?eval ${project.version}?> provides the following features:</para>
- 
  <itemizedlist>
+  <para>OpenIDM <?eval ${docTargetVersion}?> provides many new features,
+  including the following:</para>
   <listitem><para>OSGi based runtime</para></listitem>
-  <listitem><para>Embedded OrientDB as the managed object(virtual) store</para></listitem>
-  <listitem><para>Embedded Jetty servlet container</para></listitem>
+  <listitem><para>Embedded OrientDB as the managed object (virtual)
+  store</para></listitem>
+  <listitem><para>Embedded Jetty Servlet container</para></listitem>
   <listitem><para>REST and Java interfaces for CRUD</para></listitem>
-  <listitem><para>Schedular based reconciliation and synchronization</para></listitem>
+  <listitem><para>Scheduler based reconciliation and
+  synchronization</para></listitem>
   <listitem>
-    <para>Integration with the 
-        <link xlink:href='http://openicf.forgerock.org'>Open Identity Connector Framework (OpenICF)</link>
-    </para>
+   <para>Integration with the <link xlink:show="new"
+   xlink:href='http://openicf.forgerock.org'>Open Identity Connector
+   Framework (OpenICF)</link></para>
   </listitem>
  </itemizedlist>
 
- <para>For installation instructions and a sample to get familiar with the features
- please refer to the <link xlink:href="install-guide#chap-install"
+ <para>For installation instructions and a sample to get familiar with the
+ features, see the <link xlink:href="install-guide#chap-install"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
- Guide</citetitle></link>.
- </para>
- <para>For an architectural overview and details on configuration please refer to the
+ Guide</citetitle></link>.</para>
+
+ <para>For an architectural overview and details on configuration see the
  <link xlink:href="admin-guide#chap-overview"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Administration
- Guide</citetitle></link>.
- </para>
- 
+ Guide</citetitle></link>.</para>
 </chapter>
