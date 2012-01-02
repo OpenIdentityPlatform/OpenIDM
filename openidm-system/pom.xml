@@ -15,7 +15,7 @@
   Copyright © 2011 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
@@ -51,14 +51,57 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.jboss.maven.plugins</groupId>
+                <artifactId>maven-injection-plugin</artifactId>
+                <version>1.0.2</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>bytecode</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <bytecodeInjections>
+                        <bytecodeInjection>
+                            <expression>${openidm.version}</expression>
+                            <targetMembers>
+                                <constant>
+                                    <className>org.forgerock.openidm.core.ServerConstants</className>
+                                    <fieldName>VERSION</fieldName>
+                                </constant>
+                                <methodBodyReturn>
+                                    <className>org.forgerock.openidm.core.ServerConstants</className>
+                                    <methodName>getVersion</methodName>
+                                </methodBodyReturn>
+                            </targetMembers>
+                        </bytecodeInjection>
+                        <bytecodeInjection>
+                            <expression>${ci.svn.revision}</expression>
+                            <targetMembers>
+                                <constant>
+                                    <className>org.forgerock.openidm.core.ServerConstants</className>
+                                    <fieldName>SCM_REVISION</fieldName>
+                                </constant>
+                                <methodBodyReturn>
+                                    <className>org.forgerock.openidm.core.ServerConstants</className>
+                                    <methodName>getRevision</methodName>
+                                </methodBodyReturn>
+                            </targetMembers>
+                        </bytecodeInjection>
+                    </bytecodeInjections>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
                         <Import-Package>!*</Import-Package>
-						<Fragment-Host>system.bundle;extension:=framework</Fragment-Host>
-						<IFragment-Host>system.bundle;extension:=framework</IFragment-Host>
+                        <Fragment-Host>system.bundle;extension:=framework</Fragment-Host>
+                        <IFragment-Host>system.bundle;extension:=framework</IFragment-Host>
                         <Export-Package>
                             org.forgerock.openidm.core;version=${openidm.version}
                         </Export-Package>
