@@ -30,10 +30,32 @@ package org.forgerock.openidm.core;
 /**
  * This class defines a set of constants that may be referenced throughout the
  * Identity Server source.
- *
+ * <p/>
  * Based on OpenDJ ServerConstants
  */
 public class ServerConstants {
+
+    static {
+        System.out.append("OpenIDM version \"").append(getVersion()).append("\" (revision: ").append(getRevision()).println(")");
+    }
+
+    public static String getVersion() {
+        return VERSION;
+    }
+
+    public static String getRevision() {
+        return SCM_REVISION;
+    }
+
+    /**
+     * OpenIDM version number
+     */
+    public static final String VERSION = "0";
+
+    /**
+     * OpenIDM SCM revision number
+     */
+    public static final String SCM_REVISION = "0";
 
     /**
      * The end-of-line character for this platform.
