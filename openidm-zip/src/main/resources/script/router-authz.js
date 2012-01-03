@@ -11,7 +11,7 @@
 const allowCert = false;
 
 function contains(a, o) {
-    if (typeof(a) != 'undefined') {
+    if (typeof(a) != 'undefined' && a != null) {
         for (var i = 0; i <= a.length; i++) {
             if (a[i] === o) {
                 return true;
