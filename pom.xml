@@ -218,9 +218,7 @@
         <log4j.version>1.2.16</log4j.version>
         <!--<orientdb.version>1.0rc7-SNAPSHOT</orientdb.version>-->
         <orientdb.version>1.0rc6</orientdb.version>
-        <ci.build.number>${env.BUILD_NUMBER}</ci.build.number>
-        <ci.svn.revision>${env.SVN_REVISION}</ci.svn.revision>
-        <jackson.version>1.9.2</jackson.version>
+        <jackson.version>1.9.3</jackson.version>
         <restlet.version>2.0.9</restlet.version>
 
         <!-- Commons JSON versions -->
@@ -281,6 +279,31 @@
     </modules>
 
     <profiles>
+        <profile>
+            <!-- This profile only active if the build server exports the SVN_REVISION variable -->
+            <id>ci-build</id>
+            <activation>
+                <property>
+                    <name>env.SVN_REVISION</name>
+                </property>
+            </activation>
+            <properties>
+                <ci.build.number>${env.BUILD_NUMBER}</ci.build.number>
+                <ci.svn.revision>${env.SVN_REVISION}</ci.svn.revision>
+            </properties>
+        </profile>
+        <profile>
+            <id>non-ci-build</id>
+            <activation>
+                <property>
+                    <name>!env.SVN_REVISION</name>
+                </property>
+            </activation>
+            <properties>
+                <ci.build.number>0</ci.build.number>
+                <ci.svn.revision>0</ci.svn.revision>
+            </properties>
+        </profile>
         <profile>
             <id>functional-test</id>
             <activation>
@@ -491,7 +514,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
-                <version>1.8.5</version>
+                <version>1.9.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
