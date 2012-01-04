@@ -327,12 +327,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
-{"reconId":"cc0c849b-1ed3-4822-aa47-f44a9fa24489"}</screen>
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
-  <para>OpenIDM responds with the reconciliation identifier.</para>
-  <para>By default, logging is turned on, so debug messages are displayed on
-  the console.</para>
+  <para>To see what happened, review the CSV format logs in the
+  <filename>openidm/audit/</filename> directory.</para>
  </section>
 
  <section xml:id="sample-viewing-users-logs">
@@ -388,7 +386,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  }</screen>
 
   <para>In the OrientDB console, connect to the database, and then query the
-  users and audit logs.</para>
+  users and audit logs. The following shows edited excerpts from a console
+  session querying OrientDB.</para>
 
   <screen>&gt; connect remote:localhost/openidm admin admin
 Connecting to database [remote:localhost/openidm] with user 'admin'...OK
@@ -426,11 +425,11 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
 
 2 item(s) found. Query executed in 0.01 sec(s).</screen>
 
-  <para>Also notice the audit logs in the <filename>openidm/audit</filename>
-  directory, which are in CSV format.</para>
+  <para>Again, this information is also available in the CSV format audit logs
+  located in the <filename>openidm/audit</filename> directory.</para>
 
   <screen>$ ls /path/to/openidm/audit/
-activity.csv recon.csv</screen>
+access.csv activity.csv recon.csv</screen>
  </section>
 
  <section xml:id="sample-adding-users-resource">
