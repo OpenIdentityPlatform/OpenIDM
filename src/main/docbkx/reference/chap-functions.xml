@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id="chap-functions"
+ version="5.0"
+ xml:lang="en"
+ xmlns="http://docbook.org/ns/docbook"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ <title>Functions</title>
+
+  <para>Functions (access to managed objects, system objects, configuration
+  objects) within OpenIDM are accessible to scripts via the
+  <literal>openidm</literal> object, which is included in the top-level scope
+  provided to each script.</para>
+
+ <section xml:id="function-create">
+  <title>openidm.create(id, value)</title>
+
+  <para>This function creates a new resource object.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the object to be created.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>value</term>
+    <listitem>
+     <para>object</para>
+     <para>The value of the object to be created.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>A <literal>null</literal> value if successful.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the object could not be created for any
+    reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-read">
+  <title>openidm.read(id)</title>
+
+  <para>This function reads and returns an OpenIDM resource object.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the object to be read.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>The read OpenIDM resource object, or <literal>null</literal> if not
+    found.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-update">
+  <title>openidm.update(id, rev, value)</title>
+
+  <para>This function updates a resource object.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the resource object to be updated.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>rev</term>
+    <listitem>
+     <para>string</para>
+     <para>The revision of the object to be updated, or <literal>null</literal>
+     if the object is not subject to revision control.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>value</term>
+    <listitem>
+     <para>object</para>
+     <para>The value of the object to be updated.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>A <literal>null</literal> value if successful.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the object could not be updated for any
+    reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-delete">
+  <title>openidm.delete(id, rev)</title>
+
+  <para>This function deletes a resource object.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the object to be deleted.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>rev</term>
+    <listitem>
+     <para>string</para>
+     <para>The revision of the object to be deleted, or <literal>null</literal>
+     if the object is not subject to revision control.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>A <literal>null</literal> value if successful.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the object could not be deleted for any
+    reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-query">
+  <title>openidm.query(id, params)</title>
+
+  <para>This function performs a query on the specified OpenIDM resource
+  object.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the object to perform the query on.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>params</term>
+    <listitem>
+     <para>object</para>
+     <para>An object containing the parameters to pass to the query.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>The result of the query.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the given query could not be processed for
+    any reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-action">
+  <title>openidm.action(id, params, value)</title>
+
+  <para>This function performs an action on the specified OpenIDM resource
+  object.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the object to perform the action on.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>params</term>
+    <listitem>
+     <para>object</para>
+     <para>An object containing the parameters to pass to the action.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>value</term>
+    <listitem>
+     <para>object</para>
+     <para>A value that can be provided to the action for processing.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>The result of the action. May be <literal>null</literal> if no result
+    is provided.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the given action could not be executed
+    for any reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-encrypt">
+  <title>openidm.encrypt(value, cipher, alias)</title>
+
+  <para>This function encrypts a value.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>value</term>
+    <listitem>
+     <para>any</para>
+     <para>The value to be encrypted.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>cipher</term>
+    <listitem>
+     <para>string</para>
+     <para>The cipher with which to encrypt the value, using the form
+     "algorithm/mode/padding" or just "algorithm". Example:
+     <literal>AES/ECB/PKCS5Padding</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>alias</term>
+    <listitem>
+     <para>string</para>
+     <para>The key alias in the key store with which to encrypt the node.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>The value, encrypted with the specified cipher and key.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the object could not be encrypted for any
+    reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="function-decrypt">
+  <title>openidm.decrypt(value)</title>
+
+  <para>This function decrypts a value.</para>
+  
+  <variablelist>
+   <title>Parameters</title>
+   <varlistentry>
+    <term>value</term>
+    <listitem>
+     <para>any</para>
+     <para>The value to be decrypted.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <itemizedlist>
+   <title>Returns</title>
+   <listitem>
+    <para>A deep copy of the value, with any encrypted value decrypted.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <title>Throws</title>
+   <listitem>
+    <para>An exception is thrown if the object could not be decrypted for any
+    reason.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+</chapter>
