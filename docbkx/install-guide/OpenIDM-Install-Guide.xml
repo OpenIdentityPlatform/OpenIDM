@@ -30,9 +30,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
-  <title>OpenIDM <?eval ${project.version}?> Installation Guide</title>
+  <title>OpenIDM <?eval ${docTargetVersion}?> Installation Guide</title>
   <copyright>
-   <year>2011</year>
+   <year>2011-2012</year>
    <holder>ForgeRock AS</holder>
   </copyright>
   <authorgroup>

@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-workflow'
@@ -45,12 +45,12 @@
  <note>
   <para>The embedded workflow and business process engine is currently
   provided as part of a separate, experimental download,
-  <filename>openidm-<?eval ${project.version}?>-workflow-experimental.zip</filename>,
+  <filename>openidm-<?eval ${docTargetVersion}?>-workflow-experimental.zip</filename>,
   supported separately from the standard OpenIDM release.</para>
 
   <!-- TODO: Confirm this approach for delivery -->
   <para>You install
-  <filename>openidm-<?eval ${project.version}?>-workflow-experimental.zip</filename>
+  <filename>openidm-<?eval ${docTargetVersion}?>-workflow-experimental.zip</filename>
   in the same way as standard OpenIDM. See the <link
   xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
