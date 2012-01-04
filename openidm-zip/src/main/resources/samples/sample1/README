@@ -16,6 +16,6 @@ cp -r samples/sample1/conf .
 
 The following command will start a one time reconciliation which will create the users from the xml file in the OpenIDM repository of a running server:
 
-$ curl -X POST -d '{"Hallow":"World"}' "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+$ curl --user openidm-admin:openidm-admin -X POST -d '{"Hallow":"World"}' "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
 
