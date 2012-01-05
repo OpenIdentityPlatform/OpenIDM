@@ -222,14 +222,17 @@ Listening for transport dt_socket at address: 5005
     repository.</para>
     <step>
      <para>Access the following URL to get a JSON file including all users in
-     the OpenIDM repository: <link xlink:show="new"
-     xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids">
-     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>
-     (requires authentication).</para>
+     the OpenIDM repository.</para>
+
+     <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</screen>
+
      <para>When you first install OpenIDM with an empty repository, no users
-     exist. What the result looks like depends on your browser settings.</para>
-     <para>You can use the URL with the <command>curl</command> command line
-     tool, included with most operating systems.<footnote><para>For more
+     exist.</para>
+     <para>The <command>curl</command> command line tool is included with most
+     operating systems.<footnote><para>For more
      information on <command>curl</command>, see <link
      xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>.</para>
      </footnote></para>
