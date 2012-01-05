@@ -262,7 +262,7 @@ Listening for transport dt_socket at address: 5005
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data {
- \"name\":\"joe",
+ \"name\":\"joe\",
  \"firstname\":\"joe\",
  \"lastname\":\"smith\",
  \"email\":\"joe@abc.com\",
