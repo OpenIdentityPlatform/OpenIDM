@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-debug'
@@ -30,19 +30,72 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Debugging OpenIDM</title>
+ <title>Debugging OpenIDM Scripts</title>
 
- <para>This chapter covers ... TODO.</para>
+ <para>OpenIDM includes Eclipse JSDT libraries so you can use Eclipse to debug
+ you OpenIDM scripts during development.</para>
 
- <section xml:id="debug-section-id">
-  <title>Section Title</title>
+ <procedure xml:id="enable-debugging">
+  <title>To Enable Debugging</title>
 
-  <para>This section covers ... TODO.</para>
+  <para>Follow these steps to enable debugging using Eclipse.</para>
 
-  <section xml:id="debug-subsection-id">
-   <title>Subsection Title</title>
-
-   <para>This subsection covers ... TODO.</para>
-  </section>
- </section>
+  <step>
+   <para>Install the environment to support JavaScript development in either
+   of the following ways.</para>
+   <stepalternatives>
+    <step>
+     <para>Download and install Eclipse IDE for JavaScript Web Developers
+     from the <link xlink:href="http://www.eclipse.org/downloads/"
+     xlink:show="new">Eclipse download page</link>.</para>
+    </step>
+    <step>
+     <para>Add <link xlink:href="http://wiki.eclipse.org/JSDT" xlink:show="new"
+     >JavaScript Development Tools</link> to your existing Eclipse
+     installation.</para>
+    </step>
+   </stepalternatives>
+  </step>
+  <step>
+   <para>Create an empty JavaScript project called <literal>External JavaScript
+   Source</literal> in Eclipse.</para>
+   <para>Eclipse then uses the <filename>External JavaScript Source</filename>
+   directory in the default workspace location to store sources that it
+   downloads from OpenIDM.</para>
+  </step>
+  <step>
+   <para>Stop OpenIDM.</para>
+  </step>
+  <step>
+   <para>Edit <filename>openidm/conf/boot/boot.properties</filename> to
+   enable debugging.</para>
+   <substeps>
+    <step>
+     <para>Uncomment and edit the following line.</para>
+     <programlisting language="none" width="84">
+#openidm.script.javascript.debug=transport=socket,suspend=y,address=9888,trace=true</programlisting>
+     <para>Here <literal>suspend=y</literal> prevents OpenIDM from starting
+     until the remote JavaScript debugger has connected. You might therefore
+     choose to set this to <literal>suspend=n</literal>.</para>
+    </step>
+    <step>
+     <para>Uncomment and edit the following line.</para>
+     <programlisting language="none" width="81">
+#openidm.script.javascript.sources=/Eclipse/workspace/External JavaScript Source/</programlisting>
+     <para> Adjust <literal>/Eclipse/workspace/External JavaScript
+     Source/</literal> to match the absolute path to this folder including the
+     trailing <literal>/</literal> character. On Windows, also use forward
+     slashes, such as <literal>C:/Eclipse/workspace/External JavaScript
+     Source/</literal>.</para>
+     <para>Each time OpenIDM loads a new script, it then creates or overwrites
+     the file in the <filename>External JavaScript Source</filename> directory.
+     Before toggling breakpoints, be sure to refresh the source manually in
+     Eclipse so you have the latest version.</para>
+    </step>
+   </substeps>
+  </step>
+  <step>
+   <para>Start OpenIDM, and connect the debugger.</para>
+  </step>
+ </procedure>
 </chapter>
