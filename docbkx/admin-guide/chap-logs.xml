@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-logs'
@@ -37,10 +37,9 @@
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Audit
  Logging</citetitle></link>.</para>
 
- <para>OpenIDM uses <link xlink:href="http://www.slf4j.org/" xlink:show="new"
- >Simple Logging Facade for Java</link> to log server messages. You can
- configure logging by editing the <filename>conf/logging.properties</filename>
- file where you installed OpenIDM.</para>
+ <para>You can configure logging by editing the
+ <filename>conf/logging.properties</filename> file where you installed
+ OpenIDM.</para>
 
  <para>The default configuration writes log messages in simple format to
  <filename>logs/openidm*.log</filename> files where you installed
