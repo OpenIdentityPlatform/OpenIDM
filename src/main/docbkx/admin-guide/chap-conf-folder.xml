@@ -192,7 +192,7 @@ $OPENIDM
   </section>
   <section>
    <title>connectors</title>
-   <para>The <filename>openidm/connectors</filename> is the default directory connectors. The system will pick up and enable connectors of a certain type if it can locate a respective connector bundle in either this directory (or if its an OSGi enabled connector also in the <filename>openidm/bundle</filename> directory. By default the OpenICF LDAP and XML connector is packaged. More connectors can be downloaded from the OpenICF project web site - http://openicf.forgerock.org.</para>
+   <para>The <filename>openidm/connectors</filename> is the default directory connectors. The system will pick up and enable connectors of a certain type if it can locate a respective connector bundle in either this directory (or if its an OSGi enabled connector also in the <filename>openidm/bundle</filename> directory). By default the OpenICF LDAP and XML connectors are packaged. More connectors can be downloaded from the OpenICF project web site - http://openicf.forgerock.org.</para>
   </section>
   <section>
    <title>script</title>
@@ -241,10 +241,6 @@ $OPENIDM
    </section>
    <section>
     <title>repo.jdbc.json</title>
-    <para>When using the embedded NoSQL repository based on OrientDB, this file describes the behavior of the repository including defining necessary queries, indexes and database details. If using a RDMBS based repository this file can be removed.</para>
-   </section>
-   <section>
-    <title>repo.jdbc.json</title>
     <para>If configuring OpenIDM to leverage a RDBMS repository via JDBC, this file specifies the repository details, queries and connectivity details.</para>
    </section>
    <section>
@@ -262,12 +258,12 @@ scheduler-&lt;TYPE&gt;_&lt;MAPPING&gt;.json</para>
    </section>
    <section>
     <title>sync.json</title>
-    <para>sync.json is the main configuration file to describe all mappings that the OpenIDM discovery engine looks at. The discovery engine provides two features; Reconciliation and Synchronization. The sync.json provides configuration details for both features such as reconciliation policies, attribute mappings and transformations and responses to triggers.</para>
+    <para>sync.json is the main configuration file to describe all mappings that the OpenIDM discovery engine looks at. The discovery engine provides two features: Reconciliation and Synchronization. The sync.json provides configuration details for both features such as reconciliation policies, attribute mappings and transformations and responses to triggers.</para>
    </section>
   </section>
   <section>
    <title>Framework Configuration (<filename>openidm/conf</filename>)</title>
-   <para>The following configuration files are also located in the <filename>openidm/conf</filename> directory but configure the OSGI frame work services.</para>
+   <para>The following configuration files are also located in the <filename>openidm/conf</filename> directory but configure the OSGI framework services.</para>
    <section>
     <title>config.properties</title>
     <para>An internal system configuration that typically does not need to be changed. config.properties is used to specify the behavior of the embedded OSGi container Felix.</para>
@@ -282,7 +278,7 @@ scheduler-&lt;TYPE&gt;_&lt;MAPPING&gt;.json</para>
    </section>
    <section>
     <title>system.properties</title>
-    <para>Specifies additional Java system properties used for system start-up. System.properties is a global place holder for advanced system configurations to OpenIDM or utilized customer libraries that use Java system properties.</para>
+    <para>Specifies additional Java system properties used for system start-up. system.properties is a global place holder for advanced system configurations to OpenIDM or utilized customer libraries that use Java system properties.</para>
    </section>
    <section>
     <title>jetty.xml</title>
