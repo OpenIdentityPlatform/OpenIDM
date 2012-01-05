@@ -58,7 +58,7 @@
         (or the startup.bat on windows). This will start OpenIDM in a mode where it will 
         report all out put to the OSGI console. The console also accepts OSGI commands like 
         "scr list" in this mode. OpenIDM can simply be started with: </para>
-   <programlisting>./start</programlisting>
+   <programlisting>./startup.sh</programlisting>
    <para>To stop OpenIDM in this mode type the following on the OSGI console:</para>
    <programlisting>->shutdown</programlisting>
   </section>
@@ -71,9 +71,9 @@
         <listitem><para>The ConsoleHandler is removed from the list of handlers in the same file.</para></listitem>
    </itemizedlist>
    <para>OpenIDM can then be started in the background with: </para>
-   <programlisting>./start &amp;</programlisting>
+   <programlisting>./startup.sh &amp;</programlisting>
    <para>Stopping the instance will now be done with the stop command: </para>
-   <programlisting>./stop</programlisting>
+   <programlisting>./shutdown.sh</programlisting>
   </section>
  </section>
  <section>
