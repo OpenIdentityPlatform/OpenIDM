@@ -337,9 +337,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <title>Viewing Users &amp; Logs</title>
   <para>After reconciliation runs, you can use the REST interface to display
   all users in the local repository, by performing an HTTP GET on the following
-  link: <link xlink:show="new"
-  xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
-  >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
+  URL:
+  <literal>http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</literal>.</para>
 
   <para>OpenIDM returns a JSON file. Depending on your browser, it can display
   the JSON or download it as a file. Alternatively, you can use the following
@@ -350,6 +349,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+
 {
  "query-time-ms":1,
  "result":[
@@ -375,6 +375,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  http://localhost:8080/openidm/managed/user/DDOE1
+
 {
  "lastname":"Doe1",
  "firstname":"Darth1",
@@ -463,6 +464,7 @@ access.csv activity.csv recon.csv</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+
 {
  "query-time-ms":1,
  "result":[{
@@ -547,6 +549,7 @@ access.csv activity.csv recon.csv</screen>
   "userPassword":"asdfkj23"
  }'
  http://localhost:8080/openidm/managed/user/james
+
 {"_rev":"0","_id":"james"}</screen>
 
   <para>On Windows</para>
@@ -564,6 +567,7 @@ access.csv activity.csv recon.csv</screen>
  \"userPassword\":\"asdfkj23\"
  }
  http://localhost:8080/openidm/managed/user/james
+
 {"_rev":"0","_id":"james"}</screen>
 
   <para>OpenIDM creates the new user in the repository. If you configure a
