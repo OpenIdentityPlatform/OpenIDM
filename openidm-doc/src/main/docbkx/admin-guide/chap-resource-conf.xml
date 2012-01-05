@@ -605,9 +605,9 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
         </itemizedlist>
         </section>
     </section>
-    <section><title>Scripted SQL Connectro</title>
+    <section><title>Scripted SQL Connector</title>
         <section><title>Example connectorRef</title>
-        <para>The Scripted SQL Connector opens a lot of flexibility since the actual db interaction is done by means of in customizable SQL scripts. There is one script of each of the following actions against the external data base:</para>
+        <para>The Scripted SQL Connector opens a lot of flexibility since the actual db interaction is done by means of customizable Groovy scripts. There is one script of each of the following actions against the external data base:</para>
         <itemizedlist>
             <listitem><para>Create</para></listitem>
             <listitem><para>Delete</para></listitem>
