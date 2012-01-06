@@ -31,8 +31,6 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Resource Connector Configuration</title>
- <section>
-  <title>Common Settings</title>
   <section>
    <title>Introduction</title>
    <para>The topic of this chapter is to describe how to connect to different external resources, like flat file, LDAP, AD and others. 
@@ -45,28 +43,28 @@ Not all resources are suited for all OpenIDM operations. Still all of the resour
     The image below shows the architecture of how OpenIDM connects to external resources via the OpenICF server. In most cases the OpenICF server will start as part of OpenIDM.
             </para>
     <para>
-     <figure>
+     <figure><title>OpenICF Architecture</title>
             <mediaobject>
               <imageobject>
                 <imagedata fileref="images/OpenICFarc.png" format="PNG">
                 </imagedata>
               </imageobject>
             </mediaobject>
-            <caption>The figure shows the basic architecture of OpenIDM with a connector server.</caption>
+            <caption><para>The figure shows the basic architecture of OpenIDM with two connector servers. The built in local java server, and the remote .net server.</para></caption>
             </figure>
           </para>
         </section>
         <section>
             <title>Local v.s. Remote Connector Server</title>
             <para>The idea of OpenICF is to provide a common SPI to give identity 
-            related services access to different sources which contain information 
-            about users. Principally OpenIDF will always avoid agents on the external 
-            system and use the external system\'s native access protocol instead. 
-            A connection to a Db will be established with the DB's java connection 
+            related services access to different sources which contain information about users. The connection to the external resource is established by the Connector server which can part of the application (called a local connector server) or a stand alone process, then called a remote Connector sever.</para> 
+            <para>The reason to use a remote connector server could be  to access libraries which can not be used inside the application's process. Principally OpenICF will always avoid agents on the external 
+            system and use the external system's native access protocol instead. 
+            (A connection to a Db will be established with the DB's java connection 
             libraries or JDBC driver. Connections to ldap servers are done over JNDI 
-            and to Operating systems it uses ssh. If an external service does not 
+            and to connect to Operating systems it uses ssh.) If an external service does not 
             provide a connection library which can be executed inside the JVM, like 
-            Microsoft's ADSI, then a OpenICF can still use the native dll by a remote 
+            Microsoft's ADSI, then OpenICF can still use the native dll by a remote 
             connector server. In the case of ADSI the connector server is established 
             as a .net service.</para>
   </section>
@@ -621,6 +619,4 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
         <para>TODO</para>
         </section>
     </section>
-
- </section>
 </chapter>
