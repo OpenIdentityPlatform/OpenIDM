@@ -752,42 +752,42 @@
                             <!-- Resources required but not copied by DocBook.xsl. -->
                             <preProcess>
                                 <copy todir="${docbkx-out}/html/admin-guide/images">
-                                    <fileset dir="${docbkx-src}/admin-guide/images"/>
+                                    <fileset dir="${docbkx-src}/admin-guide/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/admin-guide">
-                                    <fileset dir="src/main/resources"/>
+                                    <fileset dir="src/main/resources" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/dev-guide/images">
-                                    <fileset dir="${docbkx-src}/dev-guide/images"/>
+                                    <fileset dir="${docbkx-src}/dev-guide/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/dev-guide">
-                                    <fileset dir="src/main/resources"/>
+                                    <fileset dir="src/main/resources" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/install-guide/images">
-                                    <fileset dir="${docbkx-src}/install-guide/images"/>
+                                    <fileset dir="${docbkx-src}/install-guide/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/install-guide">
-                                    <fileset dir="src/main/resources"/>
+                                    <fileset dir="src/main/resources" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/reference/images">
-                                    <fileset dir="${docbkx-src}/reference/images"/>
+                                    <fileset dir="${docbkx-src}/reference/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/reference">
-                                    <fileset dir="src/main/resources"/>
+                                    <fileset dir="src/main/resources" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/release-notes/images">
-                                    <fileset dir="${docbkx-src}/release-notes/images"/>
+                                    <fileset dir="${docbkx-src}/release-notes/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/release-notes">
-                                    <fileset dir="src/main/resources"/>
+                                    <fileset dir="src/main/resources" />
                                 </copy>
                             </preProcess>
                             <postProcess>
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/admin-guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/reference' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes' />
+                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/admin-guide" />
+                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/dev-guide" />
+                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/install-guide" />
+                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/reference" />
+                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/release-notes" />
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
                                   <include name="**/**/*.html" />
                                   <replacevalue>
@@ -797,6 +797,86 @@
 $(document).ready(function() {
   $(".screen").attr("title", "Double-click [-] to flatten lines.");
   $(".screen").prepend('&lt;img src="./images/minus.png" class="toggle"&gt;');
+});
+$(".screen").live("dblclick", function() {
+  $(this).replaceWith(
+    "&lt;pre class=\"flat\" title=\"Double-click [+] to wrap long lines.\"&gt;" +
+    $(this).html().replace(/minus\.png/,"plus.png").replace(/\n /g," ") + "\n&lt;!--" + $(this).html() + "--&gt;" +
+    "&lt;/pre&gt;");
+});
+$(".flat").live("dblclick", function() {
+  $(this).replaceWith(
+    "&lt;pre class=\"screen\" title=\"Double-click [-] to flatten lines.\"&gt;" +
+    $(this).html().replace(/(.|\n)+&lt;!\-\-/m,"").replace(/\-\-\&gt;/,"").replace(/plus\.png/,"minus.png") +
+    "&lt;/pre&gt;");
+});
+&lt;/script&gt;
+&lt;link rel="shortcut icon" href="http://forgerock.org/favicon.ico"&gt;
+&lt;/head &gt;</replacevalue>
+                                </replace>
+                            </postProcess>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>doc-chunked-html</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>generate-html</goal>
+                        </goals>
+                        <configuration>
+                            <chunkedOutput>true</chunkedOutput>
+                            <htmlCustomization>${dbstyle-dir}/html/chunked.xsl</htmlCustomization>
+                            <htmlStylesheet>css/coredoc.css</htmlStylesheet>
+                            <highlightSource>1</highlightSource>
+
+                            <!-- Resources required but not copied by DocBook.xsl. -->
+                            <preProcess>
+                                <copy todir="${docbkx-out}/html/admin-guide/OpenIDM-Admin-Guide/images">
+                                    <fileset dir="${docbkx-src}/admin-guide/images"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/admin-guide/OpenIDM-Admin-Guide">
+                                    <fileset dir="src/main/resources"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide/images">
+                                    <fileset dir="${docbkx-src}/dev-guide/images"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide">
+                                    <fileset dir="src/main/resources"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/install-guide/OpenIDM-Install-Guide/images">
+                                    <fileset dir="${docbkx-src}/install-guide/images"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/install-guide/OpenIDM-Install-Guide">
+                                    <fileset dir="src/main/resources"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/reference/OpenIDM-Reference/images">
+                                    <fileset dir="${docbkx-src}/reference/images"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/reference/OpenIDM-Reference">
+                                    <fileset dir="src/main/resources"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/release-notes/OpenIDM-Release-Notes/images">
+                                    <fileset dir="${docbkx-src}/release-notes/images"/>
+                                </copy>
+                                <copy todir="${docbkx-out}/html/release-notes/OpenIDM-Release-Notes">
+                                    <fileset dir="src/main/resources"/>
+                                </copy>
+                            </preProcess>
+                            <postProcess>
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/admin-guide/OpenIDM-Admin-Guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide/OpenIDM-Install-Guide' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/reference/OpenIDM-Reference' />
+                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes/OpenIDM-Release-Notes' />
+                                <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
+                                  <include name="**/**/**/*.html" />
+                                  <replacevalue>
+&lt;script src="http://code.jquery.com/jquery.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+// On double-click, reformat &lt;pre class="screen"&gt; for easy copying.
+$(document).ready(function() {
+  $(".screen").attr("title", "Double-click [-] to flatten lines.");
+  $(".screen").prepend('&lt;img src="../images/minus.png" class="toggle"&gt;');
 });
 $(".screen").live("dblclick", function() {
   $(this).replaceWith(
