@@ -51,6 +51,12 @@
    <screen>$ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/</screen>
   </step>
   <step>
+   <para>Make sure that OpenIDM is stopped.</para>
+   <screen>$ cd /path/to/openidm/
+$ ./shutdown.sh
+OpenIDM is not running, not stopping.</screen>
+  </step>
+  <step>
    <para>Remove <filename>openidm/conf/repo.orientdb.json</filename>.</para>
    <screen>$ cd /path/to/openidm/conf/
 $ rm repo.orientdb.json</screen>
