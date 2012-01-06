@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-services'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Managing OpenIDM Services</title>
+
+ <section xml:id="startup-shutdown">
+  <title>Starting &amp; Stopping OpenIDM</title>
+
+  <para>By default you start and stop OpenIDM in interactive mode.</para>
+
+  <itemizedlist>
+   <para>To start OpenIDM interactively, open a terminal or command window,
+   change to the <filename>openidm</filename> directory, and run the startup
+   script:</para>
+   <listitem>
+    <para><command>startup.sh</command> on UNIX, Linux, &amp; Mac OS X</para>
+   </listitem>
+   <listitem>
+    <para><command>startup.bat</command> on Windows</para>
+   </listitem>
+  </itemizedlist>
+
+  <para>The startup script starts OpenIDM, and opens an OSGi console with a
+  <literal>-&gt;</literal> prompt where you can issue console commands.</para>
+
+  <para>To stop OpenIDM interactively in the OSGi console, enter the
+  <command>shutdown</command> command.</para>
+
+  <screen>-&gt; shutdown</screen>
+
+  <!-- TODO: Editing logging.properties, even removing everything referencing
+  the ConsoleHandler, is not sufficient. The OSGi console prompt appears
+  nevertheless. When enter is pressed, the job is stopped.
+  So there's likely something missing from this part. -->
+  <orderedlist>
+   <para>You can also start OpenIDM as a background process on UNIX, Linux, and
+   Mac OS X.</para>
+   <listitem>
+    <para>Disable <literal>ConsoleHandler</literal> logging before starting
+    OpenIDM by editing <filename>openidm/conf/logging.properties</filename>
+    to comment out references to the console handler.</para>
+   </listitem>
+   <listitem>
+    <para>Start OpenIDM in the background.</para>
+    <screen>$ ./startup.sh &amp;</screen>
+   </listitem>
+  </orderedlist>
+
+  <para>To stop OpenIDM running as a background process, use the
+  <command>shutdown.sh</command> script.</para>
+ </section>
+
+ <section xml:id="command-line-tools">
+  <title>Command-Line Tools</title>
+
+  <variablelist>
+   <para>OpenIDM includes these command line tools in the
+   <filename>openidm</filename> directory.</para>
+   <varlistentry>
+    <term><command>cli.sh</command></term>
+    <listitem>
+     <para>This script supports the following subcommands.</para>
+     <variablelist>
+      <varlistentry>
+       <term><command>export</command></term>
+       <listitem>
+        <para>Export all objects</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><command>keytool</command></term>
+       <listitem>
+        <para>Export or import SecretKeyEntry values</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><command>validate</command></term>
+       <listitem>
+        <para>Validate all .json configuration files in the
+        <filename>conf/</filename> directory</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>startup.bat</command></term>
+    <term><command>startup.sh</command></term>
+    <listitem>
+     <para>Script to start OpenIDM and the OSGi console</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>shutdown.sh</command></term>
+    <listitem>
+     <para>Script to stop OpenIDM</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</chapter>
