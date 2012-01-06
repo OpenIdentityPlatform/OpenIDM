@@ -63,7 +63,6 @@
  <xinclude:include href='chap-install.xml' />
  <xinclude:include href='chap-conf-folder.xml' />
  <xinclude:include href='chap-logs.xml' />
- <xinclude:include href='chap-repo-setup.xml' />
  <xinclude:include href='chap-object-main.xml' />
  <xinclude:include href='chap-resource-conf.xml' />
  <xinclude:include href='chap-synchronization.xml' />
