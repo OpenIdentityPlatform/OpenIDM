@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id="chap-overview"
@@ -51,7 +51,6 @@
   <section xml:id="openidm-modular-framework">
     <title>OpenIDM Modular Framework</title>
 
-    
     <variablelist>
      <para>The OpenIDM framework is based on OSGi.</para>
      <varlistentry>
