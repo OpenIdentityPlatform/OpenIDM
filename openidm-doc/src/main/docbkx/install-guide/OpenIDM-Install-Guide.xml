@@ -56,6 +56,11 @@
      <firstname>Laszlo</firstname><surname>Hordos</surname>
     </personname>
    </author>
+   <author>
+    <personname>
+     <firstname>Matthias</firstname><surname>Tristl</surname>
+    </personname>
+   </author>
   </authorgroup>
   <xinclude:include href="../legal.xml" />
   <date><?dbtimestamp format="B d, Y"?></date>
@@ -69,6 +74,7 @@
  <xinclude:include href='chap-sample.xml' />
  <xinclude:include href='chap-repository.xml' />
  <xinclude:include href='chap-uninstall.xml' />
+ <xinclude:include href='chap-samples.xml' />
 
 <!-- Add the index back when we have more content
  <index /> -->
