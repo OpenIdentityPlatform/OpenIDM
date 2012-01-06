@@ -60,7 +60,7 @@
  
  <xinclude:include href="preface.xml" />
  <xinclude:include href='chap-overview.xml' />
- <xinclude:include href='chap-install.xml' />
+ <xinclude:include href='chap-services.xml' />
  <xinclude:include href='chap-conf-folder.xml' />
  <xinclude:include href='chap-logs.xml' />
  <xinclude:include href='chap-object-main.xml' />
