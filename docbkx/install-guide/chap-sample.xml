@@ -37,7 +37,7 @@
  in <filename>openidm/samples/sample1</filename> is configured and enabled by
  default. This chapter provides an overview of the sample and how it is
  configured. To see a listing and an overview of the rest of the samples
- provided see the README found in <filename>openidm/samples</filename>.
+ provided see the README found in <filename>openidm/samples</filename> and in the chapter <link xlink:href="chap-samples">More OpenIDM Samples</link> below.
  </para>
 
  <section xml:id="before-you-begin-sample">

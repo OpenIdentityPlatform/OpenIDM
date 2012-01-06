@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-samples'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+
+<title>More OpenIDM Samples</title>
+
+ <para>The current distribution of OpenIDM comes with a couple of samples 
+ in <filename>openidm/samples/</filename>. Sample1 is configured in per default and described in the chapter above.</para>
+
+ <section xml:id="before-you-begin-samples">
+  <title>Before You Begin</title>
+  <para>Install OpenIDM as described in the chapter on <link
+  xlink:href="install-guide#chap-install"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
+  OpenIDM Services</citetitle></link>.</para>
+
+  <para>OpenIDM comes with an internal noSQL database, OrientDB for use as
+  the internal repository out of the box. This makes it easy to get started
+  with OpenIDM. OrientDB is not yet supported for production use, however,
+  so use a supported JDBC database when moving to production.</para>
+  <section><title>Installing the samples</title>
+   <para>Each of the sample folders in <filename>openidm/samples/</filename> contains a list of sub folders like <filename>conf</filename>, <filename>script</filename>. The easiest way to configure a new installa tion for one of the samples is to copy all files of the sample folders into the appropriate folder under <filename>openidm/</filename>. Some, but not all samples might need some extra installation like an external ldap or db server. In most cases a restart of OpenIDM is not needed here.</para>
+  </section>
+  <section xml:id="preparignIDM-id"><title>Preparing OpenIDM</title>
+   <para>It is recommended to remove the existing sample1 files before starting starting with other samples. On the command line in the folder <filename>openidm/</filename> do the following: </para>
+   <screen>$ rm conf/provisioner.openicf-xml.json conf/sync.json conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</screen>
+   <para>And then:</para>
+<screen>$ cp -r samples/sample2/conf .</screen>
+  </section>
+ </section>
+ <section><title>Sample 1</title>
+  <para>Sample 1 is described above: <link xlink:href="chap-sample">OpenIDM Samples</link></para>
+ </section>
+ <section><title>Sample 2</title>
+  <para>Sample 1 is rather similar to sample 1 but in Sample 2 OpenIDM is connected to a local ldap server. It was tested with OpenDJ but other ldap v3 compliant servers should work as well.</para>
+  <para>Sample 2 is should demonstrate how OpenIDM can pick up new or changed objects from an external resource. It contains only one mapping, from the externa resource to the repository and will therefor not push any changes made to an internal user object out to the external resource!</para>
+  <section><title>Install the Sample</title>
+   <para>Here the sample is installed exactly like described in <xref linkend="preparignIDM-id"/>.</para>
+  </section>
+  <section xml:id="external-ldap-config-id"><title>External LDAP Configuration</title>
+   <para>Sample 2 expects the external ldap server with the following configuration:</para>
+   <itemizedlist>
+    <listitem>the ldap server runs on the local host</listitem>
+    <listitem>the ldap server listens on port 1389</listitem>
+    <listitem>the ldap server can be accesses by a user called "cn=Directory Manager with the password: password</listitem>
+    <listitem>The user objects are stored on the ldap server under: ou=People,dc=example,dc=com</listitem>
+    <listitem>the user objects have the objectclass inetOrgPerson</listitem>
+    <listitem>the user objects contain the attributres (see below for an example user): 
+     <itemizedlist>
+      <listitem>uid</listitem>
+      <listitem>sn</listitem>
+      <listitem>cn</listitem>
+      <listitem>givenName</listitem>
+      <listitem>mail</listitem>
+      <listitem>description</listitem>
+     </itemizedlist>
+    </listitem>
+   </itemizedlist>
+   <screen>
+dn: uid=jdoe,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: top
+givenName: John
+uid: jdoe
+cn: John Doe
+telephoneNumber: 12345
+sn: Doe
+mail: ddoe@example.com
+description: Created by OpenIDM
+   </screen>
+   <para>The ldap server can be prepared by creating a base suffix of <filename>dc=example,dc=com</filename> and importing the following two objexts, if they do not already exist: </para>
+   <screen>
+dn: dc=example,dc=com
+objectclass: organization
+
+dn: ou=People,dc=example,dc=com
+ou: people
+description: people
+objectclass: organizationalunit
+   </screen>
+  </section>
+  <section><title>Running the Sample</title>
+   <para>For starting the sample start first start openidm. Then run a reconciliation against the REST interface: </para>
+   <screen>
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+   </screen>
+   <para>For some reason there is sometimes a restart needed after the first start of a vanilla installation. If the command above returns with an error then please stop and start OpenIDM. The result of a successful reconciliation is empty.</para>
+   <para>Using the configuration of sample 2, the user objects will be created from LDAP in OpenIDM with a random unique ID. To get a list of all user object ids from the repository use:</para>
+   <screen>
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+   </screen>
+   <para>The result should look something like this:</para>
+   <screen>{"query-time-ms":1,"result":[{"_id":"56f0fb7e-3837-464d-b9ec-9d3b6af665c3","_rev":"0"}],"conversion-time-ms":0}</screen>
+   <para>And the command to get the user listed above like: </para>
+   <screen>curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+   <para>Please have a look at <filename>openidm/conf/sync.json</filename> and <filename>openidm/conf/provisioner.openicf-ldap.json</filename> and try to find why the user object in the repository looks like this.</para>
+  </section>
+ </section>
+ 
+ <section><title>Sample 2b</title>
+  <para>Like sample 2, sample 2b also connects to an external ldap server. </para>
+  <para>But in opposite to sample 2, sample 2b has two mappings configured: from the external resource into the repo and vice versa.</para>
+  <section><title>Install the Sample</title>
+   <para>The sample is installed like described in <xref linkend="preparignIDM-id"/>. plus the following:</para>
+   <screen>$ cp -r samples/sample2/script .</screen>
+   <para>If the current installation already contains sample 2 then moving to sample 2b can also be done by adding the second mapping of sample 2b's <filename>sync.json</filename> to the current <filename>sync.json</filename> file. Additionaly the content of the <filename>script</filename> folder must be copied to the OpenIDM installation. It is just one file named <filename>ldapBackCorrelationQuery.js</filename>. The file is referenced in the second mapping.</para>
+  </section>  
+  <section xml:id="external-ldap-config-id"><title>External LDAP Configuration</title>
+  <para>For the configuration of the LDAP sever please follow the steps in sample 2: <xref linkend="external-ldap-config-id" />.</para>
+  </section>  
+  <section><title>Running the Sample</title>
+   <para>For starting the sample start first start openidm. Then run a reconciliation against the REST interface: </para>
+   <screen>
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+   </screen>
+   <para>For some reason there is sometimes a restart needed after the first start of a vanilla installation. If the command above returns with an error then please stop and start OpenIDM. The result of a successful reconciliation is empty.</para>
+   <para>Using the configuration of sample 2, the user objects will be created from LDAP in OpenIDM with a random unique ID. To get a list of all user object ids from the repository use:</para>
+   <screen>
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+   </screen>
+   <para>The result should look something like this:</para>
+   <screen>{"query-time-ms":1,"result":[{"_id":"56f0fb7e-3837-464d-b9ec-9d3b6af665c3","_rev":"0"}],"conversion-time-ms":0}</screen>
+   <para>And the command to get the user listed above like: </para>
+   <screen>curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+   <para>Testing the second mapping is done by creating a user in the OpenIDM repository like this:</para>
+   <screen>curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" -d '{"email":"fdoe@example.com","familyName":"Doe","userName":"fdoe","givenName":"Felicitas","displayName":"Felicitas Doe"}' --request PUT "http://localhost:8080/openidm/managed/user/repoUser1"</screen>
+  </section>
+  <warning>Unfortunately there is a inconsistency in the sample file deliverd with OpenIDM 2.0.0! Constructing the dn in the onCreate property of the second mapping must be like: <screen>"target.dn = 'uid=' + source.userName + ',ou=people,dc=example,dc=com';"</screen></warning>
+ </section>
+</chapter>
