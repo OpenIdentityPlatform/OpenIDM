@@ -96,6 +96,13 @@ $</screen>
      <literal>org.osgi.service.http.port</literal> property in the
      <filename>openidm/conf/config.properties</filename> file.</para>
     </step>
+    <step>
+     <para>Before running OpenIDM in production, replace the OrientDB
+     repository provided for evaluation with a JDBC repository.</para>
+     <para>See the chapter on <link xlink:href="install-guide#chap-repository"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
+     a Repository For Production</citetitle></link> for details.</para>
+    </step>
    </procedure>
 
    <procedure xml:id="run-openidm">
