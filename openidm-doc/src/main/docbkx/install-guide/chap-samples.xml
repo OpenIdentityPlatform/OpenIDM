@@ -66,22 +66,22 @@
   <section><title>Install the Sample</title>
    <para>Here the sample is installed exactly like described in <xref linkend="preparignIDM-id"/>.</para>
   </section>
-  <section xml:id="external-ldap-config-id"><title>External LDAP Configuration</title>
+  <section xml:id="external-ldap-config-2"><title>External LDAP Configuration</title>
    <para>Sample 2 expects the external ldap server with the following configuration:</para>
    <itemizedlist>
-    <listitem>the ldap server runs on the local host</listitem>
-    <listitem>the ldap server listens on port 1389</listitem>
-    <listitem>the ldap server can be accesses by a user called "cn=Directory Manager with the password: password</listitem>
-    <listitem>The user objects are stored on the ldap server under: ou=People,dc=example,dc=com</listitem>
-    <listitem>the user objects have the objectclass inetOrgPerson</listitem>
-    <listitem>the user objects contain the attributres (see below for an example user): 
+    <listitem><para>the ldap server runs on the local host</para></listitem>
+    <listitem><para>the ldap server listens on port 1389</para></listitem>
+    <listitem><para>the ldap server can be accesses by a user called "cn=Directory Manager with the password: password</para></listitem>
+    <listitem><para>The user objects are stored on the ldap server under: ou=People,dc=example,dc=com</para></listitem>
+    <listitem><para>the user objects have the objectclass inetOrgPerson</para></listitem>
+    <listitem><para>the user objects contain the attributres (see below for an example user):</para>
      <itemizedlist>
-      <listitem>uid</listitem>
-      <listitem>sn</listitem>
-      <listitem>cn</listitem>
-      <listitem>givenName</listitem>
-      <listitem>mail</listitem>
-      <listitem>description</listitem>
+      <listitem><para>uid</para></listitem>
+      <listitem><para>sn</para></listitem>
+      <listitem><para>cn</para></listitem>
+      <listitem><para>givenName</para></listitem>
+      <listitem><para>mail</para></listitem>
+      <listitem><para>description</para></listitem>
      </itemizedlist>
     </listitem>
    </itemizedlist>
@@ -136,8 +136,8 @@ $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password
    <screen>$ cp -r samples/sample2/script .</screen>
    <para>If the current installation already contains sample 2 then moving to sample 2b can also be done by adding the second mapping of sample 2b's <filename>sync.json</filename> to the current <filename>sync.json</filename> file. Additionaly the content of the <filename>script</filename> folder must be copied to the OpenIDM installation. It is just one file named <filename>ldapBackCorrelationQuery.js</filename>. The file is referenced in the second mapping.</para>
   </section>  
-  <section xml:id="external-ldap-config-id"><title>External LDAP Configuration</title>
-  <para>For the configuration of the LDAP sever please follow the steps in sample 2: <xref linkend="external-ldap-config-id" />.</para>
+  <section xml:id="external-ldap-config-2b"><title>External LDAP Configuration</title>
+  <para>For the configuration of the LDAP sever please follow the steps in sample 2: <xref linkend="external-ldap-config-2" />.</para>
   </section>  
   <section><title>Running the Sample</title>
    <para>For starting the sample start first start openidm. Then run a reconciliation against the REST interface: </para>
@@ -155,7 +155,8 @@ $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password
    <screen>curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
    <para>Testing the second mapping is done by creating a user in the OpenIDM repository like this:</para>
    <screen>curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" -d '{"email":"fdoe@example.com","familyName":"Doe","userName":"fdoe","givenName":"Felicitas","displayName":"Felicitas Doe"}' --request PUT "http://localhost:8080/openidm/managed/user/repoUser1"</screen>
+  <warning><para>Unfortunately there is a inconsistency in the sample file deliverd with OpenIDM 2.0.0! Constructing the dn in the onCreate property of the second mapping must be like:</para>
+  <screen>"target.dn = 'uid=' + source.userName + ',ou=people,dc=example,dc=com';"</screen></warning>
   </section>
-  <warning>Unfortunately there is a inconsistency in the sample file deliverd with OpenIDM 2.0.0! Constructing the dn in the onCreate property of the second mapping must be like: <screen>"target.dn = 'uid=' + source.userName + ',ou=people,dc=example,dc=com';"</screen></warning>
  </section>
 </chapter>
