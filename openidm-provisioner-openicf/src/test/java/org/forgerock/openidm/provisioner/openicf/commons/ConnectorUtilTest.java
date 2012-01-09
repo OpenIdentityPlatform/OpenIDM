@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -77,19 +77,17 @@ public class ConnectorUtilTest {
     public void beforeTest() throws Exception {
         TestConfiguration configuration = new TestConfiguration();
         runtimeAPIConfiguration = TestHelpers.createTestConfiguration(TestConnector.class, configuration);
-
-        InputStream inputStream = ConnectorUtilTest.class.getResourceAsStream("/config/TestSystemConnectorConfiguration.json");
-        Assert.assertNotNull(inputStream);
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] temp = new byte[1024];
-        int read;
-        while ((read = inputStream.read(temp)) > 0) {
-            buffer.write(temp, 0, read);
+        InputStream inputStream = null;
+        try {
+            inputStream = ConnectorUtilTest.class.getResourceAsStream("/config/TestSystemConnectorConfiguration.json");
+            ObjectMapper mapper = new ObjectMapper();
+            Map map = mapper.readValue(inputStream, Map.class);
+            jsonConfiguration = new JsonValue(map);
+        } finally {
+            if (null != inputStream) {
+                inputStream.close();
+            }
         }
-        String config = new String(buffer.toByteArray());
-        ObjectMapper mapper = new ObjectMapper();
-        Map map = mapper.readValue(config, Map.class);
-        jsonConfiguration = new JsonValue(map);
         Assert.assertNotNull(jsonConfiguration);
     }
 

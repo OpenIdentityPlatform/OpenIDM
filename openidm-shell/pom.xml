@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright © 2011 ForgeRock AS. All rights reserved.
+  Copyright © 2011-2012 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -26,7 +26,9 @@
     <name>OpenIDM Felix Gogo Shell</name>
     <packaging>bundle</packaging>
     <properties>
-        <openidm.osgi.import.defaults>!org.apache.felix.gogo.shell,!org.apache.felix.gogo.runtime*,org.apache.felix.service.command;version="[0.10.0,1)";status=provisional;mandatory:=status</openidm.osgi.import.defaults>
+        <openidm.osgi.import.defaults>
+            !org.apache.felix.gogo.shell,!org.apache.felix.gogo.runtime*,org.apache.felix.service.command;version="[0.10.0,1)";status=provisional;mandatory:=status
+        </openidm.osgi.import.defaults>
     </properties>
     <dependencies>
         <dependency>
@@ -42,7 +44,7 @@
         <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.jackson</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -115,7 +117,7 @@
                     <instructions>
                         <Export-Package>org.forgerock.openidm.shell;version=${openidm.version}</Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.shell.felixgogo.Activator</Bundle-Activator>
-                        <Embed-Dependency>*;artifactId=asm-all;inline=false</Embed-Dependency>                        
+                        <Embed-Dependency>*;artifactId=asm-all;inline=false</Embed-Dependency>
                         <Main-Class>org.forgerock.openidm.shell.impl.Main</Main-Class>
                         <_failok>true</_failok>
                     </instructions>
