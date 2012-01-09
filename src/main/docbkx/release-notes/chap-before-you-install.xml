@@ -31,14 +31,47 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Before You Install OpenIDM Software</title>
 
- <para>This chapter covers software and hardware prerequisites for installing
- and running OpenIDM software.</para>
+ <para>This chapter covers prerequisites for installing and running OpenIDM
+ software.</para>
 
- <para>OpenIDM requires a Java SE JDK 6 update 24 or later. When using the
+ <variablelist>
+  <para>For OpenIDM <?eval ${docTargetVersion}?>, the following configurations
+  are supported for use in production.</para>
+  <varlistentry>
+   <term>Repository</term>
+   <listitem>
+    <para>MySQL 5.1 or 5.5 with Connector/J 5.1.18 or later is supported for
+    use as a JDBC repository in production.</para>
+    <para>OrientDB is provided for evaluation only.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>Stand-alone installation</term>
+   <listitem>
+    <para>You must install OpenIDM as a stand-alone service, using Apache Felix
+    and Jetty as provided. Alternate containers are not supported.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>Connectors</term>
+   <listitem>
+    <para>TODO</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+
+ <para>If you have a special request to support a component or combination not
+ listed here, contact ForgeRock at <link
+ xlink:href='mailto:info@forgerock.com'>info@forgerock.com</link>.</para>
+
+ <para>OpenIDM requires Java SE JDK 6 update 24 or later. When using the
  Oracle JDK, you also need Java Cryptography Extension (JCE)
  <link xlink:show="new"
  xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html"
  >policy files</link>.</para>
 
- <para>You need 30 MB disk space for a minimal evaluation installation.</para>
+ <para>You need 30 MB disk space for a minimal evaluation installation. For a
+ production installation, disk space required depends on the size of the
+ repository, and on size of the audit and service log files that OpenIDM
+ writes.</para>
 </chapter>
