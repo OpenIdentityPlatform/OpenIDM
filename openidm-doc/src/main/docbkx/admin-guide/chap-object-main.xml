@@ -137,9 +137,9 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
   <literal>https://localhost:8443/openidm/managed/organization/mysampleorg</literal>.</para>
 
   <para>By default, the HTTP GET returns a JSON representation of the object.
-  See the chapter on <link xlink:href="admin-guide#chap-rest"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using RESTful
-  Services</citetitle></link> for details.</para>
+  See the appendix on the <link xlink:href="admin-guide#appendix-rest"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
+  API</citetitle></link> for details.</para>
  </section>
 
  <section xml:id="object-main-managed-objects">
@@ -305,8 +305,10 @@ val = openidm.query("managed/foobar", params);</programlisting>
    <para>OpenIDM exposes all managed object functionality through the REST API
    unless you configure a policy to prevent such access. In addition to the
    common REST functionality of create, read, update, delete, patch, and query,
-   the REST API also supports patch by query.</para>
-   <!-- TODO: link to admin-guide#chap-rest or reference#chap-rest ? -->
+   the REST API also supports patch by query. See the appendix on the
+   <link xlink:href="admin-guide#appendix-rest"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
+   API</citetitle></link> for details.</para>
   </section>
  </section>
 

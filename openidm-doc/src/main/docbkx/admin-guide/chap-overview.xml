@@ -219,9 +219,10 @@
       <listitem>
        <para>REST APIs for CRUD operations and invoking synchronization and
        reconciliation are provided for both HTTP and Java.</para>
-       <para>See the <link xlink:href="reference#chap-rest"
+       <para>See the appendix on the
+       <link xlink:href="admin-guide#appendix-rest"
        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
-       API</citetitle></link> chapter for details.</para>
+       API</citetitle></link> for details.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
