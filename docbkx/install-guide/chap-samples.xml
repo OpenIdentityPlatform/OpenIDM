@@ -66,14 +66,14 @@ $ rm conf/provisioner.openicf-xml.json
    <para>This will configure OpenIDM for sample2.</para>
   </section>
  </section>
- <section><title>Sample 1</title>
+ <section><title>Sample 1 XML file</title>
   <para>Sample 1 is described above: <link
   xlink:href="install-guide#chap-sample"
   xlink:role="http://docbook.org/xlink/role/olink">
   <citetitle>OpenIDM Sample</citetitle>
 </link>.</para>
  </section>
- <section><title>Sample 2</title>
+ <section><title>Sample 2 - LDAP one way</title>
   <para>Sample 2 is rather similar to sample 1 but in Sample 2 OpenIDM is connected to a local ldap server. It was tested with OpenDJ but other ldap v3 compliant servers should work as well.</para>
   <para>Sample 2 should demonstrate how OpenIDM can pick up new or changed objects from an external resource. It contains only one mapping, from the external resource to the repository and will therefor not push any changes made to an internal user object out to the external resource!</para>
   <section><title>Install the Sample</title>
@@ -149,12 +149,13 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+ "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"
+   </screen>
    <para>Please have a look at <filename>openidm/conf/sync.json</filename> and <filename>openidm/conf/provisioner.openicf-ldap.json</filename> and try to find why the user object in the repository looks like this.</para>
   </section>
  </section>
  
- <section><title>Sample 2b</title>
+ <section><title>Sample 2b LDAP two way</title>
   <para>Like sample 2, sample 2b also connects to an external ldap server. </para>
   <para>But in opposite to sample 2, sample 2b has two mappings configured: from the external resource into the repo and vice versa.</para>
   <section><title>Install the Sample</title>
@@ -202,5 +203,87 @@ $ curl
   <warning><para>Unfortunately there is a inconsistency in the sample file which is delivered with OpenIDM 2.0.0! Constructing the dn in the onCreate property of the second mapping must be like:</para>
   <screen>"target.dn = 'uid=' + source.userName + ',ou=people,dc=example,dc=com';"</screen></warning>
   </section>
+ </section>
+ 
+ <section><title>Sample 3 - SQL scripted</title>
+  <para>Sample 3 shows an example configuration for the SQL scripted connector. This connector is very flexible since the communication with the database is established by configurable sql scripts. Each operation, like create or dlete, is represented by its own db script. The scripts are kept in the <filename>tools</filename> folder. The folder named <filename>data</filename> contains an example DDL to create a database schema which will hold the external user objects.</para>
+  <para>It is recommended to start playing with this sample with a fresh installation of OpenIDM.</para>
+  <section><title>Install the Sample</title>
+   <para>The sample is installed like described in <xref linkend="preparignIDM-id"/> plus copying another folder called <filename>tools</filename>.</para>
+   <screen>$ cp -r samples/sample3/tools .</screen>
+   <para>There is no need to copy the third folder of the sample3 direcotry, data, since it just contains the DDL for creating the external user database.</para>
+   <para>In this example OpenIDM needs to communicate with a mySQL database server and therefore a driver for mySQL is needed.</para>
+   <para>Download <link xlink:show="new"
+   xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL
+   Connector/J</link>, unpack the delivery, and copy the .jar into the
+   <filename>openidm/bundle</filename> directory.</para>
+   <screen>$ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/</screen>
+  </section>
+  <section><title>External Configuration</title>
+   <para>OpenIDM is expected to connect to an external database server running on mySQL. The following configuration of the database is expected:</para>
+   <itemizedlist>
+    <listitem>the database is available on the local host</listitem>
+    <listitem>the database listens on port 3306</listitem>
+    <listitem>a network connection to the db possible with user: root and password: password</listitem>
+    <listitem>there is a database called HRDB with a table called Users on the databasee server</listitem>
+    <listitem>te db schema is like described in the DDL file</listitem>
+   </itemizedlist>
+   <warning>If running the DDL to create the DB schema gives you an arror on creating the tables, then you may need to change the type of the timestamp column from "timestamp TIMESTAMP(8)" to "timestamp TIMESTAMP"</warning>
+   <para>If the configuration of the external database was correct the OpenIDM should echo 5 users during startup. This is because the check method, which is executed on against each connected resource, executes a "select * from Users" statement in this case.</para>
+  </section>
+  <section><title>Run the Sample</title>
+   <para>The sync configuration of sampel 3 contains a mapping for reconciling agianst the external DB. To run the reconciliation run the following curl command:</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
+   <para>This will create the 5 users from the database in the OpenIDM repository. Check it by executing this:</para>
+      <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+   </screen>
+   <para>The result should look something like this:</para>
+   <screen>
+{"query-time-ms":2,"result":[
+ {"_id":"dc870bff-c2e9-4378-8ac1-45ee085b09bf","_rev":"0"},
+ {"_id":"9046dea4-1dea-4ae8-8335-070839b12b9c","_rev":"0"},
+ {"_id":"17fc954f-828a-454c-b05e-f8e9934c6e64","_rev":"0"},
+ {"_id":"371855d1-44c9-4854-a576-3397275211e4","_rev":"0"},
+ {"_id":"97066201-e0de-48d9-8c9e-bdf7f0f0c7e5","_rev":"0"}],"conversion-time-ms":0}</screen>
+   <para>And the command to get one of the user above listed is like: </para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/dc870bff-c2e9-4378-8ac1-45ee085b09bf"
+   </screen>
+  </section>
+ </section>
+ 
+ <section><title>Sample 4 - </title>
+  <para>ToDo</para>
+  <section><title>Install the Sample</title></section>
+  <section><title>External Configuration</title></section>
+  <section><title>Run the Sample</title></section>
+ </section>
+ 
+ <section><title>Sample 5 - </title>
+  <para>ToDo</para>
+  <section><title>Install the Sample</title></section>
+  <section><title>External Configuration</title></section>
+  <section><title>Run the Sample</title></section>
+ </section>
+ 
+ <section><title>Sample 6 - </title>
+  <para>ToDo</para>
+  <section><title>Install the Sample</title></section>
+  <section><title>External Configuration</title></section>
+  <section><title>Run the Sample</title></section>
  </section>
 </chapter>
