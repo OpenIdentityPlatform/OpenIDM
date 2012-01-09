@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-object-main'
@@ -32,13 +32,9 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Data Models &amp; Objects</title>
 
- <para>OpenIDM allows you to customize of a variety of objects. In REST
- nomenclature, the objects are referred to as <firstterm>resources</firstterm>.
- Resources are objects that can be addressed via a URL or URI, and that have a
- common set of functions that OpenIDM can perform on them such as CRUD, query,
- and action. The term resource in this context should not be confused with
- target resources that you provision to using, for example, an OpenICF
- connector.</para>
+ <para>OpenIDM allows you to customize of a variety of objects that can be
+ addressed via a URL or URI, and that have a common set of functions that
+ OpenIDM can perform on them such as CRUD, query, and action.</para>
 
  <para>Depending on how you intend to use them, different objects are
  appropriate.</para>
@@ -309,6 +305,12 @@ val = openidm.query("managed/foobar", params);</programlisting>
    <link xlink:href="admin-guide#appendix-rest"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
    API</citetitle></link> for details.</para>
+
+   <para>OpenIDM requires authentication to access the REST API. Authentication
+   configuration is shown in
+   <filename>openidm/conf/authentication.json</filename>. The default
+   authorization filter script is
+   <filename>openidm/script/router-authz.js</filename>.</para>
   </section>
  </section>
 
@@ -322,8 +324,13 @@ val = openidm.query("managed/foobar", params);</programlisting>
   automatically and can start new services, OpenIDM stores custom configuration
   objects and makes them available to your code through the API.</para>
 
+  <para>See the chapter on <link xlink:href="admin-guide#chap-configuration"
+  xlink:role="http://docbook.org/xlink/role/olink"
+  ><citetitle>Configuration</citetitle></link> for an introduction to standard
+  configuration objects.</para>
+
   <section xml:id="object-main-configuration-objects-when-to-use">
-   <title>When To Use Configuration Objects</title>
+   <title>When To Use Custom Configuration Objects</title>
 
    <para>Configuration objects are ideal for metadata and settings that need
    not be included in the data to reconcile. In other words, use configuration
@@ -339,7 +346,7 @@ val = openidm.query("managed/foobar", params);</programlisting>
   </section>
 
   <section xml:id="object-main-configuration-objects-naming">
-   <title>Configuration Object Naming Conventions</title>
+   <title>Custom Configuration Object Naming Conventions</title>
 
    <para>By convention custom configuration objects are added under the
    reserved context, <literal>config/custom</literal>.</para>
@@ -355,8 +362,8 @@ val = openidm.query("managed/foobar", params);</programlisting>
 
    <para>If you have not disabled the file based view for configuration, you
    can view and edit all configuration including custom configuration in
-   <filename>conf/*.json</filename> files where you installed OpenIDM. The
-   configuration maps to a file named
+   <filename>openidm/conf/*.json</filename> files. The configuration maps to a
+   file named
    <filename><replaceable>context</replaceable>-<replaceable>config-name</replaceable>.json</filename>,
    where <replaceable>context</replaceable> for custom configuration objects
    is <literal>custom</literal> by convention, and
@@ -499,11 +506,16 @@ val = openidm.read("config/custom/myconfig")</programlisting>
 
  <section xml:id="object-main-audit-objects">
   <title>Audit Objects</title>
-  <para>The Audit Objects houses audit data selected for local storage in the OpenIDM repository.</para>
+  <para>Audit objects house audit data selected for local storage in the
+  OpenIDM repository.</para>
  </section>
 
  <section xml:id="object-main-links">
   <title>Links</title>
-  <para>The link object defines a relation between one source object and a target object; typically in the case of a Managed Object to a System Object. This relation is established via any provisioning activity resulting in a new account on a target system or in case of applicable scenarios during reconciliation and synchronization yielding a LINK action.</para>
+  <para>Link objects define relations between source objects and a target
+  objects, usually relations between managed objects and system objects.
+  The link relationship is established by provisioning activity that either
+  results in a new account on a target system, or a reconciliation or
+  synchronization scenario that takes a <literal>LINK</literal> action.</para>
  </section>
 </chapter>

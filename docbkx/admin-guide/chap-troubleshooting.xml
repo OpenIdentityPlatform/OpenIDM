@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-troubleshooting'
@@ -64,8 +64,24 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
     at org.forgerock.openidm.config.installer.JSONConfigInstaller.setConfig(JSONConfigInstaller.java:340)</literal>
   </para> 
   <para>
-  You have a syntax error in your <filename>openidm/conf/sync.json</filename>
-  </para> 
+  You have a syntax error in your <filename>openidm/conf/sync.json</filename>.
+  After fixing your configuration, use <filename>openidm/cli.sh</filename>
+  with the <command>validate</command> command to check that your configuration
+  files are valid.
+  </para>
+  <screen>$ sh cli.sh validate
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+...................................................................
+[Validating] Load JSON configuration files from:
+[Validating]  /path/to/openidm/conf
+[Validating] audit.json .................................. SUCCESS
+[Validating] authentication.json ......................... SUCCESS
+[Validating] managed.json ................................ SUCCESS
+[Validating] provisioner.openicf-xml.json ................ SUCCESS
+[Validating] repo.orientdb.json .......................... SUCCESS
+[Validating] router.json ................................. SUCCESS
+[Validating] scheduler-reconcile_systemXmlAccounts_managedUser.json  SUCCESS
+[Validating] sync.json ................................... SUCCESS</screen>
  </section>
  <section>
   <title>Json Parsing Error</title>
@@ -85,30 +101,9 @@ org.forgerock.openidm.config.InvalidException: Configuration for org.forgerock.o
   <para>
   The situation usually results in the service the config-json belongs to is left in the "unsatisfied" state.
   </para>
- </section>
- <section>
-  <title>Missing Link-Table</title>
-  <para>
-  When using OrientDB, each mapping needs a separate linking table defined in the repo.orientdb.json. If it is missing, then a huge error stack is thrown to the log, starting with:
-  </para>
-  <screen width="100">
-  Link query failed
-  followed by: 
-  Failed to resolve and parse the query SELECT * FROM ${_resource} 
-  WHERE sourceId = '${sourceId}' with params: 
-  {_resource=link_XXXsystemHrAccounts_managedUser, _query-id=links-for-sourceId, sourceId=DDOE}
-  And:
-  Error on parsing query at position...
-  And:
-  Class 'LINK_XXXSYSTEMHRACCOUNTS_MANAGEDUSER' was not found in current database...
-  </screen>
-  <para>
-  The last hint, "Class ... was not found in current database" is finally telling the problem: there is no class (i.e. table) in the repository for the links of this mapping.
-  </para>
-  <para>
-  The naming convention for the table name is:
-  The string "link_" concatenated with the name of the mapping (as defined in the sync.json configuration).
-  </para>
+  <para>You can use <filename>openidm/cli.sh</filename> with the
+  <command>validate</command> command to check that your configuration files
+  are valid.</para>
  </section>
  <section>
   <title>System Not available</title>

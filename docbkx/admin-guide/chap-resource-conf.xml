@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-resource-conf'
@@ -31,44 +31,56 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Resource Connector Configuration</title>
-  <section>
-   <title>Introduction</title>
-   <para>The topic of this chapter is to describe how to connect to different external resources, like flat file, LDAP, AD and others. 
-The configuration shown here is kept simple, especially concerning the number of attributes handled. Still it should be possible to extend the configuration to any projects need with the knowledge learned here. 
-Not all resources are suited for all OpenIDM operations. Still all of the resources shown here support the most of the CRUD functionalities plus reconciliation and live sync.</para>
-   <section>
-    <title>About Connections to Resources</title>
-    <para>Resources are the external systems, data bases, directory servers which usually hold user data which needs to be maintained and audited by an identity management system. 
-    OpenIDM connects to external resources through a connector frame work called OpenICF. The project for OpenICF is hosted [here|http://openicf.forgerock.org/].
-    The image below shows the architecture of how OpenIDM connects to external resources via the OpenICF server. In most cases the OpenICF server will start as part of OpenIDM.
-            </para>
-    <para>
-     <figure><title>OpenICF Architecture</title>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref="images/OpenICFarc.png" format="PNG">
-                </imagedata>
-              </imageobject>
-            </mediaobject>
-            <caption><para>The figure shows the basic architecture of OpenIDM with two connector servers. The built in local java server, and the remote .net server.</para></caption>
-            </figure>
-          </para>
-        </section>
-        <section>
-            <title>Local v.s. Remote Connector Server</title>
-            <para>The idea of OpenICF is to provide a common SPI to give identity 
-            related services access to different sources which contain information about users. The connection to the external resource is established by the Connector server which can part of the application (called a local connector server) or a stand alone process, then called a remote Connector sever.</para> 
-            <para>The reason to use a remote connector server could be  to access libraries which can not be used inside the application's process. Principally OpenICF will always avoid agents on the external 
-            system and use the external system's native access protocol instead. 
-            (A connection to a Db will be established with the DB's java connection 
-            libraries or JDBC driver. Connections to ldap servers are done over JNDI 
-            and to connect to Operating systems it uses ssh.) If an external service does not 
-            provide a connection library which can be executed inside the JVM, like 
-            Microsoft's ADSI, then OpenICF can still use the native dll by a remote 
-            connector server. In the case of ADSI the connector server is established 
-            as a .net service.</para>
-  </section>
+
+ <para>This chapter describes how to connect to external resources such
+ as LDAP, Active Directory, flat files, and others. Configurations shown
+ here are simplified to show essential aspects. Not all resources are
+ suited to all OpenIDM operations, though the resources shown here support
+ most of CRUD, and also reconciliation and live sync.</para>
+
+ <para>In OpenIDM, <firstterm>resources</firstterm> are external systems,
+ databases, directory servers, and other sources of user data to be maintained
+ and audited by the identity management system. OpenIDM connects to resources
+ through the identity connector framework, <link xlink:show="new"
+ xlink:href="http://openicf.forgerock.org/">OpenICF</link>. OpenICF aims to
+ avoid the need to install agents to access resources, instead using the
+ resources' native protocols. For example, OpenICF connects to database
+ resources using the database's Java connection libraries or JDBC driver.
+ It connects to directory servers over JNDI. It connects to operating systems
+ by using <command>ssh</command>.</para>
+
+ <section xml:id="openidm-openicf">
+  <title>OpenIDM &amp; OpenICF</title>
+
+ <para>The following figure shows how OpenIDM can connect to resources through
+ an OpenICF server. In most cases, the OpenICF server runs as part of
+ OpenIDM.</para>
+
+ <mediaobject>
+  <alt>OpenICF architecture</alt>
+  <imageobject>
+   <imagedata fileref="images/OpenICFarc.png" format="PNG" />
+  </imageobject>
+  <textobject>
+   <para>The figure shows the basic architecture of OpenIDM with two connector
+   servers, one built-in local java server, and another remote, .NET
+   server.</para>
+  </textobject>
+ </mediaobject>
+
+ <para>OpenICF provides a common service provider interface to allow identity
+ services access to the resources containing user information. OpenICF uses
+ a connection server that can run as a local connector server inside OpenIDM,
+ or as a remote connector server that is a stand-alone process.</para>
+
+ <para>You might use a remote connector server when you need to access
+ libraries that cannot be included as part of the OpenIDM process. If a
+ resource, such as Microsoft ADSI, does not provide a connection library that
+ you can include inside the Java Virtual Machine, then OpenICF can use the
+ native .dll with a remote connector server. (OpenICF connects to ADSI through
+ a remote connector server implemented as a .NET service.)</para>
  </section>
+
  <section xml:id="connect-prop-id">
   <title>Common Connector Properties</title>
   <section>
