@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -231,28 +231,32 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      */
     public JsonValue configure(JsonValue params) throws JsonResourceException {
         JsonValue result = null;
-        if (params.isNull() || params.size() == 0) {
-            result = new JsonValue(new HashMap<String, Object>());
-            result.put(ConnectorUtil.OPENICF_CONNECTOR_REF, listAllConnectorInfo());
-        } else if (!params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull() && params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull()) {
-            //May throw IllegalArgumentException
-            ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
-            ConnectorInfo info = findConnectorInfo(ref);
-            if (null == info) {
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
+        try {
+            if (params.isNull() || params.size() == 0) {
+                result = new JsonValue(new HashMap<String, Object>());
+                result.put(ConnectorUtil.OPENICF_CONNECTOR_REF, listAllConnectorInfo());
+            } else if (!params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull() && params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull()) {
+                //May throw IllegalArgumentException
+                ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
+                ConnectorInfo info = findConnectorInfo(ref);
+                if (null == info) {
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
+                }
+                result = params;
+                ConnectorUtil.createSystemConfigurationFromAPIConfiguration(info.createDefaultAPIConfiguration(), result.asMap());
+            } else if (!params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull() && !params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull()) {
+                //May throw IllegalArgumentException
+                ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
+                ConnectorInfo info = findConnectorInfo(ref);
+                if (null == info) {
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
+                }
+                APIConfiguration configuration = info.createDefaultAPIConfiguration();
+                ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);
+                result = new JsonValue(createSystemConfiguration(configuration, false));
             }
-            result = params;
-            ConnectorUtil.createSystemConfigurationFromAPIConfiguration(info.createDefaultAPIConfiguration(), result.asMap());
-        } else if (!params.get(ConnectorUtil.OPENICF_CONNECTOR_REF).isNull() && !params.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES).isNull()) {
-            //May throw IllegalArgumentException
-            ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
-            ConnectorInfo info = findConnectorInfo(ref);
-            if (null == info) {
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
-            }
-            APIConfiguration configuration = info.createDefaultAPIConfiguration();
-            ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);
-            result = new JsonValue(createSystemConfiguration(configuration, false));
+        } catch (JsonValueException e) {
+            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, e.getMessage(), e);
         }
         return result;
     }
@@ -315,12 +319,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         for (ConnectorInfo info : connectorInfoManager.getConnectorInfos()) {
             Map<String, Object> connectorReference = ConnectorUtil.getConnectorKey(info.getConnectorKey());
+            connectorReference.put("displayName",info.getConnectorDisplayName());
             result.add(connectorReference);
         }
 
         if (null != osgiConnectorManager) {
             for (ConnectorInfo info : osgiConnectorManager.getConnectorInfos()) {
                 Map<String, Object> connectorReference = ConnectorUtil.getConnectorKey(info.getConnectorKey());
+                connectorReference.put("displayName",info.getConnectorDisplayName());
                 connectorReference.put(ConnectorUtil.OPENICF_CONNECTOR_HOST_REF, ConnectorReference.OSGI_SERVICE_CONNECTOR_MANAGER);
                 result.add(connectorReference);
             }
@@ -331,6 +337,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 ConnectorInfoManager remoteConnectorInfoManager = factory.getRemoteManager(entry.getValue());
                 for (ConnectorInfo info : remoteConnectorInfoManager.getConnectorInfos()) {
                     Map<String, Object> connectorReference = ConnectorUtil.getConnectorKey(info.getConnectorKey());
+                    connectorReference.put("displayName",info.getConnectorDisplayName());
                     connectorReference.put(ConnectorUtil.OPENICF_CONNECTOR_HOST_REF, entry.getKey());
                     result.add(connectorReference);
                 }

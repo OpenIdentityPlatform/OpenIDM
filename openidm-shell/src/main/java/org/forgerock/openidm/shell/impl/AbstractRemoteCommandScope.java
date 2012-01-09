@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2011 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,6 +24,7 @@
  */
 package org.forgerock.openidm.shell.impl;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
@@ -34,6 +35,8 @@ import org.forgerock.openidm.shell.CustomCommandScope;
 public abstract class AbstractRemoteCommandScope implements CustomCommandScope {
 
     private JsonResource router;
+
+    protected final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * @return HttpRemoteJsonResource instance

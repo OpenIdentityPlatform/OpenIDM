@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -35,6 +35,7 @@ import org.forgerock.openidm.shell.CustomCommandScope;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -72,6 +73,17 @@ public class Main {
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
         for (CustomCommandScope cmdScope : ldr) {
             if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
+                if (cmdScope instanceof AbstractRemoteCommandScope) {
+                    try {
+                        Field router = AbstractRemoteCommandScope.class.getDeclaredField("router");
+                        if (null != router) {
+                            router.setAccessible(true);
+                            router.set(cmdScope, new HttpRemoteJsonResource());
+                        }
+                    } catch (Exception e) {
+                        System.out.append("Failed to set HttpRemoteJsonResource: ").println(e.getMessage());
+                    }
+                }
                 for (Map.Entry<String, String> entry : cmdScope.getFunctionMap().entrySet()) {
                     Function target = new CommandProxy(cmdScope,
                             entry.getKey());
