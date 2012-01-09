@@ -71,7 +71,6 @@
  <xinclude:include href='chap-managed-objects.xml' />
  <xinclude:include href='chap-router.xml' />
  <xinclude:include href='chap-functions.xml' />
- <xinclude:include href='chap-rest.xml' />
  <xinclude:include href='chap-scripting.xml' />
 
  <index />

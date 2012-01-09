@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<chapter xml:id="chap-configuration"
+ xmlns="http://docbook.org/ns/docbook"
+ version="5.0" xml:lang="en"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ <title>OpenIDM Configuration</title>
+
+ <para>OpenIDM configuration is split between .properties and container
+ configuration files, and also dynamic configuration objects. The majority
+ of OpenIDM configuration files are stored under
+ <filename>openidm/conf/</filename>, as described in the appendix listing the
+ <link xlink:href="admin-guide#appendix-file-layout"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>File
+ Layout</citetitle></link>.</para>
+
+ <para>OpenIDM stores configuration objects in its internal repository.
+ You can manage the configuration by using either the REST access to the
+ configuration objects, or by using the JSON file based views</para>
+
+ <section xml:id="configuration-objects">
+  <title>About Configuration Objects</title>
+
+  <para>OpenIDM exposes internal configuration objects in JSON. Configuration
+  elements can be either have single instances or multiple instances for
+  an OpenIDM installation.</para>
+
+  <itemizedlist>
+   <para>Single instance configurations correspond to services that have
+   at most one instance per installation.</para>
+   <para>JSON file views of these configuration objects are named
+   <filename><replaceable>object-name</replaceable>.json</filename>.</para>
+   <listitem>
+    <para>The <literal>audit</literal> configuration specifies how audit
+    events are logged, for example.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>authentication</literal> configuration controls
+    REST access.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>managed</literal> configuration defines managed
+    objects and their schemas.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>repo.<replaceable>repo-type</replaceable></literal>
+    configuration such as <literal>repo.orientdb</literal> or
+    <literal>repo.jdbc</literal> configures the internal repository.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>router</literal> configuration specifies filters to
+    apply for specific operations.</para>
+   </listitem>
+   <listitem>
+    <para>The <literal>sync</literal> configuration defines all the mappings
+    OpenIDM uses when synchronizing and reconciling managed objects.</para>
+   </listitem>
+  </itemizedlist>
+
+  <itemizedlist>
+   <para>Multiple instance configurations correspond to services that can
+   have many instances per installation.</para>
+   <para>Configuration objects are named
+   <literal><replaceable>object-name</replaceable>/<replaceable>instance-name</replaceable></literal>.</para>
+   <para>JSON file views of these configuration objects are named
+   <filename><replaceable>object-name</replaceable>-<replaceable>instance-name</replaceable>.json</filename>.</para>
+   <listitem>
+    <para>Multiple <literal>scheduler</literal> configurations can run
+    reconciliations on different schedules.</para>
+   </listitem>
+   <listitem>
+    <para>Multiple <literal>provisioner.openicf</literal> configurations
+    correspond to the resources connected to OpenIDM.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="when-configuring-notes">
+  <title>When Changing the Configuration</title>
+
+  <itemizedlist>
+   <para>When changing OpenIDM's configuration objects, take the following
+   points into account.</para>
+   <listitem>
+    <para>OpenIDM's authoritative configuration source is the internal
+    repository. JSON files provide a view of the configuration objects, but
+    do not represent the authoritative source.</para>
+    <para>OpenIDM updates JSON files after making configuration changes,
+    whether those changes are made through REST access to configuration
+    objects, or through edits to the JSON files.</para>
+   </listitem>
+   <listitem>
+    <para>OpenIDM recognizes changes to JSON files when it is running. OpenIDM
+    must be running when you delete configuration objects, even if you do so
+    by editing the JSON files.</para>
+   </listitem>
+   <listitem>
+    <para>Avoid directly editing configuration objects in the internal
+    repository. Use either REST access or JSON files to ensure consistent
+    behavior and that operations are logged.</para>
+   </listitem>
+  </itemizedlist>
+ </section>
+
+ <section xml:id="configuring-over-rest">
+  <title>Configuring OpenIDM Over REST</title>
+
+  <para>OpenIDM exposes configuration objects under the
+  <literal>openidm/config</literal> context.</para>
+
+  <indexterm>
+  <primary>REST API</primary>
+  <secondary>Listing configuration objects</secondary>
+  </indexterm>
+  <para>You can list the configuration on the local host by performing a GET
+  <literal>http://localhost:8080/openidm/config</literal>.</para>
+  <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ http://localhost:8080/openidm/config
+
+{
+    "configurations": [
+        {
+            "_id": "managed",
+            "pid": "managed",
+            "factoryPid": null
+        },
+        {
+            "_id": "repo.orientdb",
+            "pid": "repo.orientdb",
+            "factoryPid": null
+        },
+        {
+            "_id": "scheduler/reconcile_systemXmlAccounts_managedUser",
+            "pid": "scheduler.adc5cd2f-7086-4e30-9d80-b36077861868",
+            "factoryPid": "scheduler"
+        },
+        {
+            "_id": "org.apache.felix.fileinstall/openidm",
+            "pid":
+            "org.apache.felix.fileinstall.abb696a2-95c6-4432-ae74-ba60a319d1bb",
+            "factoryPid": "org.apache.felix.fileinstall"
+        },
+        {
+            "_id": "sync",
+            "pid": "sync",
+            "factoryPid": null
+        },
+        {
+            "_id": "audit",
+            "pid": "audit",
+            "factoryPid": null
+        },
+        {
+            "_id": "provisioner.openicf/xml",
+            "pid": "provisioner.openicf.10e2dd6d-442d-466c-a077-643bb53e2006",
+            "factoryPid": "provisioner.openicf"
+        },
+        {
+            "_id": "router",
+            "pid": "router",
+            "factoryPid": null
+        },
+        {
+            "_id": "authentication",
+            "pid": "authentication",
+            "factoryPid": null
+        }
+    ]
+}</screen>
+
+  <para>You can find single instance configuration objects under
+  <literal>openidm/config/<replaceable>object-name</replaceable></literal>.
+  The following example shows the default <literal>audit</literal>
+  configuration.</para>
+
+  <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ http://localhost:8080/openidm/config/audit
+
+{
+    "eventTypes": {
+        "activity": {
+            "filter": {
+                "actions": [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            }
+        },
+        "recon": {}
+    },
+    "logTo": [
+        {
+            "logType": "csv",
+            "location": "audit",
+            "recordDelimiter": ";"
+        },
+        {
+            "logType": "repository"
+        }
+    ]
+}</screen>
+
+  <para>Multiple instance configuration objects are found under
+  <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable>instance-name</replaceable></literal>.
+  The following example shows the configuration for the XML connector
+  provisioner.</para>
+
+  <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ http://localhost:8080/openidm/config/provisioner.openicf/xml
+
+{
+    "name": "xmlfile",
+    "connectorRef": {
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "1.1.0.0-EA",
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector"
+    },
+    "producerBufferSize": 100,
+    "connectorPoolingSupported": true,
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "TEST": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "GET": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd",
+        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml"
+    },
+    "objectTypes": {
+        "account": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ACCOUNT__",
+            "type": "object",
+            "nativeType": "__ACCOUNT__",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "firstname": {
+                    "type": "string",
+                    "nativeName": "firstname",
+                    "nativeType": "string"
+                },
+                "email": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "email",
+                    "nativeType": "string"
+                },
+                "__UID__": {
+                    "type": "string",
+                    "nativeName": "__UID__"
+                },
+                "password": {
+                    "type": "string",
+                    "required": false,
+                    "nativeName": "__PASSWORD__",
+                    "nativeType": "JAVA_TYPE_GUARDEDSTRING",
+                    "flags": [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                },
+                "lastname": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "lastname",
+                    "nativeType": "string"
+                }
+            }
+        }
+    },
+    "operationOptions": {}
+}</screen>
+
+  <para>See the appendix on the <link xlink:href="admin-guide#appendix-rest"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
+  API</citetitle></link> for additional details and examples using REST
+  access to update and patch objects.</para>
+ </section>
+</chapter>
