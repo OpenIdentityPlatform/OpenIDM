@@ -61,7 +61,7 @@
  <xinclude:include href="preface.xml" />
  <xinclude:include href='chap-overview.xml' />
  <xinclude:include href='chap-services.xml' />
- <xinclude:include href='chap-conf-folder.xml' />
+ <xinclude:include href='chap-configuration.xml' />
  <xinclude:include href='chap-logs.xml' />
  <xinclude:include href='chap-object-main.xml' />
  <xinclude:include href='chap-resource-conf.xml' />
@@ -77,6 +77,9 @@
  <xinclude:include href='chap-best-pract.xml' />
  <xinclude:include href='chap-debug.xml' />
  <xinclude:include href='chap-troubleshooting.xml' />
+
+ <xinclude:include href="appendix-file-layout.xml" />
+ <xinclude:include href="appendix-rest.xml" />
 
  <index />
  <?dbhtml-include href="../ga.html"?>
