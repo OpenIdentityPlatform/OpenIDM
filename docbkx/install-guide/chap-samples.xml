@@ -222,17 +222,17 @@ $ curl
   <section><title>External Configuration</title>
    <para>OpenIDM is expected to connect to an external database server running on mySQL. The following configuration of the database is expected:</para>
    <itemizedlist>
-    <listitem>the database is available on the local host</listitem>
-    <listitem>the database listens on port 3306</listitem>
-    <listitem>a network connection to the db possible with user: root and password: password</listitem>
-    <listitem>there is a database called HRDB with a table called Users on the databasee server</listitem>
-    <listitem>te db schema is like described in the DDL file</listitem>
+    <listitem><para>the database is available on the local host</para></listitem>
+    <listitem><para>the database listens on port 3306</para></listitem>
+    <listitem><para>a network connection to the db possible with user: root and password: password</para></listitem>
+    <listitem><para>there is a database called HRDB with a table called Users on the database server</para></listitem>
+    <listitem><para>the db schema is like described in the DDL file</para></listitem>
    </itemizedlist>
-   <warning>If running the DDL to create the DB schema gives you an arror on creating the tables, then you may need to change the type of the timestamp column from "timestamp TIMESTAMP(8)" to "timestamp TIMESTAMP"</warning>
+   <warning><para>If running the DDL to create the DB schema gives you an arror on creating the tables, then you may need to change the type of the timestamp column from "timestamp TIMESTAMP(8)" to "timestamp TIMESTAMP"</para></warning>
    <para>If the configuration of the external database was correct the OpenIDM should echo 5 users during startup. This is because the check method, which is executed on against each connected resource, executes a "select * from Users" statement in this case.</para>
   </section>
   <section><title>Run the Sample</title>
-   <para>The sync configuration of sampel 3 contains a mapping for reconciling agianst the external DB. To run the reconciliation run the following curl command:</para>
+   <para>The sync configuration of sampel 3 contains a mapping for reconciling against the external DB. To run the reconciliation run the following curl command:</para>
    <screen>
 $ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -255,7 +255,7 @@ $ curl
  {"_id":"17fc954f-828a-454c-b05e-f8e9934c6e64","_rev":"0"},
  {"_id":"371855d1-44c9-4854-a576-3397275211e4","_rev":"0"},
  {"_id":"97066201-e0de-48d9-8c9e-bdf7f0f0c7e5","_rev":"0"}],"conversion-time-ms":0}</screen>
-   <para>And the command to get one of the user above listed is like: </para>
+   <para>And the command to get one of the user above listed is like (please use the id of one of your users): </para>
    <screen>
 $ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -266,24 +266,31 @@ $ curl
   </section>
  </section>
  
- <section><title>Sample 4 - </title>
+ <section><title>Sample 4 - CSV Connector</title>
   <para>ToDo</para>
-  <section><title>Install the Sample</title></section>
-  <section><title>External Configuration</title></section>
-  <section><title>Run the Sample</title></section>
+  <section><title>Install the Sample</title>
+   <para>ToDo</para>
+  </section>
+  <section><title>External Configuration</title>
+   <para>ToDo</para>
+  </section>
+  <section><title>Run the Sample</title>
+   <para>ToDo</para>
+  </section>
  </section>
  
- <section><title>Sample 5 - </title>
+ <!--section><title>Sample 5 - Synchronizaiton of two Resources</title>
   <para>ToDo</para>
-  <section><title>Install the Sample</title></section>
+  <section><title>Install the Sample</title>
+  </section>
   <section><title>External Configuration</title></section>
   <section><title>Run the Sample</title></section>
- </section>
+ </section-->
  
- <section><title>Sample 6 - </title>
+ <!--section><title>Sample 6 - Live Sync with LDAP</title>
   <para>ToDo</para>
   <section><title>Install the Sample</title></section>
   <section><title>External Configuration</title></section>
   <section><title>Run the Sample</title></section>
- </section>
+ </section-->
 </chapter>
