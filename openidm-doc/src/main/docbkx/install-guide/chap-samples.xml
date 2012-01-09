@@ -267,25 +267,74 @@ $ curl
  </section>
  
  <section><title>Sample 4 - CSV Connector</title>
-  <para>ToDo</para>
+  <para>Sample 4 deals with a flat file comma separated value file as the external resource. The file id part of the sample configuration, therefore noe other external resource needs to be maintained.</para>
   <section><title>Install the Sample</title>
-   <para>ToDo</para>
+   <para>Additionally to the <xref linkend="preparignIDM-id"/> a directory called <filename>data</filename>, containing the csv file, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
+   <screen>$ cp -r samples/sample4/data .</screen>
   </section>
   <section><title>External Configuration</title>
-   <para>ToDo</para>
+   <para>No other configuration for the external resource is needed except the copying file <filename>data/hr.csv</filename> (see above). </para>
   </section>
   <section><title>Run the Sample</title>
-   <para>ToDo</para>
+   <para>The csv file from the <filename>sample4/data</filename> already contains two example users in lines two and three. The first line of the file is used to set the attribute names. Running a reconciliation will create the two user in the OpenIDM repository:</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemHrAccounts_managedUser"
+   </screen>
+   <para>Check that the users where reconciled and created in OpenIDM with:</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"   
+   </screen>
   </section>
  </section>
  
- <!--section><title>Sample 5 - Synchronizaiton of two Resources</title>
-  <para>ToDo</para>
+ <section><title>Sample 5 - Synchronizaiton of two Resources</title>
+  <para>The purpose of sample 5 is to demonstrate the flow of data from one external resource to another. The resources are called LDAP and AD, but in the example both directory like resources are simulated by two xml files.</para>
   <section><title>Install the Sample</title>
+   <para>Additionally to the <xref linkend="preparignIDM-id"/>, a directory called <filename>script</filename>, containing some java script files, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
+   <screen>
+$ cp -r samples/sample5/script .
+   </screen>
+   <warning>If you get a sever warning on on startup of OpenIDM which lokk like: SEVERE: Failed to parse the config of [org.forgerock.openidm.provisioner.openicf, xml-AD]-java.lang.IllegalArgumentException: bundleName may not be null, then please add the following line to both provisioner jason files:
+   <screen>"bundleName" :
+   "org.forgerock.openicf.connectors.file.openicf-xml-connector",</screen>
+   <para>This line must be put into the "connectorRef" property, for instanc it can be put behind the line:</para>
+   <screen>"bundleVersion" : "1.1.0.0-EA",</screen>
+   <para>Additionally the correlation rule in the script file  <filename>script/name_eq_name_correlationQuery.js</filename> may need a change:</para>
+   <screen>
+change
+var value = source.name;
+to
+var value = source.userName;
+   </screen>
+   <para>Keep in mind that in opposite to the json configuration files any change to a java script file will only be loaded on system startup or if the calling file was change. The file mentioned here is called by <filename>conf/sync.json</filename></para>
+   </warning>
   </section>
-  <section><title>External Configuration</title></section>
-  <section><title>Run the Sample</title></section>
- </section-->
+  <section><title>External Configuration</title>
+   <para>No extra external resource needs configuration for this example.</para>
+   <info>
+    <para>As can be seen in the provisioner json files, the two xml files which represent the external resources are located in the folder: <filename>/samples/sample5/data</filename>! The file <filename>xml_AD_Data.xml</filename> will be automatically created on the first startup of the server. Before the first reconciliation it will not contain any user!</para>
+   </info>
+  </section>
+  <section><title>Run the Sample</title>
+   <para>To run the sample a reconciliation between OpenIDM and the pseudo LDAP resource must be executed:</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+   </screen>
+   <para>This will create a user in the repository as well as in the pseudo AD resource, represented in the file <filename>samples/sample5/data/xml_AD_Data.xml</filename></para>
+  </section>
+ </section>
  
  <!--section><title>Sample 6 - Live Sync with LDAP</title>
   <para>ToDo</para>
