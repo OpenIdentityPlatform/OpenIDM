@@ -10,7 +10,7 @@
         "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'",
         "credential-query" : "select _openidm_id, password from managed_user WHERE email = ${username}",
         "credential-internaluser-query" : "select _openidm_id, password, roles from internal_user WHERE _openidm_id = ${username}",
-        "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${userName}'"
+        "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"
     },
     "dbStructure" : {
         "orientdbClass" : {
