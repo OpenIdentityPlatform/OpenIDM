@@ -100,8 +100,8 @@
  <section xml:id="limitations">
   <title>Limitations</title>
 
-  <para>No limitations are identified for OpenIDM <?eval ${docTargetVersion}?>
-  at this time.</para>
+  <para>OpenIDM <?eval ${docTargetVersion}?> does not run as a Windows
+  service.</para>
  </section>
 
  <section xml:id="known-issues">
