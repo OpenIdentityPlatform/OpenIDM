@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-synchronization'
@@ -48,11 +48,24 @@
     <listitem><para>LiveSync</para></listitem>
    </itemizedlist>
    <section><title>Reconciliation</title>
-   <para>In identity management reconciliation is the process of bidirectional synchronization of objects between different data stores. Though it is mainly user objects, other types of objects might be groups or roles. The important part here is that the synchronizing machine needs to analyze both systems, the source and the target system to find any differences which should be reconciled according to a set of rules. Reconciliation has to be distinguished from replication, a concept used in LDAP servers, which is a one way synchronization and based on a change log. In a replication process only changes which appear in the change log will be processes and changes are replicated only in one direction. In the case of replication it is also always the server on which the initial change was applied which pushes the changes to the target server.</para>
-   <para>In OpenIDM Reconciliation is used to pick up changes from External resources. The process is configured in the mapping properties in the file <filename>openidm/conf/sync.json</filename>. Additionally the mapping can be configured in the scheduler configuration. This is useful if the reconciliation mapping needs to be different than the LiveSync mapping.</para>
+   <para>In identity management <firstterm>reconciliation</firstterm> is the
+   process of bidirectional synchronization of objects between different data
+   stores. Reconciliation applies primarily to user objects, though other
+   objects such groups or roles can also be reconciled. To perform
+   reconciliation, OpenIDM must analyze both the source and target systems
+   to uncover differences that it must reconcile.</para>
+   <para>In OpenIDM, reconciliation picks up changes from external resources
+   based on the mapping properties you configure in the <literal>sync</literal>
+   configuration, exposed in the <filename>openidm/conf/sync.json</filename>
+   configuration file, or in the scheduler configuration. You can add the
+   mapping to the scheduler for example when the mapping for reconciliation
+   needs to be different from the mapping for live sync.</para>
   </section>
   <section><title>LiveSync</title>
-   <para>OpenIDM does not have a replication concept but something called Live Sync which is in between Reconciliation and Replication. It is based on a change log but runs as a pull, not a push process. LiveSync will be compared to reconciliation below. LiveSync is configured in the same mapping properties as reconciliation.</para>
+   <para>OpenIDM <firstterm>LiveSync</firstterm> makes use of a change log on
+   the resource to run as a pull process. LiveSync is configured using the
+   same mapping properties as reconciliation. For LiveSync, OpenIDM applies
+   the mapping defined in <filename>openidm/conf/sync.json</filename>.</para>
    </section>
   </section>
   <section><title>Triggered Updates</title>
@@ -64,14 +77,31 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
     </programlisting>
    </example>
   </section>
-  <section><title>LiveSync versus Reconciliation</title>
-  <para>During reconciliation it is OpenIDM's task to find out which of the external objects might have received a change since the last run of reconciliation. This makes reconciliation a very fail safe but at the same time also rather expensive process. Expensive in terms of computation time. Therefore it might be desired to have a process which focuses only on those object which have received a change. This process is called LiveSync in OpenIDM</para>
-  <para>The important difference between Reconciliation and LivSync is that in the latter case OpenIDM needs to know which objects were changed and would then be able to handle only the changed objects. In oposite to reconciliation where OpenIDM first needs to find those objects which have received a change on the external system.</para>
-  <para>In large sets of data finding the changed objects might be more work than processing the changes itself, which makes reconciliation an unnecessarily heavy process.</para>
-  <para>The important prerequisite for LiveSync is to provide OpenIDM with the list of changed objects. Fortunately many of the external resources provide this information out of the box. For instance directory servers including Active Directory support something called a change log. If this change log can be accessed by OpenIDM, i.e. the connector server, then the information of which objects have received a change is provided there. OpenIDM just needs to keep track of which changes have been processed already and method to find the unprocessed changes. This can be a time stamp or a change sequence number.</para>
-   <section><title>Example: Live sync against OpenDJ</title>
-   <para>In the case of an external OpenDJ server all changes are stored, one object per change, in something called the External Change Log (ECL) under the base suffix cn=changelog with an attribute called changeNumber. Any change will get a new changeNumber increased by one. So between different LiveSync runs, OpenIDM just needs to remember the value of the last successfully processed changeNumber.</para>
-   </section>
+
+  <section xml:id="livesync-reconciliation">
+   <title>LiveSync &amp; Reconciliation</title>
+
+   <para>LiveSync is intended to react quickly to changes as they happen. Yet,
+   LiveSync is a best effort mechanism that in some cases can miss
+   changes.</para>
+ 
+   <para>Furthermore, not all resources support LiveSync's event-style
+   processing. The resource must provide OpenIDM with a list of changed
+   objects such as OpenDJ does with its external change log, where OpenIDM
+   needs to store only the last change it encountered between requests to
+   search the external change log. Active Directory also provides a change
+   log, for example.</para>
+ 
+   <para>Reconciliation is more thorough, and can recognize more system
+   conditions in addition to catching changes that LiveSync could miss.
+   Reconciliation is the basis for compliance and reporting
+   functionality.</para>
+ 
+   <para>Reconciliation can be a heavyweight process. When working with large
+   data sets, find all the changes can be more work than processing the
+   changes.</para>
+
+   <para></para>
   </section>
  </section>
  
@@ -81,15 +111,13 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    <para>OpenIDM does not defined any schema or set of Attributes to be stored in the repository. Any attribute which is configured as a target in a mapping pointing to the repository will be stored there. The schema of the repository database will be dynamically updated if a new attribute is mapped. Therefore OpenIDM can be used for both scenarios: the Metadirectory scenario, the minimum data scenario or any solution in between.</para>
   </section> 
   <section><title>Using SCIM</title>
-   <para>As mentioned int he chapter before, out of the box OpenIDM does not provide any predefined data schema for storing data in the repository. For compatibility reasons it is highly recommended to agree on a data model before a project is started. One possibility is to follow the attribute names as provided in the Simple Cloud Identity Management (<link xlink:href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html">SCIM</link>) specification.</para>
-   <para>The idea is to use any attribute name from SCIM if there is a suitable name defined. If not, then a new name needs to be chosen. A general challenge is that SCIM uses a rather hierarchical structure where in OpenIDM we currently prefer a flat structure. This may change in the near future.</para>
-   <!--section><title>Mapping exsiting SCUM attributes</title>
-    <itemizedlist>
-     <listitem><para>
-    </itemizedlist>
-   </section-->
-   <!--section><title>Additional Attributes</title>
-   </section-->
+   <para>OpenIDM lets you define the schema for storing data in the repository.
+   One possibility is to follow the attribute names defined in the Simple Cloud
+   Identity Management (<link
+   xlink:href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html"
+   >SCIM</link>) specification.</para>
+   <!-- TODO: Provide the configuration for SCIM, preferably not just as
+              documentation. -->
   </section>
   <section><title>Components for Data Synchronization</title>
    <para>OpenIDM involves two configuration file types and a database table in the synchronization process: sync.json, all provisioner.&lt;resourceName&gt;.json and the link table. The configuration files are used to configure synchronization by the administrators where the link table is maintained by OpenIDM to link objects on different resources (or the repository) which belong to the same user.</para>
@@ -314,6 +342,10 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    ]
 }        
         </programlisting>
+        <para>Do not use the default symmetric key in production. See the
+        chapter on <link xlink:href="admin-guide#chap-security"
+        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
+        &amp; Hardening OpenIDM</citetitle></link> for more.</para>
       </example>
      </section>
      <section><title>All time Construction</title>
@@ -415,7 +447,12 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
  <section><title>Correlation Queries</title>
   <para>If user or object is created through a reconciliation or liveSync, the OpenIDM's sync engine will also create a link between the two objects. the link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
   <para>Especially during the early phases of an identity management project there might be loads of users created from resource A when the next reconciliation with resource B is started. I this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
-  <para>In OpenIDM, or better to say OpenICF since this is the component wich executes the correlation query the syntax for the query depends on the direction of the synchronization. Direction here means whether the repository is the source or the target system.</para>
+
+  <para>In OpenIDM, the query is executed against the target. The syntax of the
+  query therefore depends on which system is the target. The syntax is specific
+  to the underlying data store or to OpenICF. All native query facilities are
+  available.</para>
+
   <section><title>Correlation query with the Repository as the Target</title>
    <para>As a prerequisite to find an object in the repository, there needs to be a query defined in the file <link>openidm/conf/repo.jdbc.json</link> or <link>openidm/conf/repo.orientdb.json</link>, depending on which type of repository is used. An example for a generic query for a OrientDB repository is shown in <xref linkend="orient-query-example-id"/> and one for a JDBC based repository in <xref linkend="jdbc-query-example-id"/> respectively.</para>
    <para>An example correlation rule to call the query looks like <xref linkend="correlation-toRepo-id"/>. The _query-id property has the name of the query in the repository configuration as a value, here "for-userName". The userName property will get the value of the variable "source.name" which will be put int the query at '${userName}'. </para>
@@ -448,15 +485,16 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    </example>
   </section>
  
-  <section><title>Correlation query with a resource as the Target</title>
-   <para>In the case when a resource is the target, then it is the connector which needs to execute the query for finding target objects.</para>
+  <section xml:id="correlation-query-system-object">
+   <title>Correlation Query With a System Object as the Target</title>
+   <para>In the case when a system object is the target, then it is the connector which needs to execute the query for finding target objects.</para>
    <para>The java script needs to return a map containing a generic query with the following elements:</para>
    <itemizedlist>
     <listitem><para>A condition like "Equals"</para></listitem>
-    <listitem><para>The name of the attribute to compare with on the resource: it is the value for the property "name", in the example below it is "uid"</para></listitem>
+    <listitem><para>The name of the attribute to compare on the system object: it is the value for the property "name", in the example below it is "uid"</para></listitem>
     <listitem><para>The value from the source to be used in the seearch filter. It is set in the propety "value" and needs an array as a value. In the example it is [source.userName]</para></listitem>
    </itemizedlist>
-   <example xml:base="back-correlation-example-id"><title>Correlation Query for Resources</title>
+   <example xml:base="back-correlation-example-id"><title>Correlation Query for System Objects</title>
     <programlisting language="javascript">
 var map = {"query": { "Equals": {"field" : "uid", "values" : [source.userName ]}}};
 map;    

@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-security'
@@ -35,6 +35,15 @@
  <para>After following the guidance in this chapter, make sure that you test
  your installation to verify that it behaves as expected before putting it
  into production.</para>
+
+ <!-- 
+  Chapter 11 - this needs to change / be enhanced with 
+- The fact that there now is a default user table (internal/user)
+- There is an OpenIDM authentication mechanism
+- That there is a fine grained access policy mechanism that they can use to protect resources, e.g. very flexible RBAC
+- Installing an additional and/or replacing the default symmetric key for encryption (see above for some details)
+- Replacing the default user/password with the detailed procedure.
+  -->
 
  <para>Out of the box, OpenIDM is set up for ease of development and
  deployment. When deploying OpenIDM in production, take the following
@@ -74,31 +83,31 @@
   such as passwords. OpenIDM replaces clear text values when the system first
   reads the configuration file. Take care with configuration files having
   clear text values that OpenIDM has not yet read and updated.</para>
+
+  <para>Also, do not use the default keys provided with OpenIDM, such
+  as the symmetric key with alias, <literal>openidm-sym-default</literal>.
+  Replace the key and the default password before starting OpenIDM for the
+  first time. See the examples in <filename>openidm/samples/security</filename>
+  for hints on creating your own. If you import your own key into the key
+  store with a different alias, change the alias used in
+  <filename>openidm/conf/boot/boot.properties</filename>.</para>
  </section>
 
  <section xml:id="security-messages">
   <title>Use Message Level Security</title>
 
   <para>OpenIDM supports message level security, forcing authentication before
-  granting access. The built in mechanism is based on Jetty security. An
-  alternative is to use an access manager such as OpenAM to control
-  authentication and authorization.</para>
+  granting access. TODO: Describe OpenIDM authentication and authorization.</para>
 
-  <section xml:id="security-jetty">
-   <title>Secure Jetty</title>
- 
-   <para>Install the <literal>openidm-security-jetty</literal> bundle, and
-   configure the <literal>openidm</literal> realm to authenticate users
-   appropriately.</para>
- 
-   <para>TODO: Explain how.</para>
-  </section>
- 
-  <section xml:id="security-openam-integration">
-   <title>Protect Access With OpenAM</title>
- 
-   <para>TODO</para>
-  </section>
+ </section>
+
+ <section xml:id="security-jetty">
+  <title>Secure Jetty</title>
+
+  <para>Before running OpenIDM in production, edit the
+  <filename>openidm/conf/jetty.xml</filename> configuration to avoid
+  clear text HTTP. Opt instead for HTTPS either with or without mutual
+  authentication.</para>
  </section>
 
  <section xml:id="security-files">

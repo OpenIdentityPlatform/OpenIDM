@@ -79,6 +79,7 @@
  <xinclude:include href='chap-troubleshooting.xml' />
 
  <xinclude:include href="appendix-file-layout.xml" />
+ <xinclude:include href="appendix-ports-used.xml" />
  <xinclude:include href="appendix-rest.xml" />
 
  <index />

@@ -97,7 +97,7 @@
   <varlistentry>
    <term><filename>openidm/conf/authentication.json</filename></term>
    <listitem>
-    <para>Authentication configuration view</para>
+    <para>Authentication configuration view for access to the REST API</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -141,6 +141,11 @@
    <listitem>
     <para>Sample XML connector configuration view. After evaluation,
     replace this with your own connector configurations.</para>
+    <para>Each connector instance has a corresponding
+    <filename>provisioner.openicf</filename> configuration file. Each file
+    specifies connector configuration details such as network information,
+    credentials, attribute schema, and which OpenICF features are
+    supported.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -285,9 +290,15 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/script/router-authz.js</filename></term>
+   <listitem>
+    <para>Default authorization policy script</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/security/</filename></term>
    <listitem>
-    <para>OpenIDM REST access configuration, key store, and trust store</para>
+    <para>OpenIDM security configuration, key store, and trust store</para>
    </listitem>
   </varlistentry>
   <varlistentry>
