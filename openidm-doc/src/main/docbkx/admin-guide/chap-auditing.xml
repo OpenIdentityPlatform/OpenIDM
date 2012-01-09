@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-auditing'
@@ -36,11 +36,13 @@
  the targets you specify. Auditing can include data from reconciliation as
  a basis for reporting, to detailed activity logs that capture operations on
  internal (managed) objects and external (system) objects. Auditing provides
- the data for all the relevant reports, including orphan account reports.
+ the data for all the relevant reports, including orphan account reports.</para>
+ <!--
  For instructions on setting up an external reporting engine with OpenIDM,
  see the chapter on <link xlink:href="admin-guide#chap-reporting"
  xlink:role="http://docbook.org/xlink/role/olink">generating reports</link>
- for instructions.</para>
+ for instructions.
+  -->
 
  <para>The auditing interface allows you to push auditing data to files or
  to the OpenIDM repository.</para>
@@ -50,6 +52,12 @@
 
   <variablelist>
    <para>This section describes the types of audit log OpenIDM provides.</para>
+   <varlistentry>
+    <term>Access Log</term>
+    <listitem>
+     <para>OpenIDM logs access to the REST API here.</para>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>Activity Log</term>
     <listitem>
@@ -206,5 +214,14 @@
     </varlistentry>
    </variablelist>
   </section>
+ </section>
+
+ <section xml:id="audit-log-format">
+  <title>Audit Log File Formats</title>
+
+  <para>This section describes the audit log file formats to help you map
+  these to into the reports you generate.</para>
+
+  <para>TODO complete this section.</para>
  </section>
 </chapter>
