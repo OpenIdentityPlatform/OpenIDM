@@ -81,292 +81,539 @@
  a remote connector server implemented as a .NET service.)</para>
  </section>
 
- <section xml:id="connect-prop-id">
-  <title>Common Connector Properties</title>
-  <section>
-   <title>Connecting to a Local Connector Server</title>
-            <para>The top level properties of the OpenICF Provisioner Service are:</para>
-            <example>
-                <title>Top Level Provisioner Service Properties as defined in the file provisioiner.&lt;connectorName&gt;.conf</title>
-                <programlisting>
-   {
-      "name" : {_See Below_,
-      ...}
-      "connectorRef" : {_See Below_,
-      ...}
-      "poolConfigOption" : {_See Below_,
-      ...}
-      "operationTimeout" : {_See Below_,
-      ...}
-      "configurationProperties" : {_See Below_,
-      ...}
-      "objectTypes" : {_See Below_,
-      ...}
-      "operationOptions" : {_See Below_
-      ...}
-   }                
-                </programlisting>
-   </example>
-   <section>
-    <title>The "name" Property</title>
-    <para>The name of the connector is used to reference the resource in all other configurations.</para>
-   </section>
-   <section>
-    <title>The "connectorRef"</title>
-    <para>It tells OpenIDM which java class, in which bundle to use as well as the version of the connector. Therefore it is possible to have different versions of the same connector installed in parallel.</para>
-    <example>
-                <title>Example "connectroRef"</title>
-                <programlisting>
-   {
-      "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-      "bundleName" : "org.forgerock.openicf.connectors.file.xml",
-      "bundleVersion" : "1.1.0.0-SNAPSHOT",
-      "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
-   }                
-                </programlisting>
-    </example>
-    <para>Where:</para>
-    <itemizedlist>
-                    <listitem><para>connectorHostRef: A pointer to the connector server. In case of a remote connector server it needs to point to the connector info provicer object, see the "connectorRef" for a Remote Connector below.</para>
-                        <itemizedlist>
-                        <listitem><para>If the connector server is local and the connector jar is installed as a bundle (i.e. in the openidm/bundle folder) then the value must be "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager", like in the example above.</para></listitem>
-                        <listitem><para>If the connector server is local and the connector jar is installed as connector (i.e. in the openidm/connectors folder) the the value should be "#LOCAL"</para></listitem>
-                        </itemizedlist>
-                    </listitem>
-                    <listitem><para>bundleName: The ConnectorBundle-Name of the OpenICF connector.</para></listitem>
-                    <listitem><para>bundleVersion: The ConnectorBundle-Version of the OpenICF connector.</para></listitem>
-                    <listitem><para>connectorName: The Connector implementation class name.</para></listitem>
-                </itemizedlist>
-            </section>
-            <section>
-                <title>The "poolConfigOption"</title>
-                <para>The connection between OpenIDM and the OpenICF connector server is handled with a configurable connection pool. An example for pool settings are shown here:</para>
-                <example>
-                    <title>Connection Pool Configuration between OpenIDM and the connector server</title>
-                    <programlisting>
-   {
-      "maxObjects" : 10,
-      "maxIdle" : 10,
-      "maxWait" : 150000,
-      "minEvictableIdleTimeMillis" : 120000,
-      "minIdle" : 1
-   }                    
-                    </programlisting>
-    </example>
-   </section>
-   <section>
-    <title>The "operationTimeout"</title>
-    <para>Each operation which might be requested from the connector server can be set with a different time out. A value of -1 disables the time out.</para>
-    <example>
-                    <title>Example Time Out configuration</title>
-                    <programlisting>
-   {
-      "CREATE" : -1,
-      "TEST" : -1,
-      "AUTHENTICATE" : -1,
-      "SEARCH" : -1,
-      "VALIDATE" : -1,
-      "GET" : -1,
-      "UPDATE" : -1,
-      "DELETE" : -1,
-      "SCRIPT_ON_CONNECTOR" : -1,
-      "SCRIPT_ON_RESOURCE" : -1,
-      "SYNC" : -1,
-      "SCHEMA" : -1
-   }                    
-                    </programlisting>
-    </example>
-   </section>
-   <section>
-    <title>The "configurationProperties"</title>
-    <para>The configurationProperties property configures the connection between the connection server and the actual resource and is therefore highly resource type specific. A file base resource will need a file path where any network based resource will need a host name and port combination. Authentication parameters will be configured here as well as search paths (like base contexts) in hierarchical directories. Two rather different examples are shown below:</para>
-    <example>
-                <title>Example for a File Base Resource</title>
-                <programlisting>
-    {
-        "xsdIcfFilePath" : "data/resource-schema-1.xsd",
-        "xsdFilePath" : "data/ef2bc95b-76e0-48e2-86d6-4d4f44d4e4a4.xsd",
-        "xmlFilePath" : "data/xmlConnectorData.xml"
-    }                
-                </programlisting>
-    </example>
-    <example>
-                <title>Example for an LDAP Based Resource (abbreviated)</title>
-                <programlisting>
-    {
-        "host" : "localhost",
-        "port" : 2389,
-        "baseContexts" : [ "ou=People,o=aaa" ],
-        "principal" : "cn=Directory Manager",
-        "credentials" : {"password"},
-        "changeLogBlockSize" : 100,
-        "failover" : [ ],
-        "ssl" : false,
-        ...
+ <section xml:id="connector-info-provider-conf">
+  <title>Connector Info Provider Service</title>
 
-    }                
-                </programlisting>
-    </example>
-    <para>Comment: even required properties are skipped in the example above!</para>
-   </section>
-   <section>
-    <title>The "objectTypes"</title>
-    <para>Though OpenIDM focuses on User Identity management the concept of managing other types of objects is part of the scope. Example of other objects that should be maintained by OpenIDM, i.e. created, updated or deleted, are:</para>
-    <itemizedlist>
-                    <listitem><para>Group Objects like LDAP or AD Groups</para></listitem>
-                    <listitem><para>Organizational Units in a Directory</para></listitem>
-                    <listitem><para>Container in Active Directory</para></listitem>
-                </itemizedlist>
-                <para>An example for object type "account" is given below:</para>
-                <example>
-                <title>Example Configuration for Object Type "account", i.e. User on external resources</title>
-                <programlisting>
+  <para>The connector info provider service takes this configuration.</para>
+<programlisting language="javascript">
 {
-        "account" : {
-            "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "__ACCOUNT__",
-            "type" : "object",
-            "nativeType" : "__ACCOUNT__",
-            "properties" : {... (_See Below_)}
-        }
-    }         
-     </programlisting>
-    </example>
-    <itemizedlist>
-                    <listitem><para>"$schema" will currently always point to "http://json-schema.org/draft-03/schema"</para></listitem>
-                    <listitem><para>"type" needs to be set to "object"</para></listitem>
-                    <listitem><para>"nativeType" is "__ACCOUNT__" in the case of users and "__GROUP__" for group objects. On an LDAP server a extra objectType can be created for each objectClass which is used.</para></listitem>
-                    <listitem><para>"properties" contains the definition of each attribute which should be handled for the objectType.</para></listitem>
-                </itemizedlist>
-                <para>Examples are shown below.</para>
-                <example>
-                <title>Example properties of an Object of Type "account"</title>
-                <programlisting>
+  "connectorsLocation"     : <replaceable>string</replaceable>,
+  "remoteConnectorServers" : [<replaceable>remoteConnectorServer objects</replaceable>]
+}</programlisting>
+
+  <variablelist>
+   <varlistentry>
+    <term>connectorsLocation</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>Specifies the directory where OpenICF connectors are located. The
+     default location is <filename>connectors</filename>.
+     </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>remoteConnectorServers</term>
+    <listitem>
+     <para>array of RemoteConnectorServer objects, optional</para>
+     <para>A list of remote connector servers managed by this service.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <para>The following example shows a <literal>remoteConnectorServer</literal>
+  object configuration.</para>
+
+  <programlisting language="javascript">
+{
+  "name"          : "testServer",
+  "host"          : "127.0.0.1",
+  "port"          : 8759,
+  "useSSL"        : false,
+  "timeout"       : 0,
+  "key"           : "Passw0rd",
+  "trustManagers" :
+    [
+       "X509TrustManager",
+       "BlindTrustManager"
+    ]
+}</programlisting>
+
+ <variablelist xml:id="remote-connector-server-object-properties">
+  <title>Remote Connector Server Object Properties</title>
+  <para>OpenIDM supports the following remote connector server object
+  properties.</para>
+  <varlistentry>
+   <term>name</term>
+   <listitem>
+    <para>string, required</para>
+    <para>The name of the remote connector server object. Used to identify the
+    remote connector server in connector reference object.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>host</term>
+   <listitem>
+    <para>string, required</para>
+    <para>Remote host to connect to.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>port</term>
+   <listitem>
+    <para>string, optional</para>
+    <para>
+     Remote port to connect to. Default value: 8759</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>useSSL</term>
+   <listitem>
+    <para>boolean, optional</para>
+    <para>Specifies to use or not SSL to connect. Default value:
+    <literal>false</literal></para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>timeout</term>
+   <listitem>
+    <para>integer, optional</para>
+    <para>Specifies the timeout (in milliseconds) to use for the connection.
+    Default value: 0</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>key</term>
+   <listitem>
+    <para>string, required</para>
+    <para>The secret key to use to authenticate to the remote connector
+    server.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>trustManagers</term>
+   <listitem>
+    <para>not specified</para>
+    <para>Not implemented yet. The service uses the default JVM
+    <literal>TrustManager</literal>.</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+ </section>
+
+ <section xml:id="openicf-provisioner-conf">
+  <title>OpenICF Provisioner Service</title>
+
+  <para>The following example shows an OpenICF provisioner service
+  configuration.</para>
+
+  <programlisting language="javascript">{
+ "name"                    : "xml",
+ "connectorRef"            : <link linkend="connector-reference">connector-ref-object</link>,
+ "poolConfigOption"        : <link linkend="pool-configuration-option">pool-config-option-object</link>,
+ "operationTimeout"        : <link linkend="operation-timeout">operation-timeout-object</link>,
+ "configurationProperties" : <link linkend="configuration-properties">configuration-properties-object</link>,
+ "objectTypes"             : <link linkend="object-types">object-types-object</link>,
+ "operationOptions"        : <link linkend="operation-options">operation-options-object</link>
+}</programlisting>
+
+  <variablelist xml:id="connector-reference">
+   <title>Connector Reference</title>
+   <para>The following example shows a connector reference object.</para>
+   <programlisting language="javascript">
+{
+  "bundleName"       : "org.forgerock.openicf.connectors.file.xml",
+  "bundleVersion"    : "1.1.0.0-SNAPSHOT",
+  "connectorName"    : "com.forgerock.openicf.xml.XMLConnector",
+  "connectorHostRef" : "host"
+}</programlisting>
+   <varlistentry>
+    <term>bundleName</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The <replaceable>ConnectorBundle-Name</replaceable> of the OpenICF
+     connector.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>bundleVersion</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The <replaceable>ConnectorBundle-Version</replaceable> of the
+     OpenICF connector.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>connectorName</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The Connector implementation class name.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>connectorHostRef</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>The name of the RemoteConnectorServer object.</para>
+     <itemizedlist>
+      <listitem>
+       <para>If the connector server is local and the connector .jar is
+       installed in <filename>openidm/bundle/</filename>, then the value
+       must be
+       <literal>"osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager"</literal>.</para>
+      </listitem>
+      <listitem>
+       <para>If the connector server is local and the connector .jar is
+       installed in <filename>openidm/connectors/</filename>, then the value
+       must be <literal>"#LOCAL"</literal>.</para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="pool-configuration-option">
+   <title>Pool Configuration Option</title>
+   <para>The following example shows a pool configuration option object
+   for the connection pool between OpenIDM and the OpenICF connector
+   server.</para>
+
+   <programlisting language="javascript">
+{
+  "maxObjects"                 : 10,
+  "maxIdle"                    : 10,
+  "maxWait"                    : 150000,
+  "minEvictableIdleTimeMillis" : 120000,
+  "minIdle"                    : 1
+}</programlisting>
+
+   <varlistentry>
+    <term>maxObjects</term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>maxIdle</term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>maxWait</term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>minEvictableIdleTimeMillis</term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>minIdle</term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="operation-timeout">
+   <title>Operation Timeout</title>
+   <para>This configuration sets the timeout per operation type.</para>
+
+   <programlisting language="javascript">
+{
+  "CREATE"              : -1,
+  "TEST"                : -1,
+  "AUTHENTICATE"        : -1,
+  "SEARCH"              : -1,
+  "VALIDATE"            : -1,
+  "GET"                 : -1,
+  "UPDATE"              : -1,
+  "DELETE"              : -1,
+  "SCRIPT_ON_CONNECTOR" : -1,
+  "SCRIPT_ON_RESOURCE"  : -1,
+  "SYNC"                : -1,
+  "SCHEMA"              : -1
+}</programlisting>
+   <varlistentry>
+    <term><replaceable>operation-name</replaceable></term>
+    <listitem>
+     <para>Timeout in milliseconds</para>
+     <para>A value of <literal>-1</literal> disables the timeout.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="configuration-properties">
+   <title>Configuration Properties</title>
+   <para>This object contains the configuration for the connection between
+   the connection server and the resource, and is therefore resource
+   specific.</para>
+   <para>The following example shows a configuration properties object for
+   the default XML sample resource connector.</para>
+
+   <programlisting language="javascript">
+{
+  "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd",
+  "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+  "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml"
+ }</programlisting>
+
+   <varlistentry>
+    <term><replaceable>property</replaceable></term>
+    <listitem>
+     <para>Individual properties depend on the type of connector.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="object-types">
+   <title>Object Types</title>
+   <para>This configuration object specifies the supported object types. The
+   property name defines the <literal>objectType</literal> used in the
+   URI: <literal>system/$<replaceable >systemName</replaceable>/$<replaceable
+   >objectType</replaceable></literal></para>
+   <para>The configuration is based on <link xlink:show="new"
+   xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
+   Schema</link> with extensions described below.</para>
+
+   <para>Attribute names with start and end with <literal>__</literal> are
+   resource type specific attributes used by OpenICF for particular
+   purposes, such as <literal>__NAME__</literal> as the naming attribute
+   for objects on a resource.</para>
+   <programlisting language="javascript">
+{
+  "account" :
+  {
+    "$schema" : "http://json-schema.org/draft-03/schema",
+    "id" : "__ACCOUNT__",
+    "type" : "object",
+    "nativeType" : "__ACCOUNT__",
+    "properties" :
+    {
+      "name" :
+      {
+        "type" : "string",
+        "nativeName" : "__NAME__",
+        "nativeType" : "JAVA_TYPE_PRIMITIVE_LONG",
+        "flags" :
+        [
+          "NOT_CREATABLE",
+          "NOT_UPDATEABLE",
+          "NOT_READABLE",
+          "NOT_RETURNED_BY_DEFAULT"
+        ]
+      },
+      "groups" :
+      {
+        "type" : "array",
+        "items" :
+        {
+          "type" : "string",
+          "nativeType" : "string"
+        },
+        "nativeName" : "__GROUPS__",
+        "nativeType" : "string",
+        "flags" :
+        [
+          "NOT_RETURNED_BY_DEFAULT"
+        ]
+      }
+    }
+  }
+}</programlisting>
+
+   <varlistentry>
+    <term>Object Level Extensions</term>
+    <listitem>
+     <variablelist>
+      <varlistentry>
+       <term>nativeType</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF object type.</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Property Level Extensions</term>
+    <listitem>
+     <variablelist>
+      <varlistentry>
+       <term>nativeType</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF attribute type.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>nativeName</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF attribute name.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>flags</term>
+       <listitem>
+        <para>string, optional</para>
+        <para>The native OpenICF attribute flags. The
+        <replaceable>required</replaceable> and
+        <replaceable>multivalued</replaceable> flags are defined by the JSON
+        schema.</para>
+        <literallayout class="monospaced"
+        ><replaceable>required</replaceable> = <literal
+        >"required" : true</literal></literallayout>
+        <literallayout class="monospaced"
+        ><replaceable>multivalued</replaceable> = <literal
+        >"type" : "array"</literal></literallayout>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="operation-options">
+   <title>Operation Options</title>
+
+   <para>Operation options define how to act on specified operations.
+   You can for example deny operations on specific resources to avoid
+   OpenIDM accidentally updating a read-only resource during a synchronization
+   operation.</para>
+
+   <programlisting language="javascript">
+{
+  "SYNC" :
+  {
+    "denied" : true,
+    "onDeny" : "DO_NOTHING",
+    "objectFeatures" :
+    {
+      "__ACCOUNT__" :
+      {
+        "denied" : true,
+        "onDeny" : "THROW_EXCEPTION",
+        "operationOptionInfo" :
+        {
+          "$schema" : "http://json-schema.org/draft-03/schema",
+          "id" : "FIX_ME",
+          "type" : "object",
+          "properties" :
+          {
+            "_OperationOption-float" :
             {
-                "firstname" : {
-                    "type" : "string",
-                    "nativeName" : "firstname",
-                    "nativeType" : "string"
-                },
-                "__UID__" : {
-                    "type" : "string",
-                    "nativeName" : "__UID__"
-                },
-                "name" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "__NAME__",
-                    "nativeType" : "string"
-                },
-                "lastname" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "lastname",
-                    "nativeType" : "string"
-                }
-            }                
-                </programlisting>
-                </example>
-                <para>Properties for each attribute are:</para>
-                <itemizedlist>
-                <listitem><para>"type": a string containing the name of the type:</para>
-                    <itemizedlist>
-                        <listitem><para>"string" is used for single value attributes</para></listitem>
-                        <listitem><para>"array" is used for multi valued attributes. Needs a item type: "items" type and nativeType are usually "string".</para></listitem>
-                    </itemizedlist>
-                </listitem>
-                <listitem><para>nativeName: The native OpenICF attribute name. In most of the cases this will be also the attribute name on the resource, but there are exceptions, like the DN on an LDAP server is the "__NAME__" attribute here.</para></listitem>
-                <listitem><para>"nativeType": The native OpenICF attribute type.</para></listitem>
-                <listitem><para>"required": true or false. It is a boolean value, not a string!</para></listitem>
-                <listitem><para>"flags": one or several of</para>
-                    <itemizedlist>
-                        <listitem><para>"NOT_CREATABLE",</para></listitem>
-                        <listitem><para>"NOT_UPDATEABLE",</para></listitem>
-                        <listitem><para>"NOT_READABLE",</para></listitem>
-                        <listitem><para>"NOT_RETURNED_BY_DEFAULT"</para></listitem>
-                    </itemizedlist>
-                </listitem>
-                </itemizedlist>
-                <para>Attribute names which start and end with "__" are usually special attributes and handled differently in OpenICF and are usually resource type specific. For instance the attribute "__NAME__" is required to make the naming attribute of the object on the external resource. In case of an LDAP server for instance it has to contain the DN when an object is to be created on the resource.</para>
-            </section>
+               "type" : "number",
+               "nativeType" : "JAVA_TYPE_PRIMITIVE_FLOAT"
+            }
+          }
+        }
+      },
+      "__GROUP__" :
+      {
+        "denied" : false,
+        "onDeny" : "DO_NOTHING"
+      }
+    }
+  }
+}</programlisting>
 
-            <section>
-                <title>The "operationOptions"</title>
-                <para>Some of the operation which are possible with a connector may be inappropriate in some projects or situations. Therefore the operations can be denied for the specific resource instance to avoid for instance accidental update of a read only resource. </para>
-                <para>The deny might be configured for the entire resource configuration or on the object type level as shown in the example below:</para>
-                <example>
-                <title>Deny of Operations on the Resources Instance or Object Type Level</title>
-                <programlisting>
-      "SYNC" :
-         {
-            "denied" : true,
-            "onDeny" : "DO_NOTHING",
-            "objectFeatures" :
-               {
-                  "__ACCOUNT__" :
-                     {
-                        "denied" : true,
-                        "onDeny" : "THROW_EXCEPTION"
-                     },
-                  "__GROUP__" :
-                     {
-                        "denied" : false,
-                        "onDeny" : "DO_NOTHING"
-                     }
-               }
-         }                
-     </programlisting>
-    </example>
-    <para>The reaction on the deny event can be "DO_NOTHING" or "THROW_EXCEPTION". The list of operations is:</para>
-    <itemizedlist>
-                    <listitem><para>AUTHENTICATE</para></listitem>
-                    <listitem><para>CREATE</para></listitem>
-                    <listitem><para>DELETE</para></listitem>
-                    <listitem><para>GET</para></listitem>
-                    <listitem><para>RESOLVEUSERNAME</para></listitem>
-                    <listitem><para>SCHEMA</para></listitem>
-                    <listitem><para>SCRIPT_ON_CONNECTOR</para></listitem>
-                    <listitem><para>SCRIPT_ON_RESOURCE</para></listitem>
-                    <listitem><para>SEARCH</para></listitem>
-                    <listitem><para>SYNC</para></listitem>
-                    <listitem><para>TEST</para></listitem>
-                    <listitem><para>UPDATE</para></listitem>
-                    <listitem><para>VALIDATE</para></listitem>
-                </itemizedlist>
-            </section>
-        </section>            
-        <section>
-            <title>Connection to a Remote Connector Server</title>
-            <para>In the case of a connection to a remote connector server, a Connector Info Provider Service is needed with the following configuration. The configuration is stored in an extra json file with the name provisioner.openicf.connectorinfoprovider.json</para>
-            <para>An example for a connectorinfoprovider looks like this:</para>
-            <example>
-                <title>Example Connector Info Provider Configuration</title>
-                <programlisting>
-{
-   "connectorsLocation" : "connectors",
-   "remoteConnectorServers" :
-      [
-         {
-            "name" : "dotnet",
-            "host" : "127.0.0.1",
-            "port" : 8759,
-            "useSSL" : false,
-            "timeout" : 0,
-            "key" : "Passw0rd"
-         }
-  ...                
-                </programlisting>
-   </example>
-   <section>
-    <title>The "connectorRef" for a Remote Connector</title>
-    <para>Additionally to the connectorRef properties as mention in chapter "Connecting to a Local Connector Server, in case of a remote connector the "connector info provider object" must be referenced. This is done in the "connectorHostRef" property of "connectorRef" and must contain the "name" property of the "connectorinfoprovider". In the example above that is "dotnet".</para>
-   </section>
+   <itemizedlist>
+    <para>The list of operations is as follows.</para>
+    <listitem>
+     <para><literal>AUTHENTICATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/AuthenticationApiOp.html"
+     >AuthenticationApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>CREATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/CreateApiOp.html"
+     >CreateApiOp</link></para>
+    </listitem>
+   <listitem>
+     <para><literal>DELETE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/DeleteApiOp.html"
+     >DeleteApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>GET</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/GetApiOp.html"
+     >GetApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>RESOLVEUSERNAME</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ResolveUsernameApiOp.html"
+     >ResolveUsernameApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SCHEMA</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SchemaApiOp.html"
+     >SchemaApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SCRIPT_ON_CONNECTOR</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnConnectorApiOp.html"
+     >ScriptOnConnectorApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SCRIPT_ON_RESOURCE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ScriptOnResourceApiOp.html"
+     >ScriptOnResourceApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SEARCH</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SearchApiOp.html"
+     >SearchApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>SYNC</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/SyncApiOp.html"
+     >SyncApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>TEST</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/TestApiOp.html"
+     >TestApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>UPDATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/UpdateApiOp.html"
+     >UpdateApiOp</link></para>
+    </listitem>
+    <listitem>
+     <para><literal>VALIDATE</literal>: <link xlink:show="new"
+     xlink:href="http://openicf.forgerock.org/connector-framework/apidocs/org/identityconnectors/framework/api/operations/ValidateApiOp.html"
+     >ValidateApiOp</link></para>
+    </listitem>
+   </itemizedlist>
 
-  </section>
-        <!--  TODO: Where does this orphaned paragraph belong? Not here in any case.
-        <para>The top level properties of the OpenICF Provsioner Service are:</para>-->
-        
-    </section>
+   <varlistentry>
+    <term>denied</term>
+    <listitem>
+     <para>boolean, optional</para>
+     <para>This property prevents operation execution if the value is
+     <literal>true</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onDeny</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>If <literal>denied</literal> is <literal>true</literal>, then the
+     service uses this value. Default value:
+     <literal>DO_NOTHING</literal>.</para>
+     <itemizedlist>
+      <listitem>
+       <para><literal>DO_NOTHING</literal>: On operation the service does
+       nothing.</para>
+      </listitem>
+      <listitem>
+       <para><literal>THROW_EXCEPTION</literal>: On operation the service
+       throws a  <literal>ForbiddenException</literal> exception.</para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+
+
     <section><title>XML File Resource</title>
         <section><title>Example connectorRef</title>
         <para>The following code example shows a typical part of the provisioner configuration for an XML file connector.</para>
@@ -626,9 +873,6 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
             <listitem><para>Test</para></listitem>
             <listitem><para>Update</para></listitem>
         </itemizedlist>
-        </section>
-        <section><title>Typical configurationProperties configuration</title>
-        <para>TODO</para>
         </section>
     </section>
 </chapter>
