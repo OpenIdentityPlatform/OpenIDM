@@ -1,0 +1,1133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<appendix xml:id='appendix-objects'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Data Models &amp; Objects</title>
+
+ <para>OpenIDM allows you to customize of a variety of objects that can be
+ addressed via a URL or URI, and that have a common set of functions that
+ OpenIDM can perform on them such as CRUD, query, and action.</para>
+
+ <para>Depending on how you intend to use them, different objects are
+ appropriate.</para>
+
+ <table pgwide="1" xml:id="table-object-types">
+  <title>OpenIDM Objects</title>
+  <tgroup cols="3">
+   <colspec colnum="1" colwidth="1*"/>
+   <colspec colnum="2" colwidth="2*"/>
+   <colspec colnum="3" colwidth="1*"/>
+   <thead>
+    <row>
+     <entry>Object Type</entry>
+     <entry>Intended Use</entry>
+     <entry>Special Functionality</entry>
+    </row>
+   </thead>
+   <tbody>
+    <row>
+     <entry>Managed objects</entry>
+     <entry>Serve as targets and sources for synchronization, and to build
+     virtual identities.</entry>
+     <entry>Provide appropriate auditing, script hooks, declarative mappings
+     and so forth in addition to the REST interface.</entry>
+    </row>
+    <row>
+     <entry>Configuration objects</entry>
+     <entry>Ideal for look-up tables or other custom configuration, which
+     can be configured externally like any other system configuration.</entry>
+     <entry>Adds file view, REST interface, and so forth</entry>
+    </row>
+    <row>
+     <entry>Repository objects</entry>
+     <entry>The equivalent of arbitrary database table access. Appropriate
+     when it is appropriate to manage data purely through the underlying
+     data store or repository API.</entry>
+     <entry>Persistence and API access</entry>
+    </row>
+    <row>
+     <entry>System objects</entry>
+     <entry>Representation of target resource objects, such as accounts,
+     but also resource objects such as groups.</entry>
+     <entry>-</entry>
+    </row>
+    <row>
+     <entry>Audit objects</entry>
+     <entry>Houses audit data in the OpenIDM internal repository.</entry>
+     <entry></entry>
+    </row>
+    <row>
+     <entry>Links</entry>
+     <entry>Defines a relation between two objects.</entry>
+     <entry></entry>
+    </row>
+   </tbody>
+  </tgroup>
+ </table>
+
+ <section xml:id="objects-resource-api">
+  <title>Accessing Objects</title>
+
+  <!-- TODO: Link to the resource API reference elsewhere in the documentation. -->
+  <para>OpenIDM's uniform programming model means that all objects are queried
+  and manipulated in the same way from your scripts using the Resource API.
+  The URL or URI used to identify the target object for an operation depends
+  on the object type. Also additional functionality is available for different
+  types of object, known as <firstterm>Resource Sets</firstterm>.</para>
+
+  <para>For example, you get managed objects, configuration objects, and
+  repository objects in the following way using the Resource API.</para>
+
+  <programlisting language="javascript">
+val = openidm.read("managed/organization/mysampleorg")
+
+val = openidm.read("config/custom/mylookuptable")
+
+val = openidm.read("repo/custom/mylookuptable")</programlisting>
+
+  <para>You update entire objects with the <literal>update()</literal>
+  function.</para>
+
+  <programlisting language="javascript">
+openidm.update("managed/organization/mysampleorg", mymap)
+
+openidm.update("config/custom/mylookuptable", mymap)
+
+openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
+
+  <para>The <literal>create()</literal>, <literal>delete()</literal>, and
+  <literal>query()</literal> functions work in similar fashion.</para>
+
+  <para>To get a managed object through the REST API, depending on your
+  security settings and authentication configuration, perform an HTTP GET
+  on a similar URL, such as
+  <literal>https://localhost:8443/openidm/managed/organization/mysampleorg</literal>.</para>
+
+  <para>By default, the HTTP GET returns a JSON representation of the object.
+  See the appendix on the <link xlink:href="admin-guide#appendix-rest"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
+  API</citetitle></link> for details.</para>
+ </section>
+
+ <section xml:id="managed-objects">
+  <title>Managed Objects</title>
+
+  <para>A <firstterm>managed object</firstterm> in OpenIDM is an object which
+  represents the identity-related data managed by OpenIDM. Managed objects
+  are stored by OpenIDM in its data store. All managed objects are JSON-based
+  data structures.</para>
+
+  <section xml:id="managed-object-schema">
+   <title>Manage Object Schema</title>
+
+   <para>Managed objects have an associated schema to enforce a specific
+   data structure. Schema is specified using the <link xlink:show="new"
+   xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
+   Schema</link> specification. This is currently an Internet-Draft, with
+   implementations in multiple programming languages.</para>
+
+   <section xml:id="managed-object-reserved-properties">
+    <title>Manage Object Reserved Properties</title>
+
+    <para>Top-level properties in a managed object that begin with an underscore
+    ( <literal>_</literal> ) are reserved by OpenIDM for internal use, and are
+    not explicitly part of its schema. Internal properties are read-only, and
+    are ignored when provided by the REST API client.</para>
+
+    <variablelist>
+     <para>The following properties exist for all managed objects in
+     OpenIDM.</para>
+     <varlistentry>
+      <term>_id</term>
+      <listitem>
+       <para>string</para>
+       <para>The unique identifier for the object. This value forms a part
+       of the managed object's URI.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>_rev</term>
+      <listitem>
+       <para>string</para>
+       <para>The revision of the object. This is the same value that is
+       exposed as the object's ETag through the REST API. The content of this
+       attribute is not defined. No consumer should make any assumptions
+       of its content beyond equivalence comparison. This attribute may
+       be provided by the underlying data store.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>_schema_id</term>
+      <listitem>
+       <para>string</para>
+       <para>The a reference to the schema object that the managed object
+       is associated with.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>_schema_rev</term>
+      <listitem>
+       <para>string</para>
+       <para>The revision of the schema that was used for validation when
+       the object was last stored.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+
+   <section xml:id="managed-object-schema-validation">
+    <title>Manage Object Schema Validation</title>
+
+    <para>Schema validation is performed unequivocally whenever an object
+    is stored, and conditionally whenever an object is retrieved from the
+    data store and exhibits a <literal>_schema_rev</literal> value that
+    differs from the <literal>_rev</literal> of the schema that the OpenIDM
+    instance currently has for that managed object type. Whenever a schema
+    validation is performed, the <literal>_schema_rev</literal> of the object
+    is updated to contain the <literal>_rev</literal> value of the current
+    schema.</para>
+
+    <!--
+     PB: While the _schema_rev optimization above reduces schema
+     validation overhead for object retrieval, there's still the issue of
+     object and property validation triggers. One way to solve this could
+     be to qualify these as schema validation and bake them into the
+     computed ETag for the schema. I kinda like this solution, but should
+     be discussed.
+    -->
+   </section>
+
+   <section xml:id="managed-object-derived-properties">
+    <title>Manage Object Derived Properties</title>
+
+    <para>Properties can be defined to be strictly derived from other
+    properties within the object. This allows computed and composite
+    values to be created in the object. Whenever an object undergoes a
+    change, all derived properties are recomputed. The value of derived
+    properties are stored in the data store, and are not recomputed upon
+    retrieval.</para>
+
+    <!-- PB: Mechanism for defining a derived property will likely be through a JavaScript trigger. -->
+   </section>
+  </section>
+
+  <section xml:id="managed-object-data-consistency">
+   <title>Data Consistency</title>
+
+   <para>Single-object operations shall be consistent within the scope of
+   the operation performed, limited by capabilities of the underlying
+   data store. Bulk operations shall not have any consistency
+   guarantees. OpenIDM does not expose any transactional semantics
+   in the managed object access API.</para>
+
+   <para>All access through the REST API uses the ETag and associated
+   conditional headers: <literal>If-Match</literal>,
+   <literal>If-None-Match</literal>. In operations that
+   modify model objects, conditional headers are mandatory.</para>
+  </section>
+
+  <section xml:id="managed-object-triggers">
+   <title>Manage Object Triggers</title>
+
+   <para><firstterm>Triggers</firstterm> are user-definable functions that
+   validate or modify object or property state.</para>
+
+   <section xml:id="managed-object-state-triggers">
+    <title>State Triggers</title>
+
+    <para>Managed objects are resource-oriented. A set of triggers is
+    defined to intercept the supported request methods on managed
+    objects. Such triggers are intended to perform authorization, redact,
+    or modify objects before the action is performed. The object
+    being operated on is in scope for each trigger, meaning that it the
+    object is retrieved by the data store before the trigger is fired.</para>
+
+    <para>If retrieval of the object fails, the failure occurs before any
+    trigger is called. Triggers are executed before any optimistic
+    concurrency mechanisms are invoked. The reason for this is to
+    prevent a potential attacker from getting information about an
+    object (including its presence in the data store) before
+    authorization is applied.</para>
+
+    <!-- PB: Status codes and internationalization considerations are still TBD. -->
+
+    <variablelist>
+     <varlistentry>
+      <term>onCreate</term>
+      <listitem>
+       <para>Called upon a request to create a new object. Throwing an
+       exception causes the create to fail.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>onRead</term>
+      <listitem>
+       <para>Called upon a request to retrieve a whole object or portion of
+       an object. Throwing an exception causes the object to not be
+       included in the result. This method is also called when lists of
+       objects are retrieved via requests to its container object; in this
+       case, only the requested properties are included in the object.
+       Allows for uniform access control for retrieval of objects,
+       regardless of the method in which they were requested.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>onUpdate</term>
+      <listitem>
+       <para>Called upon a request to store an object. The "old" and "new"
+       objects are in-scope for the trigger. The "old" object represents a
+       complete object as retrieved from the data store. The trigger can
+       elect to change "new" object properties. If as a result of the
+       trigger the object's "old" and "new" values are identical (that is,
+       update is reverted), the update ends prematurely, though
+       successfully. Throwing an exception causes the update to fail.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>onDelete</term>
+      <listitem>
+       <para>Called upon a request to delete an object. Throwing an
+       exception causes the deletion to fail.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+
+   <section xml:id="managed-object-storage-triggers">
+    <title>Object Storage Triggers</title>
+
+    <variablelist>
+    <para>An object-scoped trigger applies to an entire object. Unless
+    otherwise specified, the object itself is in scope for the trigger.</para>
+     <varlistentry>
+      <term>validate</term>
+      <listitem>
+       <para>Validates an object after its retrieval and prior to its
+       storage into the data store. Throws an exception in the event of a
+       validation failure.</para>
+       <!-- i18n TBD. -->
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>onRetrieval</term>
+      <listitem>
+       <para>Called when an object is retrieved from the data store.
+       Typically used to transform an object after it has been retrieved
+       (for example decryption, JIT data conversion).</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+       <term>onStorage</term>
+       <listitem>
+        <para>Called just prior to when an object is stored into the data
+        store. Typically used to transform an object just prior to its
+        storage (for example, encryption).</para>
+       </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+
+   <section xml:id="managed-object-property-storage-triggers">
+    <title>Property Storage Triggers</title>
+
+    <para>A property-scoped trigger applies to a specific property within
+    an object. Only the property itself is in scope for the trigger&#8212;no
+    other properties in the object should be accessed during execution
+    of the trigger. Unless otherwise specified, the order of execution
+    of property-scoped triggers is intentionally left undefined.</para>
+
+    <variablelist>
+     <varlistentry>
+      <term>validate</term>
+      <listitem>
+       <para>Validates a given property value after its retrieval from and
+       prior to its storage into the data store. Throws an exception in the
+       event of a validation failure.</para>
+       <!--  i18n of validation error TBD. -->
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>onRetrieval</term>
+      <listitem>
+       <para>Called after an object is retrieved from the data store.
+       Typically used to transforms a given property after its object's
+       retrieval.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>onStorage</term>
+      <listitem>
+       <para>Called prior to when an object is stored into the data
+       store. Typically used to transform a given property prior to its
+       object's storage.</para>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+
+   <section xml:id="managed-object-storage-trigger-sequences">
+    <title>Storage Trigger Sequences</title>
+
+    <para>The triggers are executed in the following orders.</para>
+
+    <orderedlist xml:id="managed-object-retrieval-sequence">
+     <title>Object Retrieval Sequence</title>
+
+     <listitem>
+      <para>Retrieve the raw object from the data store</para>
+     </listitem>
+     <listitem>
+      <para>Call object <literal>onRetrieval</literal> trigger</para>
+     </listitem>
+     <listitem>
+      <para>Per-property within the object (order undefined):</para>
+      <itemizedlist>
+       <listitem>
+        <para>Call property <literal>onRetrieval</literal> trigger</para>
+       </listitem>
+       <listitem>
+        <para>Perform schema validation if <literal>_schema_rev</literal>
+        does not match (see the <link
+        linkend="managed-object-schema-validation"><citetitle>Schema
+        Validation</citetitle></link> section)</para>
+       </listitem>
+       <listitem>
+        <para>Call object validate trigger</para>
+        <!-- PB: overhead we may be able to avoid; see note in schema validation section -->
+       </listitem>
+      </itemizedlist> 
+     </listitem>
+     <listitem>
+      <para>Per-property within the object (order undefined):</para>
+      <itemizedlist>
+       <listitem>
+        <para>Call property validate trigger</para>
+        <!-- PB: overhead we may be able to avoid; see note in schema validation section -->
+       </listitem>
+      </itemizedlist>
+     </listitem>
+    </orderedlist>
+
+     <orderedlist xml:id="managed-object-storage-sequence">
+      <title>Object Storage Sequence</title>
+
+      <listitem>
+       <para>Per-property within the object (order undefined):</para>
+       <itemizedlist>
+        <listitem>
+         <para>Call property <literal>validate</literal> trigger</para>
+        </listitem>
+        <listitem>
+         <para>Call object <literal>validate</literal> trigger</para>
+        </listitem>
+        <listitem>
+         <para>Perform schema validation (see the <link
+         linkend="managed-object-schema-validation"><citetitle>Schema
+         Validation</citetitle></link> section)</para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+      <listitem>
+       <para>Per-property trigger within the object (order undefined):</para>
+       <itemizedlist>
+        <listitem>
+         <para>Call property <literal>onStorage</literal> trigger</para>
+        </listitem>
+        <listitem>
+         <para>Call object <literal>onStorage</literal> trigger</para>
+        </listitem>
+        <listitem>
+         <para>Store the object with any resulting changes to the data
+          store</para>
+        </listitem>
+       </itemizedlist>
+      </listitem>
+     </orderedlist>
+   </section>
+  </section>
+
+  <section xml:id="managed-object-encryption">
+   <title>Manage Object Encryption</title>
+
+   <para>Sensitive object properties can be encrypted prior to storage,
+   typically through the property <literal>onStorage</literal> trigger. The
+   trigger has access to configuration data, which can include arbitrary
+   attributes that you define, such as a symmetric encryption key. Such
+   attributes can be decrypted during retrieval from the data store through
+   the property <literal>onRetrieval</literal> trigger.</para>
+  </section>
+
+  <section xml:id="managed-object-configuration">
+   <title>Manage Object Configuration</title>
+
+   <para>Configuration of managed objects is provided through an array of
+   managed object configuration objects.</para>
+
+   <programlisting language="javascript">
+{
+  "objects": [ <replaceable>managed-object-config object</replaceable>, ... ]
+}</programlisting>
+
+   <variablelist>
+    <varlistentry>
+     <term>objects</term>
+     <listitem>
+      <para>array of managed-object-config objects, required</para>
+      <para>Specifies the objects that the managed object service
+       manages.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <variablelist xml:id="managed-object-config-object-properties">
+    <title>Managed Object Config Object Properties</title>
+
+    <para>Specifies the configuration of each managed object.</para>
+
+    <programlisting language="javascript">
+{
+  "name"      : <replaceable>string</replaceable>,
+  "schema"    : <replaceable>json-schema object</replaceable>,
+  "onCreate"  : <replaceable>script object</replaceable>,
+  "onRead"    : <replaceable>script object</replaceable>,
+  "onUpdate"  : <replaceable>script object</replaceable>,
+  "onDelete"  : <replaceable>script object</replaceable>,
+  "onValidate": <replaceable>script object</replaceable>,
+  "onRetrieve": <replaceable>script object</replaceable>,
+  "onStore"   : <replaceable>script object</replaceable>,
+  "properties": [ <replaceable>property-configuration object</replaceable>, ... ]
+}</programlisting>
+
+    <varlistentry>
+     <term>name</term>
+     <listitem>
+      <para>string, required</para>
+      <para>The name of the managed object. Used to identify the
+      managed object in URIs and identifiers.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>schema</term>
+     <listitem>
+      <para>json-schema object, optional</para>
+      <para>The schema to use to validate the structure and content of
+      the managed object. The schema-object format is specified by the
+      JSON Schema specification.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onCreate</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when the creation of an object
+      is being requested. The object to be created is provided in the
+      root scope as an object property. The script may change the
+      object. If an exception is thrown, the create aborts with an
+      exception.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onRead</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when the read of an object is
+      being requested. The object being read is provided in the root
+      scope as an object property. The script may change the object.
+      If an exception is thrown, the read aborts with an
+      exception.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onUpdate</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when an update to an object is
+      requested. The old value of the object being updated is provided
+      in the root scope as an <literal>oldObject</literal> property. The new
+      value of the object being updated is provided in the root scope as a
+      <literal>newObject</literal> property. The script may change the
+      <literal>newObject</literal>. If an exception is thrown, the update
+      aborts with an exception.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onDelete</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when the deletion of an object
+      is being requested. The object being deleted is provided in the
+      root scope as an object property. If an exception is thrown, the
+      deletion aborts with an exception.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onValidate</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when the object requires
+      validation. The object to be validated is provided in the root
+      scope as an object property. If an exception is thrown, the
+      validation fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onRetrieve</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger once an object is retrieved from
+      the repository. The object that was retrieved is provided in the
+      root scope as an object property. The script may change the
+      object. If an exception is thrown, then object retrieval
+      fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onStore</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when an object is about to be
+      stored in the repository. The object to be stored is provided in
+      the root scope as an object property. The script may change the
+      object. If an exception is thrown, then object storage
+      fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>properties</term>
+     <listitem>
+      <para>array of property-config objects, optional</para>
+      <para>A list of property specifications.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <variablelist xml:id="managed-object-script-object-properties">
+    <title>Script Object Properties</title>
+
+    <programlisting language="javascript">
+{
+  "type"  : "text/javascript",
+  "source": <replaceable>string</replaceable>
+ }</programlisting>
+
+    <varlistentry>
+     <term>type</term>
+     <listitem>
+      <para>string, required</para>
+      <para>Specifies the type of script to be executed. Currently, only
+      <literal>"text/javascript"</literal> is supported.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>source</term>
+     <listitem>
+      <para>string, required</para>
+      <para>Specifies the source code of the script to be executed.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <variablelist xml:id="managed-object-property-config-properties">
+    <title>Property Config Properties</title>
+
+    <programlisting language="javascript">
+{
+  "name"      : <replaceable>string</replaceable>,
+  "onValidate": <replaceable>script object</replaceable>,
+  "onRetrieve": <replaceable>script object</replaceable>,
+  "onStore"   : <replaceable>script object</replaceable>,
+  "encryption": <replaceable>property-encryption object</replaceable>
+}</programlisting>
+
+    <varlistentry>
+     <term>name</term>
+     <listitem>
+      <para>string, required</para>
+      <para>The name of the property being configured.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onValidate</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when the property requires
+      validation. The property to be validated is provided in the root
+      scope as the <literal>property</literal> property. If an exception is
+      thrown, the validation fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onRetrieve</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger once a property is retrieved
+       from the repository. The property that was retrieved is provided
+       in the root scope as the <literal>property</literal> property. The
+       script may change the property value. If an exception is thrown, then
+       object retrieval fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>onStore</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>A script object to trigger when a property is about to be
+       stored in the repository. The property to be stored is provided
+       in the root scope as the <literal>property</literal> property. The
+       script may change the property value. If an exception is thrown, then
+       object storage fails.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>encryption</term>
+     <listitem>
+      <para>property-encryption object, optional</para>
+      <para>Specifies the configuration for encryption of the property
+       in the repository. If omitted or null, the property is not
+       encrypted.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <variablelist xml:id="managed-object-property-encryption-properties">
+    <title>Property Encryption Object</title>
+
+    <programlisting language="javascript">
+{
+  "cipher": <replaceable>string</replaceable>,
+  "key"   : <replaceable>string</replaceable>
+}</programlisting>
+
+    <varlistentry>
+     <term>cipher</term>
+     <listitem>
+      <para>string, optional</para>
+      <para>The cipher transformation used to encrypt the property. If
+      omitted or null, the default cipher of
+      <literal>"AES/CBC/PKCS5Padding"</literal> is used.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>key</term>
+     <listitem>
+      <para>string, required</para>
+      <para>The alias of the key in the OpenIDM cryptography service
+      keystore used to encrypt the property.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+
+  <section xml:id="custom-managed-objects">
+   <title>Custom Managed Objects</title>
+   
+   <para>Managed objects in OpenIDM are inherently fully user definable and
+   customizable. Like all OpenIDM objects, managed objects can maintain
+   relationships to each other in the form of links. Managed objects are
+   intended for use as targets and sources for synchronization operations to
+   represent domain objects, and to build up virtual identities. The name comes
+   from the intention that OpenIDM stores and manages these objects, as opposed
+   to system objects that are present in external systems.</para>
+
+   <para>OpenIDM can synchronize and map directly between external systems
+   (system objects), without storing intermediate managed objects. Managed
+   objects are appropriate, however, as a way to cache the data&#8212;for
+   example, when mapping to multiple target systems, or when decoupling the
+   availability of systems&#8212;to more fully report and audit on all object
+   changes during reconciliation, and to build up views that are different from
+   the original source, such transformed and combined or virtual views. Managed
+   objects can also be allowed to act as an authoritative source if no other
+   appropriate source is available.</para>
+
+   <para>Other object types exist for other settings that should be available
+   to a script, such as configuration or look-up tables that do not need audit
+   logging.</para>
+   <section xml:id="managed-objects-setup">
+    <title>Setting Up a Managed Object Type</title>
+
+    <para>To set up a managed object, you declare the object in the
+    <filename>conf/managed.json</filename> file where OpenIDM is installed.
+    The following example adds a simple <literal>foobar</literal> object
+    declaration after the user object type.</para>
+
+    <programlisting language="javascript">
+{
+    "objects": [
+        {
+            "name": "user"
+        },
+        {
+            "name": "foobar"
+        }
+    ]
+}</programlisting>
+  </section>
+
+   <section xml:id="managed-objects-declarative">
+    <title>Manipulating Managed Objects Declaratively</title>
+
+    <para>By mapping an object to another object, either an external system
+    object or another internal managed object, you automatically tie the object
+    life cycle and property settings to the other object. See the chapter on
+    <link xlink:href="admin-guide#chap-synchronization"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    ><citetitle>Configuring Synchronization</citetitle></link> for
+    details.</para>
+   </section>
+
+   <section xml:id="managed-objects-programmatic">
+    <title>Manipulating Managed Objects Programmatically</title>
+
+    <para>You can address managed objects as resources using URLs or URIs with
+    the <literal>managed/</literal> prefix. This works whether you address the
+    managed object internally as a script running in OpenIDM or externally
+    through the REST interface.</para>
+
+    <para>You can use all resource API functions in script objects for
+    create, read, update, delete operations, and also for arbitrary queries on
+    the object set, but not currently for arbitrary actions. See the
+    chapter on <link xlink:href="reference#chap-scripting"
+    xlink:role="http://docbook.org/xlink/role/olink"
+    ><citetitle>Scripting</citetitle></link> in the
+    <citetitle>Reference</citetitle> for details.</para>
+
+    <para>OpenIDM supports concurrency through a multi version concurrency
+    control (MVCC) mechanism. In other words, each time an object changes,
+    OpenIDM assigns it a new revision.</para>
+
+    <para>Objects can be arbitrarily complex as long as they use supported
+    types, such as maps, lists, numbers, strings, and booleans as defined in
+    <link xlink:href="http://www.json.org" xlink:show="new">JSON</link>.</para>
+   
+    <section xml:id="managed-objects-programmatic-create">
+     <title>Creating Objects</title>
+
+     <para>The following script example creates an object type.</para>
+     <programlisting language="javascript">
+openidm.create("managed/foobar/myidentifier", mymap)</programlisting>
+    </section>
+
+    <section xml:id="managed-objects-programmatic-update">
+     <title>Updating Objects</title>
+ 
+     <para>The following script example updates an object type.</para>
+     <programlisting language="javascript">var expectedRev = origMap._rev
+openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlisting>
+
+     <para>The MVCC mechanism requires that <literal>expectedRev</literal>
+     be set to the expected revision of the object to update. You obtain the
+     revision from the object's <literal>_rev</literal> property. If something
+     else changes the object concurrently, OpenIDM rejects the update, and you
+     must either retry or inspect the concurrent modification.</para>
+    </section>
+
+    <section xml:id="managed-objects-programmatic-patch">
+     <title>Patching Objects</title>
+
+     <para>You can partially update an object using a patch, which changes only
+     the specified properties of the object. OpenIDM supports patch by query,
+     so the caller need not know the identifier of the object to change.</para>
+
+     <!-- TODO: an example would be nice. -->
+    </section>
+
+    <section xml:id="managed-objects-programmatic-delete">
+     <title>Deleting Objects</title>
+
+     <para>The following script example deletes an object type.</para>
+
+     <programlisting language="javascript">var expectedRev = origMap._rev
+openidm.delete("managed/foobar/myidentifier", expectedRev)</programlisting>
+
+     <para>The MVCC mechanism requires that <literal>expectedRev</literal>
+     be set to the expected revision of the object to update. You obtain the
+     revision from the object's <literal>_rev</literal> property. If something
+     else changes the object concurrently, OpenIDM rejects deletion, and you
+     must either retry or inspect the concurrent modification.</para>
+    </section>
+
+    <section xml:id="managed-objects-programmatic-read">
+     <title>Reading Objects</title>
+
+     <para>The following script example reads an object type.</para>
+
+     <programlisting language="javascript">
+val = openidm.read("managed/foobar/myidentifier")</programlisting>
+    </section>
+
+    <section xml:id="managed-objects-programmatic-query">
+     <title>Querying Object Sets</title>
+
+     <para>The following script example queries object type instances.</para>
+
+     <programlisting language="javascript">
+var params = {
+    "_query-id": "my-custom-query-id",
+    "mycustomtoken": "samplevalue"
+};
+val = openidm.query("managed/foobar", params);</programlisting>
+
+     <para>The example sets up a query with ID
+     <literal>my-custom-query-id</literal>. The query definition (not shown)
+     is found in the repository configuration. The query definition includes
+     the parameter <literal>mycustomtoken</literal> for token
+     substitution.</para>
+    </section>
+   </section>
+  </section>
+
+  <section xml:id="managed-objects-access-rest">
+   <title>Accessing Managed Objects Through the REST API</title>
+
+   <para>OpenIDM exposes all managed object functionality through the REST API
+   unless you configure a policy to prevent such access. In addition to the
+   common REST functionality of create, read, update, delete, patch, and query,
+   the REST API also supports patch by query. See the appendix on the
+   <link xlink:href="admin-guide#appendix-rest"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
+   API</citetitle></link> for details.</para>
+
+   <para>OpenIDM requires authentication to access the REST API. Authentication
+   configuration is shown in
+   <filename>openidm/conf/authentication.json</filename>. The default
+   authorization filter script is
+   <filename>openidm/script/router-authz.js</filename>.</para>
+  </section>
+ </section>
+
+ <section xml:id="configuration-objects-reference">
+  <title>Configuration Objects</title>
+
+  <para>OpenIDM provides an extensible configuration to allow you to leverage
+  regular configuration mechanisms.</para>
+
+  <para>Unlike native OpenIDM configuration, which OpenIDM interprets
+  automatically and can start new services, OpenIDM stores custom configuration
+  objects and makes them available to your code through the API.</para>
+
+  <para>See the chapter on <link xlink:href="admin-guide#chap-configuration"
+  xlink:role="http://docbook.org/xlink/role/olink"
+  ><citetitle>Configuration</citetitle></link> for an introduction to standard
+  configuration objects.</para>
+
+  <section xml:id="configuration-objects-when-to-use">
+   <title>When To Use Custom Configuration Objects</title>
+
+   <para>Configuration objects are ideal for metadata and settings that need
+   not be included in the data to reconcile. In other words, use configuration
+   objects for data that does not require and audit log, and does not serve
+   directly as a target or source for mappings.</para>
+
+   <para>Although you can set and manipulate configuration objects both
+   programmatically and also manually, configuration objects are expected to
+   change slowly, perhaps through a mix of both manual file updates and also
+   programmatic updates. To store temporary values that can change frequently
+   and that you do not expect to be updated by configuration file changes,
+   custom repository objects can be more appropriate.</para>
+  </section>
+
+  <section xml:id="configuration-objects-naming">
+   <title>Custom Configuration Object Naming Conventions</title>
+
+   <para>By convention custom configuration objects are added under the
+   reserved context, <literal>config/custom</literal>.</para>
+
+   <para>You can choose any name under
+   <literal>config/<replaceable>context</replaceable></literal>. Be sure,
+   however, to choose a value for <replaceable>context</replaceable> that
+   does not clash with future OpenIDM configuration names.</para>
+  </section>
+
+  <section xml:id="configuration-objects-file-mapping">
+   <title>Mapping Configuration Objects To Configuration Files</title>
+
+   <para>If you have not disabled the file based view for configuration, you
+   can view and edit all configuration including custom configuration in
+   <filename>openidm/conf/*.json</filename> files. The configuration maps to a
+   file named
+   <filename><replaceable>context</replaceable>-<replaceable>config-name</replaceable>.json</filename>,
+   where <replaceable>context</replaceable> for custom configuration objects
+   is <literal>custom</literal> by convention, and
+   <replaceable>config-name</replaceable> is the configuration object name.
+   A configuration object named <literal>escalation</literal> thus maps to a
+   file named <filename>conf/custom-escalation.json</filename>.</para>
+
+   <para>OpenIDM detects and automatically picks up changes to the file.</para>
+
+   <para>OpenIDM also applies changes made through APIs to the file.</para>
+
+   <para>By default, OpenIDM stores configuration objects in the repository.
+   The file view is an added convenience aimed to help you in the development
+   phase of your project.</para>
+  </section>
+
+  <section xml:id="configuration-objects-formats">
+   <title>Configuration Objects File &amp; REST Payload Formats</title>
+
+   <para>By default, OpenIDM maps configuration objects to JSON
+   representations.</para>
+
+   <para>OpenIDM represents objects internally in plain, native types like
+   maps, lists, strings, numbers, booleans, null. OpenIDM constrains the
+   object model to simple types so that mapping objects to external
+   representations is trivial.</para>
+
+   <para>The following example shows a representation of a configuration
+   object with a look-up map.</para>
+
+   <programlisting language="javascript">{
+    "CODE123" : "ALERT",
+    "CODE889" : "IGNORE"
+}</programlisting>
+
+   <para>In the JSON representation, maps are represented with braces
+   (<literal>{ }</literal>), and lists are represented with brackets
+   (<literal>[ ]</literal>). Objects can be arbitrarily complex, as in the
+   following example.</para>
+
+   <programlisting language="javascript">{
+    "CODE123" : {
+        "email" : ["sample@sample.com", "john.doe@somedomain.com"],
+        "sms" : ["555666777"]
+    }
+    "CODE889" : "IGNORE"
+}</programlisting>
+  </section>
+
+  <section xml:id="configuration-objects-access-rest">
+   <title>Accessing Configuration Objects Through the REST API</title>
+
+   <para>You can list all available configuration objects, including system
+   and custom configurations, using an HTTP GET on
+   <literal>/openidm/config</literal>.</para>
+
+   <para>The <literal>_id</literal> property in the configuration object
+   provides the link to the configuration details with an HTTP GET on
+   <literal>/openidm/config/<replaceable>id-value</replaceable></literal>.
+   By convention, the <replaceable>id-value</replaceable> for a custom
+   configuration object called <literal>escalation</literal> is
+   <literal>custom/escalation</literal>.</para>
+
+   <para>OpenIDM supports REST mappings for create, read, update, and delete
+   of configuration objects. Currently OpenIDM does not support patch and
+   custom query operations for configuration objects.</para>
+  </section>
+
+  <section xml:id="configuration-objects-access-programmatic">
+   <title>Accessing Configuration Objects Programmatically</title>
+
+   <para>You can address configuration objects as resources using the URL or
+   URI <literal>config/</literal> prefix both internally and also through
+   the REST interface. The resource API provides script object functions for
+   create, read, update, and delete operations.</para>
+
+   <para>OpenIDM supports concurrency through a multi version concurrency
+   control mechanism. In other words, each time an object changes, OpenIDM
+   assigns it a new revision.</para>
+
+   <para>Objects can be arbitrarily complex as long as they use supported
+   types, such as maps, lists, numbers, strings, and booleans.</para>
+  </section>
+
+   <section xml:id="configuration-objects-programmatic-create">
+    <title>Creating Objects</title>
+
+    <para>The following script example creates an object type.</para>
+    <programlisting language="javascript">
+openidm.create("config/custom/myconfig", mymap)</programlisting>
+   </section>
+
+   <section xml:id="configuration-objects-programmatic-update">
+    <title>Updating Objects</title>
+
+    <para>The following script example updates an object type.</para>
+    <programlisting language="javascript">var expectedRev = origMap._rev
+openidm.update("managed/custom/myconfig", expectedRev, mymap)</programlisting>
+
+    <para>The MVCC mechanism requires that <literal>expectedRev</literal>
+    be set to the expected revision of the object to update. You obtain the
+    revision from the object's <literal>_rev</literal> property. If something
+    else changes the object concurrently, OpenIDM rejects the update, and you
+    must either retry or inspect the concurrent modification.</para>
+   </section>
+
+   <section xml:id="configuration-objects-programmatic-delete">
+    <title>Deleting Objects</title>
+
+    <para>The following script example deletes an object type.</para>
+
+    <programlisting language="javascript">var expectedRev = origMap._rev
+openidm.delete("config/custom/myconfig", expectedRev)</programlisting>
+
+    <para>The MVCC mechanism requires that <literal>expectedRev</literal>
+    be set to the expected revision of the object to update. You obtain the
+    revision from the object's <literal>_rev</literal> property. If something
+    else changes the object concurrently, OpenIDM rejects deletion, and you
+    must either retry or inspect the concurrent modification.</para>
+   </section>
+
+   <section xml:id="configuration-objects-programmatic-read">
+    <title>Reading Objects</title>
+
+    <para>The following script example reads an object type.</para>
+
+    <programlisting language="javascript">
+val = openidm.read("config/custom/myconfig")</programlisting>
+   </section>
+ </section>
+
+ <section xml:id="system-objects">
+  <title>System Objects</title>
+  <para><firstterm>System objects</firstterm> are pluggable representations of
+  objects on external systems. They follow the same RESTful resource based
+  design principles as managed objects. There is a default implementation for
+  the OpenICF framework, which allows any connector object to be represented
+  as a system object.</para>
+ </section>
+
+ <section xml:id="audit-objects">
+  <title>Audit Objects</title>
+  <para>Audit objects house audit data selected for local storage in the
+  OpenIDM repository. For details, see the chapter on <link
+  xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="admin-guide#chap-auditing"><citetitle>Audit
+  Logging</citetitle></link>.</para>
+ </section>
+
+ <section xml:id="links">
+  <title>Links</title>
+  <para>Link objects define relations between source objects and a target
+  objects, usually relations between managed objects and system objects.
+  The link relationship is established by provisioning activity that either
+  results in a new account on a target system, or a reconciliation or
+  synchronization scenario that takes a <literal>LINK</literal> action.</para>
+ </section>
+</appendix>
