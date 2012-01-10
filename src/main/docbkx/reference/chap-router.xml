@@ -146,7 +146,7 @@
     <varlistentry>
      <term>"openidm"</term>
      <listitem>
-      <para><link xlink:href="reference#chap-functions"
+      <para><link xlink:href="admin-guide#function-ref"
       xlink:role="http://docbook.org/xlink/role/olink">openidm-functions</link>
       object</para>
       <para>Provides access to OpenIDM resources.</para>
@@ -169,7 +169,7 @@
     <varlistentry>
      <term>"response"</term>
      <listitem>
-      <para><link xlink:href="reference#chap-functions"
+      <para><link xlink:href="admin-guide#function-ref"
       xlink:role="http://docbook.org/xlink/role/olink">openidm-functions</link>
       object</para>
       <para>The response to the resource-request. Only provided in the scope of

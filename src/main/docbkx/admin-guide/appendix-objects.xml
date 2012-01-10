@@ -814,10 +814,10 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
     <para>You can use all resource API functions in script objects for
     create, read, update, delete operations, and also for arbitrary queries on
     the object set, but not currently for arbitrary actions. See the
-    chapter on <link xlink:href="reference#chap-scripting"
+    appendix on <link xlink:href="admin-guide#appendix-scripting"
     xlink:role="http://docbook.org/xlink/role/olink"
     ><citetitle>Scripting</citetitle></link> in the
-    <citetitle>Reference</citetitle> for details.</para>
+    <citetitle>Administration Guide</citetitle> for details.</para>
 
     <para>OpenIDM supports concurrency through a multi version concurrency
     control (MVCC) mechanism. In other words, each time an object changes,

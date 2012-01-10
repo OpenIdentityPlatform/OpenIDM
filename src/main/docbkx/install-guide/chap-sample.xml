@@ -296,10 +296,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      reconciliation. You can use an <literal>onCreate</literal> script in a
      mapping to set default values for a user created in the target resource.
      For details on scripting see the <link
-     xlink:href="reference#chap-scripting"
+     xlink:href="admin-guide#appendix-scripting"
      xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Scripting</citetitle></link> chapter in the
-     <citetitle>Reference</citetitle>.</para>
+     ><citetitle>Scripting</citetitle></link> appendix in the
+     <citetitle>Administration Guide</citetitle>.</para>
      <para>For details on synchronization, reconciliation, and
      <filename>sync.json</filename>, see the <link
      xlink:href="reference#chap-synchronization"
