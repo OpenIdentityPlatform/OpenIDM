@@ -74,7 +74,6 @@
  <xinclude:include href='chap-reporting.xml' />
  -->
  <xinclude:include href='chap-best-pract.xml' />
- <xinclude:include href='chap-debug.xml' />
  <xinclude:include href='chap-troubleshooting.xml' />
 
  <xinclude:include href="appendix-file-layout.xml" />
