@@ -23,7 +23,7 @@
   !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
-<chapter xml:id="appendix-scripting"
+<appendix xml:id="appendix-scripting"
  version="5.0"
  xml:lang="en"
  xmlns="http://docbook.org/ns/docbook"
@@ -518,4 +518,4 @@
    </step>
   </procedure>
  </section>
-</chapter>
+</appendix>

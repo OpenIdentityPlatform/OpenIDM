@@ -23,7 +23,7 @@
   !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
-<chapter xml:id='appendix-rest'
+<appendix xml:id='appendix-rest'
  xmlns='http://docbook.org/ns/docbook'
  version='5.0' xml:lang='en'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -277,4 +277,4 @@ If-Match: "238693bd8dae"
    </varlistentry>
   </variablelist>
  </section>
-</chapter>
+</appendix>

@@ -20,17 +20,17 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
-<chapter xml:id="chap-scheduling" 
-         xmlns="http://docbook.org/ns/docbook"
-         version="5.0"
-         xml:lang="en"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xinclude="http://www.w3.org/2001/XInclude">
+<appendix xml:id="appendix-scheduling"
+ xmlns="http://docbook.org/ns/docbook"
+ version="5.0"
+ xml:lang="en"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xinclude="http://www.w3.org/2001/XInclude">
  <title>Scheduling</title>
 
  <para>OpenIDM provides the scheduling for operations such as synchronization
@@ -135,4 +135,4 @@
   <literal>ScheduledService</literal>. The service PID is used as a basis for
   the service identifier in schedule definitions.</para>
  </section>
-</chapter>
+</appendix>
