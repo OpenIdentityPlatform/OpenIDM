@@ -302,7 +302,8 @@ $ curl
    <screen>
 $ cp -r samples/sample5/script .
    </screen>
-   <warning>If you get a sever warning on on startup of OpenIDM which lokk like: SEVERE: Failed to parse the config of [org.forgerock.openidm.provisioner.openicf, xml-AD]-java.lang.IllegalArgumentException: bundleName may not be null, then please add the following line to both provisioner jason files:
+   <warning>
+   <para>If you get a sever warning on on startup of OpenIDM which lokk like: SEVERE: Failed to parse the config of [org.forgerock.openidm.provisioner.openicf, xml-AD]-java.lang.IllegalArgumentException: bundleName may not be null, then please add the following line to both provisioner jason files:</para>
    <screen>"bundleName" :
    "org.forgerock.openicf.connectors.file.openicf-xml-connector",</screen>
    <para>This line must be put into the "connectorRef" property, for instanc it can be put behind the line:</para>
@@ -319,9 +320,9 @@ var value = source.userName;
   </section>
   <section><title>External Configuration</title>
    <para>No extra external resource needs configuration for this example.</para>
-   <info>
+   <note>
     <para>As can be seen in the provisioner json files, the two xml files which represent the external resources are located in the folder: <filename>/samples/sample5/data</filename>! The file <filename>xml_AD_Data.xml</filename> will be automatically created on the first startup of the server. Before the first reconciliation it will not contain any user!</para>
-   </info>
+   </note>
   </section>
   <section><title>Run the Sample</title>
    <para>To run the sample a reconciliation between OpenIDM and the pseudo LDAP resource must be executed:</para>
