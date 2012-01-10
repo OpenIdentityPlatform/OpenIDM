@@ -75,6 +75,12 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/bundle/json-crypto-cli-1.1.0.jar</filename></term>
+   <listitem>
+    <para>Utility to encrypt and decrypt values in JSON objects</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/cli.sh</filename></term>
    <listitem>
     <para>Script for exporting objects, exporting secret keys, and validating
