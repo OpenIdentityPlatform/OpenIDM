@@ -155,10 +155,10 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <filename>samples/sample1/data/xmlConnectorData.xml</filename>, which
      contains users in XML format.</para>
      <para>For details on the OpenICF connector configuration files see the
-     <link xlink:href="reference#chap-provisioning"
+     <link xlink:href="admin-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Provisioning</citetitle></link> chapter in the
-     <citetitle>Reference</citetitle>.</para>
+     ><citetitle>Resource Connector Configuration</citetitle></link> chapter in
+     the <citetitle>Administration Guide</citetitle>.</para>
     </listitem>
    </varlistentry>
    <varlistentry>

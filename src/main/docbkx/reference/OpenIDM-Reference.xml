@@ -66,7 +66,6 @@
  <xinclude:include href="preface.xml" />
  <xinclude:include href='chap-scheduling.xml' />
  <xinclude:include href='chap-synchronization.xml' />
- <xinclude:include href='chap-provisioning.xml' />
  <xinclude:include href='chap-router.xml' />
  <xinclude:include href='chap-functions.xml' />
  <xinclude:include href='chap-scripting.xml' />
