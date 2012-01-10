@@ -81,6 +81,7 @@
  <xinclude:include href="appendix-ports-used.xml" />
  <xinclude:include href='appendix-objects.xml' />
  <xinclude:include href="appendix-rest.xml" />
+ <xinclude:include href="appendix-scripting.xml" />
 
  <index />
  <?dbhtml-include href="../ga.html"?>
