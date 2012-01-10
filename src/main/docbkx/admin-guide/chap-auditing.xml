@@ -471,4 +471,14 @@
    </variablelist>
   </section>
  </section>
+
+ <section xml:id="audit-reports">
+  <title>Generating Reports</title>
+
+  <para>When generating reports from audit logs, you can correlate information
+  from activity and reconciliation logs by matching the
+  <literal>"rootActionId"</literal> on entries in both logs.</para>
+  
+  <para>TODO: Demonstrate a join query with MySQL</para>
+ </section>
 </chapter>
