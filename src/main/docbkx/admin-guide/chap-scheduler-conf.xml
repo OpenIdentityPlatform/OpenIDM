@@ -98,7 +98,7 @@
     </programlisting>
    </example>
    <para><emphasis>Note</emphasis> that in the case of a reconciliation scheduled task, the entire mapping definition can be inlined. Refer to the chapter about reconciliation for more information.</para>
-   <para>An example configuration for scheduling liveSync can look link:</para>
+   <para>An example configuration for scheduling LiveSync can look link:</para>
    <example>
     <programlisting>
 {
