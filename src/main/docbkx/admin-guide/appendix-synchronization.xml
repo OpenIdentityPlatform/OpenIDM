@@ -20,17 +20,17 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
-<chapter xml:id='chap-synchronization'
-         xmlns="http://docbook.org/ns/docbook"
-         version="5.0"
-         xml:lang="en"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xinclude="http://www.w3.org/2001/XInclude">
+<appendix xml:id='appendix-synchronization'
+ xmlns="http://docbook.org/ns/docbook"
+ version="5.0"
+ xml:lang="en"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xinclude="http://www.w3.org/2001/XInclude">
  <title>Synchronization</title>
 
  <para>The synchronization engine is the core of OpenIDM. You configure the
@@ -242,8 +242,7 @@
      <listitem>
       <para>string, required</para>
       <para>Specifies the situation for which an associated action is to be
-      defined. For a set of valid situation and default actions, see the
-      <link linkend="sync-situations">Situations</link> section.</para>
+      defined.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -252,16 +251,11 @@
       <para>string or script object, required</para>
       <para>Specifies the action to perform. If a script is specified, the
        script is executed and is expected to yield a string containing the
-       action to perform. For a set of valid actions, see the <link
-       linkend="sync-actions">Actions</link> section.</para>
+       action to perform.</para>
      </listitem>
     </varlistentry>
    </variablelist>
    
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../shared/sec-syncSituations.xml"/>
-   
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../shared/sec-syncActions.xml"/>
-
    <section xml:id="sync-script-objects">
     <title>Script Object</title>
 
@@ -496,4 +490,4 @@ HTTP/1.1 409 Conflict
    </varlistentry>
   </variablelist>
  </section>
-</chapter>
+</appendix>

@@ -63,13 +63,6 @@
     <a href="./doc/OpenIDM-Dev-Guide.pdf">PDF</a>,
     <a href="./doc/OpenIDM-Dev-Guide.rtf">RTF</a></dd>
 
-    <dt>Reference</dt>
-    <dd><a href="./doc/OpenIDM-Reference.epub">EPUB</a>,
-    <a href="./doc/reference/OpenIDM-Reference.html">HTML (single page)</a>,
-    <a href="./doc/reference/OpenIDM-Reference/OpenIDM-Reference.html">HTML (1 page/chapter)</a>,
-    <a href="./doc/OpenIDM-Reference.pdf">PDF</a>,
-    <a href="./doc/OpenIDM-Reference.rtf">RTF</a></dd>
-
     <dt>API Specification (Javadoc)</dt>
     <dd><a href="./apidocs/index.html">HTML</a></dd>
    </dl>

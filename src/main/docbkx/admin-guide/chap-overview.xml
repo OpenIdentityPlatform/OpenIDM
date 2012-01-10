@@ -91,9 +91,10 @@
        xlink:href="http://www.quartz-scheduler.org">Quartz library</link>. Use
        the scheduler, for example, to enable regular synchronizations and
        reconciliations.</para>
-       <para>See the <link xlink:href="reference#chap-scheduling"
+       <para>See the <link xlink:href="admin-guide#chap-scheduler-conf"
        xlink:role="http://docbook.org/xlink/role/olink"
-       ><citetitle>Scheduling</citetitle></link> chapter for details.</para>
+       ><citetitle>Scheduled Tasks &amp; Events</citetitle></link> chapter
+       for details.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -185,9 +186,9 @@
        their attributes during synchronization and reconciliation. Mappings
        can also define triggers for validation, customization, filtering, and
        transformation of source and target objects.</para>
-       <para>See the <link xlink:href="reference#chap-synchronization"
+       <para>See the <link xlink:href="admin-guide#chap-synchronization"
        xlink:role="http://docbook.org/xlink/role/olink"
-       ><citetitle>Synchronization</citetitle></link> chapter for
+       ><citetitle>Configuring Synchronization</citetitle></link> chapter for
        details.</para>
       </listitem>
      </varlistentry>
@@ -202,9 +203,9 @@
        <para>Synchronization provides for creating, updating, and deleting
        resources from a source to a target system either on demand or according
        to a schedule.</para>
-       <para>See the <link xlink:href="reference#chap-synchronization"
+       <para>See the <link xlink:href="admin-guide#chap-synchronization"
        xlink:role="http://docbook.org/xlink/role/olink"
-       ><citetitle>Synchronization</citetitle></link> chapter for
+       ><citetitle>Configuring Synchronization</citetitle></link> chapter for
        details.</para>
       </listitem>
      </varlistentry>

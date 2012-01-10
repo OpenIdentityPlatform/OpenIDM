@@ -3,7 +3,6 @@
 <!ENTITY admin-guide SYSTEM "../../../target/admin-guide.target.db">
 <!ENTITY dev-guide SYSTEM "../../../target/dev-guide.target.db">
 <!ENTITY install-guide SYSTEM "../../../target/install-guide.target.db">
-<!ENTITY reference SYSTEM "../../../target/reference.target.db">
 <!ENTITY release-notes SYSTEM "../../../target/release-notes.target.db">
 ]>
 <targetset>
@@ -32,14 +31,6 @@
      <document targetdoc="install-guide"
                baseuri="../install-guide/OpenIDM-Install-Guide.html">
       &install-guide;
-     </document>
-    </dir>
-   </dir>
-   <dir name="reference">
-    <dir name="OpenIDM-Reference">
-     <document targetdoc="reference"
-               baseuri="../reference/OpenIDM-Reference.html">
-      &reference;
      </document>
     </dir>
    </dir>

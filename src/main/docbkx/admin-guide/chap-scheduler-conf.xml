@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-scheduler-conf'
@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Scheduled Tasks and Events</title>
+ <title>Scheduled Tasks &amp; Events</title>
  <para>A number of tasks and events in OpenIDM is allowed to be scheduled or is expected to be scheduled; this includes the aspects of the Discovery Engine providing reconciliation and synchronization or arbitrary events via a scheduling object.</para>
  <para>To configure scheduled events and tasks a cron like syntax is used and leverages internally the Quartz scheduler.</para>
  <para>Typically all scheduled tasks and events are if using a file based configuration approach, located in the <filename>openidm/conf</filename> directory and follows a naming convention of using scheduler-&lt;schedule-name&gt;.json. All scheduled tasks or events are dynamically picked up during runtime or during initialization of OpenIDM.</para>
