@@ -127,6 +127,8 @@
   <filename>conf/boot/boot.properties</filename> including the key store
   password to start up. You can set an obfuscated version in the file, or
   prompt for the password at start up time.</para>
+
+  <!-- TODO: Show how to do this. -->
  </section>
 
  <section xml:id="security-remove-dev-tools">
