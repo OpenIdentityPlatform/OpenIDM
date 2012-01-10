@@ -111,9 +111,9 @@
        log stores. This includes the data from reconciliation as a basis for
        reporting, as well as detailed activity logs to capture operations on
        the internal (managed) and external (system) objects.</para>
-       <para>See the <link xlink:href="reference#chap-auditing"
+       <para>See the <link xlink:href="admin-guide#chap-auditing"
        xlink:role="http://docbook.org/xlink/role/olink"
-       ><citetitle>Auditing</citetitle></link> chapter for details.</para>
+       ><citetitle>Audit Logging</citetitle></link> chapter for details.</para>
       </listitem>
      </varlistentry>
      <varlistentry>

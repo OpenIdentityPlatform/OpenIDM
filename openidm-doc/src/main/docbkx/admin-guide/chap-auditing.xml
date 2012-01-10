@@ -34,9 +34,10 @@
 
  <para>OpenIDM auditing can publish and log all relevant system activity to
  the targets you specify. Auditing can include data from reconciliation as
- a basis for reporting, to detailed activity logs that capture operations on
- internal (managed) objects and external (system) objects. Auditing provides
- the data for all the relevant reports, including orphan account reports.</para>
+ a basis for reporting, to access details, to activity logs that capture
+ operations on internal (managed) objects and external (system) objects.
+ Auditing provides the data for all the relevant reports, including orphan
+ account reports.</para>
  <!--
  For instructions on setting up an external reporting engine with OpenIDM,
  see the chapter on <link xlink:href="admin-guide#chap-reporting"
@@ -44,7 +45,7 @@
  for instructions.
   -->
 
- <para>The auditing interface allows you to push auditing data to files or
+ <para>The auditing interface allows you to push auditing data to files and
  to the OpenIDM repository.</para>
 
  <section xml:id="audit-log-types">
@@ -91,6 +92,255 @@
   <para>TODO: Show a concrete example.</para>
  </section>
 
+ <section xml:id="audit-log-format">
+  <title>Audit Log File Formats</title>
+
+  <para>This section describes the audit log file formats to help you map
+  these to into the reports you generate.</para>
+
+  <variablelist xml:id="audit-access-fields">
+   <title>Access Log Fields</title>
+   <para>Access messages are split into the following fields.</para>
+
+   <varlistentry>
+    <term><literal>"_id"</literal></term>
+    <listitem>
+     <para>GUID for the message object, such as
+     <literal>"0419d364-1b3d-4e4f-b769-555c3ca098b0"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"action"</literal></term>
+    <listitem>
+     <para>Action requested, such as <literal>"authenticate"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"ip"</literal></term>
+    <listitem>
+     <para>IP address of the client. For access from the local host, this
+     can appear for example as <literal>"0:0:0:0:0:0:0:1%0"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"principal"</literal></term>
+    <listitem>
+     <para>Principal requesting the operation, such as
+     <literal>"openidm-admin"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"roles"</literal></term>
+    <listitem>
+     <para>Roles associated with the principal, such as
+     <literal>"[openidm-admin, openidm-authorized]"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"status"</literal></term>
+    <listitem>
+     <para>Result of the operation, such as <literal>"SUCCESS"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"timestamp"</literal></term>
+    <listitem>
+     <para>Time when OpenIDM logged the message, such as
+     <literal>"2012-01-10T10:45:42"</literal></para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="audit-activity-fields">
+   <title>Activity Log Fields</title>
+   <para>Activity messages are split into the following fields.</para>
+
+   <varlistentry>
+    <term><literal>"_id"</literal></term>
+    <listitem>
+     <para>GUID for the message object, such as
+     <literal>"0419d364-1b3d-4e4f-b769-555c3ca098b0"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"action"</literal></term>
+    <listitem>
+     <para>Action performed, such as <literal>"create"</literal>. See
+     the section on <link xlink:href="admin-guide#audit-eventtypes"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Event
+     Types</citetitle></link> for a list.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"activityId"</literal></term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"after"</literal></term>
+    <listitem>
+     <para>JSON representation of the object resulting from the activity</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"before"</literal></term>
+    <listitem>
+     <para>JSON representation of the object prior to the activity</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"message"</literal></term>
+    <listitem>
+     <para>Human readable text about the activity</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"objectId"</literal></term>
+    <listitem>
+     <para>Object identifier such as
+     <literal>"managed/user/DDOE1"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"parentActionId"</literal></term>
+    <listitem>
+     <para>GUID of the action leading to the activity</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"requester"</literal></term>
+    <listitem>
+     <para>Principal requesting the operation</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"rev"</literal></term>
+    <listitem>
+     <para>Object revision number</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"rootActionId"</literal></term>
+    <listitem>
+     <para>GUID of the root cause for the activity. This matches a
+     corresponding <literal>"rootActionId"</literal> in a reconciliation
+     message.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"status"</literal></term>
+    <listitem>
+     <para>Result of the operation, such as <literal>"SUCCESS"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"timestamp"</literal></term>
+    <listitem>
+     <para>Time when OpenIDM logged the message, such as
+     <literal>"2012-01-10T10:45:42"</literal></para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <variablelist xml:id="audit-recon-fields">
+   <title>Reconciliation Log Fields</title>
+   <para>Reconciliation messages are split into the following fields.</para>
+
+   <varlistentry>
+    <term><literal>"_id"</literal></term>
+    <listitem>
+     <para>GUID for the message object, such as
+     <literal>"0419d364-1b3d-4e4f-b769-555c3ca098b0"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"action"</literal></term>
+    <listitem>
+     <para>Synchronization action, such as <literal>"CREATE"</literal>. See
+     the section on <link xlink:href="admin-guide#sync-actions"
+     xlink:role="http://docbook.org/xlink/role/olink"
+     ><citetitle>Actions</citetitle></link> for a list.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"ambiguousTargetObjectIds"</literal></term>
+    <listitem>
+     <para>TODO</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"entryType"</literal></term>
+    <listitem>
+     <para>Kind of reconciliation log entry, such as <literal>"start"</literal>,
+     or <literal>"summary"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"message"</literal></term>
+    <listitem>
+     <para>Human readable text about the reconciliation action</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"reconciling"</literal></term>
+    <listitem>
+     <para>What OpenIDM is reconciling, such as
+     <literal>"source"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"reconId"</literal></term>
+    <listitem>
+     <para>GUID for the reconciliation operation, which is the same for all
+     entries pertaining to the reconciliation run</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"rootActionId"</literal></term>
+    <listitem>
+     <para>GUID of the root cause for the activity. This matches a
+     corresponding <literal>"rootActionId"</literal> in an activity
+     message.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"situation"</literal></term>
+    <listitem>
+     <para>The situation encountered. See
+     the section describing <link xlink:href="admin-guide#sync-situations"
+     xlink:role="http://docbook.org/xlink/role/olink">sychronization
+     situations</link> for a list.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"sourceObjectId"</literal></term>
+    <listitem>
+     <para>GUID for the source object.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"status"</literal></term>
+    <listitem>
+     <para>Result of the operation, such as <literal>"SUCCESS"</literal></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"targetObjectId"</literal></term>
+    <listitem>
+     <para>GUID for the target object</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>"timestamp"</literal></term>
+    <listitem>
+     <para>Time when OpenIDM logged the message, such as
+     <literal>"2012-01-10T10:45:42"</literal>.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
  <section xml:id="audit-configuration">
   <title>Audit Configuration</title>
 
@@ -108,7 +358,9 @@
                 "actions": [
                     "create",
                     "update",
-                    "delete"
+                    "delete",
+                    "patch",
+                    "action"
                 ]
             }
         },
@@ -192,36 +444,31 @@
      <listitem>
       <para>Write to a comma-separated variable format file in the location
       specified relative to the directory where you installed OpenIDM.</para>
-      <para>Audit file names are fixed, <filename>activity.csv</filename> and
-      <filename>recon.csv.</filename></para>
+      <para>Audit file names are fixed, <filename>access.csv</filename>,
+      <filename>activity.csv</filename>, and
+      <filename>recon.csv</filename>.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term><literal>repository</literal></term>
      <listitem>
       <para>Write to the OpenIDM database repository.</para>
-      <para>OpenIDM stores entries under the <literal>audit/</literal> context,
-      such entries appear as
-      <literal>audit/activity/<replaceable>ID</replaceable></literal> and
-      <literal>audit/recon/<replaceable>ID</replaceable></literal>.</para>
+      <para>OpenIDM stores entries under the
+      <literal>/openidm/repo/audit/</literal> context, such entries appear as
+      <literal>audit/access/<replaceable>_id</replaceable></literal>,
+      <literal>audit/activity/<replaceable>_id</replaceable></literal>, and
+      <literal>audit/recon/<replaceable>_id</replaceable></literal>, where
+      the <replaceable>_id</replaceable> is the GUID of the entry such as
+      <literal>0419d364-1b3d-4e4f-b769-555c3ca098b0</literal>.</para>
       <para>In the OrientDB repository, OpenIDM stores records in
-      <literal>audit_activity</literal> and
-      <literal>audit_recon</literal> tables.</para>
+      <literal>audit_activity</literal>, <literal>audit_activity</literal>,
+      and <literal>audit_recon</literal> tables.</para>
       <para>In a JDBC repository, OpenIDM stores records in
-      <literal>auditactivity</literal> and
+      <literal>auditaccess</literal>, <literal>auditactivity</literal>, and
       <literal>auditrecon</literal> tables.</para>
      </listitem>
     </varlistentry>
    </variablelist>
   </section>
- </section>
-
- <section xml:id="audit-log-format">
-  <title>Audit Log File Formats</title>
-
-  <para>This section describes the audit log file formats to help you map
-  these to into the reports you generate.</para>
-
-  <para>TODO complete this section.</para>
  </section>
 </chapter>
