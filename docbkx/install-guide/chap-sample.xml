@@ -522,10 +522,10 @@ access.csv activity.csv recon.csv</screen>
   <citetitle>Reference</citetitle>.</para>
 
   <para>For details on auditing, see the <link
-  xlink:href="reference#chap-auditing"
+  xlink:href="admin-guide#chap-auditing"
   xlink:role="http://docbook.org/xlink/role/olink"
-  ><citetitle>Auditing</citetitle></link> chapter in the
-  <citetitle>Reference</citetitle>.</para>
+  ><citetitle>Audit Logging</citetitle></link> chapter in the
+  <citetitle>Administration Guide</citetitle>.</para>
  </section>
  
  <section xml:id="sample-adding-users-rest">
