@@ -40,7 +40,7 @@
  account reports.</para>
  <!--
  For instructions on setting up an external reporting engine with OpenIDM,
- see the chapter on <link xlink:href="admin-guide#chap-reporting"
+ see the chapter on <link xlink:href="admin-UUIDe#chap-reporting"
  xlink:role="http://docbook.org/xlink/role/olink">generating reports</link>
  for instructions.
   -->
@@ -105,7 +105,7 @@
    <varlistentry>
     <term><literal>"_id"</literal></term>
     <listitem>
-     <para>GUID for the message object, such as
+     <para>UUID for the message object, such as
      <literal>"0419d364-1b3d-4e4f-b769-555c3ca098b0"</literal></para>
     </listitem>
    </varlistentry>
@@ -158,7 +158,7 @@
    <varlistentry>
     <term><literal>"_id"</literal></term>
     <listitem>
-     <para>GUID for the message object, such as
+     <para>UUID for the message object, such as
      <literal>"0419d364-1b3d-4e4f-b769-555c3ca098b0"</literal></para>
     </listitem>
    </varlistentry>
@@ -166,7 +166,7 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>Action performed, such as <literal>"create"</literal>. See
-     the section on <link xlink:href="admin-guide#audit-eventtypes"
+     the section on <link xlink:href="admin-UUIDe#audit-eventtypes"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Event
      Types</citetitle></link> for a list.</para>
     </listitem>
@@ -174,7 +174,8 @@
    <varlistentry>
     <term><literal>"activityId"</literal></term>
     <listitem>
-     <para>TODO</para>
+     <para>UUID for the activity corresponding to the UUID of the resource
+     context</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -205,7 +206,7 @@
    <varlistentry>
     <term><literal>"parentActionId"</literal></term>
     <listitem>
-     <para>GUID of the action leading to the activity</para>
+     <para>UUID of the action leading to the activity</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -223,7 +224,7 @@
    <varlistentry>
     <term><literal>"rootActionId"</literal></term>
     <listitem>
-     <para>GUID of the root cause for the activity. This matches a
+     <para>UUID of the root cause for the activity. This matches a
      corresponding <literal>"rootActionId"</literal> in a reconciliation
      message.</para>
     </listitem>
@@ -250,7 +251,7 @@
    <varlistentry>
     <term><literal>"_id"</literal></term>
     <listitem>
-     <para>GUID for the message object, such as
+     <para>UUID for the message object, such as
      <literal>"0419d364-1b3d-4e4f-b769-555c3ca098b0"</literal></para>
     </listitem>
    </varlistentry>
@@ -258,7 +259,7 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>Synchronization action, such as <literal>"CREATE"</literal>. See
-     the section on <link xlink:href="admin-guide#sync-actions"
+     the section on <link xlink:href="admin-UUIDe#sync-actions"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Actions</citetitle></link> for a list.</para>
     </listitem>
@@ -266,7 +267,10 @@
    <varlistentry>
     <term><literal>"ambiguousTargetObjectIds"</literal></term>
     <listitem>
-     <para>TODO</para>
+     <para>When the situation is AMBIGUOUS or UNQUALIFIED and OpenIDM cannot
+     distinguish between more than one target object, OpenIDM logs the
+     identifiers of the objects in this field in comma-separated format. This
+     makes it possible to figure out what was ambiguous afterwards.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -292,14 +296,14 @@
    <varlistentry>
     <term><literal>"reconId"</literal></term>
     <listitem>
-     <para>GUID for the reconciliation operation, which is the same for all
+     <para>UUID for the reconciliation operation, which is the same for all
      entries pertaining to the reconciliation run</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"rootActionId"</literal></term>
     <listitem>
-     <para>GUID of the root cause for the activity. This matches a
+     <para>UUID of the root cause for the activity. This matches a
      corresponding <literal>"rootActionId"</literal> in an activity
      message.</para>
     </listitem>
@@ -308,7 +312,7 @@
     <term><literal>"situation"</literal></term>
     <listitem>
      <para>The situation encountered. See
-     the section describing <link xlink:href="admin-guide#sync-situations"
+     the section describing <link xlink:href="admin-UUIDe#sync-situations"
      xlink:role="http://docbook.org/xlink/role/olink">sychronization
      situations</link> for a list.</para>
     </listitem>
@@ -316,7 +320,7 @@
    <varlistentry>
     <term><literal>"sourceObjectId"</literal></term>
     <listitem>
-     <para>GUID for the source object.</para>
+     <para>UUID for the source object.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -328,7 +332,7 @@
    <varlistentry>
     <term><literal>"targetObjectId"</literal></term>
     <listitem>
-     <para>GUID for the target object</para>
+     <para>UUID for the target object</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -458,7 +462,7 @@
       <literal>audit/access/<replaceable>_id</replaceable></literal>,
       <literal>audit/activity/<replaceable>_id</replaceable></literal>, and
       <literal>audit/recon/<replaceable>_id</replaceable></literal>, where
-      the <replaceable>_id</replaceable> is the GUID of the entry such as
+      the <replaceable>_id</replaceable> is the UUID of the entry such as
       <literal>0419d364-1b3d-4e4f-b769-555c3ca098b0</literal>.</para>
       <para>In the OrientDB repository, OpenIDM stores records in
       <literal>audit_activity</literal>, <literal>audit_activity</literal>,
