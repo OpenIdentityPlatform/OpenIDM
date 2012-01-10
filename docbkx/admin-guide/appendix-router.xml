@@ -23,7 +23,7 @@
   !      Copyright 2012 ForgeRock AS
   !    
 -->
-<chapter xml:id="chap-router"
+<appendix xml:id="appendix-router"
  version="5.0"
  xml:lang="en"
  xmlns="http://docbook.org/ns/docbook"
@@ -245,4 +245,4 @@
     ]
 }</programlisting>
  </section>
-</chapter>
+</appendix>
