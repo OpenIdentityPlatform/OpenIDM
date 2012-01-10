@@ -59,7 +59,7 @@
    configuration, exposed in the <filename>openidm/conf/sync.json</filename>
    configuration file, or in the scheduler configuration. You can add the
    mapping to the scheduler for example when the mapping for reconciliation
-   needs to be different from the mapping for live sync.</para>
+   needs to be different from the mapping for LiveSync.</para>
   </section>
   <section><title>LiveSync</title>
    <para>OpenIDM <firstterm>LiveSync</firstterm> makes use of a change log on
@@ -435,7 +435,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    </varlistentry>
   </variablelist>
   <section><title>Source Reconciliation</title>
-   <para>When OpenIDM starts a reconciliation or liveSync it first gets a list of objects from the resource. In case of liveSync the list contains only objects which had a change, in case of reconciliation a list of all objects which are available through the connector. Keep in mind that the connector might filter out objects already, like through the baseContext or a filter (in case of an LDAP resource for instance). In addition objects can be filtered through the validSource property like mentioned in the <xref linkend="advance-syncing-example-id"/>.</para>
+   <para>When OpenIDM starts a reconciliation or LiveSync it first gets a list of objects from the resource. In case of LiveSync the list contains only objects which had a change, in case of reconciliation a list of all objects which are available through the connector. Keep in mind that the connector might filter out objects already, like through the baseContext or a filter (in case of an LDAP resource for instance). In addition objects can be filtered through the validSource property like mentioned in the <xref linkend="advance-syncing-example-id"/>.</para>
    <para>OpenIDM will then iterate over that list, check each entry against the "validSource" filter and try to classify all entries in one of the situations above (<xref linkend="sync-situations"/>). For doing so it also needs to have the list of existing links for this mapping available. Finally it will execute the configured action for the situation.</para>
   </section>
   <section><title>Target Reconciliation</title>
@@ -445,7 +445,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
  </section>
  
  <section><title>Correlation Queries</title>
-  <para>If user or object is created through a reconciliation or liveSync, the OpenIDM's sync engine will also create a link between the two objects. the link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
+  <para>If user or object is created through a reconciliation or LiveSync, the OpenIDM's sync engine will also create a link between the two objects. the link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
   <para>Especially during the early phases of an identity management project there might be loads of users created from resource A when the next reconciliation with resource B is started. I this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
 
   <para>In OpenIDM, the query is executed against the target. The syntax of the
