@@ -370,8 +370,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   this guide, you see IDs for two users, the second user
   <literal>DDOE1</literal> created during reconcililation. Now try a RESTful
   GET of user <literal>DDOE1</literal> by appending the user ID to the managed
-  user URL, <link xlink:href="http://localhost:8080/openidm/managed/user/"
-  xlink:show="new">http://localhost:8080/openidm/managed/user/</link>.</para>
+  user URL,
+  <literal>http://localhost:8080/openidm/managed/user/</literal>.</para>
 
   <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -457,9 +457,7 @@ access.csv activity.csv recon.csv</screen>
   linkend="sample-running-reconciliation"><citetitle>Running
   Reconciliation</citetitle></link>. After reconciliation has run, query the
   local repository to see the new user appear in the list of all users under
-  <link xlink:show="new"
-  xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
-  >http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
+  <literal>http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</literal>.</para>
 
   <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
