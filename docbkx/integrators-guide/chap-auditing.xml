@@ -40,7 +40,7 @@
  account reports.</para>
  <!--
  For instructions on setting up an external reporting engine with OpenIDM,
- see the chapter on <link xlink:href="admin-guide#chap-reporting"
+ see the chapter on <link xlink:href="integrators-guide#chap-reporting"
  xlink:role="http://docbook.org/xlink/role/olink">generating reports</link>
  for instructions.
   -->
@@ -166,7 +166,7 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>Action performed, such as <literal>"create"</literal>. See
-     the section on <link xlink:href="admin-guide#audit-eventtypes"
+     the section on <link xlink:href="integrators-guide#audit-eventtypes"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Event
      Types</citetitle></link> for a list.</para>
     </listitem>
@@ -259,7 +259,7 @@
     <term><literal>"action"</literal></term>
     <listitem>
      <para>Synchronization action, such as <literal>"CREATE"</literal>. See
-     the section on <link xlink:href="admin-guide#sync-actions"
+     the section on <link xlink:href="integrators-guide#sync-actions"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Actions</citetitle></link> for a list.</para>
     </listitem>
@@ -312,7 +312,7 @@
     <term><literal>"situation"</literal></term>
     <listitem>
      <para>The situation encountered. See
-     the section describing <link xlink:href="admin-guide#sync-situations"
+     the section describing <link xlink:href="integrators-guide#sync-situations"
      xlink:role="http://docbook.org/xlink/role/olink">sychronization
      situations</link> for a list.</para>
     </listitem>
