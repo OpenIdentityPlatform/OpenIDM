@@ -182,10 +182,10 @@ Listening for transport dt_socket at address: 5005
      and <literal>repo.jdbc</literal> are active. If any other services remain
      <literal>unsatisfied</literal>, check <filename>openidm/logs</filename>
      for errors, and refer to the chapter on <link
-     xlink:href="admin-guide#chap-troubleshooting"
+     xlink:href="integrators-guide#chap-troubleshooting"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Troubleshooting</citetitle></link> in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Integrator's Guide</citetitle>.</para>
     </step>
     <step>
      <para>Alternatively, you can manage the container and services from the

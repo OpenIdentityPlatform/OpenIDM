@@ -31,23 +31,20 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Preface</title>
  
- <para>This guide shows you how to configure and maintain OpenIDM services.</para>
+ <para>This guide shows you how to integrate OpenIDM as part of a complete
+ identity management solution.</para>
 
  <section>
   <title>Who Should Use this Guide</title>
   
-  <para>This guide is written for identity management
-   administrators who administer and maintain OpenIDM services for
-   their organizations. This guide covers the tasks you might repeat
-   throughout the life cycle of an OpenIDM release used in your
-   organization.</para>
+  <para>This guide is written for systems integrators building identity
+  management solutions based on OpenIDM services. This guide describes
+  OpenIDM, and shows you how to set up OpenIDM as part of your identity
+  management solution.</para>
    
   <para>You do not need to be an OpenIDM wizard to learn something from
-   this guide, though a background in access management and maintaining
-   web application software can help. You do need some background in
-   managing services on your operating systems and in your application
-   servers. You can nevertheless get started with this guide, and then
-   learn more as you go along.</para>
+  this guide, though a background in identity management and building
+  identity management solutions can help.</para>
  </section>
 
  <section>

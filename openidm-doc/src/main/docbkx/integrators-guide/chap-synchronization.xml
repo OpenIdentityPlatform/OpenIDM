@@ -343,7 +343,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
 }        
         </programlisting>
         <para>Do not use the default symmetric key in production. See the
-        chapter on <link xlink:href="admin-guide#chap-security"
+        chapter on <link xlink:href="integrators-guide#chap-security"
         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
         &amp; Hardening OpenIDM</citetitle></link> for more.</para>
       </example>

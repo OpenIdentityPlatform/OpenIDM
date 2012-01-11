@@ -157,7 +157,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <filename>samples/sample1/data/xmlConnectorData.xml</filename>, which
      contains users in XML format.</para>
      <para>For details on the OpenICF connector configuration files see the
-     <link xlink:href="admin-guide#chap-resource-conf"
+     <link xlink:href="integrators-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Resource Connector Configuration</citetitle></link> chapter in
      the <citetitle>Administration Guide</citetitle>.</para>
@@ -298,16 +298,16 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      reconciliation. You can use an <literal>onCreate</literal> script in a
      mapping to set default values for a user created in the target resource.
      For details on scripting see the <link
-     xlink:href="admin-guide#appendix-scripting"
+     xlink:href="integrators-guide#appendix-scripting"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Scripting</citetitle></link> appendix in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Integrator's Guide</citetitle>.</para>
      <para>For details on synchronization, reconciliation, and
      <filename>sync.json</filename>, see the <link
-     xlink:href="admin-guide#chap-synchronization"
+     xlink:href="integrators-guide#chap-synchronization"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Configuring Synchronization</citetitle></link> chapter in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Integrator's Guide</citetitle>.</para>
      </listitem>
    </varlistentry>
   </variablelist>
@@ -518,16 +518,16 @@ access.csv activity.csv recon.csv</screen>
   <para>You configure the action that OpenIDM takes based on an object's
   situation in the configuration file, <filename>conf/sync.json</filename>.
   For the list of all possible situations and actions, see the <link
-  xlink:href="admin-guide#chap-synchronization"
+  xlink:href="integrators-guide#chap-synchronization"
   xlink:role="http://docbook.org/xlink/role/olink"
   ><citetitle>Configuring Synchronization</citetitle></link> chapter in the
-  <citetitle>Administration Guide</citetitle>.</para>
+  <citetitle>Integrator's Guide</citetitle>.</para>
 
   <para>For details on auditing, see the <link
-  xlink:href="admin-guide#chap-auditing"
+  xlink:href="integrators-guide#chap-auditing"
   xlink:role="http://docbook.org/xlink/role/olink"
   ><citetitle>Audit Logging</citetitle></link> chapter in the
-  <citetitle>Administration Guide</citetitle>.</para>
+  <citetitle>Integrator's Guide</citetitle>.</para>
  </section>
  
  <section xml:id="sample-adding-users-rest">

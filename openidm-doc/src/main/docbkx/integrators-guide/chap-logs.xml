@@ -33,7 +33,7 @@
  <title>Logging</title>
 
  <para>This chapter briefly describes server logging. For audit information,
- see the chapter on <link xlink:href="admin-guide#chap-auditing"
+ see the chapter on <link xlink:href="integrators-guide#chap-auditing"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Audit
  Logging</citetitle></link>.</para>
 
