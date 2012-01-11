@@ -300,7 +300,7 @@ public class AuthFilter implements Filter {
             throw new AuthException(ad.username);
         }
         ad.username = certs[0].getSubjectDN().getName();
-        ad.roles.add("openidm-authorized");
+        ad.roles.add("openidm-cert");
         LOGGER.debug("Authentication client certificate subject {}", ad.username );
         return ad;
     }
