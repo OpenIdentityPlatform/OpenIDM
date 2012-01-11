@@ -94,7 +94,7 @@ import org.forgerock.openidm.audit.util.Status;
 
 @Component(
     name = "org.forgerock.openidm.authentication", immediate = true,
-    policy = ConfigurationPolicy.OPTIONAL
+    policy = ConfigurationPolicy.REQUIRE
 )
 
 public class AuthFilter implements Filter {
@@ -370,11 +370,20 @@ public class AuthFilter implements Filter {
         String urlPatterns[] = {"/openidm/*"};
         String servletNames[] = null;
         Dictionary initParams = null;
-        webContainer.registerFilter((Filter)new AuthFilter(), urlPatterns, servletNames, initParams, httpContext);
+        webContainer.registerFilter(this, urlPatterns, servletNames, initParams, httpContext);
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
+        if (httpService != null) {
+            try {
+                org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
+                webContainer.unregisterFilter(this);
+                LOGGER.info("Unregistered authentication filter.");
+            } catch (Exception ex) {
+                LOGGER.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
+            }
+        }
     }
 
 }
