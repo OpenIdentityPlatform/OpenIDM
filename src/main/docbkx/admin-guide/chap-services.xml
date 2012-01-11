@@ -57,26 +57,51 @@
 
   <screen>-&gt; shutdown</screen>
 
-  <!-- TODO: Editing logging.properties, even removing everything referencing
-  the ConsoleHandler, is not sufficient. The OSGi console prompt appears
-  nevertheless. When enter is pressed, the job is stopped.
-  So there's likely something missing from this part. -->
   <orderedlist>
    <para>You can also start OpenIDM as a background process on UNIX, Linux, and
-   Mac OS X.</para>
+   Mac OS X. Follow these steps <emphasis>before starting OpenIDM for the first
+   time</emphasis>.</para>
    <listitem>
     <para>Disable <literal>ConsoleHandler</literal> logging before starting
     OpenIDM by editing <filename>openidm/conf/logging.properties</filename>
-    to comment out references to the console handler.</para>
+    to set <literal>java.util.logging.ConsoleHandler.level = OFF</literal>,
+    and to comment out other references to <literal>ConsoleHandler</literal>,
+    as shown in the following excerpt.</para>
+    <programlisting language="ini">
+# ConsoleHandler: A simple handler for writing formatted records to System.err
+#handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+handlers=java.util.logging.FileHandler
+...
+# --- ConsoleHandler ---
+# Default: java.util.logging.ConsoleHandler.level = INFO
+java.util.logging.ConsoleHandler.level = OFF
+#java.util.logging.ConsoleHandler.formatter = ...
+#java.util.logging.ConsoleHandler.filter=...</programlisting>
+   </listitem>
+   <listitem>
+    <para>Remove the text-based OSGi console bundle,
+    <filename>bundle/org.apache.felix.shell.tui-1.4.1.jar</filename>.</para>
    </listitem>
    <listitem>
     <para>Start OpenIDM in the background.</para>
-    <screen>$ ./startup.sh &amp;</screen>
+    <screen>$ ./startup.sh &amp;
+[3] 454
+$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+
+$</screen>
    </listitem>
   </orderedlist>
 
   <para>To stop OpenIDM running as a background process, use the
   <command>shutdown.sh</command> script.</para>
+  <screen>$ ./shutdown.sh
+./shutdown.sh
+Stopping OpenIDM (454)</screen>
  </section>
 
  <section xml:id="command-line-tools">
@@ -128,7 +153,8 @@
    <varlistentry>
     <term><command>shutdown.sh</command></term>
     <listitem>
-     <para>Script to stop OpenIDM</para>
+     <para>Script to stop OpenIDM, especially when you run OpenIDM as a
+     background process</para>
     </listitem>
    </varlistentry>
   </variablelist>
