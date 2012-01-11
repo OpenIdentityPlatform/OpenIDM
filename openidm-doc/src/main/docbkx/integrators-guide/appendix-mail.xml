@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<appendix xml:id='appendix-mail'
+ version='5.0' xml:lang='en'
+ xmlns='http://docbook.org/ns/docbook'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Sending Email</title>
+
+ <para>After you configure the outbound email service, you can send email
+ through OpenIDM either in scripts or through the REST API.</para>
+
+ <procedure xml:id="setup-outbound-email">
+  <title>To Set Up Outbound Email</title>
+
+  <para>The outbound email service relies on a configuration object to identify
+  the email account used to send messages.</para>
+  <step>
+   <para>Shut down OpenIDM.</para>
+  </step>
+  <step>
+   <para>Copy the sample configuration to
+   <filename>openidm/conf</filename>.</para>
+   <screen>$ cd /path/to/openidm/
+$ cp samples/misc/external.email.json conf/</screen>
+  </step>
+  <step>
+   <para>Edit <filename>external.email.json</filename> to reflect the
+   account used to send messages.</para>
+   <programlisting language="javascript">
+{
+        "host" : "smtp.example.com",
+        "port" : "587",
+        "username" : "openidm",
+        "password" : "secret12",
+        "mail.smtp.auth" : "true",
+        "mail.smtp.starttls.enable" : "true"
+}</programlisting>
+    <para>OpenIDM encrypts the password you provide.</para>
+   <variablelist>
+    <para>Follow these hints when editing the configuration.</para>
+    <varlistentry>
+     <term><literal>"host"</literal></term>
+     <listitem>
+      <para>SMTP server host name or IP address. This can be
+      <literal>"localhost"</literal> if the server is on the same system as
+      OpenIDM.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"port"</literal></term>
+     <listitem>
+      <para>SMTP server port number such as 25, or 587</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"username"</literal></term>
+     <listitem>
+      <para>Mail account user name needed when <literal>"mail.smtp.auth" :
+      "true"</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"password"</literal></term>
+     <listitem>
+      <para>Mail account user password needed when <literal>"mail.smtp.auth" :
+      "true"</literal></para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"mail.smtp.auth"</literal></term>
+     <listitem>
+      <para>If <literal>"true"</literal>, use SMTP authentication</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"mail.smtp.starttls.enable"</literal></term>
+     <listitem>
+      <para>If <literal>"true"</literal>, use TLS</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term><literal>"from"</literal></term>
+     <listitem>
+      <para>Optional default <literal>From:</literal> address</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </step>
+  <step>
+   <para>Start up OpenIDM.</para>
+  </step>
+  <step>
+   <para>Check that the email service is active.</para>
+   <screen>-&gt; scr list
+...
+[   6] [active       ] org.forgerock.openidm.external.email
+...</screen>
+  </step>
+ </procedure>
+
+ <section xml:id="send-mail-rest">
+  <title>Sending Mail Over REST</title>
+  <para>Although you are more likely to send mail from a script in production,
+  you can send email using the REST API by an HTTP POST to
+  <literal>/openam/external/email</literal> in order to test that your
+  configuration works. You pass the message parameters as POST parameters,
+  URL encoding the content as necessary.</para>
+
+  <para>The following example sends a test email using the REST API.</para>
+  <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/external/email?
+ _from=openidm@example.com&amp;_to=admin@example.com&amp;
+ _subject=Test&amp;_body=Test"</screen>
+ </section>
+
+ <section xml:id="send-mail-script">
+  <title>Sending Mail From a Script</title>
+
+  <para>You can send email from using the resource API <link
+  xlink:href="integrators-guide#function-ref"
+  xlink:role="http://docbook.org/xlink/role/olink">functions</link> with
+  the <literal>external/email</literal> context, as in the following
+  example, where <literal>params</literal> is an object containing the
+  POST parameters.</para>
+
+  <programlisting language="javascript">
+var params =  new Object();
+params._from = "openidm@example.com";
+params._to = "admin@example.com";
+params._cc = "wally@example.com,dilbert@example.com";
+params._subject = "OpenIDM recon report";
+params._type = "text/html";
+params._body = "&lt;html&gt;&lt;body&gt;&lt;p&gt;Recon report follows...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;";
+
+openidm.action("external/email", params);</programlisting>
+
+  <variablelist>
+   <para>OpenIDM supports the following POST parameters.</para>
+   <varlistentry>
+    <term><literal>_from</literal></term>
+    <listitem>
+     <para>Sender mail address</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>_to</literal></term>
+    <listitem>
+     <para>Comma-separated list of recipient mail addresses</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>_cc</literal></term>
+    <listitem>
+     <para>Optional comma-separated list of copy recipient mail addresses</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>_bcc</literal></term>
+    <listitem>
+     <para>Optional comma-separated list of blind copy recipient mail
+     addresses</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>_subject</literal></term>
+    <listitem>
+     <para>Email subject</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>_body</literal></term>
+    <listitem>
+     <para>Email body text</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>_type</literal></term>
+    <listitem>
+     <para>Optional MIME type. One of <literal>"text/plain"</literal>,
+     <literal>"text/html"</literal>, or <literal>"text/xml"</literal>.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</appendix>
