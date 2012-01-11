@@ -112,7 +112,7 @@ sn: Doe
 mail: ddoe@example.com
 description: Created by OpenIDM
    </screen>
-   <para>The ldap server can be prepared by creating a base suffix of <filename>dc=example,dc=com</filename> and importing the following two objexts, if they do not already exist: </para>
+   <para>The ldap server can be prepared by creating a base suffix of <filename>dc=example,dc=com</filename> and importing the following two objects, if they do not already exist: </para>
    <screen>
 dn: dc=example,dc=com
 objectclass: organization
@@ -337,10 +337,117 @@ $ curl
   </section>
  </section>
  
- <!--section><title>Sample 6 - Live Sync with LDAP</title>
-  <para>ToDo</para>
-  <section><title>Install the Sample</title></section>
-  <section><title>External Configuration</title></section>
-  <section><title>Run the Sample</title></section>
- </section-->
+ <section><title>Sample 6 - LiveSync between two LDAP server</title>
+  <para>The sample is a bit similar to sample 5, except that it is using two real LDAP connections. To simplify the setup, both provisioners point to the same ldap server but on different baseContexts!</para>
+  <para>The example configuration will pick up new and changed users from LDAP (i.e. ou=people,dc=example,dc=com) and send the updates to AD. For simplicity no flow from AD to LDAP is configured!</para>
+  <section><title>Install the Sample</title>
+   <para>Here the sample is installed exactly like described in <xref linkend="preparignIDM-id"/>.</para>
+  </section>
+  <section><title>External Configuration</title>
+  <para>To change the example and use two independent ldap processes they need to listen to different ports and the provisioner configurations need to be changed accordingly.</para>
+  <para>Sample 6 expects an external ldap server with the following configuration:</para>
+   <itemizedlist>
+    <listitem><para>the ldap server runs on the local host</para></listitem>
+    <listitem><para>the ldap server "LDAP" listens on port 1389</para></listitem>
+    <listitem><para>the ldap server "AD" listens on port 4389</para></listitem>
+    <listitem><para>the ldap servers can be accesses by a user called "cn=Directory Manager" with the password: password</para></listitem>
+    <listitem><para>The user objects are stored on the ldap server under:</para> <itemizedlist>
+     <listitem><para>ou=people,o=ad for the connector called "AD"</para></listitem>
+     <listitem><para>ou=people,dc=example,dc=com for the connector called "LDAP"</para></listitem>
+    </itemizedlist></listitem>
+    <listitem><para>the user objects have the objectclass inetOrgPerson</para></listitem>
+    <listitem><para>the user objects contain the attributres (see below for an example user):</para>
+     <itemizedlist>
+      <listitem><para>uid</para></listitem>
+      <listitem><para>sn</para></listitem>
+      <listitem><para>cn</para></listitem>
+      <listitem><para>givenName</para></listitem>
+      <listitem><para>mail</para></listitem>
+      <listitem><para>description</para></listitem>
+     </itemizedlist>
+    </listitem>
+   </itemizedlist>
+   <screen>
+dn: uid=jdoe,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: top
+givenName: John
+uid: jdoe
+cn: John Doe
+telephoneNumber: 12345
+sn: Doe
+mail: ddoe@example.com
+description: Created by OpenIDM
+   </screen>
+   <para>The ldap server can be prepared by creating a base suffix of <filename>dc=example,dc=com</filename> and one for <filename>o=AD</filename> and importing the following objects, if they do not already exist: </para>
+   <screen>
+For Resource "LDAP"
+dn: dc=example,dc=com
+objectclass: organization
+
+dn: ou=People,dc=example,dc=com
+ou: people
+description: people
+objectclass: organizationalunit
+
+For Resource "AD"
+dn: o=AD
+objectclass: organization
+
+dn: ou=People,o=AD
+ou: people
+description: people
+objectclass: organizationalunit
+   </screen>
+   <note><para>In some version of the sample there is an inconsistency in the "onCreate" construction of the dn: it uses "source.uid" instead of "source.userName". The correct version looks like:</para></note>
+   <screen>
+"onCreate" : {
+    "type" : "text/javascript",
+    "source" : "target.dn = 'uid=' + source.userName + ',ou=people,o=ad';"
+}   
+   </screen>   
+  </section>
+  <section><title>Running the Sample</title>
+   <para>For starting the sample first start openidm. Then run a reconciliation against the REST interface: </para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+   </screen>
+   <para>For some reason there is sometimes a restart needed after the first start of a vanilla installation. If the command above returns with an error then please stop and start OpenIDM. The result of a successful reconciliation is empty.</para>
+   <para>Using the configuration of sample 6, the user objects will be created from LDAP in OpenIDM and in the target ldap server "AD". To get a list of all user object ids from the repository use:</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+   </screen>
+   <para>The result should look something like this:</para>
+   <screen>{"query-time-ms":1,"result":[{"_id":"56f0fb7e-3837-464d-b9ec-9d3b6af665c3","_rev":"0"}],"conversion-time-ms":0}</screen>
+   <para>And the command to get the user above listed like: </para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"
+   </screen>
+   <para>To see the users which should now be created in the "AD" ldap server use an ldapsearch like:</para>
+   <screen>
+$ ./ldapsearch -D "cn=Directory Manager" -w password -h localhost -p 4389 -b o=AD uid=*
+   </screen>
+   <note><para>In some version of the sample there is an inconsistency in the "onCreate" construction of the dn: it uses "source.uid" instead of "source.userName". The correct version looks like:</para></note>
+   <screen>
+"onCreate" : {
+    "type" : "text/javascript",
+    "source" : "target.dn = 'uid=' + source.userName + ',ou=people,o=ad';"
+}   
+   </screen>
+  </section>
+ </section>
 </chapter>
