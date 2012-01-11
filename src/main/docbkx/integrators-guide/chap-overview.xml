@@ -91,7 +91,7 @@
        xlink:href="http://www.quartz-scheduler.org">Quartz library</link>. Use
        the scheduler, for example, to enable regular synchronizations and
        reconciliations.</para>
-       <para>See the <link xlink:href="admin-guide#chap-scheduler-conf"
+       <para>See the <link xlink:href="integrators-guide#chap-scheduler-conf"
        xlink:role="http://docbook.org/xlink/role/olink"
        ><citetitle>Scheduled Tasks &amp; Events</citetitle></link> chapter
        for details.</para>
@@ -112,7 +112,7 @@
        log stores. This includes the data from reconciliation as a basis for
        reporting, as well as detailed activity logs to capture operations on
        the internal (managed) and external (system) objects.</para>
-       <para>See the <link xlink:href="admin-guide#chap-auditing"
+       <para>See the <link xlink:href="integrators-guide#chap-auditing"
        xlink:role="http://docbook.org/xlink/role/olink"
        ><citetitle>Audit Logging</citetitle></link> chapter for details.</para>
       </listitem>
@@ -186,7 +186,7 @@
        their attributes during synchronization and reconciliation. Mappings
        can also define triggers for validation, customization, filtering, and
        transformation of source and target objects.</para>
-       <para>See the <link xlink:href="admin-guide#chap-synchronization"
+       <para>See the <link xlink:href="integrators-guide#chap-synchronization"
        xlink:role="http://docbook.org/xlink/role/olink"
        ><citetitle>Configuring Synchronization</citetitle></link> chapter for
        details.</para>
@@ -203,7 +203,7 @@
        <para>Synchronization provides for creating, updating, and deleting
        resources from a source to a target system either on demand or according
        to a schedule.</para>
-       <para>See the <link xlink:href="admin-guide#chap-synchronization"
+       <para>See the <link xlink:href="integrators-guide#chap-synchronization"
        xlink:role="http://docbook.org/xlink/role/olink"
        ><citetitle>Configuring Synchronization</citetitle></link> chapter for
        details.</para>
@@ -224,7 +224,7 @@
        <para>REST APIs for CRUD operations and invoking synchronization and
        reconciliation are provided for both HTTP and Java.</para>
        <para>See the appendix on the
-       <link xlink:href="admin-guide#appendix-rest"
+       <link xlink:href="integrators-guide#appendix-rest"
        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
        API</citetitle></link> for details.</para>
       </listitem>
