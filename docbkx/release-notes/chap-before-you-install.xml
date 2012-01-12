@@ -55,7 +55,7 @@
   <varlistentry>
    <term>Connectors</term>
    <listitem>
-    <para>TODO</para>
+    <para>OpenIDM is packaged with four default connectors; CSV File, XML File, ScriptedSQL and LDAP connector. Should you require additional connectors to integrate to other systems, please refer to http://openicf.forgerock.org/connectors/.</para>
    </listitem>
   </varlistentry>
  </variablelist>
