@@ -336,7 +336,7 @@ public class AuthFilter implements Filter {
         referenceInterface = JsonResource.class,
         bind = "bindRouter",
         unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
         policy = ReferencePolicy.STATIC,
         target = "(service.pid=org.forgerock.openidm.router)"
     )
