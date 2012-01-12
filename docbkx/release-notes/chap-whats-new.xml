@@ -46,6 +46,9 @@
    xlink:href='http://openicf.forgerock.org'>Open Identity Connector
    Framework (OpenICF)</link></para>
   </listitem>
+  <listitem><para>Password synchronization capabilities</para></listitem>
+  <listitem><para>Workflow and Business Process support for BPMN 2.0
+  (Experimental)</para></listitem>
  </itemizedlist>
 
  <para>For installation instructions and a sample to get familiar with the
