@@ -307,7 +307,7 @@ $ cp -r samples/sample5/script .
    <screen>"bundleName" :
    "org.forgerock.openicf.connectors.file.openicf-xml-connector",</screen>
    <para>This line must be put into the "connectorRef" property, for instanc it can be put behind the line:</para>
-   <screen>"bundleVersion" : "1.1.0.0-EA",</screen>
+   <screen>"bundleVersion" : "1.1.0.0",</screen>
    <para>Additionally the correlation rule in the script file  <filename>script/name_eq_name_correlationQuery.js</filename> may need a change:</para>
    <screen>
 change

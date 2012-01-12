@@ -623,7 +623,7 @@
     "connectorRef" : {
         "connectorHostRef" : "#LOCAL",
         "bundleName" : "org.forgerock.openicf.connectors.file.file.openicf-xml-connector",
-        "bundleVersion" : "1.1.0.0-EA",
+        "bundleVersion" : "1.1.0.0",
         "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
     },        
         </programlisting>
@@ -659,7 +659,7 @@
          "connectorHostRef" : "#LOCAL",
          "connectorName" : "org.identityconnectors.ldap.LdapConnector",
          "bundleName" : "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
-         "bundleVersion" : "1.1.0.0-EA"
+         "bundleVersion" : "1.1.0.0"
       },        
         </programlisting>
    </example>
@@ -831,7 +831,7 @@ The connectorHostRef is NOT optional in this case since the AD connector needs t
         "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
-        "bundleVersion" : "1.1.0.0-EA"
+        "bundleVersion" : "1.1.0.0"
     },        
         </programlisting>
    </example>
