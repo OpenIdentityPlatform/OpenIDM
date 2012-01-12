@@ -267,7 +267,7 @@ $ curl
  </section>
  
  <section><title>Sample 4 - CSV Connector</title>
-  <para>Sample 4 deals with a flat file comma separated value file as the external resource. The file id part of the sample configuration, therefore noe other external resource needs to be maintained.</para>
+  <para>Sample 4 deals with a flat file comma separated value file as the external resource. The file id part of the sample configuration, therefore no other external resource needs to be maintained.</para>
   <section><title>Install the Sample</title>
    <para>Additionally to the <xref linkend="preparignIDM-id"/> a directory called <filename>data</filename>, containing the csv file, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
    <screen>$ cp -r samples/sample4/data .</screen>
