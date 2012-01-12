@@ -295,7 +295,7 @@ $ curl
   </section>
  </section>
  
- <section><title>Sample 5 - Synchronizaiton of two Resources</title>
+ <section><title>Sample 5 - Synchronization of two Resources</title>
   <para>The purpose of sample 5 is to demonstrate the flow of data from one external resource to another. The resources are called LDAP and AD, but in the example both directory like resources are simulated by two xml files.</para>
   <section><title>Install the Sample</title>
    <para>Additionally to the <xref linkend="preparignIDM-id"/>, a directory called <filename>script</filename>, containing some java script files, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
