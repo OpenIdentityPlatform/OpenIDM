@@ -160,7 +160,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <link xlink:href="integrators-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Resource Connector Configuration</citetitle></link> chapter in
-     the <citetitle>Administration Guide</citetitle>.</para>
+     the <citetitle>Integrator's Guide</citetitle>.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -200,7 +200,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      xlink:href="reference#chap-scheduler-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Scheduled Tasks &amp; Events</citetitle></link> chapter in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Integrator's Guide</citetitle>.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
