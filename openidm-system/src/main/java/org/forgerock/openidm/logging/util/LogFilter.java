@@ -1,4 +1,5 @@
 /*
+
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -24,7 +25,7 @@ public class LogFilter implements Filter {
     @Override
     public boolean isLoggable(LogRecord rec) {
         // Filter out well known noise on the console
-
+        
         // OrientDB RC6 noise
         if (rec.getLoggerName().startsWith("com.orientechnologies.orient.core.storage.impl.local.")) {
             if (rec.getMessage().endsWith("was not closed correctly last time. Checking segments...")
@@ -36,7 +37,7 @@ public class LogFilter implements Filter {
             // Felix 4.0.2 shutdown has some noise in trying to unbind references when services are already gone
             if (rec.getMessage().endsWith("[org.forgerock.openidm.managed] Cannot create component instance due to failure to bind reference ref_ManagedObjectService_JsonResourceRouterService")
                     || rec.getMessage().endsWith("[org.forgerock.openidm.managed] Component instance could not be created, activation failed")
-                    || rec.getMessage().endsWith("org.ops4j.pax.web.pax-web-jetty-bundle [65] FrameworkEvent ERROR")) {
+                    || (rec.getMessage().contains("org.ops4j.pax.web.pax-web-jetty-bundle [") && rec.getMessage().endsWith("] FrameworkEvent ERROR"))) {
                 return false;
             }
         }
