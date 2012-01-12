@@ -99,7 +99,7 @@ GET /openidm/managed/user/bdd793f8 HTTP/1.1
 HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 123
-ETag: "7769ac1c6493"
+ETag: "0"
 ...
 
 [<replaceable>JSON representation of the managed object</replaceable>]</programlisting>
@@ -118,7 +118,7 @@ HEAD /openidm/managed/user/bdd793f8 HTTP/1.1
 HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 123
-ETag: "7769ac1c6493"</programlisting>
+ETag: "0"</programlisting>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -140,7 +140,7 @@ If-None-Match: *
 HTTP/1.1 201 Created
 Content-Type: application/json
 Content-Length: 45
-ETag: "238693bd8dae"
+ETag: "0"
 ...
 
 [<replaceable>JSON representation containing metadata (underscore-prefixed) properties</replaceable>]</programlisting>
@@ -149,14 +149,14 @@ ETag: "238693bd8dae"
 PUT /openidm/managed/user/5752c0fd9509 HTTP/1.1
 Content-Type: application/json
 Content-Length: 123
-If-Match: "238693bd8dae"
-…
+If-Match: "0"
+...
 
 [<replaceable>JSON representation of managed object to update</replaceable>]</programlisting>
      <para>Example Response: Updating an existing object (success)</para>
      <programlisting language="http">
 HTTP/1.1 204 No Content
-ETag: "c3b7232fc0b3"
+ETag: "1"
 ...</programlisting>
      <para>Example Response: Updating an existing object (version conflict)</para>
      <programlisting language="http">
@@ -196,7 +196,7 @@ Content-Length: 123
 HTTP/1.1 201 Created
 Content-Type: application/json
 Content-Length: 45
-ETag: "238693bd8dae"
+ETag: "0"
 ...
 
 [<replaceable>JSON representation containing metadata (underscore-prefixed) properties</replaceable>]</programlisting>
@@ -209,7 +209,7 @@ ETag: "238693bd8dae"
      <para>Example Request</para>
      <programlisting language="http">
 DELETE /openidm/managed/user/c3471805b60f
-If-Match: "238693bd8dae"
+If-Match: "0"
 ...</programlisting>
      <para>Example Response (success)</para>
      <programlisting language="http">
@@ -237,14 +237,14 @@ Content-Length: 89
 PATCH /openidm/managed/user/5752c0fd9509 HTTP/1.1
 Content-Type: application/patch+json
 Content-Length: 456
-If-Match: "238693bd8dae"
+If-Match: "0"
 ...
 
 [<replaceable>JSON representation of patch document to apply</replaceable>]</programlisting>
      <para>Example Response (success)</para>
      <programlisting language="http">
 HTTP/1.1 204 No Content
-ETag: "c3b7232fc0b3"
+ETag: "1"
 ...</programlisting>
      <para>Example Response (version conflict)</para>
      <programlisting language="http">
@@ -269,7 +269,7 @@ POST /openidm/managed/user/5752c0fd9509 HTTP/1.1
 X-HTTP-Method-Override: PATCH
 Content-Type: application/patch+json
 Content-Length: 456
-If-Match: "238693bd8dae"
+If-Match: "0"
 ...
 
 [<replaceable>JSON representation of patch document to apply</replaceable>]</programlisting>
