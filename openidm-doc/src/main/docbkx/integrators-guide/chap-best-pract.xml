@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-best-pract'
@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>OpenIDM Project Best Practice</title>
+ <title>OpenIDM Project Best Practices</title>
  <section xml:id="immplementation-phase">
   <title>Implementation Phases</title>
   <para>Any Identity Management project whether using OpenIDM and/or other technologies should follow a set of well defined phases, where each phase discretely defines deliverables and takes the project from initiation to finally going live with a tested solution.</para>
