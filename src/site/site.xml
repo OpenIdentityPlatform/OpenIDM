@@ -59,7 +59,7 @@
   <item name="All Formats" href="docs.html" />
   <item name="Release Notes" href="./doc/release-notes/OpenIDM-Release-Notes.html" />
   <item name="Installation Guide" href="./doc/install-guide/OpenIDM-Install-Guide.html" />
-  <item name="Administration Guide" href="./doc/integrators-guide/OpenIDM-Integrators-Guide.html" />
+  <item name="Integrator's Guide" href="./doc/integrators-guide/OpenIDM-Integrators-Guide.html" />
   <item name="Developer Guide" href="./doc/dev-guide/OpenIDM-Dev-Guide.html" />
   <item name="Javadoc" href="./apidocs/index.html" />
   </menu>
