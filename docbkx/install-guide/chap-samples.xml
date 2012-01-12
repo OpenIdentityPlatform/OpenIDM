@@ -206,7 +206,7 @@ $ curl
  </section>
  
  <section><title>Sample 3 - SQL scripted</title>
-  <para>Sample 3 shows an example configuration for the SQL scripted connector. This connector is very flexible since the communication with the database is established by configurable sql scripts. Each operation, like create or dlete, is represented by its own db script. The scripts are kept in the <filename>tools</filename> folder. The folder named <filename>data</filename> contains an example DDL to create a database schema which will hold the external user objects.</para>
+  <para>Sample 3 shows an example configuration for the SQL scripted connector. This connector is very flexible since the communication with the database is established by configurable sql scripts. Each operation, like create or delete, is represented by its own db script. The scripts are kept in the <filename>tools</filename> folder. The folder named <filename>data</filename> contains an example DDL to create a database schema which will hold the external user objects.</para>
   <para>It is recommended to start playing with this sample with a fresh installation of OpenIDM.</para>
   <section><title>Install the Sample</title>
    <para>The sample is installed like described in <xref linkend="preparignIDM-id"/> plus copying another folder called <filename>tools</filename>.</para>
