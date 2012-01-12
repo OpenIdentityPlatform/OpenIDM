@@ -5,7 +5,7 @@
         "target" : "managed/user",
         "correlationQuery" : {
             "type": "text/javascript",
-            "source" : "var query = {'_query-id' : 'for-userName', 'userName' :  source.name};query;"
+            "source" : "var query = {'_query-id' : 'for-userName', 'uid' :  source.name};query;"
         },
         "properties" : [ {
             "source" : "description",

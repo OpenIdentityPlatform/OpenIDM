@@ -184,20 +184,20 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>icfl-over-slf4j</artifactId>
-            <version>1.1.0.0-EA</version>
+            <version>1.1.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
-            <version>1.1.0.0-EA</version>
+            <version>1.1.0.0</version>
             <scope>provided</scope>
         </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
             <groupId>org.forgerock.openicf.connectors.file</groupId>
             <artifactId>openicf-xml-connector</artifactId>
-            <version>1.1.0.0-EA</version>
+            <version>1.1.0.0</version>
             <scope>provided</scope>
         </dependency>
 
