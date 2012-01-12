@@ -51,8 +51,9 @@
   elements can be either have single instances or multiple instances for
   an OpenIDM installation.</para>
 
-  <itemizedlist>
-   <para>Single instance configurations correspond to services that have
+  <itemizedlist xml:id="single-instance-configuration-objects">
+   <title>Single Instance Configuration Objects</title>
+   <para>Single instance configuration objects correspond to services that have
    at most one instance per installation.</para>
    <para>JSON file views of these configuration objects are named
    <filename><replaceable>object-name</replaceable>.json</filename>.</para>
@@ -83,9 +84,10 @@
    </listitem>
   </itemizedlist>
 
-  <itemizedlist>
-   <para>Multiple instance configurations correspond to services that can
-   have many instances per installation.</para>
+  <itemizedlist xml:id="multiple-instance-configuration-objects">
+   <title>Multiple Instance Configuration Objects</title>
+   <para>Multiple instance configuration objects correspond to services that
+   can have many instances per installation.</para>
    <para>Configuration objects are named
    <literal><replaceable>object-name</replaceable>/<replaceable>instance-name</replaceable></literal>.</para>
    <para>JSON file views of these configuration objects are named
