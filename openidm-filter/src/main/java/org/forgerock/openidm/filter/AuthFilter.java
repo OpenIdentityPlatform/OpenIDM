@@ -94,7 +94,7 @@ import org.forgerock.openidm.audit.util.Status;
 
 @Component(
     name = "org.forgerock.openidm.authentication", immediate = true,
-    policy = ConfigurationPolicy.OPTIONAL
+    policy = ConfigurationPolicy.REQUIRE
 )
 
 public class AuthFilter implements Filter {
@@ -142,6 +142,10 @@ public class AuthFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                                                         throws IOException, ServletException {
+        if (router == null) {
+            throw new ServletException("Internal services not ready to process requests.");
+        }
+        
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         AuthData authData = new AuthData();
@@ -213,7 +217,12 @@ public class AuthFilter implements Filter {
                 }
             }
             entry.put("ip", ipAddress);
-            router.create("audit/access", entry);
+            if (router != null) {
+                router.create("audit/access", entry);
+            } else {
+                // Filter should have rejected request if router is not available
+                LOGGER.warn("Failed to log entry for {} as router is null.", username);
+            }
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to log entry for {}", username, ose);
         }
@@ -361,11 +370,20 @@ public class AuthFilter implements Filter {
         String urlPatterns[] = {"/openidm/*"};
         String servletNames[] = null;
         Dictionary initParams = null;
-        webContainer.registerFilter((Filter)new AuthFilter(), urlPatterns, servletNames, initParams, httpContext);
+        webContainer.registerFilter(this, urlPatterns, servletNames, initParams, httpContext);
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
+        if (httpService != null) {
+            try {
+                org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
+                webContainer.unregisterFilter(this);
+                LOGGER.info("Unregistered authentication filter.");
+            } catch (Exception ex) {
+                LOGGER.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
+            }
+        }
     }
 
 }
