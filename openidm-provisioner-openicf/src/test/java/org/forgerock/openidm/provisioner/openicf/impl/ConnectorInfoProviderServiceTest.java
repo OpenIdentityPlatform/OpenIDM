@@ -130,7 +130,7 @@ public class ConnectorInfoProviderServiceTest {
         InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
         instance.activate(context);
 
-        ConnectorReference ref = new ConnectorReference(new ConnectorKey("org.forgerock.openicf.connectors.file.openicf-xml-connector", "1.1.0.0-EA", "com.forgerock.openicf.xml.XMLConnector"));
+        ConnectorReference ref = new ConnectorReference(new ConnectorKey("org.forgerock.openicf.connectors.file.openicf-xml-connector", "1.1.0.0", "com.forgerock.openicf.xml.XMLConnector"));
         Assert.assertNotNull(testableConnectorInfoProvider.findConnectorInfo(ref), "XML Connector is missing");
 
     }
@@ -138,7 +138,7 @@ public class ConnectorInfoProviderServiceTest {
     @Test
     public void testCreateSystemConfiguration() throws URISyntaxException {
         ConnectorInfo xmlConnectorInfo = null;
-        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.file.openicf-xml-connector", "1.1.0.0-EA", "com.forgerock.openicf.xml.XMLConnector");
+        ConnectorKey key = new ConnectorKey("org.forgerock.openicf.connectors.file.openicf-xml-connector", "1.1.0.0", "com.forgerock.openicf.xml.XMLConnector");
         for (ConnectorInfo info : testableConnectorInfoProvider.getAllConnectorInfo()) {
             if (key.equals(info.getConnectorKey())) {
                 xmlConnectorInfo = info;
