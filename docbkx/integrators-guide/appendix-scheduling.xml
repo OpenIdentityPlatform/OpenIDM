@@ -90,40 +90,57 @@
     >http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html</link>.</para>
    </listitem>
    <listitem>
-    <para>The <literal>"invokeService"</literal> service identifier and
-    <literal>"invokeContext"</literal> information can be take the following
-    values: TODO.</para>
-    <para>A service identifier can be specified without the
-    <literal>org.forgerock.openidm.</literal> prefix. In other words,
-    <literal>"invokeService" : "active-sync"</literal> is equivalent to
-    <literal>"invokeService" : "org.forgerock.openidm.active-sync"</literal>.</para>
+    <para>The <literal>"invokeService"</literal> service identifier can currently take the following values: "sync" for reconciliation and "provisioner" for LiveSync.</para>
+   </listitem>
+   <listitem>
+    <para>The value for "invokeContext" depends on the value for "invokeService". Possible combinations are:</para>
+    <screen>
+    "invokeService" : "provisioner",
+    "invokeContext" : {
+        "action" : "activeSync",
+        "source" : "system/ldap/account"    
+    </screen>
+    <para>"source" takes the external resource  (here ldap) and the object type (here account) as the value in the form: system/ldap/account.</para>
+    <screen>
+    "invokeService" : "sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "systemLdapAccounts_managedUser"    
+    </screen>
+    <para>"mapping" takes the name property of the mapping as configured in sync.json as a configuration.</para>
    </listitem>
   </itemizedlist>
-
+  <note><para>A service identifier can be specified without the
+    <literal>org.forgerock.openidm.</literal> prefix. In other words,
+    <literal>"invokeService" : "sync"</literal> is equivalent to
+    <literal>"invokeService" : "org.forgerock.openidm.sync"</literal>.</para></note>
   <example xml:id="simple-scheduler-example">
-   <title>Schedule Configuration: Simple Example</title>
-   <para>TODO describe the example.</para>
+   <title>Schedule Configuration: Reconciliation</title>
+   <para>The example describes a scheduled reconciliation which is currently not enabled (no scheduled reconciliation will run) and runs every 30 minute.</para>
    <programlisting language="javascript">{
-  "enabled" : true,
-  "type" : "cron",
-  "schedule" : "0 30 10-13 ? * WED,FRI"
-  "invokeService" : "active-sync",
-  "invokeContext" : "system-x"
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0 0/30 * * * ?",
+    "invokeService" : "sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "systemLdapAccounts_managedUser"
+    }
 }</programlisting>
   </example>
 
   <example xml:id="complex-scheduler-example">
-   <title>Schedule Configuration: Complex Example</title>
-   <para>TODO describe the example.</para>
+   <title>Schedule Configuration: LiveSync</title>
+   <para>The example is for a scheduled LiveSync, currently enabled and will be executed every 15 sseconds.</para>
    <programlisting language="javascript">{
-  "enabled" : true,
-  "type" : "cron",
-  "startTime" : "2011-05-03T10:00:00 ",
-  "endTime" : "2011-05-03T15:59:59",
-  "schedule" : "0 30 10-13 ? * WED,FRI"
-  "timeZone" : "America/Los_Angeles"
-  "invokeService" : "active-sync",
-  "invokeContext" : "system-x"
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "0/15 * * * * ?",
+    "invokeService" : "provisioner",
+    "invokeContext" : {
+        "action" : "activeSync",
+        "source" : "system/ldap/account"
+    }
 }</programlisting>
   </example>
  </section>
