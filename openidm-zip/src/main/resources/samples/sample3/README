@@ -2,7 +2,7 @@ Scripted SQL sample using mySQL
 
 Before the example can be started a mySQL db must be running and available.
 There is a script in smaple3/data called sample_HR_DB.mysql which will create a sample db with some sample users. 
-It will also grant access to that db for the user "root" with the password "passowrd" (no quotes).
+It will also grant access to that db for the user "root" with the password "password" (no quotes).
 
 The mysql jdbc driver must be available in the bundle folder too!
 
