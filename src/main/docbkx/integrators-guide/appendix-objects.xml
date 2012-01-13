@@ -96,7 +96,6 @@
  <section xml:id="objects-resource-api">
   <title>Accessing Objects</title>
 
-  <!-- TODO: Link to the resource API reference elsewhere in the documentation. -->
   <para>OpenIDM's uniform programming model means that all objects are queried
   and manipulated in the same way from your scripts using the Resource API.
   The URL or URI used to identify the target object for an operation depends
@@ -104,7 +103,11 @@
   types of object, known as <firstterm>Resource Sets</firstterm>.</para>
 
   <para>For example, you get managed objects, configuration objects, and
-  repository objects in the following way using the Resource API.</para>
+  repository objects in the following way using the Resource API. On how to construct the "id" of an object please see <link
+  xlink:href="appendix-rest#rest-uri-scheme"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>URI Scheme</citetitle>
+</link>.</para>
 
   <programlisting language="javascript">
 val = openidm.read("managed/organization/mysampleorg")
@@ -855,7 +858,14 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
      the specified properties of the object. OpenIDM supports patch by query,
      so the caller need not know the identifier of the object to change.</para>
 
-     <!-- TODO: an example would be nice. -->
+     <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST -d '[{"replace":"/adPassword","value": "Password"}]' 
+ http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-username&amp;uid=DDOE
+      </screen>
+      <para>For the syntax on how to formulate the query (_query-id=for-username&amp;uid=DDOE) please refer to <xref linkend="managed-objects-programmatic-query"/> </para>
     </section>
 
     <section xml:id="managed-objects-programmatic-delete">

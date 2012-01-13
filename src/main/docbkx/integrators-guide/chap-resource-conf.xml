@@ -48,6 +48,8 @@
  resources using the database's Java connection libraries or JDBC driver.
  It connects to directory servers over JNDI. It connects to operating systems
  by using <command>ssh</command>.</para>
+ 
+ <para>Connectors are configured in <filename>openidm/conf/</filename> in files with the naming convention <filename>provisioner.openicf-&lt;name&gt;.json</filename> where "name" stands for the individual name of the connector.</para>
 
  <section xml:id="openidm-openicf">
   <title>OpenIDM &amp; OpenICF</title>
@@ -83,7 +85,7 @@
 
  <section xml:id="connector-info-provider-conf">
   <title>Connector Info Provider Service</title>
-
+  <para>This configuration is only needed for remote connectors and configured in a separate configuration file: <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>. A sample configuration can be found at <filename>openidm/samples/provisioners/</filename>.</para>
   <para>The connector info provider service takes this configuration.</para>
 <programlisting language="javascript">
 {
@@ -91,7 +93,7 @@
   "remoteConnectorServers" : [<replaceable>remoteConnectorServer objects</replaceable>]
 }</programlisting>
 
-  <variablelist>
+  <variablelist><title>Connector Info Provider Properties</title>
    <varlistentry>
     <term>connectorsLocation</term>
     <listitem>
@@ -102,7 +104,7 @@
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>remoteConnectorServers</term>
+    <term><link linkend="remote-connector-server-object-properties">remoteConnectorServers</link></term>
     <listitem>
      <para>array of RemoteConnectorServer objects, optional</para>
      <para>A list of remote connector servers managed by this service.</para>
@@ -110,6 +112,9 @@
    </varlistentry>
   </variablelist>
 
+ <variablelist xml:id="remote-connector-server-object-properties">
+  <title>Remote Connector Server Properties</title>
+  
   <para>The following example shows a <literal>remoteConnectorServer</literal>
   object configuration.</para>
 
@@ -128,8 +133,6 @@
     ]
 }</programlisting>
 
- <variablelist xml:id="remote-connector-server-object-properties">
-  <title>Remote Connector Server Object Properties</title>
   <para>OpenIDM supports the following remote connector server object
   properties.</para>
   <varlistentry>
@@ -279,31 +282,31 @@
    <varlistentry>
     <term>maxObjects</term>
     <listitem>
-     <para>TODO</para>
+     <para>Maximum number of idle and active objects.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>maxIdle</term>
     <listitem>
-     <para>TODO</para>
+     <para>Maximum number of idle objects</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>maxWait</term>
     <listitem>
-     <para>TODO</para>
+     <para>The maximum time in milliseconds which the pool will wait for an object before it times out. Zero means that it will never time out.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>minEvictableIdleTimeMillis</term>
     <listitem>
-     <para>TODO</para>
+     <para>Maximum time in milliseconds an object can be idle before it is removed. Zero means no timeout.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>minIdle</term>
     <listitem>
-     <para>TODO</para>
+     <para>The minimum number of idle objects.</para>
     </listitem>
    </varlistentry>
   </variablelist>

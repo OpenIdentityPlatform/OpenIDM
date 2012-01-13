@@ -115,9 +115,25 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
    One possibility is to follow the attribute names defined in the Simple Cloud
    Identity Management (<link
    xlink:href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html"
-   >SCIM</link>) specification.</para>
-   <!-- TODO: Provide the configuration for SCIM, preferably not just as
-              documentation. -->
+   >SCIM</link>) specification. An example for a scim user object is shown below.</para>
+   <example>
+    <programlisting language="javascript">
+{
+     "userName":"james1",
+     "familyName":"Berg",
+     "givenName":"James",
+     "email":"james1@examplerock.com",
+     "description":"Created by OpenIDM REST.",
+     "password":"asdfkj23",
+     "displayName":"James Berg",
+     "phoneNumber":"12345",
+     "employeeNumber":"12345",
+     "userType":"Contractor",
+     "title":"Vice President",
+     "active":true
+}    
+    </programlisting>
+   </example>
   </section>
   <section><title>Components for Data Synchronization</title>
    <para>OpenIDM involves two configuration file types and a database table in the synchronization process: sync.json, all provisioner.&lt;resourceName&gt;.json and the link table. The configuration files are used to configure synchronization by the administrators where the link table is maintained by OpenIDM to link objects on different resources (or the repository) which belong to the same user.</para>
@@ -609,9 +625,14 @@ map;
    </programlisting>
   </example>
   <section><title>Include data from a third resource</title>
-  <para>At any time during the reconciliation it is possible to get information form any connected system. The function to call is:</para> 
-  <para>openidm.read(id)</para>
-   <para>TODO</para>
+  <para>At any time during the reconciliation it is possible to get information from any connected system. The function to call is openidm.read(id). An example on how to use in a script:</para> 
+  <example>
+   <programlisting language="javascript">
+   repoUser = openidm.read("managed/user/ddoe);
+   or
+   externalAccount = openidm.read("system/ldap/account/ddoe");
+   </programlisting>
+  </example>
   </section>
  </section>
  
