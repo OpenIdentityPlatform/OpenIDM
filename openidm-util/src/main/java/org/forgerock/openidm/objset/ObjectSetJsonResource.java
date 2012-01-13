@@ -196,7 +196,7 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
 
     @Override // JsonResourceHandler
     protected JsonValue action(JsonValue request) throws JsonResourceException {
-        JsonValue result;
+        JsonValue result = null;
         String id = request.get("id").asString();
         Map<String, Object> params = request.get("params").copy().asMap(); // copy; gonna add _entity to it
         JsonValue value = request.get("value");
@@ -205,10 +205,13 @@ public class ObjectSetJsonResource extends SimpleJsonResource implements ObjectS
         }
         ObjectSetContext.push(request);
         try {
-            result = new JsonValue(action(id, params));
+            Map<String, Object> res = action(id, params);
+            if (null != res) {
+                result = new JsonValue(res);
+            }
         } finally {
             ObjectSetContext.pop();
         }
-        return new JsonValue(null);
+        return result;
     }
 }
