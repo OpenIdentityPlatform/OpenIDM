@@ -344,7 +344,8 @@ $ curl
    <para>Here the sample is installed exactly like described in <xref linkend="preparignIDM-id"/>.</para>
   </section>
   <section><title>External Configuration</title>
-  <para>To change the example and use two independent ldap processes they need to listen to different ports and the provisioner configurations need to be changed accordingly.</para>
+  <para>The sample provisioners are configured for tow independent ldap processes. To change the example to connect to one ldap process which represents both external resources both suffices can be configured on one ldap server and the provisioner configuration's port need to be changed accordingly.</para>
+  <section><title>LDAP Configuration</title>
   <para>Sample 6 expects an external ldap server with the following configuration:</para>
    <itemizedlist>
     <listitem><para>the ldap server runs on the local host</para></listitem>
@@ -382,8 +383,8 @@ mail: ddoe@example.com
 description: Created by OpenIDM
    </screen>
    <para>The ldap server can be prepared by creating a base suffix of <filename>dc=example,dc=com</filename> and one for <filename>o=AD</filename> and importing the following objects, if they do not already exist: </para>
+   <para>For Resource "LDAP":</para>
    <screen>
-For Resource "LDAP"
 dn: dc=example,dc=com
 objectclass: organization
 
@@ -391,8 +392,9 @@ dn: ou=People,dc=example,dc=com
 ou: people
 description: people
 objectclass: organizationalunit
-
-For Resource "AD"
+   </screen>
+   <para>For Resource "AD"</para>
+   <screen>
 dn: o=AD
 objectclass: organization
 
@@ -402,14 +404,36 @@ description: people
 objectclass: organizationalunit
    </screen>
    <note><para>In some version of the sample there is an inconsistency in the "onCreate" construction of the dn: it uses "source.uid" instead of "source.userName". The correct version looks like:</para></note>
-   <screen>
+   <example>
+    <programlisting language="javascript">
 "onCreate" : {
     "type" : "text/javascript",
     "source" : "target.dn = 'uid=' + source.userName + ',ou=people,o=ad';"
 }   
-   </screen>   
+    </programlisting>
+   </example>
+   </section>
+   <section><title>Prepare OpenDJ for LiveSync</title>
+    <para>The changes in OpenDJ are detected using the External Change Log (ECL) mechanism, a similar mechanism to the one that was known as Retro Change Log in Sun Directory Servers. The ECL is presented as an LDAP subtree with a base DN of cn=changelog. Each change is represented as an entry in that subtree and it remains in that subtree for a few days (depending on the purging policy of the ldap server).</para>
+    <para>The change log is switched on in the ldap server with configuring replication. There is no full replication configuration needed here, therefore the server may come back with an error message.</para>
+    <para>As a first step a global administrator account needs to be created for the replicaiotion (these commands can be found in the bin folder of each OpenDJ installation):</para>
+    <screen>
+$ ./dsframework create-admin-user -X --hostname localhost --port 4444 
+ --bindDN "cn=Directory Manager" --bindPassword password
+ --userID admin2 --set password:opends2    
+    </screen>
+    <para>It is assumed that the OpenDJ is configured to use the standard administration port "4444".</para>
+    <para>In a second step the replication is configured:</para>
+    <screen>
+$ ./dsreplication enable --host1 localhost --port1 4444 
+ --bindDN1 "cn=Directory Manager" --bindPassword1 secret --trustAll 
+ --onlyReplicationServer1 --replicationPort1 8989 --baseDN dc=example,dc=com 
+ --onlyReplicationServer1 --no-prompt --adminUID admin2 --adminPassword opends2    
+    </screen>
+   </section>
   </section>
   <section><title>Running the Sample</title>
+   <section><title>Running the Sample with Reconciliation</title>
    <para>For starting the sample first start openidm. Then run a reconciliation against the REST interface: </para>
    <screen>
 $ curl
@@ -448,6 +472,26 @@ $ ./ldapsearch -D "cn=Directory Manager" -w password -h localhost -p 4389 -b o=A
     "source" : "target.dn = 'uid=' + source.userName + ',ou=people,o=ad';"
 }   
    </screen>
+   <para>Note: to keep this sample simple it is only configured to create and update user from resource "LDAP" to Openidm and then to resource "AD". </para>
+   </section>
+   <section><title>Running the sample with LiveSync</title>
+    <para>In opposite to reconciliation, which can be started by the scheduler and through the REST interface directly, LiveSync needs to be started by a the scheduler. therefore a scheduler configuration is needed in the <filename>conf</filename> folder. The sample comes with the following scheduler file for LiveSync:</para>
+    <example>
+     <programlisting language="javaxcript">
+{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0/15 * * * * ?",
+    "invokeService" : "provisioner",
+    "invokeContext" : {
+        "action" : "activeSync",
+        "source" : "system/ldap/account"
+    }
+}   
+     </programlisting>
+    </example>
+    <para>The schedule is activated by changing the "enabled" property to true. </para>
+   </section>
   </section>
  </section>
 </chapter>
