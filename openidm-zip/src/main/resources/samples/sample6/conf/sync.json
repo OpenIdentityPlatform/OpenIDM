@@ -37,7 +37,7 @@
             ],
             "onCreate" : {
                 "type" : "text/javascript",
-                "source" : "target.dn = 'uid=' + source.uid + ',ou=people,o=ad';"
+                "source" : "target.dn = 'uid=' + source.userName + ',ou=people,o=ad';"
             },
             "policies" : [
                 { "situation" : "CONFIRMED", "action" : "UPDATE" },
