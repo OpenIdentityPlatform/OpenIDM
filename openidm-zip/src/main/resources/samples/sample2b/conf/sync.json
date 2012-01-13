@@ -1,107 +1,143 @@
 {
-    "mappings" : [ {
+    "mappings" : [
+        {
             "name" : "systemLdapAccounts_managedUser",
             "source" : "system/ldap/account",
             "target" : "managed/user",
-        "properties" : [ {
+            "properties" : [
+                {
             "source" : "cn",
             "target" : "displayName"
-        }, {
+                },
+                {
             "source" : "description",
             "target" : "description"
-        }, {
+                },
+                {
             "source" : "givenName",
             "target" : "givenName"
-        }, {
+                },
+                {
             "source" : "mail",
             "target" : "email"
-        }, {
+                },
+                {
             "source" : "sn",
             "target" : "familyName"
-        }, {
+                },
+                {
             "source" : "uid",
             "target" : "userName"
-        } ],
-        "policies" : [ {
+                }
+            ],
+            "policies" : [
+                {
             "situation" : "CONFIRMED",
             "action" : "UPDATE"
-        }, {
+                },
+                {
             "situation" : "FOUND",
             "action" : "UPDATE"
-        }, {
+                },
+                {
             "situation" : "ABSENT",
             "action" : "CREATE"
-        }, {
+                },
+                {
             "situation" : "AMBIGUOUS",
             "action" : "EXCEPTION"
-        }, {
+                },
+                {
             "situation" : "MISSING",
             "action" : "UNLINK"
-        }, {
+                },
+                {
             "situation" : "SOURCE_MISSING",
             "action" : "EXCEPTION"
-        }, {
+                },
+                {
             "situation" : "UNQUALIFIED",
             "action" : "IGNORE"
-        }, {
+                },
+                {
             "situation" : "UNASSIGNED",
             "action" : "IGNORE"
-        } ]
-    }, {
+                }
+            ]
+        },
+        {
         "name" : "managedUser_systemLdapAccounts",
         "source" : "managed/user",
         "target" : "system/ldap/account",
+        "links" : "systemLdapAccounts_managedUser",
         "correlationQuery" : {
             "type" : "text/javascript",
             "file" : "script/ldapBackCorrelationQuery.js"
         },
-        "properties" : [ {
+            "properties" : [
+                {
             "source" : "givenName",
             "target" : "givenName"
-        }, {
+                },
+                {
             "source" : "familyName",
             "target" : "sn"
-        }, {
+                },
+                {
             "source" : "displayName",
             "target" : "cn"
-        }, {
+                },
+                {
             "source" : "userName",
             "target" : "uid"
-        }, {
+                },
+                {
             "source" : "description",
             "target" : "description"
-        }, {
+                },
+                {
             "source" : "email",
             "target" : "mail"
-        } ],
+                }
+            ],
             "onCreate" : {
                 "type" : "text/javascript",
-            "source" : "target.dn = 'uid=' + source.uid + ',ou=people,o=aaa';"
+                "source" : "target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';"
             },
-        "policies" : [ {
+            "policies" : [
+                {
             "situation" : "CONFIRMED",
             "action" : "UPDATE"
-        }, {
+                },
+                {
             "situation" : "FOUND",
             "action" : "LINK"
-        }, {
+                },
+                {
             "situation" : "ABSENT",
             "action" : "CREATE"
-        }, {
+                },
+                {
             "situation" : "AMBIGUOUS",
             "action" : "IGNORE"
-        }, {
+                },
+                {
             "situation" : "MISSING",
             "action" : "IGNORE"
-        }, {
+                },
+                {
             "situation" : "SOURCE_MISSING",
             "action" : "IGNORE"
-        }, {
+                },
+                {
             "situation" : "UNQUALIFIED",
             "action" : "IGNORE"
-        }, {
+                },
+                {
             "situation" : "UNASSIGNED",
             "action" : "IGNORE"
-        } ]
-    } ]
+                }
+            ]
+        }
+    ]
 }
