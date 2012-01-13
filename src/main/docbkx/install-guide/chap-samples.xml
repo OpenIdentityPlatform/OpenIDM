@@ -160,7 +160,7 @@ $ curl
   <para>But in opposite to sample 2, sample 2b has two mappings configured: from the external resource into the repo and vice versa.</para>
   <section><title>Install the Sample</title>
    <para>The sample is installed like described in <xref linkend="preparignIDM-id"/> plus copying another file in the <filename>script</filename> folder:</para>
-   <screen>$ cp -r samples/sample2/script .</screen>
+   <screen>$ cp -r samples/sample2b/script .</screen>
    <para>If the current installation already contains sample 2 then moving to sample 2b can also be done by adding the second mapping of sample 2b's <filename>sync.json</filename> to the current <filename>sync.json</filename> file. Additionaly the content of the <filename>script</filename> folder must be copied to the OpenIDM installation. It is just one file named <filename>ldapBackCorrelationQuery.js</filename>. The file is referenced in the second mapping.</para>
   </section>  
   <section xml:id="external-ldap-config-2b"><title>External LDAP Configuration</title>
