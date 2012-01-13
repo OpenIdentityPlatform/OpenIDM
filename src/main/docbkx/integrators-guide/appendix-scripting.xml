@@ -515,6 +515,9 @@
    </step>
    <step>
     <para>Start OpenIDM, and connect the debugger.</para>
+    <para>To create a new debug, configuration click Run &gt; Debug
+    Configurations... &gt; Remote JavaScript &gt; New button, and then set
+    the port to 9888 as shown above.</para>
    </step>
   </procedure>
  </section>
