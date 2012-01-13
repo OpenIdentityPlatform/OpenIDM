@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <project name="${project.name}"
@@ -41,7 +41,7 @@
     </body>
     
     <custom>
-        <googleAnalytics>UA-23412190-5</googleAnalytics>
+        <googleAnalytics>UA-23412190-9</googleAnalytics>
         <openproject>
             <href>http://openidm.forgerock.org/</href>
             <src>./images/openidm-tagline-200x65.png</src>
