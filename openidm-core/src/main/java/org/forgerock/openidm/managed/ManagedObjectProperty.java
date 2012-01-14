@@ -30,8 +30,9 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
 // JSON Crypto
-import org.forgerock.json.crypto.JsonEncryptor;
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.crypto.JsonEncryptor;
 
 // OpenIDM
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -170,7 +171,8 @@ class ManagedObjectProperty {
         execScript("onStore", onStore, value);
         if (encryptor != null && value.isDefined(name)) {
             try {
-                value.put(name, encryptor.encrypt(value.get(name)).getObject()); // applies all transformations
+                value.put(name, new JsonCrypto(encryptor.getType(),
+                 encryptor.encrypt(value.get(name))).toJsonValue().getObject());
             } catch (JsonCryptoException jce) {
                 String msg = name + " property encryption exception";
                 LOGGER.debug(msg, jce);
