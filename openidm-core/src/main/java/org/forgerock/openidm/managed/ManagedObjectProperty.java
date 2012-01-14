@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.managed;
 
 // Java SE
-import java.util.HashMap;
 import java.util.Map;
 
 // SLF4J
@@ -30,6 +29,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
 // JSON Crypto
+import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.JsonCryptoException;
 
@@ -170,7 +170,8 @@ class ManagedObjectProperty {
         execScript("onStore", onStore, value);
         if (encryptor != null && value.isDefined(name)) {
             try {
-                value.put(name, encryptor.encrypt(value.get(name)).getObject()); // applies all transformations
+                value.put(name, new JsonCrypto(encryptor.getType(),
+                    encryptor.encrypt(value.get(name))).toJsonValue().getObject());
             } catch (JsonCryptoException jce) {
                 String msg = name + " property encryption exception";
                 LOGGER.debug(msg, jce);
