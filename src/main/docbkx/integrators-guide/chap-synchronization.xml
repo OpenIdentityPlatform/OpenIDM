@@ -400,7 +400,7 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   </section>
  </section>
  
- <section><title>Handling of different Situations of an Object</title>
+ <section xml:id="situation-handling-id"><title>Handling of different Situations of an Object</title>
   <section><title>Finding the right Situation</title>
    <para>During synchronization objects can be categorized into different situations depending on the existence of an object in both, source and target of the synchronization and whether a link between two objects on the different resources is already registered or not. If a situation and its action is not defined in a synchronization mapping, then a default action is take. The default actions are listed below.</para>
    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href='../shared/sec-syncSituations.xml' />
@@ -438,8 +438,8 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   </section>
  </section> 
  
- <section><title>Detailed Steps of the OpenIDM sync Engine</title>
- <para>OpenIDM's sync engine performs the synchronization action in two steps by using different lists: </para>
+ <section xml:id="syn-engine-id"><title>Detailed Steps of the OpenIDM sync Engine</title>
+ <para>OpenIDM's sync engine performs the synchronization action in two steps. First it runs the so called "Source Reconciliation", then the "Target Reconciliation".</para>
   <variablelist>
    <varlistentry>
     <term>Source Reconciliation</term>
@@ -453,16 +453,35 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
   <section><title>Source Reconciliation</title>
    <para>When OpenIDM starts a reconciliation or LiveSync it first gets a list of objects from the resource. In case of LiveSync the list contains only objects which had a change, in case of reconciliation a list of all objects which are available through the connector. Keep in mind that the connector might filter out objects already, like through the baseContext or a filter (in case of an LDAP resource for instance). In addition objects can be filtered through the validSource property like mentioned in the <xref linkend="advance-syncing-example-id"/>.</para>
    <para>OpenIDM will then iterate over that list, check each entry against the "validSource" filter and try to classify all entries in one of the situations above (<xref linkend="sync-situations"/>). For doing so it also needs to have the list of existing links for this mapping available. Finally it will execute the configured action for the situation.</para>
+   <figure xml:id="source-recon-id">
+    <title>Resolving Source Reconciliation Situations</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/SourceRecon.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+    <caption><para>The figure shows how OpenIDM's sync engine will find the appropriate situation during the first phase, the Source Reconciliation Phase, depending on whether there is a valid source ("Source Qualifies"), a link with an appropriate type exists in the links table ("Link Exits") and a target object is found based on an existing link or by a correlation rule.</para></caption>
+   </figure>
   </section>
+  
   <section><title>Target Reconciliation</title>
    <para>During the Source Reconciliation phase OpenIDM can not detect situations where there is no source object, like UNASSIGNED. These situations are detected in the second phase when OpenIDM iterates over all target objects which have not jet been treated duting the first phase, i.e. which do not have a representation on the source.</para>
    <para>OpenIDM will iterate over that list, check the object against the "validTarget" filter, find the appropriate situation and execute the configured acttion.</para>
+   <figure xml:id="target-recon-id">
+    <title>Resolving Target Reconciliation Situations</title>
+    <mediaobject>
+      <imageobject>
+        <imagedata fileref="images/TargetRecon.png" format="PNG"/>
+      </imageobject>
+    </mediaobject>
+    <caption><para>The figure shows how OpenIDM's sync engine will find the appropriate situation during the second phase, the "Target Reconciliation Phase" depending on whether there is a valid target ("Target Qualifies"), a link with an appropriate type exists in the links table ("Link Exits"), a source object is found ("Source Exists) and the source object qualifies ("Source Qualifies"). Not all situations from the source reconciliation make sense in the target reconciliation.</para></caption>
+   </figure>
   </section>
  </section>
  
- <section><title>Correlation Queries</title>
-  <para>If user or object is created through a reconciliation or LiveSync, the OpenIDM's sync engine will also create a link between the two objects. the link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
-  <para>Especially during the early phases of an identity management project there might be loads of users created from resource A when the next reconciliation with resource B is started. I this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
+ <section xml:id="correlation-id"><title>Correlation Queries</title>
+  <para>If user or object is created through a reconciliation or LiveSync, the OpenIDM's sync engine will also create a link between the two objects. The link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
+  <para>Especially during the early phases of an identity management project there might be loads of users created from resource "A" when the next reconciliation with resource "B" is started. In this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
 
   <para>In OpenIDM, the query is executed against the target. The syntax of the
   query therefore depends on which system is the target. The syntax is specific
@@ -476,14 +495,14 @@ $ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=sys
     <programlisting language="javascript">
             "correlationQuery" : {
             "type": "text/javascript",
-            "source" : "var query = {'_query-id' : 'for-userName', 'userName' :  source.name};query;"
+            "source" : "var query = {'_query-id' : 'for-userName', 'uid' :  source.name};query;"
         },
     </programlisting>
    </example>
    <para>In the example below ${_resource} will be replaced by the table name which contains the users, if the correlation is for objects of type user. At the end of the day it is a simple query against a db table which can return zero, one or more than one objects. The situation of the user, like FOUND or AMBIGUOUS will be set according to the number of returned objects.</para>
    <example xml:id="orient-query-example-id"><title>DB query for Correlation</title>
     <programlisting language="javascript">
-"for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${userName}'"    
+"for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"    
     </programlisting>
    </example>
    <para>In the case of a JDBC repository the query is slightly more complex due to the indexing structure of the tables. In this case three tables need to be joined to formulate the optimum query. The following parameters are set by the system:</para>
