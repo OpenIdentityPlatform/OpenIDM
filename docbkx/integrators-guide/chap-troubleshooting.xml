@@ -35,6 +35,26 @@
  <para>When things are not working check this chapter for tips and answers.</para>
 
  <section>
+  <title>OpenIDM Stopped in Background</title>
+  <para>When you start OpenIDM in the background without having disabled the
+  text console, the job can stop immediately after startup.</para>
+  <screen>$ ./startup.sh &amp;
+[2] 346
+$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-> 
+
+[2]+  Stopped                 ./startup.sh</screen>
+  <para>To resolve this problem, make sure you remove
+  <filename>openidm/bundle/org.apache.felix.shell.tui-1.4.1.jar</filename>
+  before starting OpenIDM, and also remove Felix cache files for the bundle in
+  <filename>openidm/felix-cache/</filename>.</para>
+ </section>
+ <section>
   <title>Internal Server Error during recon or sync</title>
   <para>
   Error message returned form recon or syn
