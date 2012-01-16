@@ -31,119 +31,217 @@
  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
- <title>Scheduling</title>
+<title>Scheduled Tasks &amp; Events</title> 
 
- <para>OpenIDM provides the scheduling for operations such as synchronization
- and reconciliation. You configure the scheduler with syntax similar to that
- of the <command>cron</command> command. The scheduler relies on the Quartz
- library.</para>
-
- <para>You can configure the feature using the
- <literal>org.forgerock.openidm.scheduler</literal> service. In other words,
- you configure the schedule by creating a JSON file named
- <filename>conf/[org.forgerock.openidm.]scheduler-<replaceable
- >schedule-name</replaceable>.json</filename>, where
- <literal>[org.forgerock.openidm.]</literal> is optional and added
- automatically when OpenIDM reads the configuration, and
- <replaceable>schedule-name</replaceable> is the logical name for the
- scheduled operation, such as
- <literal>reconcile_systemXmlAccounts_managedUser</literal>.</para>
-
- <para>Alternatively, modules can request scheduling themselves based on the
- configuration in their format and location.</para>
-
- <section xml:id="scheduler-configuration-file">
-  <title>Configuration File</title>
-
-  <para>The scheduler configuration in the file
-  <filename>conf/[org.forgerock.openidm.]scheduler-<replaceable
-  >schedule-name</replaceable>.json</filename> has the following format.</para>
-
-  <programlisting language="javascript">{
-  "enabled"       : true,
-  "type"          : "cron",
-  "startTime"     : "<replaceable>optional time</replaceable>",
-  "endTime"       : "<replaceable>optional time</replaceable>",
-  "schedule"      : "<replaceable>cron expression</replaceable>",
-  "timeZone"      : "<replaceable>optional time zone</replaceable>",
-  "invokeService" : "<replaceable>service identifier</replaceable>",
-  "invokeContext" : "<replaceable>service specific context info</replaceable>"
-}</programlisting>
-
-  <itemizedlist>
-   <listitem>
-    <para>Specify the time and date in ISO 8601 format:
-    YYYY-MM-DDThh:mm:ss.</para>
-   </listitem>
-   <listitem>
-    <para>The optional properties <literal>startTime</literal>,
-    <literal>endTime</literal>, and <literal>timeZone</literal> can be absent,
-    or empty.</para>
-   </listitem>
-   <listitem>
-    <para>The <replaceable>cron expression</replaceable> is described in
-    <link xlink:show="new"
-    xlink:href="http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html"
-    >http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html</link> and
-    <link xlink:show="new"
-    xlink:href="http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html"
-    >http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html</link>.</para>
-   </listitem>
-   <listitem>
-    <para>The <literal>"invokeService"</literal> service identifier can currently take the following values: "sync" for reconciliation and "provisioner" for LiveSync.</para>
-   </listitem>
-   <listitem>
-    <para>The value for "invokeContext" depends on the value for "invokeService". Possible combinations are:</para>
-    <screen>
-    "invokeService" : "provisioner",
-    "invokeContext" : {
-        "action" : "activeSync",
-        "source" : "system/ldap/account"    
-    </screen>
-    <para>"source" takes the external resource  (here ldap) and the object type (here account) as the value in the form: system/ldap/account.</para>
-    <screen>
-    "invokeService" : "sync",
-    "invokeContext" : {
-        "action" : "reconcile",
-        "mapping" : "systemLdapAccounts_managedUser"    
-    </screen>
-    <para>"mapping" takes the name property of the mapping as configured in sync.json as a configuration.</para>
-   </listitem>
-  </itemizedlist>
-  <note><para>A service identifier can be specified without the
-    <literal>org.forgerock.openidm.</literal> prefix. In other words,
-    <literal>"invokeService" : "sync"</literal> is equivalent to
-    <literal>"invokeService" : "org.forgerock.openidm.sync"</literal>.</para></note>
-  <example xml:id="simple-scheduler-example">
-   <title>Schedule Configuration: Reconciliation</title>
-   <para>The example describes a scheduled reconciliation which is currently not enabled (no scheduled reconciliation will run) and runs every 30 minute.</para>
-   <programlisting language="javascript">{
-    "enabled" : false,
-    "type" : "cron",
-    "schedule" : "0 0/30 * * * ?",
-    "invokeService" : "sync",
-    "invokeContext" : {
-        "action" : "reconcile",
-        "mapping" : "systemLdapAccounts_managedUser"
+<para>A number of tasks and events in OpenIDM is allowed to be scheduled or is expected to be scheduled; this includes the aspects of the Discovery Engine providing reconciliation and synchronization or arbitrary events via a scheduling object.</para>
+ <para>To configure scheduled events and tasks a cron like syntax is used and leverages internally the Quartz scheduler.</para>
+ <para>Typically all scheduled tasks and events are, if using a file based configuration approach, located in the <filename>openidm/conf</filename> directory and follows a naming convention of using scheduler-&lt;schedule-name&gt;.json. All scheduled tasks or events are dynamically picked up during runtime or during initialization of OpenIDM.</para>
+ <para>The scheduler configuration in the file scheduler-&lt;schedule-name&gt;.json has the following format.</para>
+ <example>
+  <programlisting>
+{
+ "enabled"       : true,
+ "type"          : "cron",
+ "startTime"     : "optional time",
+ "endTime"       : "optional time",
+ "schedule"      : "cron expression",
+ "timeZone"      : "optional time zone",
+ "invokeService" : "service identifier",
+ "invokeContext" : "service specific context info"
+}  
+  </programlisting>
+  <caption><para>The full list of top level properties of a scheduler configuration.</para></caption>
+ </example>
+ <para>A very simple but descriptive sample describing the components of a scheduled task and what parameters and properties can be configured is shown below. The sample itself prints out “Hello World” to the OpenIDM log which can be found pushed to the console during interactive mode and/or to <filename>/openidm/logs/openidm0.log.X</filename>, and is being scheduled to run every minute. </para>
+ <example>
+  <programlisting>
+{
+    "enabled" : true,
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "discovery-engine",
+    "invokeContext": {
+       "script" : {
+             "type" : "text/javascript",
+                 "source" : "java.lang.System.out.println('Hello World’);"
+           },
+           "input": { "edit": 26}
     }
-}</programlisting>
-  </example>
-
-  <example xml:id="complex-scheduler-example">
-   <title>Schedule Configuration: LiveSync</title>
-   <para>The example is for a scheduled LiveSync, currently enabled and will be executed every 15 sseconds.</para>
-   <programlisting language="javascript">{
-    "enabled" : false,
-    "type" : "cron",
-    "schedule" : "0/15 * * * * ?",
-    "invokeService" : "provisioner",
-    "invokeContext" : {
-        "action" : "activeSync",
-        "source" : "system/ldap/account"
+}  
+  </programlisting>
+  <caption><para>The sample shows the possibilities of the scheduler service. It will just just print the string "Hello World" to standard out, triggered by the scheduler. This way any invokable service can be triggered by the scheduler.</para></caption>
+ </example>
+ 
+ 
+ 
+ <variablelist><title>Property Overview</title>
+  <varlistentry><term>enabled</term>
+   <listitem><para>In order for a scheduled object to trigger and execute, the enabled flag must be set to true otherwise the scheduled object is considered a dormant object and will never occur or execute. As a best practice, unused or service tasks just run occasionally should explicitly be turned off an have the enabled flag set to false to avoid confusion.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>type</term>
+   <listitem><para>At this point only cron supported option.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>schedule</term>
+   <listitem><para>The schedule property accepts expression with a cron expression syntax. See the section about Cron Expressions for more detail and examples. The expression in the sample tells the scheduler to fire the scheduled task once every minute.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>invokeService</term>
+   <listitem><para>Invoke service defines what type of event or action is scheduled to happen. Currently “discovery-engine” and “script” are possible values.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>invokeContext</term>
+   <listitem><para>invokeContext allows you to specifiy specific contextual information, such as the actual script (or a reference to a file based script) in the above sample. The discovery engine provides two mechanisms; reconciliation and synchronization. Both of these requires invokeContexts to be specified.</para>
+   <para>An example configuration for a reconciliation can look like this:</para>
+   <example>
+    <programlisting>
+{
+    "enabled" : true,
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "discovery-engine",
+    "invokeContext": {
+           "action": "reconcile",
+           "mapping": "systemLdapAccount_managedUser"
     }
-}</programlisting>
-  </example>
+}    
+    </programlisting>
+   </example>
+   <para><emphasis>Note</emphasis> that in the case of a reconciliation scheduled task, the entire mapping definition can be inlined. Refer to the chapter about reconciliation for more information.</para>
+   <para>An example configuration for scheduling LiveSync can look link:</para>
+   <example>
+    <programlisting>
+{
+    "enabled" : true,
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "discovery-engine",
+    "invokeContext": {
+           "action": "liveSync",
+           "source" : "system/OpenDJ/__ACCOUNT__"
+    }
+}    
+    </programlisting>
+   </example>
+   <para>These samples are provided here purely for the demonstration of invokeContext (and invokeService). For more details on the Discovery Engine and the capabilities around reconciliation and synchronization, refer to the respective chapters about these.</para>
+   <para>As an addition to the above, the scheduled task or event also supports three optional properties that can be defined.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>startTime (optional)</term>
+   <listitem><para>Can be used to start the schedule at a later time. The scheduleing starts immediately if missing or in the past.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>endTime (optional)</term>
+   <listitem><para>To be used if there is a planned end time of the schedule.</para></listitem>
+  </varlistentry>
+  <varlistentry><term>timeZone (optional)</term>
+   <listitem><para>If missing, then the time zone used is the computer's time zone.</para></listitem>
+  </varlistentry>
+ </variablelist>
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ <section><title>Typical uses of Scheduled Tasks</title>
+  <para>Scheduling tasks is a powerful mechanism that allows not only for OpenIDM to schedule reconciliation and synchronization to occur but also to trigger scripts, collect and run reports, trigger workflows, do custom logging etc.</para>
+  <para>A set of sample uses can be found in the <filename>openidm/samples/schedules</filename> directory.</para>
  </section>
+ <section><title>Cron Expressions</title>
+  <para>The cron is a famous UNIX tool that has been around a long time and is a well known way of describing scheduling activities. Cron expressions are very powerful but can sometimes be confusing, being exposed to it the first time.</para>
+  <para>The cron implementation which is used in OpenIDM is <link xlink:href='http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger'>Quartz</link></para>
+  <section><title>The Format</title>
+   <para>A cron expression is a string comprised of 6 or 7 fields separated by white space. Fields can contain any of the allowed values, along with various combinations of the allowed special characters for that field. The fields are as follows:</para>
+   <table pgwide="1"><title>Fields used in the schedule definition.</title>
+    <tgroup cols='4'>
+    <thead>
+     <row>
+      <entry>Field Name</entry><entry>Required</entry><entry>Allowed Values</entry><entry>Allowed Special Characters</entry>
+     </row>
+    </thead>
+    <tbody>
+     <row>
+      <entry>Seconds</entry><entry>YES</entry><entry>0-59</entry><entry><literal>,-*/</literal></entry>
+     </row>
+     <row>
+      <entry>Minutes</entry><entry>YES</entry><entry>0-59</entry><entry><literal>,-*/</literal></entry>
+     </row>
+     <row>
+      <entry>Hours</entry><entry>YES</entry><entry>0-23</entry><entry><literal>,-*/</literal></entry>
+     </row>
+     <row>
+      <entry>Day of month</entry><entry>YES</entry><entry>1-31</entry><entry><literal>,-*?/LW</literal></entry>
+     </row>
+     <row>
+      <entry>Month</entry><entry>YES</entry><entry>1-12 or JAN-DEC</entry><entry><literal>,-*/</literal></entry>
+     </row>
+     <row>
+      <entry>Day of week</entry><entry>YES</entry><entry>1-7 or SUN-SAT</entry><entry><literal>,-*?/L#</literal></entry>
+     </row>
+     <row>
+      <entry>Year</entry><entry>NO</entry><entry>empty, 1970-2099</entry><entry><literal>,-*/</literal></entry>
+     </row>
+    </tbody>
+    </tgroup>
+   </table>
+   <para>So cron expressions can be as simple as this: <literal>* * * * ? *</literal>
+or more complex, like this: <literal>0/5 14,18,3-39,52 * ? JAN,MAR,SEP MON-FRI 2011-2015</literal></para>
+  </section>
+  <section><title>Special Characters</title>
+   <itemizedlist>
+    <listitem><para>* ("all values") - used to select all values within a field. For example, "" in the minute field means *"every minute".</para></listitem>
+    <listitem><para>? ("no specific value") - useful when you need to specify something in one of the two fields in which the character is allowed, but not the other. For example, if I want my trigger to fire on a particular day of the month (say, the 10th), but don't care what day of the week that happens to be, I would put "10" in the day-of-month field, and "?" in the day-of-week field. See the examples below for clarification.</para></listitem>
+    <listitem><para>- - used to specify ranges. For example, "10-12" in the hour field means "the hours 10, 11 and 12".</para></listitem>
+    <listitem><para>, - used to specify additional values. For example, "MON,WED,FRI" in the day-of-week field means "the days Monday, Wednesday, and Friday".</para></listitem>
+    <listitem><para>/ - used to specify increments. For example, "0/15" in the seconds field means "the seconds 0, 15, 30, and 45". And "5/15" in the seconds field means "the seconds 5, 20, 35, and 50". You can also specify '/' after the '' character - in this case '' is equivalent to having '0' before the '/'. '1/3' in the day-of-month field means "fire every 3 days starting on the first day of the month".</para></listitem>
+    <listitem><para>L ("last") - has different meaning in each of the two fields in which it is allowed. For example, the value "L" in the day-of-month field means "the last day of the month" - day 31 for January, day 28 for February on non-leap years. If used in the day-of-week field by itself, it simply means "7" or "SAT". But if used in the day-of-week field after another value, it means "the last xxx day of the month" - for example "6L" means "the last friday of the month". When using the 'L' option, it is important not to specify lists, or ranges of values, as you'll get confusing results.</para></listitem>
+    <listitem><para>W ("weekday") - used to specify the weekday (Monday-Friday) nearest the given day. As an example, if you were to specify "15W" as the value for the day-of-month field, the meaning is: "the nearest weekday to the 15th of the month". So if the 15th is a Saturday, the trigger will fire on Friday the 14th. If the 15th is a Sunday, the trigger will fire on Monday the 16th. If the 15th is a Tuesday, then it will fire on Tuesday the 15th. However if you specify "1W" as the value for day-of-month, and the 1st is a Saturday, the trigger will fire on Monday the 3rd, as it will not 'jump' over the boundary of a month's days. The 'W' character can only be specified when the day-of-month is a single day, not a range or list of days.</para></listitem>
+    <listitem><para># - used to specify "the nth" XXX day of the month. For example, the value of "6#3" in the day-of-week field means "the third Friday of the month" (day 6 = Friday and "#3" = the 3rd one in the month). Other examples: "2#1" = the first Monday of the month and "4#5" = the fifth Wednesday of the month. Note that if you specify "#5" and there is not 5 of the given day-of-week in the month, then no firing will occur that month.</para></listitem>
+   </itemizedlist>
+   <para>The 'L' and 'W' characters can also be combined in the day-of-month field to yield 'LW', which translates to *"last weekday of the month"*.</para>
+   <para>The legal characters and the names of months and days of the week are not case sensitive. MON is the same as mon.</para>
+  </section>
+  <section><title>Examples</title>
+   <para>Some examples for schedule configurations:</para>
+   <table pgwide="1">
+    <title>Cron Examples</title>
+    <tgroup cols='2'>
+    <thead>
+     <row><entry>Cron Expression</entry><entry>Meaning</entry></row>
+    </thead>
+    <tbody>
+     <row><entry><literal>0 0 12 * * ?</literal></entry><entry>Fire at 12pm (noon) every day</entry></row>
+     <row><entry><literal>0 15 11 ? * *</literal></entry><entry>Fire at 11:15am every day</entry></row>
+     <row><entry><literal>0 15 11 * * ?</literal></entry><entry>Fire at 11:15am every day</entry></row>
+     <row><entry><literal>0 15 11 * * ? *</literal></entry><entry>Fire at 11:15am every day</entry></row>
+     <row><entry><literal>0 15 11 * * ? 2012</literal></entry><entry>Fire at 11:15am every day during the year 2012</entry></row>
+     <row><entry><literal>0 * 14 * * ?</literal></entry><entry>Fire every minute starting at 2pm and ending at 2:59pm, every day</entry></row>
+     <row><entry><literal>0 0/5 14 * * ?</literal></entry><entry>Fire every 5 minutes starting at 2pm and ending at 2:55pm, every day</entry></row>
+     <row><entry><literal>0 0/5 14,18 * * ?</literal></entry><entry>Fire every 5 minutes starting at 2pm and ending at 2:55pm, AND fire every 5 minutes starting at 6pm and ending at 6:55pm, every day</entry></row>
+     <row><entry><literal>0 0-5 14 * * ?</literal></entry><entry>Fire every minute starting at 2pm and ending at 2:05pm, every day</entry></row>
+     <row><entry><literal>0 10,34 14 ? 4 WED</literal></entry><entry>Fire at 2:10pm and at 2:34pm every Wednesday in the month of April.</entry></row>
+    </tbody>
+    </tgroup>
+   </table>
+   <para>Pay attention to the effects of '?' and '*' in the day-of-week and day-of-month fields!</para>
+   <section><title>Notes</title>
+    <itemizedlist>
+     <listitem><para>Support for specifying both a day-of-week and a day-of-month value is not complete (you must currently use the '?' character in one of these fields).</para></listitem>
+     <listitem><para>Be careful when setting fire times between mid-night and 1:00 AM - "daylight savings" can cause a skip or a repeat depending on whether the time moves back or jumps forward.</para></listitem>
+    </itemizedlist>
+   </section>
+  </section>
+  <section><title>Applicable system configurations</title>
+   <para>The Quartz scheduler can be configured to automatically check for updated versions and report that to the OpenIDM log. This requires internet access and access to the Quartz project website. By default this option is turned of. Refer to <filename>/openidmconf/system.properties</filename> for more information.</para>
+   <example>
+    <programlisting>
+system.properties:org.quartz.scheduler.skipUpdateCheck = true    
+    </programlisting>
+   </example>
+  </section>
+ </section> 
 
  <section xml:id="scheduler-service-implementations">
   <title>Service Implementer Notes</title>
