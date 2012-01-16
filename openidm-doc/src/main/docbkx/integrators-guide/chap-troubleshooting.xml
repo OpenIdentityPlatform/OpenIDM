@@ -51,7 +51,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 [2]+  Stopped                 ./startup.sh</screen>
   <para>To resolve this problem, make sure you remove
   <filename>openidm/bundle/org.apache.felix.shell.tui-1.4.1.jar</filename>
-  before starting OpenIDM, and also remove Felix cache files for the bundle in
+  before starting OpenIDM, and also remove Felix cache files in
   <filename>openidm/felix-cache/</filename>.</para>
  </section>
  <section>
