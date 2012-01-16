@@ -94,6 +94,12 @@ Using LOGGING_CONFIG:
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 
 $</screen>
+    <para>Alternatively, use the <command>nohup</command> command to keep
+    OpenIDM running after you log out.</para>
+    <screen>$ nohup ./startup.sh &amp;
+[2] 394
+$ appending output to nohup.out
+$</screen>
    </listitem>
   </orderedlist>
 
