@@ -52,8 +52,11 @@
  <section xml:id="security-ssl-https">
   <title>Use SSL and HTTPS</title>
 
-  <para>Disable plain HTTP access, included for development convenience.
-  TODO: Show how.</para>
+  <para>Disable plain HTTP access, included for development convenience, as
+  described in the section titled <link
+  xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#security-jetty"><citetitle>Secure
+  Jetty</citetitle></link>.</para>
 
   <para>Use TLS/SSL to access OpenIDM, ideally with mutual authentication so
   that only trusted systems can invoke each other. TLS/SSL protects data on
@@ -68,8 +71,6 @@
  <section xml:id="security-encrypt-data">
   <title>Encrypt Data Internally &amp; Externally</title>
 
-  <!-- TODO: When using OpenIDM, must I do something here? Or does
-       OpenIDM do this for me? -->
   <para>Beyond relying on end-to-end availability of TLS/SSL to protect
   data, OpenIDM also supports explicit encryption of data that goes on the
   wire. This can be important if the TLS/SSL termination happens prior to
@@ -98,7 +99,6 @@
 
   <para>OpenIDM supports message level security, forcing authentication before
   granting access. TODO: Describe OpenIDM authentication and authorization.</para>
-
  </section>
 
  <section xml:id="security-jetty">
@@ -107,7 +107,25 @@
   <para>Before running OpenIDM in production, edit the
   <filename>openidm/conf/jetty.xml</filename> configuration to avoid
   clear text HTTP. Opt instead for HTTPS either with or without mutual
-  authentication.</para>
+  authentication. To disable plain HTTP access, comment out the section in
+  <filename>openidm/conf/jetty.xml</filename> that enables HTTP on port
+  8080.</para>
+
+  <programlisting language="xml">
+&lt;!--
+&lt;Item&gt;
+    &lt;New class=&quot;org.eclipse.jetty.server.nio.SelectChannelConnector&quot;&gt;
+        &lt;Set name=&quot;host&quot;&gt;&lt;Property name=&quot;jetty.host&quot; /&gt;&lt;/Set&gt;
+        &lt;Set name=&quot;port&quot;&gt;8080&lt;/Set&gt;
+        &lt;Set name=&quot;maxIdleTime&quot;&gt;300000&lt;/Set&gt;
+        &lt;Set name=&quot;Acceptors&quot;&gt;2&lt;/Set&gt;
+        &lt;Set name=&quot;statsOn&quot;&gt;false&lt;/Set&gt;
+        &lt;Set name=&quot;confidentialPort&quot;&gt;8443&lt;/Set&gt;
+        &lt;Set name=&quot;lowResourcesConnections&quot;&gt;20000&lt;/Set&gt;
+        &lt;Set name=&quot;lowResourcesMaxIdleTime&quot;&gt;5000&lt;/Set&gt;
+    &lt;/New&gt;
+&lt;/Item&gt;
+--&gt;</programlisting>
  </section>
 
  <section xml:id="security-files">
@@ -116,8 +134,8 @@
   <para>Protect OpenIDM files from access by unauthorized users.</para>
 
   <para>In particular, prevent other users from reading files in at least the
-  <filename>conf/boot/</filename> and <filename>security/</filename>
-  directories where you install OpenIDM.</para>
+  <filename>openidm/conf/boot/</filename> and
+  <filename>openidm/security/</filename> directories.</para>
  </section>
 
  <section xml:id="security-bootstrap">
@@ -136,15 +154,15 @@
 
   <para>Before deploying OpenIDM in production, remove or protect development
   and debug tools, including the OSGi console exposed under
-  <literal>system/console</literal>. Authentication for this console is not
+  <literal>/system/console</literal>. Authentication for this console is not
   integrated with authentication for OpenIDM.</para>
 
   <para>To remove the OSGi console, remove the web console bundle,
   <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.</para>
 
   <para>If you cannot remove the OSGi console, the protect it by overriding
-  the default admin:admin credentials. Create a file called
-  <filename>conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
+  the default openidm-admin:openidm-admin credentials. Create a file called
+  <filename>openidm/conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
   where you install OpenIDM containing the user name and password to access the
   console in Java properties file format.</para>
 
@@ -156,8 +174,8 @@ password=<replaceable>password</replaceable></programlisting>
  <section xml:id="security-protect-repo">
   <title>Protect the OpenIDM Repository</title>
 
-  <para>Use the JDBC repository. OrientDB is not yet supported for
-  production use.</para>
+  <para>Use the JDBC repository. OrientDB is not yet supported for production
+  use.</para>
 
   <para>Use a strong password for the JDBC connection. Do not rely on default
   passwords.</para>
@@ -171,7 +189,11 @@ password=<replaceable>password</replaceable></programlisting>
   <title>Adjust Log Levels</title>
 
   <para>Leave log levels at <literal>INFO</literal> in production to ensure
-  that you capture enough information to help diagnose issues.</para>
+  that you capture enough information to help diagnose issues. See the chapter
+  on <link xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#chap-logs"><citetitle>Logging</citetitle> for
+  more information.</link>
+  </para>
 
   <para>At start up and shut down, <literal>INFO</literal> can produce many
   messages. Yet, during stable operation, <literal>INFO</literal> generally
@@ -184,18 +206,10 @@ password=<replaceable>password</replaceable></programlisting>
 
   <para>You can run OpenIDM in the background as a service (daemon), and
   add startup and shutdown scripts to manage the service at system boot
-  and shutdown.</para>
-
-  <para>To avoid sending output to the console when you start or shutdown
-  OpenIDM, edit <filename>conf/logging.properties</filename> to turn off
-  logging to the console:</para>
-
-  <literallayout class="monospaced">java.util.logging.ConsoleHandler.level = OFF</literallayout>
-
-  <para>With logging to the console turned off, you can background OpenIDM
-  at start up and shutdown.</para>
-
-  <screen>$ sh startup.sh &amp;</screen>
+  and shutdown. For details see the section titled <link
+  xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#startup-shutdown"><citetitle>Starting &amp;
+  Stopping OpenIDM</citetitle></link>.</para>
 
   <para>See your operating system documentation for details on adding a
   service such as OpenIDM to be started at boot and shut down at system
