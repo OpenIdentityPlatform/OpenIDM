@@ -31,6 +31,7 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Managing OpenIDM Services</title>
+ <para>This chapter covers scripts provided for managing OpenIDM.</para>
 
  <section xml:id="startup-shutdown">
   <title>Starting &amp; Stopping OpenIDM</title>
