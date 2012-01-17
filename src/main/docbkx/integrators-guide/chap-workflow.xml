@@ -44,15 +44,13 @@
 
  <note>
   <para>The embedded workflow and business process engine is currently
-  provided as part of a separate, experimental download,
-  <filename>openidm-<?eval ${docTargetVersion}?>-workflow-experimental.zip</filename>,
-  supported separately from the standard OpenIDM release.</para>
+  provided as part of a separate, experimental download, the OpenIDM
+  <?eval ${project.version}?> Experimental Nightly build available
+  from the <link xlink:href="http://www.forgerock.org/openidm.html"
+  xlink:show="new">download page</link>.</para>
 
-  <!-- TODO: Confirm this approach for delivery -->
-  <para>You install
-  <filename>openidm-<?eval ${docTargetVersion}?>-workflow-experimental.zip</filename>
-  in the same way as standard OpenIDM. See the <link
-  xlink:href="install-guide#chap-install"
+  <para>You install the experimental download in the same way as standard
+  OpenIDM. See the <link xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
   Guide</citetitle></link> for instructions. After starting OpenIDM, run
   the <command>scr list</command> command at the console, and check that
@@ -60,7 +58,7 @@
 
   <screen>-&gt; scr list
 ...
-[   6] [active       ] org.forgerock.openidm.external.activiti
+[  14] [active       ] org.forgerock.openidm.workflow.activiti
 ...</screen>
 
   <para>Contact ForgeRock at <link xlink:href="mailto:info@forgerock.com"
@@ -117,7 +115,7 @@
    embedded workflow and business process engine.</para>
    <listitem>
     <para>OpenIDM does not include a form generator, making it difficult to
-    include embedded forms. (OPENIDM-468)</para>
+    include embedded forms (OPENIDM-468).</para>
    </listitem>
    <listitem>
     <!-- TODO: Issue ID? -->
@@ -126,7 +124,7 @@
    <listitem>
     <para>This version depends on Activiti 5.8, which does not have the fix
     for <link xlink:href="http://jira.codehaus.org/browse/ACT-583"
-    xlink:show="new">ACT-583</link>: Processes are not found in the bar file,
+    xlink:show="new">ACT-583</link>: Processes are not found in the .bar file
     if they are below root.</para>
     <para>To work around this issue, create a directory inside the .bar, and
     put the BPMN XML artifact in the directory so that it is properly picked up
@@ -272,17 +270,18 @@ openidm.action("workflow/activiti", map);</programlisting>
 
    <para>In Eclipse, select the project, then right click and select
    Create deployment artifacts to generate the components and package them
-   in a .bar file for deployment in the <filename>workflow</filename>
-   directory where you installed OpenIDM. OpenIDM can pick up the new
-   workflow dynamically.</para>
+   in a .bar file for deployment in the <filename>openidm/workflow</filename>
+   directory.</para>
 
-   <!-- TODO: Add specifics here... -->
    <para>Before you deploy the .bar, work around the issue mentioned above
-   by adding the XML artifact in the right place in the .bar.</para>
+   by adding the XML artifact in the right place in the .bar, for example by
+   expanding the .bar, moving the
+   <filename>EmailNotification.bpmn20.xml</filename> file inside a directory,
+   and recreating the .bar.</para>
 
    <para>After you deploy the .bar, create a script in
-   <filename>script/invokeEmailNotification.js</filename> where you installed
-   OpenIDM. The script invokes the workflow.</para>
+   <filename>openidm/script/invokeEmailNotification.js</filename>. The script
+   invokes the workflow.</para>
 
    <programlisting language="javascript">
 /*
@@ -299,9 +298,8 @@ var map = {
 openidm.action("workflow/activiti", map);</programlisting>
 
    <para>Also, create a schedule configuration object in
-   <filename>conf/schedule-EmailNotification.json</filename> where you
-   installed OpenIDM. The following schedule invokes the workflow once per
-   minute.</para>
+   <filename>openidm/conf/schedule-EmailNotification.json</filename>. The
+   following schedule invokes the workflow once per minute.</para>
 
    <programlisting language="javascript">
 {
@@ -316,8 +314,14 @@ openidm.action("workflow/activiti", map);</programlisting>
        },
    }
 }</programlisting>
+   <!-- TODO: Failing to get this to work for now. Observing these log messages:
 
-   <para>TODO: Show and explain the result.</para>
+INFO: Processing resource EmailNotification/EmailNotification.bpmn20.xml
+Jan 17, 2012 5:47:29 PM org.activiti.engine.impl.bpmn.parser.BpmnParse parseDefinitionsAttributes
+INFO: XMLSchema currently not supported as typeLanguage
+Jan 17, 2012 5:47:29 PM org.activiti.engine.impl.bpmn.parser.BpmnParse parseDefinitionsAttributes
+INFO: XPath currently not supported as expressionLanguage
+    -->
   </section>
   
   <section xml:id="example-activiti-recon-sunset-flow">
@@ -575,8 +579,6 @@ openidm.action("workflow/activiti", map);
        }
     }
 }</programlisting>
-
-   <para>TODO: Show results</para>
   </section>
  </section>
 </chapter>
