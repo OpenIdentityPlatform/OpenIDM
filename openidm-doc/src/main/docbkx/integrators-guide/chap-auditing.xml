@@ -88,8 +88,6 @@
   could result from scheduled reconciliation for an object type. OpenIDM also
   logs the top level root activity with each entry, making it possible to
   query related activities.</para>
-
-  <para>TODO: Show a concrete example.</para>
  </section>
 
  <section xml:id="audit-log-format">
@@ -483,6 +481,22 @@
   from activity and reconciliation logs by matching the
   <literal>"rootActionId"</literal> on entries in both logs.</para>
   
-  <para>TODO: Demonstrate a join query with MySQL</para>
+  <para>The following MySQL query shows a join of the audit activity and
+  audit reconciliation tables using root action ID values.</para>
+
+  <screen width="95"><?dbfo pgwide="1"?>
+mysql&gt; select distinct auditrecon.activity,auditrecon.sourceobjectid,
+ auditrecon.targetobjectid,auditactivity.activitydate,auditrecon.status
+ from auditactivity inner join auditrecon
+ <emphasis role="strong">auditactivity.rootactionid=auditrecon.rootactionid</emphasis>
+ where auditrecon.activity is not null group by auditrecon.sourceobjectid;
++----------+--------------------------+----------------------+---------------------+---------+
+| activity | sourceobjectid           | targetobjectid       | activitydate        | status  |
++----------+--------------------------+----------------------+---------------------+---------+
+| CREATE   | system/xmlfile/account/1 | managed/user/juser   | 2012-01-17T07:59:12 | SUCCESS |
+| CREATE   | system/xmlfile/account/2 | managed/user/ajensen | 2012-01-17T07:59:12 | SUCCESS |
+| CREATE   | system/xmlfile/account/3 | managed/user/bjensen | 2012-01-17T07:59:12 | SUCCESS |
++----------+--------------------------+----------------------+---------------------+---------+
+3 rows in set (0.00 sec)</screen>
  </section>
 </chapter>
