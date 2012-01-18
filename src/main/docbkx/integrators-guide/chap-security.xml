@@ -36,15 +36,6 @@
  your installation to verify that it behaves as expected before putting it
  into production.</para>
 
- <!-- 
-  Chapter 11 - this needs to change / be enhanced with 
-- The fact that there now is a default user table (internal/user)
-- There is an OpenIDM authentication mechanism
-- That there is a fine grained access policy mechanism that they can use to protect resources, e.g. very flexible RBAC
-- Installing an additional and/or replacing the default symmetric key for encryption (see above for some details)
-- Replacing the default user/password with the detailed procedure.
-  -->
-
  <para>Out of the box, OpenIDM is set up for ease of development and
  deployment. When deploying OpenIDM in production, take the following
  precautions.</para>
@@ -98,7 +89,120 @@
   <title>Use Message Level Security</title>
 
   <para>OpenIDM supports message level security, forcing authentication before
-  granting access. TODO: Describe OpenIDM authentication and authorization.</para>
+  granting access. Authentication works by means of a filter-based mechanism
+  that lets you use either HTTP Basic or OpenIDM-specific headers, setting a
+  cookie in the response that you can use for subsequent authentication. If you
+  attempt to access OpenIDM URLs without the appropriate headers or session
+  cookie, OpenIDM returns HTTP 401 Unauthorized.</para>
+
+  <para>The following examples show successful authentications.</para>
+
+  <screen>$ curl
+ --dump-header /dev/stdout
+ --user openidm-admin:openidm-admin
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=2l0zobpuk6st1b2m7gvhg5zas;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: application/json; charset=UTF-8
+Date: Wed, 18 Jan 2012 10:36:19 GMT
+Accept-Ranges: bytes
+Server: Restlet-Framework/2.0.9
+Transfer-Encoding: chunked
+
+{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+
+$ curl
+ --dump-header /dev/stdout
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: application/json; charset=UTF-8
+Date: Wed, 18 Jan 2012 10:36:40 GMT
+Accept-Ranges: bytes
+Server: Restlet-Framework/2.0.9
+Transfer-Encoding: chunked
+
+{"query-time-ms":0,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}
+
+$ curl
+ --dump-header /dev/stdout
+ --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=UTF-8
+Date: Wed, 18 Jan 2012 10:37:20 GMT
+Accept-Ranges: bytes
+Server: Restlet-Framework/2.0.9
+Transfer-Encoding: chunked
+
+{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}</screen>
+
+  <para>Notice that the last example uses the cookie OpenIDM set in the
+  response to the penultimate request. You can also request one-time
+  authentication without a session.</para>
+
+  <screen>$ curl
+ --dump-header /dev/stdout
+ --header "X-OpenIDM-NoSession: true"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=UTF-8
+Date: Wed, 18 Jan 2012 10:52:27 GMT
+Accept-Ranges: bytes
+Server: Restlet-Framework/2.0.9
+Transfer-Encoding: chunked
+
+{"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}</screen>
+
+  <para>To log out and destroy the session, send the specific OpenIDM
+  header.</para>
+
+  <screen>$ curl
+ --dump-header /dev/stdout
+ --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
+ --header "X-OpenIDM-Logout: true"
+ "http://localhost:8080/openidm/"
+
+HTTP/1.1 204 No Content</screen>
+
+  <para>OpenIDM creates the <literal>openidm-admin</literal> user with password
+  <literal>openidm-admin</literal> by default. This internal user is stored in
+  OpenIDM's repository.</para>
+
+  <screen>mysql&gt; select objectid,roles from internaluser;
++---------------+----------------------------------+
+| objectid      | roles                            |
++---------------+----------------------------------+
+| anonymous     | openidm-reg                      |
+| openidm-admin | openidm-admin,openidm-authorized |
++---------------+----------------------------------+
+2 rows in set (0.00 sec)</screen>
+
+  <para>OpenIDM uses the internal table for authentication, and also to set
+  the roles for RBAC authorization of an authenticated user.</para>
+
+ <!-- TODO: 
+- That there is a fine grained access policy mechanism that they can use to protect resources, e.g. very flexible RBAC
+- Replacing the default user/password with the detailed procedure.
+  -->
+ </section>
+
+ <section xml:id="security-replace-default-keys">
+  <title>Replace Default Encryption Keys</title>
+ <!-- TODO:
+- Installing an additional and/or replacing the default symmetric key for encryption (see above for some details)
+  -->
+  <para>TODO</para>
  </section>
 
  <section xml:id="security-jetty">
@@ -161,12 +265,12 @@
   <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.</para>
 
   <para>If you cannot remove the OSGi console, the protect it by overriding
-  the default openidm-admin:openidm-admin credentials. Create a file called
+  the default <literal>admin:admin</literal> credentials. Create a file called
   <filename>openidm/conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
-  where you install OpenIDM containing the user name and password to access the
-  console in Java properties file format.</para>
+  containing the user name and password to access the console in Java
+  properties file format.</para>
 
-  <programlisting language="none">
+  <programlisting language="ini">
 username=<replaceable>user-name</replaceable>
 password=<replaceable>password</replaceable></programlisting>
  </section>
