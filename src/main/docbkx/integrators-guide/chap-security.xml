@@ -250,7 +250,17 @@ HTTP/1.1 204 No Content</screen>
   password to start up. You can set an obfuscated version in the file, or
   prompt for the password at start up time.</para>
 
-  <!-- TODO: Show how to do this. -->
+  <para>To generate obfuscated versions of a password, invoke
+  <filename>openidm-crypto-<?eval ${docTargetVersion}?>.jar</filename> from
+  the <filename>openidm/</filename> directory.</para>
+
+  <para>$ cd /path/to/openidm
+$ java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar
+This utility helps obfuscate passwords to prevent casual observation.
+It is not securely encrypted and needs further measures to prevent disclosure.
+Please enter the password:
+OBF:1v2j1uum1xtv1zej1zer1xtn1uvk1v1v
+CRYPT:1206319abab995251d745b151b73131c</para>
  </section>
 
  <section xml:id="security-remove-dev-tools">
