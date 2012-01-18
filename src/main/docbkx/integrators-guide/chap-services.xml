@@ -81,7 +81,7 @@ java.util.logging.ConsoleHandler.level = OFF
    </listitem>
    <listitem>
     <para>Remove the text-based OSGi console bundle,
-    <filename>bundle/org.apache.felix.shell.tui-1.4.1.jar</filename>.</para>
+    <filename>bundle/org.apache.felix.shell.tui-<replaceable>version</replaceable>.jar</filename>.</para>
    </listitem>
    <listitem>
     <para>Start OpenIDM in the background.</para>
@@ -147,14 +147,14 @@ Stopping OpenIDM (454)</screen>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><command>java -jar bundle/init/openidm-crypto-2.0.1.jar</command></term>
+    <term><command>java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar</command></term>
     <listitem>
      <para>Utility to obfuscate passwords such as the bootstrap password stored
      in <filename>openidm/conf/boot/boot.properties</filename></para>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><command>java -jar bundle/json-crypto-cli-1.1.0.jar</command></term>
+    <term><command>java -jar bundle/json-crypto-cli-<?eval ${commons.json-crypto.version}?>.jar</command></term>
     <listitem>
      <para>Utility to encrypt and decrypt values in JSON objects</para>
     </listitem>
