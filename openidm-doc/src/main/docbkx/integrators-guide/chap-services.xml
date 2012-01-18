@@ -122,6 +122,7 @@ Stopping OpenIDM (454)</screen>
     <listitem>
      <para>This script supports the following subcommands.</para>
      <variablelist>
+<!-- 
       <varlistentry>
        <term><command>export</command></term>
        <listitem>
@@ -134,6 +135,7 @@ Stopping OpenIDM (454)</screen>
         <para>Export or import SecretKeyEntry values</para>
        </listitem>
       </varlistentry>
+ -->
       <varlistentry>
        <term><command>validate</command></term>
        <listitem>
@@ -145,7 +147,14 @@ Stopping OpenIDM (454)</screen>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><command>java -jar ./bundle/json-crypto-cli-1.1.0.jar</command></term>
+    <term><command>java -jar bundle/init/openidm-crypto-2.0.1.jar</command></term>
+    <listitem>
+     <para>Utility to obfuscate passwords such as the bootstrap password stored
+     in <filename>openidm/conf/boot/boot.properties</filename></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>java -jar bundle/json-crypto-cli-1.1.0.jar</command></term>
     <listitem>
      <para>Utility to encrypt and decrypt values in JSON objects</para>
     </listitem>
