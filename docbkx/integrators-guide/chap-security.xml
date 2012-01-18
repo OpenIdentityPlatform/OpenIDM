@@ -75,14 +75,6 @@
   such as passwords. OpenIDM replaces clear text values when the system first
   reads the configuration file. Take care with configuration files having
   clear text values that OpenIDM has not yet read and updated.</para>
-
-  <para>Also, do not use the default keys provided with OpenIDM, such
-  as the symmetric key with alias, <literal>openidm-sym-default</literal>.
-  Replace the key and the default password before starting OpenIDM for the
-  first time. See the examples in <filename>openidm/samples/security</filename>
-  for hints on creating your own. If you import your own key into the key
-  store with a different alias, change the alias used in
-  <filename>openidm/conf/boot/boot.properties</filename>.</para>
  </section>
 
  <section xml:id="security-messages">
@@ -189,20 +181,87 @@ HTTP/1.1 204 No Content</screen>
 2 rows in set (0.00 sec)</screen>
 
   <para>OpenIDM uses the internal table for authentication, and also to set
-  the roles for RBAC authorization of an authenticated user.</para>
-
- <!-- TODO: 
-- That there is a fine grained access policy mechanism that they can use to protect resources, e.g. very flexible RBAC
-- Replacing the default user/password with the detailed procedure.
-  -->
+  the roles for RBAC authorization of an authenticated user. The <link
+  xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#appendix-router">router service</link> enables
+  you to apply filters as shown in <filename>openidm/conf/router.json</filename>
+  and the associated script
+  <filename>openidm/script/router-authz.js</filename>.</para>
  </section>
 
- <section xml:id="security-replace-default-keys">
-  <title>Replace Default Encryption Keys</title>
- <!-- TODO:
-- Installing an additional and/or replacing the default symmetric key for encryption (see above for some details)
-  -->
-  <para>TODO</para>
+ <section xml:id="security-replace-defaults">
+  <title>Replace Default Security Settings</title>
+
+  <para>Default security settings facilitate evaluation. Change the default
+  encryption key, and then replace the default user password</para>
+
+  <procedure xml:id="security-change-encryption-keys">
+   <title>To Change Default Encryption Keys</title>
+
+   <para>By default, OpenIDM uses an symmetric encryption key with alias
+   <literal>openidm-sym-default</literal>. Change this default key before
+   deploying OpenIDM in production.</para>
+
+   <step>
+    <para>Add the new key to the key store.</para>
+    <screen>$ cd /path/to/openidm/
+$ keytool
+ -genseckey
+ -alias new-sym-key
+ -keyalg AES
+ -keysize 128
+ -keystore security/keystore.jceks
+ -storetype JCEKS
+Enter keystore password:
+Enter key password for &lt;new-sym-key&gt;
+  (RETURN if same as keystore password):
+Re-enter new password:
+$ </screen>
+    <para>Also see
+    <filename>openidm/samples/security/keystore_readme.txt</filename>.</para>
+   </step>
+   <step>
+    <para>Change the alias used in
+    <filename>openidm/conf/boot/boot.properties</filename>.</para>
+   </step>
+  </procedure>
+
+  <procedure xml:id="security-replace-default-user-password">
+   <title>To Replace Default User &amp; Password</title>
+
+   <para>After changing the default encryption key, change at least the default
+   user password.</para>
+   <step>
+    <para>Get the encrypted version of the new password.</para>
+    <screen>$ cd /path/to/openidm/
+$ echo \"newpwd\" &gt; /tmp/newpwd.json
+$ java -jar bundle/json-crypto-cli-<?eval ${commons.json-crypto.version}?>.jar
+ -encrypt
+ -keystore security/keystore.jceks
+ -storetype jceks
+ -storepass changeit
+ -alias "new-sym-key"
+ -srcjson /tmp/newpwd.json
+
+{
+    "$crypto": {
+        "value": {
+            "iv": "sL0KM93PmvvvaQQ8rP+QAQ==",
+            "data": "eSH8YgeezoWsDDIvX1WQ2A==",
+            "cipher": "AES/CBC/PKCS5Padding",
+            "key": "new-sym-key"
+        },
+        "type": "x-simple-encryption"
+    }
+}</screen>
+   </step>
+   <step>
+    <para>Replace the user object in the
+    <filename>openidm/db/scripts/mysql/openidm.sql</filename> script before
+    setting up MySQL as a repository for OpenIDM.</para>
+    <para>Alternatively, replace the user in the internal user table.</para>
+   </step>
+  </procedure>
  </section>
 
  <section xml:id="security-jetty">
