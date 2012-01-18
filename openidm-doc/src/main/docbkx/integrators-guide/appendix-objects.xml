@@ -104,7 +104,7 @@
 
   <para>For example, you get managed objects, configuration objects, and
   repository objects in the following way using the Resource API. On how to construct the "id" of an object please see <link
-  xlink:href="appendix-rest#rest-uri-scheme"
+  xlink:href="integrators-guide#rest-uri-scheme"
   xlink:role="http://docbook.org/xlink/role/olink">
   <citetitle>URI Scheme</citetitle>
 </link>.</para>
