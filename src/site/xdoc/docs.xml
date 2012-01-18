@@ -56,6 +56,7 @@
     <a href="./doc/OpenIDM-Integrators-Guide.pdf">PDF</a>,
     <a href="./doc/OpenIDM-Integrators-Guide.rtf">RTF</a></dd>
 
+<!--
     <dt>Developer Guide</dt>
     <dd><a href="./doc/OpenIDM-Dev-Guide.epub">EPUB</a>,
     <a href="./doc/dev-guide/OpenIDM-Dev-Guide.html">HTML (single page)</a>,
@@ -65,6 +66,7 @@
 
     <dt>API Specification (Javadoc)</dt>
     <dd><a href="./apidocs/index.html">HTML</a></dd>
+ -->
    </dl>
   </section>
  </body>

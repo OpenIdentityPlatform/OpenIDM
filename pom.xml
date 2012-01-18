@@ -596,7 +596,7 @@
 
                 </configuration>
                 <executions>
-                    <execution>
+<!--                     <execution>
                         <id>doc-olinkdb-dev-guide</id>
                         <phase>pre-site</phase>
                         <configuration>
@@ -611,7 +611,7 @@
                             <goal>generate-html</goal>
                         </goals>
                     </execution>
-                    <execution>
+ -->                    <execution>
                         <id>doc-olinkdb-install-guide</id>
                         <phase>pre-site</phase>
                         <configuration>
@@ -666,13 +666,13 @@
                             <epubCustomization>${dbstyle-dir}/epub/coredoc.xsl</epubCustomization>
                             <!-- Resources required but not copied by DocBook.xsl. -->
                             <preProcess>
-                                 <copy todir='${docbkx-out}/epub/dev-guide/OpenIDM-Dev-Guide/images'>
+<!--                                  <copy todir='${docbkx-out}/epub/dev-guide/OpenIDM-Dev-Guide/images'>
                                        <fileset dir='${docbkx-src}/dev-guide/images' />
                                  </copy>
                                  <copy todir='${docbkx-out}/epub/dev-guide/OpenIDM-Dev-Guide'>
                                        <fileset dir='${basedir}/src/main/resources' />
                                  </copy>
-                                 <copy todir='${docbkx-out}/epub/install-guide/OpenIDM-Install-Guide/images'>
+ -->                                 <copy todir='${docbkx-out}/epub/install-guide/OpenIDM-Install-Guide/images'>
                                        <fileset dir='${docbkx-src}/install-guide/images' />
                                  </copy>
                                  <copy todir='${docbkx-out}/epub/install-guide/OpenIDM-Install-Guide'>
@@ -730,13 +730,13 @@
 
                             <!-- Resources required but not copied by DocBook.xsl. -->
                             <preProcess>
-                                <copy todir="${docbkx-out}/html/dev-guide/images">
+<!--                                 <copy todir="${docbkx-out}/html/dev-guide/images">
                                     <fileset dir="${docbkx-src}/dev-guide/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/dev-guide">
                                     <fileset dir="src/main/resources" />
                                 </copy>
-                                <copy todir="${docbkx-out}/html/install-guide/images">
+ -->                                <copy todir="${docbkx-out}/html/install-guide/images">
                                     <fileset dir="${docbkx-src}/install-guide/images" />
                                 </copy>
                                 <copy todir="${docbkx-out}/html/install-guide">
@@ -756,8 +756,8 @@
                                 </copy>
                             </preProcess>
                             <postProcess>
-                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/dev-guide" />
-                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/install-guide" />
+<!--                                 <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/dev-guide" />
+ -->                                <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/install-guide" />
                                 <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/integrators-guide" />
                                 <copy file="${basedir}/legalnotice.html" todir="${docbkx-out}/html/release-notes" />
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
@@ -803,13 +803,13 @@ $(".flat").live("dblclick", function() {
 
                             <!-- Resources required but not copied by DocBook.xsl. -->
                             <preProcess>
-                                <copy todir="${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide/images">
+<!--                                 <copy todir="${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide/images">
                                     <fileset dir="${docbkx-src}/dev-guide/images"/>
                                 </copy>
                                 <copy todir="${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide">
                                     <fileset dir="src/main/resources"/>
                                 </copy>
-                                <copy todir="${docbkx-out}/html/install-guide/OpenIDM-Install-Guide/images">
+ -->                                <copy todir="${docbkx-out}/html/install-guide/OpenIDM-Install-Guide/images">
                                     <fileset dir="${docbkx-src}/install-guide/images"/>
                                 </copy>
                                 <copy todir="${docbkx-out}/html/install-guide/OpenIDM-Install-Guide">
@@ -829,8 +829,8 @@ $(".flat").live("dblclick", function() {
                                 </copy>
                             </preProcess>
                             <postProcess>
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide' />
-                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide/OpenIDM-Install-Guide' />
+<!--                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/dev-guide/OpenIDM-Dev-Guide' />
+ -->                                <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/install-guide/OpenIDM-Install-Guide' />
                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/integrators-guide/OpenIDM-Integrators-Guide' />
                                 <copy file='${basedir}/legalnotice.html' todir='${docbkx-out}/html/release-notes/OpenIDM-Release-Notes' />
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;/head&gt;">
@@ -900,13 +900,13 @@ $(".flat").live("dblclick", function() {
                             <encoding>UTF-8</encoding>
                             <outputDirectory>${site-out}/doc</outputDirectory>
                             <resources>
-                                <resource>
+<!--                                 <resource>
                                     <directory>${docbkx-out}/epub/dev-guide</directory>
                                     <includes>
                                         <include>**/*.epub</include>
                                     </includes>
                                 </resource>
-                                <resource>
+ -->                                <resource>
                                     <directory>${docbkx-out}/epub/install-guide</directory>
                                     <includes>
                                         <include>**/*.epub</include>
