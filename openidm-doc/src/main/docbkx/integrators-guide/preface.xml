@@ -80,9 +80,9 @@ Terminal sessions are formatted like this.</screen>
     }
 }</programlisting>
   
-  <para>In many cases, sections pertaining to UNIX, GNU/Linux, Mac OS X, BSD,
-  and so forth are marked (UNIX). Sections pertaining to Microsoft Windows
-  might be marked (Windows). To avoid repetition, however, file system
+  <para>Sections pertaining to UNIX, GNU/Linux, Mac OS X, BSD,
+  and so forth might simply be marked (UNIX). Sections pertaining to
+  Microsoft Windows might be marked (Windows). To avoid repetition, file system
   directory names are often given only in UNIX format as in
   <filename>/path/to/OpenIDM</filename>, even if the text applies to
   <filename>C:\path\to\OpenIDM</filename> as well.</para>

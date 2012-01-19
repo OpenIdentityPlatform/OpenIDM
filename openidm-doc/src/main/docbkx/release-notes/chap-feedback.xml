@@ -51,7 +51,7 @@
    its impact on your operation</para>
   </listitem>
   <listitem>
-   <para>Machine type, operating system version, web container and version,
+   <para>Machine type, operating system version, <!--web container and version,-->
    Java version, and OpenIDM release version, including any patches or other
    software that might be affecting the problem</para>
   </listitem>
