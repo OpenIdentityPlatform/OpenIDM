@@ -9,6 +9,7 @@
  <targetsetinfo>Target DB for OpenIDM DocBook content, for use with single
  HTML pages (non-chunked) only.</targetsetinfo>
  <sitemap>
+<!-- dev-guide is not built for now
   <dir name="doc">
    <dir name="dev-guide">
     <dir name="OpenIDM-Dev-Guide">
@@ -18,6 +19,7 @@
      </document>
     </dir>
    </dir>
+ -->
    <dir name="install-guide">
     <dir name="OpenIDM-Install-Guide">
      <document targetdoc="install-guide"
