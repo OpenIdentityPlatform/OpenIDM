@@ -204,14 +204,6 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <maven.compiler.source>1.6</maven.compiler.source>
 
-        <!-- Site Properties -->
-        <docbkx-src>${basedir}/src/main/docbkx</docbkx-src>
-        <dbstyle-dir>${basedir}/src/main/docbkx-stylesheets</dbstyle-dir>
-        <docbkx-out>${basedir}/target/docbkx</docbkx-out>
-        <site-out>${basedir}/target/site</site-out>
-        <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <docTargetVersion>2.0.1</docTargetVersion>
-
         <!-- version management -->
         <openidm.version>2.1.0-SNAPSHOT</openidm.version>
         <slf4j.version>1.6.4</slf4j.version>
@@ -248,6 +240,17 @@
             ${openidm.osgi.import.additional},
             *
         </openidm.osgi.import>
+
+        <!-- Documentation and site properties -->
+        <docbkx-src>${basedir}/src/main/docbkx</docbkx-src>
+        <dbstyle-dir>${basedir}/src/main/docbkx-stylesheets</dbstyle-dir>
+        <docbkx-out>${basedir}/target/docbkx</docbkx-out>
+        <site-out>${basedir}/target/site</site-out>
+        <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
+        <docTargetVersion>2.0.1</docTargetVersion>
+        <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
+        <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
+        <commonsJsonCryptoVersion>${commons.json-crypto.version}</commonsJsonCryptoVersion>
     </properties>
 
     <modules>
