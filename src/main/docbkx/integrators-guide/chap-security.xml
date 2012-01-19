@@ -235,7 +235,7 @@ $ </screen>
     <para>Get the encrypted version of the new password.</para>
     <screen>$ cd /path/to/openidm/
 $ echo \"newpwd\" &gt; /tmp/newpwd.json
-$ java -jar bundle/json-crypto-cli-<?eval ${commons.json-crypto.version}?>.jar
+$ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
  -encrypt
  -keystore security/keystore.jceks
  -storetype jceks
