@@ -290,6 +290,14 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
 &lt;/Item&gt;
 --&gt;</programlisting>
  </section>
+ 
+ <section xml:id="security-urls">
+  <title>Protect Sensitive URLs on the REST interface</title>
+  
+  <para>Although the repo is accessible directly by default (anything attached to the router is accessible currently with the default policy) direct http access should generally not be needed in production and if so should be disallowed in the authorization policy to reduce the attack surface.</para>
+
+  <para>Similarly direct http access to part(s) or all of system objects should be disallowed in production; particularly access to action. Basically anything not used here in production should not get exposed. The main public interfaces over http at this point are managed/ and config/. The rest is either in most use cases triggered indirectly, or for internal consumption.</para>
+ </section>
 
  <section xml:id="security-files">
   <title>Protect Sensitive Files &amp; Directories</title>
@@ -333,7 +341,7 @@ CRYPT:1206319abab995251d745b151b73131c</para>
   <para>To remove the OSGi console, remove the web console bundle,
   <filename>org.apache.felix.webconsole-<replaceable>version</replaceable>.jar</filename>.</para>
 
-  <para>If you cannot remove the OSGi console, the protect it by overriding
+  <para>If you cannot remove the OSGi console, then protect it by overriding
   the default <literal>admin:admin</literal> credentials. Create a file called
   <filename>openidm/conf/org.apache.felix.webconsole.internal.servlet.OsgiManager.cfg</filename>
   containing the user name and password to access the console in Java
