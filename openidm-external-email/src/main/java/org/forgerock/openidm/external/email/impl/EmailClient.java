@@ -35,6 +35,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.objset.BadRequestException;
 
 /**
  *
@@ -81,21 +82,20 @@ public class EmailClient {
 
         if (config.get("mail.smtp.starttls.enable").asString().equalsIgnoreCase("true")) {
             props.put("mail.smtp.starttls.enable", "true");
-            
+
             // temporary hack to avoid cert check
-            try{
+            try {
                 MailSSLSocketFactory sf = new MailSSLSocketFactory();
                 sf.setTrustAllHosts(true);
                 props.put("mail.smtp.ssl.socketFactory", sf);
-            }
-            catch (Exception e){
+            } catch (Exception e) {
             }
         }
 
         session = Session.getInstance(props);
     }
 
-    public void send(Map<String, Object> params) throws RuntimeException {
+    public void send(Map<String, Object> params) throws BadRequestException {
         // _from : the From: address
         // _to : The To: recipients - a comma separated email address strings 
         // _cc: The Cc: recipients - a comma separated email address strings 
@@ -115,17 +115,19 @@ public class EmailClient {
         try {
             if (params.get("_from") != null) {
                 from = new InternetAddress((String) params.get("_from"));
-            } else {
+            } else if (fromAddr != null) {
                 from = new InternetAddress(fromAddr);
+            } else { // we don't have a from, need to throw
+                throw new BadRequestException("From: email address is absent");
             }
         } catch (AddressException ae) {
-            throw new RuntimeException("Bad From: header");
+            throw new BadRequestException("Bad From: email address");
         }
 
         try {
             to = InternetAddress.parse((String) params.get("_to"));
         } catch (AddressException ae) {
-            throw new RuntimeException("Bad To: header");
+            throw new BadRequestException("Bad To: email address");
         }
 
         try {
@@ -133,7 +135,7 @@ public class EmailClient {
                 cc = InternetAddress.parse((String) params.get("_cc"));
             }
         } catch (AddressException ae) {
-            throw new RuntimeException("Bad Cc: header");
+            throw new BadRequestException("Bad Cc: email address");
         }
 
         try {
@@ -141,7 +143,7 @@ public class EmailClient {
                 bcc = InternetAddress.parse((String) params.get("_bcc"));
             }
         } catch (AddressException ae) {
-            throw new RuntimeException("Bad Bcc: header");
+            throw new BadRequestException("Bad Bcc: email address");
         }
 
         try {
@@ -170,7 +172,7 @@ public class EmailClient {
                 }
             } else {
                 // no idea what this is... let's throw
-                throw new RuntimeException("Unknown email type: " + type);
+                throw new BadRequestException("Email type: " + type + " is not handled");
             }
 
             Transport transport = session.getTransport("smtp");
@@ -185,7 +187,7 @@ public class EmailClient {
             transport.close();
 
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            throw new BadRequestException(e);
         }
     }
 
