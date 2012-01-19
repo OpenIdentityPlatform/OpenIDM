@@ -20,14 +20,8 @@
             "source" : "email",
             "target" : "email"
         }, {
-            "source" : "__DESCRIPTION__",
+            "source" : "description",
             "target" : "description"
-        }, {
-            "source" : "__ENABLE__",
-            "target" : "active"
-        }, {
-            "source" : "__GROUPS__",
-            "target" : "groups"
         }, {
             "source" : "userPassword",
             "target" : "password"
@@ -86,6 +80,7 @@
         "name" : "managedUser_systemLdapAccounts",
         "source" : "fixme_managed/user",
         "target" : "fixme_system/ldap/account",
+        "links" : "systemLdapAccounts_managedUser",
         "correlationQuery" : {
             "type" : "text/javascript",
             "file" : "script/name_eq_name_correlationQuery.js"
@@ -95,6 +90,18 @@
             "source" : "source.adPassword != null"
         },
         "properties" : [ {
+            "source" : "userName",
+            "target" : "name"
+        }, {
+            "source" : "familyName",
+            "target" : "lastname"
+        }, {
+            "source" : "givenName",
+            "target" : "firstname"
+        }, {
+            "source" : "email",
+            "target" : "email"
+        }, {
             "source" : "password",
             "target" : "__PASSWORD__",
             "condition" : {
@@ -138,6 +145,7 @@
         "name" : "systemAdAccount_managedUser",
         "source" : "system/ad/account",
         "target" : "managed/user",
+        "links" : "managedUser_systemAdAccounts",
         "validTarget" : {
             "type" : "text/javascript",
             "source" : "target.employeeType == 'internal'"
