@@ -69,14 +69,14 @@
     }
 }  
   </programlisting>
-  <caption><para>The sample shows the possibilities of the scheduler service. It will just just print the string "Hello World" to standard out, triggered by the scheduler. This way any invokable service can be triggered by the scheduler.</para></caption>
+  <caption><para>The sample shows the possibilities of the scheduler service. It will just print the string "Hello World" to standard out, triggered by the scheduler. This way any invokable service can be triggered by the scheduler.</para></caption>
  </example>
  
  
  
  <variablelist><title>Property Overview</title>
   <varlistentry><term>enabled</term>
-   <listitem><para>In order for a scheduled object to trigger and execute, the enabled flag must be set to true otherwise the scheduled object is considered a dormant object and will never occur or execute. As a best practice, unused or service tasks just run occasionally should explicitly be turned off an have the enabled flag set to false to avoid confusion.</para></listitem>
+   <listitem><para>In order for a scheduled object to trigger and execute, the enabled flag must be set to true otherwise the scheduled object is considered a dormant object and will never occur or execute. As a best practice, unused or service tasks just run occasionally should explicitly be turned off and have the enabled flag set to false to avoid confusion.</para></listitem>
   </varlistentry>
   <varlistentry><term>type</term>
    <listitem><para>At this point only cron supported option.</para></listitem>
@@ -85,7 +85,7 @@
    <listitem><para>The schedule property accepts expression with a cron expression syntax. See the section about Cron Expressions for more detail and examples. The expression in the sample tells the scheduler to fire the scheduled task once every minute.</para></listitem>
   </varlistentry>
   <varlistentry><term>invokeService</term>
-   <listitem><para>Invoke service defines what type of event or action is scheduled to happen. Currently “discovery-engine” and “script” are possible values.</para></listitem>
+   <listitem><para>Invoke service defines what type of event or action is scheduled to happen. Currently "sync", "provisioner", “discovery-engine” and “script” are possible values.</para></listitem>
   </varlistentry>
   <varlistentry><term>invokeContext</term>
    <listitem><para>invokeContext allows you to specifiy specific contextual information, such as the actual script (or a reference to a file based script) in the above sample. The discovery engine provides two mechanisms; reconciliation and synchronization. Both of these requires invokeContexts to be specified.</para>

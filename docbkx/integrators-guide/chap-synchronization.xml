@@ -69,13 +69,15 @@
    </section>
   </section>
   <section><title>Triggered Updates</title>
-   <para>For picking up changes of objects from external resources, OpenIDM needs to be told be a trigger mechanism to do so. Two different processes, Reconciliation and LiveSync are available to pick up external changes. Both can be triggered through a scheduler configuration as described in chapter "Scheduled Tasks and Events".</para>
+   <para>For picking up changes of objects from external resources, OpenIDM needs to be told by a trigger mechanism to do so. Two different processes, Reconciliation and LiveSync are available to pick up external changes. Both can be triggered through a scheduler configuration as described in chapter "Scheduled Tasks and Events".</para>
    <para>Reconciliation can also be triggered on the REST interface with a POST command to the URL http://&lt;hostname&gt;:&lt;port&gt;/openidm/sync?_action=recon&amp;mapping=&lt;Name of the Mapping&gt;. Here an example using the curl command:</para>
-   <example>
-    <programlisting>
-$ curl -X POST http://localhost:8080/openidm/sync?_action=recon\&amp;mapping=systemLdapAccounts_managedUser
-    </programlisting>
-   </example>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+   </screen>
   </section>
 
   <section xml:id="livesync-reconciliation">
