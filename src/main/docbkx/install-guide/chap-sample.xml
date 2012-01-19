@@ -197,7 +197,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
      <para>For details on the scheduler configuration see the <link
-     xlink:href="reference#chap-scheduler-conf"
+     xlink:href="integrators-guide#chap-scheduler-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Scheduled Tasks &amp; Events</citetitle></link> chapter in the
      <citetitle>Integrator's Guide</citetitle>.</para>
