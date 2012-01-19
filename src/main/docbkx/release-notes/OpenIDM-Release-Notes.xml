@@ -32,7 +32,7 @@
  <info>
   <title>OpenIDM <?eval ${docTargetVersion}?> Release Notes</title>
   <copyright>
-   <year>2011</year>
+   <year>2011-2012</year>
    <holder>ForgeRock AS</holder>
   </copyright>
   <authorgroup>

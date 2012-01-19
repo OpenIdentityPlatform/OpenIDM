@@ -33,8 +33,10 @@
  
  <para>This guide shows you how to install core OpenIDM services for identity
  management, provisioning, and compliance. Unless you are planning a throwaway
- evaluation or test installation, read the <citetitle>Release Notes</citetitle>
- before you get started.</para>
+ evaluation or test installation, read the <link
+ xlink:href="release-notes#release-notes"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Release
+ Notes</citetitle></link> before you get started.</para>
 
  <section>
   <title>Who Should Use this Guide</title>
@@ -43,7 +45,7 @@
   provision identities, and to ensure compliance with identity management
   regulations.</para>
    
-  <para>This guide covers the install, upgrade, and removal (a.k.a. uninstall)
+  <para>This guide covers the install, upgrade, and removal (uninstall)
   procedures that you theoretically perform only once per version. This
   guide aims to provide you with at least some idea of what happens
   behind the scenes when you perform the steps.</para>
@@ -89,9 +91,9 @@ Terminal sessions are formatted like this.</screen>
     }
 }</programlisting>
   
-  <para>In many cases, sections pertaining to UNIX, GNU/Linux, Mac OS X, BSD,
-  and so forth are marked (UNIX). Sections pertaining to Microsoft Windows
-  might be marked (Windows). To avoid repetition, however, file system
+  <para>Sections pertaining to UNIX, GNU/Linux, Mac OS X, BSD,
+  and so forth might simply be marked (UNIX). Sections pertaining to
+  Microsoft Windows might be marked (Windows). To avoid repetition, file system
   directory names are often given only in UNIX format as in
   <filename>/path/to/OpenIDM</filename>, even if the text applies to
   <filename>C:\path\to\OpenIDM</filename> as well.</para>
@@ -145,5 +147,4 @@ Terminal sessions are formatted like this.</screen>
   at <link xlink:href='http://www.forgerock.org/get_involved.html'>how to get
   involved</link>.</para>
  </section>
-
 </preface>

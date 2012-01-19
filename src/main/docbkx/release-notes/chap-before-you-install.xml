@@ -55,7 +55,17 @@
   <varlistentry>
    <term>Connectors</term>
    <listitem>
-    <para>OpenIDM is packaged with four default connectors; CSV File, XML File, ScriptedSQL and LDAP connector. Should you require additional connectors to integrate to other systems, please refer to http://openicf.forgerock.org/connectors/.</para>
+    <para>OpenIDM <?eval ${docTargetVersion}?> comes with these OpenICF
+    connectors:</para>
+    <itemizedlist>
+     <listitem><para>CSV File</para></listitem>
+     <listitem><para>LDAP</para></listitem>
+     <listitem><para>Scripted SQL</para></listitem>
+     <listitem><para>XML File</para></listitem>
+    </itemizedlist>
+   <para>ForgeRock provides additional connectors, as listed on the <link
+   xlink:href="http://openicf.forgerock.org/connectors/" xlink:show="new"
+   >OpenICF project connectors site</link>.</para>
    </listitem>
   </varlistentry>
  </variablelist>

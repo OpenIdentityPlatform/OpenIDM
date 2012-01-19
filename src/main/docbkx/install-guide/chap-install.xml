@@ -107,21 +107,14 @@ $</screen>
 
    <procedure xml:id="run-openidm">
     <title>To Start OpenIDM Services</title>
-<!-- When I install OpenIDM, I notice "enabled" : false in the file mentioned
-     in this note, so I'm assuming that this note is out of date.
-    <note>
-     <para>OpenIDM currently comes with the reconciliation sample enabled by
-     default. The sample consists of a source and a target connector, and a
-     reconcilation task scheduled to run every minute. To learn more about the
-     sample, refer to the <link xlink:href="install-guide#chap-sample"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
-     Sample</citetitle></link> chapter. To disable the sample, set the
-     <literal>enabled</literal> attribute to <literal>false</literal> in the
-     scheduler configuration file
-     <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.
-     </para>
-    </note> -->
-    <para>Follow these steps to run OpenIDM.</para>
+    <para>Follow these steps to run OpenIDM interactively.</para>
+
+    <para>To run OpenIDM as a background process, see the chapter on <link
+    xlink:href="integrators-guide#chap-services"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
+    OpenIDM Services</citetitle></link> in the <citetitle>Integrator's
+    Guide</citetitle>.</para>
+
     <step>
      <para>Start the Felix container, load all OpenIDM services, and start a
      command shell to allow you to manage the container.</para>

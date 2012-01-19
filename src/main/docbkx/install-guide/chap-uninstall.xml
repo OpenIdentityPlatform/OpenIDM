@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-uninstall'
@@ -42,7 +42,7 @@
    <literal>shutdown</literal> at the <literal>-&gt;</literal> prompt either
    on the command line, or on the System Information tab of the Felix
    console.</para>
-   <screen>-> shutdown</screen>
+   <screen>-&gt; shutdown</screen>
   </step>
   <step>
    <para>Remove the file system directory where you installed OpenIDM

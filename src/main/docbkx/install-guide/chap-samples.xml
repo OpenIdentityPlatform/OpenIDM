@@ -33,13 +33,12 @@
 
 <title>More OpenIDM Samples</title>
 
- <para>The current distribution of OpenIDM comes with a couple of samples 
- in <filename>openidm/samples/</filename>. Sample1 is configured per default and described in chapter 
- <link
-  xlink:href="install-guide#chap-sample"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>OpenIDM Sample</citetitle>
- </link>above.</para>
+ <para>The current distribution of OpenIDM comes with a variety of samples
+ in <filename>openidm/samples/</filename>. The first,
+ <filename>openidm/samples/sample1</filename>, is installed by default, and
+ described in the <link xlink:href="install-guide#chap-sample"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+ Sample</citetitle></link> chapter.</para>
 
  <section xml:id="before-you-begin-samples">
   <title>Before You Begin</title>
@@ -52,53 +51,92 @@
   the internal repository out of the box. This makes it easy to get started
   with OpenIDM. OrientDB is not yet supported for production use, however,
   so use a supported JDBC database when moving to production.</para>
-  <section><title>Installing the samples</title>
-   <para>Each of the sample folders in <filename>openidm/samples/</filename> contains a list of sub folders like <filename>conf</filename>, <filename>script</filename> etc, depending on which files need to be configured to run the sample. The easiest way to configure a new installation for one of the samples is to copy all files of the sample folders into the appropriate folder under <filename>openidm/</filename>. Some, but not all samples might need some extra installation like an external ldap or db server. In most cases a restart of OpenIDM is not needed here.</para>
+
+  <section xml:id="install-samples">
+   <title>Installing the Samples</title>
+
+   <para>Each sample folder in <filename>openidm/samples/</filename> contains
+   a list of sub folders, such as <filename>conf/</filename> and
+   <filename>script/</filename>, depending on which files you need to run the
+   sample. The easiest way to configure a new installation for one of the
+   samples is to copy all files in the sample folder into the appropriate
+   folder under <filename>openidm/</filename>. Some, but not all samples
+   require additional software, such as an external LDAP server or database.
+   In most cases you can install new samples without restarting OpenIDM.</para>
   </section>
-  <section xml:id="preparignIDM-id"><title>Preparing OpenIDM</title>
-   <para>It is recommended to remove the existing sample1 files before starting with other samples. On the command line in the folder <filename>openidm/</filename> of your installation do the following: </para>
-   <screen>
+
+  <section xml:id="preparing-openidm">
+   <title>Preparing OpenIDM</title>
+
+   <para>Remove the pre-installed <literal>sample1</literal> files before
+   starting with other samples.</para>
+
+   <screen>$ cd /path/to/openidm
 $ rm conf/provisioner.openicf-xml.json
  conf/sync.json
  conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</screen>
-   <para>And then:</para>
+
+   <para>After removing the <literal>sample1</literal> files, copy the files
+   from the sample you want to try.</para>
+
    <screen>$ cp -r samples/sample2/conf .</screen>
-   <para>This will configure OpenIDM for sample2.</para>
+
+   <para>The above command configures OpenIDM to use
+   <literal>sample2</literal>.</para>
   </section>
  </section>
- <section><title>Sample 1 XML file</title>
-  <para>Sample 1 is described above: <link
+
+ <section xml:id="more-sample1">
+  <title>Sample 1 - XML File</title>
+  <para>Sample 1 is described in the chapter, <link
   xlink:href="install-guide#chap-sample"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>OpenIDM Sample</citetitle>
-</link>.</para>
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+  Sample</citetitle></link>.</para>
  </section>
- <section><title>Sample 2 - LDAP one way</title>
-  <para>Sample 2 is rather similar to sample 1 but in Sample 2 OpenIDM is connected to a local ldap server. It was tested with OpenDJ but other ldap v3 compliant servers should work as well.</para>
-  <para>Sample 2 should demonstrate how OpenIDM can pick up new or changed objects from an external resource. It contains only one mapping, from the external resource to the repository and will therefor not push any changes made to an internal user object out to the external resource!</para>
-  <section><title>Install the Sample</title>
-   <para>Here the sample is installed exactly like described in <xref linkend="preparignIDM-id"/>.</para>
+ 
+ <section xml:id="more-sample2">
+  <title>Sample 2 - LDAP One Way</title>
+  <para>Sample 2 resembles sample 1, but in sample 2 OpenIDM is connected to
+  a local LDAP server. The sample has been tested with OpenDJ, but it should
+  work with any LDAPv3 compliant server.</para>
+
+  <para>Sample 2 demonstrates how OpenIDM can pick up new or changed objects
+  from an external resource. The sample contains only one mapping, from the
+  external LDAP server resource to the OpenIDM repository. The sample therefore
+  does not push any changes made to OpenIDM managed user objects out to the
+  LDAP server.</para>
+
+  <section xml:id="install-sample2">
+   <title>Install the Sample</title>
+   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.</para>
   </section>
-  <section xml:id="external-ldap-config-2"><title>External LDAP Configuration</title>
-   <para>Sample 2 expects the external ldap server with the following configuration:</para>
+
+  <section xml:id="external-ldap-config-2">
+   <title>LDAP Server Configuration</title>
+
    <itemizedlist>
-    <listitem><para>the ldap server runs on the local host</para></listitem>
-    <listitem><para>the ldap server listens on port 1389</para></listitem>
-    <listitem><para>the ldap server can be accesses by a user called "cn=Directory Manager" with the password: password</para></listitem>
-    <listitem><para>The user objects are stored on the ldap server under: ou=People,dc=example,dc=com</para></listitem>
-    <listitem><para>the user objects have the objectclass inetOrgPerson</para></listitem>
-    <listitem><para>the user objects contain the attributres (see below for an example user):</para>
+    <para>Sample 2 expects the following configuration for the external LDAP
+    server:</para>
+    <listitem><para>The LDAP server runs on the local host.</para></listitem>
+    <listitem><para>The LDAP server listens on port 1389.</para></listitem>
+    <listitem><para>A user with DN <literal>cn=Directory Manager</literal>
+    and password <literal>password</literal> has read access to the LDAP
+    server.</para></listitem>
+    <listitem><para>User objects are stored on the LDAP server under base DN
+    <literal>ou=People,dc=example,dc=com</literal>.</para></listitem>
+    <listitem><para>User objects have the object class
+    <literal>inetOrgPerson</literal>.</para></listitem>
+    <listitem><para>User objects have the following attributes:</para>
      <itemizedlist>
-      <listitem><para>uid</para></listitem>
-      <listitem><para>sn</para></listitem>
-      <listitem><para>cn</para></listitem>
-      <listitem><para>givenName</para></listitem>
-      <listitem><para>mail</para></listitem>
-      <listitem><para>description</para></listitem>
+      <listitem><para><literal>uid</literal></para></listitem>
+      <listitem><para><literal>sn</literal></para></listitem>
+      <listitem><para><literal>cn</literal></para></listitem>
+      <listitem><para><literal>givenName</literal></para></listitem>
+      <listitem><para><literal>mail</literal></para></listitem>
+      <listitem><para><literal>description</literal></para></listitem>
      </itemizedlist>
-    </listitem>
-   </itemizedlist>
-   <screen>
+     <para>An example user object follows.</para>
+     <programlisting language="ldif">
 dn: uid=jdoe,ou=People,dc=example,dc=com
 objectClass: person
 objectClass: organizationalPerson
@@ -109,22 +147,29 @@ uid: jdoe
 cn: John Doe
 telephoneNumber: 12345
 sn: Doe
-mail: ddoe@example.com
-description: Created by OpenIDM
-   </screen>
-   <para>The ldap server can be prepared by creating a base suffix of <filename>dc=example,dc=com</filename> and importing the following two objects, if they do not already exist: </para>
-   <screen>
+mail: jdoe@example.com
+description: Created by OpenIDM</programlisting>
+    </listitem>
+   </itemizedlist>
+
+   <para>Prepare the LDAP server by creating a base suffix of
+   <literal>dc=example,dc=com</literal>, and importing two objects:</para>
+   <programlisting language="ldif">
 dn: dc=example,dc=com
 objectclass: organization
 
 dn: ou=People,dc=example,dc=com
 ou: people
 description: people
-objectclass: organizationalunit
-   </screen>
+objectclass: organizationalunit</programlisting>
   </section>
-  <section><title>Running the Sample</title>
-   <para>For starting the sample first start openidm. Then run a reconciliation against the REST interface: </para>
+
+  <section xml:id="run-sample2">
+   <title>Running the Sample</title>
+
+   <para>First start OpenIDM. Then run reconciliation over the REST
+   interface.</para>
+
    <screen>
 $ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -132,8 +177,12 @@ $ curl
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
    </screen>
-   <para>For some reason there is sometimes a restart needed after the first start of a vanilla installation. If the command above returns with an error then please stop and start OpenIDM. The result of a successful reconciliation is empty.</para>
-   <para>Using the configuration of sample 2, the user objects will be created from LDAP in OpenIDM with a random unique ID. To get a list of all user object ids from the repository use:</para>
+   <para>If the command above returns an error, shutdown and start OpenIDM
+   again. Successful reconciliation returns an empty result.</para>
+
+   <para>With the configuration of sample 2, OpenIDM creates user objects from
+   LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
+   objects by ID, run a query over the REST interface.</para>
    <screen>
 $ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -141,75 +190,141 @@ $ curl
  --request GET
  "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
    </screen>
-   <para>The result should look something like this:</para>
-   <screen>{"query-time-ms":1,"result":[{"_id":"56f0fb7e-3837-464d-b9ec-9d3b6af665c3","_rev":"0"}],"conversion-time-ms":0}</screen>
-   <para>And the command to get the user above listed like: </para>
+
+   <para>The resulting JSON object should look something like this, but all on
+   one line.</para>
+
    <screen>
-$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"
-   </screen>
-   <para>Please have a look at <filename>openidm/conf/sync.json</filename> and <filename>openidm/conf/provisioner.openicf-ldap.json</filename> and try to find why the user object in the repository looks like this.</para>
-  </section>
- </section>
- 
- <section><title>Sample 2b LDAP two way</title>
-  <para>Like sample 2, sample 2b also connects to an external ldap server. </para>
-  <para>But in opposite to sample 2, sample 2b has two mappings configured: from the external resource into the repo and vice versa.</para>
-  <section><title>Install the Sample</title>
-   <para>The sample is installed like described in <xref linkend="preparignIDM-id"/> plus copying another file in the <filename>script</filename> folder:</para>
-   <screen>$ cp -r samples/sample2b/script .</screen>
-   <para>If the current installation already contains sample 2 then moving to sample 2b can also be done by adding the second mapping of sample 2b's <filename>sync.json</filename> to the current <filename>sync.json</filename> file. Additionaly the content of the <filename>script</filename> folder must be copied to the OpenIDM installation. It is just one file named <filename>ldapBackCorrelationQuery.js</filename>. The file is referenced in the second mapping.</para>
-  </section>  
-  <section xml:id="external-ldap-config-2b"><title>External LDAP Configuration</title>
-  <para>For the configuration of the LDAP sever please follow the steps in sample 2: <xref linkend="external-ldap-config-2" />.</para>
-  </section>  
-  <section><title>Running the Sample</title>
-   <para>For starting the sample first start openidm. Then run a reconciliation against the REST interface: </para>
-   <screen>
-$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
-   </screen>
-   <para>For some reason there is sometimes a restart needed after the first start of a vanilla installation. If the command above returns with an error then please stop and start OpenIDM. The result of a successful reconciliation is empty.</para>
-   <para>Using the configuration of sample 2, the user objects will be created from LDAP in OpenIDM with a random unique ID. To get a list of all user object ids from the repository use:</para>
-   <screen>
-$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
-   </screen>
-   <para>The result should look something like this:</para>
-   <screen>{"query-time-ms":1,"result":[{"_id":"56f0fb7e-3837-464d-b9ec-9d3b6af665c3","_rev":"0"}],"conversion-time-ms":0}</screen>
-   <para>And the command to get the user listed above like: </para>
+{
+    "query-time-ms": 1,
+    "result": [
+        {
+            "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+            "_rev": "0"
+        }
+    ],
+    "conversion-time-ms": 0
+}</screen>
+
+   <para>To retrieve the user, get the object by ID.</para>
+
    <screen>
 $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
-   <para>Testing the second mapping is done by creating a user in the OpenIDM repository like this:</para>
+
+   <para>Read <filename>openidm/conf/sync.json</filename> and
+   <filename>openidm/conf/provisioner.openicf-ldap.json</filename> to
+   understand the layout of the user object in the repository.</para>
+  </section>
+ </section>
+ 
+ <section xml:id="more-sample2b">
+  <title>Sample 2b - LDAP Two Way</title>
+
+  <para>Like sample 2, sample 2b also connects to an external LDAP server.</para>
+
+  <para>Unlike sample 2, however, sample 2b has two mappings configured, one
+  from the LDAP server to the OpenIDM repository, and the other from the
+  OpenIDM repository to the LDAP server.</para>
+
+  <section xml:id="install-sample2b">
+   <title>Install the Sample</title>
+
+   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
+   Also copy the sample script to the <filename>script</filename> folder.</para>
+   <screen>$ cp -r samples/sample2b/script .</screen>
+
+   <para>If you already installed sample 2, then simply add the second mapping
+   from sample 2b's <filename>sync.json</filename> file to the current
+   <filename>sync.json</filename> file, and copy the sample script to the
+   <filename>script</filename> folder. The script is referenced in the second
+   mapping.</para>
+  </section>
+
+  <section xml:id="external-ldap-config-2b">
+   <title>External LDAP Configuration</title>
+   <para>Configure the LDAP server as for sample 2,
+   <xref linkend="external-ldap-config-2" />. The LDAP user must have write
+   access to create users from OpenIDM on the LDAP server.</para>
+  </section>  
+
+  <section xml:id="run-sample2b">
+   <title>Running the Sample</title>
+
+   <para>First start OpenIDM. Then run reconciliation over the REST
+   interface.</para>
+
    <screen>
 $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- -d '{"email":"fdoe@example.com","familyName":"Doe","userName":"fdoe","givenName":"Felicitas","displayName":"Felicitas Doe"}'
- --request PUT "http://localhost:8080/openidm/managed/user/repoUser1"</screen>
-  <warning><para>Unfortunately there is a inconsistency in the sample file which is delivered with OpenIDM 2.0.0! Constructing the dn in the onCreate property of the second mapping must be like:</para>
-  <screen>"target.dn = 'uid=' + source.userName + ',ou=people,dc=example,dc=com';"</screen></warning>
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ 
+   <para>If the command above returns an error, shutdown and start OpenIDM
+   again. Successful reconciliation returns an empty result.</para>
+
+   <para>With the configuration of sample 2b, OpenIDM creates user objects from
+   LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
+   objects by ID, run a query over the REST interface.</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+   </screen>
+
+   <para>The resulting JSON object should look something like this, but all on
+   one line.</para>
+
+   <screen>
+{
+    "query-time-ms": 1,
+    "result": [
+        {
+            "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+            "_rev": "0"
+        }
+    ],
+    "conversion-time-ms": 0
+}</screen>
+
+   <para>To retrieve the user, get the object by ID.</para>
+
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+
+   <para>Test the second mapping by creating a user in the OpenIDM
+   repository.</para>
+ 
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --data '{"email":"fdoe@example.com","familyName":"Doe","userName":"fdoe",
+ "givenName":"Felicitas","displayName":"Felicitas Doe"}'
+ --request PUT
+ "http://localhost:8080/openidm/managed/user/repoUser1"</screen>
+
+   <para>Run reconciliation again to create the new user in the LDAP server
+   as well.</para>
   </section>
  </section>
  
- <section><title>Sample 3 - SQL scripted</title>
+ <section xml:id="more-sample3">
+  <title>Sample 3 - Scripted SQL</title>
   <para>Sample 3 shows an example configuration for the SQL scripted connector. This connector is very flexible since the communication with the database is established by configurable sql scripts. Each operation, like create or delete, is represented by its own db script. The scripts are kept in the <filename>tools</filename> folder. The folder named <filename>data</filename> contains an example DDL to create a database schema which will hold the external user objects.</para>
   <para>It is recommended to start playing with this sample with a fresh installation of OpenIDM.</para>
   <section><title>Install the Sample</title>
-   <para>The sample is installed like described in <xref linkend="preparignIDM-id"/> plus copying another folder called <filename>tools</filename>.</para>
+   <para>The sample is installed like described in <xref linkend="preparing-openidm"/> plus copying another folder called <filename>tools</filename>.</para>
    <screen>$ cp -r samples/sample3/tools .</screen>
    <para>There is no need to copy the third folder of the sample3 direcotry, data, since it just contains the DDL for creating the external user database.</para>
    <para>In this example OpenIDM needs to communicate with a mySQL database server and therefore a driver for mySQL is needed.</para>
@@ -266,10 +381,11 @@ $ curl
   </section>
  </section>
  
- <section><title>Sample 4 - CSV Connector</title>
+ <section xml:id="more-sample4">
+  <title>Sample 4 - CSV File</title>
   <para>Sample 4 deals with a flat file comma separated value file as the external resource. The file id part of the sample configuration, therefore no other external resource needs to be maintained.</para>
   <section><title>Install the Sample</title>
-   <para>Additionally to the <xref linkend="preparignIDM-id"/> a directory called <filename>data</filename>, containing the csv file, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
+   <para>Additionally to the <xref linkend="preparing-openidm"/> a directory called <filename>data</filename>, containing the csv file, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
    <screen>$ cp -r samples/sample4/data .</screen>
   </section>
   <section><title>External Configuration</title>
@@ -295,10 +411,11 @@ $ curl
   </section>
  </section>
  
- <section><title>Sample 5 - Synchronization of two Resources</title>
+ <section xml:id="more-sample5">
+  <title>Sample 5 - Synchronization of Two Resources</title>
   <para>The purpose of sample 5 is to demonstrate the flow of data from one external resource to another. The resources are called LDAP and AD, but in the example both directory like resources are simulated by two xml files.</para>
   <section><title>Install the Sample</title>
-   <para>Additionally to the <xref linkend="preparignIDM-id"/>, a directory called <filename>script</filename>, containing some java script files, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
+   <para>Additionally to the <xref linkend="preparing-openidm"/>, a directory called <filename>script</filename>, containing some java script files, should be copied into the OpenIDM folder <filename>openidm</filename>:</para>
    <screen>
 $ cp -r samples/sample5/script .
    </screen>
@@ -337,11 +454,12 @@ $ curl
   </section>
  </section>
  
- <section><title>Sample 6 - LiveSync between two LDAP server</title>
+ <section xml:id="more-sample6">
+  <title>Sample 6 - LiveSync Between Two LDAP Servers</title>
   <para>The sample is a bit similar to sample 5, except that it is using two real LDAP connections. To simplify the setup, both provisioners point to the same ldap server but on different baseContexts!</para>
   <para>The example configuration will pick up new and changed users from LDAP (i.e. ou=people,dc=example,dc=com) and send the updates to AD. For simplicity no flow from AD to LDAP is configured!</para>
   <section><title>Install the Sample</title>
-   <para>Here the sample is installed exactly like described in <xref linkend="preparignIDM-id"/>.</para>
+   <para>Here the sample is installed exactly like described in <xref linkend="preparing-openidm"/>.</para>
   </section>
   <section><title>External Configuration</title>
   <para>The sample provisioners are configured for tow independent ldap processes. To change the example to connect to one ldap process which represents both external resources both suffices can be configured on one ldap server and the provisioner configuration's port need to be changed accordingly.</para>
@@ -477,7 +595,7 @@ $ ./ldapsearch -D "cn=Directory Manager" -w password -h localhost -p 4389 -b o=A
    <section><title>Running the sample with LiveSync</title>
     <para>In opposite to reconciliation, which can be started by the scheduler and through the REST interface directly, LiveSync needs to be started by a the scheduler. therefore a scheduler configuration is needed in the <filename>conf</filename> folder. The sample comes with the following scheduler file for LiveSync:</para>
     <example>
-     <programlisting language="javaxcript">
+     <programlisting language="javascript">
 {
     "enabled" : true,
     "type" : "cron",
@@ -487,8 +605,7 @@ $ ./ldapsearch -D "cn=Directory Manager" -w password -h localhost -p 4389 -b o=A
         "action" : "activeSync",
         "source" : "system/ldap/account"
     }
-}   
-     </programlisting>
+}</programlisting>
     </example>
     <para>The schedule is activated by changing the "enabled" property to true. </para>
    </section>
