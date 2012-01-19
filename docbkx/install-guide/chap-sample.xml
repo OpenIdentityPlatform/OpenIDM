@@ -164,13 +164,6 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><filename>conf/repo.orientdb.json</filename></term>
-    <listitem>
-     <para>This local repository configuration file maps the data and queries
-     for use with OrientDB.</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
     <term><filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename></term>
     <listitem>
      <para>The sample scheduler configuration file defines a reconciliation
@@ -213,7 +206,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <filename>conf/sync.json</filename> defines the synchronization mappings
      between the XML file connector (source) and the local repository
      (target).</para>
-     <programlisting language="javascript">{
+     <programlisting language="javascript">
+{
     "mappings": [
         {
             "name": "systemXmlfileAccounts_managedUser",
@@ -290,7 +284,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <para>Source and target paths starting with <literal>managed</literal>,
      such as <literal>managed/user</literal>, always refer to objects in the
      local OpenIDM repository, whereas paths starting with
-     <literal>system</literal>, such as <literal>system/xml/account</literal>,
+     <literal>system</literal>, such as <literal>system/xmlfile/account</literal>,
      refer to connector objects, in this case the XML file connector.</para>
      <para>To filter objects from the resource for a particular target, you can
      use the <literal>validTarget</literal> script in the mapping to ensure
@@ -325,7 +319,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <filename>conf/sync.json</filename> to set <literal>"enabled" : true</literal>
   and then waiting until the scheduled reconciliation happens, or by using the
   REST interface.</para>
-  <screen width="100">$ curl
+
+  <screen width="100"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -485,7 +480,7 @@ access.csv activity.csv recon.csv</screen>
   reconciliation. This formatted excerpt from the log covers two
   reconciliation runs.</para>
 
-  <programlisting width="110">
+  <programlisting width="110"><?dbfo pgwide="1"?>
 "_id",  "action",...,"reconId","situation","sourceObjectId",...,              "targetObjectId","timestamp";
 "02...","CREATE",...,"cc0...", "ABSENT",   "system/xmlfile/account/1",...,    "managed/user/DDOE1",...;
 "47...","IGNORE",...,"cc0...", "UNQUALIFIED",""            ,...,              "managed/user/joe",...;
