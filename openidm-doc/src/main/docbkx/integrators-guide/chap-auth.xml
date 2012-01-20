@@ -138,7 +138,7 @@ curl
   </variablelist>
   
   <para>The default role which each authenticated user gets on authentication is configured in the file <filename>openidm/conf/authentication.json</filename> in the property "defaultUserRoles" which uses a list as the value: ["openidm-authorized"].</para>
-  <example xml:id="authentication-json-id">
+  <example xml:id="authentication-json-id2">
    <programlisting language="javascript">
 {
     "queryId" : "credential-query",
