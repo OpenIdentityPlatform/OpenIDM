@@ -164,5 +164,26 @@ If installed as connector (i.e. under <filename>openidm/connectors</filename>) t
   <screen width="100">"connectorHostRef" : "#LOCAL",</screen>
   </para>
  </section>
+ <section>
+  <title>Missing Name Attribute</title>
+  <subtitle>Situation in audit recon log shows "Null"</subtitle>
+  
+  <para>An error of missing name attribute, and following an IllegalArgumentException can point to a misconfiguration in the correlation rule, with the correlation query pointing to the external system. These queries usually reference the "name" field which, if empty, leads to the error below.</para>
+  <screen>
+-> Jan 20, 2012 1:59:58 PM org.forgerock.openidm.provisioner.openicf.commons.AttributeInfoHelper build
+SEVERE: Failed to build name attribute out of [null]
+Jan 20, 2012 1:59:58 PM org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService query
+SEVERE: Operation [query, system/ad/account] failed with Exception on system object: java.lang.IllegalArgumentException: Attribute value must be an instance of String.
+Jan 20, 2012 1:59:58 PM org.forgerock.openidm.router.JsonResourceRouterService handle
+WARNING: JSON resource exception
+org.forgerock.json.resource.JsonResourceException: IllegalArgumentException
+	at org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.query(OpenICFProvisionerService.java:582)
+	at org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService.handle(OpenICFProvisionerService.java:246)
+	at org.forgerock.openidm.provisioner.impl.SystemObjectSetService.handle(SystemObjectSetService.java:114)
+	at org.forgerock.json.resource.JsonResourceRouter.handle(JsonResourceRouter.java:79)
+  
+  </screen>
+  <para>If you see this error then please check your correlationQuery. Another symptom of the a broken correlationQuery is that the audit_recon log shows a situation of "NULL" and no onCreate, or onUpdate or alike scripts are executed.</para>
+ </section>
 </chapter>
 
