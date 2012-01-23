@@ -449,7 +449,54 @@
    </itemizedlist>
   </section>
  </section>
-
+ 
+ <section xml:id="script-places">
+  <title>Places to Trigger Scripts</title>
+  
+  <para>Scripts can be triggered at different places and events.</para>
+  
+  <variablelist>
+   <varlistentry>
+    <term>In openidm/conf/sync.json</term>
+    <listitem>
+     <variablelist>
+      <varlistentry>
+       <term>Triggered by Situation</term>
+       <listitem><para>onCreate, onUpdate, onDelete, onLink, onUnlink</para></listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>Object Filter</term>
+       <listitem><para>vaildSource, validTarget</para></listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>Correlating Objects</term>
+       <listitem><para>correlationQuery</para></listitem>
+      </varlistentry>
+       <varlistentry>
+        <term>Triggered on any Reconciliation</term>
+        <listitem><para>result</para></listitem>
+       </varlistentry>
+       <varlistentry>
+        <term>Scripts inside Properties</term>
+        <listitem><para>condition, transform</para></listitem>
+       </varlistentry> 
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   
+   <varlistentry>
+    <term>In openidm/conf/managed.json</term>
+    <listitem><para>onRetreive, onValidate</para></listitem>
+   </varlistentry>
+   
+   <varlistentry>
+    <term>In openidm/conf/router.json</term>
+    <listitem><para>onRequest, onResponse</para></listitem>
+   </varlistentry>
+  
+  </variablelist>
+ </section>
+ 
  <section xml:id="debugging-scripts">
   <title>Debugging OpenIDM Scripts</title>
 
