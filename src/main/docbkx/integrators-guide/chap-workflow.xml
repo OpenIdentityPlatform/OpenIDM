@@ -342,7 +342,7 @@ INFO: XPath currently not supported as expressionLanguage
    file containing the following.</para> <!-- TODO: Howto steps or link to howto -->
    <!-- TODO: need a script or steps to generate dates for the example, because
    the dates here will not be useful if you read the documentation in 2013, right? -->
-   <programlisting language="csv" width="112">
+   <programlisting language="csv" width="112"><?dbfo pgwide="1"?>
 firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","active"
 "Darth","DDOE","Doe","doe@forgerock.org","123456","Z29vZA==","2011-11-30T10:17:00","2011-12-23T16:12:00","TRUE"</programlisting>
    <para>The authoritative source contains the field, <literal>sunset</literal>,

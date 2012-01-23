@@ -32,8 +32,9 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Sending Email</title>
 
- <para>After you configure the outbound email service, you can send email
- through OpenIDM either in scripts or through the REST API.</para>
+ <para>This appendix shows you how to configure the outbound email service, so
+ that you can send email through OpenIDM either by script or through the REST
+ API.</para>
 
  <procedure xml:id="setup-outbound-email">
   <title>To Set Up Outbound Email</title>
@@ -127,7 +128,7 @@ $ cp samples/misc/external.email.json conf/</screen>
  <section xml:id="send-mail-rest">
   <title>Sending Mail Over REST</title>
   <para>Although you are more likely to send mail from a script in production,
-  you can send email using the REST API by an HTTP POST to
+  you can send email using the REST API by sending an HTTP POST to
   <literal>/openam/external/email</literal> in order to test that your
   configuration works. You pass the message parameters as POST parameters,
   URL encoding the content as necessary.</para>

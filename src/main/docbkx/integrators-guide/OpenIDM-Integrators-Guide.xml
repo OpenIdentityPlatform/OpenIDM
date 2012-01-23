@@ -74,7 +74,7 @@
 <!-- Consider adding this chapter after 2.0.0:
  <xinclude:include href='chap-reporting.xml' />
  -->
- <xinclude:include href='chap-best-pract.xml' />
+ <xinclude:include href='chap-best-practices.xml' />
  <xinclude:include href='chap-troubleshooting.xml' />
 
  <xinclude:include href="appendix-file-layout.xml" />

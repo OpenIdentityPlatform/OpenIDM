@@ -186,7 +186,10 @@ HTTP/1.1 204 No Content</screen>
   xlink:href="integrators-guide#appendix-router">router service</link> enables
   you to apply filters as shown in <filename>openidm/conf/router.json</filename>
   and the associated script
-  <filename>openidm/script/router-authz.js</filename>.</para>
+  <filename>openidm/script/router-authz.js</filename>. See the chapter on
+  <link xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#chap-auth"><citetitle>Authentication,
+  Authorization &amp; RBAC</citetitle></link> for details.</para>
  </section>
 
  <section xml:id="security-replace-defaults">
@@ -227,7 +230,7 @@ $ </screen>
   </procedure>
 
   <procedure xml:id="security-replace-default-user-password">
-   <title>To Replace Default User &amp; Password</title>
+   <title>To Replace the Default User &amp; Password</title>
 
    <para>After changing the default encryption key, change at least the default
    user password.</para>
@@ -292,11 +295,23 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
  </section>
  
  <section xml:id="security-urls">
-  <title>Protect Sensitive URLs on the REST interface</title>
+  <title>Protect Sensitive REST Interface URLs</title>
   
-  <para>Although the repo is accessible directly by default (anything attached to the router is accessible currently with the default policy) direct http access should generally not be needed in production and if so should be disallowed in the authorization policy to reduce the attack surface.</para>
+  <para>Although the repository is accessible directly by default, since
+  anything attached to the router is accessible with the default policy,
+  avoid direct HTTP access in production. If you do not need such access,
+  deny it in the authorization policy to reduce the attack surface.</para>
 
-  <para>Similarly direct http access to part(s) or all of system objects should be disallowed in production; particularly access to action. Basically anything not used here in production should not get exposed. The main public interfaces over http at this point are managed/ and config/. The rest is either in most use cases triggered indirectly, or for internal consumption.</para>
+  <para>Similarly deny direct HTTP access to system objects in production,
+  particularly access to action. As a rule of thumb, do not expose anything
+  not used in production. The main public interfaces over HTTP are
+  <literal>/openidm/managed/</literal> and <literal>/openidm/config/</literal>.
+  Other URIs are triggered indirectly, or are for internal consumption.</para>
+
+  <para>See the chapter on <link xlink:href="integrators-guide#chap-auth"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Authentication,
+  Authorization &amp; RBAC</citetitle></link> for an example showing how to
+  protect sensitive URLs.</para>
  </section>
 
  <section xml:id="security-files">
@@ -372,8 +387,8 @@ password=<replaceable>password</replaceable></programlisting>
   <para>Leave log levels at <literal>INFO</literal> in production to ensure
   that you capture enough information to help diagnose issues. See the chapter
   on <link xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#chap-logs"><citetitle>Logging</citetitle> for
-  more information.</link>
+  xlink:href="integrators-guide#chap-logs"><citetitle>Server Logging</citetitle>
+  for more information.</link>
   </para>
 
   <para>At start up and shut down, <literal>INFO</literal> can produce many

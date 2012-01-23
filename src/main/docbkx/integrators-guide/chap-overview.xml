@@ -101,8 +101,8 @@
       <term>Script Engine</term>
       <listitem>
        <para>The script engine is a pluggable module that provides the triggers
-       and plugin points for OpenIDM. OpenIDM currently implements a
-       <literal>LINKJavaScript</literal> engine.</para>
+       and plugin points for OpenIDM. OpenIDM currently implements a JavaScript
+       engine.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -221,8 +221,8 @@
      <varlistentry>
       <term>RESTful Interfaces</term>
       <listitem>
-       <para>REST APIs for CRUD operations and invoking synchronization and
-       reconciliation are provided for both HTTP and Java.</para>
+       <para>OpenIDM provides REST APIs for CRUD operations and invoking
+       synchronization and reconciliation for both HTTP and Java.</para>
        <para>See the appendix on the
        <link xlink:href="integrators-guide#appendix-rest"
        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
@@ -232,7 +232,7 @@
      <varlistentry>
       <term>User Interfaces</term>
       <listitem>
-       <para>User interfaces are to provide password management, registration,
+       <para>User interfaces provide password management, registration,
        self-service, and workflow services.</para>
       </listitem>
      </varlistentry>

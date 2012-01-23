@@ -75,7 +75,7 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term><filename>openidm/bundle/json-crypto-cli-1.1.0.jar</filename></term>
+   <term><filename>openidm/bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar</filename></term>
    <listitem>
     <para>Utility to encrypt and decrypt values in JSON objects</para>
    </listitem>
@@ -83,8 +83,8 @@
   <varlistentry>
    <term><filename>openidm/cli.sh</filename></term>
    <listitem>
-    <para>Script for exporting objects, exporting secret keys, and validating
-    configuration files</para>
+    <para>Management commands for operations such as validating configuration
+    files</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -254,7 +254,7 @@
   <varlistentry>
    <term><filename>openidm/sample/sample3/</filename></term>
    <listitem>
-    <para>ScriptSQL connector sample for MySQL</para>
+    <para>Scripted SQL connector sample for MySQL</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -266,14 +266,14 @@
   <varlistentry>
    <term><filename>openidm/sample/sample5/</filename></term>
    <listitem>
-    <para>LDAP to OpenIDM to Active Directory attribute flow sample with XML
-    resources</para>
+    <para>LDAP to OpenIDM to Active Directory attribute flow sample using XML
+    resources rather than actual directories</para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><filename>openidm/sample/sample6/</filename></term>
    <listitem>
-    <para>LiveSync sample for OpenDJ</para>
+    <para>LiveSync sample for use with one or two LDAP servers</para>
    </listitem>
   </varlistentry>
   <varlistentry>
