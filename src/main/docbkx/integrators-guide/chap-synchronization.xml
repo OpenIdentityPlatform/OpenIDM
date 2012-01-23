@@ -541,8 +541,8 @@ map;
  </section>
   
  <section xml:id="advance-dataflow-id"><title>Advanced Data Flow Configuration</title>
-  <para>correlation, onUnlink, onDelete, onStore, onRetreive, onValidate</para>
-  <para>In <xref linkend="basic-flow-sec-id"/> the extra action which can be plugged in for two standard situations was mentiond: onCreate and on Update.In some cases it might be needed to execute special scripts on other actions as well. For instance if the user object on an external resource was deleted the action in OpenIDM is not necessarely a delete as well. Instead the user should for instance be deactivated. In this case the action would be set to "unlink" and an "onUnlink" script might be needed to deactivate the user in OpenIDM or even another external resource. See for instance <xref linkend="advance-syncing-example-id"/></para>
+  
+  <para>In <xref linkend="basic-flow-sec-id"/> the extra action which can be plugged in for two standard situations was mentiond: onCreate and onUpdate.In some cases it might be needed to execute special scripts on other actions as well. For instance if the user object on an external resource was deleted the action in OpenIDM is not necessarely a delete as well. Instead the user should for instance be deactivated. In this case the action would be set to "unlink" and an "onUnlink" script might be needed to deactivate the user in OpenIDM or even another external resource. See for instance <xref linkend="advance-syncing-example-id"/></para>
   <para>Simmilarely it might be desired to delete the object in OpenIDM and still execute an extra script. That would then be done in the "onDelete" property.</para>
   
   <example xml:id="advance-syncing-example-id">
@@ -645,6 +645,31 @@ map;
     }   
    </programlisting>
   </example>
+  
+    <para>A complete list of hooks for calling scripts in the sync.json file is:</para>
+  <variablelist>
+   <varlistentry>
+    <term>Triggered by Situation</term>
+    <listitem><para>onCreate, onUpdate, onDelete, onLink, onUnlink</para></listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Object Filter</term>
+    <listitem><para>vaildSource, validTarget</para></listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Correlating Objects</term>
+    <listitem><para>correlationQuery</para></listitem>
+   </varlistentry>
+    <varlistentry>
+     <term>Triggered on any Reconciliation</term>
+     <listitem><para>result</para></listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>Scripts inside Properties</term>
+     <listitem><para>condition, transform</para></listitem>
+    </varlistentry>
+  </variablelist>
+  
   <section><title>Include data from a third resource</title>
   <para>At any time during the reconciliation it is possible to get information from any connected system. The function to call is openidm.read(id). An example on how to use in a script:</para> 
   <example>
