@@ -77,17 +77,17 @@
      <entry>System objects</entry>
      <entry>Representation of target resource objects, such as accounts,
      but also resource objects such as groups.</entry>
-     <entry>-</entry>
+     <entry>&#160;</entry>
     </row>
     <row>
      <entry>Audit objects</entry>
      <entry>Houses audit data in the OpenIDM internal repository.</entry>
-     <entry></entry>
+     <entry>&#160;</entry>
     </row>
     <row>
      <entry>Links</entry>
      <entry>Defines a relation between two objects.</entry>
-     <entry></entry>
+     <entry>&#160;</entry>
     </row>
    </tbody>
   </tgroup>
@@ -103,11 +103,11 @@
   types of object, known as <firstterm>Resource Sets</firstterm>.</para>
 
   <para>For example, you get managed objects, configuration objects, and
-  repository objects in the following way using the Resource API. On how to construct the "id" of an object please see <link
-  xlink:href="integrators-guide#rest-uri-scheme"
+  repository objects in the following way using the Resource API. See the
+  section on <link xlink:href="integrators-guide#rest-uri-scheme"
   xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>URI Scheme</citetitle>
-</link>.</para>
+  <citetitle>URI Scheme</citetitle></link> for information on how to
+  construct and object ID.</para>
 
   <programlisting language="javascript">
 val = openidm.read("managed/organization/mysampleorg")
@@ -865,7 +865,9 @@ $ curl
  --request POST -d '[{"replace":"/adPassword","value": "Password"}]' 
  http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-username&amp;uid=DDOE
       </screen>
-      <para>For the syntax on how to formulate the query (_query-id=for-username&amp;uid=DDOE) please refer to <xref linkend="managed-objects-programmatic-query"/> </para>
+      <para>For the syntax on how to formulate the query
+      <literal>_query-id=for-username&amp;uid=DDOE</literal> see
+      <xref linkend="managed-objects-programmatic-query"/>.</para>
     </section>
 
     <section xml:id="managed-objects-programmatic-delete">
