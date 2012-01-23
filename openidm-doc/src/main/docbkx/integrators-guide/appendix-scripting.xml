@@ -92,7 +92,8 @@
   reconciliation to establish whether the source object should be a part of
   the reconciliation, or ignored.</para>
 
-  <programlisting language="javascript">"validTarget": {
+  <programlisting language="javascript">
+"validTarget": {
   "type"  : "text/javascript",
   "source": "object.employeeType == 'external'"
 }</programlisting>
@@ -101,16 +102,18 @@
   attribute to <literal>defaultpwd</literal> when OpenIDM creates a target
   object.</para>
 
-  <programlisting language="javascript">"onCreate" : {
+  <programlisting language="javascript">
+"onCreate" : {
   "type"  : "text/javascript",
   "source": "target.__PASSWORD__ = 'defaultpwd'"
 }</programlisting>
 
-  <para>This example shows how to define a trigger to create Solaris home
+  <para>The following example shows a trigger to create Solaris home
   directories using a script. The script is located in a file,
   <filename>/path/to/openidm/script/createUnixHomeDir.js</filename>.</para>
 
-  <programlisting language="javascript">{
+  <programlisting language="javascript">
+{
   "filters" : [ {
       "pattern" : "^system/solaris/account$",
       "methods" : [ "create" ],
@@ -453,31 +456,32 @@
  <section xml:id="script-places">
   <title>Places to Trigger Scripts</title>
   
-  <para>Scripts can be triggered at different places and events.</para>
+  <para>Scripts can be triggered at different places, by different
+  events.</para>
   
   <variablelist>
    <varlistentry>
-    <term>In openidm/conf/sync.json</term>
+    <term>In <filename>openidm/conf/sync.json</filename></term>
     <listitem>
      <variablelist>
       <varlistentry>
-       <term>Triggered by Situation</term>
+       <term>Triggered by situation</term>
        <listitem><para>onCreate, onUpdate, onDelete, onLink, onUnlink</para></listitem>
       </varlistentry>
       <varlistentry>
-       <term>Object Filter</term>
+       <term>Object filter</term>
        <listitem><para>vaildSource, validTarget</para></listitem>
       </varlistentry>
       <varlistentry>
-       <term>Correlating Objects</term>
+       <term>Correlating objects</term>
        <listitem><para>correlationQuery</para></listitem>
       </varlistentry>
        <varlistentry>
-        <term>Triggered on any Reconciliation</term>
+        <term>Triggered on any reconciliation</term>
         <listitem><para>result</para></listitem>
        </varlistentry>
        <varlistentry>
-        <term>Scripts inside Properties</term>
+        <term>Scripts inside properties</term>
         <listitem><para>condition, transform</para></listitem>
        </varlistentry> 
      </variablelist>
@@ -485,12 +489,12 @@
    </varlistentry>
    
    <varlistentry>
-    <term>In openidm/conf/managed.json</term>
+    <term>In <filename>openidm/conf/managed.json</filename></term>
     <listitem><para>onRetreive, onValidate</para></listitem>
    </varlistentry>
    
    <varlistentry>
-    <term>In openidm/conf/router.json</term>
+    <term>In <filename>openidm/conf/router.json</filename></term>
     <listitem><para>onRequest, onResponse</para></listitem>
    </varlistentry>
   
@@ -514,17 +518,20 @@
     <stepalternatives>
      <step>
       <para>Download and install Eclipse IDE for JavaScript Web Developers
-      from the <link xlink:href="http://www.eclipse.org/downloads/" xlink:show="new">Eclipse download page</link>.</para>
+      from the <link xlink:href="http://www.eclipse.org/downloads/"
+      xlink:show="new">Eclipse download page</link>.</para>
      </step>
      <step>
-      <para>Add <link xlink:href="http://wiki.eclipse.org/JSDT" xlink:show="new">JavaScript Development Tools</link> to your existing Eclipse
-      installation.</para>
+      <para>Add <link xlink:href="http://wiki.eclipse.org/JSDT"
+      xlink:show="new">JavaScript Development Tools</link> to your existing
+      Eclipse installation.</para>
      </step>
     </stepalternatives>
    </step>
    <step>
     <para>Create an empty JavaScript project called <literal>External JavaScript
     Source</literal> in Eclipse.</para>
+
     <para>Eclipse then uses the <filename>External JavaScript Source</filename>
     directory in the default workspace location to store sources that it
     downloads from OpenIDM.</para>
@@ -538,21 +545,26 @@
     <substeps>
      <step>
       <para>Uncomment and edit the following line.</para>
+
       <programlisting language="none" width="84">
 #openidm.script.javascript.debug=transport=socket,suspend=y,address=9888,trace=true</programlisting>
+
       <para>Here <literal>suspend=y</literal> prevents OpenIDM from starting
       until the remote JavaScript debugger has connected. You might therefore
       choose to set this to <literal>suspend=n</literal>.</para>
      </step>
      <step>
       <para>Uncomment and edit the following line.</para>
+
       <programlisting language="none" width="81">
 #openidm.script.javascript.sources=/Eclipse/workspace/External JavaScript Source/</programlisting>
-      <para> Adjust <literal>/Eclipse/workspace/External JavaScript
+
+      <para>Adjust <literal>/Eclipse/workspace/External JavaScript
       Source/</literal> to match the absolute path to this folder including the
       trailing <literal>/</literal> character. On Windows, also use forward
       slashes, such as <literal>C:/Eclipse/workspace/External JavaScript
       Source/</literal>.</para>
+
       <para>Each time OpenIDM loads a new script, it then creates or overwrites
       the file in the <filename>External JavaScript Source</filename> directory.
       Before toggling breakpoints, be sure to refresh the source manually in

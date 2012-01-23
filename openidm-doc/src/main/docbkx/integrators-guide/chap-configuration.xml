@@ -134,7 +134,7 @@
   <title>Configuring OpenIDM Over REST</title>
 
   <para>OpenIDM exposes configuration objects under the
-  <literal>openidm/config</literal> context.</para>
+  <literal>/openidm/config</literal> context.</para>
 
   <indexterm>
   <primary>REST API</primary>

@@ -49,8 +49,8 @@
   <title>Object Identifiers</title>
 
   <para>Each managed object has an identifier&#8212;expressed as
-  <replaceable>id</replaceable> in the URI scheme &#8212;which is used to
-  address it through the REST API. The REST API allows for the
+  <replaceable>id</replaceable> in the URI scheme&#8212;which is used to
+  address the object through the REST API. The REST API allows for the
   client-generated and server-generated identifiers, through PUT and POST
   methods. The default server-generated identifier type is a UUID. Object
   identifiers that begin with underscore ( <literal>_</literal> ) are reserved

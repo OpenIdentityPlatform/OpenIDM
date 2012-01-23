@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-reporting'
@@ -30,19 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Creating Reports in OpenIDM</title>
+ <title>Generating Reports</title>
 
- <para>This chapter covers ... TODO.</para>
-
- <section xml:id="reporting-section-id">
-  <title>Section Title</title>
-
-  <para>This section covers ... TODO.</para>
-
-  <section xml:id="reporting-subsection-id">
-   <title>Subsection Title</title>
-
-   <para>This subsection covers ... TODO.</para>
-  </section>
- </section>
+ <para>TODO</para>
 </chapter>

@@ -41,8 +41,8 @@
  <!--
  For instructions on setting up an external reporting engine with OpenIDM,
  see the chapter on <link xlink:href="integrators-guide#chap-reporting"
- xlink:role="http://docbook.org/xlink/role/olink">generating reports</link>
- for instructions.
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Generating
+ Reports</citetitle></link>.
   -->
 
  <para>The auditing interface allows you to push auditing data to files and
@@ -56,28 +56,32 @@
    <varlistentry>
     <term>Access Log</term>
     <listitem>
-     <para>OpenIDM logs access to the REST API here.</para>
+     <para>OpenIDM writes messages concerning access to the REST API in this
+     log.</para>
+     <para>Default file: <filename>openidm/audit/access.csv</filename></para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>Activity Log</term>
     <listitem>
-     <para>To this type, OpenIDM logs operations on internal (managed) and
-     external (system) objects.</para>
+     <para>OpenIDM logs operations on internal (managed) and external (system)
+     objects to this log type.</para>
      <para>Entries in the activity log contain identifiers both for the
      reconciliation or synchronization action that triggered the activity,
      and also for the original caller and the relationships between related
      actions.</para>
+     <para>Default file: <filename>openidm/audit/activity.csv</filename></para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>Reconciliation Log</term>
     <listitem>
-     <para>To this type, OpenIDM logs the results of a reconciliation run,
-     including situations and the resulting actions taken. The activity log
-     contains details about the actions, where log entries display parent
+     <para>OpenIDM logs the results of a reconciliation run, including
+     situations and the resulting actions taken to this log type. The activity
+     log contains details about the actions, where log entries display parent
      activity identifiers,
      <literal>recon/<replaceable>reconID</replaceable></literal>.</para>
+     <para>Default file: <filename>openidm/audit/recon.csv</filename></para>
     </listitem>
    </varlistentry>
   </variablelist>

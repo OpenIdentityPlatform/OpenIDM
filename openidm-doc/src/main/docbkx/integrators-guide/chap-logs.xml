@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Logging</title>
+ <title>Server Logging</title>
 
  <para>This chapter briefly describes server logging. For audit information,
  see the chapter on <link xlink:href="integrators-guide#chap-auditing"
@@ -42,7 +42,7 @@
  OpenIDM.</para>
 
  <para>The default configuration writes log messages in simple format to
- <filename>logs/openidm*.log</filename> files where you installed
+ <filename>openidm/logs/openidm*.log</filename> files where you installed
  OpenIDM, rotating files when the size reaches 5 MB, and retaining up to 5
  files. Also by default, OpenIDM writes all system and custom log messages
  to the files.</para>
