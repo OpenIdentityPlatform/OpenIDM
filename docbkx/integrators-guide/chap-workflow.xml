@@ -193,7 +193,7 @@ openidm.action("workflow/activiti", map);</programlisting>
    <literal>StartEvent</literal>, <literal>MailTask</literal>, and
    <literal>EndEvent</literal>.</para>
 
-   <mediaobject>
+   <mediaobject xml:id="figure-email-notification-process">
     <alt>Email notification process</alt>
     <imageobject>
      <imagedata fileref="images/bpmn-email-notification.png" format="PNG" />
@@ -354,7 +354,7 @@ firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","a
    <para>Define a Sunset Workflow using Activiti Eclipse BPMN 2.0
    Designer.</para>
 
-   <mediaobject>
+   <mediaobject xml:id="figure-sunset-workflow-process">
     <alt>Sunset workflow process</alt>
     <imageobject>
      <imagedata fileref="images/bpmn-sunset-flow.png" format="PNG" />
