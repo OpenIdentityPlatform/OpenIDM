@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Business Processes &amp; Workflow</title>
+ <title>Integrating Business Processes &amp; Workflow</title>
 
  <para>Key to any identity management solution is the ability to provide
  workflow driven provisioning activities, whether for self-service actions

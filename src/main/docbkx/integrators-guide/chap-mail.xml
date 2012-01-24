@@ -23,7 +23,7 @@
   !      Copyright 2012 ForgeRock AS
   !    
 -->
-<appendix xml:id='appendix-mail'
+<chapter xml:id='chap-mail'
  version='5.0' xml:lang='en'
  xmlns='http://docbook.org/ns/docbook'
  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -32,7 +32,7 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Sending Email</title>
 
- <para>This appendix shows you how to configure the outbound email service, so
+ <para>This chapter shows you how to configure the outbound email service, so
  that you can send email through OpenIDM either by script or through the REST
  API.</para>
 
@@ -212,4 +212,4 @@ openidm.action("external/email", params);</programlisting>
    </varlistentry>
   </variablelist>
  </section>
-</appendix>
+</chapter>
