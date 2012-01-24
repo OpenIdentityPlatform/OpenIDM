@@ -388,6 +388,7 @@ $ curl
          </programlisting>
          <caption>Construction of the dn in a onCreate property</caption>
         </example></listitem>
+       </varlistentry>
        <varlistentry>
         <term>OnUpdate</term>
         <listitem><para>Similar to the "onCreate" action it might be needed to execute an attribute value manipulation during the update of an object only. In the example below the email address must only be updated if the source email address has a new value. The mail address which is there during creation might not be valid an therefore it should not be synced at that time</para>
