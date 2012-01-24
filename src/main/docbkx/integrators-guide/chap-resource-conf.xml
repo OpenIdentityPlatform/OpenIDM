@@ -628,7 +628,7 @@
  </section>
 
  <section xml:id="connector-examples">
-  <title>Connector Configurations</title>
+  <title>Connector Configuration Examples</title>
 
   <para>This section explains provisioner configurations for common
   connectors.</para>

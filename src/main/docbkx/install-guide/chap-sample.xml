@@ -159,7 +159,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <para>For details on the OpenICF connector configuration files see the
      <link xlink:href="integrators-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Resource Connector Configuration</citetitle></link> chapter in
+     ><citetitle>Connecting to External Resources</citetitle></link> chapter in
      the <citetitle>Integrator's Guide</citetitle>.</para>
     </listitem>
    </varlistentry>
@@ -192,7 +192,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <para>For details on the scheduler configuration see the <link
      xlink:href="integrators-guide#chap-scheduler-conf"
      xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Scheduled Tasks &amp; Events</citetitle></link> chapter in the
+     ><citetitle>Scheduling Synchronization</citetitle></link> chapter in the
      <citetitle>Integrator's Guide</citetitle>.</para>
     </listitem>
    </varlistentry>

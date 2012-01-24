@@ -152,7 +152,7 @@ $ curl
     <listitem><para>provisioner.&lt;resource name&gt;.json - one file for each resource</para></listitem>
     <listitem><para>sync.json - one file per OpenIDM installation</para></listitem>
    </itemizedlist>
-   <para>Further more not all attributes of a user on the external resource need to be synchronized. Not even all accounts need to be synchronized. Many of the configuration, especially attribute name mapping is done in the different provisioner.&lt;name&gt;.json files as described in chapter <link xlink:href="integrators-guide#chap-resource-conf" xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Resource Connector Configuration</citetitle></link>. The other main important configuration file is called sync.json and contains the core configuration of how objects and attributes which flow through OpenIDM need to be handled.</para>
+   <para>Further more not all attributes of a user on the external resource need to be synchronized. Not even all accounts need to be synchronized. Many of the configuration, especially attribute name mapping is done in the different provisioner.&lt;name&gt;.json files as described in chapter <link xlink:href="integrators-guide#chap-resource-conf" xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to External Resources</citetitle></link>. The other main important configuration file is called sync.json and contains the core configuration of how objects and attributes which flow through OpenIDM need to be handled.</para>
    
   <section>
    <title>Mapping in provisioner.&lt;resource name&gt;.json</title>

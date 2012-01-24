@@ -93,7 +93,7 @@
        reconciliations.</para>
        <para>See the <link xlink:href="integrators-guide#chap-scheduler-conf"
        xlink:role="http://docbook.org/xlink/role/olink"
-       ><citetitle>Scheduled Tasks &amp; Events</citetitle></link> chapter
+       ><citetitle>Scheduling Synchronization</citetitle></link> chapter
        for details.</para>
       </listitem>
      </varlistentry>
