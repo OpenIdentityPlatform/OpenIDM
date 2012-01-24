@@ -294,7 +294,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      For details on scripting see the <link
      xlink:href="integrators-guide#appendix-scripting"
      xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Scripting</citetitle></link> appendix in the
+     ><citetitle>Scripting Reference</citetitle></link> appendix in the
      <citetitle>Integrator's Guide</citetitle>.</para>
      <para>For details on synchronization, reconciliation, and
      <filename>sync.json</filename>, see the <link
@@ -519,7 +519,7 @@ access.csv activity.csv recon.csv</screen>
   <para>For details on auditing, see the <link
   xlink:href="integrators-guide#chap-auditing"
   xlink:role="http://docbook.org/xlink/role/olink"
-  ><citetitle>Audit Logging</citetitle></link> chapter in the
+  ><citetitle>Using Audit Logs</citetitle></link> chapter in the
   <citetitle>Integrator's Guide</citetitle>.</para>
  </section>
  

@@ -111,8 +111,8 @@ $</screen>
 
     <para>To run OpenIDM as a background process, see the chapter on <link
     xlink:href="integrators-guide#chap-services"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
-    OpenIDM Services</citetitle></link> in the <citetitle>Integrator's
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Starting &amp;
+    Stopping OpenIDM</citetitle></link> in the <citetitle>Integrator's
     Guide</citetitle>.</para>
 
     <step>

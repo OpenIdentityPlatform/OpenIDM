@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Data Models &amp; Objects</title>
+ <title>Data Models &amp; Objects Reference</title>
 
  <para>OpenIDM allows you to customize of a variety of objects that can be
  addressed via a URL or URI, and that have a common set of functions that
@@ -135,9 +135,9 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
   <literal>https://localhost:8443/openidm/managed/organization/mysampleorg</literal>.</para>
 
   <para>By default, the HTTP GET returns a JSON representation of the object.
-  See the appendix on the <link xlink:href="integrators-guide#appendix-rest"
+  See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
-  API</citetitle></link> for details.</para>
+  API Specification</citetitle></link> appendix for details.</para>
  </section>
 
  <section xml:id="managed-objects">
@@ -817,9 +817,10 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
     <para>You can use all resource API functions in script objects for
     create, read, update, delete operations, and also for arbitrary queries on
     the object set, but not currently for arbitrary actions. See the
-    appendix on <link xlink:href="integrators-guide#appendix-scripting"
+    <link xlink:href="integrators-guide#appendix-scripting"
     xlink:role="http://docbook.org/xlink/role/olink"
-    ><citetitle>Scripting</citetitle></link> for details.</para>
+    ><citetitle>Scripting Reference</citetitle></link> appendix for
+    details.</para>
 
     <para>OpenIDM supports concurrency through a multi version concurrency
     control (MVCC) mechanism. In other words, each time an object changes,
@@ -921,10 +922,10 @@ val = openidm.query("managed/foobar", params);</programlisting>
    <para>OpenIDM exposes all managed object functionality through the REST API
    unless you configure a policy to prevent such access. In addition to the
    common REST functionality of create, read, update, delete, patch, and query,
-   the REST API also supports patch by query. See the appendix on the
-   <link xlink:href="integrators-guide#appendix-rest"
+   the REST API also supports patch by query. See the <link
+   xlink:href="integrators-guide#appendix-rest"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
-   API</citetitle></link> for details.</para>
+   API Specification</citetitle></link> appendix for details.</para>
 
    <para>OpenIDM requires authentication to access the REST API. Authentication
    configuration is shown in
@@ -947,8 +948,8 @@ val = openidm.query("managed/foobar", params);</programlisting>
   <para>See the chapter on <link
   xlink:href="integrators-guide#chap-configuration"
   xlink:role="http://docbook.org/xlink/role/olink"
-  ><citetitle>Configuration</citetitle></link> for an introduction to standard
-  configuration objects.</para>
+  ><citetitle>Configuring OpenIDM Services</citetitle></link> for an
+  introduction to standard configuration objects.</para>
 
   <section xml:id="configuration-objects-when-to-use">
    <title>When To Use Custom Configuration Objects</title>
@@ -1130,8 +1131,8 @@ val = openidm.read("config/custom/myconfig")</programlisting>
   <para>Audit objects house audit data selected for local storage in the
   OpenIDM repository. For details, see the chapter on <link
   xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#chap-auditing"><citetitle>Audit
-  Logging</citetitle></link>.</para>
+  xlink:href="integrators-guide#chap-auditing"><citetitle>Using Audit
+  Logs</citetitle></link>.</para>
  </section>
 
  <section xml:id="links">

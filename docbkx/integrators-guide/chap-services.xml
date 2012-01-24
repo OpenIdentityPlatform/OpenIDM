@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Managing OpenIDM Services</title>
+ <title>Starting &amp; Stopping OpenIDM</title>
 
  <para>This chapter covers scripts provided for managing OpenIDM.</para>
 
