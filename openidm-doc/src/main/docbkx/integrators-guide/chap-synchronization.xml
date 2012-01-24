@@ -493,33 +493,286 @@ $ curl
     <listitem><para>Here the sync engine iterates over the objects from the target which have not jet been processed</para></listitem>
    </varlistentry>
   </variablelist>
-  <section><title>Source Reconciliation</title>
-   <para>When OpenIDM starts a reconciliation or LiveSync it first gets a list of objects from the resource. In case of LiveSync the list contains only objects which had a change, in case of reconciliation a list of all objects which are available through the connector. Keep in mind that the connector might filter out objects already, like through the baseContext or a filter (in case of an LDAP resource for instance). In addition objects can be filtered through the validSource property like mentioned in the <xref linkend="advance-syncing-example-id"/>.</para>
-   <para>OpenIDM will then iterate over that list, check each entry against the "validSource" filter and try to classify all entries in one of the situations above (<xref linkend="sync-situations"/>). For doing so it also needs to have the list of existing links for this mapping available. Finally it will execute the configured action for the situation.</para>
-   <figure xml:id="source-recon-id">
+
+  <section xml:id="source-reconciliation">
+   <title>Source Reconciliation</title>
+
+   <para>OpenIDM starts reconciliation and LiveSync by reading a list of
+   objects from the resource. For reconciliation, the list includes all
+   objects available through the connector. For LiveSync, the list contains
+   only changed objects. The connector can filter objects out of the list, too.
+   You can filter objects out of the list by using the
+   <literal>validSource</literal> property mentioned in
+   <xref linkend="advance-syncing-example-id"/>.</para>
+
+   <para>OpenIDM then iterates over the list, checking each entry against the
+   <literal>validSource</literal> filter, classifying objects according to
+   their situations as described in <xref linkend="sync-situations"/>. OpenIDM
+   uses the list of links for the current mapping to classify objects. Finally,
+   OpenIDM executes the action configured for the situation.</para>
+
+   <para>The following table shows how OpenIDM assigns the appropriate
+   situation during source reconciliation, depending on whether a valid
+   source exists (Source Qualifies), whether a link with the appropriate type
+   exists in the repository (Link Exists), and how many target objects are
+   found either based on links or correlation results.</para>
+
+   <table pgwide="1" rules="none">
     <title>Resolving Source Reconciliation Situations</title>
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/SourceRecon.png" format="PNG"/>
-      </imageobject>
-    </mediaobject>
-    <caption><para>The figure shows how OpenIDM's sync engine will find the appropriate situation during the first phase, the Source Reconciliation Phase, depending on whether there is a valid source ("Source Qualifies"), a link with an appropriate type exists in the links table ("Link Exits") and a target object is found based on an existing link or by a correlation rule.</para>
-    <para>* A correlation query is only executed if there is no existing link for the source user.</para></caption>
-   </figure>
+    <tgroup cols="8">
+     <colspec colnum="1" colname="c1" colwidth="1*" />
+     <colspec colnum="2" colname="c2" colwidth="1*" />
+     <colspec colnum="3" colname="c3" colwidth="1*" />
+     <colspec colnum="4" colname="c4" colwidth="1*" />
+     <colspec colnum="5" colname="c5" colwidth="1*" />
+     <colspec colnum="6" colname="c6" colwidth="1*" />
+     <colspec colnum="7" colname="c7" colwidth="1*" />
+     <colspec colnum="8" colname="c8" colwidth="2*" />
+     <thead>
+      <row>
+       <entry namest="c1" nameend="c2" align="left">Source Qualifies?</entry>
+       <entry namest="c3" nameend="c4" align="left">Link Exists?</entry>
+       <entry namest="c5" nameend="c7" align="left">Target Objects
+       Found<footnote><para>If no link exists for the source object, then
+       OpenIDM executes a correlation query.</para></footnote></entry>
+       <entry morerows="1" valign="top" align="left">Situation</entry>
+      </row>
+      <row>
+       <entry>Yes</entry>
+       <entry>No</entry>
+       <entry>Yes</entry>
+       <entry>No</entry>
+       <entry>0</entry>
+       <entry>1</entry>
+       <entry>&gt; 1</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>SOURCE_IGNORED</entry>
+      </row>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>UNQUALIFIED</entry>
+      </row>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>UNQUALIFIED</entry>
+      </row>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>UNQUALIFIED</entry>
+      </row>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>UNQUALIFIED</entry>
+      </row>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>UNQUALIFIED</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>ABSENT</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>FOUND</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>AMBIGUOUS</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>MISSING</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>CONFIRMED</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </section>
   
-  <section><title>Target Reconciliation</title>
-   <para>During the Source Reconciliation phase OpenIDM can not detect situations where there is no source object, like UNASSIGNED. These situations are detected in the second phase when OpenIDM iterates over all target objects which have not jet been treated duting the first phase, i.e. which do not have a representation on the source.</para>
-   <para>OpenIDM will iterate over that list, check the object against the "validTarget" filter, find the appropriate situation and execute the configured acttion.</para>
-   <figure xml:id="target-recon-id">
+  <section xml:id="target-reconciliation">
+   <title>Target Reconciliation</title>
+
+   <para>During source reconciliation, OpenIDM cannot detect situations where
+   no source object exists, such as the UNASSIGNED situation. When no source
+   object exists, OpenIDM detects the situation during the second
+   reconciliation phase, target reconciliation. During target reconciliation,
+   OpenIDM iterates over all target objects that do not have a representation
+   on the source, checking each object against the
+   <literal>validTarget</literal> filter, determining the appropriate situation,
+   and executing the action configured for the situation.</para>
+
+   <para>The following table shows how OpenIDM assigns the appropriate
+   situation during target reconciliation, depending on whether a valid target
+   exists (Target Qualifies), whether a link with an appropriate type exists
+   in the repository (Link Exists), whether a source object exists
+   (Source Exists), and whether the source object qualifies (Source Qualifies).
+   Not all situations assigned during source reconciliation are assigned
+   during target reconciliation.</para>
+
+   <table pgwide="1" rules="none">
     <title>Resolving Target Reconciliation Situations</title>
-    <mediaobject>
-      <imageobject>
-        <imagedata fileref="images/TargetRecon.png" format="PNG"/>
-      </imageobject>
-    </mediaobject>
-    <caption><para>The figure shows how OpenIDM's sync engine will find the appropriate situation during the second phase, the "Target Reconciliation Phase" depending on whether there is a valid target ("Target Qualifies"), a link with an appropriate type exists in the links table ("Link Exits"), a source object is found ("Source Exists) and the source object qualifies ("Source Qualifies"). Not all situations from the source reconciliation make sense in the target reconciliation.</para></caption>
-   </figure>
+    <tgroup cols="9">
+     <colspec colnum="1" colname="c1" colwidth="1*" />
+     <colspec colnum="2" colname="c2" colwidth="1*" />
+     <colspec colnum="3" colname="c3" colwidth="1*" />
+     <colspec colnum="4" colname="c4" colwidth="1*" />
+     <colspec colnum="5" colname="c5" colwidth="1*" />
+     <colspec colnum="6" colname="c6" colwidth="1*" />
+     <colspec colnum="7" colname="c7" colwidth="1*" />
+     <colspec colnum="8" colname="c8" colwidth="1*" />
+     <colspec colnum="9" colname="c9" colwidth="2*" />
+     <thead>
+      <row>
+       <entry namest="c1" nameend="c2" align="left">Target Qualifies?</entry>
+       <entry namest="c3" nameend="c4" align="left">Link Exists?</entry>
+       <entry namest="c5" nameend="c6" align="left">Source Exists?</entry>
+       <entry namest="c7" nameend="c8" align="left">Source Qualifies?</entry>
+       <entry morerows="1" valign="top" align="left">Situation</entry>
+      </row>
+      <row>
+       <entry>Yes</entry>
+       <entry>No</entry>
+       <entry>Yes</entry>
+       <entry>No</entry>
+       <entry>Yes</entry>
+       <entry>No</entry>
+       <entry>Yes</entry>
+       <entry>No</entry>
+      </row>
+     </thead>
+     <tbody>
+      <row>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>TARGET_IGNORED</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>UNASSIGNED</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>CONFIRMED</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>UNQUALIFIED</entry>
+      </row>
+      <row>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>X</entry>
+       <entry>&#160;</entry>
+       <entry>&#160;</entry>
+       <entry>SOURCE_MISSING</entry>
+      </row>
+     </tbody>
+    </tgroup>
+   </table>
   </section>
  </section>
  
