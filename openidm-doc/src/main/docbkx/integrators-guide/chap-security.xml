@@ -181,14 +181,15 @@ HTTP/1.1 204 No Content</screen>
 2 rows in set (0.00 sec)</screen>
 
   <para>OpenIDM uses the internal table for authentication, and also to set
-  the roles for RBAC authorization of an authenticated user. The <link
+  the roles for RBAC authorization of an authenticated user. The router
+  service, described in the <link
   xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#appendix-router">router service</link> enables
-  you to apply filters as shown in <filename>openidm/conf/router.json</filename>
-  and the associated script
-  <filename>openidm/script/router-authz.js</filename>. See the chapter on
-  <link xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#chap-auth"><citetitle>Authentication,
+  xlink:href="integrators-guide#appendix-router"><citetitle>Router
+  Service Reference</citetitle></link> appendix, enables you to apply filters
+  as shown in <filename>openidm/conf/router.json</filename> and the associated
+  script, <filename>openidm/script/router-authz.js</filename>. See the chapter
+  on <link xlink:role="http://docbook.org/xlink/role/olink"
+  xlink:href="integrators-guide#chap-auth"><citetitle>Managing Authentication,
   Authorization &amp; RBAC</citetitle></link> for details.</para>
  </section>
 
@@ -309,9 +310,9 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
   Other URIs are triggered indirectly, or are for internal consumption.</para>
 
   <para>See the chapter on <link xlink:href="integrators-guide#chap-auth"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Authentication,
-  Authorization &amp; RBAC</citetitle></link> for an example showing how to
-  protect sensitive URLs.</para>
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
+  Authentication, Authorization &amp; RBAC</citetitle></link> for an example
+  showing how to protect sensitive URLs.</para>
  </section>
 
  <section xml:id="security-files">
@@ -387,8 +388,8 @@ password=<replaceable>password</replaceable></programlisting>
   <para>Leave log levels at <literal>INFO</literal> in production to ensure
   that you capture enough information to help diagnose issues. See the chapter
   on <link xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#chap-logs"><citetitle>Server Logging</citetitle>
-  for more information.</link>
+  xlink:href="integrators-guide#chap-logs"><citetitle>Configuring Server
+  Logs</citetitle> for more information.</link>
   </para>
 
   <para>At start up and shut down, <literal>INFO</literal> can produce many

@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Authentication, Authorization &amp; RBAC</title>
+ <title>Managing Authentication, Authorization &amp; RBAC</title>
 
  <para>OpenIDM currently provides a simple, yet flexible authentication and
  authorization mechanism based on REST interface URLs and on roles stored in

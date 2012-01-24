@@ -31,7 +31,7 @@
  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
- <title>Synchronization</title>
+ <title>Synchronization Reference</title>
 
  <para>The synchronization engine is the core of OpenIDM. You configure the
  synchronization service through a <literal>mappings</literal> property
