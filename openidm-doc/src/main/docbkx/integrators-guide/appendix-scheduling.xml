@@ -31,7 +31,7 @@
  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
-<title>Scheduled Tasks &amp; Events</title> 
+<title>Scheduler Reference</title> 
 
  <para>OpenIDM lets you schedule many tasks and events including reconciliation
  and synchronization, but also arbitrary events by use of scheduler

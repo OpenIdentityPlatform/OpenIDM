@@ -30,15 +30,21 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Scheduling Reconciliation and LiveSync</title>
+ <title>Scheduling Synchronization</title>
 
- <para>OpenIDM provides scheduling for operations such as LiveSync
- and reconciliation. The scheduler's schedule is configured with syntax similar to that of the <command>cron</command> service of many operating systems. OpenIDM's scheduler relies on the Quartz library.</para>
+ <para>OpenIDM provides scheduling for synchronization operations such as
+ LiveSync and reconciliation. You schedule the operations using
+ <command>cron</command>-like syntax.</para>
  
- <para>This chapter only describes the use of the scheduler for reconciliation and LiveSync, though the scheduler service of OpenIDM can be used to schedule many events. For a more complete description please see <link xlink:href="integrators-guide#appendix-scheduling" xlink:role="http://docbook.org/xlink/role/olink" ><citetitle>Appendix Scheduled Tasks &amp; Events</citetitle></link>.</para>
+ <para>This chapter describes scheduling for reconciliation and LiveSync.
+ Yet, you can use OpenIDM's scheduler service to schedule other events, too.
+ See the <link xlink:href="integrators-guide#appendix-scheduling"
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler
+ Reference</citetitle></link> appendix for details.</para>
  
- <para>The scheduler is configured by creating a JSON file named
- <filename>conf/[org.forgerock.openidm.]scheduler-<replaceable
+ <para>You configure the scheduler through JSON objects. The corresponding
+ configuration file names take the form
+ <filename>openidm/conf/[org.forgerock.openidm.]scheduler-<replaceable
  >schedule-name</replaceable>.json</filename>, where
  <literal>[org.forgerock.openidm.]</literal> is optional and added
  automatically when OpenIDM reads the configuration, and
@@ -47,10 +53,11 @@
  <literal>reconcile_systemXmlAccounts_managedUser</literal>.</para>
 
  <section xml:id="scheduler-configuration-file">
-  <title>Configuration File</title>
+  <title>Scheduler Configuration</title>
 
-  <para>The scheduler configuration in the file
-  <filename>conf/[org.forgerock.openidm.]scheduler-<replaceable>schedule-name</replaceable>.json</filename> has the following format.</para>
+  <para>The scheduler configuration file,
+  <filename>openidm/conf/[org.forgerock.openidm.]scheduler-<replaceable
+  >schedule-name</replaceable>.json</filename> has the following format.</para>
 
   <programlisting language="javascript">{
   "enabled"       : true,
@@ -65,77 +72,91 @@
 
   <itemizedlist>
    <listitem>
-    <para>Specify the time and date in ISO 8601 format:
-    YYYY-MM-DDThh:mm:ss.</para>
+    <para>The optional properties <literal>"startTime"</literal>,
+    <literal>"endTime"</literal>, and <literal>"timeZone"</literal> properties
+    can be absent, or empty.</para>
+    <para>When specifying times and dates, use ISO 8601 format,
+    <literal><replaceable>YYYY</replaceable>-<replaceable>MM</replaceable
+    >-<replaceable>DD</replaceable>T<replaceable>hh</replaceable>:<replaceable
+    >mm</replaceable>:<replaceable>ss</replaceable></literal>.</para>
    </listitem>
    <listitem>
-    <para>The optional properties <literal>startTime</literal>,
-    <literal>endTime</literal>, and <literal>timeZone</literal> can be absent,
-    or empty.</para>
-   </listitem>
-   <listitem>
-    <para>The <replaceable>cron expression</replaceable> is described in
-    <link xlink:show="new"
+    <para>OpenIDM relies on the Quartz Scheduler. The <replaceable>cron
+    expression</replaceable> to use is described in the <link xlink:show="new"
     xlink:href="http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html"
-    >http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html</link> and
-    <link xlink:show="new"
+    ><citetitle>CronTrigger Tutorial</citetitle></link> and in <link
     xlink:href="http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html"
-    >http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html</link>. There are also some examples in <link xlink:href="integrators-guide#appendix-scheduling" xlink:role="http://docbook.org/xlink/role/olink" ><citetitle>Appendix Scheduled Tasks &amp; Events</citetitle></link></para>
+    xlink:show="new"><citetitle>Lesson 6: CronTrigger</citetitle></link>.</para>
    </listitem>
    <listitem>
-    <para>The <literal>"invokeService"</literal> service identifier can currently take the following values: "sync" for reconciliation and "provisioner" for LiveSync.</para>
+    <para>The <literal>"invokeService"</literal> property takes either
+    <literal>"sync"</literal> for reconciliation or
+    <literal>"provisioner"</literal> for LiveSync.</para>
+    <para>You can also specify the service identifier by its full name as in
+    <literal>"invokeService" : "org.forgerock.openidm.sync"</literal>.</para>
    </listitem>
    <listitem>
-    <para>The value for "invokeContext" depends on the value for "invokeService". Possible combinations are:</para>
-    <screen>
-    "invokeService" : "provisioner",
-    "invokeContext" : {
-        "action" : "activeSync",
-        "source" : "system/ldap/account"    
-    </screen>
-    <para>"source" takes the external resource  (here ldap) and the object type (here account) as the value in the form: system/ldap/account.</para>
-    <screen>
-    "invokeService" : "sync",
-    "invokeContext" : {
-        "action" : "reconcile",
-        "mapping" : "systemLdapAccounts_managedUser"    
-    </screen>
-    <para>"mapping" takes the name property of the mapping as configured in sync.json as a configuration.</para>
+    <para>The <literal>"invokeContext"</literal> property depends on the
+    setting for <literal>"invokeService"</literal>.</para>
+
+    <para>For LiveSync, <literal>"source"</literal> takes an external resource
+    name and object type.</para>
+    <programlisting language="javascript">
+{
+    "invokeService": "provisioner",
+    "invokeContext": {
+        "action": "activeSync",
+        "source": "system/ldap/account"
+    }
+}</programlisting>
+
+    <para>For reconciliation, <literal>"mapping"</literal> takes the name of
+    the mapping configured in
+    <filename>openidm/conf/sync.json</filename>.</para>
+    <programlisting language="javascript">
+{
+    "invokeService": "sync",
+    "invokeContext": {
+        "action": "reconcile",
+        "mapping": "systemLdapAccounts_managedUser"
+    }
+}</programlisting>
    </listitem>
   </itemizedlist>
-  <note><para>A service identifier can be specified without the
-    <literal>org.forgerock.openidm.</literal> prefix. In other words,
-    <literal>"invokeService" : "sync"</literal> is equivalent to
-    <literal>"invokeService" : "org.forgerock.openidm.sync"</literal>.</para></note>
-  <example xml:id="scheule-reconcile-id">
-   <title>Schedule Configuration: Reconciliation</title>
-   <programlisting language="javascript">{
-    "enabled" : false,
-    "type" : "cron",
-    "schedule" : "0 0/30 * * * ?",
-    "invokeService" : "sync",
-    "invokeContext" : {
-        "action" : "reconcile",
-        "mapping" : "systemLdapAccounts_managedUser"
-    }
-}</programlisting>
-  <caption><para>The example describes a scheduled reconciliation which is currently not enabled (no scheduled reconciliation will run) and runs every 30 minute, starting on the 0<superscript>th</superscript> or 30<superscript>th</superscript> minute of the hour.</para></caption>
-  </example>
-
-  <example xml:id="schedule-livesync-id">
-   <title>Schedule Configuration: LiveSync</title>
-   <programlisting language="javascript">{
-    "enabled" : false,
-    "type" : "cron",
-    "schedule" : "0/15 * * * * ?",
-    "invokeService" : "provisioner",
-    "invokeContext" : {
-        "action" : "activeSync",
-        "source" : "system/ldap/account"
-    }
-}</programlisting>
-  <caption><para>The example is for a scheduled LiveSync, currently enabled and will be executed every 15 seconds, starting at the 0<superscript>th</superscript>, 15<superscript>th</superscript>, 30<superscript>th</superscript> or 45<superscript>th</superscript> second of the minute.</para></caption>
-  </example>
  </section>
 
+ <section xml:id="scheduler-examples">
+  <title>Scheduler Examples</title>
+
+   <para>The following example shows a schedule for reconciliation that
+   is not enabled. When enabled (<literal>"enabled" : true,</literal>),
+   reconciliation runs every 30 minutes, starting on the hour.</para>
+
+   <programlisting language="javascript">
+{
+    "enabled": false,
+    "type": "cron",
+    "schedule": "0 0/30 * * * ?",
+    "invokeService": "sync",
+    "invokeContext": {
+        "action": "reconcile",
+        "mapping": "systemLdapAccounts_managedUser"
+    }
+}</programlisting>
+
+   <para>The following example shows a schedule for LiveSync enabled
+   to run every 15 seconds, starting at the beginning of the minute.</para>
+
+   <programlisting language="javascript">
+{
+    "enabled": false,
+    "type": "cron",
+    "schedule": "0/15 * * * * ?",
+    "invokeService": "provisioner",
+    "invokeContext": {
+        "action": "activeSync",
+        "source": "system/ldap/account"
+    }
+}</programlisting>
+ </section>
 </chapter>
