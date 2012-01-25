@@ -30,7 +30,7 @@
  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
- <title>Configuring OpenIDM Services</title>
+ <title>Configuration Options</title>
 
  <para>OpenIDM configuration is split between .properties and container
  configuration files, and also dynamic configuration objects. The majority
@@ -341,7 +341,7 @@
 
   <para>See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
-  Specification</citetitle></link> appendix for additional details and
+  Reference</citetitle></link> appendix for additional details and
   examples using REST access to update and patch objects.</para>
  </section>
 </chapter>
