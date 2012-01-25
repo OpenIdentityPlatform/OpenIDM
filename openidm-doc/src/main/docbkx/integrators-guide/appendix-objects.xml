@@ -137,7 +137,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
   <para>By default, the HTTP GET returns a JSON representation of the object.
   See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
-  API Specification</citetitle></link> appendix for details.</para>
+  API Reference</citetitle></link> appendix for details.</para>
  </section>
 
  <section xml:id="managed-objects">
@@ -925,7 +925,7 @@ val = openidm.query("managed/foobar", params);</programlisting>
    the REST API also supports patch by query. See the <link
    xlink:href="integrators-guide#appendix-rest"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
-   API Specification</citetitle></link> appendix for details.</para>
+   API Reference</citetitle></link> appendix for details.</para>
 
    <para>OpenIDM requires authentication to access the REST API. Authentication
    configuration is shown in
@@ -948,8 +948,8 @@ val = openidm.query("managed/foobar", params);</programlisting>
   <para>See the chapter on <link
   xlink:href="integrators-guide#chap-configuration"
   xlink:role="http://docbook.org/xlink/role/olink"
-  ><citetitle>Configuring OpenIDM Services</citetitle></link> for an
-  introduction to standard configuration objects.</para>
+  ><citetitle>Configuration Options</citetitle></link> for an introduction
+  to standard configuration objects.</para>
 
   <section xml:id="configuration-objects-when-to-use">
    <title>When To Use Custom Configuration Objects</title>

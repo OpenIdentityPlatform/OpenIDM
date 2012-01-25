@@ -225,7 +225,7 @@
        synchronization and reconciliation for both HTTP and Java.</para>
        <para>See the <link xlink:href="integrators-guide#appendix-rest"
        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST
-       API Specification</citetitle></link> appendix for details.</para>
+       API Reference</citetitle></link> appendix for details.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
