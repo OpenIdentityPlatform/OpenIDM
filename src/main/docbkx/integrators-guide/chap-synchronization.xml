@@ -32,176 +32,300 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Configuring Synchronization</title>
 
- <section xml:id="synchronization-section-id"><title>Introduction</title>
- <para>Synchronization of user and other object between different resources and the repository is one of the key tasks of Identity Management and OpenIDM in particular. As usual, synchronization is a rather complex task and so is its configuration.</para>
- </section>
- 
- <section xml:id="sync-triggers-id"><title>Different Triggers to Start Synchronization</title>
-  <para>A synchronization engine is expected to update changed objects automatically. Two mechanisms are used to trigger the update of changed objects, a push mechanism for changes done to objects inside OpenIDM and a poll mechanism with which OpenIDM polls in changes from external resources.</para>
-  <section><title>Push Updates to External Resources</title>
-   <para>If a change is applied to OpenIDM itself, for instance through the REST interface, then OpenIDM will immediately push the changes to all those external resources which are configured to receive these updates. There is no starting of a Reconciliation or LiveSync process needed to make this happen.</para>
-   <para> It should be mentioned that not only a change through the REST interface, but also any other change like through reconciliation with another resource would trigger the push mechanism.</para>
-  </section>
-  <section><title>Pull Updates from External Resources</title>
-   <para>OpenIDM has two mechanisms to pull changes from external resources:</para>
+ <para>The central function of OpenIDM is synchronizing identity data from
+ different resources. This chapter explains what you must know to get started
+ configuring OpenIDM's flexible synchronization mechanism, and illustrates the
+ concepts with examples.</para>
 
-   <variablelist>
-    <varlistentry>
-     <term>Reconciliation</term>
-     <listitem><para>In identity management <firstterm>reconciliation</firstterm> is the
+ <section xml:id="sync-types">
+  <title>Types of Synchronization</title>
+
+  <para>Synchronization happens either when OpenIDM receives a change directly,
+  or when OpenIDM discovers a change on an external resource.</para>
+
+  <para>For direct changes to OpenIDM, OpenIDM immediately pushes updates to
+  all external resources configured to receive the updates. A direct change
+  can originate not only as a write request through the REST interface, but
+  also as an update resulting from reconciliation with another resource.</para>
+
+  <variablelist>
+   <para>OpenIDM discovers changes on external resources through reconciliation,
+   and through LiveSync.</para>
+
+   <varlistentry>
+    <term>Reconciliation</term>
+    <listitem>
+     <para>In identity management, <firstterm>reconciliation</firstterm> is the
      process of bidirectional synchronization of objects between different data
-     stores. Reconciliation applies primarily to user objects, though other
-     objects such groups or roles can also be reconciled. To perform
-     reconciliation, OpenIDM must analyze both the source and target systems
-     to uncover differences that it must reconcile.</para>
-     <para>In OpenIDM, reconciliation picks up changes from external resources
-     based on the mapping properties you configure in the <literal>sync</literal>
-     configuration, exposed in the <filename>openidm/conf/sync.json</filename>
-     configuration file, or in the scheduler configuration. You can add the
-     mapping to the scheduler for example when the mapping for reconciliation
-     needs to be different from the mapping for LiveSync.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>LiveSync</term>
-     <listitem><para>OpenIDM <firstterm>LiveSync</firstterm> makes use of a change log on
-     the resource to run as a pull process. LiveSync is configured using the
-     same mapping properties as reconciliation. For LiveSync, OpenIDM applies
-     the mapping defined in <filename>openidm/conf/sync.json</filename>.</para></listitem>
-    </varlistentry>
-   </variablelist>
+     stores. Reconciliation applies chiefly to user objects, though OpenIDM
+     can reconcile any objects, including groups and roles.</para>
 
-  </section>
-  <section><title>Triggered Updates</title>
-   <para>For picking up changes of objects from external resources, OpenIDM needs to be told by a trigger mechanism to do so. Two different processes, Reconciliation and LiveSync are available to pick up external changes. Both can be triggered through a scheduler configuration as described in chapter "Scheduled Tasks and Events".</para>
-   <para>Reconciliation can also be triggered on the REST interface with a POST command to the URL http://&lt;hostname&gt;:&lt;port&gt;/openidm/sync?_action=recon&amp;mapping=&lt;Name of the Mapping&gt;. Here an example using the curl command:</para>
-   <screen>
-$ curl
+     <para>To perform reconciliation, OpenIDM analyzes both source and target
+     systems to uncover the differences that it must reconcile. Reconciliation
+     can therefore be a heavyweight process. When working with large data sets,
+     finding all changes can be more work than processing the changes.</para>
+
+     <para>Reconciliation is, however, thorough. It recognizes system error
+     conditions and catches changes that might be missed by the more
+     lightweight LiveSync mechanism. Reconciliation therefore serves as the
+     basis for compliance and reporting functionality.</para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>LiveSync</term>
+    <listitem>
+     <para><firstterm>LiveSync</firstterm> performs the same job as
+     reconciliation. LiveSync relies on a change log on the external resource
+     to determine which objects have changed.</para>
+
+     <para>LiveSync is intended to react quickly to changes as they happen.
+     LiveSync is however a best effort mechanism that in some cases can miss
+     changes.</para>
+
+     <para>Furthermore, not all resources provide the change log mechanism
+     that LiveSync requires. The change long provides OpenIDM with a list of
+     objects changed since the last request such that OpenIDM does not need to
+     scan all objects for changes. OpenDJ provides an external change log.
+     Active Directory also provides a change log.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <para>In all cases, OpenIDM relies on mappings that you configure to
+  determine what to synchronize and how to carry out synchronization.
+  LiveSync relies on the set of mappings that you configure once per OpenIDM
+  server, whereas reconciliation also allows you to configure specific mappings
+  for a particular reconciliation job.</para>
+
+  <para>You must trigger OpenIDM to poll for changes on external resources,
+  usually by scheduling reconciliation or LiveSync as described in the chapter
+  on <link xlink:href="integrators-guide#chap-scheduler-conf"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
+  Synchronization</citetitle></link>. Alternatively, you can start
+  reconciliation through the REST interface.</para>
+
+  <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
-   </screen>
-  </section>
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ </section>
 
-  <section xml:id="livesync-reconciliation">
-   <title>LiveSync &amp; Reconciliation</title>
+ <section xml:id="sync-flexible-data">
+  <title>Flexible Data Model</title>
 
-   <para>LiveSync is intended to react quickly to changes as they happen. Yet,
-   LiveSync is a best effort mechanism that in some cases can miss
-   changes.</para>
- 
-   <para>Furthermore, not all resources support LiveSync's event-style
-   processing. The resource must provide OpenIDM with a list of changed
-   objects such as OpenDJ does with its external change log, where OpenIDM
-   needs to store only the last change it encountered between requests to
-   search the external change log. Active Directory also provides a change
-   log, for example.</para>
- 
-   <para>Reconciliation is more thorough, and can recognize more system
-   conditions in addition to catching changes that LiveSync could miss.
-   Reconciliation is the basis for compliance and reporting
-   functionality.</para>
- 
-   <para>Reconciliation can be a heavyweight process. When working with large
-   data sets, find all the changes can be more work than processing the
-   changes.</para>
+  <para>Identity management software tends to favor either a meta-directory
+  data model, where all data are mirrored in a central repository, or a
+  virtual data model, where only a minimum set of attributes are stored
+  centrally, and most are loaded on demand from the external resources
+  on which they are stored. The meta-directory model offers fast access at
+  the risk of getting out-of-date data. The virtual model guarantees fresh
+  data, but pays for that guarantee in terms of performance.</para>
 
-   <para></para>
-  </section>
+  <para>OpenIDM leaves the data model choice with you. You determine the right
+  trade offs for a particular deployment. OpenIDM does not hard code any
+  particular schema or set of attributes stored in the repository. Instead,
+  you define how external system objects map onto managed objects, and OpenIDM
+  dynamically updates the repository to store the managed object attributes
+  that you configure.</para>
+
+  <para>You can, for example, choose to follow the data model defined in the
+  Simple Cloud Identity Management (<link xlink:show="new"
+  xlink:href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html"
+  >SCIM</link>) specification. The following object represents a SCIM
+  user.</para>
+
+  <programlisting language="javascript">
+{
+    "userName": "james1",
+    "familyName": "Berg",
+    "givenName": "James",
+    "email": [
+        "james1@example.com"
+    ],
+    "description": "Created by OpenIDM REST.",
+    "password": "asdfkj23",
+    "displayName": "James Berg",
+    "phoneNumber": "12345",
+    "employeeNumber": "12345",
+    "userType": "Contractor",
+    "title": "Vice President",
+    "active": true
+}</programlisting>
  </section>
  
- <section xml:id="sync-data-model-id"><title>The Data Model of OpenIDM</title>
-  <section><title>Repository Attributes</title>
-   <para>There are two different flavors in identity management software concerning the data which should be persisted in the identity managers repository. Some prefer a Metadirectory like configuration where almost any attribute of the connected external resources is mirrored in the local repository. Others prefer a setup where only a minimum set of attributes is stored localy and all other attributes which a user might have are loaded into the system on demand in a transient way, i.e. they are not stored in the local store. Both possibilities have pros and cons. The Metadirectory way gives fast access to the data, which is kind of cached locally, but on the risk of being not up to date. The minimum data approach would guaranty to show the latest version of the data, though on the cost of performance.</para>
-   <para>OpenIDM does not define any schema or set of Attributes to be stored in the repository. Any attribute which is configured as a target in a mapping pointing to the repository will be stored there. The schema of the repository database will be dynamically updated if a new attribute is mapped. Therefore OpenIDM can be used for both scenarios: the Metadirectory scenario, the minimum data scenario or any solution in between.</para>
-  </section> 
-  <section><title>Using SCIM</title>
-   <para>OpenIDM lets you define the schema for storing data in the repository.
-   One possibility is to follow the attribute names defined in the Simple Cloud
-   Identity Management (<link
-   xlink:href="http://www.simplecloud.info/specs/draft-scim-core-schema-00.html"
-   >SCIM</link>) specification. An example for a scim user object is shown below.</para>
-   <example>
-    <programlisting language="javascript">
+ <section xml:id="basic-flow">
+  <title>Basic Data Flow Configuration</title>
+
+  <para>Data flow for synchronization involves three types of configuration
+  files, two of which you typically edit, and also a links table that OpenIDM
+  maintains in its repository, as well as scripts needed to check objects and
+  manipulate attributes. The two types of configuration files you edit are the
+  connector configuration files, with one file per external resource, and the
+  synchronization mappings file, with one file per OpenIDM instance.</para>
+
+  <variablelist>
+   <varlistentry>
+    <term>Connector configuration files</term>
+    <listitem>
+     <para>Connector configuration files are described in the chapter on <link
+     xlink:href="integrators-guide#chap-resource-conf"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
+     External Resources</citetitle></link>. Connector configuration files are
+     named <filename>openidm/conf/provisioner.<replaceable
+     >resource-name</replaceable>.json</filename>,
+     where <replaceable>resource-name</replaceable> reflects the connector
+     technology and external resource, such as
+     <literal>openicf-xml</literal>.</para>
+
+     <para>An excerpt from an example connector configuration follows. The
+     example shows the name for the connector and two attributes of an account
+     object type. In the attribute mapping definitions, the attribute name is
+     mapped from the <literal>nativeName</literal>, the attribute name used on
+     the external resource, to the attribute name used in OpenIDM. Thus the
+     example shows that <literal>sn</literal> from LDAP is mapped to
+     <literal>lastName</literal> in OpenIDM. The <literal>homePhone</literal>
+     attribute can have multiple values.</para>
+
+     <programlisting language="javascript">
 {
-     "userName":"james1",
-     "familyName":"Berg",
-     "givenName":"James",
-     "email":["james1@examplerock.com"],
-     "description":"Created by OpenIDM REST.",
-     "password":"asdfkj23",
-     "displayName":"James Berg",
-     "phoneNumber":"12345",
-     "employeeNumber":"12345",
-     "userType":"Contractor",
-     "title":"Vice President",
-     "active":true
-}    
-    </programlisting>
-   </example>
-  </section>
-  <section><title>Components for Data Synchronization</title>
-   <para>OpenIDM involves two configuration file types and a database table in the synchronization process: sync.json, all provisioner.&lt;resourceName&gt;.json and the link table. The configuration files are used to configure synchronization by the administrators where the link table is maintained by OpenIDM to link objects on different resources (or the repository) which belong to the same user.</para>
-  </section>
- </section>
- 
- <section xml:id="basic-flow-sec-id"><title>Basic Data Flow Configuration</title>
- 
-   <para>Before a value of an attribute from an external resource is stored in the OpenIDM repository or even another external resource, there are several configuration files involved at which the attribute name might be mapped, the attribute value might be changed or combined with other attributes.</para>
-   <itemizedlist>
-    <listitem><para>provisioner.&lt;resource name&gt;.json - one file for each resource</para></listitem>
-    <listitem><para>sync.json - one file per OpenIDM installation</para></listitem>
-   </itemizedlist>
-   <para>Further more not all attributes of a user on the external resource need to be synchronized. Not even all accounts need to be synchronized. Many of the configuration, especially attribute name mapping is done in the different provisioner.&lt;name&gt;.json files as described in chapter <link xlink:href="integrators-guide#chap-resource-conf" xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to External Resources</citetitle></link>. The other main important configuration file is called sync.json and contains the core configuration of how objects and attributes which flow through OpenIDM need to be handled.</para>
-   
-  <section>
-   <title>Mapping in provisioner.&lt;resource name&gt;.json</title>
-   
-    <para>The attribute name mapping of the provisioner files is configured in the "objectTypes" part. As described in the chapter <link xlink:href="integrators-guide#openicf-provisioner-conf" xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Resource Connector Configuration</citetitle></link> each attribute is mapped from its nativeName, that is the attribute name as known to the external resource, to an attribute name which will be know to OpenIDM's sync engine. Additionally to attribute name mapping the attribute's type and whether it is single or multivalued is configured here. The "name" attribute is an example for a single valued attribute of the type "string" and "homePhone" is an example for a multivalued attribute, also of type "string".</para>
-    <example xml:id="ldap-provisioner">
-     <title>Attribute Mapping in Provisioner Configuration</title>
-     <programlisting>
-{
-    "name" : "myLdap",
-    ...
-"objectTypes" : {
-        "account" : {
-    ...
-    "lastName" : {
-            "type" : "string",
-            "required" : true,
-            "nativeName" : "sn",
-            "nativeType" : "string"
-              },
-    "homePhone" : {
-            "type" : "array",
-            "items" : {
-                "type" : "string",
-                "nativeType" : "string"
+    "name": "MyLDAP",
+    "objectTypes": {
+        "account": {
+            "lastName": {
+                "type": "string",
+                "required": true,
+                "nativeName": "sn",
+                "nativeType": "string"
             },
-            "nativeName" : "homePhone",
-            "nativeType" : "string"
-         }
-     ...    
-      }
-   }
-}         
-     </programlisting>
-     <caption><para>Two attributes as defined in a provisioner configuration</para></caption>
-    </example>
-    <para>No attribute construction or value manipulation is configured in the provisioner configurations.</para>
-   </section>
-   
-   <section>
-    <title>Mapping in sync.json</title>
-    
-    <para>The sync.json is the core configuration for the synchronization engine. Here is the place to configure which objects should be synchronized as well as attribute value manipulation like combining values or manipulating values. The sync.json contains a number of mappings where each mapping connects two resources (or the repository) and is identified by a unique "name" property.</para>
-    
-    
-    <section>
-     <title>Selecting the participating Resources</title>
-     
-     <para>Each resource will usually get one or two mappings in the sync.json file, one for each direction. The resource is identified in the mapping by either the "source" or the "target" property following a "/" separated path: paths starting with "managed" point to objects in the repository, where paths starting with "system" point to external resources. The most right portion of the path specifies the type of object which will be handled: in example <xref linkend="basic-ldap-mapping"/> the "target" with value "managed/user" points to objects of type user in the repository. In the same example the "source" property points to a resource specified by the name "myLdap" and the object type "account". This is the "objectType" as defined in the provisioner configuration shown in example <xref linkend="ldap-provisioner"/>.</para>
+            "homePhone": {
+                "type": "array",
+                "items": {
+                    "type": "string",
+                    "nativeType": "string"
+                },
+                "nativeName": "homePhone",
+                "nativeType": "string"
+            }
+        }
+    }
+}</programlisting>
+
+     <para>In order for OpenIDM to access external resource objects and
+     attributes, the object and its attributes must match the connector
+     configuration. Also, the connector file strictly maps external resource
+     objects to OpenIDM objects. To construct attributes and to manipulate
+     their values, you use the synchronization mappings file.</para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Synchronization mappings file</term>
+
+    <listitem>
+     <para>The synchronization mappings file is
+     <filename>openidm/conf/sync.json</filename>. The synchronization mappings
+     represent the core configuration for OpenIDM synchronization.</para>
+
+     <para>The <filename>sync.json</filename> file describes a set of mappings.
+     Each mapping specifies how attributes from source objects correspond to
+     attributes on target objects. The source and target indicate the direction
+     for the data flow, so you must define a mapping for each data flow. For
+     example, if you want data flows from an LDAP server to the repository
+     and also from the repository to the LDAP server, you must define two
+     separate mappings.</para>
+
+     <para>You identify external resource sources and targets as
+     <literal>system/<replaceable>name</replaceable>/<replaceable
+     >object-type</replaceable></literal>, where
+     <replaceable>name</replaceable> is the name used in the connector
+     configuration file, and <replaceable>object-type</replaceable> is the
+     object defined in the connector configuration file list of object types.
+     For objects in OpenIDM's internal repository, you use
+     <literal>managed/<replaceable>object-type</replaceable></literal>, where
+     <replaceable>object-type</replaceable> is defined in
+     <filename>openidm/conf/managed.json</filename>. The name for the mapping
+     by convention is set to a string of the form
+     <literal><replaceable>source</replaceable>_<replaceable
+     >target</replaceable></literal>, as shown in the following example.</para>
+
+    <programlisting language="javascript" xml:id="basic-ldap-mapping">
+{
+    "mappings": [
+        {
+            "name": "systemLdapAccounts_managedUser",
+            "source": "system/MyLDAP/account",
+            "target": "managed/user",
+            "properties": [
+                {
+                    "target": "familyName",
+                    "source": "lastName"
+                },
+                {
+                    "target": "homePhone",
+                    "source": "homePhone"
+                },
+                {
+                    "target": "phoneExtension",
+                    "default": "0047"
+                },
+                {
+                    "target": "mail",
+                    "comment": "Set mail if non-empty.",
+                    "source": "email",
+                    "condition": {
+                        "type": "text/javascript",
+                        "source": "(source.email != null)"
+                    }
+                },
+                {
+                    "target": "displayName",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "(source.lastName +', ' + source.firstName;)"
+                    }
+                }
+            ]
+        }
+    ]
+}</programlisting>
+
+     <para>In this example, the source is the external resource,
+     <literal>MyLDAP</literal>, and the target is OpenIDM's repository,
+     specifically the managed user objects. The <literal>properties</literal>
+     reflect OpenIDM attribute names. For example, the mapping has the
+     attribute <literal>lastName</literal> defined in the
+     <literal>MyLDAP</literal> connector configuration file mapped to
+     <literal>familyName</literal> in the OpenIDM managed user object. Notice
+     that the attribute names come from the connector configuration, rather
+     than the external resource itself.</para>
+
+     <para>You can create attributes on the target as part of the
+     mapping. In the example, OpenIDM creates a
+     <literal>phoneExtension</literal> attribute with a default value of
+     <literal>0047</literal>.</para>
+
+     <para>You can also set up conditions under which OpenIDM maps attributes
+     as shown for the email attribute in the example. By default, OpenIDM
+     synchronizes all attributes. In the example, the mail attribute is set
+     only if the script for the condition returns
+     <literal>true</literal>.</para>
+
+     <para>OpenIDM lets you transform attributes as well. In the example, the
+     <literal>displayName</literal> attribute is set using a combination of
+     the <literal>lastName</literal> and <literal>firstName</literal> attribute
+     values from the source.</para>
+
+     <para>To add a flow from the repository to <literal>MyLDAP</literal>,
+     you would define a mapping with source <literal>managed/user</literal>
+     and target <literal>system/MyLDAP/account</literal>, named for example
+     <literal>managedUser_systemLdapAccounts</literal>.</para>
+
+<!-- 
+
+ This may belong in appendix-object.xml, but it first needs cleaning up.
+
      <figure xml:id="object-paths-figure">
      <title>Name Spaces and Object paths in the OpenIDM Object Model</title>
       <mediaobject>
@@ -210,14 +334,18 @@ $ curl
        </imageobject>
       </mediaobject>
      </figure>
-    </section>
-    
-    <section>
-     <title>Selecting the Objects</title>
-     
-     <para>The OpenIDM sync engine per default handles all objects of the right type which are delivered by the resource connector. Possibilities to filter accounts on the connector side depend on the connector itself. For instance in case of the standard LDAP connector it is possible to limit the scope by the baseDn, by specifying an objectclass or even standard ldap filter.</para>
-     <para>In the sync engine itself more filtering can be done with the properties validSource and validTarget. Both properties use a script as the value. An example is shown in the example <xref linkend="basic-ldap-mapping"/>. Following is a description of both properties. See <xref linkend="jscript-id"/> on how to use java script here.</para>
+ -->
      <variablelist>
+      <para>By default, OpenIDM synchronizes all objects matching those defined
+      in the connector configuration for the resource. Many connectors let you
+      limit the scope of objects the connector accesses. For example, the LDAP
+      connector lets you specify base DNs and LDAP filters so you need not
+      access every entry in the directory. Yet, OpenIDM also lets you filter
+      what is considered a valid source or valid target for synchronization by
+      using JavaScript code. To apply these filters, use the
+      <literal>validSource</literal>, and <literal>validTarget</literal>
+      properties in your mapping.</para>
+
       <varlistentry>
        <term>validSource</term>
        <listitem>
@@ -228,6 +356,14 @@ $ curl
          the source object is provided in the <literal>"source"</literal>
          property. If the script is not specified, then all source objects are
          considered valid.</para>
+
+         <programlisting language="javascript">
+{
+    "validTarget": {
+        "type": "text/javascript",
+        "source": "target.employeeType == 'internal'"
+    }
+}</programlisting>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -241,258 +377,336 @@ $ curl
          provided in the <literal>"target"</literal> property. If the script is
          not specified, then all target objects are considered valid for
          mapping.</para>
-       </listitem>
-      </varlistentry>      
-     </variablelist>
-    </section>
-    
-    <section>
-     <title>Selecting the Attributes</title>
-     
-     <para>Like with objects, the list of attributes which will be synced is configured in both, the provisioner config and the sync.json. Only attributes which are set up in the "objectTypes" part of the connector's provisioner configuration, part "objectTypes" will be handled by the connector. In the example <xref linkend="ldap-provisioner"/> the connector would hand over attributes with names fullname and homePhone to the sync engine. In the mapping shown in <xref linkend="basic-ldap-mapping"/> the two attributes are configured as sources and their values would be stored as displayName and homePhone in the target system, which is the repositroy in this example. This is set in the "properties" part of the mapping. </para>
-   
-   <example xml:id="basic-ldap-mapping">
-    <title>Mappings in sync.json</title>
-    <programlisting language="javascript">
+
+         <programlisting language="javascript">
 {
-    "mappings" : [
-        {
-            "name" : "systemLdapAccounts_managedUser",
-            "source" : "system/myLdap/account",
-            "target" : "managed/user",
-            "properties" : [
-                { "target" : "familyName", "source" : "lastName" },
-                { "target" : "homePhone", "source" : "homePhone" },
-                { "target" : "phoneExtension",  "default" : "0047" },
-                { "target" : "mail", 
-                    "comment" : "mail is only set if there is a value coming from the resource."
-                    "source" : "email",
-                    "condition" : {
-                      "type" : "text/javascript",
-                      "source" : "(source.email != null)"
-                      }
-                },
-                { "target" : "displayName", 
-                    "transform" : {
-                       "type" : "text/javascript",
-                       "source" : "(source.lastName +', ' + source.firstName;)"
-                    }
-                }
-            ]
-        }
-    ]
-}    
-    </programlisting>
-    <caption><para>An example provisioner file which maps users from an LDAP resourced into the OpenIDM repository</para></caption>
-   </example>
-    </section>
-   
-    <section>
-     <title>Attribute Handling in Mappings</title>
-     
-     <para>As pointed out in the last paragraph, each attribute which should be handled by the sync engine needs to have an entry in the "properties" part of the mapping for the source and target resources which should be synced. Each property in the "properties" part needs to sepcify at least the "target". This is the name of the attribute where the value will be stored, for instance "displayName" in the example below.</para>
-     <para>In the case of "displayName" and "homePhone" the value is simply take from the source object which is specified by the "source" property which contains the attribute name of the attribute in the connector. </para>
-     <para>For the next target in the example below, "phoneExtension", there is no value available in the source. Still it is possible to set a default value, "0047" here. It will be set to the same value for each user. If this is not appropriate then it might be useful to have the "condition" property set as shown in <xref linkend="basic-ldap-mapping"/> for the mail address.</para>
-     <para>Here in the example it is assumed that there is a mail address coming from the resource, except not for all users. The email address should only be set if there is a value coming from the resource. If the script in the condition property returns false, then the target "mail" is not synchronized.</para>
-     <para>The target "mail" in <xref linkend="basic-ldap-mapping"/> also shows how comments can be set in the "properties".</para>
-     <para>Another frequent requirement is to construct attribute values during synchronization. This can be done with the property called "transform". It uses a script again. In the example below "transform" is used to construct the "displayName" from three components: The lastName attribute from the resource, a litteral ", " and the firstName attribute from the resource again.</para>
-     <para>Please see <xref linkend="jscript-id"/> for more details on how to use scripts in the mapping.</para>
-    </section> 
-     
-    <section xml:id="jscript-id">
-     <title>Using Scripts</title>
-     
-     <para>Some of the most important flexibility of the OpenIDM sync engine is provided by the ability to use scripts in the mappings. Currently only java script is available but other scripting languages like groove will follow soon. As <xref linkend="jscript-examples-id"/> shows, scripts can be included in two ways: by adding the script to the "source" property or by referencing a file which contains the script in a "file" property. The "correlationQuery" property refers to a file which contains the script. The path to the script is either absolute or relative to the openidm folder. For ease of maintenance it is recommended to use relative paths and to store all scripts in the folder "openidm/scritp" which is there per default.</para>
-     </section>
-      <section><title>Available contexts in Scripts in sync.json</title>
-      
-       <para>During synchronization between a source and a target resources there are always the two objects "source" and "target" available. The source object contains all the attributes coming from the source and the target object contains the attributes which will be sent to the target. All attributes of these objects are accessible in the scripts with the syntax source.&lt;attribute name&gt;. The syntax is used for instance in the <xref linkend="basic-ldap-mapping"/>. Similarly it is possible to directly write to the target object: target&lt;attribute name&gt;.</para>
-       <para>source, target, object, DB queries read</para>
-      <example xml:id="jscript-examples-id">
-       <title>Include Scripts</title>
-       <programlisting language="javascript">
-"correlationQuery" : {
-    "type" : "text/javascript",
-    "file" : "script/ldapBackCorrelationQuery.js"
-},       
-"onUpdate" : {
-    "type" : "text/javascript",
-    "source" : "if ((source.email != null) &amp;&amp; (source.email.length &gt; 0))
-        {target.mail = source.email;}"
+    "validSource": {
+        "type": "text/javascript",
+        "source": "source.ldapPassword != null"
+    }
 }</programlisting>
-       <caption><para>Two examples on how to include java script in the properties part of a mapping in sync.json </para></caption>
-      </example>
-      <para>If the java script is directly written in the mapping as a "source" property then the value is configured as a string and put into double quotes like "...". This makes the double quotes unusably inside the java script, for instance for strings. Single quotes need to be used instead as shown in the "displayName" property in example <xref linkend="basic-ldap-mapping"/>. Alternatively the quotes can be escaped like: \". Experience shows that escaping the quotes leads to less readable code.</para>
-      </section>
-     
-     <section><title>Using Encrypted Values</title>
-      <para>Sometimes it is desirable to not only encrypt the user's passwords when stored in the repository, but also some other attribute. Examples might be answers to authentication questions, credit card or social security numbers.</para>
-      <para>The configuration of which attributes should be encrypted before stored in the repository is kept in the file openidm/conf/managed.json as shown in <xref linkend="managed-example-id"/>.</para> 
-      <para>The original purpose of the file is to define any managed object which needs to be persisted in the repository. For instance if it is desired to store groups in the repository then it would be needed to have an entry of "name" : "groups" in the same file. Groups would then be available for synchronization as "target" : "managed/group"</para> 
-      <example xml:id="managed-example-id">
-       <title>Encrypting Attributes</title>
-        <programlisting>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+
+     <para>During synchronization, your scripts always have access to a
+     <literal>source</literal> object and a <literal>target</literal> object.
+     Examples already shown in this section use <literal>source.<replaceable
+     >attributeName</replaceable></literal> to retrieve attributes from the
+     source objects. Your scripts can also write to target attributes using
+     <literal>target.<replaceable>attributeName</replaceable></literal>
+     syntax.</para>
+
+       <programlisting language="javascript">
 {
-   "objects": [
-       {
-           "name": "user",
-           "properties" : [
-               { "name" : "securityanswer",
-                 "encryption" : { "key" : "openidm-sym-default" }
-               }, 
-               { "name" : "ssn",
-                 "encryption" : { "key" : "openidm-sym-default" }
-               }, 
-               { "name" : "password",
-                 "encryption" : { "key" : "openidm-sym-default" }
-               } 
-           ],
-           
-        "onStore" : {
-            "type" : "text/javascript",
-            "file" : "script/encryptExtraPassword.js"
-        },
-        "onRetrieve" : {
-            "type" : "text/javascript",
-            "file" : "script/decrypteExtraPassword.js"
-        }
-       }
-   ]
-}        
-        </programlisting>
-        <para>Do not use the default symmetric key in production. See the
-        chapter on <link xlink:href="integrators-guide#chap-security"
-        xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
-        &amp; Hardening OpenIDM</citetitle></link> for more.</para>
-      </example>
-     </section>
-     
-     <section><title>Conditional Execution</title>
-      <para>All actions and mappings which are defined in the "properties" and "policies" part are executed on each run of the sync engine. The mappings in the "properties" are executed if the action, which is defined as the answer to the situation found, is "UPDATE" or "CREATE". If in some cases it is needed to execute the logic of a mapping only in certain situations, then the property "condition" can be used. The logic will be executed only if the "condition" is true.</para>
-     </section>
-     
-     <section><title>Event Based Construction</title>
-      <para>Sometimes it is important to execute an attribute construction or manipulation only during the creation of an object, sometimes only during update of an existing object.</para>
-      
-      <variablelist>
-       <varlistentry>
-        <term>OnCreate</term>
-        <listitem><para>A rather often used "onCreate" action is to construct the dn of a new user on an LDAP server. After the user was successfully created, the dn will be stored in the target part of the link table and there is no need to construct it again during update. An example for this is shown below.</para>
-        <example>
-         <title>An onCreate Script</title>
-         <programlisting>
-         "onCreate" : {
-             "type" : "text/javascript",
-             "source" : "target.dn = 'uid=' + source.uid + ',ou=people,dc=example,dc=com'"
-         }       
-         </programlisting>
-         <caption>Construction of the dn in a onCreate property</caption>
-        </example></listitem>
-       </varlistentry>
-       <varlistentry>
-        <term>OnUpdate</term>
-        <listitem><para>Similar to the "onCreate" action it might be needed to execute an attribute value manipulation during the update of an object only. In the example below the email address must only be updated if the source email address has a new value. The mail address which is there during creation might not be valid an therefore it should not be synced at that time</para>
-        <example xml:id="onUpdet-example-id">
-         <title>An onUpdate Script</title>
-         <programlisting>
-        "onUpdate" : {
-            "type" : "text/javascript",
-            "source" : "if ((source.email != null) &amp;&amp; (source.email.length > 0)) {target.mail = source.email;}"
-        }       
-         </programlisting>
-        </example>
-        <para>More actions on specific situations are explained in chapter <xref linkend="advance-dataflow-id"/> below.</para></listitem>
-       </varlistentry>
-      </variablelist>
-     
-    </section>
-    
-    <section>
-     <title>Mappings and the link Table</title>
-     
-     <para>Each mapping in the sync.json file contains the configuration between a source and a target resource, where each resource can serve as a source resource in one mapping and as a target resource in another mapping. It is very common that pair of resources which should be synchronized with each other occur on two mappings.</para>
-     <para>For instance, if there is an ldap resource called myLDAP which should be synchronized with the local repository in both directions then there would be one mapping with myLDAP as the source and the repository as the target and a second mapping with the repository as the source and myLDAP as the target.</para>
-     <para>OpenIDM will remember the connection of an object in the repository which belongs to an object in myLDAP, i.e. the two objects representing the same user on different systems, in a link table. On the first synchronization OpenIDM will create a type of link for the new mapping. In most cases it will be desirable that the two mappings use the same link information, since the connection of the two objects is the same for both directions. The rule is:</para>
-     <itemizedlist>
-      <listitem><para>If a mapping does not have a "links" property then a new type is created for the mapping during the first synchronization.</para></listitem>
-      <listitem><para>If the second mapping should use the same link type, the it needs to have a "links" property with the name of the first mapping as the value.</para></listitem>
-     </itemizedlist>
-     <example xml:id="links-example-id">
-      <title>Handling Links in Mappings</title>
-      <programlisting language="javascript">
-{
-    "mappings" : [
-        {
-            "name" : "systemmyLDAPAccounts_managedUser",
-            "source" : "system/myLDAP/account",
-            "target" : "managed/user",
-            ...
-         },{
-            "name" : "managedUser_systemMyLDAPAccounts",
-            "source" : "managed/user",
-            "target" : "system/myLDAP/account",
-            "links" : "systemmyLDAPAccounts_managedUser",
-            ...
-         }]
-}         
-      </programlisting>
-      <caption><para>In the example <xref linkend="links-example-id"/> the first mapping does not have any "links" property. Therefore the associated link type will be called "systemmyLDAPAccounts_managedUser". The second mapping has a "links" property defined and this will be used for maintaining the links.</para></caption>
-     </example>
-    </section>    
-   </section>
- </section>
- 
- <section xml:id="situation-handling-id"><title>Situation Handling</title>
-  <section><title>Finding the right Situation</title>
-   <para>During synchronization objects can be categorized into different situations depending on the existence of an object on source or/and target system and whether a link between two objects on the different resources is already registered or not. If a situation and its action is not defined in a synchronization mapping, then a default action is take. The default actions are listed below.</para>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href='../shared/sec-syncSituations.xml' />
-  </section>
-  <section><title>Reaction on a given Situation</title>
-   <para>In each mapping the appropriate action on a given situation can be defined.</para>
-   <example xml:id="situation-policy">
-    <title>Situation Policies</title>
-    <programlisting language="javascript">
-        "policies" : [ {
-            "situation" : "CONFIRMED",
-            "action" : "UPDATE"
-        }, {
-            "situation" : "FOUND",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
-        }, {
-            "situation" : "AMBIGUOUS",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "MISSING",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "UNQUALIFIED",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "UNASSIGNED",
-            "action" : "IGNORE"
-        } ]    
-    </programlisting>
-    <caption><para>A typical "policies" section of a Mapping in the configuration sync.json</para></caption>
-   </example>
-   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="../shared/sec-syncActions.xml"/>
-  </section>
- </section> 
- 
- <section xml:id="syn-engine-id"><title>Detailed Steps of the OpenIDM sync Engine</title>
- <para>OpenIDM's sync engine performs the synchronization action in two steps. First it runs the so called "Source Reconciliation", then the "Target Reconciliation".</para>
-  <variablelist>
-   <varlistentry>
-    <term>Source Reconciliation</term>
-    <listitem><para>The lists take into account here are the objects found on the source resource and the links which associated with the appropriate mapping.</para></listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>Target Reconciliation</term>
-    <listitem><para>Here the sync engine iterates over the objects from the target which have not jet been processed</para></listitem>
+    "onUpdate": {
+        "type": "text/javascript",
+        "source": "if ((source.email != null) {target.mail = source.email;}"
+    }
+}</programlisting>
+
+     <para>See the <link xlink:href="integrators-guide#appendix-scripting"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
+     Reference</citetitle></link> appendix for more on scripting.</para>
+    </listitem>
    </varlistentry>
   </variablelist>
+
+  <section xml:id="sync-encrypted-values">
+   <title>Using Encrypted Values</title>
+   <para>OpenIDM supports reversible encryption of attributes values for
+   managed objects. Attribute values to encrypt include passwords (if passwords
+   are not already encrypted on the external resource), and also authentication
+   questions, credit card numbers, and social security numbers.</para>
+
+   <para>You configure encryption in the managed object configuration. The file
+   to edit is <filename>openidm/conf/managed.json</filename>. The following
+   example shows a managed object configuration that encrypts and decrypts
+   <literal>securityAnswer</literal>, <literal>ssn</literal>, and
+   <literal>password</literal> attributes using the default symmetric
+   key, and additional scripts for extra passwords.</para> 
+
+     <programlisting language="javascript">
+{
+    "objects": [
+        {
+            "name": "user",
+            "properties": [
+                {
+                    "name": "securityAnswer",
+                    "encryption": {
+                        "key": "openidm-sym-default"
+                    }
+                },
+                {
+                    "name": "ssn",
+                    "encryption": {
+                        "key": "openidm-sym-default"
+                    }
+                },
+                {
+                    "name": "password",
+                    "encryption": {
+                        "key": "openidm-sym-default"
+                    }
+                }
+            ],
+            "onStore": {
+                "type": "text/javascript",
+                "file": "script/encryptExtraPassword.js"
+            },
+            "onRetrieve": {
+                "type": "text/javascript",
+                "file": "script/decryptExtraPassword.js"
+            }
+        }
+    ]
+}</programlisting>
+
+   <para>Do not use the default symmetric key,
+   <literal>openidm-sym-default</literal>, in production. See the chapter on
+   <link xlink:href="integrators-guide#chap-security"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
+   &amp; Hardening OpenIDM</citetitle></link> for instructions on adding your
+   own symmetric key.</para>
+  </section>
+
+  <section xml:id="constructing-attributes">
+   <title>Constructing &amp; Manipulating Attributes</title>
+
+   <para>OpenIDM lets you construct and manipulate attributes using scripts
+   triggered when an object is created (onCreate), updated (onUpdate), or
+   deleted (onDelete), or when a link is created (onLink), or removed
+   (onUnlink).</para>
+
+   <para>The following example derives a DN for an LDAP entry when the entry
+   is created in the internal repository.</para>
+
+   <programlisting language="javascript">
+{
+    "onCreate": {
+        "type": "text/javascript",
+        "source":
+            "target.dn = 'uid=' + source.uid + ',ou=people,dc=example,dc=com'"
+    }
+}</programlisting>
+  </section>
+
+  <section xml:id="reusing-links">
+   <title>Reusing Links</title>
+   
+   <para>When two mappings exist to sync the same objects bidirectionally,
+   you can use the <literal>links</literal> property in one mapping to have
+   OpenIDM use the same internally managed link for both mappings. Otherwise,
+   if no <literal>links</literal> property is specified, OpenIDM maintains a
+   link for each mapping.</para>
+
+   <para>The following excerpt shows two mappings, one from MyLDAP accounts
+   to managed users, and another from managed users to MyLDAP accounts. In
+   the second mapping, the <literal>link</literal> property tells OpenIDM
+   to reuse the links created in the first mapping, rather than create new
+   links.</para>
+
+   <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name": "systemMyLDAPAccounts_managedUser",
+            "source": "system/MyLDAP/account",
+            "target": "managed/user"
+        },
+        {
+            "name": "managedUser_systemMyLDAPAccounts",
+            "source": "managed/user",
+            "target": "system/MyLDAP/account",
+            "links": "systemMyLDAPAccounts_managedUser"
+        }
+    ]
+}</programlisting>
+  </section>
+ </section>
+ 
+ <section xml:id="handling-sync">
+  <title>Synchronization Situations &amp; Actions</title>
+
+  <para>During synchronization, OpenIDM categorizes objects by situation.
+  Situations are characterized by whether an object exists on a source or
+  target system, whether OpenIDM has registered a link between the source
+  object and the target object, and whether the object is considered valid.
+  OpenIDM takes action depending on the situation.</para>
+
+  <para>You can define actions for particular situations in the
+  <literal>policies</literal> section of a synchronization mapping, as
+  shown in the following excerpt.</para>
+
+  <programlisting language="javascript">
+{
+    "policies": [
+        {
+            "situation": "CONFIRMED",
+            "action": "UPDATE"
+        },
+        {
+            "situation": "FOUND",
+            "action": "IGNORE"
+        },
+        {
+            "situation": "ABSENT",
+            "action": "CREATE"
+        },
+        {
+            "situation": "AMBIGUOUS",
+            "action": "IGNORE"
+        },
+        {
+            "situation": "MISSING",
+            "action": "IGNORE"
+        },
+        {
+            "situation": "UNQUALIFIED",
+            "action": "IGNORE"
+        },
+        {
+            "situation": "UNASSIGNED",
+            "action": "IGNORE"
+        }
+    ]
+}</programlisting>
+
+  <para>If you do not define a policy for a particular situation, OpenIDM
+  takes the default action for the situation.</para>
+
+  <para>The situations and their corresponding actions are described in the
+  sections below.</para>
+
+  <section xml:id="sync-situations">
+   <title>Synchronization Situations</title>
+
+   <para>OpenIDM performs synchronization action in two phases. First, OpenIDM
+   performs source reconciliation, where OpenIDM accounts for source objects
+   and associated links based on the mapping configured. Second, OpenIDM runs
+   target reconciliation, where OpenIDM interates over the target objects not
+   processed in the first phase.</para>
+
+   <orderedlist>
+    <para>During reconciliation OpenIDM builds three lists, assigning values
+    to the objects to reconcile.</para>
+    <listitem>
+     <para>All valid objects from the source</para>
+
+     <para>OpenIDM assigns valid source objects <literal>qualifies=1</literal>.
+     Invalid objects, including those not found in the source system, and those
+     filtered out by the script specified in the <literal>validSource</literal>
+     property get <literal>qualifies=0</literal>.</para>
+    </listitem>
+    <listitem>
+     <para>All records from the appropriate link table</para>
+
+     <para>Object with corresponding links in the link table of the repository
+     get <literal>link=1</literal>. Objects without corresponding links get
+     <literal>link=0</literal>.</para>
+    </listitem>
+    <listitem>
+     <para>All valid objects on the target system</para>
+
+     <para>Object found in the target system get <literal>target=1</literal>.
+     Objects not found in the target system get
+     <literal>target=0</literal>.</para>
+    </listitem>
+   </orderedlist>
+
+   <variablelist>
+    <para>Based on the values assigned to objects during source reconciliation,
+    OpenIDM assigns situations, listed here with their default actions.</para>
+    <varlistentry>
+     <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
+     <listitem>
+      <para>The mapping qualifies for a target object, and a link to a target
+      object exists. Detected during change events and reconciliation. Default
+      action: "UPDATE".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"FOUND" (qualifies=1, link=0, target=1)</term>
+     <listitem>
+      <para>The mapping qualifies for a target object, there is no link to a
+      target object, and there is a single correlated target object to link.
+      Detected during change events and reconciliation. Default action:
+      "UPDATE".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"ABSENT" (qualifies=1, link=0, target=0)</term>
+     <listitem>
+      <para>The mapping qualifies for a target object, there is no link to a
+      target object, and there is no correlated target object to link.
+      Detected during change events and reconciliation. Default action:
+      "CREATE".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
+     <listitem>
+      <para>The mapping qualifies for a target object, there is no link to a
+      target object, but there is more than one correlated target object to
+      link. Detected during change events and reconciliation. Default
+      action: "EXCEPTION".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"MISSING" (qualifies=1, link=1, target=0)</term>
+     <listitem>
+      <para>The mapping is qualified for a target object, and there is a
+      qualified link to a target object, but the target object is missing.
+      Only detected during reconciliation and synchronous operations.
+      Default action: "EXCEPTION".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"UNQUALIFIED" (qualifies=0, link=1)</term>
+     <listitem>
+      <para>The mapping is not qualified for a target object and there is a
+      link to an existing target object. Detected during change events and
+      reconciliation. Default action: "DELETE".</para>
+      <note>
+       <para>Target synchronization assigns the same situation when
+       (qualifies=0, link=0 or source=0).</para>
+      </note>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"UNASSIGNED" (qualifies=0, link=0, target=1) (not in use)</term>
+     <listitem>
+      <para>A target object exists for which there is no link. Only detected
+      during reconciliation. Default action: "EXCEPTION".</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <variablelist>
+    <para>Based on the values assigned to objects during target reconciliation,
+    OpenIDM assigns situations, listed here with their default actions.</para>
+    <varlistentry>
+     <term>"CONFIRMED" (qualifies=1, link=1, source=1)</term>
+     <listitem>
+      <para>The mapping qualifies for a target object, and a link to a
+      source object exists. Detected during only reconciliation. Default
+      action: "UPDATE".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</term>
+     <listitem>
+      <para>The mapping is not qualified for a target object, and there is a
+      link to an existing target object. Detected during change events and
+      reconciliation. Default action: "DELETE".</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <para>The following sections reiterate in detail how OpenIDM assigns
+   situations during each of the two synchronization phases.</para>
+  </section>
 
   <section xml:id="source-reconciliation">
    <title>Source Reconciliation</title>
@@ -502,8 +716,7 @@ $ curl
    objects available through the connector. For LiveSync, the list contains
    only changed objects. The connector can filter objects out of the list, too.
    You can filter objects out of the list by using the
-   <literal>validSource</literal> property mentioned in
-   <xref linkend="advance-syncing-example-id"/>.</para>
+   <literal>validSource</literal> property.</para>
 
    <para>OpenIDM then iterates over the list, checking each entry against the
    <literal>validSource</literal> filter, classifying objects according to
@@ -662,7 +875,7 @@ $ curl
     </tgroup>
    </table>
   </section>
-  
+
   <section xml:id="target-reconciliation">
    <title>Target Reconciliation</title>
 
@@ -774,207 +987,334 @@ $ curl
     </tgroup>
    </table>
   </section>
- </section>
- 
- <section xml:id="correlation-id"><title>Correlation Queries</title>
-  <para>If a user or object is created through a reconciliation or LiveSync, the OpenIDM's sync engine will also create a link between the two objects. The link is then used for further reconciliations to find the appropriate target object for any further reconciliation or liveSync.</para>
-  <para>Especially during the early phases of an identity management project there might be loads of users created from resource "A" when the next reconciliation with resource "B" is started. In this case the sync engine needs to find already existing user objects and just link them instead of creating new objects. The correlation of objects is done through a correlation query which is the means to find the corresponding object on the target system.</para>
 
-  <para>In OpenIDM, the query is executed against the target. The syntax of the
-  query therefore depends on which system is the target. The syntax is specific
-  to the underlying data store or to OpenICF. All native query facilities are
-  available.</para>
+  <section xml:id="sync-actions">
+   <title>Synchronization Actions</title>
 
-  <section><title>Correlation query with the Repository as the Target</title>
-   <para>As a prerequisite to find an object in the repository, there needs to be a query defined in the file <link>openidm/conf/repo.jdbc.json</link> or <link>openidm/conf/repo.orientdb.json</link>, depending on which type of repository is used. An example for a generic query for a OrientDB repository is shown in <xref linkend="orient-query-example-id"/> and one for a JDBC based repository in <xref linkend="jdbc-query-example-id"/> respectively.</para>
-   <para>An example correlation rule to call the query looks like <xref linkend="correlation-toRepo-id"/>. The _query-id property has the name of the query in the repository configuration as a value, here "for-userName". The userName property will get the value of the variable "source.name" which will be put int the query at '${userName}'. </para>
-   <example xml:id="correlation-toRepo-id"><title>Correlation Query for Repository</title>
-    <programlisting language="javascript">
-            "correlationQuery" : {
-            "type": "text/javascript",
-            "source" : "var query = {'_query-id' : 'for-userName', 'uid' :  source.name};query;"
-        },
-    </programlisting>
-   </example>
-   <para>In the example below ${_resource} will be replaced by the table name which contains the users, if the correlation is for objects of type user. At the end of the day it is a simple query against a db table which can return zero, one or more than one objects. The situation of the user, like FOUND or AMBIGUOUS will be set according to the number of returned objects.</para>
-   <example xml:id="orient-query-example-id"><title>DB query for Correlation</title>
-    <programlisting language="javascript">
-"for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"    
-    </programlisting>
-   </example>
-   <para>In the case of a JDBC repository the query is slightly more complex due to the indexing structure of the tables. In this case three tables need to be joined to formulate the optimum query. The following parameters are set by the system:</para>
-   <itemizedlist>
-    <listitem><para>${_dbSchema}: contains the name of the schema, usually openidm</para></listitem>
-    <listitem><para>${_mainTable}: contains the name of the main table for these objects, in case of user it is managedobjects</para></listitem>
-    <listitem><para>${_propTable}: the name of the associated property table, usually managedobjectproperties</para></listitem>
-    <listitem><para>The third table which will be joined is the objecttypes table </para></listitem>
-   </itemizedlist>
-   <example xml:id="jdbc-query-example-id"><title>DB query for Correlation</title>
-    <programlisting>
-"for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${userName} AND objtype.objecttype = ${_resource}"    
-    </programlisting>
-    <caption></caption>
-   </example>
+   <variablelist>
+    <para>Once OpenIDM has assigned a situation to an object, OpenIDM takes
+    the actions configured in the mapping. If no action is configured, then
+    OpenIDM takes the default action for the situation. OpenIDM supports the
+    following actions.</para>
+
+    <varlistentry>
+     <term>"CREATE"</term>
+     <listitem>
+      <para>Create and link a target object.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"UPDATE"</term>
+     <listitem>
+      <para>Link and update a target object.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"DELETE"</term>
+     <listitem>
+      <para>Delete and unlink the target object.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"LINK"</term>
+     <listitem>
+      <para>Link the correlated target object.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"UNLINK"</term>
+     <listitem>
+      <para>Unlink the linked target object.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"EXCEPTION"</term>
+     <listitem>
+      <para>Flag the link situation as an exception.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"IGNORE"</term>
+     <listitem>
+      <para>Do not change the link or target object state.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+  </section>
+ </section> 
+
+ <section xml:id="correlation">
+  <title>Correlation Queries</title>
+
+  <para>Every time OpenIDM creates an object through synchronization, it
+  creates a link between the source and target objects. OpenIDM then uses the
+  link to determine the object's situation during later synchronization
+  operations.</para>
+
+  <para>Initial, bulk synchronization operations can involve correlating
+  many objects that exist both on source and target systems. In this case,
+  OpenIDM uses correlation queries to find target objects that already exist,
+  and that correspond to source objects. For the target objects that match
+  a correlation query, OpenIDM needs only to create a link, rather than a
+  new target object.</para>
+
+  <para>Correlation queries run against target resources. The query syntax
+  therefore depends on the target system, and is either specific to the data
+  store underlying the OpenIDM repository, or to OpenICF query
+  capabilities.</para>
+
+  <section xml:id="correlation-query-managed-object">
+   <title>Managed Object as Correlation Query Target</title>
+
+   <para>Queries on managed objects in the repository must defined in the
+   configuration file for the repository, which is either
+   <filename>openidm/conf/repo.orientdb.json</filename>, or
+   <filename>openidm/conf/repo.jdbc.json</filename>.</para>
+
+   <para>The following example shows a correlation query defined in
+   <filename>openidm/conf/repo.orientdb.json</filename>.</para>
+
+   <programlisting language="javascript">
+"for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"</programlisting>
+
+   <para>The following correlation query example shows the JavaScript to call
+   the query defined for OrientDB. The <literal>_query-id</literal> property
+   value matches the name of the query specified in
+   <filename>openidm/conf/repo.orientdb.json</filename>,
+   <literal>for-userName</literal>. The <literal>source.name</literal> value
+   replaces <literal>${uid}</literal> in the query. OpenIDM replaces
+   <literal>${_resource}</literal> in the query with the name of table that
+   holds managed objects.</para>
+
+   <programlisting language="javascript">
+{
+  "correlationQuery": {
+    "type": "text/javascript",
+    "source":
+      "var query = {'_query-id' : 'for-userName', 'uid' : source.name}; query;"
+  }
+}</programlisting>
+
+   <para>The query can return zero or more objects, so the situation OpenIDM
+   assigns to the source object depends on the number of target objects
+   returned.</para>
+
+   <para>With a JDBC-based repository, the query defined in
+   <filename>openidm/conf/repo.jdbc.json</filename> is more complex due
+   to how the tables are indexed. The correlation query you define in
+   <filename>openidm/conf/sync.json</filename> is the same, however.</para>
   </section>
  
   <section xml:id="correlation-query-system-object">
-   <title>Correlation Query With a System Object as the Target</title>
-   <para>In the case when a system object is the target, then it is the connector which needs to execute the query for finding target objects.</para>
-   <para>The java script needs to return a map containing a generic query with the following elements:</para>
+   <title>System Object as Correlation Query Target</title>
+
+   <para>Correlation queries on system objects access the connector. The
+   connector then executes the query on the external resource.</para>
+
+   <para>Your correlation query JavaScript must return a map holding a generic
+   query with the following elements.</para>
    <itemizedlist>
-    <listitem><para>A condition like "Equals"</para></listitem>
-    <listitem><para>The name of the attribute to compare on the system object: it is the value for the property "name", in the example below it is "uid"</para></listitem>
-    <listitem><para>The value from the source to be used in the seearch filter. It is set in the propety "value" and needs an array as a value. In the example it is [source.userName]</para></listitem>
+    <listitem>
+     <para>A condition such as "Equals"</para>
+    </listitem>
+    <listitem>
+     <para>The naming attribute to compare on the system object. In the example
+     that follows, the naming attribute is <literal>uid</literal>.</para>
+    </listitem>
+    <listitem>
+     <para>The value from the source object to use in the search filter. You
+     set this as the value of the <literal>value</literal> property, which
+     takes an array. In the example that follows, the value to use in the
+     search filter is <literal>source.userName</literal>.</para>
+    </listitem>
    </itemizedlist>
-   <example xml:base="back-correlation-example-id"><title>Correlation Query for System Objects</title>
-    <programlisting language="javascript">
-var map = {"query": { "Equals": {"field" : "uid", "values" : [source.userName ]}}};
-map;    
-    </programlisting>
-   </example>
+
+   <programlisting language="javascript">
+varmap={"query": {"Equals": {"field": "uid", "values": [ source.userName ]}}};
+map;</programlisting>
   </section>
  </section>
   
- <section xml:id="advance-dataflow-id"><title>Advanced Data Flow Configuration</title>
+ <section xml:id="advanced-dataflow">
+  <title>Advanced Data Flow Configuration</title>
   
-  <para>In <xref linkend="basic-flow-sec-id"/> the extra action which can be plugged in for two standard situations was mentiond: onCreate and onUpdate.In some cases it might be needed to execute special scripts on other actions as well. For instance if the user object on an external resource was deleted the action in OpenIDM is not necessarely a delete as well. Instead the user should for instance be deactivated. In this case the action would be set to "unlink" and an "onUnlink" script might be needed to deactivate the user in OpenIDM or even another external resource. See for instance <xref linkend="advance-syncing-example-id"/></para>
-  <para>Simmilarely it might be desired to delete the object in OpenIDM and still execute an extra script. That would then be done in the "onDelete" property.</para>
+  <para><xref linkend="basic-flow"/> shows how to trigger scripts when objects
+  are created and updated. Other situations require you to trigger scripts
+  in response to other synchronization actions. For example, you might not
+  want OpenIDM to delete a managed user directly when an external account is
+  deleted, but instead unlink the objects and deactivate the user in another
+  resource. (Alternatively, you might delete the object in OpenIDM but
+  nevertheless execute a script.) The following example shows a more advanced
+  mapping configuration.</para>
   
-  <example xml:id="advance-syncing-example-id">
-   <title>An advanced sync.json configuration</title>
-   <programlisting linenumbering="numbered" language="javascript">
+  <programlisting linenumbering="numbered" language="javascript">
 {
-    "mappings" : [ {
-        "name" : "systemLdapAccount_managedUser",
-        "source" : "system/ldap/account",
-        "target" : "managed/user",
-        "validSource" : {
-            "type" : "text/javascript",
-            "file" : "jscript/isValid.js"
-        },
-        "correlationQuery" : {
-            "type" : "text/javascript",
-            "file" : "jscript/ldapCorrelationQuery.js"
-        },
-        "properties" : [ {
-            "source" : "uid",
-            "transform" : {
-                "type" : "text/javascript",
-                "source" : "source.toLowerCase()"
+    "mappings": [
+        {
+            "name": "systemLdapAccount_managedUser",
+            "source": "system/ldap/account",
+            "target": "managed/user",
+            "validSource": {
+                "type": "text/javascript",
+                "file": "jscript/isValid.js"
             },
-            "target" : "userName"
-        }, {
-            "transform" : {
-                "type" : "text/javascript",
-                "source" : "if (source.myGivenName) {source.myGivenName;}
-                    else {source.givenName;}"
+            "correlationQuery": {
+                "type": "text/javascript",
+                "file": "jscript/ldapCorrelationQuery.js"
             },
-            "target" : "givenName"
-        }, {
-            "source" : "",
-            "transform" : {
-                "type" : "text/javascript",
-                "source" : "if (source.mySn) {source.mySn;} else {source.sn;}"
+            "properties": [
+                {
+                    "source": "uid",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.toLowerCase()"
+                    },
+                    "target": "userName"
+                },
+                {
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "if (source.myGivenName)
+                            {source.myGivenName;} else {source.givenName;}"
+                    },
+                    "target": "givenName"
+                },
+                {
+                    "source": "",
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "if (source.mySn)
+                            {source.mySn;} else {source.sn;}"
+                    },
+                    "target": "familyName"
+                },
+                {
+                    "source": "cn",
+                    "target": "fullname"
+                },
+                {
+                    "comment": "Multi-valued in LDAP, single-valued in AD.
+                        Retrieve first non-empty value.",
+                    "source": "title",
+                    "transform": {
+                        "type": "text/javascript",
+                        "file": "jscript/getFirstNonEmpty.js"
+                    },
+                    "target": "title"
+                },
+                {
+                    "condition": {
+                        "type": "text/javascript",
+                        "source": "var clearObj = openidm.decrypt(object);
+                            ((clearObj.password != null) &amp;&amp;
+                            (clearObj.ldapPassword != clearObj.password))"
+                    },
+                    "transform": {
+                        "type": "text/javascript",
+                        "source": "source.password"
+                    },
+                    "target": "__PASSWORD__"
+                }
+            ],
+            "onCreate": {
+                "type": "text/javascript",
+                "source": "target.ldapPassword = null;
+                    target.adPassword = null;
+                    target.password = null;
+                    target.ldapStatus = 'New Account'"
             },
-            "target" : "familyName"
-        }, {
-            "source" : "cn",
-            "target" : "fullname"
-        }, {
-            "comment" : "Multi-valued in LDAP, single-valued in AD.
-                Retrieve first non-empty value.",
-            "source" : "title",
-            "transform" : {
-                "type" : "text/javascript",
-                "file" : "jscript/getFirstNonEmpty.js"
+            "onUpdate": {
+                "type": "text/javascript",
+                "source": "target.ldapStatus = 'OLD'"
             },
-            "target" : "title"
-        }, {
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "var clearObj = openidm.decrypt(object);
-                    ((clearObj.password != null) &amp;&amp;
-                        (clearObj.ldapPassword != clearObj.password))"
+            "onUnlink": {
+                "type": "text/javascript",
+                "file": "jscript/triggerAdDisable.js"
             },
-            "transform" : {
-                "type" : "text/javascript",
-                "source" : "source.password"
-            },
-            "target" : "__PASSWORD__"
-        }],
-        "onCreate" : {
-            "type" : "text/javascript",
-            "source" : "target.ldapPassword = null; target.adPassword = null;
-                target.password = null; target.ldapStatus = 'New Account'"
-        },
-        "onUpdate" : {
-            "type" : "text/javascript",
-            "source" : "target.ldapStatus = 'OLD'"
-        },
-        "onUnlink" : {
-            "type" : "text/javascript",
-            "file" : "jscript/triggerAdDisable.js"
-        },
-        "policies" : [ {
-            "situation" : "CONFIRMED",
-            "action" : "UPDATE"
-        }, {
-            "situation" : "FOUND",
-            "action" : "UPDATE"
-        }, {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
-        }, {
-            "situation" : "AMBIGUOUS",
-            "action" : "EXCEPTION"
-        }, {
-            "situation" : "MISSING",
-            "action" : "EXCEPTION"
-        }, {
-            "situation" : "UNQUALIFIED",
-            "action" : "UNLINK"
-        }, {
-            "situation" : "UNASSIGNED",
-            "action" : "EXCEPTION"
-        } ]
-    }   
-   </programlisting>
-  </example>
-  
-    <para>A complete list of hooks for calling scripts in the sync.json file is:</para>
+            "policies": [
+                {
+                    "situation": "CONFIRMED",
+                    "action": "UPDATE"
+                },
+                {
+                    "situation": "FOUND",
+                    "action": "UPDATE"
+                },
+                {
+                    "situation": "ABSENT",
+                    "action": "CREATE"
+                },
+                {
+                    "situation": "AMBIGUOUS",
+                    "action": "EXCEPTION"
+                },
+                {
+                    "situation": "MISSING",
+                    "action": "EXCEPTION"
+                },
+                {
+                    "situation": "UNQUALIFIED",
+                    "action": "UNLINK"
+                },
+                {
+                    "situation": "UNASSIGNED",
+                    "action": "EXCEPTION"
+                }
+            ]
+        }
+    ]
+}</programlisting>
+
   <variablelist>
+   <para>Here is the complete list of properties you can use as hooks in
+    mapping configurations to call scripts.
+   </para>
    <varlistentry>
     <term>Triggered by Situation</term>
-    <listitem><para>onCreate, onUpdate, onDelete, onLink, onUnlink</para></listitem>
+    <listitem>
+     <para>onCreate, onUpdate, onDelete, onLink, onUnlink</para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>Object Filter</term>
-    <listitem><para>vaildSource, validTarget</para></listitem>
+    <listitem>
+     <para>vaildSource, validTarget</para>
+    </listitem>
    </varlistentry>
    <varlistentry>
     <term>Correlating Objects</term>
-    <listitem><para>correlationQuery</para></listitem>
+    <listitem>
+     <para>correlationQuery</para>
+    </listitem>
    </varlistentry>
-    <varlistentry>
-     <term>Triggered on any Reconciliation</term>
-     <listitem><para>result</para></listitem>
-    </varlistentry>
-    <varlistentry>
-     <term>Scripts inside Properties</term>
-     <listitem><para>condition, transform</para></listitem>
-    </varlistentry>
+   <varlistentry>
+    <term>Triggered on Reconciliation</term>
+    <listitem>
+     <para>result</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>Scripts Inside Properties</term>
+    <listitem>
+     <para>condition, transform</para>
+    </listitem>
+   </varlistentry>
   </variablelist>
   
-  <section><title>Include data from a third resource</title>
-  <para>At any time during the reconciliation it is possible to get information from any connected system. The function to call is openidm.read(id). An example on how to use in a script:</para> 
-  <example>
-   <programlisting language="javascript">
-   repoUser = openidm.read("managed/user/ddoe);
-   or
-   externalAccount = openidm.read("system/ldap/account/ddoe");
-   </programlisting>
-  </example>
-  </section>
+  <para>Your scripts can get data from any connected system at any time by
+  using the <literal>openidm.read(id)</literal> function, where
+  <literal>id</literal> is the identifier of the object to read.</para>
+
+  <para>The following example reads a managed user object from the
+  repository.</para>
+
+  <programlisting language="javascript">
+repoUser = openidm.read("managed/user/ddoe);</programlisting>
+
+  <para>The following example reads an account from an external LDAP
+  resource.</para>
+
+  <programlisting language="javascript">
+externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
  </section>
- 
 </chapter>
