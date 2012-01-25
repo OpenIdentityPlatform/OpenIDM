@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <section xml:id='sync-situations'
@@ -30,118 +30,121 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Synchronization Situations</title>
 
-    <title>Situations</title>
+ <orderedlist>
+  <para>During reconciliation OpenIDM builds three lists.</para>
+  <listitem>
+   <para>All valid objects from the source</para>
+  </listitem>
+  <listitem>
+   <para>All records from the appropriate link table</para>
+  </listitem>
+  <listitem>
+   <para>All valid objects on the target system</para>
+  </listitem>
+ </orderedlist>
 
-    <orderedlist>
-     <para>During reconciliation OpenIDM builds three lists.</para>
-     <listitem>
-      <para>All valid objects from the source</para>
-     </listitem>
-     <listitem>
-      <para>All records from the appropriate link table</para>
-     </listitem>
-     <listitem>
-      <para>All valid objects on the target system</para>
-     </listitem>
-    </orderedlist>
+ <para>Valid objects from the source are rated as
+ <literal>qualifies=1</literal>. Invalid objects include those not on the
+ source system, and those filtered out by the script specified in the
+ <literal>validSource</literal> property. Invalid objects are rated
+ as <literal>qualifies=0</literal>.</para>
 
-    <para>Any valid object from the source list is rated as
-    <literal>qualifies=1</literal>. An object can be not valid because it
-    is not on the source system or because it was filtered out by the script
-    in the <literal>"validSource"</literal> property.</para>
+ <para>Object with corresponding links in the link table of the repository
+ get <literal>link=1</literal>. Objects without corresponding links get
+ <literal>link=0</literal>.</para>
 
-    <para>Any object for which there is not yet a link found in the link
-    table results in <literal>link=0</literal>. Any object which can not be
-    found in the target system gets <literal>target=0</literal>.</para>
+ <para>Object found in the target system get <literal>target=1</literal>.
+ Objects not found in the target system get <literal>target=0</literal>.</para>
 
-    <variablelist>
-     <para>The following conditions are supported during the source
-     synchronization.</para>
-     <varlistentry>
-      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
-      <listitem>
-       <para>The mapping qualifies for a target object, and a link to a target
-       object exists. Detected during change events and reconciliation. Default
-       action: "UPDATE".</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"FOUND" (qualifies=1, link=0, target=1)</term>
-      <listitem>
-       <para>The mapping qualifies for a target object, there is no link to a
-       target object, and there is a single correlated target object to link.
-       Detected during change events and reconciliation. Default action:
-       "UPDATE".</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"ABSENT" (qualifies=1, link=0, target=0)</term>
-      <listitem>
-       <para>The mapping qualifies for a target object, there is no link to a
-       target object, and there is no correlated target object to link.
-       Detected during change events and reconciliation. Default action:
-       "CREATE".</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
-      <listitem>
-       <para>The mapping qualifies for a target object, there is no link to a
-       target object, but there is more than one correlated target object to
-       link. Detected during change events and reconciliation. Default
-       action: "EXCEPTION".</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"MISSING" (qualifies=1, link=1, target=0)</term>
-      <listitem>
-       <para>The mapping is qualified for a target object, and there is a
-       qualified link to a target object, but the target object is missing.
-       Only detected during reconciliation and synchronous operations.
-       Default action: "EXCEPTION".</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"UNQUALIFIED" (qualifies=0, link=1)</term>
-      <listitem>
-       <para>The mapping is not qualified for a target object and there is a
-       link to an existing target object. Detected during change events and
-       reconciliation. Default action: "DELETE".</para>
-       <note>
-        <para>Target syncronization has the same situation when
-        (qualifies=0, link=0 or source=0).</para>
-       </note>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"UNASSIGNED" (qualifies=0, link=0, target=1) (not in use)</term>
-      <listitem>
-       <para>A target object exists for which there is no link. Only detected
-       during reconciliation. Default action: "EXCEPTION".</para>
-      </listitem>
-     </varlistentry>
-    </variablelist>
+ <variablelist>
+  <para>The following conditions are supported during source
+  synchronization.</para>
+  <varlistentry>
+   <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
+   <listitem>
+    <para>The mapping qualifies for a target object, and a link to a target
+    object exists. Detected during change events and reconciliation. Default
+    action: "UPDATE".</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"FOUND" (qualifies=1, link=0, target=1)</term>
+   <listitem>
+    <para>The mapping qualifies for a target object, there is no link to a
+    target object, and there is a single correlated target object to link.
+    Detected during change events and reconciliation. Default action:
+    "UPDATE".</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"ABSENT" (qualifies=1, link=0, target=0)</term>
+   <listitem>
+    <para>The mapping qualifies for a target object, there is no link to a
+    target object, and there is no correlated target object to link.
+    Detected during change events and reconciliation. Default action:
+    "CREATE".</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
+   <listitem>
+    <para>The mapping qualifies for a target object, there is no link to a
+    target object, but there is more than one correlated target object to
+    link. Detected during change events and reconciliation. Default
+    action: "EXCEPTION".</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"MISSING" (qualifies=1, link=1, target=0)</term>
+   <listitem>
+    <para>The mapping is qualified for a target object, and there is a
+    qualified link to a target object, but the target object is missing.
+    Only detected during reconciliation and synchronous operations.
+    Default action: "EXCEPTION".</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"UNQUALIFIED" (qualifies=0, link=1)</term>
+   <listitem>
+    <para>The mapping is not qualified for a target object and there is a
+    link to an existing target object. Detected during change events and
+    reconciliation. Default action: "DELETE".</para>
+    <note>
+     <para>Target synchronization assigns the same situation when
+     (qualifies=0, link=0 or source=0).</para>
+    </note>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"UNASSIGNED" (qualifies=0, link=0, target=1) (not in use)</term>
+   <listitem>
+    <para>A target object exists for which there is no link. Only detected
+    during reconciliation. Default action: "EXCEPTION".</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
 
-    <variablelist>
-     <para>The following conditions are supported during the target
-     synchronization. In each case, the target object must qualify. Otherwise
-     the object is ignored.</para>
-     <varlistentry>
-      <term>"CONFIRMED" (qualifies=1, link=1, source=1)</term>
-      <listitem>
-       <para>The mapping qualifies for a target object, and a link to a
-       source object exists. Detected during only reconciliation. Default
-       action: "UPDATE".</para>
-      </listitem>
-     </varlistentry>
-     <varlistentry>
-      <term>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</term>
-      <listitem>
-       <para>The mapping is not qualified for a target object, and there is a
-       link to an existing target object. Detected during change events and
-       reconciliation. Default action: "DELETE".</para>
-      </listitem>
-     </varlistentry>
-    </variablelist>
-   </section>
+ <variablelist>
+  <para>The following conditions are supported during target
+  synchronization. In each case, the target object must qualify. Otherwise,
+  the object is ignored.</para>
+  <varlistentry>
+   <term>"CONFIRMED" (qualifies=1, link=1, source=1)</term>
+   <listitem>
+    <para>The mapping qualifies for a target object, and a link to a
+    source object exists. Detected during only reconciliation. Default
+    action: "UPDATE".</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</term>
+   <listitem>
+    <para>The mapping is not qualified for a target object, and there is a
+    link to an existing target object. Detected during change events and
+    reconciliation. Default action: "DELETE".</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</section>
