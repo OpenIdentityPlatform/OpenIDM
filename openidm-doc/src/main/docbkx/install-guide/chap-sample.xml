@@ -31,7 +31,18 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
 
-<title>OpenIDM Sample</title>
+<title>First OpenIDM Sample</title>
+ <indexterm>
+  <primary>Getting started</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Samples</primary>
+  <secondary>Sample 1 - XML file</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>Repository database</primary>
+  <secondary>Evaluation version</secondary>
+ </indexterm>
 
  <para>In the current distribution of OpenIDM the sample 
  in <filename>openidm/samples/sample1</filename> is configured and enabled by

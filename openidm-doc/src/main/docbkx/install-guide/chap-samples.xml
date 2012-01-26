@@ -30,14 +30,13 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
-
 <title>More OpenIDM Samples</title>
 
  <para>The current distribution of OpenIDM comes with a variety of samples
  in <filename>openidm/samples/</filename>. The first,
  <filename>openidm/samples/sample1</filename>, is installed by default, and
  described in the <link xlink:href="install-guide#chap-sample"
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>First OpenIDM
  Sample</citetitle></link> chapter.</para>
 
  <section xml:id="before-you-begin-samples">
@@ -54,6 +53,10 @@
 
   <section xml:id="install-samples">
    <title>Installing the Samples</title>
+   <indexterm>
+    <primary>Installing</primary>
+    <secondary>Samples</secondary>
+   </indexterm>
 
    <para>Each sample folder in <filename>openidm/samples/</filename> contains
    a list of sub folders, such as <filename>conf/</filename> and
@@ -90,12 +93,16 @@ $ rm conf/provisioner.openicf-xml.json
   <title>Sample 1 - XML File</title>
   <para>Sample 1 is described in the chapter, <link
   xlink:href="install-guide#chap-sample"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>First OpenIDM
   Sample</citetitle></link>.</para>
  </section>
  
  <section xml:id="more-sample2">
   <title>Sample 2 - LDAP One Way</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 2 - LDAP one way</secondary>
+  </indexterm>
   <para>Sample 2 resembles sample 1, but in sample 2 OpenIDM is connected to
   a local LDAP server. The sample has been tested with <link xlink:show="new"
   xlink:href="http://www.forgerock.org/opendj.html">OpenDJ</link>, but it should
@@ -224,6 +231,10 @@ $ curl
  
  <section xml:id="more-sample2b">
   <title>Sample 2b - LDAP Two Way</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 2b - LDAP two way</secondary>
+  </indexterm>
 
   <para>Like sample 2, sample 2b also connects to an external LDAP server.</para>
 
@@ -322,6 +333,10 @@ $ curl
  
  <section xml:id="more-sample3">
   <title>Sample 3 - Scripted SQL</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 3 - Scripted SQL</secondary>
+  </indexterm>
 
   <para>Sample 3 shows an example configuration for the Scripted SQL connector.
   The Scripted SQL connector communicates with the database through
@@ -435,6 +450,10 @@ $ curl
  
  <section xml:id="more-sample4">
   <title>Sample 4 - CSV File</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 4 - CSV file</secondary>
+  </indexterm>
 
   <para>Sample 4 deals with a comma-separated value file as the external
   resource. The file name is part of the sample configuration. Therefore you
@@ -482,6 +501,10 @@ $ curl
 
  <section xml:id="more-sample5">
   <title>Sample 5 - Synchronization of Two Resources</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 5 - Sychronization of two resources</secondary>
+  </indexterm>
 
   <para>Sample 5 demonstrates the flow of data from one external resource to
   another. The resources are called LDAP and AD, but in the sample both
@@ -560,6 +583,10 @@ $ curl
  
  <section xml:id="more-sample6">
   <title>Sample 6 - LiveSync Between Two LDAP Servers</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 6 - LiveSync between two LDAP servers</secondary>
+  </indexterm>
 
   <para>Sample 6 resembles sample 5, but sample 6 uses two real LDAP
   connections. To simplify setup, both provisioners point to the same LDAP

@@ -31,6 +31,10 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Installing a Repository For Production</title>
+  <indexterm>
+   <primary>Repository database</primary>
+   <secondary>Production ready</secondary>
+  </indexterm>
 
  <para>By default OpenIDM uses OrientDB for its internal repository so that you
  do not have to install a database in order to evaluate OpenIDM. Before using
@@ -70,6 +74,10 @@ $ rm repo.orientdb.json</screen>
 $ cp ../samples/misc/repo.jdbc.json .</screen>
   </step>
   <step>
+   <indexterm>
+    <primary>Repository database</primary>
+    <secondary>Table names</secondary>
+   </indexterm>
    <para>Import the data definition language script for OpenIDM into
    MySQL.</para>
    <screen>$ ./bin/mysql -u root -p &lt; /path/to/openidm/db/scripts/mysql/openidm.sql
@@ -106,7 +114,7 @@ mysql&gt; show tables;
 | objecttypes             |
 +-------------------------+
 12 rows in set (0.01 sec)</screen>
-   <para>The table names are simliar to those used with OrientDB.</para>
+   <para>The table names are similar to those used with OrientDB.</para>
   </step>
   <step performance="optional">
    <para>Optionally protect access to the <literal>openidm</literal> database

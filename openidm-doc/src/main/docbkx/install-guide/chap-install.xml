@@ -32,7 +32,8 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Installing OpenIDM Services</title>
 
- <para>This chapter covers the tasks required to install the OpenIDM services.</para>
+ <para>This chapter covers the tasks required to install and start
+ OpenIDM.</para>
 
  <section xml:id="before-you-start">
   <title>Before You Run OpenIDM</title>
@@ -42,7 +43,10 @@
   
   <section xml:id="java-prerequisites">
    <title>Java Environment</title>
-   
+   <indexterm>
+    <primary>Java</primary>
+    <secondary>Requirements</secondary>
+   </indexterm>
    <para>OpenIDM requires Oracle Java SE JDK 6 update 24 or later.</para>
    <!-- TODO: When this doc has been reviewed, either the next sentence should
               be removed, or this entire section should change to something
@@ -53,12 +57,14 @@
   
   <section xml:id="application-container-prerequisites">
    <title>Application Container</title>
-  
+   <indexterm>
+    <primary>Application container</primary>
+    <secondary>Requirements</secondary>
+   </indexterm>
    <para>OpenIDM services run in an OSGi container with an embedded Servlet
    container, and an embedded noSQL database. By default the OSGi container is
-   Apache Felix. The default Servlet container is Jetty. The default noSQL
-   database is OrientDB. At this time the only supported configuration is
-   running the services in Apache Felix.</para>
+   Apache Felix. The default Servlet container is Jetty. At this time the only
+   supported configuration is running the services in Apache Felix.</para>
   </section>
  </section>
 
@@ -70,6 +76,10 @@
 
    <procedure xml:id="install-openidm">
     <title>To Install OpenIDM Services</title>
+    <indexterm>
+     <primary>Installing</primary>
+    </indexterm>
+
     <para>Follow these steps to install OpenIDM.</para>
     <step>
      <para>Make sure you have the correct version of Java installed.</para>
@@ -79,25 +89,33 @@ Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
 Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
     </step>
     <step>
+     <indexterm>
+      <primary>Downloading</primary>
+     </indexterm>
      <para>Download OpenIDM from the <link
      xlink:href='http://forgerock.org/openidm.html'>download page</link>.</para>
     </step>
     <step>
      <para>Unpack the contents of the .zip file into the install location.</para>
      <screen>$ cd /path/to
-$ unzip ~/Downloads/openidm-*.zip
+$ unzip ~/Downloads/openidm-<?eval ${docTargetVersion}?>.zip
 ...
-inflating: openidm/src/site/index.htm
+  inflating: openidm/connectors/openicf-scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
+  inflating: openidm/bin/felix.jar   
+  inflating: openidm/bin/openidm.jar
 $</screen>
     </step>
     <step performance="optional">
-     <para>By default the OpenIDM servlet container listens on port 8080. To
-     change the default port, edit the
-     <literal>org.osgi.service.http.port</literal> property in the
-     <filename>openidm/conf/config.properties</filename> file.</para>
+     <para>By default, OpenIDM listens for HTTP connections on port 8080. To
+     change the default port, edit
+     <filename>openidm/conf/jetty.xml</filename>.</para>
     </step>
-    <step>
-     <para>Before running OpenIDM in production, replace the OrientDB
+    <step performance="optional">
+     <indexterm>
+      <primary>Repository database</primary>
+      <secondary>Requirements</secondary>
+     </indexterm>
+     <para>Before running OpenIDM in production, replace the default OrientDB
      repository provided for evaluation with a JDBC repository.</para>
      <para>See the chapter on <link xlink:href="install-guide#chap-repository"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
@@ -107,6 +125,9 @@ $</screen>
 
    <procedure xml:id="run-openidm">
     <title>To Start OpenIDM Services</title>
+   <indexterm>
+    <primary>Starting OpenIDM</primary>
+   </indexterm>
     <para>Follow these steps to run OpenIDM interactively.</para>
 
     <para>To run OpenIDM as a background process, see the chapter on <link
@@ -218,6 +239,9 @@ Listening for transport dt_socket at address: 5005
 
    <procedure xml:id="first-steps-with-rest">
     <title>To Get Started With the OpenIDM REST Interface</title>
+    <indexterm>
+     <primary>Getting started</primary>
+    </indexterm>
     <para>OpenIDM provides RESTful access to users in the OpenIDM
     repository.</para>
     <step>
@@ -310,6 +334,9 @@ Listening for transport dt_socket at address: 5005
 
    <procedure xml:id="stop-openidm">
     <title>To Stop the OpenIDM Services</title>
+    <indexterm>
+     <primary>Stopping OpenIDM</primary>
+    </indexterm>
     <step>
     <para>You can stop OpenIDM Services from the <literal>-&gt;</literal>
     prompt, or through the Felix console.</para>
