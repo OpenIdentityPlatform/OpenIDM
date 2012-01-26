@@ -281,6 +281,7 @@
                 },
                 {
                     "target": "displayName",
+                    "source": "";
                     "transform": {
                         "type": "text/javascript",
                         "source": "(source.lastName +', ' + source.firstName;)"
@@ -316,6 +317,8 @@
      <literal>displayName</literal> attribute is set using a combination of
      the <literal>lastName</literal> and <literal>firstName</literal> attribute
      values from the source.</para>
+     
+     <note><para>The use of the "source" property is optional in a property which is using "transform", but the source object will only be available if "source" is mentioned in the property. Since source.lastName and source.firstName should be used to calculate the displayName in the example, it needs to mention "source" though the value is empty. See the line <filename>"source" : "";</filename> in the example above)</para></note>
 
      <para>To add a flow from the repository to <literal>MyLDAP</literal>,
      you would define a mapping with source <literal>managed/user</literal>
