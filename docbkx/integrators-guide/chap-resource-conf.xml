@@ -83,6 +83,8 @@
  you can include inside the Java Virtual Machine, then OpenICF can use the
  native .dll with a remote connector server. (OpenICF connects to ADSI through
  a remote connector server implemented as a .NET service.)</para>
+ 
+ <note><para>Both, the .net as well as the java connector server can be used as a stand alone service ("remote"). This might be important for scalability or if the service is installed as a cloud service. The .net server must run as a stand alone process since the code can not be run inside the OpenIDM java process. The java server can be run as a remote or local service. There is per default a java server running inside OpenIDM for use as a "#LOCAL" service. See also <xref linkend="connector-reference" />.</para></note>
  </section>
 
  <section xml:id="connector-info-provider-conf">
