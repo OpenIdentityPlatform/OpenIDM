@@ -32,6 +32,14 @@
   <xsl:param name="page.height.portrait">9in</xsl:param>
   <xsl:param name="page.width.portrait">7.5in</xsl:param>
   <xsl:param name="double.sided" select="1"></xsl:param>
+  <xsl:param name="fop1.extensions" select="1" />
+
+  <xsl:param name="body.font.master">9</xsl:param>
+  <xsl:param name="body.font.family">DejaVuSerif</xsl:param>
+  <xsl:param name="dingbat.font.family">DejaVuSerif</xsl:param>
+  <xsl:param name="monospace.font.family">DejaVuSansMono</xsl:param>
+  <xsl:param name="sans.font.family">DejaVuSans</xsl:param>
+  <xsl:param name="title.font.family">DejaVuSans</xsl:param>
 
   <xsl:attribute-set name="section.title.level1.properties">
    <xsl:attribute name="font-size">14pt</xsl:attribute>
