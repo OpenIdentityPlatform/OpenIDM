@@ -44,6 +44,32 @@
 
    <listitem>
     <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-532'
+    >OPENIDM-532</link>: Authentication rejected on first start-up.</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-533'
+    >OPENIDM-533</link>: Shutdown script seems to have stopped working.</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-538'
+    >OPENIDM-538</link>: SSL Mutual auth should set openidm-cert role.</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-541'
+    >OPENIDM-541</link>: Rest POST <literal>managed/user?_action=patch</literal>
+    returning with no response. Status should be 204.</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-542'
+    >OPENIDM-542</link>: <literal>ManagedObjectProperty#onStore</literal> does
+    not put the encrypted value into <literal>JsonCrypto</literal>.</para>
+   </listitem>   <listitem>
+    <para><link xlink:show="new"
     xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-448'
     >OPENIDM-448</link>: Reconciliation process is stopped when the first
     readObject throws SynchronizationException</para>
