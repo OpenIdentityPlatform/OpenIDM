@@ -31,6 +31,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Removing OpenIDM Software</title>
+ <indexterm>
+  <primary>Uninstalling</primary>
+ </indexterm>
 
  <para>This chapter shows you how to uninstall OpenIDM software.</para>
 
