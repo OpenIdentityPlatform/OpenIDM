@@ -322,19 +322,22 @@
      and target <literal>system/MyLDAP/account</literal>, named for example
      <literal>managedUser_systemLdapAccounts</literal>.</para>
 
-<!-- 
+     <mediaobject xml:id="figure-object-paths"><?dbfo pgwide="1"?>
+      <alt>OpenIDM name space and object paths</alt>
+      <imageobject>
+       <imagedata fileref="images/ServiceTree.png" format="PNG" />
+      </imageobject>
+      <textobject>
+       <para>The image shows paths to objects in the OpenIDM name space.</para>
+      </textobject>
+      <caption>
+       <para>OpenIDM stores managed objects in the repository, and exposes
+       them under <literal>/openidm/managed</literal>. System objects on
+       external resources are exposed under
+       <literal>/openidm/system</literal>.</para>
+      </caption>
+     </mediaobject>
 
- This may belong in appendix-object.xml, but it first needs cleaning up.
-
-     <figure xml:id="object-paths-figure">
-     <title>Name Spaces and Object paths in the OpenIDM Object Model</title>
-      <mediaobject>
-       <imageobject>
-        <imagedata fileref="images/ServiceTree.png" format="PNG"/>
-       </imageobject>
-      </mediaobject>
-     </figure>
- -->
      <variablelist>
       <para>By default, OpenIDM synchronizes all objects matching those defined
       in the connector configuration for the resource. Many connectors let you
