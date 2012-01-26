@@ -34,8 +34,8 @@
 
  <para>This chapter describes how to connect to external resources such
  as LDAP, Active Directory, flat files, and others. Configurations shown
- here are simplified to show essential aspects. Not all resources 
- upports all OpenIDM operations, however the resources shown here support
+ here are simplified to show essential aspects. Not all resources support
+ all OpenIDM operations, however the resources shown here support
  most of the CRUD operations, and also reconciliation and LiveSync.</para>
 
  <para>In OpenIDM, <firstterm>resources</firstterm> are external systems,
