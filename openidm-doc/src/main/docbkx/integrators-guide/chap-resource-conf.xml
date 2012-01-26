@@ -34,20 +34,19 @@
 
  <para>This chapter describes how to connect to external resources such
  as LDAP, Active Directory, flat files, and others. Configurations shown
- here are simplified to show essential aspects. Not all resources are
- suited to all OpenIDM operations, though the resources shown here support
- most of CRUD, and also reconciliation and LiveSync.</para>
+ here are simplified to show essential aspects. Not all resources 
+ upports all OpenIDM operations, however the resources shown here support
+ most of the CRUD operations, and also reconciliation and LiveSync.</para>
 
  <para>In OpenIDM, <firstterm>resources</firstterm> are external systems,
- databases, directory servers, and other sources of user data to be maintained
+ databases, directory servers, and other sources of identity data to be managed
  and audited by the identity management system. OpenIDM connects to resources
  through the identity connector framework, <link xlink:show="new"
  xlink:href="http://openicf.forgerock.org/">OpenICF</link>. OpenICF aims to
  avoid the need to install agents to access resources, instead using the
  resources' native protocols. For example, OpenICF connects to database
  resources using the database's Java connection libraries or JDBC driver.
- It connects to directory servers over JNDI. It connects to operating systems
- by using <command>ssh</command>.</para>
+ It connects to directory servers over JNDI. It connects to UNIX and Linux operating systems by using <command>ssh</command>.</para>
  
  <para>Connectors are configured through files named
  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
