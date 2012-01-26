@@ -138,6 +138,18 @@
    issues.</para>
    <listitem>
     <para><link xlink:show="new"
+    xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-521"
+    >OPENIDM-521</link>: Spurious 4xx errors if HTTP service starts before
+    others</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-491"
+    >OPENIDM-491</link>: Running recon with misconfigured or empty connector
+    results in the error "Cowardly refusing to perform recon"</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
     xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-467"
     >OPENIDM-467</link>: Cannot save JSON object in repository if it contains
     a list</para>
