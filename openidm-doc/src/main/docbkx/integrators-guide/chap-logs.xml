@@ -31,6 +31,10 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Configuring Server Logs</title>
+ <indexterm>
+  <primary>Server logs</primary>
+ </indexterm>
+
 
  <para>This chapter briefly describes server logging. For audit information,
  see the chapter on <link xlink:href="integrators-guide#chap-auditing"

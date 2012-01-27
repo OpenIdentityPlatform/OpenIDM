@@ -31,6 +31,12 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Integrating Business Processes &amp; Workflow</title>
+ <indexterm>
+  <primary>Workflow</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Business processes</primary>
+ </indexterm>
 
  <para>Key to any identity management solution is the ability to provide
  workflow driven provisioning activities, whether for self-service actions
@@ -119,7 +125,7 @@
    </listitem>
    <listitem>
     <!-- TODO: Issue ID? -->
-    <para>Error handling needs improvement. (OPENIDM-???)</para>
+    <para>Error handling needs improvement.</para>
    </listitem>
    <listitem>
     <para>This version depends on Activiti 5.8, which does not have the fix

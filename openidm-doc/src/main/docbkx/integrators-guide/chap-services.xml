@@ -35,7 +35,13 @@
  <para>This chapter covers scripts provided for managing OpenIDM.</para>
 
  <section xml:id="startup-shutdown">
-  <title>Starting &amp; Stopping OpenIDM</title>
+  <title>Startup &amp; Shutdown</title>
+  <indexterm>
+   <primary>Starting OpenIDM</primary>
+  </indexterm>
+  <indexterm>
+   <primary>Stopping OpenIDM</primary>
+  </indexterm>
 
   <para>By default you start and stop OpenIDM in interactive mode.</para>
 
@@ -140,6 +146,10 @@ Stopping OpenIDM (454)</screen>
       <varlistentry>
        <term><command>validate</command></term>
        <listitem>
+        <indexterm>
+         <primary>Configuration</primary>
+         <secondary>Validating</secondary>
+        </indexterm>
         <para>Validate all .json configuration files in the
         <filename>conf/</filename> directory</para>
        </listitem>
@@ -157,6 +167,9 @@ Stopping OpenIDM (454)</screen>
    <varlistentry>
     <term><command>java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar</command></term>
     <listitem>
+     <indexterm>
+      <primary>Encryption</primary>
+     </indexterm>
      <para>Utility to encrypt and decrypt values in JSON objects</para>
     </listitem>
    </varlistentry>

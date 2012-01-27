@@ -31,6 +31,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Using Audit Logs</title>
+ <indexterm>
+  <primary>Audit logs</primary>
+ </indexterm>
 
  <para>OpenIDM auditing can publish and log all relevant system activity to
  the targets you specify. Auditing can include data from reconciliation as

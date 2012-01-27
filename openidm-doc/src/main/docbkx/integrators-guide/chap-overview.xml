@@ -32,6 +32,7 @@
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xinclude="http://www.w3.org/2001/XInclude">
   <title>Architectural Overview</title>
+  <indexterm><primary>Architecture</primary></indexterm>
 
   <para>The following figure provides an overview of the OpenIDM architecture,
   which is covered in more detail in subsequent sections of this chapter.</para>
@@ -161,6 +162,11 @@
      <varlistentry>
       <term>Managed Objects</term>
       <listitem>
+       <indexterm>
+        <primary>Objects</primary>
+        <secondary>Managed objects</secondary>
+       </indexterm>
+
        <para>A <firstterm>managed object</firstterm> is an object that
        represents the identity-related data managed by OpenIDM. Managed objects
        are configurable, JSON-based data structures OpenIDM stores in its
@@ -172,6 +178,11 @@
      <varlistentry>
       <term>System Objects</term>
       <listitem>
+       <indexterm>
+        <primary>Objects</primary>
+        <secondary>System objects</secondary>
+       </indexterm>
+
        <para><firstterm>System objects</firstterm> are pluggable representations
        of objects on external systems. They follow the same RESTful resource
        based design principles as managed objects. There is a default
@@ -182,10 +193,15 @@
      <varlistentry>
       <term>Mappings</term>
       <listitem>
-       <para>Mappings define policies between source and target objects and
-       their attributes during synchronization and reconciliation. Mappings
-       can also define triggers for validation, customization, filtering, and
-       transformation of source and target objects.</para>
+       <indexterm>
+        <primary>Mappings</primary>
+       </indexterm>
+
+       <para><firstterm>Mappings</firstterm>
+       define policies between source and target objects and their attributes
+       during synchronization and reconciliation. Mappings can also define
+       triggers for validation, customization, filtering, and transformation
+       of source and target objects.</para>
        <para>See the <link xlink:href="integrators-guide#chap-synchronization"
        xlink:role="http://docbook.org/xlink/role/olink"
        ><citetitle>Configuring Synchronization</citetitle></link> chapter for
@@ -195,6 +211,13 @@
      <varlistentry>
       <term>Synchronization &amp; Reconciliation</term>
       <listitem>
+       <indexterm>
+        <primary>Synchronization</primary>
+       </indexterm>
+       <indexterm>
+        <primary>Reconciliation</primary>
+       </indexterm>
+
        <para><firstterm>Reconciliation</firstterm> provides for on-demand and
        scheduled resource comparisons between the OpenIDM managed object
        repository and source or target systems. Comparisons can result in

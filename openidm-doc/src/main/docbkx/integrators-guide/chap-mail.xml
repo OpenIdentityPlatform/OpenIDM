@@ -31,6 +31,11 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Sending Email</title>
+ <indexterm>
+  <primary>Configuration</primary>
+  <secondary>Email</secondary>
+ </indexterm>
+ <indexterm><primary>Sending mail</primary></indexterm>
 
  <para>This chapter shows you how to configure the outbound email service, so
  that you can send email through OpenIDM either by script or through the REST

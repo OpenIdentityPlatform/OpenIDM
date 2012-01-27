@@ -32,6 +32,9 @@
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
  <title>Scripting Reference</title>
+ <indexterm>
+  <primary>Scripting</primary>
+ </indexterm>
 
   <para>Scripting lets you customize how OpenIDM works in various ways, such
   as providing custom logic between source and target mappings, defining
@@ -127,6 +130,14 @@
 
  <section xml:id="function-ref">
   <title>Function Reference</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Script access</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Scripting</primary>
+   <secondary>Functions</secondary>
+  </indexterm>
 
    <para>Functions (access to managed objects, system objects, configuration
    objects) within OpenIDM are accessible to scripts via the
