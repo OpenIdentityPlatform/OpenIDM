@@ -40,16 +40,18 @@
 
  <section>
   <title>Who Should Use this Guide</title>
-  
   <para>This guide is written for anyone installing OpenIDM to manage and to
   provision identities, and to ensure compliance with identity management
   regulations.</para>
-   
+
   <para>This guide covers the install, upgrade, and removal (uninstall)
   procedures that you theoretically perform only once per version. This
   guide aims to provide you with at least some idea of what happens
   behind the scenes when you perform the steps.</para>
-   
+
+  <para>This guide also takes you through all of the samples provided with
+  OpenIDM.</para>
+
   <para>You do not need to be an OpenIDM wizard to learn something from
   this guide, though a background in identity management and maintaining
   web application software can help. You do need some background in
