@@ -43,10 +43,11 @@
  <procedure xml:id="repository-mysql">
   <title>To Set Up OpenIDM With MySQL</title>
 
-  <para>OpenIDM <?eval ${docTargetVersion}?> supports use of MySQL as an
-  internal repository. After installing MySQL on the local host and
-  <emphasis>before starting OpenIDM for the first time</emphasis>, perform the
-  following steps.</para>
+  <para>OpenIDM <?eval ${docTargetVersion}?> supports use of <link
+  xlink:href="http://dev.mysql.com/downloads/mysql/" xlink:show="new"
+  >MySQL</link> as an internal repository. After installing MySQL on the local
+  host and <emphasis>before starting OpenIDM for the first time</emphasis>,
+  perform the following steps.</para>
 
   <step>
    <para>Download <link xlink:show="new"
