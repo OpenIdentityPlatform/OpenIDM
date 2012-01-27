@@ -31,7 +31,14 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>REST API Reference</title>
- 
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>REST API</primary>
+  </indexterm>
+
  <para>OpenIDM provides a RESTful API for accessing managed objects.</para>
  
  <section xml:id="rest-uri-scheme">
@@ -47,6 +54,11 @@
 
  <section xml:id="rest-object-identifier">
   <title>Object Identifiers</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+   <tertiary>Identifiers</tertiary>
+  </indexterm>
 
   <para>Each managed object has an identifier&#8212;expressed as
   <replaceable>id</replaceable> in the URI scheme&#8212;which is used to

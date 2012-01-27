@@ -41,6 +41,11 @@
 
  <table pgwide="1" xml:id="table-object-types">
   <title>OpenIDM Objects</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Object types</secondary>
+  </indexterm>
+
   <tgroup cols="3">
    <colspec colnum="1" colwidth="1*"/>
    <colspec colnum="2" colwidth="2*"/>
@@ -95,6 +100,10 @@
 
  <section xml:id="objects-resource-api">
   <title>Accessing Objects</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Script access</secondary>
+  </indexterm>
 
   <para>OpenIDM's uniform programming model means that all objects are queried
   and manipulated in the same way from your scripts using the Resource API.
@@ -142,6 +151,10 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
  <section xml:id="managed-objects">
   <title>Managed Objects</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
 
   <para>A <firstterm>managed object</firstterm> in OpenIDM is an object which
   represents the identity-related data managed by OpenIDM. Managed objects
@@ -751,7 +764,12 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
   <section xml:id="custom-managed-objects">
    <title>Custom Managed Objects</title>
-   
+   <indexterm>
+    <primary>Objects</primary>
+    <secondary>Managed objects</secondary>
+    <tertiary>Customizing</tertiary>
+   </indexterm>
+
    <para>Managed objects in OpenIDM are inherently fully user definable and
    customizable. Like all OpenIDM objects, managed objects can maintain
    relationships to each other in the form of links. Managed objects are
@@ -1119,6 +1137,11 @@ val = openidm.read("config/custom/myconfig")</programlisting>
 
  <section xml:id="system-objects">
   <title>System Objects</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>System objects</secondary>
+  </indexterm>
+
   <para><firstterm>System objects</firstterm> are pluggable representations of
   objects on external systems. They follow the same RESTful resource based
   design principles as managed objects. There is a default implementation for
@@ -1128,6 +1151,11 @@ val = openidm.read("config/custom/myconfig")</programlisting>
 
  <section xml:id="audit-objects">
   <title>Audit Objects</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Audit objects</secondary>
+  </indexterm>
+
   <para>Audit objects house audit data selected for local storage in the
   OpenIDM repository. For details, see the chapter on <link
   xlink:role="http://docbook.org/xlink/role/olink"
@@ -1137,6 +1165,11 @@ val = openidm.read("config/custom/myconfig")</programlisting>
 
  <section xml:id="links">
   <title>Links</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Links</secondary>
+  </indexterm>
+
   <para>Link objects define relations between source objects and a target
   objects, usually relations between managed objects and system objects.
   The link relationship is established by provisioning activity that either

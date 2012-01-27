@@ -32,6 +32,9 @@
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
  <title>Synchronization Reference</title>
+ <indexterm>
+  <primary>Synchronization</primary>
+ </indexterm>
 
  <para>The synchronization engine is the core of OpenIDM. You configure the
  synchronization service through a <literal>mappings</literal> property

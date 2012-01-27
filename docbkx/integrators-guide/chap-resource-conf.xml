@@ -31,6 +31,15 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Connecting to External Resources</title>
+ <indexterm>
+  <primary>Connectors</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Resources</primary>
+ </indexterm>
+ <indexterm>
+  <primary>OpenICF</primary>
+ </indexterm>
 
  <para>This chapter describes how to connect to external resources such
  as LDAP, Active Directory, flat files, and others. Configurations shown
@@ -46,7 +55,8 @@
  avoid the need to install agents to access resources, instead using the
  resources' native protocols. For example, OpenICF connects to database
  resources using the database's Java connection libraries or JDBC driver.
- It connects to directory servers over JNDI. It connects to UNIX and Linux operating systems by using <command>ssh</command>.</para>
+ It connects to directory servers over JNDI. It connects to UNIX systems
+ by using <command>ssh</command>.</para>
  
  <para>Connectors are configured through files named
  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
@@ -56,39 +66,50 @@
  <section xml:id="openidm-openicf">
   <title>About OpenIDM &amp; OpenICF</title>
 
- <para>The following figure shows how OpenIDM can connect to resources through
- an OpenICF server. In most cases, the OpenICF server runs as part of
- OpenIDM.</para>
+  <para>The following figure shows how OpenIDM can connect to resources
+  through an OpenICF server. In most cases, the OpenICF server runs as part
+  of OpenIDM.</para>
 
- <mediaobject xml:id="figure-openicf-architecture">
-  <alt>OpenICF architecture</alt>
-  <imageobject>
-   <imagedata fileref="images/OpenICFarc.png" format="PNG" />
-  </imageobject>
-  <textobject>
-   <para>The figure shows the basic architecture of OpenIDM with two connector
-   servers, one built-in local java server, and another remote, .NET
-   server.</para>
-  </textobject>
- </mediaobject>
+  <mediaobject xml:id="figure-openicf-architecture">
+   <alt>OpenICF architecture</alt>
+   <imageobject>
+    <imagedata fileref="images/OpenICFarc.png" format="PNG" />
+   </imageobject>
+   <textobject>
+    <para>The figure shows the basic architecture of OpenIDM with two connector
+    servers, one built-in local java server, and another remote, .NET
+    server.</para>
+   </textobject>
+  </mediaobject>
 
- <para>OpenICF provides a common service provider interface to allow identity
- services access to the resources containing user information. OpenICF uses
- a connection server that can run as a local connector server inside OpenIDM,
- or as a remote connector server that is a stand-alone process.</para>
+  <para>OpenICF provides a common service provider interface to allow identity
+  services access to the resources containing user information. OpenICF uses
+  a connection server that can run as a local connector server inside OpenIDM,
+  or as a remote connector server that is a stand-alone process.</para>
 
- <para>You might use a remote connector server when you need to access
- libraries that cannot be included as part of the OpenIDM process. If a
- resource, such as Microsoft ADSI, does not provide a connection library that
- you can include inside the Java Virtual Machine, then OpenICF can use the
- native .dll with a remote connector server. (OpenICF connects to ADSI through
- a remote connector server implemented as a .NET service.)</para>
- 
- <note><para>Both, the .net as well as the java connector server can be used as a stand alone service ("remote"). This might be important for scalability or if the service is installed as a cloud service. The .net server must run as a stand alone process since the code can not be run inside the OpenIDM java process. The java server can be run as a remote or local service. There is per default a java server running inside OpenIDM for use as a "#LOCAL" service. See also <xref linkend="connector-reference" />.</para></note>
+  <para>You might use a remote connector server when you need to access
+  libraries that cannot be included as part of the OpenIDM process. If a
+  resource, such as Microsoft ADSI, does not provide a connection library that
+  you can include inside the Java Virtual Machine, then OpenICF can use the
+  native .dll with a remote connector server. (OpenICF connects to ADSI through
+  a remote connector server implemented as a .NET service.)</para>
+
+  <tip>
+   <para>You can run not only .NET connector servers but also Java connector
+   servers as stand alone, remote services. Run them as remote services for
+   scalability, or to have the service run in the cloud.</para>
+
+   <para>By default and for convenience, OpenIDM includes a Java connector
+   server that runs as a <literal>"#LOCAL"</literal> service.</para>
+  </tip>
  </section>
 
  <section xml:id="connector-info-provider-conf">
   <title>Accessing Remote Connectors</title>
+  <indexterm>
+   <primary>Connectors</primary>
+   <secondary>Remote</secondary>
+  </indexterm>
 
   <para>When configuring remote connectors, you use the connector info provider
   service to connect through remote connector servers. The configuration is
@@ -377,6 +398,11 @@
 
   <variablelist xml:id="object-types">
    <title>Object Types</title>
+   <indexterm>
+    <primary>Connectors</primary>
+    <secondary>Object types</secondary>
+   </indexterm>
+
    <para>This configuration object specifies the supported object types. The
    property name defines the <literal>objectType</literal> used in the
    URI: <literal>system/$<replaceable >systemName</replaceable>/$<replaceable
@@ -630,6 +656,10 @@
 
  <section xml:id="connector-examples">
   <title>Connector Configuration Examples</title>
+  <indexterm>
+   <primary>Connectors</primary>
+   <secondary>Examples</secondary>
+  </indexterm>
 
   <para>This section explains provisioner configurations for common
   connectors.</para>

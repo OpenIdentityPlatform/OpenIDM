@@ -32,6 +32,9 @@
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
  <title>Router Service Reference</title>
+  <indexterm>
+   <primary>Router service</primary>
+  </indexterm>
 
   <para>The OpenIDM router service provides the uniform interface to all
   objects in OpenIDM: managed objects, system objects, configuration
