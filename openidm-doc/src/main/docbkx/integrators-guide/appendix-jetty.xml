@@ -81,11 +81,11 @@
    <section>
    <title>Generic Properties Access</title>
 
-{noformat}
+    <programlisting>
 &lt;Call class="org.forgerock.openidm.jetty.Param" name="getProperty">
   &lt;Arg&gt;org.forgerock.openidm.some.sample.property&lt;/Arg&gt;
 &lt;/Call&gt;
-{noformat}
+    </programlisting>
    </section>
   </section>
  </section>
@@ -94,6 +94,7 @@
   <title>Default Settings</title>
   
   <para>Out of the box, OpenIDM comes with a jetty.xml that is configured with</para>
+  
   <itemizedlist>
    <listitem><para>An http connector, listening on port 8080</para></listitem>
    <listitem><para>An ssl connector, listening on port 8443</para></listitem>
@@ -104,4 +105,4 @@
   <para>These default settings are intended for development purposes, and need to be adjusted to the production requirements.</para>
  </section>
 
-</appendix
+</appendix>
