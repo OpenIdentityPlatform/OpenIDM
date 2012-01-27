@@ -51,11 +51,8 @@ public class LocalCommandScope implements CustomCommandScope {
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", "Validates all json configuration file in /conf folder.");
-        help.put("help", "List available commands.");
         help.put("keytool", "Export or import SecretKeyEntry. Keytool does not allow to export or import SecretKeyEntries.");
-        help.put("exit", "Exit from the tool");
         return help;
-
     }
 
     /**
@@ -63,23 +60,6 @@ public class LocalCommandScope implements CustomCommandScope {
      */
     public String getScope() {
         return "local";
-    }
-
-    //TODO Do not register it when it's running in OSGi. Use the org.apache.felix.gogo.command implementation
-    public void help(CommandSession session) {
-        ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
-        for (CustomCommandScope cmdScope : ldr) {
-            if (null != cmdScope.getScope() && null != cmdScope.getFunctionMap()) {
-                for (Map.Entry<String, String> entry : cmdScope.getFunctionMap().entrySet()) {
-                    session.getConsole().append("\t").append(cmdScope.getScope()).append(":").append(entry.getKey()).append("\t").println(entry.getValue());
-                }
-            }
-        }
-    }
-
-    //TODO Do not register it when it's running in OSGi. Use the org.apache.felix.gogo.command implementation
-    public void exit() {
-        System.exit(0);
     }
 
     @Descriptor("")

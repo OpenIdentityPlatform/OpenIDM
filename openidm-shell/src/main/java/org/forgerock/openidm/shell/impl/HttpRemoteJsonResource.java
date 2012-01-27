@@ -139,7 +139,8 @@ public class HttpRemoteJsonResource implements JsonResource {
 
             switch (jsonValues.get("method").required().asEnum(SimpleJsonResource.Method.class)) {
                 case create:
-                    conditions.setNoneMatch(Arrays.asList(Tag.ALL));
+                    //TODO Use condition when org.forgerock.json.resource.restlet.JsonServerResource#doHandle() is fixed
+                    //conditions.setNoneMatch(Arrays.asList(Tag.ALL));
                     clientResource.getRequest().setConditions(conditions);
                     response = clientResource.put(request);
                     break;

@@ -36,12 +36,16 @@ public abstract class AbstractRemoteCommandScope implements CustomCommandScope {
 
     private JsonResource router;
 
-    protected final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * @return HttpRemoteJsonResource instance
      */
     protected JsonResource getRouter() {
         return router;
+    }
+
+    protected ObjectMapper getMapper() {
+        return mapper;
     }
 }
