@@ -86,6 +86,7 @@
  <xinclude:include href="appendix-scripting.xml" />
  <xinclude:include href='appendix-scheduling.xml' />
  <xinclude:include href='appendix-router.xml' />
+ <xinclude:include href='appendix-jetty.xml' />
 
  <index />
  <?dbhtml-include href="../ga.html"?>
