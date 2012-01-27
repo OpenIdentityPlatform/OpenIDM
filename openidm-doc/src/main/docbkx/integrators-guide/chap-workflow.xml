@@ -510,7 +510,7 @@ openidm.action("workflow/activiti", map);
     "enabled" : true,
     "type" : "cron",
     "schedule" : "0 08 16 * * ?",
-    "invokeService" : "discovery-engine",
+    "invokeService" : "sync",
     "invokeContext" : {
        "action" : "reconcile",
        "mapping" : {
