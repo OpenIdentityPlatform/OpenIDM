@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Embedded Jatty</title>
+ <title>Embedded Jetty</title>
   <section><title>Configuration</title>
 
    <para>The default OpenIDM stand-alone distribution includes an embedded Jetty web server.</para>
@@ -39,14 +39,14 @@
 
    <para>Note that all connector configuration is delegated to the jetty.xml, using OSGi and/or PAX web specific settings for connector configuration will not take effect. This allows users to take advantage of all jetty capabilities as it is not configured through an abstraction (which would limit some of the options).</para>
 
-   <para>To unify the settings used for OpenIDM and Jetty, the Jetty configuration can reference configuration properties from OpenIDM; for example, keystore details from OpenIDM's boot.properties.</para>
+   <para>To unify the settings used for OpenIDM and Jetty, the Jetty configuration can reference configuration properties from OpenIDM, for example, keystore details from OpenIDM's boot.properties.</para>
 
    <section>
     <title>Using OpenIDM Configuration Properties in Jetty Configuration</title>
 
     <para>OpenIDM exposes a "Param" class that can be used in Jetty.xml to include OpenIDM configuration.</para>
 
-    <para>This class exposes bean properties for common Jetty settings; and generic property access for arbitrary other settings.</para>
+    <para>This class exposes bean properties for common Jetty settings and generic property access for arbitrary other settings.</para>
 
    <section>
     <title>Explicit Bean Properties</title>
@@ -81,7 +81,7 @@
    <section>
    <title>Generic Properties Access</title>
 
-    <programlisting>
+    <programlisting language="xml">
 &lt;Call class="org.forgerock.openidm.jetty.Param" name="getProperty">
   &lt;Arg&gt;org.forgerock.openidm.some.sample.property&lt;/Arg&gt;
 &lt;/Call&gt;
