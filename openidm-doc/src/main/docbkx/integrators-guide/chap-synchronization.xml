@@ -1178,6 +1178,7 @@ map;</programlisting>
                     "target": "userName"
                 },
                 {
+                    "source": "",
                     "transform": {
                         "type": "text/javascript",
                         "source": "if (source.myGivenName)
@@ -1322,5 +1323,39 @@ repoUser = openidm.read("managed/user/ddoe);</programlisting>
 
   <programlisting language="javascript">
 externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
+ </section>
+ 
+ <section xml:id="alternative-mapping">
+  <title>Alternative Mappings Location</title>
+  
+  <para>The mappings for synchronization of objects are usually stored in the file <filename>openidm/conf/sync.json</filename> and used in all situation, reconciliation, LiveSync and pushing changes out to resources made to managed objects. In some cases it might be desirably to have a different synchronization logic for a scheduled reconciliation. Therefore it is possible to configure a different mapping inside the scheduler configuration for a reconciliation instead of referencing the mapping from the <filename>sync.json</filename>-file.</para>
+  
+  <example xml:id="inline-mapping">
+  <programlisting language="javascript">
+{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0 08 16 * * ?",
+    "invokeService" : "sync",
+    "invokeContext" : {
+       "action" : "reconcile",<emphasis role="bold">
+       "mapping" : {
+           "name" : "CSV_XML",
+           "source" : "system/Ldap/account",
+           "target" : "managed/user",
+           "properties" : [
+               {
+                   "source" : "firstname",
+                   "target" : "firstname"
+               },
+               ...
+           ],
+           "policies" : [
+               ...
+           ]
+       } </emphasis>
+    }
+}</programlisting>
+  </example>
  </section>
 </chapter>
