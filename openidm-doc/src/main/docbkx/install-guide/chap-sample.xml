@@ -44,8 +44,8 @@
   <secondary>Evaluation version</secondary>
  </indexterm>
 
- <para>In the current distribution of OpenIDM the sample 
- in <filename>openidm/samples/sample1</filename> is configured and enabled by
+ <para>In OpenIDM <?eval ${docTargetVersion}?>, the sample in
+ <filename>openidm/samples/sample1</filename> is configured and enabled by
  default. This chapter provides an overview of the sample and how it is
  configured. To see a listing and an overview of the rest of the samples
  provided see the README found in <filename>openidm/samples</filename> and in
@@ -55,7 +55,7 @@
 
  <section xml:id="before-you-begin-sample">
   <title>Before You Begin</title>
-  <para>Install OpenIDM as described in the chapter on <link
+  <para>Install and start OpenIDM as described in the chapter on <link
   xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
   OpenIDM Services</citetitle></link>.</para>
@@ -97,7 +97,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
    </varlistentry>
    <varlistentry>
     <term><command>select * from audit_recon</command></term>
-    <listitem><para>Shows all reconciliation audit records</para></listitem>
+    <listitem><para>Shows all reconciliation audit records</para>
+    <para>This table is created when you run reconciliation.</para></listitem>
    </varlistentry>
   </variablelist>
  </section>
@@ -105,14 +106,14 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  <section xml:id="about-the-sample">
   <title>About the Sample</title>
 
-  <para>OpenIDM connects identity data objects held in different data resources
-  by mapping one object to another. To connect to different data resources,
+  <para>OpenIDM connects identity data objects held in external resources
+  by mapping one object to another. To connect to external resources,
   OpenIDM uses <link xlink:href="http://openicf.forgerock.org">OpenICF</link>
-  connectors configured for use with the data resources.</para>
+  connectors configured for use with the external resources.</para>
 
-  <para>When objects in one data resource change, OpenIDM determines how the
-  changes affect other objects, and can make the changes as necessary. This
-  sample demonstrates how OpenIDM does this by using
+  <para>When objects in one external resource change, OpenIDM determines how
+  the changes affect other objects, and can make the changes as necessary.
+  This sample demonstrates how OpenIDM does this by using
   <firstterm>reconciliation</firstterm> and
   <firstterm>synchronization</firstterm>. OpenIDM reconciliation compares
   objects in one object set to mapped objects in another object set.
@@ -127,11 +128,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   created in the local repository to show you how you can manage local users
   through the REST APIs. You can also use OpenIDM without storing managed
   objects for users in the local repository, instead reconciling and
-  synchronizing objects directly through connectors to external data
+  synchronizing objects directly through connectors to external
   resources.</para>
 
-  <para>Furthermore, this sample involves only one data resource. In practice,
-  you can connect as many resources as needed for your deployment.</para>
+  <para>Furthermore, this sample involves only one external resource. In
+  practice, you can connect as many resources as needed for your
+  deployment.</para>
 
   <variablelist xml:id="about-the-sample-configuration">
    <title>Sample Configuration Files</title>
@@ -141,11 +143,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
    <orderedlist>
     <listitem>
      <para>OpenIDM regularly scans for any scheduler configuration files in the
-     <filename>conf</filename> directory.</para>
+     <filename>openidm/conf</filename> directory.</para>
     </listitem>
     <listitem>
     <para>OpenIDM's reconciliation service reads the mappings and actions for
-    the source and target users from <filename>conf/sync.json</filename>.</para>
+    the source and target users from
+    <filename>openidm/conf/sync.json</filename>.</para>
     </listitem>
     <listitem>
     <para>Reconciliation runs, querying all users in the source, and then
@@ -385,13 +388,13 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  http://localhost:8080/openidm/managed/user/DDOE1
 
 {
- "lastname":"Doe1",
- "firstname":"Darth1",
- "_id":"DDOE1",
- "_rev":"0",
- "email":["mail1@example.com"],
- "description":"Created By XML1",
- "name":"DDOE1"
+ "familyName": "Doe1",
+ "userName": "DDOE1",
+ "givenName": "Darth1",
+ "_id": "DDOE1",
+ "_rev": "0",
+ "email": [ "mail1@example.com" ],
+ "description": "Created By XML1"
  }</screen>
 
   <para>In the OrientDB console, connect to the database, and then query the

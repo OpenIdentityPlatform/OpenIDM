@@ -52,7 +52,8 @@
               be removed, or this entire section should change to something
               like: OpenIDM requires Java SE 6 JDK update 24 or later. OpenIDM
               has been tested with both the Oracle JDK and also OpenJDK. -->
-   <para>The equivalent version of OpenJDK should work too.</para>
+   <para>The equivalent version of OpenJDK should work for evaluation,
+   too.</para>
   </section>
   
   <section xml:id="application-container-prerequisites">
@@ -63,8 +64,9 @@
    </indexterm>
    <para>OpenIDM services run in an OSGi container with an embedded Servlet
    container, and an embedded noSQL database. By default the OSGi container is
-   Apache Felix. The default Servlet container is Jetty. At this time the only
-   supported configuration is running the services in Apache Felix.</para>
+   Apache Felix. The default Servlet container is Jetty. For OpenIDM
+   <?eval ${docTargetVersion}?>, the only supported configuration is running
+   the services in Apache Felix and Jetty.</para>
   </section>
  </section>
 
@@ -82,11 +84,15 @@
 
     <para>Follow these steps to install OpenIDM.</para>
     <step>
-     <para>Make sure you have the correct version of Java installed.</para>
+     <para>Make sure you have an appropriate version of Java installed.</para>
      <screen>$ java -version
 java version "1.6.0_24"
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
 Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
+     <para>Check the release notes for Java requirements in the chapter, <link
+     xlink:href="release-notes#chap-before-you-install"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You
+     Install OpenIDM Software</citetitle></link>.</para>
     </step>
     <step>
      <indexterm>
@@ -305,15 +311,7 @@ Listening for transport dt_socket at address: 5005
     <step>
      <para>Fetch the newly created user from the repository with a RESTful
      GET.</para>
-     <stepalternatives>
-      <step>
-       <para>Browse to <link xlink:show="new"
-       xlink:href="http://localhost:8080/openidm/managed/user/joe"
-       >http://localhost:8080/openidm/managed/user/joe</link>.</para>
-      </step>
-      <step>
-       <para>Use the <command>curl</command> command.</para>
-       <screen>$ curl
+     <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  http://localhost:8080/openidm/managed/user/joe
@@ -327,8 +325,6 @@ Listening for transport dt_socket at address: 5005
  "email":"joe@abc.com",
  "name":"joe"
  }</screen>
-      </step>
-     </stepalternatives>
     </step>
    </procedure>
 
