@@ -161,15 +161,36 @@ description: Created by OpenIDM</programlisting>
    </itemizedlist>
 
    <para>Prepare the LDAP server by creating a base suffix of
-   <literal>dc=example,dc=com</literal>, and importing two objects:</para>
+   <literal>dc=example,dc=com</literal>, and importing these objects:</para>
    <programlisting language="ldif">
+dn: dc=com
+objectClass: domain
+objectClass: top
+dc: com
+
 dn: dc=example,dc=com
-objectclass: organization
+objectClass: domain
+objectClass: top
+dc: example
 
 dn: ou=People,dc=example,dc=com
 ou: people
 description: people
-objectclass: organizationalunit</programlisting>
+objectclass: organizationalunit
+
+dn: uid=jdoe,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: top
+givenName: John
+uid: jdoe
+cn: John Doe
+telephoneNumber: 12345
+sn: Doe
+mail: jdoe@example.com
+description: Created for OpenIDM
+</programlisting>
   </section>
 
   <section xml:id="run-sample2">
@@ -247,7 +268,7 @@ $ curl
 
    <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
    Also copy the sample script to the <filename>script</filename> folder.</para>
-   <screen>$ cp -r samples/sample2b/script .</screen>
+   <screen>$ cp -r samples/sample2b/conf samples/sample2b/script .</screen>
 
    <para>If you already installed sample 2, then simply add the second mapping
    from sample 2b's <filename>sync.json</filename> file to the current
