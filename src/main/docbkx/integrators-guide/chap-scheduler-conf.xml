@@ -31,6 +31,21 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Scheduling Synchronization</title>
+ <indexterm>
+  <primary>Scheduler</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Reconciliation</primary>
+  <secondary>Scheduling</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>Synchronization</primary>
+  <secondary>Scheduling</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>LiveSync</primary>
+  <secondary>Scheduling</secondary>
+ </indexterm>
 
  <para>OpenIDM provides scheduling for synchronization operations such as
  LiveSync and reconciliation. You schedule the operations using
@@ -54,6 +69,10 @@
 
  <section xml:id="scheduler-configuration-file">
   <title>Scheduler Configuration</title>
+  <indexterm>
+   <primary>Scheduler</primary>
+   <secondary>Configuration</secondary>
+  </indexterm>
 
   <para>The scheduler configuration file,
   <filename>openidm/conf/[org.forgerock.openidm.]scheduler-<replaceable
@@ -124,25 +143,34 @@
    </listitem>
   </itemizedlist>
   
-  <para>In case of reconciliation there are two possibilities to define the mapping which should be used as the synchronization logic: </para>
+  <para>For reconciliation, you can define the mapping in two ways.</para>
   <itemizedlist>
-   <listitem><para>By referencing the mapping from the sync.json file by its name, like shown in the example above. The mapping must exist in the sync.json file.</para></listitem>
-   <listitem><para>By configuring the logic in the scheduler configuration itself in the "mapping" poroperty as shown in the example in <link
-  xlink:href="integrators-guide#alternative-mapping"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Alternative Mappings Location</citetitle>
-</link>.</para></listitem>
+   <listitem>
+    <para>Referencing the mapping by its name in <filename>sync.json</filename>
+    as shown in the example above. The mapping must exist in the
+    <filename>sync.json</filename> file.</para></listitem>
+   <listitem>
+    <para>Configuring the mapping in the scheduler configuration by using the
+    <literal>"mapping"</literal> property as shown in the example in
+    <link xlink:href="integrators-guide#alternative-mapping"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Alternative
+    Mappings Location</citetitle></link>.</para>
+   </listitem>
   </itemizedlist>
  </section>
 
  <section xml:id="scheduler-examples">
   <title>Scheduler Examples</title>
+  <indexterm>
+   <primary>Scheduler</primary>
+   <secondary>Examples</secondary>
+  </indexterm>
 
-   <para>The following example shows a schedule for reconciliation that
-   is not enabled. When enabled (<literal>"enabled" : true,</literal>),
-   reconciliation runs every 30 minutes, starting on the hour.</para>
+  <para>The following example shows a schedule for reconciliation that
+  is not enabled. When enabled (<literal>"enabled" : true,</literal>),
+  reconciliation runs every 30 minutes, starting on the hour.</para>
 
-   <programlisting language="javascript">
+  <programlisting language="javascript">
 {
     "enabled": false,
     "type": "cron",
@@ -154,10 +182,10 @@
     }
 }</programlisting>
 
-   <para>The following example shows a schedule for LiveSync enabled
-   to run every 15 seconds, starting at the beginning of the minute.</para>
+  <para>The following example shows a schedule for LiveSync enabled
+  to run every 15 seconds, starting at the beginning of the minute.</para>
 
-   <programlisting language="javascript">
+  <programlisting language="javascript">
 {
     "enabled": false,
     "type": "cron",

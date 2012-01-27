@@ -31,6 +31,12 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Managing Authentication, Authorization &amp; RBAC</title>
+ <indexterm>
+  <primary>Authentication</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Authorization</primary>
+ </indexterm>
 
  <para>OpenIDM currently provides a simple, yet flexible authentication and
  authorization mechanism based on REST interface URLs and on roles stored in
@@ -38,7 +44,15 @@
 
  <section xml:id="openidm-users">
   <title>OpenIDM Users</title>
-  
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Internal users</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Managed users</secondary>
+  </indexterm>
+
   <para>OpenIDM distinguishes between internal users and managed users.</para>
   
   <section xml:id="internal-users">
@@ -85,7 +99,11 @@
   
   <section xml:id="managed-users">
    <title>Managed Users</title>
-   
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
+
    <para>External users that OpenIDM manages are referred to as managed users.
    OpenIDM stores managed users in the managed objects table of the repository,
    called <literal>managedobjects</literal> when implemented in MySQL. A second
@@ -166,7 +184,14 @@
 
  <section xml:id="openidm-roles">
   <title>Roles</title>
-  
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Roles</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Roles</primary>
+  </indexterm>
+
   <variablelist>
    <para>OpenIDM sets up the following roles by default.</para>
    <varlistentry>
@@ -215,7 +240,10 @@
  
  <section xml:id="openidm-authorization">
   <title>Authorization</title>
-  
+  <indexterm>
+   <primary>Authorization</primary>
+  </indexterm>
+
   <para>OpenIDM access control can be based on REST interface URLs.</para>
 
   <para>The <filename>openidm/script/router-authz.js</filename> script

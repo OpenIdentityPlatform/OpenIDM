@@ -31,6 +31,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Configuring Synchronization</title>
+ <indexterm>
+  <primary>Synchronization</primary>
+ </indexterm>
 
  <para>The central function of OpenIDM is synchronizing identity data from
  different resources. This chapter explains what you must know to get started
@@ -39,6 +42,10 @@
 
  <section xml:id="sync-types">
   <title>Types of Synchronization</title>
+  <indexterm>
+   <primary>Synchronization</primary>
+   <secondary>Direct (push)</secondary>
+  </indexterm>
 
   <para>Synchronization happens either when OpenIDM receives a change directly,
   or when OpenIDM discovers a change on an external resource.</para>
@@ -55,6 +62,10 @@
    <varlistentry>
     <term>Reconciliation</term>
     <listitem>
+     <indexterm>
+      <primary>Reconciliation</primary>
+     </indexterm>
+
      <para>In identity management, <firstterm>reconciliation</firstterm> is the
      process of bidirectional synchronization of objects between different data
      stores. Reconciliation applies chiefly to user objects, though OpenIDM
@@ -75,6 +86,10 @@
    <varlistentry>
     <term>LiveSync</term>
     <listitem>
+     <indexterm>
+      <primary>LiveSync</primary>
+     </indexterm>
+
      <para><firstterm>LiveSync</firstterm> performs the same job as
      reconciliation. LiveSync relies on a change log on the external resource
      to determine which objects have changed.</para>
@@ -114,6 +129,10 @@
 
  <section xml:id="sync-flexible-data">
   <title>Flexible Data Model</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
 
   <para>Identity management software tends to favor either a meta-directory
   data model, where all data are mirrored in a central repository, or a
@@ -168,7 +187,13 @@
   <variablelist>
    <varlistentry>
     <term>Connector configuration files</term>
+
     <listitem>
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Connectors</secondary>
+     </indexterm>
+
      <para>Connector configuration files are described in the chapter on <link
      xlink:href="integrators-guide#chap-resource-conf"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Connecting to
@@ -224,6 +249,14 @@
     <term>Synchronization mappings file</term>
 
     <listitem>
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Mappings</secondary>
+     </indexterm>
+     <indexterm>
+      <primary>Mappings</primary>
+     </indexterm>
+
      <para>The synchronization mappings file is
      <filename>openidm/conf/sync.json</filename>. The synchronization mappings
      represent the core configuration for OpenIDM synchronization.</para>
@@ -302,23 +335,39 @@
      that the attribute names come from the connector configuration, rather
      than the external resource itself.</para>
 
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Creating attributes</secondary>
+     </indexterm>
      <para>You can create attributes on the target as part of the
      mapping. In the example, OpenIDM creates a
      <literal>phoneExtension</literal> attribute with a default value of
      <literal>0047</literal>.</para>
 
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Conditions</secondary>
+     </indexterm>
      <para>You can also set up conditions under which OpenIDM maps attributes
      as shown for the email attribute in the example. By default, OpenIDM
      synchronizes all attributes. In the example, the mail attribute is set
      only if the script for the condition returns
      <literal>true</literal>.</para>
 
+     <indexterm>
+      <primary>Synchronization</primary>
+      <secondary>Transforming attributes</secondary>
+     </indexterm>
      <para>OpenIDM lets you transform attributes as well. In the example, the
      <literal>displayName</literal> attribute is set using a combination of
      the <literal>lastName</literal> and <literal>firstName</literal> attribute
-     values from the source.</para>
-     
-     <note><para>The use of the "source" property is optional in a property which is using "transform", but the source object will only be available if "source" is mentioned in the property. Since source.lastName and source.firstName should be used to calculate the displayName in the example, it needs to mention "source" though the value is empty. See the line <filename>"source" : "";</filename> in the example above)</para></note>
+     values from the source. For transformations, the <literal>source</literal>
+     property is optional. However, the source object is only available
+     when you specify the <literal>source</literal> property. Therefore, in
+     order to use <literal>source.lastName</literal> and
+     <literal>source.firstName</literal> to calculate the
+     <literal>displayName</literal>, the example specifies <literal>"source" :
+     ""</literal>.</para>
 
      <para>To add a flow from the repository to <literal>MyLDAP</literal>,
      you would define a mapping with source <literal>managed/user</literal>
@@ -342,6 +391,10 @@
      </mediaobject>
 
      <variablelist>
+      <indexterm>
+       <primary>Synchronization</primary>
+       <secondary>Filtering</secondary>
+      </indexterm>
       <para>By default, OpenIDM synchronizes all objects matching those defined
       in the connector configuration for the resource. Many connectors let you
       limit the scope of objects the connector accesses. For example, the LDAP
@@ -420,6 +473,11 @@
 
   <section xml:id="sync-encrypted-values">
    <title>Using Encrypted Values</title>
+   <indexterm>
+    <primary>Synchronization</primary>
+    <secondary>Encryption</secondary>
+   </indexterm>
+
    <para>OpenIDM supports reversible encryption of attributes values for
    managed objects. Attribute values to encrypt include passwords (if passwords
    are not already encrypted on the external resource), and also authentication
@@ -479,6 +537,10 @@
 
   <section xml:id="constructing-attributes">
    <title>Constructing &amp; Manipulating Attributes</title>
+   <indexterm>
+    <primary>Synchronization</primary>
+    <secondary>Creating attributes</secondary>
+   </indexterm>
 
    <para>OpenIDM lets you construct and manipulate attributes using scripts
    triggered when an object is created (onCreate), updated (onUpdate), or
@@ -500,7 +562,11 @@
 
   <section xml:id="reusing-links">
    <title>Reusing Links</title>
-   
+   <indexterm>
+    <primary>Synchronization</primary>
+    <secondary>Reusing links</secondary>
+   </indexterm>
+
    <para>When two mappings exist to sync the same objects bidirectionally,
    you can use the <literal>links</literal> property in one mapping to have
    OpenIDM use the same internally managed link for both mappings. Otherwise,
@@ -534,6 +600,14 @@
  
  <section xml:id="handling-sync">
   <title>Synchronization Situations &amp; Actions</title>
+   <indexterm>
+    <primary>Synchronization</primary>
+    <secondary>Situations</secondary>
+   </indexterm>
+   <indexterm>
+    <primary>Synchronization</primary>
+    <secondary>Actions</secondary>
+   </indexterm>
 
   <para>During synchronization, OpenIDM categorizes objects by situation.
   Situations are characterized by whether an object exists on a source or
@@ -1051,6 +1125,13 @@
 
  <section xml:id="correlation">
   <title>Correlation Queries</title>
+  <indexterm>
+   <primary>Synchronization</primary>
+   <secondary>Correlation queries</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Correlation queries</primary>
+  </indexterm>
 
   <para>Every time OpenIDM creates an object through synchronization, it
   creates a link between the source and target objects. OpenIDM then uses the
@@ -1143,6 +1224,10 @@ map;</programlisting>
   
  <section xml:id="advanced-dataflow">
   <title>Advanced Data Flow Configuration</title>
+  <indexterm>
+   <primary>Mappings</primary>
+   <secondary>Hooks for scripting</secondary>
+  </indexterm>
   
   <para><xref linkend="basic-flow"/> shows how to trigger scripts when objects
   are created and updated. Other situations require you to trigger scripts
@@ -1326,36 +1411,41 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
  </section>
  
  <section xml:id="alternative-mapping">
-  <title>Alternative Mappings Location</title>
-  
-  <para>The mappings for synchronization of objects are usually stored in the file <filename>openidm/conf/sync.json</filename> and used in all situation, reconciliation, LiveSync and pushing changes out to resources made to managed objects. In some cases it might be desirably to have a different synchronization logic for a scheduled reconciliation. Therefore it is possible to configure a different mapping inside the scheduler configuration for a reconciliation instead of referencing the mapping from the <filename>sync.json</filename>-file.</para>
-  
-  <example xml:id="inline-mapping">
+  <title>Alternative Mappings</title>
+  <indexterm>
+   <primary>Mappings</primary>
+   <secondary>Scheduled reconciliation</secondary>
+  </indexterm>
+
+  <para>Mappings for synchronization are usually stored in
+  <filename>openidm/conf/sync.json</filename> for reconciliation, LiveSync,
+  and for pushing changes made to managed objects to external resources.
+  You can, however, provide alternative mappings for scheduled reconciliation
+  by adding the mapping to the scheduler configuration instead of referencing
+  the <filename>sync.json</filename> mapping.</para>
+
   <programlisting language="javascript">
 {
-    "enabled" : true,
-    "type" : "cron",
-    "schedule" : "0 08 16 * * ?",
-    "invokeService" : "sync",
-    "invokeContext" : {
-       "action" : "reconcile",<emphasis role="bold">
-       "mapping" : {
-           "name" : "CSV_XML",
-           "source" : "system/Ldap/account",
-           "target" : "managed/user",
-           "properties" : [
-               {
-                   "source" : "firstname",
-                   "target" : "firstname"
-               },
-               ...
-           ],
-           "policies" : [
-               ...
-           ]
-       } </emphasis>
+    "enabled": true,
+    "type": "cron",
+    "schedule": "0 08 16 * * ?",
+    "invokeService": "sync",
+    "invokeContext": {
+        "action": "reconcile",
+        <emphasis role="bold">mapping": {
+            "name": "CSV_XML",
+            "source": "system/Ldap/account",
+            "target": "managed/user",
+            "properties": [
+                {
+                    "source": "firstname",
+                    "target": "firstname"
+                },
+                ...
+            ],
+            "policies": [...]
+        }</emphasis>
     }
 }</programlisting>
-  </example>
  </section>
 </chapter>

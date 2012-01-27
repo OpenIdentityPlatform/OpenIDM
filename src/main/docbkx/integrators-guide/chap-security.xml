@@ -31,6 +31,12 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Securing &amp; Hardening OpenIDM</title>
+ <indexterm>
+  <primary>Best practices</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Security</primary>
+ </indexterm>
 
  <para>After following the guidance in this chapter, make sure that you test
  your installation to verify that it behaves as expected before putting it
@@ -42,6 +48,10 @@
 
  <section xml:id="security-ssl-https">
   <title>Use SSL and HTTPS</title>
+  <indexterm>
+   <primary>Security</primary>
+   <secondary>SSL</secondary>
+  </indexterm>
 
   <para>Disable plain HTTP access, included for development convenience, as
   described in the section titled <link
@@ -61,6 +71,13 @@
 
  <section xml:id="security-encrypt-data">
   <title>Encrypt Data Internally &amp; Externally</title>
+  <indexterm>
+   <primary>Security</primary>
+   <secondary>Encryption</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Encryption</primary>
+  </indexterm>
 
   <para>Beyond relying on end-to-end availability of TLS/SSL to protect
   data, OpenIDM also supports explicit encryption of data that goes on the
@@ -79,6 +96,10 @@
 
  <section xml:id="security-messages">
   <title>Use Message Level Security</title>
+  <indexterm>
+   <primary>Security</primary>
+   <secondary>Authentication</secondary>
+  </indexterm>
 
   <para>OpenIDM supports message level security, forcing authentication before
   granting access. Authentication works by means of a filter-based mechanism
@@ -180,6 +201,11 @@ HTTP/1.1 204 No Content</screen>
 +---------------+----------------------------------+
 2 rows in set (0.00 sec)</screen>
 
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Internal users</secondary>
+  </indexterm>
+
   <para>OpenIDM uses the internal table for authentication, and also to set
   the roles for RBAC authorization of an authenticated user. The router
   service, described in the <link
@@ -195,12 +221,22 @@ HTTP/1.1 204 No Content</screen>
 
  <section xml:id="security-replace-defaults">
   <title>Replace Default Security Settings</title>
+  <indexterm>
+   <primary>Passwords</primary>
+  </indexterm>
 
   <para>Default security settings facilitate evaluation. Change the default
   encryption key, and then replace the default user password</para>
 
   <procedure xml:id="security-change-encryption-keys">
    <title>To Change Default Encryption Keys</title>
+   <indexterm>
+    <primary>Encryption</primary>
+   </indexterm>
+   <indexterm>
+    <primary>Security</primary>
+    <secondary>Encryption</secondary>
+   </indexterm>
 
    <para>By default, OpenIDM uses an symmetric encryption key with alias
    <literal>openidm-sym-default</literal>. Change this default key before
@@ -270,6 +306,10 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
 
  <section xml:id="security-jetty">
   <title>Secure Jetty</title>
+  <indexterm>
+   <primary>Ports</primary>
+   <secondary>Disabling</secondary>
+  </indexterm>
 
   <para>Before running OpenIDM in production, edit the
   <filename>openidm/conf/jetty.xml</filename> configuration to avoid
@@ -297,7 +337,7 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
  
  <section xml:id="security-urls">
   <title>Protect Sensitive REST Interface URLs</title>
-  
+
   <para>Although the repository is accessible directly by default, since
   anything attached to the router is accessible with the default policy,
   avoid direct HTTP access in production. If you do not need such access,
@@ -405,8 +445,8 @@ password=<replaceable>password</replaceable></programlisting>
   add startup and shutdown scripts to manage the service at system boot
   and shutdown. For details see the section titled <link
   xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#startup-shutdown"><citetitle>Starting &amp;
-  Stopping OpenIDM</citetitle></link>.</para>
+  xlink:href="integrators-guide#startup-shutdown"><citetitle>Startup &amp;
+  Shutdown</citetitle></link>.</para>
 
   <para>See your operating system documentation for details on adding a
   service such as OpenIDM to be started at boot and shut down at system

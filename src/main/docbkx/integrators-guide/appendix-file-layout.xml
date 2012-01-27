@@ -31,6 +31,11 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>File Layout</title>
+ <indexterm><primary>File layout</primary></indexterm>
+ <indexterm>
+  <primary>Configuration</primary>
+  <secondary>Files</secondary>
+ </indexterm>
 
  <variablelist>
   <para>When you unpack and start OpenIDM <?eval ${docTargetVersion}?>, you

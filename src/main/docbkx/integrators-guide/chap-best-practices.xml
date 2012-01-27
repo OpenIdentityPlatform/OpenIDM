@@ -31,6 +31,9 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>OpenIDM Project Best Practices</title>
+ <indexterm>
+  <primary>Best practices</primary>
+ </indexterm>
 
  <para>This chapter lists points to check when implementing an identity
  management solution with OpenIDM.</para>

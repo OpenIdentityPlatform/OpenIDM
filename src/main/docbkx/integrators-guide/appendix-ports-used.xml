@@ -40,6 +40,10 @@
   <varlistentry>
    <term><literal>8080</literal></term>
    <listitem>
+    <indexterm>
+     <primary>Ports</primary>
+     <secondary>8080</secondary>
+    </indexterm>
     <para>HTTP access to the REST API, requiring OpenIDM authentication. This
     port is not secure, exposing clear text passwords and all data that is not
     encrypted. This port is therefore not suitable for production use.</para>
@@ -48,12 +52,20 @@
   <varlistentry>
    <term><literal>8443</literal></term>
    <listitem>
+    <indexterm>
+     <primary>Ports</primary>
+     <secondary>8443</secondary>
+    </indexterm>
     <para>HTTPS access to the REST API, requiring OpenIDM authentication</para>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term><literal>8444</literal></term>
    <listitem>
+    <indexterm>
+     <primary>Ports</primary>
+     <secondary>8444</secondary>
+    </indexterm>
     <para>HTTPS access to the REST API, requiring SSL mutual authentication.
     Clients presenting certificates found in the trust store under
     <filename>openidm/security/</filename> are granted access to the

@@ -46,6 +46,14 @@
 
  <section xml:id="configuration-objects">
   <title>About Configuration Objects</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Configuration objects</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Configuration</primary>
+   <secondary>Objects</secondary>
+  </indexterm>
 
   <para>OpenIDM exposes internal configuration objects in JSON. Configuration
   elements can be either have single instances or multiple instances for
@@ -89,9 +97,11 @@
    <para>Multiple instance configuration objects correspond to services that
    can have many instances per installation.</para>
    <para>Configuration objects are named
-   <literal><replaceable>object-name</replaceable>/<replaceable>instance-name</replaceable></literal>.</para>
+   <literal><replaceable>object-name</replaceable>/<replaceable
+   >instance-name</replaceable></literal>.</para>
    <para>JSON file views of these configuration objects are named
-   <filename><replaceable>object-name</replaceable>-<replaceable>instance-name</replaceable>.json</filename>.</para>
+   <filename><replaceable>object-name</replaceable>-<replaceable
+   >instance-name</replaceable>.json</filename>.</para>
    <listitem>
     <para>Multiple <literal>scheduler</literal> configurations can run
     reconciliations on different schedules.</para>
@@ -132,6 +142,13 @@
 
  <section xml:id="configuring-over-rest">
   <title>Configuring OpenIDM Over REST</title>
+  <indexterm>
+   <primary>REST API</primary>
+  </indexterm>
+  <indexterm>
+   <primary>Configuration</primary>
+   <secondary>REST API</secondary>
+  </indexterm>
 
   <para>OpenIDM exposes configuration objects under the
   <literal>/openidm/config</literal> context.</para>
@@ -236,7 +253,8 @@
 }</screen>
 
   <para>Multiple instance configuration objects are found under
-  <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable>instance-name</replaceable></literal>.
+  <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable
+  >instance-name</replaceable></literal>.
   The following example shows the configuration for the XML connector
   provisioner.</para>
 
