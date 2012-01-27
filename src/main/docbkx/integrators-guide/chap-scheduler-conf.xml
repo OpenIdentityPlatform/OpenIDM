@@ -123,6 +123,16 @@
 }</programlisting>
    </listitem>
   </itemizedlist>
+  
+  <para>In case of reconciliation there are two possibilities to define the mapping which should be used as the synchronization logic: </para>
+  <itemizedlist>
+   <listitem><para>By referencing the mapping from the sync.json file by its name, like shown in the example above. The mapping must exist in the sync.json file.</para></listitem>
+   <listitem><para>By configuring the logic in the scheduler configuration itself in the "mapping" poroperty as shown in the example in <link
+  xlink:href="integrators-guide#alternative-mapping"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Alternative Mappings Location</citetitle>
+</link>.</para></listitem>
+  </itemizedlist>
  </section>
 
  <section xml:id="scheduler-examples">
