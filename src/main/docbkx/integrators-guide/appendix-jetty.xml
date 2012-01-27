@@ -31,7 +31,7 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Embedded Jatty</title>
-  <section>Configuration
+  <section><title>Configuration</title>
 
    <para>The default OpenIDM stand-alone distribution includes an embedded Jetty web server.</para>
 
