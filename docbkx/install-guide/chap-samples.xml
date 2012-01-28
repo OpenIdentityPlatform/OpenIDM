@@ -233,7 +233,7 @@ $ curl
         }
     ],
     "conversion-time-ms": 0
-}</screen>
+ }</screen>
 
    <para>To retrieve the user, get the object by ID.</para>
 
@@ -324,7 +324,7 @@ $ curl
         }
     ],
     "conversion-time-ms": 0
-}</screen>
+ }</screen>
 
    <para>To retrieve the user, get the object by ID.</para>
 
@@ -503,7 +503,7 @@ $ curl
    <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
    Also copy the <filename>data</filename> folder holding the .csv file.</para>
 
-   <screen>$ cp -r samples/sample4/data .</screen>
+   <screen>$ cp -r samples/sample4/conf samples/sample4/data .</screen>
   </section>
 
   <section xml:id="csv-file-sample4">
@@ -534,6 +534,44 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"</screen>
+
+   <para>The result should resemble the following JSON object, but all on one
+   line.</para>
+
+   <screen>
+{
+    "query-time-ms": 1,
+    "result": [
+        {
+            "_id": "a8c6a158-3e82-450e-8e28-6ebf5a01a1a6",
+            "_rev": "0"
+        },
+        {
+            "_id": "750a2375-6983-4e5f-bdbd-7e121e94cf74",
+            "_rev": "0"
+        }
+    ],
+    "conversion-time-ms": 0
+ }
+   </screen>
+
+   <para>To view the JSON for one of the users, get the user by
+   the value of the <literal>_id</literal>.</para>
+
+   <screen>$ curl
+ --header "X-OpenIDM-Username-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ http://localhost:8080/openidm/managed/user/a8c6a158-3e82-450e-8e28-6ebf5a01a1a6
+
+{
+    "userName": "Doe",
+    "givenName": "Darth",
+    "employeeNumber": "123456",
+    "_id": "a8c6a158-3e82-450e-8e28-6ebf5a01a1a6",
+    "_rev": "0",
+    "email": "doe@forgerock.org"
+ }</screen>
   </section>
  </section>
 
@@ -555,7 +593,7 @@ $ curl
    Also copy the <filename>script</filename> folder that holds sample
    JavaScript files.</para>
 
-   <screen>$ cp -r samples/sample5/script .</screen>
+   <screen>$ cp -r samples/sample5/conf samples/sample5/script .</screen>
 
    <tip>
     <para>If you get a message when starting OpenIDM like this:</para>
@@ -574,7 +612,8 @@ SEVERE: Failed to parse the config of
 
     <para>Also, change correlation rule in the script file 
     <filename>script/name_eq_name_correlationQuery.js</filename> to read
-    as follows.</para>
+    as follows, with <literal>source.userName</literal> instead of
+    <literal>source.name</literal>.</para>
 
     <programlisting language="javascript">
 <emphasis role="strong">var value = source.userName;</emphasis>
@@ -643,16 +682,50 @@ $ curl
    <title>Install the Sample</title>
    <para>Install the sample as described in
    <xref linkend="preparing-openidm"/>.</para>
+
+   <screen>$ cp -r samples/sample6/conf .</screen>
   </section>
 
   <section xml:id="external-resource-sample6">
    <title>External Configuration</title>
 
-  <para>Out of the box, the sample provisioners are configured to use two
-  independent LDAP servers. Change the sample to connect to a single LDAP
-  server representing both external resources by using the same port numbers
-  in both provisioner .json files. For example, set both lines to read
-  <literal>"port" : 1389,</literal>.</para>
+   <para>Out of the box, the sample provisioners are configured to use two
+   independent LDAP servers. Change the sample to connect to a single LDAP
+   server representing both external resources by using the same port numbers
+   in both provisioner .json files. For example, change
+   <filename>conf/provisioner.openicf-ad.json</filename> so the port number
+   line reads <literal>"port" : 1389</literal>.</para>
+
+   <section xml:id="prepare-livesync-sample6">
+    <title>Prepare OpenDJ For LiveSync</title>
+
+    <para>With LiveSync, OpenIDM detects changes in an external resource as they
+    happen. OpenIDM detects changes in OpenDJ by reading the External Change Log
+    (ECL), a mechanism similar to the Retro Change Log for those who have worked
+    with Sun Directory Server. The ECL is presented as an LDAP subtree with 
+    base DN <literal>cn=changelog</literal>. Each change is represented as an
+    entry in the subtree. Each change entry remains in the subtree until the
+    log is purged (by default three days).</para>
+
+    <para>You turn on the change log in OpenDJ by enabling replication. OpenDJ
+    provides the change log even if it does not in fact replicate data to
+    another OpenDJ server (though it can log, in this case, harmless error
+    messages because it is not connected to another replica).</para>
+
+    <para>To enable replication without another server, set up replication when
+    installing OpenDJ.</para>
+
+    <mediaobject xml:id="screenshot-opendj-repl-setup">
+     <alt>Topology Options screen from the OpenDJ QuickSetup wizard</alt>
+     <imageobject>
+      <imagedata fileref="images/replication-setup.png" format="PNG" />
+     </imageobject>
+     <textobject>
+      <para>The OpenDJ QuickSetup wizard lets you set up replication at
+      installation time.</para>
+     </textobject>
+    </mediaobject>
+   </section>
 
    <section xml:id="ldap-configuration-sample6">
     <title>LDAP Configuration</title>
@@ -709,55 +782,48 @@ description: Created by OpenIDM
 
     <para>For the "LDAP" directory:</para>
     <programlisting language="ldif">
+dn: dc=com
+objectClass: domain
+objectClass: top
+dc: com
+
 dn: dc=example,dc=com
-objectclass: organization
+objectClass: domain
+objectClass: top
+dc: example
 
 dn: ou=People,dc=example,dc=com
 ou: people
 description: people
-objectclass: organizationalunit</programlisting>
+objectclass: organizationalunit
 
-   <para>For "AD" directory:</para>
+dn: uid=jdoe,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: top
+givenName: John
+uid: jdoe
+cn: John Doe
+telephoneNumber: 12345
+sn: Doe
+mail: jdoe@example.com
+description: Created for OpenIDM
+</programlisting>
+
+   <para>For the "AD" directory:</para>
 
    <programlisting language="ldif">
 dn: o=AD
-objectclass: organization
+objectClass: domain
+objectClass: top
+dc: organization
 
 dn: ou=People,o=AD
 ou: people
 description: people
-objectclass: organizationalunit</programlisting>
-   </section>
-
-   <section xml:id="prepare-livesync-sample6">
-    <title>Prepare OpenDJ For LiveSync</title>
-
-    <para>With LiveSync, OpenIDM detects changes in an external resource as they
-    happen. OpenIDM detects changes in OpenDJ by reading the External Change Log
-    (ECL), a mechanism similar to the Retro Change Log for those who have worked
-    with Sun Directory Server. The ECL is presented as an LDAP subtree with 
-    base DN <literal>cn=changelog</literal>. Each change is represented as an
-    entry in the subtree. Each change entry remains in the subtree until the
-    log is purged (by default three days).</para>
-
-    <para>You turn on the change log in OpenDJ by enabling replication. OpenDJ
-    provides the change log even if it does not in fact replicate data to
-    another OpenDJ server (though it can log, in this case, harmless error
-    messages because it is not connected to another replica).</para>
-
-    <para>To enable replication without another server, set up replication when
-    installing OpenDJ.</para>
-
-    <mediaobject xml:id="screenshot-opendj-repl-setup">
-     <alt>Topology Options screen from the OpenDJ QuickSetup wizard</alt>
-     <imageobject>
-      <imagedata fileref="images/replication-setup.png" format="PNG" />
-     </imageobject>
-     <textobject>
-      <para>The OpenDJ QuickSetup wizard lets you set up replication at
-      installation time.</para>
-     </textobject>
-    </mediaobject>
+objectclass: organizationalunit
+</programlisting>
    </section>
   </section>
 
@@ -779,7 +845,10 @@ $ curl
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
     <para>If the command above returns with an error, then stop and start
-    OpenIDM again. The result of a successful reconciliation is empty.</para>
+    OpenIDM again. The result of a successful reconciliation is a
+    <literal>reconId</literal> object.</para>
+
+    <screen>{"reconId":"7da56fc0-54de-4c7b-bae3-de7c7a999387"}</screen>
 
     <para>With the configuration for sample 6, OpenIDM creates user objects
     from LDAP in the repository, and also in the target AD suffix.</para>
@@ -827,7 +896,20 @@ $ curl
  --hostname `hostname`
  --port 1389
  --baseDN o=AD
- "(uid=*)"</screen>
+ "(uid=*)"
+
+dn: uid=jdoe,ou=people,o=ad
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: top
+givenName: John
+description: Created for OpenIDM
+uid: jdoe
+cn: John Doe
+sn: Doe
+mail: jdoe@example.com
+</screen>
    </section>
 
    <section xml:id="run-sample6-live-sync">
@@ -836,7 +918,8 @@ $ curl
     <para>In contrast to reconciliation, which you can start by using a
     scheduler configuration or by using the REST interface directly, you must
     start LiveSync using a scheduler. The sample comes with the following
-    scheduler configuration file for LiveSync.</para>
+    scheduler configuration file for LiveSync in
+    <filename>conf/scheduler-activeSynchroniser_systemLdapAccount.json</filename>.</para>
 
     <programlisting language="javascript">
 {
