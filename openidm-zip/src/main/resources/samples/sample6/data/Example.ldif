@@ -1,0 +1,28 @@
+dn: dc=com
+objectClass: domain
+objectClass: top
+dc: com
+
+dn: dc=example,dc=com
+objectClass: domain
+objectClass: top
+dc: example
+
+dn: ou=People,dc=example,dc=com
+ou: people
+description: people
+objectclass: organizationalunit
+
+dn: uid=jdoe,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: top
+givenName: John
+uid: jdoe
+cn: John Doe
+telephoneNumber: 12345
+sn: Doe
+mail: jdoe@example.com
+description: Created for OpenIDM
+
