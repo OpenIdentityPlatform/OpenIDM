@@ -32,7 +32,7 @@
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
  <title>Configuration Options</title>
 
- <para>OpenIDM configuration is split between .properties and container
+ <para>OpenIDM configuration is split between <filename>.properties</filename> and container
  configuration files, and also dynamic configuration objects. The majority
  of OpenIDM configuration files are stored under
  <filename>openidm/conf/</filename>, as described in the appendix listing the
@@ -67,7 +67,7 @@
    <filename><replaceable>object-name</replaceable>.json</filename>.</para>
    <listitem>
     <para>The <literal>audit</literal> configuration specifies how audit
-    events are logged, for example.</para>
+    events are logged.</para>
    </listitem>
    <listitem>
     <para>The <literal>authentication</literal> configuration controls
@@ -96,12 +96,12 @@
    <title>Multiple Instance Configuration Objects</title>
    <para>Multiple instance configuration objects correspond to services that
    can have many instances per installation.</para>
-   <para>Configuration objects are named
-   <literal><replaceable>object-name</replaceable>/<replaceable
-   >instance-name</replaceable></literal>.</para>
-   <para>JSON file views of these configuration objects are named
-   <filename><replaceable>object-name</replaceable>-<replaceable
-   >instance-name</replaceable>.json</filename>.</para>
+   <para><emphasis>Configuration objects</emphasis> are named
+   <literal><replaceable>objectname</replaceable>/<replaceable
+   >instancename</replaceable></literal>. For instance <filename>provisioner.openicf/xml</filename>.</para>
+   <para><emphasis>JSON file</emphasis> views of these configuration objects are named
+   <filename><replaceable>objectname</replaceable>-<replaceable
+   >instancename</replaceable>.json</filename>. For instance <filename>provisioner.openicf-xml.json.</filename></para>
    <listitem>
     <para>Multiple <literal>scheduler</literal> configurations can run
     reconciliations on different schedules.</para>

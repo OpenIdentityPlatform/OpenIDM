@@ -146,8 +146,8 @@
       <listitem>
        <para>Artifacts handled by OpenIDM are Java object representations of
        the JavaScript object model as defined by JSON. The object model supports
-       interoperability and potential integration with a many applications,
-       services, and programming languages. As OpenIDM is a Java-based product,
+       interoperability and potential integration with many applications,
+       services and programming languages. As OpenIDM is a Java-based product,
        these representations are instances of classes: <literal>Map</literal>,
        <literal>List</literal>, <literal>String</literal>,
        <literal>Number</literal>, <literal>Boolean</literal>, and
