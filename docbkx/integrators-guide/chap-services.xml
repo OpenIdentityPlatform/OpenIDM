@@ -104,6 +104,9 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 $</screen>
     <para>Alternatively, use the <command>nohup</command> command to keep
     OpenIDM running after you log out.</para>
+    
+    <note><para>If OpenIDM was started before applying the change then it is likely that the felix cache needs to be removed: remove the whole <filename>openidm/felix-cache</filename> directory.</para></note>
+    
     <screen>$ nohup ./startup.sh &amp;
 [2] 394
 $ appending output to nohup.out

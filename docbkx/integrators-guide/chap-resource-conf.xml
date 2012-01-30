@@ -522,7 +522,8 @@
    </varlistentry>
   </variablelist>
 
-  <note><para>Using the "-" character for property names, like "given-name", must be avoided since the are problematic to use in java script!</para></note>
+  <note><para>Using the "-" character for property names, like "given-name", should be avoided since it adds more complex syntax if used in java script. If it can not be avoided then the following needs to be used:</para>
+  <para>Use <filename>source['last-name']</filename> instead of <filename>source.last-name</filename></para></note>
   
   <variablelist xml:id="operation-options">
    <title>Operation Options</title>

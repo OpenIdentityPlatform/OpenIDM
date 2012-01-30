@@ -42,12 +42,11 @@
  Logs</citetitle></link>.</para>
 
  <para>You can configure logging by editing the
- <filename>conf/logging.properties</filename> file where you installed
+ <filename>openidm/conf/logging.properties</filename> file in
  OpenIDM.</para>
 
  <para>The default configuration writes log messages in simple format to
- <filename>openidm/logs/openidm*.log</filename> files where you installed
- OpenIDM, rotating files when the size reaches 5 MB, and retaining up to 5
+ <filename>openidm/logs/openidm*.log</filename> files , rotating files when the size reaches 5 MB, and retaining up to 5
  files. Also by default, OpenIDM writes all system and custom log messages
  to the files.</para>
 
