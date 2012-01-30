@@ -173,7 +173,8 @@
     "active": true
 }</programlisting>
 
-  <para>Concerning attribute names there is one restriction which is the use of "-" characters. Attribute names like given-name must be avoided since they can cause problems when used in java script!</para>
+  <note><para>Using the "-" character for property names, like "given-name", should be avoided since it adds more complex syntax if used in java script. If it can not be avoided then the following needs to be used:</para>
+  <para>Use <filename>source['last-name']</filename> instead of <filename>source.last-name</filename></para></note>
  </section>
  
  <section xml:id="basic-flow">
