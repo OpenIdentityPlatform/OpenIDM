@@ -62,6 +62,8 @@
  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
  where <replaceable>name</replaceable> corresponds to the name of the
  connector.</para>
+ 
+ <note><para>Though the <replaceable>name</replaceable> part of the file name is free text, it must not contain any "-" character!</para></note>
 
  <section xml:id="openidm-openicf">
   <title>About OpenIDM &amp; OpenICF</title>
@@ -227,8 +229,11 @@
  <section xml:id="openicf-provisioner-conf">
   <title>Configuring Connectors</title>
 
-  <para>You configure connectors through the OpenICF provisioner service.
-  The following example shows an OpenICF provisioner service
+  <para>Connectors are configured through the OpenICF provisioner service. Each configuration is stored in an extra file/object in the  <filename>openidm/conf/</filename> folder or under the same URL respectively. The file name convention is <filename>provisioner.openicf-<replaceable>name</replaceable>.json</filename>.</para>
+  
+  <note><para>Though the <replaceable>name</replaceable> part of the file name is free text, it must not contain any "-" character!</para></note>
+  
+  <para>The following example shows an OpenICF provisioner service
   configuration.</para>
 
   <programlisting language="javascript">{
@@ -415,6 +420,7 @@
    resource type specific attributes used by OpenICF for particular
    purposes, such as <literal>__NAME__</literal> as the naming attribute
    for objects on a resource.</para>
+   
    <programlisting language="javascript">
 {
   "account" :
@@ -452,7 +458,12 @@
         [
           "NOT_RETURNED_BY_DEFAULT"
         ]
-      }
+      },                
+      "givenName" : {
+         "type" : "string",
+         "nativeName" : "givenName",
+         "nativeType" : "string"
+         },
     }
   }
 }</programlisting>
@@ -511,6 +522,8 @@
    </varlistentry>
   </variablelist>
 
+  <note><para>Using the "-" character for property names, like "given-name", must be avoided since the are problematic to use in java script!</para></note>
+  
   <variablelist xml:id="operation-options">
    <title>Operation Options</title>
 
@@ -663,6 +676,12 @@
 
   <para>This section explains provisioner configurations for common
   connectors.</para>
+  
+  <note><para>There is an description on how to interactively produce a conector configuration in <link
+  xlink:href="integrators-guide#appendix-connector-wiz"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Appendix "Creating Default Provisioner Configurations"</citetitle>
+</link>.</para></note>
 
   <section xml:id="xml-file-connector">
    <title>XML File Connector</title>
