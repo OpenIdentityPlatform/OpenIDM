@@ -172,6 +172,8 @@
     "title": "Vice President",
     "active": true
 }</programlisting>
+
+  <para>Concerning attribute names there is one restriction which is the use of "-" characters. Attribute names like given-name must be avoided since they can cause problems when used in java script!</para>
  </section>
  
  <section xml:id="basic-flow">
