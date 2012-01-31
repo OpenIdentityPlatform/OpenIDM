@@ -35,7 +35,7 @@
   <primary>Synchronization</primary>
  </indexterm>
 
- <para>The central function of OpenIDM is synchronizing identity data from
+ <para>One of the core services of OpenIDM is synchronizing identity data from
  different resources. This chapter explains what you must know to get started
  configuring OpenIDM's flexible synchronization mechanism, and illustrates the
  concepts with examples.</para>
