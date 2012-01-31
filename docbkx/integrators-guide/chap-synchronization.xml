@@ -68,7 +68,7 @@
 
      <para>In identity management, <firstterm>reconciliation</firstterm> is the
      process of bidirectional synchronization of objects between different data
-     stores. Reconciliation applies chiefly to user objects, though OpenIDM
+     stores. Reconciliation applies mainly to user objects, though OpenIDM
      can reconcile any objects, including groups and roles.</para>
 
      <para>To perform reconciliation, OpenIDM analyzes both source and target
