@@ -61,9 +61,8 @@
  <para>Connectors are configured through files named
  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
  where <replaceable>name</replaceable> corresponds to the name of the
- connector.</para>
- 
- <note><para>Though the <replaceable>name</replaceable> part of the file name is free text, it must not contain any "-" character!</para></note>
+ connector. <emphasis>Do not include dash characters ( <literal>-</literal> )
+ in the connector <replaceable>name</replaceable>.</emphasis></para>
 
  <section xml:id="openidm-openicf">
   <title>About OpenIDM &amp; OpenICF</title>
@@ -522,9 +521,14 @@
    </varlistentry>
   </variablelist>
 
-  <note><para>Using the "-" character for property names, like "given-name", should be avoided since it adds more complex syntax if used in java script. If it can not be avoided then the following needs to be used:</para>
-  <para>Use <filename>source['last-name']</filename> instead of <filename>source.last-name</filename></para></note>
-  
+  <note>
+   <para>Avoid using the dash character ( <literal>-</literal> ) in property
+   names, like <literal>last-name</literal>, as dashes in names make
+   JavaScript syntax more complex. If you cannot avoid the dash, then write
+   <literal>source['last-name']</literal> instead of
+   <literal>source.last-name</literal>.</para>
+  </note>
+
   <variablelist xml:id="operation-options">
    <title>Operation Options</title>
 
@@ -676,13 +680,8 @@
   </indexterm>
 
   <para>This section explains provisioner configurations for common
-  connectors.</para>
-  
-  <note><para>There is an description on how to interactively produce a conector configuration in <link
-  xlink:href="integrators-guide#appendix-connector-wiz"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Appendix "Creating Default Provisioner Configurations"</citetitle>
-</link>.</para></note>
+  connectors. Also see <xref linkend="connector-wiz"/> for instructions
+  on interactively building connector configurations.</para>
 
   <section xml:id="xml-file-connector">
    <title>XML File Connector</title>
@@ -1321,5 +1320,356 @@
    <para>See the <filename>openidm/samples/sample3/tools/</filename> directory
    for example scripts.</para>
   </section>
+ </section>
+
+ <section xml:id="connector-wiz">
+  <title>Creating Default Connector Configurations</title>
+  <indexterm>
+   <primary>Connectors</primary>
+   <secondary>Generating configurations</secondary>
+  </indexterm>
+
+  <para>Rather than creating provisioner files by hand, use the service that
+  OpenIDM exposes through the REST interface to create basic connector
+  configuration files named <filename>provisioner-openicf-<replaceable>Connector
+  Name</replaceable>.json</filename> file.</para>
+
+  <orderedlist >
+   <para>You create a new connector configuration file in three stages.</para>
+   <listitem><para>List available connectors.</para></listitem>
+   <listitem><para>Generate the core configuration.</para></listitem>
+   <listitem><para>Connect to the target system and generate the final
+   configuration.</para></listitem>
+  </orderedlist>
+ 
+  <para>List available connectors using the following command.</para>
+ 
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+  <itemizedlist>
+   <para>Available connectors are installed in
+   <filename>openidm/connectors</filename>. OpenIDM bundles the following
+   connectors.</para>
+   <listitem><para>csvfile</para></listitem>
+   <listitem><para>ldap</para></listitem>
+   <listitem><para>scriptedsql</para></listitem>
+   <listitem><para>xml</para></listitem>
+  </itemizedlist>
+
+  <para>The command above therefore should return the following output
+  (formatted here with lines folded to make it easier to read.)</para>
+
+  <programlisting xml:id="step1-return" language="javascript">
+{
+  "connectorRef": [
+    {
+      "connectorName": "org.identityconnectors.ldap.LdapConnector",
+      "bundleName":
+        "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    {
+      "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+      "bundleName":
+        "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    {
+      "connectorHostRef":
+       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "connectorName": "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector",
+      "bundleName":
+       "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    {
+      "connectorHostRef":
+       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
+      "bundleName":
+       "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
+      "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    }
+  ]
+}</programlisting>
+
+  <para>To generate the core configuration, choose one of the available
+  connectors by copying JSON objects from the list into the body of the REST
+  command, as shown below for the XML connector.</para>
+
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ -d '{"connectorRef":
+ {"connectorName":"com.forgerock.openicf.xml.XMLConnector",
+ "bundleName":"org.forgerock.openicf.connectors.file.openicf-xml-connector",
+ "bundleVersion":"<?eval ${openicfBundleVersion}?>"}}' 
+ --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+  <para>The command returns a core connector configuration. The core connector
+  configuration returned is not yet functional. It does not contain
+  system specific "configurationProperties" such as the host name and port for
+  web based connectors, or the "xmlFilePath" for the XML file based connectors
+  as can be seen below. In addition, the configuration returned does not
+  include complete "objectTypes" and "operationOptions" parts.</para>
+
+  <programlisting language="javascript">
+{
+    "connectorRef": {
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "<?eval ${openicfBundleVersion}?>"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xmlFilePath": null,
+        "xsdFilePath": null,
+        "xsdIcfFilePath": null
+    }
+}</programlisting>
+ 
+  <para>To generate the final configuration, add the missing
+  "configurationProperties" to the core configuration, and use the updated
+  core configuration as the body for the next command.</para>
+  
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --data '{
+   "connectorRef" :
+      {
+         "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
+         "bundleName" :
+             "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+         "bundleVersion" : "<?eval ${openicfBundleVersion}?>"
+      },
+   "poolConfigOption" :
+      {
+         "maxObjects" : 10,
+         "maxIdle" : 10,
+         "maxWait" : 150000,
+         "minEvictableIdleTimeMillis" : 120000,
+         "minIdle" : 1
+      },
+   "resultsHandlerConfig" :
+      {
+         "enableNormalizingResultsHandler" : true,
+         "enableFilteredResultsHandler" : true,
+         "enableCaseInsensitiveFilter" : false,
+         "enableAttributesToGetSearchResultsHandler" : true
+      },
+   "operationTimeout" :
+      {
+         "CREATE" : -1,
+         "UPDATE" : -1,
+         "DELETE" : -1,
+         "TEST" : -1,
+         "SCRIPT_ON_CONNECTOR" : -1,
+         "SCRIPT_ON_RESOURCE" : -1,
+         "GET" : -1,
+         "RESOLVEUSERNAME" : -1,
+         "AUTHENTICATE" : -1,
+         "SEARCH" : -1,
+         "VALIDATE" : -1,
+         "SYNC" : -1,
+         "SCHEMA" : -1
+      },
+   "configurationProperties" :
+      {
+         "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd",
+         "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
+         "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml"
+      }
+ }'
+ --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
+
+  <note>
+   <para>Notice the single quotes around the argument to the
+   <option>--data</option> option in the command above. For most UNIX shells,
+   single quotes around a string prevent the shell from executing the command
+   when encountering a newline in the content. You can therefore pass the
+   <option>--data '...'</option> option on a single line.</para>
+  </note>
+
+  <para>OpenIDM attempts to read the schema, if available, from the external
+  resource in order to generate output. OpenIDM then iterates through schema
+  objects and attributes, creating JSON representations for "objectTypes" and
+  "operationOptions" for supported objects and operations.</para>
+  
+  <programlisting language="javascript">
+{
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "<?eval ${openicfBundleVersion}?>-EA"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml",
+        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd"
+    },
+    "objectTypes": {
+        "OrganizationUnit": {
+            "...": "..."
+        },
+        "__GROUP__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__GROUP__",
+            "type": "object",
+            "nativeType": "__GROUP__",
+            "properties": {
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
+            }
+        },
+        "__ACCOUNT__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ACCOUNT__",
+            "type": "object",
+            "nativeType": "__ACCOUNT__",
+            "properties": {
+                "firstname": {
+                    "type": "string",
+                    "nativeName": "firstname",
+                    "nativeType": "string"
+                },
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "__UID__": {
+                    "type": "string",
+                    "nativeName": "__UID__",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
+            }
+        }
+    },
+    "operationOptions": {
+        "CREATE": {
+            "objectFeatures": {
+                "OrganizationUnit": {
+                    "...": "..."
+                },
+                "__GROUP__": {
+                    "...": "..."
+                },
+                "__ACCOUNT__": {
+                    "denied": false,
+                    "onDeny": "DO_NOTHING",
+                    "operationOptionInfo": {
+                        "$schema": "http://json-schema.org/draft-03/schema",
+                        "id": "FIX_ME",
+                        "type": "object",
+                        "properties": {
+                            "...": "..."
+                        }
+                    }
+                }
+            }
+        },
+        "UPDATE": {
+            "objectFeatures": {
+                "__ACCOUNT__": {
+                    "denied": false,
+                    "onDeny": "DO_NOTHING",
+                    "operationOptionInfo": {
+                        "$schema": "http://json-schema.org/draft-03/schema",
+                        "id": "FIX_ME",
+                        "type": "object",
+                        "properties": {
+                            "...": "..."
+                        }
+                    }
+                }
+            }
+        }
+    }
+}</programlisting>
+
+  <para>As OpenIDM produces a full property set for all attributes and all
+  object types in the schema from the external resource, the resulting
+  configuration can be large. For an LDAP server, OpenIDM can generate a
+  configuration containing several tens of thousands of lines, for example.
+  You might therefore want to reduce schema to a minimum on the external
+  resource before you run the final command.</para>
  </section>
 </chapter>
