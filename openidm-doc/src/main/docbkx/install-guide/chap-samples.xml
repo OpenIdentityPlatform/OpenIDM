@@ -199,13 +199,12 @@ description: Created for OpenIDM
    <para>First start OpenIDM. Then run reconciliation over the REST
    interface.</para>
 
-   <screen>
-$ curl
+   <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
-   </screen>
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+
    <para>If the command above returns an error, shutdown and start OpenIDM
    again. Successful reconciliation returns an empty result.</para>
 
@@ -217,8 +216,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
-   </screen>
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"</screen>
 
    <para>The resulting JSON object should look something like this, but all on
    one line.</para>
@@ -237,8 +235,7 @@ $ curl
 
    <para>To retrieve the user, get the object by ID.</para>
 
-   <screen>
-$ curl
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
@@ -290,8 +287,7 @@ $ curl
    <para>First start OpenIDM. Then run reconciliation over the REST
    interface.</para>
 
-   <screen>
-$ curl
+   <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -328,8 +324,7 @@ $ curl
 
    <para>To retrieve the user, get the object by ID.</para>
 
-   <screen>
-$ curl
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
@@ -418,9 +413,7 @@ $ ./startup.sh</screen>
     language file,
     <filename>openidm/samples/sample3/data/sample_HR_DB.mysql</filename>.
     Import the file into MySQL before running the sample.</para>
-    <screen>
-$ ./bin/mysql -u root -p
- &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
+    <screen width="84"><?dbfo pgwide="1"?>$ ./bin/mysql -u root -p &lt; /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
 Enter password:
 $ </screen>
     </listitem>
@@ -446,8 +439,7 @@ $ </screen>
    contains a mapping to reconcile OpenIDM and the external databasee.
    Run the reconciliation with the following command.</para>
 
-   <screen>
-$ curl
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -477,8 +469,7 @@ $ curl
    <para>To view the JSON for one of the users, get the user by
    the value of the <literal>_id</literal>.</para>
 
-   <screen>
-$ curl
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
@@ -519,8 +510,8 @@ $ curl
    <para>The <filename>sample4/data/hr.csv</filename> file contains two example
    users. The first line of the file sets the attribute names. Running
    reconciliation creates two users in the OpenIDM repository</para>
-   <screen>
-$ curl
+
+   <screen width="89"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -558,7 +549,8 @@ $ curl
    <para>To view the JSON for one of the users, get the user by
    the value of the <literal>_id</literal>.</para>
 
-   <screen>$ curl
+   <screen>
+$ curl
  --header "X-OpenIDM-Username-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
@@ -644,13 +636,11 @@ map;</programlisting>
    <title>Run the Sample</title>
    <para>Run reconciliation between OpenIDM and the pseudo-LDAP resource.</para>
 
-   <screen>
-$ curl
+   <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
-   </screen>
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
    <para>This command creates a user in the repository and also in the pseudo
    AD resource, represented by the
@@ -837,8 +827,7 @@ objectclass: organizationalunit
     <title>Using Reconciliation</title>
     <para>Start up OpenIDM, and then run reconciliation.</para>
 
-    <screen>
-$ curl
+    <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
@@ -879,8 +868,7 @@ $ curl
 
     <para>To read the user object, use the <literal>_id</literal> value.</para>
 
-    <screen>
-$ curl
+    <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET

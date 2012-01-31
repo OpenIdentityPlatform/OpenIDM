@@ -47,9 +47,9 @@
   </indexterm>
 
   <tgroup cols="3">
-   <colspec colnum="1" colwidth="1*"/>
-   <colspec colnum="2" colwidth="2*"/>
-   <colspec colnum="3" colwidth="1*"/>
+   <colspec colnum="1" colwidth="2*"/>
+   <colspec colnum="2" colwidth="3*"/>
+   <colspec colnum="3" colwidth="2*"/>
    <thead>
     <row>
      <entry>Object Type</entry>
@@ -877,13 +877,12 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
      the specified properties of the object. OpenIDM supports patch by query,
      so the caller need not know the identifier of the object to change.</para>
 
-     <screen>
-$ curl
+     <screen width="90"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST -d '[{"replace":"/adPassword","value": "Password"}]' 
- http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-username&amp;uid=DDOE
-      </screen>
+ http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-username&amp;uid=DDOE</screen>
+
       <para>For the syntax on how to formulate the query
       <literal>_query-id=for-username&amp;uid=DDOE</literal> see
       <xref linkend="managed-objects-programmatic-query"/>.</para>
