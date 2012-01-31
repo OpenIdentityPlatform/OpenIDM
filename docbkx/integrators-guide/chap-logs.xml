@@ -46,9 +46,9 @@
  OpenIDM.</para>
 
  <para>The default configuration writes log messages in simple format to
- <filename>openidm/logs/openidm*.log</filename> files , rotating files when the size reaches 5 MB, and retaining up to 5
- files. Also by default, OpenIDM writes all system and custom log messages
- to the files.</para>
+ <filename>openidm/logs/openidm*.log</filename> files, rotating files when
+ the size reaches 5 MB, and retaining up to 5 files. Also by default,
+ OpenIDM writes all system and custom log messages to the files.</para>
 
  <para>You can update the configuration to attach loggers to individual
  packages, setting the log level to using the following values.</para>

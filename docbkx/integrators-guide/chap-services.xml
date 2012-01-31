@@ -66,9 +66,19 @@
   <screen>-&gt; shutdown</screen>
 
   <orderedlist>
+
    <para>You can also start OpenIDM as a background process on UNIX, Linux, and
    Mac OS X. Follow these steps <emphasis>before starting OpenIDM for the first
    time</emphasis>.</para>
+   <listitem>
+    <para>If you have already started OpenIDM, then shut down OpenIDM and
+    remove Felix cache files under
+    <filename>openidm/felix-cache/</filename>.</para>
+
+    <screen>-&gt; shutdown
+...
+$ rm -rf felix-cache/*</screen>
+   </listitem>
    <listitem>
     <para>Disable <literal>ConsoleHandler</literal> logging before starting
     OpenIDM by editing <filename>openidm/conf/logging.properties</filename>
@@ -104,9 +114,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 $</screen>
     <para>Alternatively, use the <command>nohup</command> command to keep
     OpenIDM running after you log out.</para>
-    
-    <note><para>If OpenIDM was started before applying the change then it is likely that the felix cache needs to be removed: remove the whole <filename>openidm/felix-cache</filename> directory.</para></note>
-    
+
     <screen>$ nohup ./startup.sh &amp;
 [2] 394
 $ appending output to nohup.out

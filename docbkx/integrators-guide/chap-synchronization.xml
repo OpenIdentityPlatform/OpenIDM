@@ -173,8 +173,13 @@
     "active": true
 }</programlisting>
 
-  <note><para>Using the "-" character for property names, like "given-name", should be avoided since it adds more complex syntax if used in java script. If it can not be avoided then the following needs to be used:</para>
-  <para>Use <filename>source['last-name']</filename> instead of <filename>source.last-name</filename></para></note>
+  <note>
+   <para>Avoid using the dash character ( <literal>-</literal> ) in property
+   names, like <literal>last-name</literal>, as dashes in names make
+   JavaScript syntax more complex. If you cannot avoid the dash, then write
+   <literal>source['last-name']</literal> instead of
+   <literal>source.last-name</literal>.</para>
+  </note>
  </section>
  
  <section xml:id="basic-flow">
