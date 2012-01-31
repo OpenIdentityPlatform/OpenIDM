@@ -36,7 +36,7 @@
   <primary>Synchronization</primary>
  </indexterm>
 
- <para>The synchronization engine is the core of OpenIDM. You configure the
+ <para>The synchronization engine is one of the core services of OpenIDM. You configure the
  synchronization service through a <literal>mappings</literal> property
  that specifies mappings between objects managed by the synchronization
  engine.</para>
