@@ -104,10 +104,10 @@ org.forgerock.openidm.config.InvalidException:
   <para>This indicates a syntax error in
   <filename>openidm/conf/sync.json</filename>. After fixing your configuration,
   change to the <filename>/path/to/openidm/</filename> directory, and use the
-  <command>sh cli.sh validate</command> command to check that your configuration
+  <command>cli.sh validate</command> command to check that your configuration
   files are valid.</para>
 
-  <screen>$ sh cli.sh validate
+  <screen>$ cd /path/to/openidm ; ./cli.sh validate
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 ...................................................................
 [Validating] Load JSON configuration files from:
@@ -141,9 +141,9 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
   being left in the <literal>unsatisfied</literal> state.</para>
 
   <para>After fixing your configuration, change to the
-  <filename>/path/to/openidm/</filename> directory, and use the <command>sh
-  cli.sh validate</command> command to check that your configuration
-  files are valid.</para>
+  <filename>/path/to/openidm/</filename> directory, and use the <command>cli.sh
+  validate</command> command to check that your configuration files are
+  valid.</para>
  </section>
 
  <section xml:id="system-not-available">

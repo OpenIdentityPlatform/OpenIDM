@@ -52,7 +52,7 @@
   
   <para>The first step is executed by sending a simple REST command to the server:</para>
   
-  <screen width="91"><?dbfo pgwide="1"?>$ curl
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST "http://localhost:8080/openidm/system?_action=CREATECONFIGURATION"</screen>
@@ -70,39 +70,43 @@
   
   <programlisting xml:id="step1-return" language="javascript">
 {
-   "connectorRef" :
-      [
-         {
-            "connectorName" : "org.identityconnectors.ldap.LdapConnector",
-            "bundleName" : "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
-            "bundleVersion" : "1.1.0.0"
-         },
-         {
-            "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
-            "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-            "bundleVersion" : "1.1.0.0"
-         },
-         {
-            "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-            "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector",
-            "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
-            "bundleVersion" : "1.1.0.0"
-         },
-         {
-            "connectorHostRef" : "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-            "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
-            "bundleName" : "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
-            "bundleVersion" : "1.1.0.0"
-         }
-      ]
-}  
-  </programlisting>
+  "connectorRef": [
+    {
+      "connectorName": "org.identityconnectors.ldap.LdapConnector",
+      "bundleName":
+        "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+      "bundleVersion": "1.1.0.0"
+    },
+    {
+      "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+      "bundleName":
+        "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+      "bundleVersion": "1.1.0.0"
+    },
+    {
+      "connectorHostRef":
+       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "connectorName": "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector",
+      "bundleName":
+       "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
+      "bundleVersion": "1.1.0.0"
+    },
+    {
+      "connectorHostRef":
+       "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+      "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
+      "bundleName":
+       "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
+      "bundleVersion": "1.1.0.0"
+    }
+  ]
+}</programlisting>
   
   <note><para>All return values are pretty unformatted when using curl. Transform them into a better readable format can be acheved by using a json formatter like JSON Formatter &amp; Validator which can be found <link xlink:href="http://jsonformatter.curiousconcept.com/" xlink:show="new" >here</link>.</para></note>
   
   <para>For the next step one of the connectors above must be chosen by copying the result above into the body of the REST command, like shown below for the xml connector</para>
   
-  <screen width="91"><?dbfo pgwide="1"?>$ curl
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  -d '{"connectorRef":
@@ -115,62 +119,58 @@
   
   <programlisting language="javascript">
 {
-   "connectorRef" :
-      {
-         "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-         "bundleVersion" : "1.1.0.0"
-      },
-   "poolConfigOption" :
-      {
-         "maxObjects" : 10,
-         "maxIdle" : 10,
-         "maxWait" : 150000,
-         "minEvictableIdleTimeMillis" : 120000,
-         "minIdle" : 1
-      },
-   "resultsHandlerConfig" :
-      {
-         "enableNormalizingResultsHandler" : true,
-         "enableFilteredResultsHandler" : true,
-         "enableCaseInsensitiveFilter" : false,
-         "enableAttributesToGetSearchResultsHandler" : true
-      },
-   "operationTimeout" :
-      {
-         "CREATE" : -1,
-         "UPDATE" : -1,
-         "DELETE" : -1,
-         "TEST" : -1,
-         "SCRIPT_ON_CONNECTOR" : -1,
-         "SCRIPT_ON_RESOURCE" : -1,
-         "GET" : -1,
-         "RESOLVEUSERNAME" : -1,
-         "AUTHENTICATE" : -1,
-         "SEARCH" : -1,
-         "VALIDATE" : -1,
-         "SYNC" : -1,
-         "SCHEMA" : -1
-      },
-   "configurationProperties" :
-      {
-         "xmlFilePath" : null,
-         "xsdFilePath" : null,
-         "xsdIcfFilePath" : null
-      }
-}
-  </programlisting>
+    "connectorRef": {
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "1.1.0.0"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xmlFilePath": null,
+        "xsdFilePath": null,
+        "xsdIcfFilePath": null
+    }
+}</programlisting>
  
   <para>For performing the final step, the missing "configurationProperties" must be filled into the core configuration and the core configuration must be sent sent to the server as the body of a new REST commend:</para>
   
-  <screen width="91"><?dbfo pgwide="1"?>$ curl
+  <screen width="83"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  -d '{
    "connectorRef" :
       {
          "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+         "bundleName" :
+             "org.forgerock.openicf.connectors.file.openicf-xml-connector",
          "bundleVersion" : "1.1.0.0"
       },
    "poolConfigOption" :
@@ -219,169 +219,141 @@
   
   <programlisting language="javascript">
 {
-   "connectorRef" :
-      {
-         "connectorHostRef" : "#LOCAL",
-         "connectorName" : "com.forgerock.openicf.xml.XMLConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-         "bundleVersion" : "1.1.0.0-EA"
-      },
-   "poolConfigOption" :
-      {
-         "maxObjects" : 10,
-         "maxIdle" : 10,
-         "maxWait" : 150000,
-         "minEvictableIdleTimeMillis" : 120000,
-         "minIdle" : 1
-      },
-   "resultsHandlerConfig" :
-      {
-         "enableNormalizingResultsHandler" : true,
-         "enableFilteredResultsHandler" : true,
-         "enableCaseInsensitiveFilter" : false,
-         "enableAttributesToGetSearchResultsHandler" : true
-      },
-   "operationTimeout" :
-      {
-         "CREATE" : -1,
-         "UPDATE" : -1,
-         "DELETE" : -1,
-         "TEST" : -1,
-         "SCRIPT_ON_CONNECTOR" : -1,
-         "SCRIPT_ON_RESOURCE" : -1,
-         "GET" : -1,
-         "RESOLVEUSERNAME" : -1,
-         "AUTHENTICATE" : -1,
-         "SEARCH" : -1,
-         "VALIDATE" : -1,
-         "SYNC" : -1,
-         "SCHEMA" : -1
-      },
-   "configurationProperties" :
-      {
-         "xmlFilePath" : "samples/sample1/data/xmlConnectorData.xml",
-         "xsdFilePath" : "samples/sample1/data/resource-schema-extension.xsd",
-         "xsdIcfFilePath" : "samples/sample1/data/resource-schema-1.xsd"
-      },
-   "objectTypes" :
-      {
-         "OrganizationUnit" :
-            {...
-            },
-         "__GROUP__" :
-            {
-               "$schema" : "http://json-schema.org/draft-03/schema",
-               "id" : "__GROUP__",
-               "type" : "object",
-               "nativeType" : "__GROUP__",
-               "properties" :
-                  {
-                     "__DESCRIPTION__" :
-                        {
-                           "type" : "string",
-                           "required" : true,
-                           "nativeName" : "__DESCRIPTION__",
-                           "nativeType" : "string"
-                        },
-                     "__NAME__" :
-                        {
-                           "type" : "string",
-                           "required" : true,
-                           "nativeName" : "__NAME__",
-                           "nativeType" : "string"
-                        },
-                        ...
-                  }
-            },
-         "__ACCOUNT__" :
-            {
-               "$schema" : "http://json-schema.org/draft-03/schema",
-               "id" : "__ACCOUNT__",
-               "type" : "object",
-               "nativeType" : "__ACCOUNT__",
-               "properties" :
-                  {
-                     "firstname" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "firstname",
-                           "nativeType" : "string"
-                        },
-                     "__DESCRIPTION__" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "__DESCRIPTION__",
-                           "nativeType" : "string"
-                        },
-                     "__UID__" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "__UID__",
-                           "nativeType" : "string"
-                        },
-                     "__NAME__" :
-                        {
-                           "type" : "string",
-                           "required" : true,
-                           "nativeName" : "__NAME__",
-                           "nativeType" : "string"
-                        },
-                        ...
-                  }
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "com.forgerock.openicf.xml.XMLConnector",
+        "bundleName":
+            "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion": "1.1.0.0-EA"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "xmlFilePath": "samples/sample1/data/xmlConnectorData.xml",
+        "xsdFilePath": "samples/sample1/data/resource-schema-extension.xsd",
+        "xsdIcfFilePath": "samples/sample1/data/resource-schema-1.xsd"
+    },
+    "objectTypes": {
+        "OrganizationUnit": {
+            "...": "..."
+        },
+        "__GROUP__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__GROUP__",
+            "type": "object",
+            "nativeType": "__GROUP__",
+            "properties": {
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
             }
-      },
-   "operationOptions" :
-      {
-         "CREATE" :
-            {
-               "objectFeatures" :
-                  {
-                     "OrganizationUnit" :
-                        {...
-                        },
-                     "__GROUP__" :
-                        {...
-                        },
-                     "__ACCOUNT__" :
-                        {
-                           "denied" : false,
-                           "onDeny" : "DO_NOTHING",
-                           "operationOptionInfo" :
-                              {
-                                 "$schema" : "http://json-schema.org/draft-03/schema",
-                                 "id" : "FIX_ME",
-                                 "type" : "object",
-                                 "properties" :
-                                    {
-                                    }
-                              }
+        },
+        "__ACCOUNT__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ACCOUNT__",
+            "type": "object",
+            "nativeType": "__ACCOUNT__",
+            "properties": {
+                "firstname": {
+                    "type": "string",
+                    "nativeName": "firstname",
+                    "nativeType": "string"
+                },
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "__UID__": {
+                    "type": "string",
+                    "nativeName": "__UID__",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
+            }
+        }
+    },
+    "operationOptions": {
+        "CREATE": {
+            "objectFeatures": {
+                "OrganizationUnit": {
+                    "...": "..."
+                },
+                "__GROUP__": {
+                    "...": "..."
+                },
+                "__ACCOUNT__": {
+                    "denied": false,
+                    "onDeny": "DO_NOTHING",
+                    "operationOptionInfo": {
+                        "$schema": "http://json-schema.org/draft-03/schema",
+                        "id": "FIX_ME",
+                        "type": "object",
+                        "properties": {
+                            "...": "..."
                         }
-                  }
-            },
-         "UPDATE" :
-            {
-               "objectFeatures" :
-                  {
-                     "__ACCOUNT__" :
-                        {
-                           "denied" : false,
-                           "onDeny" : "DO_NOTHING",
-                           "operationOptionInfo" :
-                              {
-                                 "$schema" : "http://json-schema.org/draft-03/schema",
-                                 "id" : "FIX_ME",
-                                 "type" : "object",
-                                 "properties" :
-                                    {
-                                    }
-                              }
+                    }
+                }
+            }
+        },
+        "UPDATE": {
+            "objectFeatures": {
+                "__ACCOUNT__": {
+                    "denied": false,
+                    "onDeny": "DO_NOTHING",
+                    "operationOptionInfo": {
+                        "$schema": "http://json-schema.org/draft-03/schema",
+                        "id": "FIX_ME",
+                        "type": "object",
+                        "properties": {
+                            "...": "..."
                         }
-                  }
-            },
-            ...
-      }
-}  
-  </programlisting>
+                    }
+                }
+            }
+        }
+    }
+}</programlisting>
   
   <note><para>Due to downloading the schema from the resource and producing a full property set for all attributes in all object types of the resource schema, the result can be a rather long configuration file. Several 10000 lines in case of an LDAP server, for instance. Therefore it might be desirable to reduce the schema to the minimum required on the resource before running this command.</para></note>
  </section> 
