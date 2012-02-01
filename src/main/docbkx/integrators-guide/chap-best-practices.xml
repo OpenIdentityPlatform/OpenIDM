@@ -157,7 +157,7 @@
 
   <section>
    <title>Production</title>
-   <para>This phase deploys the solution is deployed into production until an
+   <para>This phase deploys the solution into production until an
    application steady state is reached and maintenance routines and procedures
    can be applied.</para>
   </section>

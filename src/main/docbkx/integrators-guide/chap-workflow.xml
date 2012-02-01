@@ -59,7 +59,7 @@
   OpenIDM. See the <link xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
   Guide</citetitle></link> for instructions. After starting OpenIDM, run
-  the <command>scr list</command> command at the console, and check that
+  the <command>scr list</command> command at the console, and check that the 
   bundle is active.</para>
 
   <screen>-&gt; scr list
