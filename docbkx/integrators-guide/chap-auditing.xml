@@ -98,10 +98,10 @@
  </section>
 
  <section xml:id="audit-log-format">
-  <title>Audit Log File Formats</title>
+  <title>Audit Log File Formats</title>                                                  
 
   <para>This section describes the audit log file formats to help you map
-  these to into the reports you generate.</para>
+  these to the reports you generate.</para>
 
   <variablelist xml:id="audit-access-fields">
    <title>Access Log Fields</title>
@@ -294,8 +294,8 @@
    <varlistentry>
     <term><literal>"reconciling"</literal></term>
     <listitem>
-     <para>What OpenIDM is reconciling, such as
-     <literal>"source"</literal></para>
+     <para>What OpenIDM is reconciling, 
+     <literal>"source"</literal> for the first phase, <literal>"target"</literal> for the second phase</para>
     </listitem>
    </varlistentry>
    <varlistentry>
