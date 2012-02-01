@@ -32,6 +32,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-whiteboard</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>org.forgerock.json.resource</artifactId>
         </dependency>
@@ -46,6 +51,11 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-httpcontext</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>

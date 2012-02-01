@@ -45,7 +45,6 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>*</Import-Package>
                         <Export-Package>org.forgerock.openidm.http;version="${openidm.version}"</Export-Package>
                         <Include-Resource>{maven-resources}</Include-Resource>
                     </instructions>
@@ -59,6 +58,16 @@
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-extender-whiteboard</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
