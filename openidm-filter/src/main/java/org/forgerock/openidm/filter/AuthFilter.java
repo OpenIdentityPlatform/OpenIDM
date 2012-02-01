@@ -18,24 +18,13 @@ package org.forgerock.openidm.filter;
 
 // Java Standard Edition
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Date;
+import java.util.*;
 import java.text.SimpleDateFormat;
-import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
 
 import java.security.Principal;
 import java.security.cert.X509Certificate;
-import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,10 +36,12 @@ import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 
 // OSGi Framework
+import org.forgerock.openidm.http.ContextRegistrator;
+import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
 // Apache Felix Maven SCR Plugin
@@ -67,22 +58,16 @@ import org.slf4j.LoggerFactory;
 
 // JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
 
 // JSON Resource
 import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceRouter;
 
 // Deprecated
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetContext;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
 
 import org.forgerock.openidm.audit.util.Status;
 
@@ -349,36 +334,43 @@ public class AuthFilter implements Filter {
         this.router = null;
     }
 
-    @Reference 
-    HttpService httpService;
-    
-    @Reference(target="(openidm.contextid=shared)")
-    HttpContext httpContext;
-
-    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    /** TODO: Description. */
     private ComponentContext context;
-    
+
+    /** TODO: Description. */
+    private ServiceRegistration serviceRegistration;
+
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
         LOGGER.info("Activating Auth Filter with configuration {}", context.getProperties());
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-        logClientIPHeader = (String)config.get("clientIPHeader").asString();
+        logClientIPHeader = (String) config.get("clientIPHeader").asString();
         AuthModule.setConfig(config);
-        
-        org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
-        String urlPatterns[] = {"/openidm/*"};
+
+        /*String urlPatterns[] = {"/openidm/*"};
         String servletNames[] = null;
-        Dictionary initParams = null;
-        webContainer.registerFilter(this, urlPatterns, servletNames, initParams, httpContext);
+
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, urlPatterns);
+        props.put(ExtenderConstants.PROPERTY_SERVLET_NAMES, servletNames);
+        props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "openidm");
+        serviceRegistration = context.getBundleContext().registerService(Filter.class.getName(), this, props);*/
+
+        DefaultFilterMapping filterMapping = new DefaultFilterMapping();
+        filterMapping.setFilter(this);
+        filterMapping.setHttpContextId("openidm");
+        filterMapping.setServletNames("OpenIDM REST");//, "OpenIDM Web");
+        filterMapping.setUrlPatterns("/openidm/*");//, "/openidmui/*");
+        //filterMapping.setInitParams(null);
+        serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(FilterMapping.class.getName(), filterMapping, null);
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        if (httpService != null) {
+        if (serviceRegistration != null) {
             try {
-                org.ops4j.pax.web.service.WebContainer webContainer = (org.ops4j.pax.web.service.WebContainer) httpService;
-                webContainer.unregisterFilter(this);
+                serviceRegistration.unregister();
                 LOGGER.info("Unregistered authentication filter.");
             } catch (Exception ex) {
                 LOGGER.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
