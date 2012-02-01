@@ -70,8 +70,7 @@ $ rm repo.orientdb.json</screen>
   <step>
    <para>Copy <filename>openidm/samples/misc/repo.jdbc.json</filename> to the
    <filename>openidm/conf</filename> directory.</para>
-   <screen>$ pwd
-/path/to/openidm/conf
+   <screen>$ cd /path/to/openidm/conf
 $ cp ../samples/misc/repo.jdbc.json .</screen>
   </step>
   <step>
@@ -86,7 +85,8 @@ Enter password:
 $ </screen>
    <para>This step creates an <literal>openidm</literal> database for use
    as the internal repository.</para>
-   <screen>$ ./bin/mysql -u root -p 
+   <screen>$ cd /path/to/mysql
+$ ./bin/mysql -u root -p 
 Enter password: 
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 18
@@ -131,8 +131,8 @@ mysql&gt; show tables;
     "dbType" : "MYSQL",
     "jndiName" : "",
     "driverClass" : "com.mysql.jdbc.Driver",
-    "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
-    <emphasis role="strong">"username" : "root",
+    <emphasis role="strong">"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
+    "username" : "root",
     "password" : "",</emphasis>
     "defaultCatalog" : "openidm",
     "maxBatchSize" : 100,
@@ -147,7 +147,7 @@ mysql&gt; show tables;
  <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.</para>
 
  <screen>$ cd /path/to/openidm
-$ sh startup.sh
+$ ./startup.sh
 Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m
 Using LOGGING_CONFIG:
