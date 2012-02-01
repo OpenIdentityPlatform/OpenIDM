@@ -30,6 +30,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 // OSGi
+import org.forgerock.openidm.http.ContextRegistrator;
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.extender.whiteboard.ServletMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultServletMapping;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -82,6 +88,15 @@ import org.forgerock.openidm.objset.ObjectSetContext;
     immediate = true,
     policy = ConfigurationPolicy.IGNORE
 )
+@Reference(
+        name = "reference_Servlet_Restlet",
+        referenceInterface = Restlet.class,
+        bind = "bindRestlet",
+        unbind = "unbindRestlet",
+        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+        policy = ReferencePolicy.DYNAMIC,
+        strategy = ReferenceStrategy.EVENT
+)
 public class Servlet extends RestletRouterServlet {
 
     /** TODO: Description. */
@@ -93,29 +108,13 @@ public class Servlet extends RestletRouterServlet {
     /** TODO: Description. */
     private ComponentContext context;
 
-    /**
-     * OSGi http service. May be backed by an embedded felix; or may for example come from the java ee container.
-     */
-    @Reference 
-    HttpService httpService;
-    
-    @Reference(target="(openidm.contextid=shared)")
-    HttpContext httpContext;
+    /** TODO: Description. */
+    private ServiceRegistration serviceRegistration;
     
     /**
      * Provides automatic binding of {@link Restlet} objects that include the
      * {@code openidm.restlet.path} property.
      */
-    @Reference(
-        name = "reference_Servlet_Restlet",
-        referenceInterface = Restlet.class,
-        bind = "bindRestlet",
-        unbind = "unbindRestlet",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC,
-        strategy = ReferenceStrategy.EVENT
-    )
-    protected int _dummy_Restlets; // whiteboard pattern
     protected synchronized void bindRestlet(Restlet restlet, Map<String, Object> properties) {
         Object path = properties.get(PATH_PROPERTY);
         if (path != null && path instanceof String) { // service is specified as internally routable
@@ -160,13 +159,28 @@ public class Servlet extends RestletRouterServlet {
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
         String alias = "/openidm";
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
-        httpService.registerServlet(alias, this,  props, httpContext);
+        /*Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put(ExtenderConstants.PROPERTY_ALIAS, alias);
+        //props.put(ExtenderConstants.PROPERTY_URL_PATTERNS,"openidm");
+        props.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "openidm");
+        props.put("servlet-name", "OpenIDM REST");
+        serviceRegistration = context.getBundleContext().registerService(javax.Servlet.class.getName(), this, props);*/
+
+        DefaultServletMapping servletMapping = new DefaultServletMapping();
+        servletMapping.setHttpContextId("openidm");
+        servletMapping.setAlias(alias);
+        servletMapping.setServlet(this);
+        servletMapping.setServletName("OpenIDM REST");
+        //All WebApplication elements must be registered with the same BundleContext
+        serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(ServletMapping.class.getName(), servletMapping, null);
         LOGGER.debug("Registered servlet at {}", alias);
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+        }
         this.context = null;
     }
 

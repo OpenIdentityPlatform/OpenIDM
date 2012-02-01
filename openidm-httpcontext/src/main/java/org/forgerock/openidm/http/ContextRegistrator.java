@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,11 +24,9 @@
 package org.forgerock.openidm.http;
 
 import java.io.IOException;
-import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -40,16 +38,13 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
 
+import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
+import org.ops4j.pax.web.service.SharedWebContainerContext;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +62,7 @@ public final class ContextRegistrator {
     final static Logger logger = LoggerFactory.getLogger(ContextRegistrator.class);
     
     @Reference
-    HttpService httpService;
+    WebContainer httpService;
 
     HttpContext httpContext;
     
@@ -93,9 +88,23 @@ public final class ContextRegistrator {
         this.context = context;
 
         // register the http context so other bundles can add filters etc.
+        /*//http://team.ops4j.org/browse/PAXWEB-344
+        try {
+            Method getDefaultSharedHttpContext = httpService.getClass().getDeclaredMethod("getDefaultSharedHttpContext");
+            if (null != getDefaultSharedHttpContext) {
+                httpContext = (SharedWebContainerContext) getDefaultSharedHttpContext.invoke(httpService);
+                ((SharedWebContainerContext) httpContext).registerBundle(context.getBundleContext().getBundle());
+            } else {
+                httpContext = httpService.createDefaultHttpContext();
+            }
+        } catch (Exception e) {
+            httpContext = httpService.createDefaultHttpContext();
+        }*/
         httpContext = httpService.createDefaultHttpContext();
         Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
         contextProps.put("openidm.contextid", "shared");
+        contextProps.put(ExtenderConstants.PROPERTY_HTTP_CONTEXT_ID, "openidm");
+        //TODO: Consider the HttpContextMapping it allows to configure the path
         context.getBundleContext().registerService(HttpContext.class.getName(), httpContext, contextProps);
         logger.debug("Registered OpenIDM shared http context");
         
@@ -153,7 +162,7 @@ public final class ContextRegistrator {
     }
     
     /**
-     * @param class name of SecurityConfigurator to load and instantiate
+     * @param clazzName name of SecurityConfigurator to load and instantiate
      * @return the security configurator instance if it was successfully instantiated, null if not.
      * Logs any failures
      */
