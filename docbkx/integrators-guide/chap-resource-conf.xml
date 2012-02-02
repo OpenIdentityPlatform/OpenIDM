@@ -74,12 +74,12 @@
   <mediaobject xml:id="figure-openicf-architecture">
    <alt>OpenICF architecture</alt>
    <imageobject>
-    <imagedata fileref="images/OpenICFarc.png" format="PNG" />
+    <imagedata fileref="images/OpenICFArch.png" format="PNG" />
    </imageobject>
    <textobject>
-    <para>The figure shows the basic architecture of OpenIDM with two connector
-    servers, one built-in local java server, and another remote, .NET
-    server.</para>
+    <para>The figure shows the basic architecture of OpenIDM with three
+    connector servers, one built-in local Java connector server, and two
+    remote, Java and .NET connector servers.</para>
    </textobject>
   </mediaobject>
 
