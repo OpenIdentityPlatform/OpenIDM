@@ -44,18 +44,19 @@
 
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-532'
-    >OPENIDM-532</link>: Authentication rejected on first start-up.</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-548'
+    >OPENIDM-548</link>: If-None-Match tries to read the object and fails.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
     xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-533'
-    >OPENIDM-533</link>: Shutdown script seems to have stopped working.</para>
+    >OPENIDM-547</link>: NPE with the ETag header when not using quotes.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-538'
-    >OPENIDM-538</link>: SSL Mutual auth should set openidm-cert role.</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-542'
+    >OPENIDM-542</link>: <literal>ManagedObjectProperty#onStore</literal> does
+    not put the encrypted value into <literal>JsonCrypto</literal>.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
@@ -65,31 +66,40 @@
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-542'
-    >OPENIDM-542</link>: <literal>ManagedObjectProperty#onStore</literal> does
-    not put the encrypted value into <literal>JsonCrypto</literal>.</para>
-   </listitem>   <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-448'
-    >OPENIDM-448</link>: Reconciliation process is stopped when the first
-    readObject throws SynchronizationException</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-538'
+    >OPENIDM-538</link>: SSL Mutual auth should set openidm-cert role.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-466'
-    >OPENIDM-466</link>: Wrong Logger Classname in DataSourceFactory.java</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-533'
+    >OPENIDM-533</link>: Shutdown script seems to have stopped working.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-471'
-    >OPENIDM-471</link>: On Mac when using Safari, the simple authentication
-    always pops up even when registering a new user.</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-532'
+    >OPENIDM-532</link>: Authentication rejected on first start-up.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-477'
-    >OPENIDM-477</link>: There is SQL locking issue when multiple thread try
-    to create or update object.</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-517'
+    >OPENIDM-517</link>: OrientDB service gets stuck in &quot;activating&quot;
+    state at startup</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-515'
+    >OPENIDM-515</link>: Need to be able to match activity log entries to recon
+    log entries, and tell who initiated the action</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-490'
+    >OPENIDM-490</link>: Router config must be more resilient</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-487'
+    >OPENIDM-487</link>: JAAS authentication fails on some platforms</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
@@ -100,25 +110,26 @@
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-487'
-    >OPENIDM-487</link>: JAAS authentication fails on some platforms</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-477'
+    >OPENIDM-477</link>: There is SQL locking issue when multiple thread try
+    to create or update object.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-490'
-    >OPENIDM-490</link>: Router config must be more resilient</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-471'
+    >OPENIDM-471</link>: On Mac when using Safari, the simple authentication
+    always pops up even when registering a new user.</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-515'
-    >OPENIDM-515</link>: Need to be able to match activity log entries to recon
-    log entries, and tell who initiated the action</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-466'
+    >OPENIDM-466</link>: Wrong Logger Classname in DataSourceFactory.java</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-517'
-    >OPENIDM-517</link>: OrientDB service gets stuck in &quot;activating&quot;
-    state at startup</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-448'
+    >OPENIDM-448</link>: Reconciliation process is stopped when the first
+    readObject throws SynchronizationException</para>
    </listitem>
   </itemizedlist>
  </section>
