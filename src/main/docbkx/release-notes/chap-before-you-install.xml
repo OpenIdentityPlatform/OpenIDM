@@ -55,8 +55,8 @@
   <varlistentry>
    <term>Connectors</term>
    <listitem>
-    <para>OpenIDM <?eval ${docTargetVersion}?> comes with these OpenICF
-    connectors:</para>
+    <para>OpenIDM <?eval ${docTargetVersion}?> comes packaged with these
+    OpenICF connectors:</para>
     <itemizedlist>
      <listitem><para>CSV File</para></listitem>
      <listitem><para>LDAP</para></listitem>
