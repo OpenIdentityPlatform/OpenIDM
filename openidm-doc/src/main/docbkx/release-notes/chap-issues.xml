@@ -37,20 +37,28 @@
  </para>
 
  <section xml:id="fixes">
-  <title>Fixes in This Release</title>
+  <title>Fixes &amp; Improvements in This Release</title>
 
   <itemizedlist>
-   <para>OpenIDM <?eval ${docTargetVersion}?> fixes the following issues.</para>
+   <para>OpenIDM <?eval ${docTargetVersion}?> resolves the following
+   issues.</para>
 
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-548'
-    >OPENIDM-548</link>: If-None-Match tries to read the object and fails.</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-549'
+    >OPENIDM-549</link>: <literal>onValidate</literal> hook should only be
+    invoked before managed object accepts changes to store, not upon
+    retrieval</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-533'
-    >OPENIDM-547</link>: NPE with the ETag header when not using quotes.</para>
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-548'
+    >OPENIDM-548</link>: If-None-Match tries to read the object and fails</para>
+   </listitem>
+   <listitem>
+    <para><link xlink:show="new"
+    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-547'
+    >OPENIDM-547</link>: NPE with the ETag header when not using quotes</para>
    </listitem>
    <listitem>
     <para><link xlink:show="new"
@@ -137,8 +145,8 @@
  <section xml:id="limitations">
   <title>Limitations</title>
 
-  <para>OpenIDM <?eval ${docTargetVersion}?> does not run as a Windows
-  service.</para>
+  <para>OpenIDM <?eval ${docTargetVersion}?> does not come packaged with a
+  wrapper out of the box to run as a Windows service.</para>
  </section>
 
  <section xml:id="known-issues">
@@ -162,8 +170,8 @@
    <listitem>
     <para><link xlink:show="new"
     xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-467"
-    >OPENIDM-467</link>: Cannot save JSON object in repository if it contains
-    a list</para>
+    >OPENIDM-467</link>: Cannot save JSON object in an OrientDB based
+    repository if it contains a list</para>
    </listitem>
   </itemizedlist>
  </section>
