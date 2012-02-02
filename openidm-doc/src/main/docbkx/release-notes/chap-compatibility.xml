@@ -31,6 +31,18 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>OpenIDM Compatibility</title>
 
+ <itemizedlist>
+  <para>These capabilities are expected to change in upcoming releases:</para>
+  <listitem>
+   <para>The way you generate connector configurations for access to external
+   resources, described in <link xlink:href="integrators-guide#connector-wiz"
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
+   Connector Configurations</citetitle></link></para>
+  </listitem>
+ </itemizedlist>
+
+<!-- Use the following structure post 2.0.x:
+
  <para>This chapter covers both major changes to existing functionality, and
  also deprecated and removed functionality.</para>
 
@@ -39,7 +51,6 @@
   
   <para>TODO</para>
  </section>
-
  <section xml:id="deprecation">
   <title>Deprecated Functionality</title>
   
@@ -55,4 +66,5 @@
   
   <para>No functionality is planned to be removed at this time.</para>
  </section>
+ -->
 </chapter>
