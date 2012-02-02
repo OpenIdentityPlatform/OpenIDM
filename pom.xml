@@ -249,7 +249,7 @@
         <fonts-gen>${basedir}/target/fonts</fonts-gen>
         <site-out>${basedir}/target/site</site-out>
         <siteDistributionURL>scp://forgerock.org/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <docTargetVersion>2.0.1</docTargetVersion>
+        <docTargetVersion>2.0.2</docTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
         <commonsJsonCryptoVersion>${commons.json-crypto.version}</commonsJsonCryptoVersion>
