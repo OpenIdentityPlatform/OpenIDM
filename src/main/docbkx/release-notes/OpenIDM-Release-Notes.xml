@@ -31,6 +31,11 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <info>
   <title>OpenIDM <?eval ${docTargetVersion}?> Release Notes</title>
+  <abstract>
+   <para>Notes covering OpenIDM software requirements, fixes, known issues.
+   The OpenIDM project offers flexible, open source services for automating
+   management of the identity life cycle.</para>
+  </abstract>
   <copyright>
    <year>2011-2012</year>
    <holder>ForgeRock AS</holder>
