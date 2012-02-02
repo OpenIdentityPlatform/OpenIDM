@@ -191,11 +191,6 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         for (ManagedObjectProperty property : properties) {
             property.onRetrieve(value);
         }
-// TODO: schema validation here (w. optimization), using on-the-fly decryption transformations
-        execScript("onValidate", onValidate, value);
-        for (ManagedObjectProperty property : properties) {
-            property.onValidate(value);
-        }
     }
 
     /**
