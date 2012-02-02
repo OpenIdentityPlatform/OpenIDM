@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <faqs
@@ -33,7 +33,7 @@
    <question>What is OpenIDM?</question>
    <answer>
     <p>OpenIDM is an open standards based identity management solution.
-    In additiona to being open source, OpenIDM offers high flexibility in
+    In addition to being open source, OpenIDM offers high flexibility in
     business process handling and compliance. A flexible user interface
     combined with a robust workflow engine make OpenIDM ready for any
     identity management project.</p>
