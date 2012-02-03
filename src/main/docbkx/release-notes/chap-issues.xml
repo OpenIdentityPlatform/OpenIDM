@@ -44,100 +44,115 @@
    issues.</para>
 
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-549'
-    >OPENIDM-549</link>: <literal>onValidate</literal> hook should only be
-    invoked before managed object accepts changes to store, not upon
-    retrieval</para>
+    <para>OPENIDM-549: onValidate hook should only be invoked before managed object accepts changes to store, not upon retrieval</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-548'
-    >OPENIDM-548</link>: If-None-Match tries to read the object and fails</para>
+    <para>OPENIDM-542: ManagedObjectProperty#onStore does not put the encrypted value into JsonCrypto</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-547'
-    >OPENIDM-547</link>: NPE with the ETag header when not using quotes</para>
+    <para>OPENIDM-541: REST POST managed/user?_action=patch returning with no response the status should be 204</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-542'
-    >OPENIDM-542</link>: <literal>ManagedObjectProperty#onStore</literal> does
-    not put the encrypted value into <literal>JsonCrypto</literal>.</para>
+    <para>OPENIDM-538: SSL Mutual auth should set openidm-cert role</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-541'
-    >OPENIDM-541</link>: Rest POST <literal>managed/user?_action=patch</literal>
-    returning with no response. Status should be 204.</para>
+    <para>OPENIDM-537: Mail connector uses runtime exceptions instead of object/resource set exceptions</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-538'
-    >OPENIDM-538</link>: SSL Mutual auth should set openidm-cert role.</para>
+    <para>OPENIDM-532: Authentication rejected on first start-up (possible filter registration issue)</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-533'
-    >OPENIDM-533</link>: Shutdown script seems to have stopped working.</para>
+    <para>OPENIDM-518: Improve recon strategy to never go through evaluated targets twice</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-532'
-    >OPENIDM-532</link>: Authentication rejected on first start-up.</para>
+    <para>OPENIDM-517: OrientDB service gets stuck in "activating" state at startup</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-517'
-    >OPENIDM-517</link>: OrientDB service gets stuck in &quot;activating&quot;
-    state at startup</para>
+    <para>OPENIDM-515: Need to be able to match activity log entries to recon log entries, and tell who initiated the action</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-515'
-    >OPENIDM-515</link>: Need to be able to match activity log entries to recon
-    log entries, and tell who initiated the action</para>
+    <para>OPENIDM-509: Implement the UNASSIGNED situation</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-490'
-    >OPENIDM-490</link>: Router config must be more resilient</para>
+    <para>OPENIDM-508: Provide and log a situation (SOURCE_IGNORED) for source objects that are "not qualified" and with no link or target object</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-487'
-    >OPENIDM-487</link>: JAAS authentication fails on some platforms</para>
+    <para>OPENIDM-507: Disable OrientDB multi casting by default</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-479'
-    >OPENIDM-479</link>: Start-up logs all repository configuration file
-    contents in clear text, replace with logging where configuration came
-    from</para>
+    <para>OPENIDM-506: CREATE support on back link / bi-directional link use</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-477'
-    >OPENIDM-477</link>: There is SQL locking issue when multiple thread try
-    to create or update object.</para>
+    <para>OPENIDM-502: Password sync needs to work in the context of the enhanced authentication</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-471'
-    >OPENIDM-471</link>: On Mac when using Safari, the simple authentication
-    always pops up even when registering a new user.</para>
+    <para>OPENIDM-501: JDBC repo explicit table mapping enhancements</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-466'
-    >OPENIDM-466</link>: Wrong Logger Classname in DataSourceFactory.java</para>
+    <para>OPENIDM-499: Clean up default canonical model</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href='https://bugster.forgerock.org/jira/browse/OPENIDM-448'
-    >OPENIDM-448</link>: Reconciliation process is stopped when the first
-    readObject throws SynchronizationException</para>
+    <para>OPENIDM-496: onFailure triggers</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-495: Rename $OPENIDM/jscript to $OPENIDM/script to cater for more scripting languages</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-494: Add a default $OPENIDM/workflow directory</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-488: Warning appears when a managed user is updated or created and then reconciled into an external resource</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-487: JAAS authentication fails on some platforms</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-477: SQL locking issue when multiple threads try to create or update object</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-448: Reconciliation process is stopped when the first readObject throws SynchronizationException</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-446: Productize reconciliation status reports</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-445: Clean up default non-interactive start</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-440: Prevent Reconciliation from running until the system reports complete start-up</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-439: Setup default Jetty based authentication out of the box</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-438: Make embedded OrientDB server admin user details configurable</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-436: Cleanup system properties file</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-435: Tool to validate basic validity of all .json configurations</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-434: Ability to attach JavaScript debugger</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-433: Cleanup and align Windows start/stop scripts</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-432: Link inheritance, eliminate back-links</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-431: Single links table</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-429: Basic facility to disallow access to /system in production profile</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-428: REST inbound policy enforcement point and default policy</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-426: Default OrientDB dbURL generation on Windows contains backslashes which OrientDB does not handle well</para>
    </listitem>
   </itemizedlist>
  </section>
@@ -156,23 +171,43 @@
    <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
    issues.</para>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-521"
-    >OPENIDM-521</link>: Spurious 4xx errors if HTTP service starts before
-    others</para>
+    <para>OPENIDM-550: Using "*" condition on PUT to relax MVCC fails</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-491"
-    >OPENIDM-491</link>: Running recon with misconfigured or empty connector
-    results in the error "Cowardly refusing to perform recon"</para>
+    <para>OPENIDM-545: Command line help not working</para>
    </listitem>
    <listitem>
-    <para><link xlink:show="new"
-    xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-467"
-    >OPENIDM-467</link>: Cannot save JSON object in an OrientDB based
-    repository if it contains a list</para>
+    <para>OPENIDM-527: All connectors must distinguish between successful empty results, and failure to obtain results</para>
    </listitem>
-  </itemizedlist>
+   <listitem>
+    <para>OPENIDM-521: Spurious 4xx errors if HTTP service starts before others</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-519: OpenIDM logs "unbindHttpService: Failed unregistering Servlet" message on startup</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-514: Renamed object in OrientDB sometimes disappears until OpenIDM is restarted</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-491: Running recon with misconfigured or empty connector results in the error "Cowardly refusing to perform recon"</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-470: OpenIDM can not rename objects. If the identifier of the object has been changed the link breaks.</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-469: The ObjectMapping can change the _id and then OpenIDM cannot find the original target object any more</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-467: Cannot save JSON object in OrientDB based repository if it contains a list</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-458: Add support of account types and distinguish them in the mappings</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-456: Support of systems with case-sensitive and case-insensitive ids are unpredictable</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-227: Updates to Resource not persisted via debug pages</para>
+   </listitem>  </itemizedlist>
  </section>
 </chapter>
