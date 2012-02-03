@@ -65,10 +65,10 @@ import org.forgerock.openidm.patch.JsonPatchWrapper;
  * Provides access to a set of managed objects of a given type.
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 class ManagedObjectSet extends ObjectSetJsonResource {
 
-    /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ManagedObjectSet.class);
 
     /** The managed objects service that instantiated this managed object set. */
@@ -107,7 +107,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     /**
      * Constructs a new managed object set.
      *
-     * @param service
+     * @param service the managed object service
      * @param config configuration object to use to initialize managed object set.
      * @throws JsonValueException if the configuration is malformed.
      */
@@ -120,6 +120,8 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         onUpdate = Scripts.newInstance("ManagedObjectSet", config.get("onUpdate"));
         onDelete = Scripts.newInstance("ManagedObjectSet", config.get("onDelete"));
         onValidate = Scripts.newInstance("ManagedObjectSet", config.get("onValidate"));
+        onRetrieve = Scripts.newInstance("ManagedObjectSet", config.get("onRetrieve"));
+        onStore = Scripts.newInstance("ManagedObjectSet", config.get("onStore"));
         for (JsonValue property : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(service, property));
         }
@@ -214,11 +216,11 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     }
 
     /**
-     * TODO: Description.
+     * Decrypt the value
      *
-     * @param value TODO.
-     * @return TODO.
-     * @throws InternalServerErrorException TODO.
+     * @param value an json value with poentially encrypted value(s)
+     * @return object with values decrypted
+     * @throws InternalServerErrorException if decryption failed for any reason
      */ 
     private JsonValue decrypt(JsonValue value) throws InternalServerErrorException {
         try {
@@ -229,10 +231,10 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     }
 
     /**
-     * TODO: Description.
+     * Decrypt the value
      *
-     * @param object TODO.
-     * @return TODO.
+     * @param object in map format with potentially encrypted value(s)
+     * @return object with decrypted values
      * @throws InternalServerErrorException TODO.
      */ 
     private JsonValue decrypt(Map<String, Object> object) throws InternalServerErrorException {
@@ -240,24 +242,24 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     }
 
     /**
-     * TODO: Description.
+     * Log the activities on the managed object
      *
-     * @param id TODO.
-     * @param msg TODO.
-     * @param before TODO.
-     * @param after TODO.
-     * @throws ObjectSetException TODO.
+     * @param id unqualified managed object id
+     * @param msg optional message
+     * @param before object state to log as before the operation
+     * @param after object state to log as after the operation.
+     * @throws ObjectSetException if logging the activiy fails
      */
     private void logActivity(String id, String msg, JsonValue before, JsonValue after) throws ObjectSetException {
         ActivityLog.log(service.getRouter(), ObjectSetContext.get(), msg,
-         managedId(id), before, after, Status.SUCCESS);
+                managedId(id), before, after, Status.SUCCESS);
     }
 
     /**
-     * TODO: Description.
+     * Forbid the use of sub objects
      *
-     * @param id TODO.
-     * @throws ForbiddenException TODO.
+     * @param id the identifier to check
+     * @throws ForbiddenException if the identifier identifies a sub object
      */
     private void noSubObjects(String id) throws ForbiddenException {
         if (id != null && id.indexOf('/') >= 0) {
@@ -266,10 +268,10 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     }
 
     /**
-     * TODO: Description.
+     * Forbid operation without id, on the whole object set
      *
-     * @param id TODO.
-     * @throws ForbiddenException TODO.
+     * @param id the identifier to check
+     * @throws ForbiddenException if there is no identifier.
      */
     private void idRequired(String id) throws ForbiddenException {
         if (id == null) {
@@ -325,7 +327,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         if (_id == null) { // identifier not provided in URI; this is patch-by-query
             try {
                 JsonValue results = new JsonValue(service.getRouter().query(repoId(null),
-                 params.asMap()), new JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
+                        params.asMap()), new JsonPointer("results")).get(QueryConstants.QUERY_RESULT);
                 if (!results.isList()) {
                     throw new InternalServerErrorException("Expecting list result from query");
                 } else if (results.size() == 0) {
