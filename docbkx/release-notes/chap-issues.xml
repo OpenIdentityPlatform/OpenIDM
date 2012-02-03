@@ -37,11 +37,12 @@
  </para>
 
  <section xml:id="fixes">
-  <title>Fixes &amp; Improvements in This Release</title>
+  <title>Fixes &amp; Improvements in 2.0.0, 2.0.1, &amp; 2.0.2</title>
 
   <itemizedlist>
    <para>OpenIDM <?eval ${docTargetVersion}?> resolves the following
-   issues.</para>
+   issues. This list also includes many fixes and improvements in 2.0.0 and
+   2.0.1.</para>
 
    <listitem>
     <para>OPENIDM-549: onValidate hook should only be invoked before managed object accepts changes to store, not upon retrieval</para>
