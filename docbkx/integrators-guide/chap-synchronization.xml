@@ -382,7 +382,7 @@
      and target <literal>system/MyLDAP/account</literal>, named for example
      <literal>managedUser_systemLdapAccounts</literal>.</para>
 
-     <mediaobject xml:id="figure-object-paths"><?dbfo pgwide="1"?>
+     <mediaobject xml:id="figure-service-tree"><?dbfo pgwide="1"?>
       <alt>OpenIDM name space and object paths</alt>
       <imageobject>
        <imagedata fileref="images/ServiceTree.png" format="PNG" />
