@@ -120,23 +120,23 @@
   <title>Authentication</title>
   
   <para>OpenIDM does not allow access to the REST interface unless you
-  authenticate. If your project requires anonymous access to allow users to
+  authenticate. If a project requires anonymous access, to allow users to
   self-register for example, then allow access by user
   <literal>anonymous</literal>, password <literal>anonymous</literal>, as
   described in <xref linkend="internal-users" />. In production, only
   applications are expected to access the REST interface.</para>
 
   <variablelist>
-   <para>OpenIDM supports both basic authentication, and also form based
-   authentication to the REST interface.</para>
+   <para>OpenIDM supports an improved authentication mechanism on the REST interface. The reason for not using standards, like basic authentication or form based authentication, is their leak of compatibility with AJAX.</para>
    <varlistentry>
-    <term>Basic authentication</term>
+    <term>OpenIDM authentication with standard header fields</term>
     <listitem>
      <screen>$ curl --user userName:password</screen>
+     <para>This authentication is compatible with standard basic authentication except that it will not prompt for credentials if they are missing in the request.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>Form based authentication</term>
+    <term>OpenIDM  authentication with OpenIDM header fields</term>
     <listitem>
      <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -144,6 +144,12 @@
     </listitem>
    </varlistentry>
   </variablelist>
+  
+  <para>For more details about the OpenIDM authentication mechanism please see <link
+  xlink:href="integrators-guide#security-messages>"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Use Message Level Security</citetitle>
+</link>.</para>
   
   <para>You can change the attributes OpenIDM uses to store user login and
   password values. The attribute names are shown in a database query

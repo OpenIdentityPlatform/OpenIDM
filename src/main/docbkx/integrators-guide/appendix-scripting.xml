@@ -516,7 +516,7 @@
   <title>Debugging OpenIDM Scripts</title>
 
   <para>OpenIDM includes Eclipse JSDT libraries so you can use Eclipse to debug
-  you OpenIDM scripts during development.</para>
+  your OpenIDM scripts during development.</para>
 
   <procedure xml:id="enable-debugging">
    <title>To Enable Debugging</title>

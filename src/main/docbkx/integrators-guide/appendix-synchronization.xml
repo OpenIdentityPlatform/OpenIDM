@@ -60,7 +60,9 @@
   "properties"      : [ <replaceable>property object</replaceable>, ... ],
   "policies"        : [ <replaceable>policy object</replaceable>, ... ],
   "onCreate"        : <replaceable>script object</replaceable>,
-  "onUpdate"        : <replaceable>script object</replaceable>
+  "onUpdate"        : <replaceable>script object</replaceable>,
+  "onLink"        : <replaceable>script object</replaceable>,
+  "onUnlink"        : <replaceable>script object</replaceable>
 }</programlisting>
 
   <variablelist xml:id="mapping-object-properties">
@@ -106,11 +108,11 @@
     <term>validTarget</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script used during reconciliation that determines if a target
+     <para>A script used during the target phase of reconciliation that determines if a target
       object is valid to be mapped. The script yields a boolean value:
       <literal>true</literal> indicates the target object is valid;
       <literal>false</literal> indicates that the target object should not be
-      included in reconciliation. In the root scope, the source object is
+      included in reconciliation. In the root scope, the target object is
       provided in the <literal>"target"</literal> property. If the script is
       not specified, then all target objects are considered valid for
       mapping.</para>
@@ -121,7 +123,11 @@
     <listitem>
      <para>script object, optional</para>
      <para>A script that yields a query object to query the target object
-      set when a source object has no linked target. The source object is
+      set when a source object has no linked target. The syntax for writing the query depends on the target system of the correlation. See chapter <link
+  xlink:href="integrators-guide#correlation"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Correlation</citetitle>
+</link> for examples of some common targets. The source object is
       provided in the <literal>"source"</literal> property in the script
       scope.</para>
     </listitem>
@@ -171,6 +177,39 @@
       then target object update is aborted.</para>
     </listitem>
    </varlistentry>
+   <varlistentry>
+    <term>onLink</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script to execute when a source object is to be linked to a target object,
+      after property mappings have been applied. In the root scope, the
+      source object is provided in the <literal>"source"</literal> property,
+      projected target object in the <literal>"target"</literal> property. If the script throws an exception,
+      then target object linking is aborted.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>onUnlink</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script to execute when a source and a target object are to be linked,
+      after property mappings have been applied. In the root scope, the
+      source object is provided in the <literal>"source"</literal> property,
+      projected target object in the <literal>"target"</literal> property. If the script throws an exception,
+      then target object unlinking is aborted.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>result</term>
+    <listitem>
+     <para>script object, optional</para>
+     <para>A script to execute on each mapping event, independent of the nature of the operation. In the root scope, the
+      source object is provided in the <literal>"source"</literal> property,
+      projected target object in the <literal>"target"</literal> property. If the script throws an exception,
+      then target object unlinking is aborted.</para>
+      <para>The "result" script is executed only during reconciliation operations!</para>
+    </listitem>
+   </varlistentry>
   </variablelist>
   
   <section xml:id="sync-property-objects">
@@ -181,7 +220,8 @@
    <programlisting language="javascript"> {
   "target" : <replaceable>string</replaceable>,
   "source" : <replaceable>string</replaceable>,
-  "script" : <replaceable>script object</replaceable>,
+  "transform" : <replaceable>script object</replaceable>,
+  "condition" : <replaceable>script object</replaceable>,
   "default": <replaceable>value</replaceable>
 }</programlisting>
 
@@ -205,13 +245,22 @@
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term>script</term>
+      <term>transform</term>
       <listitem>
        <para>script object, optional</para>
-       <para>An script to determine the target property value. The root
-        scope contains value of the source property in the
-        <literal>"source"</literal> property (if specified). The resulting
+       <para>A script to determine the target property value. The root
+        scope contains the value of the source in the
+        <literal>"source"</literal> property, if specified. If the <literal>"source"</literal> property has a value of <literal>""</literal>, then the entire source object of the mapping is contained in the root scope. The resulting
         value yielded by the script is stored in the target property.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>condition</term>
+      <listitem>
+       <para>script object, optional</para>
+       <para>A script to determine whether the mapping should be executed or not. The root
+        scope contains the value of the source in the
+        <literal>"source"</literal> property (if specified). The script is considered to return a boolean value.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -299,32 +348,51 @@
 
   <literallayout class="monospaced">links/<replaceable>mapping</replaceable></literallayout>
 
-  <para>Here, <replaceable>mapping</replaceable> represents that name of the
+  <para>Here, <replaceable>mapping</replaceable> represents the name of the
   mapping for which links are managed.</para>
 
   <para>Link entries have the following structure.</para>
 
   <programlisting language="javascript">{
-  "sourceId": <replaceable>string</replaceable>,
+   "_rev":<replaceable>string</replaceable>,
+   "linkType":<replaceable>string</replaceable>,
+   "secondId":<replaceable>string</replaceable>,
+   "_id":<replaceable>string</replaceable>,
+   "reconId":<replaceable>string</replaceable>,
+   "firstId":<replaceable>string</replaceable>
+}{
+  "f": <replaceable>string</replaceable>,
   "targetId": <replaceable>string</replaceable>,
-  "reconId" : <replaceable>string</replaceable> or null
+  "reconId" : <replaceable>string</replaceable>
 }</programlisting>
 
   <variablelist>
    <varlistentry>
-    <term>sourceId</term>
+    <term>_rev</term>
     <listitem>
      <para>string, required</para>
-     <para>The value of an object's <literal>_id</literal> property, which
-     identifies the source object that is linked to a target object.</para>
+     <para>The value of link object's revision.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>targetId</term>
+    <term>linkType</term>
     <listitem>
      <para>string, required</para>
-     <para>The value of an object's <literal>_id</literal> property, which
-     identifies the target object that is linked to a source object.</para>
+     <para>The type of the link. Usually then name of the mapping which created the link.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>firstId</term>
+    <listitem>
+     <para>string, required</para>
+     <para>The identifier of the first of the two linked objects.</para>
+    </listitem>
+   </varlistentry>
+      <varlistentry>
+    <term>_id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the link object.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -336,6 +404,13 @@
      target objects.</para>
     </listitem>
    </varlistentry>
+   <varlistentry>
+    <term>secondId</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the second of the two linked objects.</para>
+    </listitem>
+   </varlistentry>
   </variablelist>
  </section>
 
@@ -345,28 +420,20 @@
   <orderedlist>
    <para>OpenIDM performs the following queries on a link object set.</para>
    <listitem>
-    <para>Find link(s) for a given source object identifier.</para>
-    <literallayout class="monospaced">SELECT * FROM links/<replaceable
-    >mapping</replaceable> WHERE sourceId = <replaceable
+    <para>Find link(s) for a given firstId object identifier.</para>
+    <literallayout class="monospaced">SELECT * FROM links  WHERE linkType = <replaceable>value</replaceable> AND firstId = <replaceable
     >value</replaceable></literallayout>
     <para>Although a single result makes sense, this query is intended to
     allow multiple results so that this scenario can be handled as an
     exception.</para>
    </listitem>
    <listitem>
-    <para>Select link(s) for a given target object identifier.</para>
-    <literallayout class="monospaced">SELECT * FROM links/<replaceable
-    >mapping</replaceable> WHERE targetId = <replaceable
+    <para>Select link(s) for a given second object identifier.</para>
+    <literallayout class="monospaced">SELECT * FROM links  WHERE linkType = <replaceable>value</replaceable> AND secondId = <replaceable
     >value</replaceable></literallayout>
     <para>Although a single result makes sense, this query is intended to
     allow multiple results so that this scenario can be handled as an
     exception.</para>
-   </listitem>
-   <listitem>
-    <para>Find orphan source and target links.</para>
-    <literallayout class="monospaced">SELECT * FROM links/<replaceable
-    >mapping</replaceable> WHERE reconId &lt;&gt; = <replaceable
-    >value</replaceable></literallayout>
    </listitem>
   </orderedlist>
  </section>
