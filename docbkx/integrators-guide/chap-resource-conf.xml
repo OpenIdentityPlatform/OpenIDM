@@ -88,16 +88,16 @@
   a connection server that can run as a local connector server inside OpenIDM,
   or as a remote connector server that is a stand-alone process.</para>
 
-  <para>You might use a remote connector server when you need to access
-  libraries that cannot be included as part of the OpenIDM process. If a
+  <para>A remote connector server is needed when access
+  libraries that cannot be included as part of the OpenIDM process are needed. If a
   resource, such as Microsoft ADSI, does not provide a connection library that
-  you can include inside the Java Virtual Machine, then OpenICF can use the
-  native .dll with a remote connector server. (OpenICF connects to ADSI through
+  can be included inside the Java Virtual Machine, then OpenICF can use the
+  native .dll with a remote .NET connector server. (OpenICF connects to ADSI through
   a remote connector server implemented as a .NET service.)</para>
 
   <tip>
-   <para>You can run not only .NET connector servers but also Java connector
-   servers as stand alone, remote services. Run them as remote services for
+   <para>Not only .NET connector servers but also Java connector
+   servers can be run as stand alone, remote services. Run them as remote services for
    scalability, or to have the service run in the cloud.</para>
 
    <para>By default and for convenience, OpenIDM includes a Java connector
@@ -112,11 +112,11 @@
    <secondary>Remote</secondary>
   </indexterm>
 
-  <para>When configuring remote connectors, you use the connector info provider
-  service to connect through remote connector servers. The configuration is
+  <para>When configuring remote connectors, the connector info provider
+  service to connect through remote connector servers must be used. The configuration is
   stored in the the configuration file,
   <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
-  You can find a sample under <filename>openidm/samples/provisioners/</filename>.</para>
+  A sample can be found under <filename>openidm/samples/provisioners/</filename>.</para>
 
   <para>The connector info provider service takes this configuration.</para>
 <programlisting language="javascript">
@@ -131,7 +131,7 @@
     <listitem>
      <para>string, optional</para>
      <para>Specifies the directory where OpenICF connectors are located. The
-     default location is <filename>connectors</filename>.
+     default location is <filename>openidm/connectors</filename>.
      </para>
     </listitem>
    </varlistentry>
@@ -172,7 +172,7 @@
    <listitem>
     <para>string, required</para>
     <para>The name of the remote connector server object. Used to identify the
-    remote connector server in connector reference object.</para>
+    remote connector server in connector reference objects.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -286,14 +286,14 @@
      <itemizedlist>
       <listitem>
        <para>If the connector server is local and the connector .jar is
-       installed in <filename>openidm/bundle/</filename>, then the value
+       installed in <filename>openidm/bundle/</filename> (currently not recommended), then the value
        must be
        <literal>"osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager"</literal>.</para>
       </listitem>
       <listitem>
        <para>If the connector server is local and the connector .jar is
        installed in <filename>openidm/connectors/</filename>, then the value
-       must be <literal>"#LOCAL"</literal>.</para>
+       must be <literal>"#LOCAL"</literal>. This is currently the default location.</para>
       </listitem>
      </itemizedlist>
     </listitem>
@@ -415,7 +415,7 @@
    xlink:href="http://tools.ietf.org/html/draft-zyp-json-schema-03">JSON
    Schema</link> with extensions described below.</para>
 
-   <para>Attribute names with start and end with <literal>__</literal> are
+   <para>Attribute names which start and/or end with <literal>__</literal> are
    resource type specific attributes used by OpenICF for particular
    purposes, such as <literal>__NAME__</literal> as the naming attribute
    for objects on a resource.</para>
@@ -526,7 +526,7 @@
    names, like <literal>last-name</literal>, as dashes in names make
    JavaScript syntax more complex. If you cannot avoid the dash, then write
    <literal>source['last-name']</literal> instead of
-   <literal>source.last-name</literal>.</para>
+   <literal>source.last-name</literal> in the java script scripts.</para>
   </note>
 
   <variablelist xml:id="operation-options">
@@ -1220,18 +1220,15 @@
     <para>The CSV file connector often serves when importing users, either
     for initial provisioning or for ongoing updates. When used continuously in
     production, a CSV file serves as a change log, often containing only user
-    records that change.</para>
+    records that changed.</para>
 
    <para>The following example shows an excerpt of the provisioner
-   configuration. You must set <literal>connectorHostRef</literal> as shown
-   if you use the default connector .jar located in the
-   <filename>openidm/bundle</filename> folder.</para>
+   configuration. The default connector-jar location is now, like all other connectors, in <filename>openidm/connectors</filename>. Therefore the  <literal>connectorHostRef</literal> must point to <literal>"#LOCAL"</literal>.</para>
 
    <programlisting language="javascript">
 {
   "connectorRef": {
-    "connectorHostRef":
-      "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
+    "connectorHostRef": "#LOCAL",
     "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
     "bundleName":
       "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
@@ -1519,7 +1516,7 @@
    <option>--data</option> option in the command above. For most UNIX shells,
    single quotes around a string prevent the shell from executing the command
    when encountering a newline in the content. You can therefore pass the
-   <option>--data '...'</option> option on a single line.</para>
+   <option>--data '...'</option> option on a single line or including line feeds.</para>
   </note>
 
   <para>OpenIDM attempts to read the schema, if available, from the external
@@ -1669,7 +1666,7 @@
   object types in the schema from the external resource, the resulting
   configuration can be large. For an LDAP server, OpenIDM can generate a
   configuration containing several tens of thousands of lines, for example.
-  You might therefore want to reduce schema to a minimum on the external
+  You might therefore want to reduce the schema to a minimum on the external
   resource before you run the final command.</para>
  </section>
 </chapter>
