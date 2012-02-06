@@ -178,7 +178,7 @@
    names, like <literal>last-name</literal>, as dashes in names make
    JavaScript syntax more complex. If you cannot avoid the dash, then write
    <literal>source['last-name']</literal> instead of
-   <literal>source.last-name</literal>.</para>
+   <literal>source.last-name</literal> in java script.</para>
   </note>
  </section>
  
@@ -436,7 +436,7 @@
       <varlistentry>
        <term>validTarget</term>
        <listitem>
-        <para>A script used during reconciliation that determines if a target
+        <para>A script used during reconciliation's second phase, that determines if a target
          object is valid to be mapped. The script yields a boolean value:
          <literal>true</literal> indicates the target object is valid;
          <literal>false</literal> indicates that the target object should not be
@@ -486,9 +486,13 @@
     <secondary>Encryption</secondary>
    </indexterm>
 
-   <para>OpenIDM supports reversible encryption of attributes values for
+   <para>OpenIDM supports reversible encryption of attribute values for
    managed objects. Attribute values to encrypt include passwords (if passwords
-   are not already encrypted on the external resource), and also authentication
+   are not already encrypted on the external resource, which would usually exclude them from the synchronization process, see the chapter about <link
+  xlink:href="integrators-guide#chap-passwords"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Passwords</citetitle>
+</link>), and also authentication
    questions, credit card numbers, and social security numbers.</para>
 
    <para>You configure encryption in the managed object configuration. The file
@@ -671,9 +675,9 @@
    <title>Synchronization Situations</title>
 
    <para>OpenIDM performs synchronization action in two phases. First, OpenIDM
-   performs source reconciliation, where OpenIDM accounts for source objects
+   performs the so called source reconciliation, where OpenIDM accounts for source objects
    and associated links based on the mapping configured. Second, OpenIDM runs
-   target reconciliation, where OpenIDM interates over the target objects not
+   the target reconciliation, where OpenIDM iterates over the target objects not
    processed in the first phase.</para>
 
    <orderedlist>
@@ -690,7 +694,7 @@
     <listitem>
      <para>All records from the appropriate link table</para>
 
-     <para>Object with corresponding links in the link table of the repository
+     <para>Objects with corresponding links in the link table of the repository
      get <literal>link=1</literal>. Objects without corresponding links get
      <literal>link=0</literal>.</para>
     </listitem>
@@ -709,8 +713,8 @@
     <varlistentry>
      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, and a link to a target
-      object exists. Detected during change events and reconciliation. Default
+      <para>The mapping qualifies for a target object, and a link to an existing target
+      object was found. Detected during change events and reconciliation. Default
       action: "UPDATE".</para>
      </listitem>
     </varlistentry>
@@ -718,7 +722,7 @@
      <term>"FOUND" (qualifies=1, link=0, target=1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, there is no link to a
-      target object, and there is a single correlated target object to link.
+      target object, and there is a single target object, correlated by the logic found in the correlationQuery.
       Detected during change events and reconciliation. Default action:
       "UPDATE".</para>
      </listitem>
@@ -727,7 +731,7 @@
      <term>"ABSENT" (qualifies=1, link=0, target=0)</term>
      <listitem>
       <para>The mapping qualifies for a target object, there is no link to a
-      target object, and there is no correlated target object to link.
+      target object, and there is no correlated target object found.
       Detected during change events and reconciliation. Default action:
       "CREATE".</para>
      </listitem>
@@ -736,8 +740,7 @@
      <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, there is no link to a
-      target object, but there is more than one correlated target object to
-      link. Detected during change events and reconciliation. Default
+      target object, but there is more than one correlated target object. Detected during change events and reconciliation. Default
       action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
@@ -751,43 +754,56 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>"UNQUALIFIED" (qualifies=0, link=1)</term>
+     <term>"UNQUALIFIED" (qualifies=0, link=0 or 1, target=1 or &gt;1)</term>
      <listitem>
-      <para>The mapping is not qualified for a target object and there is a
-      link to an existing target object. Detected during change events and
+      <para>The mapping is not qualified for a source object. There is one or more targets found through the correlation logic. Detected during change events and
       reconciliation. Default action: "DELETE".</para>
-      <note>
-       <para>Target synchronization assigns the same situation when
-       (qualifies=0, link=0 or source=0).</para>
-      </note>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>"UNASSIGNED" (qualifies=0, link=0, target=1) (not in use)</term>
+     <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
+     <listitem>
+      <para>The source object is unqualified (by validSource), no link, no target is found.</para>
+     </listitem>
+    </varlistentry> 
+   </variablelist>
+   
+    <para>Based on the values assigned to objects during target reconciliation,
+    OpenIDM assigns situations, listed here with their default actions.</para>
+   <variablelist>
+    <varlistentry>
+     <term>"TARGET_IGNORED" (qualifies=0)</term>
+     <listitem>
+      <para>During target reconciliation the target becomes unqualified by the "validTagrt" script.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>"UNASSIGNED" (qualifies=1, link=0)</term>
      <listitem>
       <para>A target object exists for which there is no link. Only detected
       during reconciliation. Default action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
-   </variablelist>
-
-   <variablelist>
-    <para>Based on the values assigned to objects during target reconciliation,
-    OpenIDM assigns situations, listed here with their default actions.</para>
     <varlistentry>
      <term>"CONFIRMED" (qualifies=1, link=1, source=1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, and a link to a
-      source object exists. Detected during only reconciliation. Default
+      source object exists. Detected only during reconciliation. Default
       action: "UPDATE".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>"UNQUALIFIED" (qualifies=0, link=0 or source=0)</term>
+     <term>"UNQUALIFIED" (qualifies=0, link=1, source=1, but source does not qualify)</term>
      <listitem>
-      <para>The mapping is not qualified for a target object, and there is a
-      link to an existing target object. Detected during change events and
+      <para>The mapping is not qualified (by validTarget) for a target object, and there is a
+      link from an existing source object where the source exists. Detected during change events and
       reconciliation. Default action: "DELETE".</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
+     <listitem>
+      <para>The target qualifies and a link is found. But the source object is missing.</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -1161,7 +1177,7 @@
   <section xml:id="correlation-query-managed-object">
    <title>Managed Object as Correlation Query Target</title>
 
-   <para>Queries on managed objects in the repository must defined in the
+   <para>Queries on managed objects in the repository must be defined in the
    configuration file for the repository, which is either
    <filename>openidm/conf/repo.orientdb.json</filename>, or
    <filename>openidm/conf/repo.jdbc.json</filename>.</para>
@@ -1255,11 +1271,11 @@ map;</programlisting>
             "target": "managed/user",
             "validSource": {
                 "type": "text/javascript",
-                "file": "jscript/isValid.js"
+                "file": "script/isValid.js"
             },
             "correlationQuery": {
                 "type": "text/javascript",
-                "file": "jscript/ldapCorrelationQuery.js"
+                "file": "script/ldapCorrelationQuery.js"
             },
             "properties": [
                 {
@@ -1298,7 +1314,7 @@ map;</programlisting>
                     "source": "title",
                     "transform": {
                         "type": "text/javascript",
-                        "file": "jscript/getFirstNonEmpty.js"
+                        "file": "script/getFirstNonEmpty.js"
                     },
                     "target": "title"
                 },
@@ -1329,7 +1345,7 @@ map;</programlisting>
             },
             "onUnlink": {
                 "type": "text/javascript",
-                "file": "jscript/triggerAdDisable.js"
+                "file": "script/triggerAdDisable.js"
             },
             "policies": [
                 {
