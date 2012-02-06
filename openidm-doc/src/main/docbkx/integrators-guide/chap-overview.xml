@@ -37,7 +37,7 @@
   <para>The following figure provides an overview of the OpenIDM architecture,
   which is covered in more detail in subsequent sections of this chapter.</para>
 
-  <mediaobject xml:id="figure-openidm-architecture">
+  <mediaobject xml:id="figure-openidm2-architecture">
    <alt>OpenIDM architecture</alt>
    <imageobject>
     <imagedata fileref="images/openidm2-architecture.png" format="PNG" />

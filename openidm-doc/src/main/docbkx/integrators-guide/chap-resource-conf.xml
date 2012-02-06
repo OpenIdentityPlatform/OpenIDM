@@ -71,7 +71,7 @@
   through an OpenICF server. In most cases, the OpenICF server runs as part
   of OpenIDM.</para>
 
-  <mediaobject xml:id="figure-openicf-architecture">
+  <mediaobject xml:id="figure-openicfarch">
    <alt>OpenICF architecture</alt>
    <imageobject>
     <imagedata fileref="images/OpenICFArch.png" format="PNG" />
