@@ -45,7 +45,19 @@
    2.0.1.</para>
 
    <listitem>
+    <para>OPENIDM-553: Authorization re-configuration and re-registration issues</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-551: onStore, onRetrieve at managed object level not initialized</para>
+   </listitem>
+   <listitem>
     <para>OPENIDM-549: onValidate hook should only be invoked before managed object accepts changes to store, not upon retrieval</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-548: If-None-Match tries to read the object and fails</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-547: NPE with the ETag header when not using quotes</para>
    </listitem>
    <listitem>
     <para>OPENIDM-542: ManagedObjectProperty#onStore does not put the encrypted value into JsonCrypto</para>
