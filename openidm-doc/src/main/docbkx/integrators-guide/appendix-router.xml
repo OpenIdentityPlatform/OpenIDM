@@ -44,7 +44,7 @@
   <title>Configuration</title>
 
   <para>The router object as shown in <filename>conf/router.json</filename>
-  defines a array of filter objects.</para>
+  defines an array of filter objects.</para>
  
   <programlisting language="javascript">
 {
