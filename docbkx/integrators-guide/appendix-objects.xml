@@ -162,7 +162,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
   data structures.</para>
 
   <section xml:id="managed-object-schema">
-   <title>Manage Object Schema</title>
+   <title>Managed Object Schema</title>
 
    <para>Managed objects have an associated schema to enforce a specific
    data structure. Schema is specified using the <link xlink:show="new"
@@ -171,7 +171,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
    implementations in multiple programming languages.</para>
 
    <section xml:id="managed-object-reserved-properties">
-    <title>Manage Object Reserved Properties</title>
+    <title>Managed Object Reserved Properties</title>
 
     <para>Top-level properties in a managed object that begin with an underscore
     ( <literal>_</literal> ) are reserved by OpenIDM for internal use, and are
@@ -220,7 +220,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
    </section>
 
    <section xml:id="managed-object-schema-validation">
-    <title>Manage Object Schema Validation</title>
+    <title>Managed Object Schema Validation</title>
 
     <para>Schema validation is performed unequivocally whenever an object
     is stored, and conditionally whenever an object is retrieved from the
@@ -242,7 +242,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
    </section>
 
    <section xml:id="managed-object-derived-properties">
-    <title>Manage Object Derived Properties</title>
+    <title>Managed Object Derived Properties</title>
 
     <para>Properties can be defined to be strictly derived from other
     properties within the object. This allows computed and composite
@@ -271,7 +271,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
   </section>
 
   <section xml:id="managed-object-triggers">
-   <title>Manage Object Triggers</title>
+   <title>Managed Object Triggers</title>
 
    <para><firstterm>Triggers</firstterm> are user-definable functions that
    validate or modify object or property state.</para>
@@ -283,7 +283,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
     defined to intercept the supported request methods on managed
     objects. Such triggers are intended to perform authorization, redact,
     or modify objects before the action is performed. The object
-    being operated on is in scope for each trigger, meaning that it the
+    being operated on is in scope for each trigger, meaning that the
     object is retrieved by the data store before the trigger is fired.</para>
 
     <para>If retrieval of the object fails, the failure occurs before any
@@ -344,16 +344,16 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
     <para>An object-scoped trigger applies to an entire object. Unless
     otherwise specified, the object itself is in scope for the trigger.</para>
      <varlistentry>
-      <term>validate</term>
+      <term>onValidate</term>
       <listitem>
-       <para>Validates an object after its retrieval and prior to its
+       <para>Validates an object prior to its
        storage into the data store. Throws an exception in the event of a
        validation failure.</para>
        <!-- i18n TBD. -->
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term>onRetrieval</term>
+      <term>onRetrieve</term>
       <listitem>
        <para>Called when an object is retrieved from the data store.
        Typically used to transform an object after it has been retrieved
@@ -361,7 +361,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
       </listitem>
      </varlistentry>
      <varlistentry>
-       <term>onStorage</term>
+       <term>onStore</term>
        <listitem>
         <para>Called just prior to when an object is stored into the data
         store. Typically used to transform an object just prior to its
@@ -382,7 +382,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
     <variablelist>
      <varlistentry>
-      <term>validate</term>
+      <term>onValidate</term>
       <listitem>
        <para>Validates a given property value after its retrieval from and
        prior to its storage into the data store. Throws an exception in the
@@ -391,15 +391,15 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term>onRetrieval</term>
+      <term>onRetrieve</term>
       <listitem>
        <para>Called after an object is retrieved from the data store.
-       Typically used to transforms a given property after its object's
+       Typically used to transform a given property after its object's
        retrieval.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term>onStorage</term>
+      <term>onStore</term>
       <listitem>
        <para>Called prior to when an object is stored into the data
        store. Typically used to transform a given property prior to its
@@ -421,13 +421,13 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
       <para>Retrieve the raw object from the data store</para>
      </listitem>
      <listitem>
-      <para>Call object <literal>onRetrieval</literal> trigger</para>
+      <para>Call object <literal>onRetrieve</literal> trigger</para>
      </listitem>
      <listitem>
       <para>Per-property within the object (order undefined):</para>
       <itemizedlist>
        <listitem>
-        <para>Call property <literal>onRetrieval</literal> trigger</para>
+        <para>Call property <literal>onRetrieve</literal> trigger</para>
        </listitem>
        <listitem>
         <para>Perform schema validation if <literal>_schema_rev</literal>
@@ -435,20 +435,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
         linkend="managed-object-schema-validation"><citetitle>Schema
         Validation</citetitle></link> section)</para>
        </listitem>
-       <listitem>
-        <para>Call object validate trigger</para>
-        <!-- PB: overhead we may be able to avoid; see note in schema validation section -->
-       </listitem>
       </itemizedlist> 
-     </listitem>
-     <listitem>
-      <para>Per-property within the object (order undefined):</para>
-      <itemizedlist>
-       <listitem>
-        <para>Call property validate trigger</para>
-        <!-- PB: overhead we may be able to avoid; see note in schema validation section -->
-       </listitem>
-      </itemizedlist>
      </listitem>
     </orderedlist>
 
@@ -459,10 +446,10 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
        <para>Per-property within the object (order undefined):</para>
        <itemizedlist>
         <listitem>
-         <para>Call property <literal>validate</literal> trigger</para>
+         <para>Call property <literal>onValidate</literal> trigger</para>
         </listitem>
         <listitem>
-         <para>Call object <literal>validate</literal> trigger</para>
+         <para>Call object <literal>onValidate</literal> trigger</para>
         </listitem>
         <listitem>
          <para>Perform schema validation (see the <link
@@ -475,10 +462,10 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
        <para>Per-property trigger within the object (order undefined):</para>
        <itemizedlist>
         <listitem>
-         <para>Call property <literal>onStorage</literal> trigger</para>
+         <para>Call property <literal>onStore</literal> trigger</para>
         </listitem>
         <listitem>
-         <para>Call object <literal>onStorage</literal> trigger</para>
+         <para>Call object <literal>onStore</literal> trigger</para>
         </listitem>
         <listitem>
          <para>Store the object with any resulting changes to the data
@@ -491,18 +478,18 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
   </section>
 
   <section xml:id="managed-object-encryption">
-   <title>Manage Object Encryption</title>
+   <title>Managed Object Encryption</title>
 
    <para>Sensitive object properties can be encrypted prior to storage,
-   typically through the property <literal>onStorage</literal> trigger. The
+   typically through the property <literal>onStore</literal> trigger. The
    trigger has access to configuration data, which can include arbitrary
    attributes that you define, such as a symmetric encryption key. Such
    attributes can be decrypted during retrieval from the data store through
-   the property <literal>onRetrieval</literal> trigger.</para>
+   the property <literal>onRetrieve</literal> trigger.</para>
   </section>
 
   <section xml:id="managed-object-configuration">
-   <title>Manage Object Configuration</title>
+   <title>Managed Object Configuration</title>
 
    <para>Configuration of managed objects is provided through an array of
    managed object configuration objects.</para>
@@ -524,7 +511,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
    </variablelist>
 
    <variablelist xml:id="managed-object-config-object-properties">
-    <title>Managed Object Config Object Properties</title>
+    <title>Managed-Object-Config Object Properties</title>
 
     <para>Specifies the configuration of each managed object.</para>
 
@@ -663,10 +650,10 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>source</term>
+     <term>source, file</term>
      <listitem>
-      <para>string, required</para>
-      <para>Specifies the source code of the script to be executed.</para>
+      <para>string, required (only one, source or file is required)</para>
+      <para>Specifies the source code of the script (key word script), or the pointer to the file containing the script (key word file), to be executed.</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -929,6 +916,11 @@ val = openidm.query("managed/foobar", params);</programlisting>
      is found in the repository configuration. The query definition includes
      the parameter <literal>mycustomtoken</literal> for token
      substitution.</para>
+     <para>An example for a query can be found in chapter <link
+  xlink:href="integrators-guide#correlation-query-managed-object"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Managed Object as Correlation Query Target</citetitle>
+</link>.</para>
     </section>
    </section>
   </section>
@@ -973,7 +965,7 @@ val = openidm.query("managed/foobar", params);</programlisting>
 
    <para>Configuration objects are ideal for metadata and settings that need
    not be included in the data to reconcile. In other words, use configuration
-   objects for data that does not require and audit log, and does not serve
+   objects for data that does not require audit log, and does not serve
    directly as a target or source for mappings.</para>
 
    <para>Although you can set and manipulate configuration objects both
@@ -1096,7 +1088,6 @@ openidm.create("config/custom/myconfig", mymap)</programlisting>
    </section>
 
    <section xml:id="configuration-objects-programmatic-update">
-    <title>Updating Objects</title>
 
     <para>The following script example updates an object type.</para>
     <programlisting language="javascript">var expectedRev = origMap._rev

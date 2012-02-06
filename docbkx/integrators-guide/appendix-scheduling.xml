@@ -48,7 +48,7 @@
  scheduler files are located in the <filename>openidm/conf</filename> directory.
  By convention, OpenIDM uses file names of the form
  <filename>scheduler-<replaceable>schedule-name</replaceable>.json</filename>.
- OpenIDM dynamically picks up changes to scheduled tasks and events are both
+ OpenIDM dynamically picks up changes to scheduled tasks and events both,
  during initialization and also during runtime.</para>
 
  <variablelist xml:id="scheduler-configuration-objects">
