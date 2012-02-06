@@ -27,6 +27,9 @@ echo $PRG
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+# Make the script location the current directory
+cd $PRGDIR
+
 # Only set OPENIDM_HOME if not already set
 [ -z "$OPENIDM_HOME" ] && OPENIDM_HOME=`cd "$PRGDIR" >/dev/null; pwd`
 
