@@ -714,8 +714,7 @@
      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, and a link to an existing target
-      object was found. Detected during change events and reconciliation. Default
-      action: "UPDATE".</para>
+      object was found. Detected during change events and reconciliation. Default action: "UPDATE".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -740,7 +739,7 @@
      <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, there is no link to a
-      target object, but there is more than one correlated target object. Detected during change events and reconciliation. Default
+      target object, but there is more than one correlated target object. Detected during source object changes and reconciliation. Default
       action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
@@ -749,7 +748,7 @@
      <listitem>
       <para>The mapping is qualified for a target object, and there is a
       qualified link to a target object, but the target object is missing.
-      Only detected during reconciliation and synchronous operations.
+      Only detected during reconciliation and source object changes in synchronous mappings.
       Default action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
@@ -763,7 +762,7 @@
     <varlistentry>
      <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
      <listitem>
-      <para>The source object is unqualified (by validSource), no link, no target is found.</para>
+      <para>The source object is unqualified (by validSource), no link, no target is found. Detected during source object changes and reconciliation. Default action: "IGNORE".</para>
      </listitem>
     </varlistentry> 
    </variablelist>
@@ -774,7 +773,7 @@
     <varlistentry>
      <term>"TARGET_IGNORED" (qualifies=0)</term>
      <listitem>
-      <para>During target reconciliation the target becomes unqualified by the "validTagrt" script.</para>
+      <para>During target reconciliation the target becomes unqualified by the "validTagrt" script. Only detected during reconciliation. Default action: "IGNORE"</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -803,7 +802,7 @@
     <varlistentry>
      <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
      <listitem>
-      <para>The target qualifies and a link is found. But the source object is missing.</para>
+      <para>The target qualifies and a link is found. But the source object is missing. Only detected during reconciliation. Default action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
    </variablelist>
