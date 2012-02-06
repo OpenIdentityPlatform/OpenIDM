@@ -453,7 +453,7 @@
       <para>Look for a link to a target object in the link object set, and
       perform a correlation query (if defined).</para></listitem>
      <listitem>
-      <para>Determine the link condition.</para>
+      <para>Determine the link condition, as well as whether a target object can be found.</para>
      </listitem>
      <listitem>
       <para>Determine the action to perform based on the policy defined for the
@@ -463,8 +463,7 @@
       <para>Perform the action.</para>
      </listitem>
      <listitem>
-      <para>Store the <literal>reconId</literal> identifier in the mapping to
-      indicate that the mapping was processed.</para>
+      <para>Keep track of the target objects for which a condition and action has already been determined.</para>
      </listitem>
      <listitem>
       <para>Write the results.</para>
@@ -478,10 +477,7 @@
     <orderedlist>
      <listitem>
       <para>Find the target in the link object set.</para>
-      <para>If the <literal>reconId</literal> is <literal>"mine"</literal> then
-      the target has already been processed correctly.</para>
-      <para>If the <literal>reconId</literal> is not recognized, or the link
-      object does not exist, then the source is missing.</para>
+      <para>Determine if target object already was handled in the first phase.</para>
      </listitem>
      <listitem>
       <para>Determine the action to perform based on the policy defined for the
@@ -489,10 +485,6 @@
      </listitem>
      <listitem>
       <para>Perform the action.</para>
-     </listitem>
-     <listitem>
-      <para>Store the <literal>reconId</literal> identifier in the mapping (if
-      applicable) to indicate that the mapping was processed.</para>
      </listitem>
      <listitem>
       <para>Write the results.</para>
