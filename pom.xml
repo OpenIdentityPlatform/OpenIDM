@@ -288,12 +288,12 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>org.forgerock.json.resource</artifactId>
-                <version>1.2.1</version>
+                <version>1.2.2</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>org.forgerock.json.resource.restlet</artifactId>
-                <version>1.2.1</version>
+                <version>1.2.2</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
