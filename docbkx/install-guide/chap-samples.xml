@@ -705,7 +705,7 @@ map;</programlisting>
     <para>To enable replication without another server, set up replication when
     installing OpenDJ.</para>
 
-    <mediaobject xml:id="figure-replcation-setup">
+    <mediaobject xml:id="figure-replication-setup">
      <alt>Topology Options screen from the OpenDJ QuickSetup wizard</alt>
      <imageobject>
       <imagedata fileref="images/replication-setup.png" format="PNG" />
