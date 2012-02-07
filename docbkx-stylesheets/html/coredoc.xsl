@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -29,45 +29,40 @@
  <xsl:import href="urn:docbkx:stylesheet" />
  <xsl:import href="urn:docbkx:stylesheet/highlight.xsl" />
 
-<!-- <xsl:param name="chunk.section.depth" select="0" />-->
-<!-- <xsl:param name="chunker.output.encoding">UTF-8</xsl:param>-->
-<!-- <xsl:param name="chunker.output.indent">yes</xsl:param>-->
- <xsl:param name="generate.legalnotice.link" select="1" />
-<!-- <xsl:param name="generate.revhistory.link" select="1" />-->
- <xsl:param name="root.filename">index</xsl:param>
- <xsl:param name="use.id.as.filename" select="1" />	
-<!-- <xsl:template name="user.footer.content">-->
-<!--  <a>-->
-<!--   <xsl:attribute name="href">-->
-<!--    <xsl:apply-templates select="//legalnotice[1]" mode="chunk-filename" />-->
-<!--   </xsl:attribute>-->
-<!--   <xsl:apply-templates select="//copyright[1]" mode="titlepage.mode" />-->
-<!--  </a>-->
-<!-- </xsl:template>-->
-  <xsl:param name="generate.toc">
-   appendix  nop
-   article/appendix  nop
-   article   nop
-   book      toc,title
-   chapter   toc,title
-   part      toc,title
-   preface   nop
-   qandadiv  nop
-   qandaset  nop
-   reference nop
-   sect1     nop
-   sect2     nop
-   sect3     nop
-   sect4     nop
-   sect5     nop
-   section   nop
-   set       toc,title
-  </xsl:param>
- <xsl:param name="toc.section.depth" select="0" />
-
+ <xsl:param name="make.clean.html" select="1" />
+ <xsl:param name="docbook.css.link" select="0" />
+ <xsl:param name="html.stylesheet">css/docbook.css</xsl:param>
+ <xsl:param name="admon.style">
+  <xsl:value-of select="string('font-style: italic;')"></xsl:value-of>
+ </xsl:param>
  <xsl:param name="default.table.frame">none</xsl:param>
  <xsl:param name="default.table.rules">none</xsl:param>
  <xsl:param name="table.cell.border.thickness">0pt</xsl:param>
+
+ <xsl:param name="generate.legalnotice.link" select="1" />
+ <xsl:param name="root.filename">index</xsl:param>
+ <xsl:param name="use.id.as.filename" select="1" />
+
+ <xsl:param name="generate.toc">
+  appendix  nop
+  article/appendix  nop
+  article   nop
+  book      toc,title
+  chapter   toc,title
+  part      toc,title
+  preface   nop
+  qandadiv  nop
+  qandaset  nop
+  reference nop
+  sect1     nop
+  sect2     nop
+  sect3     nop
+  sect4     nop
+  sect5     nop
+  section   nop
+  set       toc,title
+ </xsl:param>
+ <xsl:param name="toc.section.depth" select="0" />
 
  <xsl:template match="xslthl:keyword" mode="xslthl">
    <strong class="hl-keyword">
