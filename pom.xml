@@ -217,7 +217,7 @@
         <commons.json-fluent.version>1.1.0</commons.json-fluent.version>
         <commons.json-patch.version>1.0.0</commons.json-patch.version>
         <commons.json-crypto.version>1.1.0</commons.json-crypto.version>
-        <commons.json-resource.version>1.2.1</commons.json-resource.version>
+        <commons.json-resource.version>1.2.2</commons.json-resource.version>
 
         <!-- OSGi bundles properties -->
         <!--openidm.osgi.import.openidm.version>version="[$(version;==;${openidm.osgi.version.clean}),$(version;=+;${openidm.osgi.version.clean}))"</openidm.osgi.import.openidm.version-->
