@@ -1455,7 +1455,7 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
     "invokeService": "sync",
     "invokeContext": {
         "action": "reconcile",
-        <emphasis role="bold">mapping": {
+        <emphasis role="bold">"mapping": {
             "name": "CSV_XML",
             "source": "system/Ldap/account",
             "target": "managed/user",
