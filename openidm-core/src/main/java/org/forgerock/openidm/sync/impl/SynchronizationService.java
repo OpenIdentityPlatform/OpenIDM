@@ -263,6 +263,7 @@ public class SynchronizationService extends ObjectSetJsonResource
 // FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB 
             ObjectMapping schedulerMapping = new ObjectMapping(this, mapping);
             List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
+            augmentedMappings.add(schedulerMapping);
             schedulerMapping.initRelationships(this, augmentedMappings);
             schedulerMapping.recon(reconId);
         } else {
