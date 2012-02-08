@@ -187,9 +187,6 @@
    <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
    issues.</para>
    <listitem>
-    <para>OPENIDM-550: Using "*" condition on PUT to relax MVCC fails</para>
-   </listitem>
-   <listitem>
     <para>OPENIDM-545: Command line help not working</para>
    </listitem>
    <listitem>
