@@ -51,6 +51,9 @@
     <para>OPENIDM-551: onStore, onRetrieve at managed object level not initialized</para>
    </listitem>
    <listitem>
+    <para>OPENIDM-550: Using "*" condition on PUT to relax MVCC fails</para>
+   </listitem>
+   <listitem>
     <para>OPENIDM-549: onValidate hook should only be invoked before managed object accepts changes to store, not upon retrieval</para>
    </listitem>
    <listitem>
