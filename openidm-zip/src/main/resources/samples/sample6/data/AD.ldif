@@ -1,0 +1,10 @@
+dn: o=AD
+objectClass: domain
+objectClass: top
+dc: organization
+
+dn: ou=People,o=AD
+ou: people
+description: people
+objectclass: organizationalunit
+
