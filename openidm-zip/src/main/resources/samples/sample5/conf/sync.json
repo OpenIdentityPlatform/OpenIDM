@@ -78,8 +78,8 @@
         }
     }, {
         "name" : "managedUser_systemLdapAccounts",
-        "source" : "fixme_managed/user",
-        "target" : "fixme_system/ldap/account",
+        "source" : "managed/user",
+        "target" : "system/ldap/account",
         "links" : "systemLdapAccounts_managedUser",
         "correlationQuery" : {
             "type" : "text/javascript",
