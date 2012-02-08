@@ -287,7 +287,7 @@ Listening for transport dt_socket at address: 5005
  }'
  http://localhost:8080/openidm/managed/user/joe
 
-{"_rev":"0","_id":"joe"}</screen>
+{"_id":"joe","_rev":"0"}</screen>
       </step>
       <step>
        <para>On Windows</para>
@@ -304,7 +304,7 @@ Listening for transport dt_socket at address: 5005
  }
  http://localhost:8080/openidm/managed/user/joe
 
-{"_rev":"0","_id":"joe"}</screen>
+{"_id":"joe","_rev":"0"}</screen>
       </step>
      </stepalternatives>
     </step>
@@ -317,14 +317,16 @@ Listening for transport dt_socket at address: 5005
  http://localhost:8080/openidm/managed/user/joe
 
 {
- "lastname":"smith",
- "userpassword":"11111111",
- "firstname":"joe",
- "_id":"joe",
- "_rev":"0",
- "email":"joe@abc.com",
- "name":"joe"
+  "userPassword": "11111111",
+  "lastname": "smith",
+  "firstname": "joe",
+  "_id": "joe",
+  "_rev": "0",
+  "email": "joe@abc.com",
+  "name": "joe"
  }</screen>
+     <para>The JSON output shown above is formatted for easier reading. OpenIDM
+     returns the JSON object all on one line.</para>
     </step>
    </procedure>
 
