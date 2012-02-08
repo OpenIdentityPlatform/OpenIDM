@@ -147,7 +147,7 @@ $</screen>
      command shell to allow you to manage the container.</para>
      <stepalternatives>
       <step>
-       <para>On UNIX, Linux, and Mac OS X</para>
+       <para>Start OpenIDM (UNIX).</para>
        <screen>$ ./startup.sh
 Using OPENIDM_HOME:   /path/to/openidm
 Using OPENIDM_OPTS:   -Xmx1024m
@@ -157,7 +157,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
 -&gt;</screen>
       </step>
       <step>
-       <para>On Windows</para>
+       <para>Start OpenIDM (Windows).</para>
        <screen>$ cd \path\to\openidm
 $ startup.bat
 Start in debug mode [1] default
@@ -273,7 +273,7 @@ Listening for transport dt_socket at address: 5005
      <literal>joe</literal> in the repository.</para>
      <stepalternatives>
       <step>
-       <para>On UNIX, Linux, and Mac OS X</para>
+       <para>Create <literal>joe</literal> (UNIX).</para>
        <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
@@ -290,7 +290,7 @@ Listening for transport dt_socket at address: 5005
 {"_id":"joe","_rev":"0"}</screen>
       </step>
       <step>
-       <para>On Windows</para>
+       <para>Create <literal>joe</literal> (Windows).</para>
        <screen>C:\&gt;curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"

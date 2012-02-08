@@ -543,7 +543,7 @@ access.csv activity.csv recon.csv</screen>
   <para>You can also add users directly to the local repository through the
   REST interface. The following example adds a user named James Berg.</para>
 
-  <para>On UNIX, Linux, and Mac OS X</para>
+  <para>Create <literal>james</literal> (UNIX).</para>
   <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
@@ -561,7 +561,7 @@ access.csv activity.csv recon.csv</screen>
 
 {"_rev":"0","_id":"james"}</screen>
 
-  <para>On Windows</para>
+  <para>Create <literal>james</literal> (Windows).</para>
   <screen>C:\&gt;curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"

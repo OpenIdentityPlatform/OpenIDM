@@ -50,10 +50,10 @@
    change to the <filename>openidm</filename> directory, and run the startup
    script:</para>
    <listitem>
-    <para><command>startup.sh</command> on UNIX, Linux, &amp; Mac OS X</para>
+    <para><command>startup.sh</command> (UNIX)</para>
    </listitem>
    <listitem>
-    <para><command>startup.bat</command> on Windows</para>
+    <para><command>startup.bat</command> (Windows)</para>
    </listitem>
   </itemizedlist>
 
