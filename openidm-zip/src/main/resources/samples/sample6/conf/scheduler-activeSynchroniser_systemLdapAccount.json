@@ -4,7 +4,7 @@
     "schedule": "0/15 * * * * ?",
     "invokeService": "provisioner",
     "invokeContext": {
-        "action": "activeSync",
+        "action": "liveSync",
         "source" : "system/ldap/account"
     }
 }
