@@ -161,7 +161,8 @@ description: Created by OpenIDM</programlisting>
    </itemizedlist>
 
    <para>Prepare the LDAP server by creating a base suffix of
-   <literal>dc=example,dc=com</literal>, and importing these objects:</para>
+   <literal>dc=example,dc=com</literal>, and importing these objects from
+   <filename>samples/sample2/data/Example.ldif</filename>.</para>
    <programlisting language="ldif">
 dn: dc=com
 objectClass: domain
@@ -206,7 +207,7 @@ description: Created for OpenIDM
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
    <para>If the command above returns an error, shutdown and start OpenIDM
-   again. Successful reconciliation returns an empty result.</para>
+   again. Successful reconciliation returns a "reconId" object.</para>
 
    <para>With the configuration of sample 2, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -279,7 +280,7 @@ $ curl
    <para>Configure the LDAP server as for sample 2,
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
-  </section>  
+  </section>
 
   <section xml:id="run-sample2b">
    <title>Running the Sample</title>
@@ -294,7 +295,7 @@ $ curl
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
  
    <para>If the command above returns an error, shutdown and start OpenIDM
-   again. Successful reconciliation returns an empty result.</para>
+   again. Successful reconciliation returns a "reconId" object.</para>
 
    <para>With the configuration of sample 2b, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -586,40 +587,6 @@ $ curl
    JavaScript files.</para>
 
    <screen>$ cp -r samples/sample5/conf samples/sample5/script .</screen>
-
-   <tip>
-    <para>If you get a message when starting OpenIDM like this:</para>
- 
-    <literallayout class="monospaced">
-SEVERE: Failed to parse the config of
- [org.forgerock.openidm.provisioner.openicf, xml-AD]
- -java.lang.IllegalArgumentException: bundleName may not be null</literallayout>
-
-    <para>Then make sure you have the following line in the
-    <literal>"connectorRef"</literal> property of both provisioner .json
-    files.</para>
-
-    <literallayout class="monospaced">
-"bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",</literallayout>
-
-    <para>Also, change correlation rule in the script file 
-    <filename>script/name_eq_name_correlationQuery.js</filename> to read
-    as follows, with <literal>source.userName</literal> instead of
-    <literal>source.name</literal>.</para>
-
-    <programlisting language="javascript">
-<emphasis role="strong">var value = source.userName;</emphasis>
-var myarray = [value];
-var map = {"query": { "Equals": {"field" : "name","values" : myarray}}};
-map;</programlisting>
-
-    <para>After making the changes to the script, shutdown and start up OpenIDM
-    again. When OpenIDM is running, changes to .json configuration files are
-    read immediately when you save the file, whereas changes to JavaScript files
-    are taken into account only when you start OpenIDM or change the
-    configuration file referencing the script, in this case
-    <filename>conf/sync.json</filename>.</para>
-   </tip>
   </section>
 
   <section xml:id="ext-config-sample5">
@@ -770,7 +737,8 @@ description: Created by OpenIDM
     <literal>dc=example,dc=com</literal> and <literal>o=AD</literal>,
     and then importing the following objects.</para>
 
-    <para>For the "LDAP" directory:</para>
+    <para>For the "LDAP" directory, import
+    <filename>samples/sample6/data/Example.ldif</filename>.</para>
     <programlisting language="ldif">
 dn: dc=com
 objectClass: domain
@@ -801,7 +769,8 @@ mail: jdoe@example.com
 description: Created for OpenIDM
 </programlisting>
 
-   <para>For the "AD" directory:</para>
+   <para>For the "AD" directory import
+    <filename>samples/sample6/data/AD.ldif</filename>.</para>
 
    <programlisting language="ldif">
 dn: o=AD
@@ -916,7 +885,7 @@ mail: jdoe@example.com
     "schedule" : "0/15 * * * * ?",
     "invokeService" : "provisioner",
     "invokeContext" : {
-        "action" : "activeSync",
+        "action" : "liveSync",
         "source" : "system/ldap/account"
     }
 }</programlisting>
