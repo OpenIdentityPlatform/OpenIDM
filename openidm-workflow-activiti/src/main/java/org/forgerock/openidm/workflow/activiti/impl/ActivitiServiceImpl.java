@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -59,7 +59,6 @@ import org.forgerock.json.resource.JsonResource;
 
 // Deprecated
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.ObjectSet;
 
 /**
  * Workflow service implementation
@@ -69,14 +68,23 @@ import org.forgerock.openidm.objset.ObjectSet;
  */
 @Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.OPTIONAL)
 @Service
-@Reference(
-        name = "JavaDelegateServiceReference",
-        referenceInterface = JavaDelegate.class,
-        bind = "bindService",
-        unbind = "unbindService",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC
-)
+@References({
+        @Reference(
+                name = "JavaDelegateServiceReference",
+                referenceInterface = JavaDelegate.class,
+                bind = "bindService",
+                unbind = "unbindService",
+                cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+                policy = ReferencePolicy.DYNAMIC
+        ),
+        @Reference(
+                name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
+                referenceInterface = JsonResource.class,
+                bind = "bindRouter",
+                unbind = "unbindRouter",
+                cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+                policy = ReferencePolicy.DYNAMIC,
+                target = "(service.pid=org.forgerock.openidm.router)")})
 @Properties({
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Activiti Service"),
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -92,23 +100,14 @@ public class ActivitiServiceImpl implements JsonResource {
 
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
 
-    @Reference(referenceInterface = JsonResource.class,
-            name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
-            bind = "bindRouter",
-            unbind = "unbindRouter",
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC,
-            target = "(service.pid=org.forgerock.openidm.router)")
-    private ObjectSet router;
 
     protected void bindRouter(JsonResource router) {
-        this.router = new JsonResourceObjectSet(router);
+        this.openIDMELResolver.setRouter(new JsonResourceObjectSet(router));
     }
 
     protected void unbindRouter(JsonResource router) {
-        this.router = null;
+        this.openIDMELResolver.setRouter(null);
     }
-
 
     @Reference(
             name = "processEngine",
@@ -208,11 +207,15 @@ public class ActivitiServiceImpl implements JsonResource {
 
         //POST openidm/workflow/activiti?_action=TestWorkFlow will trigger the process
         ProcessInstance instance = null;
+        Map<String, Object> variables;
         if (workflowParams.isNull()) {
-            instance = processEngine.getRuntimeService().startProcessInstanceByKey(action);
+            variables = new HashMap<String, Object>(1);
         } else {
-            instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, workflowParams.asMap());
+            variables = new HashMap<String, Object>(workflowParams.asMap());
         }
+        //TODO consider to put only the parent into the params. parent/security may contain confidential access token
+        variables.put("openidm-context", params);
+        instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, variables);
         if (null != instance) {
             result = new JsonValue(new HashMap<String, Object>());
             result.put("status", instance.isEnded() ? "ended" : "suspended");
@@ -266,9 +269,6 @@ public class ActivitiServiceImpl implements JsonResource {
                 configurationFactory.setDatabaseSchemaUpdate("true");
                 StandaloneProcessEngineConfiguration configuration = configurationFactory.getConfiguration();
                 configuration.setDatabaseType("mysql");*/
-
-                //This allow activiti to call back to OpenIDM
-                openIDMELResolver.setRouter(router);
 
                 processEngineFactory = new OpenIDMProcessEngineFactory();
                 processEngineFactory.setProcessEngineConfiguration(configuration);
