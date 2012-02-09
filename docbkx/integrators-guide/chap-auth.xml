@@ -146,7 +146,7 @@
   </variablelist>
   
   <para>For more details about the OpenIDM authentication mechanism please see <link
-  xlink:href="integrators-guide#security-messages>"
+  xlink:href="integrators-guide#security-messages"
   xlink:role="http://docbook.org/xlink/role/olink">
   <citetitle>Use Message Level Security</citetitle>
 </link>.</para>
