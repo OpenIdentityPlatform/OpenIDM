@@ -204,13 +204,12 @@ public class JsonResourceRouterService implements JsonResource {
         try {
             JsonValue response = chain.handle(request); // dispatch to router, via filter chain
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Request: " + request.toString() + ", Response: {}" + response.toString());
+                LOGGER.trace("Request: {}, Response: {}", request, response);
             }
             return response;
         } catch (JsonResourceException jre) {
             if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Resource exception: " + jre.toJsonValue() + 
-                 " processing request: " + request.toString(), jre);
+                LOGGER.trace("Resource exception: {} processing request: {}", new Object[] {jre.toJsonValue(), request, jre});
             }
             int code = jre.getCode();
             if (code >= 500 && code <= 599) { // HTTP server-side error
@@ -218,10 +217,10 @@ public class JsonResourceRouterService implements JsonResource {
             }
             throw jre;
         } catch (RuntimeException re) {
-            LOGGER.warn("Uncaught runtime exception processing request: " + request, re);
+            LOGGER.warn("Uncaught runtime exception processing request: {}", request, re);
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
         } catch (StackOverflowError sfe) {
-            LOGGER.warn("Uncaught stack overflow error processing request: " + request, sfe);
+            LOGGER.warn("Uncaught stack overflow error processing request: {}", request, sfe);
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
         }
     }
