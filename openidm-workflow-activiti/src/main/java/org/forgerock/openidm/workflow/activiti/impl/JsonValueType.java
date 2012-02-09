@@ -26,10 +26,13 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import org.activiti.engine.impl.variable.ValueFields;
 import org.activiti.engine.impl.variable.VariableType;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author $author$
@@ -48,20 +51,37 @@ public class JsonValueType implements VariableType {
     }
 
     public Object getValue(ValueFields valueFields) {
-        try {
-            return mapper.readValue(valueFields.getTextValue(), Object.class);
-        } catch (IOException e) {
-            return null;
+        String value = valueFields.getTextValue();
+        if (null != value) {
+            try {
+                Object jsonValue = mapper.readValue(value, Object.class);
+                if (jsonValue instanceof Map) {
+                    return new JsonValue(((Map) jsonValue).get("value"), new JsonPointer((String) ((Map) jsonValue).get("pointer")));
+                } else if (null == jsonValue) {
+                    //IOException when setValue
+                    return new JsonValue(null);
+                }
+            } catch (IOException e) {
+                // Should not happen
+            }
         }
+        return null;
     }
 
     public void setValue(Object value, ValueFields valueFields) {
-        try {
-            StringWriter writer = new StringWriter();
-            mapper.writeValue(writer, value);
-            valueFields.setTextValue(writer.toString());
-        } catch (IOException e) {
-            valueFields.setTextValue("null");
+        if (null == value) {
+            valueFields.setTextValue(null);
+        } else {
+            try {
+                Map jsonValue = new HashMap(2);
+                jsonValue.put("pointer", ((JsonValue) value).getPointer().toString());
+                jsonValue.put("value", ((JsonValue) value).getObject());
+                StringWriter writer = new StringWriter();
+                mapper.writeValue(writer, jsonValue);
+                valueFields.setTextValue(writer.toString());
+            } catch (IOException e) {
+                valueFields.setTextValue("null");
+            }
         }
     }
 
