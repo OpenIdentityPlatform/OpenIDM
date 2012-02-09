@@ -45,6 +45,9 @@
    2.0.1.</para>
 
    <listitem>
+    <para>OPENIDM-556: NPE during patch action due to logger level</para>
+   </listitem>
+   <listitem>
     <para>OPENIDM-555: Allow mappings in scheduler config without requiring referencing of link type from other mappings</para>
    </listitem>
    <listitem>
