@@ -350,8 +350,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
-  <para>To see what happened, review the CSV format logs in the
-  <filename>openidm/audit/</filename> directory.</para>
+  <para>To see what happened, review CSV format log,
+  <filename>openidm/audit/recon.csv</filename>.</para>
  </section>
 
  <section xml:id="sample-viewing-users-logs">
