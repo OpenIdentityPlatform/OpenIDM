@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <document
@@ -33,6 +33,21 @@
  </properties>
  <body>
   <section name="New Releases">
+   <p>February 9, 2012. OpenIDM 2.0.2 has been released as the latest supported
+   version on the 2.0.x branch. Get it now from the
+   <a href="http://www.forgerock.org/openidm.html">download page</a>.</p>
+
+   <p>January 15, 2012. OpenIDM 2.0.1 is out. You can download it at
+   <a href="http://www.forgerock.org/openidm.html">ForgeRock.org/openidm.html</a>.
+   See the <a href="https://bugster.forgerock.org/jira/secure/ReleaseNote.jspa?projectId=10020&amp;version=10180"
+   >release notes</a> for details.</p>
+
+   <p>December 24, 2011. OpenIDM 2.0.0 is now available. Get it from the
+   <a href="http://www.forgerock.org/openidm.html">download page</a>. See the
+   list of fixes in the
+   <a href="https://bugster.forgerock.org/jira/secure/ReleaseNote.jspa?projectId=10020&amp;version=10137"
+   >release notes</a>.</p>
+
    <p>May 31, 2011.  The OpenIDM team has announced OpenIDM 2.0 
    Milestone 1, the revolutionary step towards the next generation, 
    lightweight, scalable, highly modular and developer friendly 

@@ -55,7 +55,7 @@
    <item name="Wiki" href="http://wikis.forgerock.org/openidm/" />
   </menu>
   
-  <menu name="Core Documentation">
+  <menu name="OpenIDM Documentation">
   <item name="All Formats" href="docs.html" />
   <item name="Release Notes" href="./doc/release-notes/OpenIDM-Release-Notes.html" />
   <item name="Installation Guide" href="./doc/install-guide/OpenIDM-Install-Guide.html" />
