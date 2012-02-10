@@ -402,11 +402,6 @@ $ cp -r samples/sample3/conf samples/sample3/tools .</screen>
    <filename>openidm/bundle</filename> directory.</para>
 
    <screen>$ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/</screen>
-
-   <para>Restart OpenIDM to make sure the new bundle is picked up.</para>
-   <screen>-&gt; shutdown
--&gt; 
-$ ./startup.sh</screen>
   </section>
 
   <section xml:id="external-mysql-config-sample3">
@@ -430,6 +425,12 @@ Enter password:
 $ </screen>
     </listitem>
    </itemizedlist>
+
+   <para>Make sure MySQL is running, and then restart OpenIDM to make sure
+   the Connector/J bundle is picked up.</para>
+   <screen>-&gt; shutdown
+-&gt; 
+$ ./startup.sh</screen>
 
    <para>If the configuration of the external database is correct, then
    OpenIDM should show five users during startup. The check method, executed
