@@ -93,7 +93,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
    </varlistentry>
    <varlistentry>
     <term><command>select * from audit_activity</command></term>
-    <listitem><para>Shows all activity audit records</para></listitem>
+    <listitem><para>Shows all activity audit records</para>
+     <para>This table is created when there is some activity.</para></listitem>
    </varlistentry>
    <varlistentry>
     <term><command>select * from audit_recon</command></term>
@@ -121,7 +122,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   affected objects, or in report mode, where OpenIDM reports on what changes
   would be written without making the changes. OpenIDM synchronization reflects
   changes in objects to any mapped objects, making changes as necessary to
-  create or remove mapped objects and links to associate them.</para>
+  create or remove mapped objects and links to associate them. For a more
+  thorough explanation of reconciliation and synchronization, the section on
+  <link xlink:href="integrators-guide#sync-types"
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Types of
+  Synchronization</citetitle></link> in the <citetitle>Integrator's
+  Guide</citetitle>.</para>
 
   <para>This sample connects to an XML file holding sample user data. The XML
   file is configured as the authoritative source. In this sample, users are
@@ -161,8 +167,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
     directory.</para>
     </listitem>
    </orderedlist>
+
+   <para>The following configuration files play important roles in this
+   sample.</para>
+
    <varlistentry>
-    <term><filename>conf/provisioner.openicf-xml.json</filename></term>
+    <term><filename>openidm/conf/provisioner.openicf-xml.json</filename></term>
     <listitem>
      <para>This connector configuration file serves for the XML file resource.
      In this sample, this connector instance acts as the authoritative source
@@ -178,7 +188,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename></term>
+    <term><filename>openidm/conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename></term>
     <listitem>
      <para>The sample scheduler configuration file defines a reconciliation
      job that, if enabled by setting <literal>"enabled" : true</literal>,
@@ -211,7 +221,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><filename>conf/sync.json</filename></term>
+    <term><filename>openidm/conf/sync.json</filename></term>
     <listitem>
      <para>This sample configuration file defines the configuration for
      reconciliation and synchronization. The
@@ -477,11 +487,11 @@ access.csv activity.csv recon.csv</screen>
 {
  "query-time-ms":1,
  "result":[{
-   "_id":"joe",
-   "_rev":"0"
-   },{
     "_id":"DDOE1",
     "_rev":"0"
+   },{
+   "_id":"joe",
+   "_rev":"0"
    },{
     "_id":"Daffy Duck",
     "_rev":"0"
@@ -559,7 +569,7 @@ access.csv activity.csv recon.csv</screen>
  }'
  http://localhost:8080/openidm/managed/user/james
 
-{"_rev":"0","_id":"james"}</screen>
+{"_id":"james","_rev":"0"}</screen>
 
   <para>Create <literal>james</literal> (Windows).</para>
   <screen>C:\&gt;curl
@@ -577,7 +587,7 @@ access.csv activity.csv recon.csv</screen>
  }
  http://localhost:8080/openidm/managed/user/james
 
-{"_rev":"0","_id":"james"}</screen>
+{"_id":"james","_rev":"0"}</screen>
 
   <para>OpenIDM creates the new user in the repository. If you configure a
   mapping to apply changes from the local repository to the XML file connector
