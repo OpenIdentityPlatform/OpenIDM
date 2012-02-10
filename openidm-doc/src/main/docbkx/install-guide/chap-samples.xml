@@ -64,12 +64,16 @@
    sample. The easiest way to configure a new installation for one of the
    samples is to copy all files in the sample folder into the appropriate
    folder under <filename>openidm/</filename>. Some, but not all samples
-   require additional software, such as an external LDAP server or database.
-   In most cases you can install new samples without restarting OpenIDM.</para>
+   require additional software, such as an external LDAP server or
+   database.</para>
   </section>
 
   <section xml:id="preparing-openidm">
    <title>Preparing OpenIDM</title>
+
+   <para>Install an instance of OpenIDM specifically to try the samples. That
+   way you can experiment as much as you like, and discard the result if you
+   are not satisfied.</para>
 
    <para>Remove the pre-installed <literal>sample1</literal> files before
    starting with other samples.</para>
@@ -79,13 +83,12 @@ $ rm conf/provisioner.openicf-xml.json
  conf/sync.json
  conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</screen>
 
-   <para>After removing the <literal>sample1</literal> files, copy the files
-   from the sample you want to try.</para>
+   <para>After removing the <literal>sample1</literal> files, copy the
+   relevant files from the sample you want to try. For example, if you want to
+   configure OpenIDM to use <literal>sample2</literal> then copy the
+   configuration files from that sample</para>
 
    <screen>$ cp -r samples/sample2/conf .</screen>
-
-   <para>The above command configures OpenIDM to use
-   <literal>sample2</literal>.</para>
   </section>
  </section>
 
@@ -116,7 +119,11 @@ $ rm conf/provisioner.openicf-xml.json
 
   <section xml:id="install-sample2">
    <title>Install the Sample</title>
-   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.</para>
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>,
+   copying the configuration for sample 2.</para>
+
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample2/conf .</screen>
   </section>
 
   <section xml:id="external-ldap-config-2">
@@ -206,8 +213,7 @@ description: Created for OpenIDM
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>If the command above returns an error, shutdown and start OpenIDM
-   again. Successful reconciliation returns a "reconId" object.</para>
+   <para>Successful reconciliation returns a "reconId" object.</para>
 
    <para>With the configuration of sample 2, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -255,7 +261,8 @@ $ curl
    <secondary>Sample 2b - LDAP two way</secondary>
   </indexterm>
 
-  <para>Like sample 2, sample 2b also connects to an external LDAP server.</para>
+  <para>Like sample 2, sample 2b also connects to an external LDAP
+  server.</para>
 
   <para>Unlike sample 2, however, sample 2b has two mappings configured, one
   from the LDAP server to the OpenIDM repository, and the other from the
@@ -264,9 +271,12 @@ $ curl
   <section xml:id="install-sample2b">
    <title>Install the Sample</title>
 
-   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
-   Also copy the sample script to the <filename>script</filename> folder.</para>
-   <screen>$ cp -r samples/sample2b/conf samples/sample2b/script .</screen>
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+   Copy the sample configuration, and copy the script to the
+   <filename>script</filename> folder.</para>
+
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample2b/conf samples/sample2b/script .</screen>
 
    <para>If you already installed sample 2, then simply add the second mapping
    from sample 2b's <filename>sync.json</filename> file to the current
@@ -294,8 +304,7 @@ $ curl
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
  
-   <para>If the command above returns an error, shutdown and start OpenIDM
-   again. Successful reconciliation returns a "reconId" object.</para>
+   <para>Successful reconciliation returns a "reconId" object.</para>
 
    <para>With the configuration of sample 2b, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -372,10 +381,12 @@ $ curl
   <section xml:id="install-sample3">
    <title>Install the Sample</title>
 
-   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
-   Also copy the <filename>tools</filename> folder.</para>
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+   Copy the <filename>conf</filename> and <filename>tools</filename>
+   folders.</para>
 
-   <screen>$ cp -r samples/sample3/conf samples/sample3/tools .</screen>
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample3/conf samples/sample3/tools .</screen>
 
    <para>In <filename>conf/provisioner.openicf-scriptedsql.json</filename>,
    edit the paths starting with <literal>/opt/111</literal> to match your
@@ -419,13 +430,6 @@ Enter password:
 $ </screen>
     </listitem>
    </itemizedlist>
-
-   <tip>
-    <para>If you get an error when using the data definition language
-    file to create the database schema and tables, then try changing the type
-    for the timestamp column from <literal>timestamp TIMESTAMP(8)</literal> to
-    <literal>timestamp TIMESTAMP</literal>.</para>
-   </tip>
 
    <para>If the configuration of the external database is correct, then
    OpenIDM should show five users during startup. The check method, executed
@@ -492,10 +496,12 @@ $ curl
   <section xml:id="install-sample4">
    <title>Install the Sample</title>
 
-   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
-   Also copy the <filename>data</filename> folder holding the .csv file.</para>
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+   Copy the configuration, and copy the <filename>data</filename> folder
+   holding the .csv file.</para>
 
-   <screen>$ cp -r samples/sample4/conf samples/sample4/data .</screen>
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample4/conf samples/sample4/data .</screen>
   </section>
 
   <section xml:id="csv-file-sample4">
@@ -582,11 +588,12 @@ $ curl
   <section xml:id="install-sample5">
    <title>Install the Sample</title>
 
-   <para>Install the sample as described in <xref linkend="preparing-openidm"/>.
-   Also copy the <filename>script</filename> folder that holds sample
-   JavaScript files.</para>
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+   Copy the configuration, and copy the <filename>script</filename> folder
+   that holds sample JavaScript files.</para>
 
-   <screen>$ cp -r samples/sample5/conf samples/sample5/script .</screen>
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample5/conf samples/sample5/script .</screen>
   </section>
 
   <section xml:id="ext-config-sample5">
@@ -637,10 +644,12 @@ $ curl
 
   <section xml:id="install-sample6">
    <title>Install the Sample</title>
-   <para>Install the sample as described in
-   <xref linkend="preparing-openidm"/>.</para>
+   <para>Prepare OpenIDM as described in
+   <xref linkend="preparing-openidm"/>. Copy the configuration for sample
+   6.</para>
 
-   <screen>$ cp -r samples/sample6/conf .</screen>
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample6/conf .</screen>
   </section>
 
   <section xml:id="external-resource-sample6">
@@ -802,8 +811,7 @@ objectclass: organizationalunit
  --request POST
  "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-    <para>If the command above returns with an error, then stop and start
-    OpenIDM again. The result of a successful reconciliation is a
+    <para>The result of a successful reconciliation is a
     <literal>reconId</literal> object.</para>
 
     <screen>{"reconId":"7da56fc0-54de-4c7b-bae3-de7c7a999387"}</screen>
