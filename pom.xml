@@ -883,7 +883,7 @@
                             </preProcess>
                             <postProcess>
                                 <replace dir="${basedir}/target/docbkx/html/" token="&lt;html&gt;">
-                                  <include name="**/**/**/*.html" />
+                                  <include name="**/**/*.html" />
                                   <replacevalue>
 &lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
 &lt;html &gt;</replacevalue>
