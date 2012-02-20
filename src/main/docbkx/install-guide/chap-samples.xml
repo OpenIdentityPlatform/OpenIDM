@@ -515,6 +515,18 @@ $ cp -r samples/sample4/conf samples/sample4/data .</screen>
   <section xml:id="run-sample4">
    <title>Run the Sample</title>
 
+   <para>Start up OpenIDM before running the sample if you have not already
+   done so.</para>
+
+   <screen>$ ./startup.sh
+./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-&gt;</screen>
+
    <para>The <filename>sample4/data/hr.csv</filename> file contains two example
    users. The first line of the file sets the attribute names. Running
    reconciliation creates two users in the OpenIDM repository</para>
@@ -557,12 +569,12 @@ $ curl
    <para>To view the JSON for one of the users, get the user by
    the value of the <literal>_id</literal>.</para>
 
-   <screen>
+   <screen width="83"><?dbfo pgwide="1"?>
 $ curl
  --header "X-OpenIDM-Username-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- http://localhost:8080/openidm/managed/user/a8c6a158-3e82-450e-8e28-6ebf5a01a1a6
+ "http://localhost:8080/openidm/managed/user/a8c6a158-3e82-450e-8e28-6ebf5a01a1a6"
 
 {
     "userName": "Doe",
@@ -609,6 +621,19 @@ $ cp -r samples/sample5/conf samples/sample5/script .</screen>
 
   <section xml:id="run-sample5">
    <title>Run the Sample</title>
+
+   <para>Start up OpenIDM before running the sample if you have not already
+   done so.</para>
+
+   <screen>$ ./startup.sh
+./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+-&gt;</screen>
+
    <para>Run reconciliation between OpenIDM and the pseudo-LDAP resource.</para>
 
    <screen width="91"><?dbfo pgwide="1"?>$ curl
@@ -668,9 +693,8 @@ $ cp -r samples/sample6/conf .</screen>
 
     <para>With LiveSync, OpenIDM detects changes in an external resource as they
     happen. OpenIDM detects changes in OpenDJ by reading the External Change Log
-    (ECL), a mechanism similar to the Retro Change Log for those who have worked
-    with Sun Directory Server. The ECL is presented as an LDAP subtree with 
-    base DN <literal>cn=changelog</literal>. Each change is represented as an
+    (ECL). The ECL is presented as an LDAP subtree with base DN
+    <literal>cn=changelog</literal>. Each change is represented as an
     entry in the subtree. Each change entry remains in the subtree until the
     log is purged (by default three days).</para>
 
@@ -704,7 +728,7 @@ $ cp -r samples/sample6/conf .</screen>
      <listitem><para>The LDAP server "LDAP" listens on port 1389.</para></listitem>
      <listitem><para>The LDAP server "AD" listens on port 4389. Change this to
      1389 to use a single LDAP server.</para></listitem>
-     <listitem><para>The LDAP server are servers both have a user with DN
+     <listitem><para>The LDAP server both have a user with DN
      <literal>cn=Directory Manager</literal> and password
      <literal>password</literal> who can read and write to the data and read
      the change log.</para></listitem>
