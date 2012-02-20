@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-            <version>5.8</version>
+            <version>5.9-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <artifactId>activation</artifactId>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-osgi</artifactId>
-            <version>5.8</version>
+            <version>5.9-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.transaction</groupId>
