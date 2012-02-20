@@ -37,144 +37,14 @@
  </para>
 
  <section xml:id="fixes">
-  <title>Fixes &amp; Improvements in 2.0.0, 2.0.1, &amp; 2.0.2</title>
+  <title>Fixes &amp; Improvements</title>
 
   <itemizedlist>
-   <para>OpenIDM <?eval ${docTargetVersion}?> resolves the following
-   issues. This list also includes many fixes and improvements in 2.0.0 and
-   2.0.1.</para>
+   <para>OpenIDM <?eval ${docTargetVersion}?> includes the following fixes
+   and improvements.</para>
 
    <listitem>
-    <para>OPENIDM-556: NPE during patch action due to logger level</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-555: Allow mappings in scheduler config without requiring referencing of link type from other mappings</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-553: Authorization re-configuration and re-registration issues</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-551: onStore, onRetrieve at managed object level not initialized</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-550: Using "*" condition on PUT to relax MVCC fails</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-549: onValidate hook should only be invoked before managed object accepts changes to store, not upon retrieval</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-548: If-None-Match tries to read the object and fails</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-547: NPE with the ETag header when not using quotes</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-542: ManagedObjectProperty#onStore does not put the encrypted value into JsonCrypto</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-541: REST POST managed/user?_action=patch returning with no response the status should be 204</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-538: SSL Mutual auth should set openidm-cert role</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-537: Mail connector uses runtime exceptions instead of object/resource set exceptions</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-532: Authentication rejected on first start-up (possible filter registration issue)</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-518: Improve recon strategy to never go through evaluated targets twice</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-517: OrientDB service gets stuck in "activating" state at startup</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-515: Need to be able to match activity log entries to recon log entries, and tell who initiated the action</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-509: Implement the UNASSIGNED situation</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-508: Provide and log a situation (SOURCE_IGNORED) for source objects that are "not qualified" and with no link or target object</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-507: Disable OrientDB multi casting by default</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-506: CREATE support on back link / bi-directional link use</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-502: Password sync needs to work in the context of the enhanced authentication</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-501: JDBC repo explicit table mapping enhancements</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-499: Clean up default canonical model</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-496: onFailure triggers</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-495: Rename $OPENIDM/jscript to $OPENIDM/script to cater for more scripting languages</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-494: Add a default $OPENIDM/workflow directory</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-488: Warning appears when a managed user is updated or created and then reconciled into an external resource</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-487: JAAS authentication fails on some platforms</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-477: SQL locking issue when multiple threads try to create or update object</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-448: Reconciliation process is stopped when the first readObject throws SynchronizationException</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-446: Productize reconciliation status reports</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-445: Clean up default non-interactive start</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-440: Prevent Reconciliation from running until the system reports complete start-up</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-439: Setup default Jetty based authentication out of the box</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-438: Make embedded OrientDB server admin user details configurable</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-436: Cleanup system properties file</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-435: Tool to validate basic validity of all .json configurations</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-434: Ability to attach JavaScript debugger</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-433: Cleanup and align Windows start/stop scripts</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-432: Link inheritance, eliminate back-links</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-431: Single links table</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-429: Basic facility to disallow access to /system in production profile</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-428: REST inbound policy enforcement point and default policy</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-426: Default OrientDB dbURL generation on Windows contains backslashes which OrientDB does not handle well</para>
+    <para>TODO</para>
    </listitem>
   </itemizedlist>
  </section>
@@ -193,40 +63,8 @@
    <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
    issues.</para>
    <listitem>
-    <para>OPENIDM-545: Command line help not working</para>
+    <para>TODO</para>
    </listitem>
-   <listitem>
-    <para>OPENIDM-527: All connectors must distinguish between successful empty results, and failure to obtain results</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-521: Spurious 4xx errors if HTTP service starts before others</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-519: OpenIDM logs "unbindHttpService: Failed unregistering Servlet" message on startup</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-514: Renamed object in OrientDB sometimes disappears until OpenIDM is restarted</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-491: Running recon with misconfigured or empty connector results in the error "Cowardly refusing to perform recon"</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-470: OpenIDM can not rename objects. If the identifier of the object has been changed the link breaks.</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-469: The ObjectMapping can change the _id and then OpenIDM cannot find the original target object any more</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-467: Cannot save JSON object in OrientDB based repository if it contains a list</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-458: Add support of account types and distinguish them in the mappings</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-456: Support of systems with case-sensitive and case-insensitive ids are unpredictable</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-227: Updates to Resource not persisted via debug pages</para>
-   </listitem>  </itemizedlist>
+  </itemizedlist>
  </section>
 </chapter>
