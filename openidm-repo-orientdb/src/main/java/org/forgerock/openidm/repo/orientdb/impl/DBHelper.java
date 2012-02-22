@@ -282,6 +282,7 @@ public class DBHelper {
         
         JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
         defaultAdmin.put("_openidm_id", user);
+        defaultAdmin.put("userName", user);
         defaultAdmin.put("password", pwd);
         defaultAdmin.put("roles", roles);
         

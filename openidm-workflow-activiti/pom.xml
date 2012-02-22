@@ -24,12 +24,11 @@
     </parent>
     <artifactId>openidm-workflow-activiti</artifactId>
     <name>OpenIDM Activiti BPMN 2.0 Integration</name>
-    <version>2.1.0-SNAPSHOT</version>
     <packaging>bundle</packaging>
 
     <properties>
-        <spring.version>3.0.6.RELEASE</spring.version>
-        <drools.version>5.1.1</drools.version> <!-- mvn versions:display-dependency-updates -->
+        <spring.version>3.1.0.RELEASE</spring.version>
+        <drools.version>5.1.1</drools.version>
     </properties>
     <repositories>
         <repository>
@@ -47,6 +46,7 @@
         </repository>
     </repositories>
     <dependencies>
+        <!-- mvn versions:display-dependency-updates -->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
@@ -124,7 +124,7 @@
             </exclusions>
         </dependency>
 
-
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
@@ -238,7 +238,9 @@
                 <configuration>
                     <instructions>
                         <Private-Package>org.forgerock.openidm.workflow.activiti.impl.*</Private-Package>
-                        <Export-Package>org.forgerock.openidm.workflow.activiti.*;version=${openidm.version}</Export-Package>
+                        <Export-Package>
+							org.forgerock.openidm.workflow.activiti.*;version=${openidm.version}
+                        </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>

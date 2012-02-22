@@ -52,6 +52,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 
+import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 
 // JSON Resource
@@ -100,13 +101,17 @@ public class ActivitiServiceImpl implements JsonResource {
 
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
 
+    private final SharedIdentityService identityService = new SharedIdentityService();
+
 
     protected void bindRouter(JsonResource router) {
         this.openIDMELResolver.setRouter(new JsonResourceObjectSet(router));
+        this.identityService.setRouter(router);
     }
 
     protected void unbindRouter(JsonResource router) {
         this.openIDMELResolver.setRouter(null);
+        this.identityService.setRouter(null);
     }
 
     @Reference(
@@ -128,6 +133,9 @@ public class ActivitiServiceImpl implements JsonResource {
      */
     @Reference
     private TransactionManager transactionManager;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, target = "(osgi.jndi.service.name=jdbc/openidm)")
+    private DataSource dataSource;
 
     private OpenIDMProcessEngineFactory processEngineFactory = null;
     private Configuration barInstallerConfiguration = null;
@@ -237,12 +245,6 @@ public class ActivitiServiceImpl implements JsonResource {
                 EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
                 JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
 
-                //initialise the DataSource
-                JdbcDataSource dataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
-                File root = IdentityServer.getFileForPath("db/activiti/database");
-                dataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_DELAY=1000");
-                dataSource.setUser("sa");
-
                 /*MysqlConnectionPoolDataSource dataSource = new MysqlConnectionPoolDataSource();
                 dataSource.setUser("root");
                 //dataSource.setPassword("password");
@@ -253,8 +255,21 @@ public class ActivitiServiceImpl implements JsonResource {
                 //we need a TransactionManager to use this
                 JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
 
-                configuration.setDatabaseType("h2");
-                configuration.setDataSource(dataSource);
+                if (null == dataSource) {
+                    //initialise the DataSource
+                    JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
+                    File root = IdentityServer.getFileForPath("db/activiti/database");
+                    jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_DELAY=1000");
+                    jdbcDataSource.setUser("sa");
+                    configuration.setDatabaseType("h2");
+                    configuration.setDataSource(jdbcDataSource);
+                } else {
+                    configuration.setDatabaseType("mysql");
+                    configuration.setDataSource(dataSource);
+                    configuration.setIdentityService(identityService);
+                }
+
+
                 configuration.setTransactionManager(transactionManager);
                 configuration.setDatabaseSchemaUpdate("true");
 
