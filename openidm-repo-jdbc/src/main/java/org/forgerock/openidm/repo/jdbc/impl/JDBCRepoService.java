@@ -40,6 +40,7 @@ import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -81,6 +84,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
     public static final String PID = "org.forgerock.openidm.repo.jdbc";
 
     ObjectMapper mapper = new ObjectMapper();
+
+    private static ServiceRegistration sharedDataSource = null;
 
     // Keys in the JSON configuration
     public static final String CONFIG_CONNECTION = "connection";
@@ -649,6 +654,11 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                             + dbDriver + " to start repository ", ex);
                 }
                 Boolean enableConnectionPool = connectionConfig.get("enableConnectionPool").defaultTo(Boolean.FALSE).asBoolean();
+                if (null == sharedDataSource) {
+                    Dictionary<String, String> serviceParams = new Hashtable<String, String>(1);
+                    serviceParams.put("osgi.jndi.service.name", "jdbc/openidm");
+                    sharedDataSource = bundleContext.registerService(DataSource.class.getName(), DataSourceFactory.newInstance(connectionConfig), serviceParams);
+                }
                 if (enableConnectionPool) {
                     ds = DataSourceFactory.newInstance(connectionConfig);
                     useDataSource = true;
