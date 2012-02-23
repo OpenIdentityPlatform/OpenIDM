@@ -357,6 +357,144 @@ $ curl
   </section>
  </section>
  
+ <section xml:id="more-sample2c">
+  <title>Sample 2c - Synchronizing LDAP Group Membership</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 2c - Synchronizing LDAP Group Membership</secondary>
+  </indexterm>
+
+  <para>Like sample 2b, sample 2c also connects to an external LDAP
+  server. The difference is just that in sample 2c Ldap Group Memberships are synchronized.</para>
+  
+  <section xml:id="install-sample2c">
+   <title>Install the Sample</title>
+
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>.
+   Copy the sample configuration, and copy the script to the
+   <filename>script</filename> folder.</para>
+
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
+
+   <para>If you already installed sample 2c, then simply two properties need to be added to both mappings, "systemLdapAccounts_managedUser" and "managedUser_systemLdapAccounts" (it is the same property since source and target use the same property name!): </para>
+   <screen>
+                {
+                    "source" : "ldapGroups",
+                    "target" : "ldapGroups"
+                }   
+   </screen>
+   
+   <para>In addition the following property needs to be added to the "objectTypes"/"accounts" part of the provisioner configuration: </para>
+   
+   <screen>
+                "ldapGroups" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "ldapGroups",
+                    "nativeType" : "string"
+                }   
+   </screen>
+  </section>
+  
+  <section xml:id="external-ldap-config-2c">
+   <title>External LDAP Configuration</title>
+   <para>Configure the LDAP server as for sample 2,
+   <xref linkend="external-ldap-config-2" />. The LDAP user must have write
+   access to create users from OpenIDM on the LDAP server.</para>
+   
+   <para>In addition two LDAP Gropus should be created, which can be found in the ldif file: <filename>openidm/samples/sample2c/data/Example.ldif</filename>:</para>
+   
+   <screen>
+dn: ou=Groups,dc=example,dc=com
+ou: Groups
+objectClass: organizationalUnit
+objectClass: top
+
+dn: cn=openidm,ou=Groups,dc=example,dc=com
+uniqueMember: uid=jdoe,ou=People,dc=example,dc=com
+cn: openidm
+objectClass: groupOfUniqueNames
+objectClass: top
+
+dn: cn=openidm2,ou=Groups,dc=example,dc=com
+cn: openidm2
+objectClass: groupOfUniqueNames
+objectClass: top   
+   </screen>
+   
+   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before yo import this groups.</para> 
+  </section>
+  
+  <section xml:id="run-sample2c">
+   <title>Running the Sample</title>
+
+   <para>First start OpenIDM. Then run reconciliation over the REST
+   interface.</para>
+
+   <screen width="91"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ 
+   <para>Successful reconciliation returns a "reconId" object.</para>
+
+   <para>With the configuration of sample 2c, OpenIDM creates user objects from
+   LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
+   objects by ID, run a query over the REST interface.</para>
+   <screen>
+$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+   </screen>
+
+   <para>The resulting JSON object should look something like this, but all on
+   one line.</para>
+
+   <screen>
+{
+    "query-time-ms": 1,
+    "result": [
+        {
+            "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+            "_rev": "0"
+        }
+    ],
+    "conversion-time-ms": 0
+ }</screen>
+
+   <para>To retrieve the user, get the object by ID.</para>
+
+   <screen width="83"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
+ 
+   <para>Your user's object should contain a property like: </para>
+   
+   <screen>"ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"]</screen>
+   
+   <para>Now change the user on the OpdenIDM side with the following patch query: </para>
+   
+   <screen>
+$ curl -u openidm-admin:openidm-admin 
+ -d '[{"replace":"/ldapGroups","value": ["cn=openidm2,ou=Groups,dc=example,dc=com"]}]' 
+ -X POST
+ "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=jdoe"   
+   </screen>
+   
+   <para>This will change the user's ldapGroups property in OpenIDM from <filename>"cn=openidm,ou=Groups,dc=example,dc=com"</filename> to <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and as a consequence the user will be removed from the one LDAP group and added to the other LDAP group on OpenDJ!</para>
+ 
+  </section>
+ </section>
+ 
  <section xml:id="more-sample3">
   <title>Sample 3 - Scripted SQL</title>
   <indexterm>
