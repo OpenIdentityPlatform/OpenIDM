@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+    xmlns:tns="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension" xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd" >
+    <xsd:import namespace="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd" schemaLocation="resource-schema-1.xsd"/>
+    <xsd:element name="__ACCOUNT__">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="icf:__UID__" minOccurs="0"/>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element name="firstname" type="xsd:string" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="lastname" type="xsd:string" >
+                </xsd:element>
+                <xsd:element name="middlename" type="xsd:string" >
+                </xsd:element>
+                <xsd:element name="honorificPrefix" type="xsd:string" minOccurs="0"></xsd:element>
+                <xsd:element name="honorificSuffix" type="xsd:string" minOccurs="0"></xsd:element>
+                <xsd:element name="nickName" type="xsd:string" minOccurs="0"></xsd:element>
+                <xsd:element name="email" type="xsd:string" maxOccurs="unbounded" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="address" type="xsd:string" maxOccurs="unbounded" minOccurs="0">
+                    <!--xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="type" type="xsd:string"></xsd:element>
+                            <xsd:element name="streetAddress" type="xsd:string"></xsd:element>
+                            <xsd:element name="locality"></xsd:element>
+                            
+                        </xsd:sequence>
+                    </xsd:complexType-->    
+                </xsd:element>
+                <xsd:element name="phoneNumber" type="xsd:string" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                <xsd:element name="im" type="xsd:string" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                <xsd:element name="photo" type="xsd:string" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                <xsd:element name="employee-type" type="xsd:string" minOccurs="0"></xsd:element>
+                <xsd:element name="title" type="xsd:string" minOccurs="0">
+                </xsd:element>
+                <xsd:element name="preferredLanguage" type="xsd:string" minOccurs="0"></xsd:element>
+                <xsd:element name="local" type="xsd:string"></xsd:element>
+                <xsd:element name="timezone" type="xsd:string"></xsd:element>
+                <xsd:element name="group" type="xsd:string" maxOccurs="unbounded" minOccurs="0"></xsd:element>
+                <xsd:element ref="icf:__PASSWORD__"/>
+                <xsd:element ref="icf:__DESCRIPTION__"  minOccurs="0"/>
+                <xsd:element ref="icf:__DISABLE_DATE__"  minOccurs="0"/>
+                <xsd:element ref="icf:__ENABLE_DATE__"  minOccurs="0"/>
+                <xsd:element ref="icf:__ENABLE__"  minOccurs="0"/>
+                <xsd:element ref="icf:__GROUPS__"  minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="__GROUP__">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <xsd:sequence>
+                        <icf:operation>CREATE</icf:operation>
+                        <icf:operation>SEARCH</icf:operation>
+                        <icf:operation>UPDATE</icf:operation>
+                    </xsd:sequence>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:sequence>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element ref="icf:__DESCRIPTION__"/>
+                <xsd:element ref="icf:__SHORT_NAME__"/>
+                <xsd:element ref="icf:OpenICFContainer"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+    <xsd:element name="OrganizationUnit">
+        <xsd:complexType>
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <xsd:sequence>
+                        <icf:operation>CREATE</icf:operation>
+                        <icf:operation>SEARCH</icf:operation>
+                        <icf:operation>UPDATE</icf:operation>
+                    </xsd:sequence>
+                </xsd:appinfo>
+            </xsd:annotation>
+            <xsd:sequence>
+                <xsd:element ref="icf:__NAME__"/>
+                <xsd:element ref="icf:__DESCRIPTION__"/>
+                <xsd:element ref="icf:__SHORT_NAME__"/>
+                <xsd:element ref="icf:OpenICFContainer"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
