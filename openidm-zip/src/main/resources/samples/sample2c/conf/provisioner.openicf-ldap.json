@@ -1,0 +1,167 @@
+{
+    "name" : "ldap",
+    "connectorRef" : {
+        "connectorHostRef" : "#LOCAL",
+        "connectorName" : "org.identityconnectors.ldap.LdapConnector",
+        "bundleName" : "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+        "bundleVersion" : "1.1.0.0"
+    },
+    "poolConfigOption" : {
+        "maxObjects" : 10,
+        "maxIdle" : 10,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "VALIDATE" : -1,
+        "TEST" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCHEMA" : -1,
+        "DELETE" : -1,
+        "UPDATE" : -1,
+        "SYNC" : -1,
+        "AUTHENTICATE" : -1,
+        "GET" : -1,
+        "SCRIPT_ON_RESOURCE" : -1,
+        "SEARCH" : -1
+    },
+    "configurationProperties" : {
+        "accountSynchronizationFilter" : null,
+        "passwordAttributeToSynchronize" : null,
+        "synchronizePasswords" : false,
+        "removeLogEntryObjectClassFromFilter" : true,
+        "modifiersNamesToFilterOut" : [ ],
+        "passwordDecryptionKey" : null,
+        "credentials" : {
+            "$crypto" : {
+                "value" : {
+                    "iv" : "773l5QpxKBa1rKYn9m3JSQ==",
+                    "data" : "ekO18VBXiZLZXWQIGeDPjA==",
+                    "cipher" : "AES/CBC/PKCS5Padding",
+                    "key" : "openidm-sym-default"
+                },
+                "type" : "x-simple-encryption"
+            }
+        },
+        "changeLogBlockSize" : 100,
+        "baseContextsToSynchronize" : [
+            "dc=example,dc=com"
+        ],
+        "attributesToSynchronize" : [
+            "uid",
+            "sn",
+            "cn",
+            "givenName",
+            "mail",
+            "description"
+        ],
+        "changeNumberAttribute" : "changeNumber",
+        "passwordDecryptionInitializationVector" : null,
+        "filterWithOrInsteadOfAnd" : false,
+        "objectClassesToSynchronize" : [
+            "inetOrgPerson"
+        ],
+        "port" : 1389,
+        "vlvSortAttribute" : "uid",
+        "passwordAttribute" : "userPassword",
+        "useBlocks" : false,
+        "maintainPosixGroupMembership" : false,
+        "failover" : [ ],
+        "ssl" : false,
+        "principal" : "cn=Directory Manager",
+        "baseContexts" : [
+            "dc=example,dc=com"
+        ],
+        "readSchema" : true,
+        "accountObjectClasses" : [
+            "top",
+            "person",
+            "organizationalPerson",
+            "inetOrgPerson"
+        ],
+        "accountUserNameAttributes" : [
+            "uid",
+            "cn"
+        ],
+        "host" : "localhost",
+        "groupMemberAttribute" : "uniqueMember",
+        "accountSearchFilter" : null,
+        "passwordHashAlgorithm" : null,
+        "usePagedResultControl" : false,
+        "blockSize" : 100,
+        "uidAttribute" : "dn",
+        "maintainLdapGroupMembership" : false,
+        "respectResourcePasswordPolicyChangeAfterReset" : false
+    },
+    "objectTypes" : {
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "cn" : {
+                    "type" : "string",
+                    "nativeName" : "cn",
+                    "nativeType" : "string"
+                },
+                "description" : {
+                    "type" : "string",
+                    "nativeName" : "description",
+                    "nativeType" : "string"
+                },
+                "givenName" : {
+                    "type" : "string",
+                    "nativeName" : "givenName",
+                    "nativeType" : "string"
+                },
+                "mail" : {
+                    "type" : "string",
+                    "nativeName" : "mail",
+                    "nativeType" : "string"
+                },
+                "sn" : {
+                    "type" : "string",
+                    "nativeName" : "sn",
+                    "nativeType" : "string"
+                },
+                "uid" : {
+                    "type" : "string",
+                    "nativeName" : "uid",
+                    "nativeType" : "string"
+                },
+                "dn" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string",
+                    "required" : true
+                },
+                "ldapGroups" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "ldapGroups",
+                    "nativeType" : "string"
+                }
+            }
+        }
+    },
+    "operationOptions" : {
+        "DELETE" : {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        },
+        "UPDATE" : {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        },
+        "CREATE" : {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        }
+    }
+}
