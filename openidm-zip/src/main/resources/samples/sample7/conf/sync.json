@@ -1,0 +1,165 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_query-id' : 'for-userName', 'uid' :  source.name};query;"
+            },
+            "properties" : [
+                {
+                    "target" : "schemas",
+                    "default" : "['urn:scim:schemas:core:1.0']"
+                },
+                {
+                    "target" : "_id",
+                    "source" : "name"
+                },
+                {
+                    "target" : "externalId",
+                    "source" : "name"
+                },
+                {
+                    "target" : "userName",
+                    "source" : "name"
+                },
+                {
+                    "target" : "name",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimName.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "displayName",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimDisplayName.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "nickName",
+                    "source" : "nickName"
+                },
+                {
+                    "target" : "profileUrl",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimProfileUrl.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "emails",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimEmails.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "addresses",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimAddresses.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "phoneNumbers",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimPhoneNumbers.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "ims",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimIms.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "photos",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimPhotos.js"
+                    },
+                    "source" : ""
+                },
+                {
+                    "target" : "userType",
+                    "source" : "employee-type"
+                },
+                {
+                    "target" : "title",
+                    "source" : "title"
+                },
+                {
+                    "target" : "preferredLanguage",
+                    "source" : "preferredLanguage"
+                },
+                {
+                    "target" : "locale",
+                    "source" : "locale"
+                },
+                {
+                    "target" : "timezone",
+                    "source" : "timezone"
+                },
+                {
+                    "target" : "groups",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/setScimGroups.js"
+                    },
+                    "source" : ""
+                }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/setScimMetaCreate.js"
+            },
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}
