@@ -396,7 +396,7 @@ if (!allow()) {
   <literal>allow()</literal> function before the role test. The additional test
   filters out all requests not to <literal>/openidm/config</literal> or below
   <literal>/openidm/managed</literal>. The context root itself is excluded in
-  theh latter call to avoid actions like patch by query on
+  the latter call to avoid actions like patch by query on
   <filename>/openidm/managed/user</filename>.</para>
  </section>
 </chapter>
