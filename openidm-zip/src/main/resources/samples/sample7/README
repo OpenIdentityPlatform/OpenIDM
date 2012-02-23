@@ -4,6 +4,8 @@ Please refer to the sample documentation
 
 http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-sample
 
+Curently the sample only works when using a mysql repository!
+
 Short description:
 In this example a basic reconciliation between OpenIDM and an external XML based resource will be set up. The steps that have to be performed are:
 
