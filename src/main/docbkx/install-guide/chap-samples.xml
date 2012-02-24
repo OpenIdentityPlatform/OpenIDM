@@ -398,6 +398,17 @@ $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
                     "nativeType" : "string"
                 }   
    </screen>
+   
+   <warning><para>If you change from a previous provisioner configuration then also make sure that the LDAP groups to sync are within the search scope: </para>
+   <programlisting>
+        "baseContexts" : [
+            "dc=example,dc=com"
+        ],        
+
+        "baseContextsToSynchronize" : [
+            "dc=example,dc=com"
+        ],    
+   </programlisting></warning>
   </section>
   
   <section xml:id="external-ldap-config-2c">
@@ -1080,8 +1091,8 @@ mail: jdoe@example.com
   <para>Sample 7 should demonstrate how OpenIDM can be used to provide the user data in a SCIM like schema. The sample uses the xml file connector to read in attributes form external accounts and constructs a Json object for the user in the OpenIDM repository which according to the SCIM core schema: <link xlink:show="new"
  xlink:href='http://www.simplecloud.info/specs/draft-scim-core-schema-01.html'
  >SCIM schema 1.0 - draft</link></para>
- 
- <info>The sample currently works with a mysql repository only!</info>
+
+ <warning><para>The sample currently works with a mysql repository only!</para></warning>
 
   <section xml:id="install-sample7">
    <title>Install the Sample</title>
