@@ -583,6 +583,15 @@
      </step>
     </substeps>
    </step>
+   <!-- Fix for OPENIDM-566: JavaScript debugger configuration description refinement -->
+   <step>
+    <para>Prepare the Eclipse debugger to allow you set breakpoints.</para>
+    <para>In the Eclipse Debug perspective, select the Breakpoints tab, and
+    then click the Add Script Load Breakpoint icon to open the list of
+    scripts.</para>
+    <para>In the Add Script Load Breakpoint window, select your scripts, and
+    then click OK.</para>
+   </step>
    <step>
     <para>Start OpenIDM, and connect the debugger.</para>
     <para>To create a new debug, configuration click Run &gt; Debug
