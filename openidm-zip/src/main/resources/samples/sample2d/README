@@ -1,0 +1,18 @@
+The sample is the same as sample 2c except that it focuses on syncing  ldapGroups.
+ 
+The sample configuration connects to a local OpenDJ with the following paramers:
+
+"host" : "localhost",
+"port" : 1389,
+"principal" : "cn=Directory Manager",
+"credentials" : "password",
+
+In opposite to sample2, this sample sync.json configuration contains three mappings:two for user objects and one for group objects. 
+The number of attributes mapped are still rather limited.
+
+New groups will be created from LDAP by running a reconciliation against the ldap groups.
+
+Ti will sync cn and dn of the groups as well as the description and the uniqueMember attribute which contains a list of all of this group's member's dns.
+
+For a more precise description on how to run the sample see:
+http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-samples

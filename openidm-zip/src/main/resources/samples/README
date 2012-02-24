@@ -11,6 +11,10 @@ Sample2 - OpenDJ connector sample; no back link
 
 Sample2b - OpenDJ connector sample; with back link
 
+Sample2c - OpenDJ connector sample; with sync of group membership
+
+Sample2d - OpenDJ connector sample; with sync of LDAP Groups
+
 Sample3 - ScriptSQL connector with mySQL
 
 Sample4 - CSV connector sample
@@ -18,6 +22,8 @@ Sample4 - CSV connector sample
 Sample5 - Attribute flow: LDAP -> OpenIDM -> AD with simulating xml resources
 
 Sample6 - Live Sync with OpenDJ
+
+Sample7 - Scim Schema Attributes
 
 provisioners - example provisioner configuration files for different connectors
 

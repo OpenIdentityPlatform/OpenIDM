@@ -1,0 +1,10 @@
+{
+    "objects" : [
+        {
+            "name" : "user"
+        },
+        {
+            "name" : "group"
+        }
+    ]
+}

@@ -1,11 +1,11 @@
 The sample configuration connects to a local OpenDJ with the following paramers:
 
 "host" : "localhost",
-"port" : 4389,
+"port" : 1389,
 "principal" : "cn=Directory Manager",
 "credentials" : "password",
 
-In opposite to sample2, this sample sync.json configuration contains only two mappings from OpenDJ to OpenIDM and back. 
+In opposite to sample2, this sample sync.json configuration contains two mappings from OpenDJ to OpenIDM and back. 
 The number of attributes mapped are still rather limited. 
 It contains a scheduler configuration which can be used to schedule reconciliation.
 New users will be created from LDAP or existing will be updated and back-linked from OpenIDM to OpenDJ
