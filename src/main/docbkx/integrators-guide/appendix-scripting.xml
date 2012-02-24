@@ -585,7 +585,7 @@
    </step>
    <!-- Fix for OPENIDM-566: JavaScript debugger configuration description refinement -->
    <step>
-    <para>Prepare the Eclipse debugger to allow you set breakpoints.</para>
+    <para>Prepare the Eclipse debugger to allow you to set breakpoints.</para>
     <para>In the Eclipse Debug perspective, select the Breakpoints tab, and
     then click the Add Script Load Breakpoint icon to open the list of
     scripts.</para>
