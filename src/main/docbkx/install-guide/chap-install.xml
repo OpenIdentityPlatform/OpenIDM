@@ -279,11 +279,11 @@ Listening for transport dt_socket at address: 5005
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data '{
- "name":"joe",
- "firstname":"joe",
- "lastname":"smith",
- "email":"joe@abc.com",
- "userPassword":"11111111"
+ "userName":"joe",
+ "givenName":"joe",
+ "familyName":"smith",
+ "email":["joe@example.com"],
+ "description":"My first user"
  }'
  http://localhost:8080/openidm/managed/user/joe
 
@@ -296,11 +296,11 @@ Listening for transport dt_socket at address: 5005
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data {
- \"name\":\"joe\",
- \"firstname\":\"joe\",
- \"lastname\":\"smith\",
- \"email\":\"joe@abc.com\",
- \"userPassword\":\"11111111\"
+ \"userName\":\"joe\",
+ \"givenName\":\"joe\",
+ \"familyName\":\"smith\",
+ \"email\":[\"joe@example.com\"],
+ \"description\":\"My first user\"
  }
  http://localhost:8080/openidm/managed/user/joe
 
@@ -317,13 +317,13 @@ Listening for transport dt_socket at address: 5005
  http://localhost:8080/openidm/managed/user/joe
 
 {
-  "userPassword": "11111111",
-  "lastname": "smith",
-  "firstname": "joe",
-  "_id": "joe",
-  "_rev": "0",
-  "email": "joe@abc.com",
-  "name": "joe"
+    "familyName": "smith",
+    "userName": "joe",
+    "givenName": "joe",
+    "_id": "joe",
+    "_rev": "0",
+    "email": [ "joe@example.com" ],
+    "description": "My first user"
  }</screen>
      <para>The JSON output shown above is formatted for easier reading. OpenIDM
      returns the JSON object all on one line.</para>
