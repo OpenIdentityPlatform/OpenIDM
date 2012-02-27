@@ -192,7 +192,7 @@
     <term>onUnlink</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute when a source and a target object are to be linked,
+     <para>A script to execute when a source and a target object are to be unlinked,
       after property mappings have been applied. In the root scope, the
       source object is provided in the <literal>"source"</literal> property,
       projected target object in the <literal>"target"</literal> property. If the script throws an exception,
