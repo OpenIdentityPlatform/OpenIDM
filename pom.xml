@@ -836,7 +836,7 @@
                             <goal>generate-manpages</goal>
                         </goals>
                         <configuration>
-                            <foCustomization>${dbstyle-dir}/man/manpages.xsl</foCustomization>
+                            <manpagesCustomization>${dbstyle-dir}/man/manpages.xsl</manpagesCustomization>
                         </configuration>
                     </execution>
                     <execution>
