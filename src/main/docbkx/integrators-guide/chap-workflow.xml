@@ -127,15 +127,6 @@
     <!-- TODO: Issue ID? -->
     <para>Error handling needs improvement.</para>
    </listitem>
-   <listitem>
-    <para>This version depends on Activiti 5.8, which does not have the fix
-    for <link xlink:href="http://jira.codehaus.org/browse/ACT-583"
-    xlink:show="new">ACT-583</link>: Processes are not found in the .bar file
-    if they are below root.</para>
-    <para>To work around this issue, create a directory inside the .bar, and
-    put the BPMN XML artifact in the directory so that it is properly picked up
-    by the Process Engine.</para>
-   </listitem>
   </itemizedlist>
  </section>
 
@@ -278,12 +269,6 @@ openidm.action("workflow/activiti", map);</programlisting>
    Create deployment artifacts to generate the components and package them
    in a .bar file for deployment in the <filename>openidm/workflow</filename>
    directory.</para>
-
-   <para>Before you deploy the .bar, work around the issue mentioned above
-   by adding the XML artifact in the right place in the .bar, for example by
-   expanding the .bar, moving the
-   <filename>EmailNotification.bpmn20.xml</filename> file inside a directory,
-   and recreating the .bar.</para>
 
    <para>After you deploy the .bar, create a script in
    <filename>openidm/script/invokeEmailNotification.js</filename>. The script
