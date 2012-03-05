@@ -57,6 +57,7 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.JsonResourceFilter;
 import org.forgerock.json.resource.JsonResourceFilterChain;
 import org.forgerock.json.resource.JsonResourceRouter;
+import org.forgerock.json.resource.SimpleJsonResource.Method;
 
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -67,6 +68,10 @@ import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
+
 
 /**
  * Provides internal routing for a top-level object set.
@@ -95,6 +100,11 @@ public class JsonResourceRouterService implements JsonResource {
     /** TODO: Description. */
     private static final String PREFIX_PROPERTY = "openidm.router.prefix";
 
+    /**
+     * Event name prefix for monitoring the router
+     */
+    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router";
+    
     /** TODO: Description. */
     private final Router router = new Router();
 
@@ -198,16 +208,35 @@ public class JsonResourceRouterService implements JsonResource {
         chain.getFilters().clear();
         this.context = null;
     }
-
+    
+    Name getRouterEventName(JsonValue request) {
+        String method = request.get("method").asString();
+        String idContext = "";
+        
+        switch (request.get("method").required().asEnum(Method.class)) {
+            // For query and action group statistics by full URI
+            case query: // fall through
+            case action: 
+                idContext = "/" + request.get("id").asString();
+            // For CRUD, patch group statistics without the local resource identifier
+            default:
+                idContext = request.get("id").asPointer().parent().toString();
+        }
+        return Name.get(EVENT_ROUTER_PREFIX + idContext + "/" + request.get("method").asString());
+    }
+    
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
+        EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
         try {
             JsonValue response = chain.handle(request); // dispatch to router, via filter chain
+            measure.setResult(response);
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Request: {}, Response: {}", request, response);
             }
             return response;
         } catch (JsonResourceException jre) {
+            measure.setResult(jre);
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Resource exception: {} processing request: {}", new Object[] {jre.toJsonValue(), request, jre});
             }
@@ -217,11 +246,15 @@ public class JsonResourceRouterService implements JsonResource {
             }
             throw jre;
         } catch (RuntimeException re) {
+            measure.setResult(re);
             LOGGER.warn("Uncaught runtime exception processing request: {}", request, re);
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
         } catch (StackOverflowError sfe) {
+            measure.setResult(sfe);
             LOGGER.warn("Uncaught stack overflow error processing request: {}", request, sfe);
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
+        } finally {
+            measure.end();
         }
     }
 
