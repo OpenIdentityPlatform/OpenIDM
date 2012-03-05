@@ -37,6 +37,11 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
+
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +56,8 @@ import org.slf4j.LoggerFactory;
 public class Queries {
 
     final static Logger logger = LoggerFactory.getLogger(Queries.class);
+    
+    static final String EVENT_RAW_QUERY_PREFIX = "openidm/internal/repo/orientdb/raw/query/";
     
     TokenHandler tokenHandler = new TokenHandler();
     
@@ -80,10 +87,11 @@ public class Queries {
         params.put(QueryConstants.RESOURCE_NAME, orientClassName); 
         
         String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);
+        String queryId = null;
         if (queryExpression != null) {
             foundQueryInfo = resolveInlineQuery(type, params, database);
         } else {
-            String queryId = (String) params.get(QueryConstants.QUERY_ID);
+            queryId = (String) params.get(QueryConstants.QUERY_ID);
             if (queryId == null) {
                 throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
                         + " to identify/define a query must be passed in the parameters. " + params);
@@ -110,9 +118,12 @@ public class Queries {
             }
 
             // TODO: Simplify the below
+            logger.debug("Evaluate query {}", query);
+            Name eventName = getEventName(queryExpression, queryId);
+            EventEntry measure = Publisher.start(eventName, query, null);
             try {
-                logger.debug("Evaluate query {}", query);
                 result = database.command(query).execute(params);
+                measure.setResult(result);
             } catch (OQueryParsingException firstTryEx) {
                 if (tryPrepared) {
                     // Prepared query is invalid, fall back onto add-hoc resolved query
@@ -139,6 +150,8 @@ public class Queries {
                 // TODO: consider differentiating between bad configuration and bad request
                 throw new BadRequestException("Query is invalid: " 
                         + foundQueryInfo.getQueryString() + " " + ex.getMessage(), ex);
+            } finally {
+                measure.end();
             }
         }
         return result;
@@ -225,5 +238,17 @@ public class Queries {
             queryInfo = new QueryInfo(false, null, queryString);
         }
         return queryInfo;
+    }
+    
+    /**
+     * Get the smartevent Name for a given query
+     * @return
+     */
+    Name getEventName(String queryExpression, String queryId) {
+        if (queryId == null) {
+            return Name.get(EVENT_RAW_QUERY_PREFIX + "_query_expression");
+        } else {
+            return Name.get(EVENT_RAW_QUERY_PREFIX + queryId);
+        }
     }
 }
