@@ -79,9 +79,9 @@ public class PublisherTest {
     @Test
     public void performanceSmokeTest() throws Exception {
 
-        int warmup = 1000000;
-        int iterations = 1000000;
-        int maxTimeToAllow = 5000; // ms time to allow for this test not to fail
+        int warmup = 100000;
+        int iterations = 100000;
+        int maxTimeToAllow = 10000; // ms time to allow for this test not to fail
         
         Object dummyPayload = new JsonValue("{'test': 'value'}");
         Object dummyContext1 = "reconID: xyz123";
