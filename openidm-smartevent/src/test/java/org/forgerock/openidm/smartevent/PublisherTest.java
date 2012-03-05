@@ -104,7 +104,7 @@ public class PublisherTest {
                 + "Each start/end event took approx: " + MILLISEC_FORMAT.format(diff/(double)iterations)
                 + ". This smoke test allows max " + maxTimeToAllow + " ms ");
         
-        Assert.assertTrue(diff < 5000, "Performance warning: " + iterations + " did not complete in the expected max " + maxTimeToAllow + " ms");
+        Assert.assertTrue(diff < maxTimeToAllow, "Performance warning: " + iterations + " did not complete in the expected max " + maxTimeToAllow + " ms");
     }
     
 }
