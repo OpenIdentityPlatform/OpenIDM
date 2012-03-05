@@ -118,7 +118,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
 
     EmbeddedOServerService embeddedServer;
     
-    
     /**
      * Gets an object from the repository by identifier. The returned object is not validated 
      * against the current schema and may need processing to conform to an updated schema.
