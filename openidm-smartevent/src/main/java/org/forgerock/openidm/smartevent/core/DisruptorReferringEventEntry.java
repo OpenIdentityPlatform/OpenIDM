@@ -93,7 +93,7 @@ public class DisruptorReferringEventEntry {
     }
     
     public String toString() {
-        if (delegate.eventName != null) {
+        if (delegate != null && delegate.eventName != null) {
             return "Event name: " + delegate.eventName.asString() 
                     + " duration: " + getFormattedDuration() 
                     + " payload: " + delegate.payload 

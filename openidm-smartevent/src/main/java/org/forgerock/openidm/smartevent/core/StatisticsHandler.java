@@ -93,14 +93,18 @@ public class StatisticsHandler implements
         // TODO: consider adding history for not yet end()ed events
         // Present history ordered by start time, with latest start time first
         Map recent = new TreeMap(Collections.reverseOrder());
-        com.lmax.disruptor.RingBuffer<DisruptorReferringEventEntry > buf = disruptor.getRingBuffer();
-        if (buf != null) {
-            for (int count = 0; count < buf.getBufferSize(); count++) {
-                DisruptorReferringEventEntry entry = buf.get(count);
-                if (entry != null) {
-                    recent.put(Long.valueOf(entry.startTime), entry.toString());
+        try {
+            com.lmax.disruptor.RingBuffer<DisruptorReferringEventEntry > buf = disruptor.getRingBuffer();
+            if (buf != null) {
+                for (int count = 0; count < buf.getBufferSize(); count++) {
+                    DisruptorReferringEventEntry entry = buf.get(count);
+                    if (entry != null && entry.startTime > 0) {
+                        recent.put(Long.valueOf(entry.startTime), entry.toString());
+                    }
                 }
             }
+        } catch (RuntimeException ex) {
+            logger.info("Failure in getting recent event history", ex);
         }
         return recent;
     }
