@@ -47,6 +47,9 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
@@ -58,6 +61,24 @@ import org.forgerock.openidm.sync.SynchronizationListener;
  */
 class ObjectMapping implements SynchronizationListener {
 
+    /**
+     * Event names for monitoring ObjectMapping behavior
+     */
+    public final static Name EVENT_CREATE_OBJ = Name.get("openidm/internal/discovery-engine/sync/create-object");
+    public final static Name EVENT_READ_OBJ = Name.get("openidm/internal/discovery-engine/sync/read-object");
+    public final static Name EVENT_UPDATE_TARGET = Name.get("openidm/internal/discovery-engine/sync/update-target");
+    public final static Name EVENT_DELETE_TARGET = Name.get("openidm/internal/discovery-engine/sync/delete-target");
+    public final static String EVENT_OBJECT_MAPPING_PREFIX = "openidm/internal/discovery-engine/sync/objectmapping/";
+
+    
+    /**
+     * Event names for monitoring Reconcliation behavior
+     */
+    public final static Name EVENT_RECON = Name.get("openidm/internal/discovery-engine/reconciliation");
+    public final static Name EVENT_RECON_ID_QUERIES = Name.get("openidm/internal/discovery-engine/reconciliation/id-queries-phase");
+    public final static Name EVENT_RECON_SOURCE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
+    public final static Name EVENT_RECON_TARGET = Name.get("openidm/internal/discovery-engine/reconciliation/target-phase");
+        
     /** TODO: Description. */
     private enum Status { SUCCESS, FAILURE }
     
@@ -211,6 +232,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void doSourceSync(String id, JsonValue value) throws SynchronizationException {
         LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
+        
         String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
@@ -287,13 +309,18 @@ class ObjectMapping implements SynchronizationListener {
         if (id == null) {
             throw new NullPointerException();
         }
+        EventEntry measure = Publisher.start(EVENT_READ_OBJ, null, id);
         try {
-            return new JsonValue(service.getRouter().read(id));
+            JsonValue result = new JsonValue(service.getRouter().read(id));
+            measure.setResult(result);
+            return result;
         } catch (NotFoundException nfe) { // target not found results in null
             return null;
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to read target object", ose);
             throw new SynchronizationException(ose);
+        } finally {
+            measure.end();
         }
     }
 
@@ -305,6 +332,7 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      */
     private void createTargetObject(JsonValue target) throws SynchronizationException {
+        EventEntry measure = Publisher.start(EVENT_CREATE_OBJ, target, null);
         StringBuilder sb = new StringBuilder();
         sb.append(targetObjectSet);
         if (target.get("_id").isString()) {
@@ -314,11 +342,14 @@ class ObjectMapping implements SynchronizationListener {
         LOGGER.trace("Create target object {}", id);
         try {
             service.getRouter().create(id, target.asMap());
+            measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to create target object", ose);
             throw new SynchronizationException(ose);
+        } finally {
+            measure.end();
         }
     }
 
@@ -346,15 +377,19 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      */
     private void updateTargetObject(JsonValue target) throws SynchronizationException {
+        EventEntry measure = Publisher.start(EVENT_UPDATE_TARGET, target, null);
         try {
             String id = qualifiedId(targetObjectSet, target.get("_id").required().asString());
             LOGGER.trace("Update target object {}", id);
             service.getRouter().update(id, target.get("_rev").asString(), target.asMap());
+            measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
         } catch (ObjectSetException ose) {
             LOGGER.warn("Failed to update target object", ose);
             throw new SynchronizationException(ose);
+        } finally {
+            measure.end();
         }
     }
 
@@ -367,6 +402,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void deleteTargetObject(JsonValue target) throws SynchronizationException {
         if (target.get("_id").isString()) { // forgiving delete
+            EventEntry measure = Publisher.start(EVENT_DELETE_TARGET, target, null);
             try {
                 String id = qualifiedId(targetObjectSet, target.get("_id").required().asString());
                 LOGGER.trace("Delete target object {}", id);
@@ -378,6 +414,8 @@ class ObjectMapping implements SynchronizationListener {
             } catch (ObjectSetException ose) {
                 LOGGER.warn("Failed to delete target object", ose);
                 throw new SynchronizationException(ose);
+            } finally {
+                measure.end();
             }
         }
     }
@@ -390,9 +428,22 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      */
     private void applyMappings(JsonValue source, JsonValue target) throws SynchronizationException {
-        for (PropertyMapping property : properties) {
-            property.apply(source, target);
+        EventEntry measure = Publisher.start(getObjectMappingEventName(), source, null);
+        try {
+            for (PropertyMapping property : properties) {
+                property.apply(source, target);
+            }
+            measure.setResult(target);
+        } finally {
+            measure.end();
         }
+    }
+
+    /**
+     * @return an event name for monitoring this object mapping
+     */
+    private Name getObjectMappingEventName() {
+        return Name.get(EVENT_OBJECT_MAPPING_PREFIX + name);
     }
 
     /**
@@ -436,7 +487,9 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     public void recon(String reconId) throws SynchronizationException {
+        EventEntry measure = Publisher.start(EVENT_RECON, reconId, null);
         doRecon(reconId);
+        measure.end();
     }
 
     private void doResults() throws SynchronizationException {
@@ -460,6 +513,8 @@ class ObjectMapping implements SynchronizationListener {
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
+        
+        EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);
         JsonValue context = ObjectSetContext.get();
         JsonValue rootContext = JsonResourceContext.getRootContext(context);
         logReconStart(reconId, rootContext, context);
@@ -477,7 +532,9 @@ class ObjectMapping implements SynchronizationListener {
         targetStats.startAllIds();
         List<String> remainingTargetIds = queryAllIds(targetObjectSet);
         targetStats.endAllIds();
+        measureIdQueries.end();
         
+        EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
         while (sourceIds.hasNext()) {
             String sourceId = sourceIds.next();
             SourceSyncOperation op = new SourceSyncOperation();
@@ -520,7 +577,9 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
         sourceStats.end();
+        measureSource.end();
 
+        EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
         for (String targetId : remainingTargetIds) {
             TargetSyncOperation op = new TargetSyncOperation();
             ReconEntry entry = new ReconEntry(op, rootContext);
@@ -555,9 +614,11 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
         targetStats.end();
+        measureTarget.end();
         globalStats.end();
         logReconEnd(reconId, rootContext, context);
         doResults();
+        
 // TODO: cleanup orphan link objects (no matching source or target) here 
     }
 
