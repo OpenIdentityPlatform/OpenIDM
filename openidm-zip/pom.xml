@@ -140,6 +140,15 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
+            <!-- To satisfy both maven unit tests and OSGi packaging
+                 this embedded jar is included as a dependency for maven
+                 purposes, but explicitly excluded for the OSGi packaging -->
+            <exclusions>
+                <exclusion>  
+                    <groupId>com.googlecode.disruptor</groupId>
+                    <artifactId>disruptor</artifactId>
+                </exclusion>
+            </exclusions> 
         </dependency>
         <!-- Core OSGi -->
         <dependency>
