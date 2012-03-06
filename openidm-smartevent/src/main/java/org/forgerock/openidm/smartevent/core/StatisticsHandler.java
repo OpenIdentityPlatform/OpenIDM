@@ -43,8 +43,10 @@ import com.lmax.disruptor.util.MutableLong;
 public class StatisticsHandler implements 
         EventHandler<DisruptorReferringEventEntry>,
         StatisticsHandlerMBean {
-
+    
     private final static Logger logger = LoggerFactory.getLogger(StatisticsHandler.class);
+    
+    public final static String MBEAN_NAME = "OpenIDM:type=Statistics";
     
     final static NumberFormat MILLISEC_FORMAT = new DecimalFormat("###,###,##0.### ms");
     
@@ -68,7 +70,7 @@ public class StatisticsHandler implements
         javax.management.MBeanServer mbs = java.lang.management.ManagementFactory.getPlatformMBeanServer();
         javax.management.ObjectName statName = null;
         try {
-           statName = new javax.management.ObjectName("OpenIDM:name=statistics");
+           statName = new javax.management.ObjectName(MBEAN_NAME);
            mbs.registerMBean(this, statName);
         } catch(Exception ex) {
            logger.info("Failed to register statistics MBean", ex);;

@@ -28,6 +28,7 @@ import javax.management.ObjectName;
 import org.forgerock.json.fluent.JsonValue;
 
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.smartevent.core.StatisticsHandler;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -50,7 +51,7 @@ public class PublisherTest {
     
     // Smart event also exposes statistics via JMX
     ObjectName getStatisticsMBean() throws MalformedObjectNameException {
-        return new ObjectName("OpenIDM:name=statistics");
+        return new ObjectName(StatisticsHandler.MBEAN_NAME);
     }
     
     @Test
