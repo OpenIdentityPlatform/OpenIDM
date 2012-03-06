@@ -30,6 +30,9 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 // OpenIDM
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
@@ -51,6 +54,15 @@ public class JavaScript implements Script {
 
     /** The compiled script to execute. */
     private final org.mozilla.javascript.Script script;
+    
+    /** The script name */
+    private String scriptName;
+    
+    /** The script file if stand alone file, null if source is from embedded configuration */
+    private File file;
+    
+    /** The event name to use for monitoring this script */
+    private Name monitoringEventName;
 
     /** Indicates if this script instance should use the shared scope. */
     private final boolean sharedScope;
@@ -79,6 +91,8 @@ public class JavaScript implements Script {
      * @throws ScriptException if there was an exception encountered while compiling the script.
      */
     public JavaScript(String name, String source, boolean sharedScope) throws ScriptException {
+        this.scriptName = name;
+        this.monitoringEventName = generateEventName();
         this.sharedScope = sharedScope;
         Context cx = Context.enter();
         try {
@@ -94,6 +108,9 @@ public class JavaScript implements Script {
      * TEMPORARY
      */
     public JavaScript(String name, File file, boolean sharedScope) throws ScriptException {
+        this.scriptName = name;
+        this.file = file;
+        this.monitoringEventName = generateEventName();
         FileReader reader = null;
         try {
             reader = new FileReader(file);
@@ -143,6 +160,7 @@ public class JavaScript implements Script {
         if (scope == null) {
             throw new NullPointerException();
         }
+        EventEntry measure = Publisher.start(monitoringEventName, scope, null);
         Context context = Context.enter();
         try {
             Scriptable outer = new ScriptableMap(scope);
@@ -151,7 +169,9 @@ public class JavaScript implements Script {
             Scriptable inner = context.newObject(outer); // inner transient scope for new properties
             inner.setPrototype(outer);
             inner.setParentScope(null);
-            return Converter.convert(script.exec(context, inner));
+            Object result = Converter.convert(script.exec(context, inner));
+            measure.setResult(result);
+            return result;
         } catch (RhinoException re) {
             if (re instanceof JavaScriptException) { // thrown by the script itself
                 throw new ScriptThrownException(Converter.convert(((JavaScriptException)re).getValue()));
@@ -160,6 +180,11 @@ public class JavaScript implements Script {
             }
         } finally {
             Context.exit();
+            measure.end();
         } 
+    }
+    
+    Name generateEventName() {
+        return Name.get("openidm/internal/script/javascript/" + (file != null ? file.getName() : "embedded-source") + "/" + scriptName);
     }
 }
