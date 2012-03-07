@@ -133,6 +133,7 @@ public class Queries {
                         logger.debug("Prepared version not valid, manual token substitution for {} resulted in {}",
                                 queryString, query);
                         result = database.command(query).execute(params);
+                        measure.setResult(result);
                         // Disable use of the prepared statement as manually resolved works
                         logger.debug("Manual substition valid, mark not to use prepared statement");
                         foundQueryInfo.setUsePrepared(false);
@@ -241,8 +242,7 @@ public class Queries {
     }
     
     /**
-     * Get the smartevent Name for a given query
-     * @return
+     * @return the smartevent Name for a given query
      */
     Name getEventName(String queryExpression, String queryId) {
         if (queryId == null) {
