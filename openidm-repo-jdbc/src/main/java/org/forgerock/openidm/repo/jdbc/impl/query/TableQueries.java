@@ -32,6 +32,9 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
 import org.forgerock.openidm.repo.util.TokenHandler;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +56,9 @@ import java.util.Map;
 public class TableQueries {
 
     final static Logger logger = LoggerFactory.getLogger(TableQueries.class);
+    
+    // Monitoring event name prefix
+    static final String EVENT_RAW_QUERY_PREFIX = "openidm/internal/repo/jdbc/raw/query/";
     
     // Pre-configured queries, key is query id
     Map<String, QueryInfo> queries = new HashMap<String, QueryInfo>();
@@ -145,10 +151,13 @@ public class TableQueries {
                     + " does not match any configured queries on the OrientDB repository service.");
         }
         
+        Name eventName = getEventName(/*queryExpression,*/ queryId);
+        EventEntry measure = Publisher.start(eventName, foundQuery, null);
         ResultSet rs = null;
         try {
             rs = foundQuery.executeQuery();
             result = resultMapper.mapQueryToObject(rs, queryId, type, params, this);
+            measure.setResult(result);
         } catch (SQLException ex) {
             throw new InternalServerErrorException("DB reported failure executing query " 
                     + foundQuery.toString() + " with params: " + params + " error code: " + ex.getErrorCode() 
@@ -159,6 +168,7 @@ public class TableQueries {
         } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(foundQuery);
+            measure.end();
         }
         return result;
     }
@@ -275,4 +285,14 @@ public class TableQueries {
         }
     }    
     
+    /**
+     * @return the smartevent Name for a given query
+     */
+    Name getEventName(String queryId) {
+        if (queryId == null) {
+            return Name.get(EVENT_RAW_QUERY_PREFIX + "_query_expression");
+        } else {
+            return Name.get(EVENT_RAW_QUERY_PREFIX + queryId);
+        }
+    }
 }
