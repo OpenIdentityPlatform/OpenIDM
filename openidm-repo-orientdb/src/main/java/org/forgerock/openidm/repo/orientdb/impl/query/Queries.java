@@ -57,6 +57,7 @@ public class Queries {
 
     final static Logger logger = LoggerFactory.getLogger(Queries.class);
     
+    // Monitoring event name prefix
     static final String EVENT_RAW_QUERY_PREFIX = "openidm/internal/repo/orientdb/raw/query/";
     
     TokenHandler tokenHandler = new TokenHandler();
