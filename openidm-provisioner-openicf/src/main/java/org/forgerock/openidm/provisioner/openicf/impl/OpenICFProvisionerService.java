@@ -26,8 +26,14 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -44,6 +50,8 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
@@ -86,6 +94,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
+    // Monitoring event name prefix
+    private static final String EVENT_PREFIX = "openidm/internal/system/";
+    
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
@@ -371,9 +382,14 @@ public class OpenICFProvisionerService implements ProvisionerService {
         if (helper.isOperationPermitted(SearchApiOp.class)) {
             OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null, null);
             Filter filter = null;
+            Map<String, Object> query = null;
+            String queryId = null;
             if (null != params) {
-                Map<String, Object> query = params.get("query").asMap();
-                String queryId = params.get("_query-id").asString();
+                query = params.get("query").asMap();
+                queryId = params.get("_query-id").asString();
+            }
+            EventEntry measure = Publisher.start(getQueryEventName(id, params, query, queryId), null, id);
+            if (null != params) {
                 if (query != null) {
                     filter = helper.build(query, params.get("params").asMap());
                 } else if (queryId != null) {
@@ -391,12 +407,27 @@ public class OpenICFProvisionerService implements ProvisionerService {
             }
             getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
             result.put("result", helper.getQueryResult());
+            measure.setResult(result);
+            measure.end();
         } else {
             logger.debug("Operation QUERY of {} is not permitted", id);
         }
         return result;
     }
 
+    /**
+     * @return the smartevent Name for a given query
+     */
+    org.forgerock.openidm.smartevent.Name getQueryEventName(Id id, JsonValue params, Map<String, Object> query, String queryId) {
+        String prefix = EVENT_PREFIX + id.getSystemName() + "/" + id.getObjectType() + "/query/";
+        if (params == null) {
+            return org.forgerock.openidm.smartevent.Name.get(prefix + "_default_query");
+        } else if (query != null) {
+            return org.forgerock.openidm.smartevent.Name.get(prefix + "_query_expression");
+        } else {
+            return org.forgerock.openidm.smartevent.Name.get(prefix + queryId);
+        }
+    }
 
     public JsonValue action(Id id, JsonValue entity, JsonValue params) throws JsonResourceException {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
