@@ -65,10 +65,13 @@ public class ReconStats {
         ids.put(Situation.SOURCE_IGNORED, new ArrayList<String>());
         ids.put(Situation.TARGET_IGNORED, new ArrayList<String>());
         notValid = new ArrayList<String>();
+    }
+
+    public void start() {
         startTime = System.currentTimeMillis();
         startTimestamp = sdformat.format(new Date());
     }
-
+    
     public void end() {
         endTime = System.currentTimeMillis();
         endTimestamp = sdformat.format(new Date());
