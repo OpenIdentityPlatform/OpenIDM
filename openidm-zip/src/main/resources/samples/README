@@ -25,6 +25,8 @@ Sample6 - Live Sync with OpenDJ
 
 Sample7 - Scim Schema Attributes
 
+Sample8 - Use of logging in scripts for debugging
+
 provisioners - example provisioner configuration files for different connectors
 
 jscript - example javascripts

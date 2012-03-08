@@ -1,0 +1,104 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var query = {'_query-id' : 'for-userName', 'uid' :  source.name};query;"
+            },
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/onCreate.js"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "file" : "script/onUpdate.js"
+            },
+            "result" : {
+                "type" : "text/javascript",
+                "file" : "script/result.js"
+            },
+            "properties" : [
+                {
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/nosource.js"
+                    },
+                    "target" : "sourceTest1Nosource"
+                },
+                {
+                    "source" : "",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/emptySource.js"
+                    },
+                    "target" : "sourceTestEmptySource"
+                },
+                {
+                    "source" : "description",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "file" : "script/sourceDescription.js"
+                    },
+                    "target" : "sourceTestDescription"
+                },
+                {
+                    "source" : "firstname",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "email",
+                    "target" : "email"
+                },
+                {
+                    "source" : "lastname",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "name",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "name",
+                    "target" : "_id"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}
