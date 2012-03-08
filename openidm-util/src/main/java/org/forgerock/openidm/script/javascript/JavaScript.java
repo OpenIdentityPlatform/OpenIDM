@@ -137,7 +137,8 @@ public class JavaScript implements Script {
     }
 
     /**
-     * Gets the JavaScript standard objects, either as the shared sealed scope or as a newly
+     * Gets the JavaScript standard objects and any default 
+     * objects such as logger, either as the shared sealed scope or as a newly
      * allocated set of standard objects, depending on the value of {@code useSharedScope}.
      *
      * @param context The runtime context of the executing script.
@@ -145,14 +146,26 @@ public class JavaScript implements Script {
      */
     private ScriptableObject getStandardObjects(Context context) {
         if (!sharedScope) {
-            return context.initStandardObjects(); // somewhat expensive
+            ScriptableObject scope = context.initStandardObjects(); // somewhat expensive
+            addLoggerProperty(scope);
+            return scope;
         }
         if (SHARED_SCOPE == null) { // lazy initialization race condition is harmless
             ScriptableObject scope = context.initStandardObjects(null, true);
+            addLoggerProperty(scope);
             scope.sealObject(); // seal the whole scope (not just standard objects)
             SHARED_SCOPE = scope;
         }
         return SHARED_SCOPE;
+    }
+    
+    /**
+     * Add the logger property to the JavaScript scope
+     * @param scope to add the property to
+     */
+    private void addLoggerProperty(ScriptableObject scope) {
+        String loggerName = "org.forgerock.openidm.script.javascript.JavaScript." + (file == null ? "embedded-source" : file.getName());
+        ScriptableObject.putProperty(scope, "logger", LoggerPropertyFactory.get(loggerName));
     }
 
     @Override
