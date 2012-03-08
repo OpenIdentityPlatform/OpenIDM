@@ -1,0 +1,20 @@
+XML connector sample to demo logging in scripts and the situation dependent content of the source object
+
+Please refer to the sample documentation
+
+http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-sample
+
+
+Short description:
+In this example a basic reconciliation between OpenIDM and an external XML based resource will be set up. The steps that have to be performed are:
+
+$ cd /path/to/openidm
+$ cp -r samples/sample8/conf .
+$ cp -r samples/sample8/script .
+
+
+The following command will start a one time reconciliation which will create the users from the xml file in the OpenIDM repository of a running server:
+
+curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+
+Hint: the log level in the demo scripts is set to "warn" to make OpenIDM show the messages on the Felix console with the default console logging configuration. 
