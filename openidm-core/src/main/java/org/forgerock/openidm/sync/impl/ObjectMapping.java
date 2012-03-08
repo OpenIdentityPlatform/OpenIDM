@@ -520,6 +520,7 @@ class ObjectMapping implements SynchronizationListener {
         logReconStart(reconId, rootContext, context);
         sourceStats = new ReconStats(reconId,sourceObjectSet);
         globalStats = new ReconStats(reconId,name);
+        globalStats.start();
 
         // Get all the source and target identifiers before we assess the situations
         sourceStats.startAllIds();
@@ -535,6 +536,7 @@ class ObjectMapping implements SynchronizationListener {
         measureIdQueries.end();
         
         EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
+        sourceStats.start();
         while (sourceIds.hasNext()) {
             String sourceId = sourceIds.next();
             SourceSyncOperation op = new SourceSyncOperation();
@@ -580,6 +582,7 @@ class ObjectMapping implements SynchronizationListener {
         measureSource.end();
 
         EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
+        targetStats.start();
         for (String targetId : remainingTargetIds) {
             TargetSyncOperation op = new TargetSyncOperation();
             ReconEntry entry = new ReconEntry(op, rootContext);
