@@ -376,14 +376,15 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
   <para>To generate obfuscated versions of a password, invoke
   <filename>openidm-crypto-<?eval ${docTargetVersion}?>.jar</filename> from
   the <filename>openidm/</filename> directory.</para>
+ 
+  <screen>$ cd /path/to/openidm
+$ java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar</screen>
 
-  <para>$ cd /path/to/openidm
-$ java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar
-This utility helps obfuscate passwords to prevent casual observation.
-It is not securely encrypted and needs further measures to prevent disclosure.
-Please enter the password:
-OBF:1v2j1uum1xtv1zej1zer1xtn1uvk1v1v
-CRYPT:1206319abab995251d745b151b73131c</para>
+  <para>This utility helps obfuscate passwords to prevent casual observation.
+   It is not securely encrypted and needs further measures to prevent disclosure.
+   Please enter the password:
+   <literal>OBF:1v2j1uum1xtv1zej1zer1xtn1uvk1v1v
+CRYPT:1206319abab995251d745b151b73131c</literal></para>
  </section>
 
  <section xml:id="security-remove-dev-tools">
