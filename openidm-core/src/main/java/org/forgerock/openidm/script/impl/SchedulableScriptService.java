@@ -82,29 +82,30 @@ public class SchedulableScriptService implements ScheduledService {
     public void execute(Map<String, Object> context) throws ExecutionException {
 // TODO: Use resource interface.
         try {
-            String name = (String) context.get(INVOKER_NAME);
+            String invokerName = (String) context.get(INVOKER_NAME);
+            String scriptName = (String) context.get(CONFIG_NAME);
             JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
             JsonValue scriptValue = params.get("script").expect(Map.class);
             if (!scriptValue.isNull()) {
                 JsonValue input = params.get("input");
-                Script script = Scripts.newInstance(name, scriptValue);
-                execScript(name, script, input);
+                Script script = Scripts.newInstance(scriptName, scriptValue);
+                execScript(scriptName, invokerName, script, input);
             } else {
-                throw new ExecutionException("Unknown script '" + name + "' configured in schedule.");
+                throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
         }
     }
 
-    private void execScript(String name, Script script, JsonValue input) throws ExecutionException {
+    private void execScript(String scriptName, String invokerName, Script script, JsonValue input) throws ExecutionException {
         if (script != null) {
             Map<String, Object> scope = newScope();
             scope.put("input", input.getObject());
             try {
                 script.exec(scope);
             } catch (ScriptException se) {
-                String msg = name + " script encountered exception";
+                String msg = scriptName + " script invoked by " + invokerName + " encountered exception";
                 LOGGER.debug(msg, se);
                 throw new ExecutionException(msg, se);
             }

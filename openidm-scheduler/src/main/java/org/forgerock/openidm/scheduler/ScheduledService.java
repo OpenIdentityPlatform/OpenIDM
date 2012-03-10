@@ -35,6 +35,7 @@ import java.util.Map;
 public interface ScheduledService {
     
     // Reserved keys for the ScheduledService execution context map
+    final static String CONFIG_NAME = "scheduler.config-name";
     final static String INVOKER_NAME = "scheduler.invoker-name";
     final static String SCHEDULED_FIRE_TIME = "scheduler.scheduled-fire-time";
     final static String ACTUAL_FIRE_TIME = "scheduler.actual-fire-time";

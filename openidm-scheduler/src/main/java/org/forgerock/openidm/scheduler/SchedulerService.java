@@ -144,6 +144,8 @@ public class SchedulerService  {
                 JobDetail job = new JobDetail(jobName, groupName, SchedulerServiceJob.class);
                 JobDataMap context = new JobDataMap();
                 context.put(SERVICE_TRACKER, scheduledServiceTracker);
+                context.put(ScheduledService.CONFIG_NAME,
+                        "scheduler"+ (configFactoryPID != null ? "-" + configFactoryPID : ""));
                 context.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
                 context.put(ScheduledService.CONFIGURED_INVOKE_CONTEXT, invokeContext);
                 job.setJobDataMap(context);
