@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2012 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.script.javascript;
@@ -20,6 +20,7 @@ package org.forgerock.openidm.script.javascript;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 // Mozilla Rhino
@@ -43,15 +44,18 @@ import org.forgerock.openidm.script.ScriptThrownException;
  * This implementation pre-compiles the provided script. Any syntax errors in the source code
  * will throw an exception during construction of the object.
  * <p>
- * This implementation provides 
  *
  * @author Paul C. Bryan
+ * @author aegloff
  */
 public class JavaScript implements Script {
 
     /** A sealed shared scope to improve performance; avoids allocating standard objects on every exec call. */
     private static ScriptableObject SHARED_SCOPE = null; // lazily initialized
 
+    /** The script level scope to use */
+    private Scriptable scriptScope = null;
+    
     /** The compiled script to execute. */
     private final org.mozilla.javascript.Script script;
     
@@ -96,6 +100,7 @@ public class JavaScript implements Script {
         this.sharedScope = sharedScope;
         Context cx = Context.enter();
         try {
+            scriptScope = getScriptScope(cx);
             script = cx.compileString(source, name, 1, null);
         } catch (RhinoException re) {
             throw new ScriptException(re.getMessage());
@@ -112,11 +117,12 @@ public class JavaScript implements Script {
         this.file = file;
         this.monitoringEventName = generateEventName();
         FileReader reader = null;
+        this.sharedScope = sharedScope;
         try {
             reader = new FileReader(file);
-            this.sharedScope = sharedScope;
             Context cx = Context.enter();
             try {
+                scriptScope = getScriptScope(cx);
                 script = cx.compileReader(reader, name != null ? name : file.getPath(), 1, null);
             } catch (RhinoException re) {
                 throw new ScriptException(re);
@@ -137,8 +143,8 @@ public class JavaScript implements Script {
     }
 
     /**
-     * Gets the JavaScript standard objects and any default 
-     * objects such as logger, either as the shared sealed scope or as a newly
+     * Gets the JavaScript standard objects, 
+     * either as the shared sealed scope or as a newly
      * allocated set of standard objects, depending on the value of {@code useSharedScope}.
      *
      * @param context The runtime context of the executing script.
@@ -147,12 +153,10 @@ public class JavaScript implements Script {
     private ScriptableObject getStandardObjects(Context context) {
         if (!sharedScope) {
             ScriptableObject scope = context.initStandardObjects(); // somewhat expensive
-            addLoggerProperty(scope);
             return scope;
         }
         if (SHARED_SCOPE == null) { // lazy initialization race condition is harmless
             ScriptableObject scope = context.initStandardObjects(null, true);
-            addLoggerProperty(scope);
             scope.sealObject(); // seal the whole scope (not just standard objects)
             SHARED_SCOPE = scope;
         }
@@ -160,12 +164,29 @@ public class JavaScript implements Script {
     }
     
     /**
+     * Get the scope scriptable re-used for this script
+     * Holds common functionality such as the logger
+     * 
+     * @param The runtime context of the executing script.
+     * @return the context scriptable for this script
+     */
+    private Scriptable getScriptScope(Context context) {
+        Map<String, Object> scriptScopeMap = new HashMap<String, Object>();
+        addLoggerProperty(scriptScopeMap);
+        Scriptable scriptScopeScriptable = new ScriptableMap(scriptScopeMap);
+        scriptScopeScriptable.setPrototype(getStandardObjects(context)); // standard objects included with every box
+        scriptScopeScriptable.setParentScope(null);
+        return scriptScopeScriptable;
+    }
+    
+    /**
      * Add the logger property to the JavaScript scope
      * @param scope to add the property to
      */
-    private void addLoggerProperty(ScriptableObject scope) {
-        String loggerName = "org.forgerock.openidm.script.javascript.JavaScript." + (file == null ? "embedded-source" : file.getName());
-        ScriptableObject.putProperty(scope, "logger", LoggerPropertyFactory.get(loggerName));
+    private void addLoggerProperty(Map<String, Object> scope) {
+        String loggerName = "org.forgerock.openidm.script.javascript.JavaScript." 
+                + (file == null ? "embedded-source" : file.getName());
+        scope.put("logger", LoggerPropertyFactory.get(loggerName));
     }
 
     @Override
@@ -177,7 +198,7 @@ public class JavaScript implements Script {
         Context context = Context.enter();
         try {
             Scriptable outer = new ScriptableMap(scope);
-            outer.setPrototype(getStandardObjects(context)); // standard objects included with every box
+            outer.setPrototype(scriptScope); // script level context and standard objects included with every box
             outer.setParentScope(null);
             Scriptable inner = context.newObject(outer); // inner transient scope for new properties
             inner.setPrototype(outer);

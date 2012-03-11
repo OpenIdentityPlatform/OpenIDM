@@ -219,4 +219,8 @@ class ScriptableList implements Scriptable, Wrapper {
     public Object unwrap() {
         return list;
     }
+    
+    public String toString() {
+        return list == null ? "null" : list.toString();
+    }
 }

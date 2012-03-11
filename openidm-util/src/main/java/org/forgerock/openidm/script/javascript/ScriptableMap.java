@@ -165,4 +165,8 @@ class ScriptableMap implements Scriptable, Wrapper {
     public Object unwrap() {
         return map;
     }
+    
+    public String toString() {
+        return map == null ? "null" : map.toString();
+    }
 }
