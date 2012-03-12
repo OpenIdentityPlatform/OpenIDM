@@ -55,17 +55,6 @@
                "nativeType" : "Group",
                "properties" :
                   {
-                     "__DESCRIPTION__" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "__DESCRIPTION__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
                      "member" :
                         {
                            "type" : "array",
@@ -75,12 +64,7 @@
                                  "nativeType" : "string"
                               },
                            "nativeName" : "member",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
+                           "nativeType" : "string"
                         },
                      "description" :
                         {
@@ -116,12 +100,7 @@
                         {
                            "type" : "string",
                            "nativeName" : "displayName",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
+                           "nativeType" : "string"
                         },
                      "__NAME__" :
                         {
@@ -130,17 +109,6 @@
                            "nativeName" : "__NAME__",
                            "nativeType" : "string"
                         },
-                     "ad_container" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "ad_container",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
                      "cn" :
                         {
                            "type" : "string",
@@ -148,18 +116,6 @@
                            "nativeType" : "string",
                            "flags" :
                               [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "__SHORT_NAME__" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "__SHORT_NAME__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
                                  "NOT_UPDATEABLE"
                               ]
                         }
@@ -173,33 +129,29 @@
                "nativeType" : "organizationalUnit",
                "properties" :
                   {
-                     "__DESCRIPTION__" :
+                     "description" :
                         {
                            "type" : "string",
-                           "nativeName" : "__DESCRIPTION__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
+                           "nativeName" : "description",
+                           "nativeType" : "string"
                         },
                      "displayName" :
                         {
                            "type" : "string",
                            "nativeName" : "displayName",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
+                           "nativeType" : "string"
                         },
                      "__NAME__" :
                         {
                            "type" : "string",
                            "required" : true,
                            "nativeName" : "__NAME__",
+                           "nativeType" : "string"
+                        },
+                     "managedby" :
+                        {
+                           "type" : "string",
+                           "nativeName" : "managedby",
                            "nativeType" : "string"
                         },
                      "ou" :
@@ -209,18 +161,6 @@
                            "nativeType" : "string",
                            "flags" :
                               [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "__SHORT_NAME__" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "__SHORT_NAME__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
                                  "NOT_UPDATEABLE"
                               ]
                         }
@@ -239,17 +179,6 @@
                            "type" : "boolean",
                            "nativeName" : "PasswordNeverExpires",
                            "nativeType" : "boolean"
-                        },
-                     "ReconnectionAction" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "ReconnectionAction",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
                         },
                      "mail" :
                         {
@@ -279,50 +208,6 @@
                            "nativeName" : "middleName",
                            "nativeType" : "string"
                         },
-                     "ConnectClientDrivesAtLogon" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "ConnectClientDrivesAtLogon",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "BrokenConnectionAction" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "BrokenConnectionAction",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "ad_container" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "ad_container",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "EnableRemoteControl" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "EnableRemoteControl",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
                      "__SHORT_NAME__" :
                         {
                            "type" : "string",
@@ -339,17 +224,6 @@
                            "type" : "string",
                            "nativeName" : "company",
                            "nativeType" : "string"
-                        },
-                     "DefaultToMainPrinter" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "DefaultToMainPrinter",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
                         },
                      "description" :
                         {
@@ -385,23 +259,6 @@
                            "nativeName" : "displayName",
                            "nativeType" : "string"
                         },
-                     "MaxConnectionTime" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "MaxConnectionTime",
-                           "nativeType" : "integer"
-                        },
-                     "TerminalServicesInitialProgram" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "TerminalServicesInitialProgram",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
                      "__NAME__" :
                         {
                            "type" : "string",
@@ -425,39 +282,6 @@
                            "type" : "string",
                            "nativeName" : "facsimileTelephoneNumber",
                            "nativeType" : "string"
-                        },
-                     "MaxDisconnectionTime" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "MaxDisconnectionTime",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "ConnectClientPrintersAtLogon" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "ConnectClientPrintersAtLogon",
-                           "nativeType" : "integer",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
-                     "__DESCRIPTION__" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "__DESCRIPTION__",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
                         },
                      "homePhone" :
                         {
@@ -483,27 +307,10 @@
                            "nativeName" : "homeDirectory",
                            "nativeType" : "string"
                         },
-                     "TerminalServicesHomeDirectory" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "TerminalServicesHomeDirectory",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
                      "postalCode" :
                         {
                            "type" : "string",
                            "nativeName" : "postalCode",
-                           "nativeType" : "string"
-                        },
-                     "TerminalServicesWorkDirectory" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "TerminalServicesWorkDirectory",
                            "nativeType" : "string"
                         },
                      "st" :
@@ -518,17 +325,6 @@
                            "nativeName" : "manager",
                            "nativeType" : "string"
                         },
-                     "TerminalServicesHomeDrive" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "TerminalServicesHomeDrive",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
-                        },
                      "__GROUPS__" :
                         {
                            "type" : "array",
@@ -539,17 +335,6 @@
                               },
                            "nativeName" : "__GROUPS__",
                            "nativeType" : "string"
-                        },
-                     "TerminalServicesProfilePath" :
-                        {
-                           "type" : "string",
-                           "nativeName" : "TerminalServicesProfilePath",
-                           "nativeType" : "string",
-                           "flags" :
-                              [
-                                 "NOT_CREATABLE",
-                                 "NOT_UPDATEABLE"
-                              ]
                         },
                      "__PASSWORD__" :
                         {
@@ -567,12 +352,6 @@
                            "type" : "string",
                            "nativeName" : "department",
                            "nativeType" : "string"
-                        },
-                     "AllowLogon" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "AllowLogon",
-                           "nativeType" : "integer"
                         },
                      "initials" :
                         {
@@ -614,12 +393,6 @@
                            "type" : "string",
                            "nativeName" : "streetAddress",
                            "nativeType" : "string"
-                        },
-                     "MaxIdleTime" :
-                        {
-                           "type" : "integer",
-                           "nativeName" : "MaxIdleTime",
-                           "nativeType" : "integer"
                         },
                      "mobile" :
                         {
