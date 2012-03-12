@@ -132,6 +132,82 @@
    </variablelist>
   </section>
 
+  <section xml:id="script-sequenze">
+    <title>Script Execution Sequence</title>
+    
+    <para>All "onRequest" and "onResponse" scripts are executed in a sorted sequence: first the "onRequest" scripts in a top down manner, then the "onResponse" in a bottom up way!</para>
+    
+    <screen>
+client -&gt; filter 1 onRequest -&gt; filter 2 onRequest -&gt; resource
+client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
+    </screen>
+    
+    <para>Here is an example of a <filename>router.json</filename> file and how the scritps would be executed:</para>
+    
+    <programlisting language="javascript">
+{
+    "filters" : [
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/router-authz.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "read"
+            ],
+            "onRequest" : {
+                "type" : "text/javascript",
+                "source" : "java.lang.System.out.println('requestFilter 1');"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "read"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "source" : "java.lang.System.out.println('responseFilter 1');"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "read"
+            ],
+            "onRequest" : {
+                "type" : "text/javascript",
+                "source" : "java.lang.System.out.println('requestFilter 2');"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "read"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "source" : "java.lang.System.out.println('responseFilter 2');"
+            }
+        }
+    ]
+}    
+    </programlisting>
+    
+    <para>Will produce a log like:</para>
+    
+    <screen>
+requestFilter 1
+requestFilter 2
+responseFilter 2
+responseFilter 1    
+    </screen>
+    
+  </section>
+  
   <section xml:id="filter-script-scope">
    <title>Script Scope</title>
 
@@ -224,7 +300,7 @@
    </variablelist>
   </section>
  </section>
-
+ 
  <section xml:id="router-example">
   <title>Example</title>
 
