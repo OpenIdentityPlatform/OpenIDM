@@ -103,7 +103,7 @@
 
   <para>OpenIDM supports message level security, forcing authentication before
   granting access. Authentication works by means of a filter-based mechanism
-  that lets you use either HTTP Basic or OpenIDM-specific headers, setting a
+  that lets you use either a HTTP Basic like mechanism or OpenIDM-specific headers, setting a
   cookie in the response that you can use for subsequent authentication. If you
   attempt to access OpenIDM URLs without the appropriate headers or session
   cookie, OpenIDM returns HTTP 401 Unauthorized.</para>
