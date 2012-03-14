@@ -65,6 +65,4 @@
  <xinclude:include href="chap-compatibility.xml" />
  <xinclude:include href="chap-feedback.xml" />
  <xinclude:include href="chap-support.xml" />
-
- <?dbhtml-include href="../ga.html"?>
 </book>
