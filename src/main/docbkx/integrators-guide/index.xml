@@ -110,5 +110,4 @@
  <xinclude:include href='appendix-jetty.xml' />
 
  <index />
- <?dbhtml-include href="../ga.html"?>
 </book>
