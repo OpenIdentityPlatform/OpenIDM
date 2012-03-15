@@ -231,3 +231,11 @@ INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES ('anonymous', '0', 'anonymous', 'openidm-reg');
 
 COMMIT;
+
+-- -------------------------------------------
+-- openidm database user
+-- ------------------------------------------
+GRANT ALL PRIVILEGES on openidm.* TO openidm IDENTIFIED BY 'openidm';
+GRANT ALL PRIVILEGES on openidm.* TO openidm@'%' IDENTIFIED BY 'openidm';
+GRANT ALL PRIVILEGES on openidm.* TO openidm@localhost IDENTIFIED BY 'openidm';
+
