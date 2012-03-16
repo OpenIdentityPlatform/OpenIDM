@@ -27,6 +27,7 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
@@ -80,6 +81,12 @@ public abstract class OpenICFProvisionerServiceTestBase {
             bind.setAccessible(true);
             bind.set(service, getConnectorInfoProvider());
         }
+        bind = OpenICFProvisionerService.class.getDeclaredField("router");
+        if (null != bind) {
+            bind.setAccessible(true);
+            bind.set(service, mock(JsonResource.class));
+        }
+
         Method activate = OpenICFProvisionerService.class.getDeclaredMethod("activate", ComponentContext.class);
         if (null != activate) {
 
@@ -121,7 +128,7 @@ public abstract class OpenICFProvisionerServiceTestBase {
         return service;
     }
 
-// TODO: Consider using JsonResourceAccessor instead of building each request.
+    // TODO: Consider using JsonResourceAccessor instead of building each request.
     protected JsonValue buildRequest(String method, String id, String rev, Map<String, Object> params, Map<String, Object> value) {
         JsonValue request = new JsonValue(new HashMap<String, Object>());
         request.put("method", method);
