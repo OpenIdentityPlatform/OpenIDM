@@ -26,6 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -37,8 +38,11 @@ import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
+import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -96,7 +100,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
 
     // Monitoring event name prefix
     private static final String EVENT_PREFIX = "openidm/internal/system/";
-    
+
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
@@ -109,6 +113,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
     @Reference
     private ConnectorInfoProvider connectorInfoProvider = null;
 
+    @Reference(referenceInterface = JsonResource.class,
+            target = "(service.pid=org.forgerock.openidm.router)")
+    private JsonResource router;
 
     /**
      * Cryptographic service.
@@ -223,6 +230,8 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
+        JsonValue before = null;
+        JsonValue after = null;
         try {
             SimpleJsonResource.Method METHOD = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
             Id id = new Id(request.get("id").required().asString());
@@ -233,72 +242,126 @@ public class OpenICFProvisionerService implements ProvisionerService {
                 traceObject(METHOD, id, value);
                 switch (METHOD) {
                     case create:
-                        return create(id, value.required(), params);
+                        before = value;
+                        after = create(id, value.required(), params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
                     case read:
-                        return read(id, params);
+                        after = read(id, params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
                     case update:
-                        return update(id, rev, value.required(), params);
+                        before = value;
+                        after = update(id, rev, value.required(), params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
                     case delete:
-                        return delete(id, rev, params);
+                        try {
+                            before = read(id, params);
+                        } catch (Exception e) {
+                            logger.error("Operation read of {} failed before delete", id, e);
+                        }
+                        after = delete(id, rev, params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
                     case query:
 // FIXME: According to the JSON resource specification (now published), query parameters are
 // required. There is a unit test that attempts to query all merely by executing query
 // without any parameters. As a result, the commented-out line below—which conforms to the
 // spec—breaks during unit testing.
 //                    return query(id, params.required());
-                        return query(id, params);
+                        before = params;
+                        after = query(id, params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
                     case action:
-                        return action(id, value, params.required());
+                        before = new JsonValue(new HashMap());
+                        before.put("value", value);
+                        before.put("params", params);
+                        after = action(id, value, params.required());
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
                     default:
                         throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
                 }
             } catch (AlreadyExistsException e) {
                 logger.error("System object {} already exists", id, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
             } catch (ConfigurationException e) {
                 logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectionBrokenException e) {
                 logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectionFailedException e) {
                 logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (ConnectorIOException e) {
                 logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (OperationTimeoutException e) {
                 logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
             } catch (PasswordExpiredException e) {
                 logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (InvalidPasswordException e) {
                 logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (UnknownUidException e) {
                 logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
             } catch (InvalidCredentialException e) {
                 logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (PermissionDeniedException e) {
                 logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
             } catch (ConnectorSecurityException e) {
                 logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (ConnectorException e) {
                 logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             } catch (JsonResourceException e) {
                 // rethrow the the expected JsonResourceException
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw e;
             } catch (Exception e) {
                 logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
                 throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } catch (JsonValueException jve) {
+            ActivityLog.log(router, request, "Bad Request", null, before, after, Status.FAILURE);
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
         }
     }
