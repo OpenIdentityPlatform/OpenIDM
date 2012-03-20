@@ -150,6 +150,7 @@ public class CSVAuditLogger implements AuditLogger {
                         tmpFileWriter.close();
                         auditTmpFile.renameTo(auditFile);
                     }
+                    resetWriter(type);
                 }
             }
             fileWriter = getWriter(type, auditFile);
@@ -203,6 +204,26 @@ public class CSVAuditLogger implements AuditLogger {
                 fileWriters.put(type, existingWriter);
             }
             return existingWriter;
+        }
+    }
+    
+    // This should only be called if it is known that 
+    // the writer is invalid for use or no thread has obtained it / is using it
+    // In other words, it does not synchronize on the use of the writer
+    private void resetWriter(String type) {
+        FileWriter existingWriter = null;
+        // TODO: optimize synchronization strategy
+        synchronized (fileWriters) {
+            existingWriter = fileWriters.remove(type);
+        }
+        if (existingWriter != null) {
+            // attempt clean-up close
+            try {
+                existingWriter.close();
+            } catch (Exception ex) {
+                // Debug level as the writer is expected to potentially be invalid
+                logger.debug("File writer close in resetWriter reported failure ", ex);
+            }
         }
     }
 
