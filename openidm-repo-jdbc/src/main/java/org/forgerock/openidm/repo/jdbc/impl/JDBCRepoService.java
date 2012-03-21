@@ -780,6 +780,22 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         maxBatchSize,
                         new DB2SQLExceptionHandler());
                 break;
+			case ORACLE:
+				handler = new OracleTableHandler(
+						tableConfig,
+                        dbSchemaName,
+                        queries,
+                        maxBatchSize,
+                        new DefaultSQLExceptionHandler());
+				break;
+            case POSTGRESQL:
+                handler = new PostgreSQLTableHandler(
+                        tableConfig,
+                        dbSchemaName,
+                        queries,
+                        maxBatchSize,
+                        new DefaultSQLExceptionHandler());
+                break;
             case MYSQL:
                 handler = new GenericTableHandler(
                         tableConfig,
@@ -813,6 +829,22 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         dbSchemaName,
                         explicitQueries,
                         new DB2SQLExceptionHandler());
+                break;
+			case ORACLE:
+                handler = new MappedTableHandler(
+                        table,
+                        objectToColumn,
+                        dbSchemaName,
+                        explicitQueries,
+                        new DefaultSQLExceptionHandler());
+                break;
+            case POSTGRESQL:
+                handler = new MappedTableHandler(
+                        table,
+                        objectToColumn,
+                        dbSchemaName,
+                        explicitQueries,
+                        new DefaultSQLExceptionHandler());
                 break;
             case MYSQL:
                 handler = new MappedTableHandler(

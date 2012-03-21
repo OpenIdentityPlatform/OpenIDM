@@ -23,8 +23,6 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
@@ -39,8 +37,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,9 +109,28 @@ public class TableQueries {
 
         return statement;
     }
-    
+
+	/**
+   * Get a prepared statement for the given connection and SQL. Returns the generated Key
+   * This is a function used by OracleTableHandler. Since ORACLE does not return the auto incremented key but the ROWID on using getGeneratedKeys(),
+   * we have to pass a string array containing the column that has been auto incremented.
+   * I.E. passing 'id' as the only entry of this array to this method will return the value of the id-column instead of the ROWID
+   * @param connection db connection to get a prepared statement for
+   * @param sql the prepared statement SQL
+   * @param columns which column shall be returned as the value of PreparedStatement.getGeneratedKeys()
+   * @return the prepared statement
+   * @throws SQLException if parsing or retrieving the prepared statement failed
+   */
+	public PreparedStatement getPreparedStatement(Connection connection, String sql, String[] columns) throws SQLException {
+        PreparedStatement statement = null;
+
+        statement = connection.prepareStatement(sql, columns);
+
+        return statement;
+    }
+
     /**
-     * Execute a query, either a pre-configured query by using the query ID, or a query expression passed as 
+     * Execute a query, either a pre-configured query by using the query ID, or a query expression passed as
      * part of the params.
      * 
      * The keys for the input parameters as well as the return map entries are in QueryConstants.
