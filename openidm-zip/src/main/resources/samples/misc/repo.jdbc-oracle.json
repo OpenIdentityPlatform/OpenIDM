@@ -1,0 +1,115 @@
+{
+    "connection" : {
+        "dbType" : "ORACLE",
+        "jndiName" : "",
+        "driverClass" : "oracle.jdbc.OracleDriver",
+        "jdbcUrl" : "jdbc:oracle:thin:@//HOSTNAME:PORT/DEFAULTCATALOG",
+        "username" : "oracleuser",
+        "password" : "oracleuser",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5
+    },
+    "queries" : {
+        "genericTables" : {
+            "query-all-ids" : "SELECT obj.objectid FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "links-for-sourceId" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND prop.propvalue = ${sourceId} AND objtype.objecttype = ${_resource}",
+            "links-for-targetId" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND prop.propvalue = ${targetId} AND objtype.objecttype = ${_resource}",
+            "credential-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_propTable} credprop INNER JOIN ${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/password' AND conditionprop.propkey='/email' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_propTable} credprop INNER JOIN ${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/password' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "for-userName" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "find-by-id" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
+            "links-for-sourceId-db2" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND CAST(prop.propvalue AS varchar(1024)) = ${sourceId} AND objtype.objecttype = ${_resource}",
+            "links-for-targetId-db2" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND CAST(prop.propvalue AS varchar(1024))= ${targetId} AND objtype.objecttype = ${_resource}"
+        },
+        "explicitTables" : {
+            "query-all-ids" : "SELECT objectid FROM ${_table}",
+            "links-for-firstId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_table} WHERE objectid = ${username}"
+        }
+    },
+    "resourceMapping" : {
+        "default" : {
+            "mainTable" : "genericobjects", 
+            "propertiesTable" : "genericobjectproperties",
+            "searchableDefault" : true
+        },
+        "genericMapping" : {
+            "managed/*" : {
+                "mainTable" : "managedobjects", 
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : true            
+            }
+        },
+        "explicitMapping" : {
+            "link" : {
+                "table" : "links",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "linkType" : "linktype",
+                    "firstId" : "firstid",
+                    "secondId" : "secondid",
+                    "reconId" : "reconid"
+                }
+            },
+            "internal/user" : {
+                "table" : "internaluser",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "password" : "pwd",
+                    "roles" : "roles"
+                }
+            },
+            "audit/activity" : {
+                "table" : "auditactivity",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "activityId" : "activityid",
+                    "timestamp" : "activitydate",
+                    "action" : "activity",  
+                    "message" : "message", 
+                    "objectId" : "subjectid",
+                    "rev" : "subjectrev", 
+                    "rootActionId" : "rootactionid", 
+                    "parentActionId" : "parentactionid", 
+                    "requester" : "requester", 
+                    "approver" : "approver",
+                    "before" : "subjectbefore",
+                    "after" : "subjectafter",
+                    "status" : "status"
+                }
+            },
+            "audit/recon" : {
+                "table" : "auditrecon",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "entryType" : "entrytype",
+                    "rootActionId" : "rootactionid",
+                    "action" : "activity",  
+                    "message" : "message", 
+                    "reconciling" : "reconciling",
+                    "reconId" : "reconid",
+                    "situation" : "situation",
+                    "sourceObjectId" : "sourceobjectid",
+                    "status" : "status",
+                    "targetObjectId" : "targetobjectid",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
+                    "timestamp" : "activitydate"
+                }
+            },
+            "audit/access" : {
+                "table" : "auditaccess",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",
+                    "ip" : "ip",
+                    "principal" : "principal",
+                    "roles" : "roles",
+                    "status" : "status",
+                    "timestamp" : "activitydate"
+                }
+            }
+        }
+    }
+}

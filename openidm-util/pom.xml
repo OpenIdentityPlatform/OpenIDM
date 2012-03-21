@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-            <version>1.7R2_2</version>
+            <version>1.7R2_3</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
