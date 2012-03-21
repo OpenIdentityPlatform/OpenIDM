@@ -26,12 +26,23 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.apache.felix.scr.annotations.*;
+
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.SimpleJsonResource;
+import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -67,8 +78,6 @@ import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.*;
 
-// TODO: Consider having this subclass SimpleJsonResource...
-
 /**
  * @author $author$
  * @version $Revision$ $Date$
@@ -85,22 +94,13 @@ public class OpenICFProvisionerService implements ProvisionerService {
     //Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
 
-    private final static Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
-
-    /**
-     * TODO: Description.
-     */
-    private enum Method {
-// FIXME: DO NOT BREAK THE UNIFORM INTERFACE BETWEEN COMPONENTS BY INVENTING NEW METHODS.
-// Use the action method for liveSync instead.
-        create, read, update, delete, patch, query, action, liveSync
-    }
+    private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
 
     private ComponentContext context = null;
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
     private boolean allowModification = true;
-    private final static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * ConnectorInfoProvider service.
@@ -108,6 +108,9 @@ public class OpenICFProvisionerService implements ProvisionerService {
     @Reference
     private ConnectorInfoProvider connectorInfoProvider = null;
 
+    @Reference(referenceInterface = JsonResource.class,
+            target = "(service.pid=org.forgerock.openidm.router)")
+    private JsonResource router;
 
     /**
      * Cryptographic service.
@@ -222,481 +225,316 @@ public class OpenICFProvisionerService implements ProvisionerService {
      */
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
+        JsonValue before = null;
+        JsonValue after = null;
         try {
-            Method method = request.get("method").required().asEnum(Method.class);
+            SimpleJsonResource.Method METHOD = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
             Id id = new Id(request.get("id").required().asString());
             String rev = request.get("rev").asString();
             JsonValue value = request.get("value");
             JsonValue params = request.get("params");
-            switch (method) {
-                case create:
-                    return create(id, value.required());
-                case read:
-                    return read(id);
-                case update:
-                    return update(id, rev, value.required());
-                case delete:
-                    return delete(id, rev);
-                case query:
+            try {
+                traceObject(METHOD, id, value);
+                switch (METHOD) {
+                    case create:
+                        before = value;
+                        after = create(id, value.required(), params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
+                    case read:
+                        after = read(id, params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
+                    case update:
+                        before = value;
+                        after = update(id, rev, value.required(), params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
+                    case delete:
+                        try {
+                            before = read(id, params);
+                        } catch (Exception e) {
+                            logger.error("Operation read of {} failed before delete", id, e);
+                        }
+                        after = delete(id, rev, params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
+                    case query:
 // FIXME: According to the JSON resource specification (now published), query parameters are
 // required. There is a unit test that attempts to query all merely by executing query
 // without any parameters. As a result, the commented-out line below—which conforms to the
 // spec—breaks during unit testing.
 //                    return query(id, params.required());
-                    return query(id, params);
-                case action:
-                    return action(id, params.required(), value);
-                default:
-                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
+                        before = params;
+                        after = query(id, params);
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
+                    case action:
+                        before = new JsonValue(new HashMap());
+                        before.put("value", value);
+                        before.put("params", params);
+                        after = action(id, value, params.required());
+                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+                        return after;
+                    default:
+                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
+                }
+            } catch (AlreadyExistsException e) {
+                logger.error("System object {} already exists", id, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
+            } catch (ConfigurationException e) {
+                logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            } catch (ConnectionBrokenException e) {
+                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
+            } catch (ConnectionFailedException e) {
+                logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
+            } catch (ConnectorIOException e) {
+                logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
+            } catch (OperationTimeoutException e) {
+                logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
+            } catch (PasswordExpiredException e) {
+                logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            } catch (InvalidPasswordException e) {
+                logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            } catch (UnknownUidException e) {
+                logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
+            } catch (InvalidCredentialException e) {
+                logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            } catch (PermissionDeniedException e) {
+                logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
+            } catch (ConnectorSecurityException e) {
+                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            } catch (ConnectorException e) {
+                logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            } catch (JsonResourceException e) {
+                // rethrow the the expected JsonResourceException
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw e;
+            } catch (Exception e) {
+                logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
+                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
+                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
+                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
         } catch (JsonValueException jve) {
+            ActivityLog.log(router, request, "Bad Request", null, before, after, Status.FAILURE);
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
         }
     }
 
-    public JsonValue create(Id id, JsonValue object) throws JsonResourceException {
-        String METHOD = "create";
-        traceObject(METHOD, id, object);
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), object, cryptoService);
-
+    public JsonValue create(Id id, JsonValue object, JsonValue params) throws Exception {
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
-            try {
-                ConnectorObject connectorObject = helper.build(CreateApiOp.class, object);
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, object);
-                Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
-                helper.resetUid(uid, object);
-                return object;
-            } catch (AlreadyExistsException e) {
-                logger.error("System object {} already exists", id, e);
-                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-            } catch (ConfigurationException e) {
-                logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectionBrokenException e) {
-                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectionFailedException e) {
-                logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectorIOException e) {
-                logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (OperationTimeoutException e) {
-                logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (PasswordExpiredException e) {
-                logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (InvalidPasswordException e) {
-                logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (UnknownUidException e) {
-                logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-            } catch (InvalidCredentialException e) {
-                logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (PermissionDeniedException e) {
-                logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-            } catch (ConnectorSecurityException e) {
-                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectorException e) {
-                logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (Exception e) {
-                logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            }
+            ConnectorObject connectorObject = helper.build(CreateApiOp.class, object);
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, params);
+            Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
+            helper.resetUid(uid, object);
+            return object;
         } else {
-            logger.debug("Operation {} of {} is not permitted", METHOD, id);
+            logger.debug("Operation create of {} is not permitted", id);
         }
         return null;
     }
 
-    public JsonValue read(Id id) throws JsonResourceException {
-        String METHOD = "read";
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), null, cryptoService);
-        try {
-            ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
-            if (helper.isOperationPermitted(GetApiOp.class)) {
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null, null);
-                ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
-                if (null != connectorObject) {
-                    return helper.build(connectorObject);
-                }
-            } else {
-                logger.debug("Operation {} of {} is not permitted", METHOD, id);
+    public JsonValue read(Id id, JsonValue params) throws Exception {
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
+        ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
+        if (helper.isOperationPermitted(GetApiOp.class)) {
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null, params);
+            ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
+            if (null != connectorObject) {
+                return helper.build(connectorObject);
             }
-        } catch (AlreadyExistsException e) {
-            logger.error("System object {} already exists", id, e);
-            throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-        } catch (ConfigurationException e) {
-            logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-        } catch (ConnectionBrokenException e) {
-            logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-        } catch (ConnectionFailedException e) {
-            logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-        } catch (ConnectorIOException e) {
-            logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-        } catch (OperationTimeoutException e) {
-            logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-        } catch (PasswordExpiredException e) {
-            logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-        } catch (InvalidPasswordException e) {
-            logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-        } catch (UnknownUidException e) {
-            logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-        } catch (InvalidCredentialException e) {
-            logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-        } catch (PermissionDeniedException e) {
-            logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-        } catch (ConnectorSecurityException e) {
-            logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-        } catch (ConnectorException e) {
-            logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-        } catch (Exception e) {
-            logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+        } else {
+            logger.debug("Operation read of {} is not permitted", id);
         }
         throw new JsonResourceException(JsonResourceException.NOT_FOUND, id.toString());
     }
 
-    public JsonValue update(Id id, String rev, JsonValue object) throws JsonResourceException {
-        String METHOD = "update";
-        traceObject(METHOD, id, object);
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), object, cryptoService);
-
+    public JsonValue update(Id id, String rev, JsonValue object, JsonValue params) throws Exception {
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
-            try {
-                Object newName = object.get("_name");
-                ConnectorObject connectorObject = null;
-                Set<Attribute> attributeSet = null;
-                if (newName instanceof String) {
-                    //This is a rename
-                    connectorObject = helper.build(UpdateApiOp.class, (String) newName, object);
-                    attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
-                } else {
-                    connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(), object);
-                    attributeSet = new HashSet<Attribute>();
-                    for (Attribute attribute : connectorObject.getAttributes()) {
-                        if (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) {
-                            continue;
-                        }
-                        attributeSet.add(attribute);
+            Object newName = object.get(ServerConstants.OBJECT_PROPERTY_ID);
+            ConnectorObject connectorObject = null;
+            Set<Attribute> attributeSet = null;
+
+            //TODO support case sensitive and insensitive rename detection!
+            if (newName instanceof String && !id.getLocalId().equals(newName)) {
+                //This is a rename
+                connectorObject = helper.build(UpdateApiOp.class, (String) newName, object);
+                attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
+            } else {
+                connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(), object);
+                attributeSet = new HashSet<Attribute>();
+                for (Attribute attribute : connectorObject.getAttributes()) {
+                    if (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) {
+                        continue;
                     }
+                    attributeSet.add(attribute);
                 }
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, object);
-                Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), attributeSet, operationOptionsBuilder.build());
-                helper.resetUid(uid, object);
-                return object;
-            } catch (AlreadyExistsException e) {
-                logger.error("System object {} already exists", id, e);
-                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-            } catch (ConfigurationException e) {
-                logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectionBrokenException e) {
-                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectionFailedException e) {
-                logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectorIOException e) {
-                logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (OperationTimeoutException e) {
-                logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (PasswordExpiredException e) {
-                logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (InvalidPasswordException e) {
-                logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (UnknownUidException e) {
-                logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-            } catch (InvalidCredentialException e) {
-                logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (PermissionDeniedException e) {
-                logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-            } catch (ConnectorSecurityException e) {
-                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectorException e) {
-                logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (Exception e) {
-                logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
             }
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject, params);
+            Uid uid = getConnectorFacade(helper.getRuntimeAPIConfiguration()).update(connectorObject.getObjectClass(), connectorObject.getUid(), attributeSet, operationOptionsBuilder.build());
+            helper.resetUid(uid, object);
+            return object;
         } else {
-            logger.debug("Operation {} of {} is not permitted", METHOD, id);
+            logger.debug("Operation update of {} is not permitted", id);
         }
         return null;
     }
 
-    public JsonValue delete(Id id, String rev) throws JsonResourceException {
-        String METHOD = "delete";
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), null, cryptoService);
-
+    public JsonValue delete(Id id, String rev, JsonValue params) throws Exception {
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
-            try {
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null, null);
-                getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
-            } catch (AlreadyExistsException e) {
-                logger.error("System object {} already exists", id, e);
-                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-            } catch (ConfigurationException e) {
-                logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectionBrokenException e) {
-                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectionFailedException e) {
-                logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectorIOException e) {
-                logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (OperationTimeoutException e) {
-                logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (PasswordExpiredException e) {
-                logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (InvalidPasswordException e) {
-                logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (UnknownUidException e) {
-                logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-            } catch (InvalidCredentialException e) {
-                logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (PermissionDeniedException e) {
-                logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-            } catch (ConnectorSecurityException e) {
-                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectorException e) {
-                logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (Exception e) {
-                logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            }
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null, null);
+            getConnectorFacade(helper.getRuntimeAPIConfiguration()).delete(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
         } else {
-            logger.debug("Operation {} of {} is not permitted", METHOD, id);
+            logger.debug("Operation DELETE of {} is not permitted", id);
         }
         return null;
     }
 
 
-    public JsonValue query(Id id, JsonValue params) throws JsonResourceException {
-        String METHOD = "query";
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), null, cryptoService);
+    public JsonValue query(Id id, JsonValue params) throws Exception {
+        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         if (helper.isOperationPermitted(SearchApiOp.class)) {
-            try {
-                OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null, null);
-                Filter filter = null;
-                if (null != params) {
-                    Map<String, Object> query = params.get("query").asMap();
-                    String queryId = params.get("_query-id").asString();
-                    if (query != null) {
-                        filter = helper.build(query, params.get("params").asMap());
-                    } else if (queryId != null) {
-                        if (queryId.equals("query-all-ids")) {
-                            // TODO: optimize query for ids, for now default to query all
-                            operationOptionsBuilder.setAttributesToGet(Uid.NAME);
-                        } else {
-                            // Unknown query id
-                            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query id: " + queryId);
-                        }
-                    } else {
-                        // Neither a query expression or query id defined,
-                        // default to query all
-                    }
-                }
-                getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
-                result.put("result", helper.getQueryResult());
-            } catch (AlreadyExistsException e) {
-                logger.error("System object {} already exists", id, e);
-                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-            } catch (ConfigurationException e) {
-                logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectionBrokenException e) {
-                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectionFailedException e) {
-                logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectorIOException e) {
-                logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (OperationTimeoutException e) {
-                logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (PasswordExpiredException e) {
-                logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (InvalidPasswordException e) {
-                logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (UnknownUidException e) {
-                logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-            } catch (InvalidCredentialException e) {
-                logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (PermissionDeniedException e) {
-                logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-            } catch (ConnectorSecurityException e) {
-                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectorException e) {
-                logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (Exception e) {
-                logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null, null);
+            Filter filter = null;
+            Map<String, Object> query = null;
+            String queryId = null;
+            if (null != params) {
+                query = params.get("query").asMap();
+                queryId = params.get("_query-id").asString();
             }
+            if (null != params) {
+                if (query != null) {
+                    filter = helper.build(query, params.get("params").asMap());
+                } else if (queryId != null) {
+                    if (queryId.equals("query-all-ids")) {
+                        // TODO: optimize query for ids, for now default to query all
+                        operationOptionsBuilder.setAttributesToGet(Uid.NAME);
+                    } else {
+                        // Unknown query id
+                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query id: " + queryId);
+                    }
+                } else {
+                    // Neither a query expression or query id defined,
+                    // default to query all
+                }
+            }
+            getConnectorFacade(helper.getRuntimeAPIConfiguration()).search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
+            result.put("result", helper.getQueryResult());
         } else {
-            logger.debug("Operation {} of {} is not permitted", METHOD, id);
+            logger.debug("Operation QUERY of {} is not permitted", id);
         }
         return result;
     }
 
-
-    public JsonValue action(Id id, JsonValue params, JsonValue entity) throws JsonResourceException {
-        String METHOD = "action";
+    public JsonValue action(Id id, JsonValue entity, JsonValue params) throws JsonResourceException {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         ConnectorScript script = new ConnectorScript(params);
         if (helper.isOperationPermitted(script.getAPIOperation())) {
-            try {
-                JsonValue vpo = params.get(ConnectorScript.SCRIPT_VARIABLE_PREFIX);
-                String variablePrefix = null;
-                if (!vpo.isNull() && vpo.isString()) {
-                    variablePrefix = vpo.asString();
-                }
-
-                for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
-                    if (entry.getKey().startsWith("_")) {
-                        continue;
-                    }
-                    Object value = entry.getValue();
-                    Object newValue = value;
-                    if (null != value) {
-                        if (value instanceof Collection) {
-                            newValue = Array.newInstance(Object.class, ((Collection) value).size());
-                            int i = 0;
-                            for (Object v : (Collection) value) {
-                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
-                                    Array.set(newValue, i, v);
-                                } else {
-                                    //Serializable may not be acceptable
-                                    Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
-                                }
-                                i++;
-                            }
-
-                        } else if (value.getClass().isArray()) {
-                            //TODO implement the array support later
-                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                            //Serializable may not be acceptable
-                            newValue = value instanceof Serializable ? value : value.toString();
-                        }
-                    }
-
-                    if (null != variablePrefix) {
-                        script.getScriptContextBuilder().addScriptArgument(variablePrefix + entry.getKey(), newValue);
-                    } else {
-                        script.getScriptContextBuilder().addScriptArgument(entry.getKey(), newValue);
-                    }
-                }
-                script.getScriptContextBuilder().addScriptArgument("openidm_id", id.toString());
-
-                Object scriptResult = null;
-                ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
-                ScriptContext scriptContext = script.getScriptContextBuilder().build();
-                OperationOptions oo = script.getOperationOptionsBuilder().build();
-                try {
-                    if (ConnectorScript.ExecutionMode.CONNECTOR.equals(script.getExecMode())) {
-                        scriptResult = facade.runScriptOnConnector(scriptContext, oo);
-                    } else {
-                        scriptResult = facade.runScriptOnResource(scriptContext, oo);
-                    }
-                } catch (Throwable t) {
-                    logger.error("Script execution error.", t);
-                    result.put("error", t.getMessage());
-                }
-                result.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
-            } catch (AlreadyExistsException e) {
-                logger.error("System object {} already exists", id, e);
-                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-            } catch (ConfigurationException e) {
-                logger.error("Operation {} failed with ConfigurationException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectionBrokenException e) {
-                logger.error("Operation {} failed with ConnectionBrokenException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectionFailedException e) {
-                logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectorIOException e) {
-                logger.error("Operation {} failed with ConnectorIOException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (OperationTimeoutException e) {
-                logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (PasswordExpiredException e) {
-                logger.error("Operation {} failed with PasswordExpiredException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (InvalidPasswordException e) {
-                logger.error("Invalid password has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (UnknownUidException e) {
-                logger.error("Operation {} failed with UnknownUidException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-            } catch (InvalidCredentialException e) {
-                logger.error("Invalid credential has been provided to operation {} for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (PermissionDeniedException e) {
-                logger.error("Permission was denied on {} operation for system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-            } catch (ConnectorSecurityException e) {
-                logger.error("Operation {} failed with ConnectorSecurityException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectorException e) {
-                logger.error("Operation {} failed with ConnectorException on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (Exception e) {
-                logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id}, e);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
+            JsonValue vpo = params.get(ConnectorScript.SCRIPT_VARIABLE_PREFIX);
+            String variablePrefix = null;
+            if (!vpo.isNull() && vpo.isString()) {
+                variablePrefix = vpo.asString();
             }
+
+            for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
+                if (entry.getKey().startsWith("_")) {
+                    continue;
+                }
+                Object value = entry.getValue();
+                Object newValue = value;
+                if (null != value) {
+                    if (value instanceof Collection) {
+                        newValue = Array.newInstance(Object.class, ((Collection) value).size());
+                        int i = 0;
+                        for (Object v : (Collection) value) {
+                            if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                Array.set(newValue, i, v);
+                            } else {
+                                //Serializable may not be acceptable
+                                Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+                            }
+                            i++;
+                        }
+
+                    } else if (value.getClass().isArray()) {
+                        //TODO implement the array support later
+                    } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                        //Serializable may not be acceptable
+                        newValue = value instanceof Serializable ? value : value.toString();
+                    }
+                }
+
+                if (null != variablePrefix) {
+                    script.getScriptContextBuilder().addScriptArgument(variablePrefix + entry.getKey(), newValue);
+                } else {
+                    script.getScriptContextBuilder().addScriptArgument(entry.getKey(), newValue);
+                }
+            }
+            script.getScriptContextBuilder().addScriptArgument("openidm_id", id.toString());
+
+            Object scriptResult = null;
+            ConnectorFacade facade = getConnectorFacade(helper.getRuntimeAPIConfiguration());
+            ScriptContext scriptContext = script.getScriptContextBuilder().build();
+            OperationOptions oo = script.getOperationOptionsBuilder().build();
+            try {
+                if (ConnectorScript.ExecutionMode.CONNECTOR.equals(script.getExecMode())) {
+                    scriptResult = facade.runScriptOnConnector(scriptContext, oo);
+                } else {
+                    scriptResult = facade.runScriptOnResource(scriptContext, oo);
+                }
+            } catch (Throwable t) {
+                logger.error("Script execution error.", t);
+                result.put("error", t.getMessage());
+            }
+            result.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+
         } else {
-            logger.debug("Operation {} of {} is not permitted", METHOD, id);
+            logger.debug("Operation ACTION of {} is not permitted", id);
         }
         return result;
     }
@@ -847,7 +685,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
         return connectorFacadeFactory.newInstance(runtimeAPIConfiguration);
     }
 
-    private void traceObject(String action, Id id, JsonValue source) {
+    private void traceObject(SimpleJsonResource.Method action, Id id, JsonValue source) {
         if (logger.isTraceEnabled()) {
             if (null != source) {
                 try {
