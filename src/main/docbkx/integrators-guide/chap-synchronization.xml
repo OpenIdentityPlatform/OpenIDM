@@ -426,11 +426,12 @@
 
          <programlisting language="javascript">
 {
-    "validTarget": {
+    "validSource": {
         "type": "text/javascript",
-        "source": "target.employeeType == 'internal'"
+        "source": "source.ldapPassword != null"
     }
-}</programlisting>
+}
+</programlisting>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -447,11 +448,12 @@
 
          <programlisting language="javascript">
 {
-    "validSource": {
+    "validTarget": {
         "type": "text/javascript",
-        "source": "source.ldapPassword != null"
+        "source": "target.employeeType == 'internal'"
     }
-}</programlisting>
+}
+</programlisting>
        </listitem>
       </varlistentry>
      </variablelist>
