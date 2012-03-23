@@ -29,6 +29,9 @@ import java.util.Map;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 
+import com.orientechnologies.orient.server.OServer;
+import com.orientechnologies.orient.server.OServerMain;
+
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
@@ -38,7 +41,7 @@ import static org.fest.assertions.MapAssert.entry;
 public class DBHelperTest {
 
     @Test
-    public void initPoolTest() {
+    public void initPoolTest() throws Exception {
         String dbURL = "local:./target/testdb";
         String user = "admin";
         String password = "admin";
@@ -46,12 +49,16 @@ public class DBHelperTest {
         JsonValue completeConfig = new JsonValue(map);
         int minSize = 5;
         int maxSize = 20;
-        ODatabaseDocumentPool pool = DBHelper.initPool(dbURL, user, password, minSize, maxSize, completeConfig);
+        ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, completeConfig, true);
         assertNotNull(pool);
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
         assertNotNull(db);
-        pool.release(db);
-        pool.close();
+        db.close();
+        DBHelper.closePools();
+        
+        // RC9 Requires an explicit shutdown call to cleanly exit the VM
+        OServer server = OServerMain.create();
+        server.shutdown();
     }
 
 }

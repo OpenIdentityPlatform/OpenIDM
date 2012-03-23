@@ -98,9 +98,12 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     repoTracker = new ServiceTracker(ctx, filter, null);
                     repoTracker.open();
                     logger.debug("Bootstrapping repository");
-                    repo = new JsonResourceObjectSet((RepoBootService)repoTracker.waitForService(5000));
-                    if (repo != null) {
+                    RepoBootService rawRepo = (RepoBootService) repoTracker.waitForService(5000);
+                    if (rawRepo != null) {
                         logger.debug("Bootstrap obtained repository");
+                        repo = new JsonResourceObjectSet(rawRepo);
+                    } else {
+                        logger.info("Failed to bootstrap repo, returned null");
                     }
                 }
             } catch (InterruptedException ex) {

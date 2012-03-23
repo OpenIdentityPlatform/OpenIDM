@@ -61,12 +61,16 @@ public class EmbeddedOServerService {
         try {
             JsonValue enabled = config.get("embeddedServer").get("enabled");
 
+            // Create regardless of whether enabled to ensure proper shutdown handling (observed in RC9)
+            orientDBServer = OServerMain.create();
+            
             // enabled flag should be Boolean, but allow for (deprecated) String representation for now.
             if ((enabled.isBoolean() && Boolean.TRUE.equals(enabled.asBoolean())
                     || enabled.isString() && "true".equalsIgnoreCase(enabled.asString()))) {
-                orientDBServer = OServerMain.create();
                 OServerConfiguration serverConfig = getOrientDBConfig(config);
                 orientDBServer.startup(serverConfig);
+                orientDBServer.activate();
+                logger.info("Embedded DB server started.");
             }
         } catch (Exception ex) {
             logger.warn("Could not start OrientDB embedded server, service disabled.", ex);
@@ -100,6 +104,7 @@ public class EmbeddedOServerService {
             String clusterSecurityKey = config.get("embeddedServer").get("clusterSecurityKey").defaultTo("hw3CgjSzqm8I/axu").asString();
             
             handler.parameters = new OServerParameterConfiguration[]{
+                    new OServerParameterConfiguration("enabled", Boolean.toString(clustered)),
                     new OServerParameterConfiguration("name", clusterName),
                     new OServerParameterConfiguration("security.algorithm", "Blowfish"),
                     new OServerParameterConfiguration("network.multicast.address", multicastAddress),
@@ -129,8 +134,11 @@ public class EmbeddedOServerService {
 
         configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>();
         OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
+
+        // TODO: make configurable what address it is accessible on
+        //listener1.ipAddress = "0.0.0.0";
         listener1.ipAddress = "127.0.0.1";
-        listener1.portRange = "2424-2430";
+        listener1.portRange = "2424-2424";
         if (clustered) {
             listener1.protocol = "distributed";
         } else {
@@ -138,9 +146,13 @@ public class EmbeddedOServerService {
         }
         configuration.network.listeners.add(listener1);
         OServerNetworkListenerConfiguration listener2 = new OServerNetworkListenerConfiguration();
+
+        // TODO: make configurable what address it is accessible on
+        // listener2.ipAddress = "0.0.0.0";
         listener2.ipAddress = "127.0.0.1";
-        listener2.portRange = "2480-2490";
+        listener2.portRange = "2480-2480";
         listener2.protocol = "http";
+
         OServerCommandConfiguration command1 = new OServerCommandConfiguration();
         command1.pattern = "POST|*.action GET|*.action";
         command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
@@ -148,7 +160,7 @@ public class EmbeddedOServerService {
 
         // Access to the studio web app
         OServerCommandConfiguration command2 = new OServerCommandConfiguration();
-        command2.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt";
+        command2.pattern = "GET|www GET|studio/ GET| GET|*.htm GET|*.html GET|*.xml GET|*.jpeg GET|*.jpg GET|*.png GET|*.gif GET|*.js GET|*.css GET|*.swf GET|*.ico GET|*.txt GET|*.otf GET|*.pjs GET|*.svg";
         command2.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.get.OServerCommandGetStaticContent";
         command2.parameters = new OServerEntryConfiguration[2];
         command2.parameters[0] = new OServerEntryConfiguration("http.cache:*.htm *.html", "Cache-Control: no-cache, no-store, max-age=0, must-revalidate\r\nPragma: no-cache");
@@ -159,7 +171,10 @@ public class EmbeddedOServerService {
                 command2
         };
 
-        listener2.parameters = new OServerParameterConfiguration[0];
+        listener2.parameters = new OServerParameterConfiguration[1];
+        // Connection custom parameters. If not specified the global configuration will be taken
+        listener2.parameters[0] = new OServerParameterConfiguration("network.http.charset", "utf-8");
+        
         configuration.network.listeners.add(listener2);
 
         OServerStorageConfiguration storage1 = new OServerStorageConfiguration();

@@ -197,8 +197,8 @@
         <openidm.version>2.1.0-SNAPSHOT</openidm.version>
         <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
-        <!--<orientdb.version>1.0rc9-SNAPSHOT</orientdb.version>-->
-        <orientdb.version>1.0rc6</orientdb.version>
+        <orientdb.version>1.0rc9-SNAPSHOT</orientdb.version>
+        <!--<orientdb.version>1.0rc6</orientdb.version>-->
         <jackson.version>1.9.5</jackson.version>
         <restlet.version>2.0.9</restlet.version>
 

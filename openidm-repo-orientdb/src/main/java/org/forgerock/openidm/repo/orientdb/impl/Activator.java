@@ -80,7 +80,7 @@ public class Activator implements BundleActivator {
 
     public void stop(BundleContext context) {
         if (bootSvc != null) {
-            logger.trace("Cleaning up OrientDB bootstrap repository");
+            logger.debug("Cleaning up OrientDB bootstrap repository");
             bootSvc.cleanup();
         }
         logger.trace("OrientDB bundle stopped");

@@ -54,7 +54,62 @@ import com.orientechnologies.orient.core.storage.impl.local.OClusterLocal;
  */
 public class DBHelper {
     final static Logger logger = LoggerFactory.getLogger(DBHelper.class);
+    
+    private static Map<String, ODatabaseDocumentPool> pools = new HashMap<String, ODatabaseDocumentPool>();
 
+    /**
+     * Get the DB pool for the given URL. May return an existing pool instance.
+     * Also can initialize/create/update the DB to meet the passed
+     * configuration if setupDB is enabled
+     * 
+     * Do not close the returned pool directly as it may be used by others.
+     * 
+     * To cleanly shut down the application, call closePools at the end
+     * 
+     * @param dbURL the orientdb URL
+     * @param user the orientdb user to connect
+     * @param password the orientdb password to connect
+     * @param minSize the orientdb pool minimum size
+     * @param maxSize the orientdb pool maximum size
+     * @param completeConfig the full configuration for the DB
+     * @param setupDB true if it should also check the DB exists in the state
+     * to match the passed configuration, and to set it up to match 
+     * @return the pool
+     * @throws org.forgerock.openidm.config.InvalidException
+     */
+    public synchronized static ODatabaseDocumentPool getPool(String dbURL, String user, String password, 
+            int minSize, int maxSize, JsonValue completeConfig, boolean setupDB) throws InvalidException {
+
+        if (setupDB) {
+            logger.debug("Check DB exists in expected state for pool {}", dbURL);
+            checkDB(dbURL, user, password, completeConfig);
+        }
+        logger.debug("Getting pool {}", dbURL);
+        ODatabaseDocumentPool pool = pools.get(dbURL);
+        if (pool == null) {
+            pool = initPool(dbURL, user, password, minSize, maxSize, completeConfig);
+            pools.put(dbURL, pool);
+        }
+        return pool;
+    }
+    
+    /**
+     * Closes all pools managed by this helper
+     * Call at application shut-down to cleanly shut down the pools.
+     */
+    public synchronized static void closePools() {
+        logger.debug("Close DB pools");
+        for (ODatabaseDocumentPool pool : pools.values()) {
+            try {
+                pool.close();
+                logger.trace("Closed pool {}", pool);
+            } catch (Exception ex) {
+                logger.info("Faillure reported in closing pool {}", pool, ex);
+            }
+        }
+        pools = new HashMap(); // release all our closed pool references
+    }
+    
     /**
      * Initialize the DB pool.
      * @param dbURL the orientdb URL
@@ -66,9 +121,9 @@ public class DBHelper {
      * @return the initialized pool
      * @throws org.forgerock.openidm.config.InvalidException
      */
-    public static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
+    private static ODatabaseDocumentPool initPool(String dbURL, String user, String password, 
             int minSize, int maxSize, JsonValue completeConfig) throws InvalidException {
-        logger.trace("Initializing DB Pool");
+        logger.trace("Initializing DB Pool {}", dbURL);
         
         // Enable transaction log
         OGlobalConfiguration.TX_USE_LOG.setValue(true);
@@ -76,7 +131,8 @@ public class DBHelper {
         // Immediate disk sync for commit 
         OGlobalConfiguration.TX_COMMIT_SYNCH.setValue(true);
         
-        checkDB(dbURL, user, password, completeConfig);
+        // Have the storage closed when the DB is closed.
+        OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(false);
         
         boolean success = false;
         int maxRetry = 10;
@@ -104,6 +160,8 @@ public class DBHelper {
             logger.info("DB verified on try {}", retryCount);
         }
         
+        logger.debug("Opened and initialized pool {}", pool);
+
         return pool;
     }
     
@@ -145,10 +203,20 @@ public class DBHelper {
         List<ODatabaseDocumentTx> list = new ArrayList<ODatabaseDocumentTx>();
         for (int count=0; count < minSize; count++) {
             logger.trace("Warming up entry {}", Integer.valueOf(count));
-            list.add(pool.acquire(dbURL, user, password));
+            try {
+                list.add(pool.acquire(dbURL, user, password));
+            } catch (Exception ex) {
+                logger.warn("Issue in warming up db pool, entry {}", Integer.valueOf(count), ex);
+            }
         }
         for (ODatabaseDocumentTx entry : list) {
-            entry.close();
+            try {
+                if (entry != null) {
+                    entry.close();
+                }
+            } catch (Exception ex) {
+                logger.warn("Issue in connection close during warming up db pool, entry {}", entry, ex);
+            }
         }
     }
     
