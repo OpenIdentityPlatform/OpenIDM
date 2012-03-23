@@ -44,9 +44,27 @@ import static org.fest.assertions.MapAssert.entry;
 
 public class DocumentUtilTest {
 
+    String dbURL = "local:./target/docutiltestdb";
     ODatabaseDocumentTx db = null; 
     String orientDocClass = "Sample";
 
+    @BeforeClass 
+    public void init() {
+        db = new ODatabaseDocumentTx(dbURL);
+        if (!db.exists()) {
+            db.create();
+        } else {
+            db.open("admin", "admin");
+        }
+    }
+    
+    @AfterClass 
+    public void cleanup() {
+        if (db != null) {
+            db.close();
+        }
+    }
+    
     @Test
     public void docToMapNullTest() {
         assertNull(DocumentUtil.toMap(null));

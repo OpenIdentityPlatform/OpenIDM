@@ -111,6 +111,9 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     int poolMinSize = 5; 
     int poolMaxSize = 20;
 
+    // Current configuration
+    JsonValue existingConfig;
+    
     // TODO: evaluate use of Guice instead
     PredefinedQueries predefinedQueries = new PredefinedQueries();
     Queries queries = new Queries();
@@ -518,19 +521,18 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
     @Activate
     void activate(ComponentContext compContext) throws Exception { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-
-        JsonValue config = null;
+        
         try {
-            config = enhancedConfig.getConfigurationAsJson(compContext);
+            existingConfig = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository: " 
                     + ex.getMessage(), ex);
             throw ex;
         }
         embeddedServer = new EmbeddedOServerService();
-        embeddedServer.activate(config);
+        embeddedServer.activate(existingConfig);
         
-        init(config);
+        init(existingConfig);
         
         logger.info("Repository started.");
     }
@@ -545,41 +547,77 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
      */
     void init (JsonValue config) {
         try {
-            File dbFolder = IdentityServer.getFileForPath("db/openidm");
-            String orientDbFolder = dbFolder.getAbsolutePath();
-            orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
-            
-            dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
+            dbURL = getDBUrl(config);
             logger.info("Use DB at dbURL: {}", dbURL);
-            user = config.get(CONFIG_USER).defaultTo("admin").asString();
-            password = config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
+            user = getUser(config);
+            password = getPassword(config);
 
             Map map = config.get(CONFIG_QUERIES).asMap();
             Map<String, String> queryMap = (Map<String, String>) map;
             queries.setConfiguredQueries(queryMap);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid, can not start OrientDB repository: " 
-                    + ex.getMessage(), ex);
+            logger.warn("Configuration invalid, can not start OrientDB repository", ex);
             throw ex;
         }
 
         try {
-            pool = DBHelper.initPool(dbURL, user, password, poolMinSize, poolMaxSize, config);
+            pool = DBHelper.getPool(dbURL, user, password, poolMinSize, poolMaxSize, config, true);
+            logger.debug("Obtained pool {}", pool);
         } catch (RuntimeException ex) {
-            logger.warn("Initializing database pool failed: " + ex.getMessage(), ex);
+            logger.warn("Initializing database pool failed", ex);
             throw ex;
         }
     }
-
-    /* Currently rely on deactivate/activate to be called by DS if config changes instead
-    @Modified
-    void modified(ComponentContext compContext) {
-        logger.info("Configuration of repository changed.");
-        deactivate(compContext);
-        activate(compContext);
+    
+    private String getDBUrl(JsonValue config) {
+        File dbFolder = IdentityServer.getFileForPath("db/openidm");
+        String orientDbFolder = dbFolder.getAbsolutePath();
+        orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
+        return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
     }
-    */
-
+    
+    private String getUser(JsonValue config) {
+        return config.get(CONFIG_USER).defaultTo("admin").asString();
+    }
+    
+    private String getPassword(JsonValue config) {
+        return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
+    }
+    
+    /**
+     * Handle an existing activated service getting changed; 
+     * e.g. configuration changes or dependency changes
+     * 
+     * @param compContext THe OSGI component context
+     * @throws Exception if handling the modified event failed
+     */
+    @Modified
+    void modified(ComponentContext compContext) throws Exception {
+        logger.debug("Handle repository service modified notification");
+        JsonValue newConfig = null;
+        try {
+            newConfig = enhancedConfig.getConfigurationAsJson(compContext);
+        } catch (RuntimeException ex) {
+            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository", ex); 
+            throw ex;
+        }
+        if (existingConfig != null 
+                && dbURL.equals(getDBUrl(newConfig))
+                && user.equals(getUser(newConfig))
+                && password.equals(getPassword(newConfig))) {
+            // If the DB pool settings don't change keep the existing pool
+            logger.info("(Re-)initialize repository with latest configuration.");
+            init(newConfig);
+        } else {
+            // If the DB pool settings changed do a more complete re-initialization
+            logger.info("Re-initialize repository with latest configuration - including DB pool setting changes.");
+            deactivate(compContext);
+            activate(compContext);
+        }
+        
+        existingConfig = newConfig;
+        logger.debug("Repository service modified");
+    }
     
     @Deactivate
     void deactivate(ComponentContext compContext) { 
@@ -595,14 +633,6 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
      * Cleanup and close the repository
      */
     void cleanup() {
-        if (pool != null) {
-            try {
-                pool.close();
-                logger.trace("Closed pool ", pool);
-            } catch (Exception ex) {
-                logger.warn("Closing pool reported exception ", ex);
-            }
-        }
+        DBHelper.closePools();
     }
-    
 }
