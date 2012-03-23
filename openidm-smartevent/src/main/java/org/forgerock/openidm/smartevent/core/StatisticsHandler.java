@@ -37,6 +37,7 @@ import com.lmax.disruptor.util.MutableLong;
 
 /**
  * Event handler for monitoring and statistics
+ * Expects a single thread assigned to gather the statistics
  * 
  * @author aegloff
  */
@@ -92,7 +93,7 @@ public class StatisticsHandler implements
      * @inheritDoc
      */
     public Map getRecent() {
-        // TODO: consider adding history for not yet end()ed events
+        // TODO: consider adding history for not yet end()-ed events
         // Present history ordered by start time, with latest start time first
         Map recent = new TreeMap(Collections.reverseOrder());
         try {
@@ -215,15 +216,13 @@ public class StatisticsHandler implements
      * Consumes the events off the ring buffer
      */
     public void onEvent(final DisruptorReferringEventEntry eventEntryWrap, final long sequence, final boolean endOfBatch) throws Exception {
-        if (newBatch) {
-            batchTime = System.nanoTime();
-        }
-        
-        EventEntryImpl eventEntry = eventEntryWrap.delegate;
-        
         // TODO: provide switch for batch or individual end time
+        //if (newBatch) {
+        //    batchTime = System.nanoTime();
+        //}
         // eventEntryWrap.endTime = batchTime;
         
+        EventEntryImpl eventEntry = eventEntryWrap.delegate;
         long diff = eventEntryWrap.getRawDuration();
         
         MonitoringInfo entry = map.get(eventEntry.eventName.asString());

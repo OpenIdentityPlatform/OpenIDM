@@ -64,26 +64,26 @@ class ObjectMapping implements SynchronizationListener {
     /**
      * Event names for monitoring ObjectMapping behavior
      */
-    public final static Name EVENT_CREATE_OBJ = Name.get("openidm/internal/discovery-engine/sync/create-object");
-    public final static Name EVENT_READ_OBJ = Name.get("openidm/internal/discovery-engine/sync/read-object");
-    public final static Name EVENT_UPDATE_TARGET = Name.get("openidm/internal/discovery-engine/sync/update-target");
-    public final static Name EVENT_DELETE_TARGET = Name.get("openidm/internal/discovery-engine/sync/delete-target");
-    public final static String EVENT_OBJECT_MAPPING_PREFIX = "openidm/internal/discovery-engine/sync/objectmapping/";
+    public static final Name EVENT_CREATE_OBJ = Name.get("openidm/internal/discovery-engine/sync/create-object");
+    public static final Name EVENT_READ_OBJ = Name.get("openidm/internal/discovery-engine/sync/read-object");
+    public static final Name EVENT_UPDATE_TARGET = Name.get("openidm/internal/discovery-engine/sync/update-target");
+    public static final Name EVENT_DELETE_TARGET = Name.get("openidm/internal/discovery-engine/sync/delete-target");
+    public static final String EVENT_OBJECT_MAPPING_PREFIX = "openidm/internal/discovery-engine/sync/objectmapping/";
 
     
     /**
-     * Event names for monitoring Reconcliation behavior
+     * Event names for monitoring Reconciliation behavior
      */
-    public final static Name EVENT_RECON = Name.get("openidm/internal/discovery-engine/reconciliation");
-    public final static Name EVENT_RECON_ID_QUERIES = Name.get("openidm/internal/discovery-engine/reconciliation/id-queries-phase");
-    public final static Name EVENT_RECON_SOURCE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
-    public final static Name EVENT_RECON_TARGET = Name.get("openidm/internal/discovery-engine/reconciliation/target-phase");
+    public static final Name EVENT_RECON = Name.get("openidm/internal/discovery-engine/reconciliation");
+    public static final Name EVENT_RECON_ID_QUERIES = Name.get("openidm/internal/discovery-engine/reconciliation/id-queries-phase");
+    public static final Name EVENT_RECON_SOURCE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
+    public static final Name EVENT_RECON_TARGET = Name.get("openidm/internal/discovery-engine/reconciliation/target-phase");
         
     /** TODO: Description. */
     private enum Status { SUCCESS, FAILURE }
     
     /** TODO: Description. */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
 
     /** TODO: Description. */
     private String name;

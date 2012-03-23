@@ -38,7 +38,8 @@ import com.lmax.disruptor.EventFactory;
  * This though makes it not suitable for many long time measurements,
  * althogh for short measurement it means less object creation/collection
  * 
- * @deprecated Considering removal as it limits the number of open start events to the ring buffer size
+ * @deprecated Considering removal as it limits the number of open start events to the ring buffer size.
+ * Plus it is highly sensitive to requiring end() to be called on the EventEntry
  * @author aegloff
  *
  */
