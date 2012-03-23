@@ -42,8 +42,9 @@ public class Publisher {
     /**
      * For events that mark/span the beginning and end of something,
      * call this method to mark the beginning of the event window.
-     * Upon reaching the end of the event window, end() MUST be called on the returned EventEntry, 
-     * for example do it in a try/finally
+     * Upon reaching the end of the event window, end() SHOULD be called on the returned EventEntry, even in failure condiitons.
+     * For example call end() in a try/finally; or at the very least the EventEntry should be unreferenced so it gets garbage collected.
+     * Event entries where end() was not called do not qualify for inclusion in statistics and may not be in the event history.
      * @param eventName the object representing the hierarchical event name and its context. See <code>Name.get()</code>
      * @param payload Optional payload to send so target subscribers (and monitoring) can act upon it
      * @param context Optional context information to send so target subscribers (and monitoring) can act upon it
