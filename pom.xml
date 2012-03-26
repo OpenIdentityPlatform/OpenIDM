@@ -237,6 +237,7 @@
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
         <commonsJsonCryptoVersion>${commons.json-crypto.version}</commonsJsonCryptoVersion>
         <openicfBundleVersion>1.1.0.0</openicfBundleVersion>
+        <gaId>UA-23412190-9</gaId>
     </properties>
 
     <modules>
@@ -590,7 +591,7 @@
                 <inherited>false</inherited>
                 <configuration>
                  <projectName>OpenIDM</projectName>
-                 <googleAnalyticsId>UA-23412190-9</googleAnalyticsId>
+                 <googleAnalyticsId>${gaId}</googleAnalyticsId>
                 </configuration>
                 <executions>
                     <execution>
