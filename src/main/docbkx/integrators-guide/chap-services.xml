@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-services'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Starting &amp; Stopping OpenIDM</title>
+
+ <para>This chapter covers scripts provided for managing OpenIDM.</para>
+
+ <section xml:id="startup-shutdown">
+  <title>Startup &amp; Shutdown</title>
+  <indexterm>
+   <primary>Starting OpenIDM</primary>
+  </indexterm>
+  <indexterm>
+   <primary>Stopping OpenIDM</primary>
+  </indexterm>
+
+  <para>By default you start and stop OpenIDM in interactive mode.</para>
+
+  <itemizedlist>
+   <para>To start OpenIDM interactively, open a terminal or command window,
+   change to the <filename>openidm</filename> directory, and run the startup
+   script:</para>
+   <listitem>
+    <para><command>startup.sh</command> (UNIX)</para>
+   </listitem>
+   <listitem>
+    <para><command>startup.bat</command> (Windows)</para>
+   </listitem>
+  </itemizedlist>
+
+  <para>The startup script starts OpenIDM, and opens an OSGi console with a
+  <literal>-&gt;</literal> prompt where you can issue console commands.</para>
+
+  <para>To stop OpenIDM interactively in the OSGi console, enter the
+  <command>shutdown</command> command.</para>
+
+  <screen>-&gt; shutdown</screen>
+
+  <orderedlist>
+
+   <para>You can also start OpenIDM as a background process on UNIX, Linux, and
+   Mac OS X. Follow these steps <emphasis>before starting OpenIDM for the first
+   time</emphasis>.</para>
+   <listitem>
+    <para>If you have already started OpenIDM, then shut down OpenIDM and
+    remove Felix cache files under
+    <filename>openidm/felix-cache/</filename>.</para>
+
+    <screen>-&gt; shutdown
+...
+$ rm -rf felix-cache/*</screen>
+   </listitem>
+   <listitem>
+    <para>Disable <literal>ConsoleHandler</literal> logging before starting
+    OpenIDM by editing <filename>openidm/conf/logging.properties</filename>
+    to set <literal>java.util.logging.ConsoleHandler.level = OFF</literal>,
+    and to comment out other references to <literal>ConsoleHandler</literal>,
+    as shown in the following excerpt.</para>
+    <programlisting language="ini">
+# ConsoleHandler: A simple handler for writing formatted records to System.err
+#handlers=java.util.logging.FileHandler, java.util.logging.ConsoleHandler
+handlers=java.util.logging.FileHandler
+...
+# --- ConsoleHandler ---
+# Default: java.util.logging.ConsoleHandler.level = INFO
+java.util.logging.ConsoleHandler.level = OFF
+#java.util.logging.ConsoleHandler.formatter = ...
+#java.util.logging.ConsoleHandler.filter=...</programlisting>
+   </listitem>
+   <listitem>
+    <para>Remove the text-based OSGi console bundle,
+    <filename>bundle/org.apache.felix.shell.tui-<replaceable>version</replaceable>.jar</filename>.</para>
+   </listitem>
+   <listitem>
+    <para>Start OpenIDM in the background.</para>
+    <screen>$ ./startup.sh &amp;
+[3] 454
+$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+
+$</screen>
+    <para>Alternatively, use the <command>nohup</command> command to keep
+    OpenIDM running after you log out.</para>
+
+    <screen>$ nohup ./startup.sh &amp;
+[2] 394
+$ appending output to nohup.out
+$</screen>
+   </listitem>
+  </orderedlist>
+
+  <para>To stop OpenIDM running as a background process, use the
+  <command>shutdown.sh</command> script.</para>
+  <screen>$ ./shutdown.sh
+./shutdown.sh
+Stopping OpenIDM (454)</screen>
+ </section>
+
+ <section xml:id="command-line-tools">
+  <title>Command-Line Tools</title>
+
+  <variablelist>
+   <para>OpenIDM includes these command line tools in the
+   <filename>openidm</filename> directory.</para>
+   <varlistentry>
+    <term><command>cli.sh</command></term>
+    <listitem>
+     <para>This script supports the following subcommands.</para>
+     <variablelist>
+<!-- 
+      <varlistentry>
+       <term><command>export</command></term>
+       <listitem>
+        <para>Export all objects</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><command>keytool</command></term>
+       <listitem>
+        <para>Export or import SecretKeyEntry values</para>
+       </listitem>
+      </varlistentry>
+ -->
+      <varlistentry>
+       <term><command>validate</command></term>
+       <listitem>
+        <indexterm>
+         <primary>Configuration</primary>
+         <secondary>Validating</secondary>
+        </indexterm>
+        <para>Validate all .json configuration files in the
+        <filename>conf/</filename> directory</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar</command></term>
+    <listitem>
+     <para>Utility to obfuscate passwords such as the bootstrap password stored
+     in <filename>openidm/conf/boot/boot.properties</filename></para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar</command></term>
+    <listitem>
+     <indexterm>
+      <primary>Encryption</primary>
+     </indexterm>
+     <para>Utility to encrypt and decrypt values in JSON objects</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>startup.bat</command></term>
+    <term><command>startup.sh</command></term>
+    <listitem>
+     <para>Script to start OpenIDM and the OSGi console</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><command>shutdown.sh</command></term>
+    <listitem>
+     <para>Script to stop OpenIDM, especially when you run OpenIDM as a
+     background process</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</chapter>

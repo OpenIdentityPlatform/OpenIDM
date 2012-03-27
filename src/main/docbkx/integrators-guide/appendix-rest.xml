@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<appendix xml:id='appendix-rest'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>REST API Reference</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>REST API</primary>
+  </indexterm>
+
+ <para>OpenIDM provides a RESTful API for accessing managed objects.</para>
+ 
+ <section xml:id="rest-uri-scheme">
+  <title>URI Scheme</title>
+
+  <para>The URI scheme for accessing a managed object follows this
+  convention, assuming the OpenIDM web application was deployed at
+  <literal>/openidm</literal>.</para>
+
+  <literallayout class="monospaced">/openidm/managed/<replaceable
+  >type</replaceable>/<replaceable>id</replaceable></literallayout>
+ </section>
+
+ <section xml:id="rest-object-identifier">
+  <title>Object Identifiers</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+   <tertiary>Identifiers</tertiary>
+  </indexterm>
+
+  <para>Each managed object has an identifier&#8212;expressed as
+  <replaceable>id</replaceable> in the URI scheme&#8212;which is used to
+  address the object through the REST API. The REST API allows for the
+  client-generated and server-generated identifiers, through PUT and POST
+  methods. The default server-generated identifier type is a UUID. Object
+  identifiers that begin with underscore ( <literal>_</literal> ) are reserved
+  for future use.</para>
+ </section>
+
+ <section xml:id="rest-content-negotiation">
+  <title>Content Negotiation</title>
+
+  <para>The REST API fully supports negotiation of content representation
+  through the <literal>Accept</literal> HTTP header. Currently, the supported
+  content type is JSON; omitting content-negotiation is equivalent to including
+  the following header:</para>
+
+  <literallayout class="monospaced">Accept: application/json</literallayout>
+ </section>
+
+ <section xml:id="rest-conditional-operations">
+  <title>Conditional Operations</title>
+
+  <para>The REST API fully supports conditional operations through the use of
+  the <literal>ETag</literal>, <literal>If-Match</literal> and
+  <literal>If-None-Match</literal> HTTP headers. The use of HTTP conditional
+  operations is the basis of OpenIDM's optimistic concurrency control system.
+  Clients should make requests conditional in order to prevent inadvertent
+  modification of the wrong version of an object.</para>
+ </section>
+
+ <section xml:id="rest-supported-methods">
+  <title>Supported Methods</title>
+
+  <para>The managed object API uses standard HTTP methods to access managed
+  objects.</para>
+
+  <variablelist>
+   <varlistentry>
+    <term>GET</term>
+    <listitem>
+     <para>Retrieves a managed object in OpenIDM.</para>
+     <para>Example Request</para>
+     <programlisting language="http">
+GET /openidm/managed/user/bdd793f8 HTTP/1.1
+...</programlisting>
+     <para>Example Response</para>
+     <programlisting language="http">
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 123
+ETag: "0"
+...
+
+[<replaceable>JSON representation of the managed object</replaceable>]</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>HEAD</term>
+    <listitem>
+     <para>Returns metainformation about a managed object in OpenIDM.</para>
+     <para>Example Request</para>
+     <programlisting language="http">
+HEAD /openidm/managed/user/bdd793f8 HTTP/1.1
+...</programlisting>
+     <para>Example Response</para>
+     <programlisting language="http">
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 123
+ETag: "0"</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>PUT</term>
+    <listitem>
+     <para>Creates or updates a managed object. PUT is the preferred method of
+     creating managed objects.</para>
+     <para>Example Request: Creating a new object</para>
+     <programlisting language="http">
+PUT /openidm/managed/user/5752c0fd9509 HTTP/1.1
+Content-Type: application/json
+Content-Length: 123
+If-None-Match: *
+...
+
+[<replaceable>JSON representation of the managed object to create</replaceable>]</programlisting>
+     <para>Example Response: Creating a new object</para>
+     <programlisting language="http">
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Length: 45
+ETag: "0"
+...
+
+[<replaceable>JSON representation containing metadata (underscore-prefixed) properties</replaceable>]</programlisting>
+     <para>Example Request: Updating an existing object</para>
+     <programlisting language="http">
+PUT /openidm/managed/user/5752c0fd9509 HTTP/1.1
+Content-Type: application/json
+Content-Length: 123
+If-Match: "0"
+...
+
+[<replaceable>JSON representation of managed object to update</replaceable>]</programlisting>
+     <para>Example Response: Updating an existing object (success)</para>
+     <programlisting language="http">
+HTTP/1.1 204 No Content
+ETag: "1"
+...</programlisting>
+     <para>Example Response: Updating an existing object (version conflict)</para>
+     <programlisting language="http">
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+Content-Length: 89
+...
+
+[<replaceable>JSON representation of error</replaceable>]</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>POST</term>
+    <listitem>
+     <para>The POST method allows arbitrary actions to be performed on managed
+     objects. The <literal>_action</literal> query parameter defines the action
+     to be performed.</para>
+     <para>The <literal>create</literal> action is used to create a managed
+     object. Because POST is neither safe nor idempotent, PUT is the preferred
+     method of creating managed objects, and should be used if the client know
+     what identifier it wants to assign the object. The response contains
+     the server-generated <literal>_id</literal> of the newly created managed
+     object.</para>
+     <para>The POST method create optionally accepts an <literal>_id</literal>
+     query parameter to specify the identifier to give the newly created
+     object. If not provided, then the server selects its own identifier.</para>
+     <para>Example Request</para>
+     <programlisting language="http">
+POST /openidm/managed/user?_action=create HTTP/1.1
+Content-Type: application/json
+Content-Length: 123
+...
+
+[<replaceable>JSON representation of the managed object to create</replaceable>]</programlisting>
+     <para>Example Response</para>
+     <programlisting language="http">
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Length: 45
+ETag: "0"
+...
+
+[<replaceable>JSON representation containing metadata (underscore-prefixed) properties</replaceable>]</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>DELETE</term>
+    <listitem>
+     <para>Deletes a managed object.</para>
+     <para>Example Request</para>
+     <programlisting language="http">
+DELETE /openidm/managed/user/c3471805b60f
+If-Match: "0"
+...</programlisting>
+     <para>Example Response (success)</para>
+     <programlisting language="http">
+HTTP/1.1 204 No Content
+...</programlisting>
+     <para>Example Response (version conflict)</para>
+     <programlisting language="http">
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+Content-Length: 89
+...
+
+[<replaceable>JSON representation of error</replaceable>]</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>PATCH</term>
+    <listitem>
+     <para>Performs a partial modification of a managed object.</para>
+     <para>See the <link xlink:show="new"
+     xlink:href="http://tools.ietf.org/html/draft-pbryan-json-patch-04">JSON
+     Patch Internet-Draft</link> for details.</para>
+     <para>Example Request</para>
+     <programlisting language="http">
+PATCH /openidm/managed/user/5752c0fd9509 HTTP/1.1
+Content-Type: application/patch+json
+Content-Length: 456
+If-Match: "0"
+...
+
+[<replaceable>JSON representation of patch document to apply</replaceable>]</programlisting>
+     <para>Example Response (success)</para>
+     <programlisting language="http">
+HTTP/1.1 204 No Content
+ETag: "1"
+...</programlisting>
+     <para>Example Response (version conflict)</para>
+     <programlisting language="http">
+HTTP/1.1 409 Conflict
+Content-Type: application/json
+Content-Length: 89
+...
+
+[<replaceable>JSON representation of error</replaceable>]</programlisting>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>X-HTTP-Method-Override</term>
+    <listitem>
+     <para>If an HTTP client or server container does not support a particular
+     method, a request can be submitted through POST with the
+     <literal>X-HTTP-Method-Override</literal> header set to the intended
+     method.</para>
+     <para>Example Request</para>
+     <programlisting language="http">
+POST /openidm/managed/user/5752c0fd9509 HTTP/1.1
+X-HTTP-Method-Override: PATCH
+Content-Type: application/patch+json
+Content-Length: 456
+If-Match: "0"
+...
+
+[<replaceable>JSON representation of patch document to apply</replaceable>]</programlisting>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</appendix>

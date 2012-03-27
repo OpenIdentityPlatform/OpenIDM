@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<appendix xml:id="appendix-scripting"
+ version="5.0"
+ xml:lang="en"
+ xmlns="http://docbook.org/ns/docbook"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xinclude="http://www.w3.org/2001/XInclude">
+ <title>Scripting Reference</title>
+ <indexterm>
+  <primary>Scripting</primary>
+ </indexterm>
+
+  <para>Scripting lets you customize how OpenIDM works in various ways, such
+  as providing custom logic between source and target mappings, defining
+  correlation rules, filters, and triggers.</para>
+
+ <section xml:id="scripting-configuration">
+  <title>Configuration</title>
+
+  <para>You define scripts using script objects, which can either include the
+  code directly in the configuration, or call an external file containing the
+  script.</para>
+ 
+  <programlisting language="javascript">{
+  "type"  : "text/javascript",
+  "source": <replaceable>string</replaceable>
+}</programlisting>
+
+  <para>or</para>
+
+  <programlisting language="javascript">{
+  "type"  : "text/javascript",
+  "file"  : <replaceable>file location</replaceable>
+}</programlisting>
+
+  <variablelist>
+   <varlistentry>
+    <term>type</term>
+    <listitem>
+     <para>string, required</para>
+     <para>Specifies the type of script to be executed. Currently, OpenIDM
+     supports only <literal>"text/javascript"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>source</term>
+    <listitem>
+     <para>string, required if file is not specified</para>
+     <para>Specifies the source code of the script to be executed.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>file</term>
+    <listitem>
+     <para>string, required if source is not specified</para>
+     <para>Specifies the file containing the source code of the script to
+     execute.</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="scripting-example">
+  <title>Examples</title>
+
+  <para>The following example returns <literal>true</literal> if the
+  <literal>employeeType</literal> is equal to <literal>external</literal>,
+  otherwise returns <literal>false</literal>. This script can be useful during
+  reconciliation to establish whether the source object should be a part of
+  the reconciliation, or ignored.</para>
+
+  <programlisting language="javascript">
+"validTarget": {
+  "type"  : "text/javascript",
+  "source": "object.employeeType == 'external'"
+}</programlisting>
+
+  <para>The following example sets the <literal>__PASSWORD__</literal>
+  attribute to <literal>defaultpwd</literal> when OpenIDM creates a target
+  object.</para>
+
+  <programlisting language="javascript">
+"onCreate" : {
+  "type"  : "text/javascript",
+  "source": "target.__PASSWORD__ = 'defaultpwd'"
+}</programlisting>
+
+  <para>The following example shows a trigger to create Solaris home
+  directories using a script. The script is located in a file,
+  <filename>/path/to/openidm/script/createUnixHomeDir.js</filename>.</para>
+
+  <programlisting language="javascript">
+{
+  "filters" : [ {
+      "pattern" : "^system/solaris/account$",
+      "methods" : [ "create" ],
+      "onResponse" : {
+        "type" : "text/javascript",
+        "file" : "script/createUnixHomeDir.js"
+      }
+  } ]
+}</programlisting>
+ </section>
+
+ <section xml:id="function-ref">
+  <title>Function Reference</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Script access</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Scripting</primary>
+   <secondary>Functions</secondary>
+  </indexterm>
+
+   <para>Functions (access to managed objects, system objects, configuration
+   objects) within OpenIDM are accessible to scripts via the
+   <literal>openidm</literal> object, which is included in the top-level scope
+   provided to each script.</para>
+
+  <section xml:id="function-create">
+   <title>openidm.create(id, value)</title>
+
+   <para>This function creates a new resource object.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>id</term>
+     <listitem>
+      <para>string</para>
+      <para>The identifier of the object to be created.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>value</term>
+     <listitem>
+      <para>object</para>
+      <para>The value of the object to be created.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the object could not be created for any
+     reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-read">
+   <title>openidm.read(id)</title>
+
+   <para>This function reads and returns an OpenIDM resource object.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>id</term>
+     <listitem>
+      <para>string</para>
+      <para>The identifier of the object to be read.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>The read OpenIDM resource object, or <literal>null</literal> if not
+     found.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-update">
+   <title>openidm.update(id, rev, value)</title>
+
+   <para>This function updates a resource object.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>id</term>
+     <listitem>
+      <para>string</para>
+      <para>The identifier of the resource object to be updated.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>rev</term>
+     <listitem>
+      <para>string</para>
+      <para>The revision of the object to be updated, or <literal>null</literal>
+      if the object is not subject to revision control.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>value</term>
+     <listitem>
+      <para>object</para>
+      <para>The value of the object to be updated.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the object could not be updated for any
+     reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-delete">
+   <title>openidm.delete(id, rev)</title>
+
+   <para>This function deletes a resource object.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>id</term>
+     <listitem>
+      <para>string</para>
+      <para>The identifier of the object to be deleted.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>rev</term>
+     <listitem>
+      <para>string</para>
+      <para>The revision of the object to be deleted, or <literal>null</literal>
+      if the object is not subject to revision control.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the object could not be deleted for any
+     reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-query">
+   <title>openidm.query(id, params)</title>
+
+   <para>This function performs a query on the specified OpenIDM resource
+   object.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>id</term>
+     <listitem>
+      <para>string</para>
+      <para>The identifier of the object to perform the query on.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>An object containing the parameters to pass to the query.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>The result of the query.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the given query could not be processed for
+     any reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-action">
+   <title>openidm.action(id, params, value)</title>
+
+   <para>This function performs an action on the specified OpenIDM resource
+   object.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>id</term>
+     <listitem>
+      <para>string</para>
+      <para>The identifier of the object to perform the action on.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>An object containing the parameters to pass to the action.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>value</term>
+     <listitem>
+      <para>object</para>
+      <para>A value that can be provided to the action for processing.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>The result of the action. May be <literal>null</literal> if no result
+     is provided.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the given action could not be executed
+     for any reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-encrypt">
+   <title>openidm.encrypt(value, cipher, alias)</title>
+
+   <para>This function encrypts a value.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>value</term>
+     <listitem>
+      <para>any</para>
+      <para>The value to be encrypted.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>cipher</term>
+     <listitem>
+      <para>string</para>
+      <para>The cipher with which to encrypt the value, using the form
+      "algorithm/mode/padding" or just "algorithm". Example:
+      <literal>AES/ECB/PKCS5Padding</literal>.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>alias</term>
+     <listitem>
+      <para>string</para>
+      <para>The key alias in the key store with which to encrypt the node.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>The value, encrypted with the specified cipher and key.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the object could not be encrypted for any
+     reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-decrypt">
+   <title>openidm.decrypt(value)</title>
+
+   <para>This function decrypts a value.</para>
+  
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>value</term>
+     <listitem>
+      <para>any</para>
+      <para>The value to be decrypted.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A deep copy of the value, with any encrypted value decrypted.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the object could not be decrypted for any
+     reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+ </section>
+ 
+ <section xml:id="script-places">
+  <title>Places to Trigger Scripts</title>
+  
+  <para>Scripts can be triggered at different places, by different
+  events.</para>
+  
+  <variablelist>
+   <varlistentry>
+    <term>In <filename>openidm/conf/sync.json</filename></term>
+    <listitem>
+     <variablelist>
+      <varlistentry>
+       <term>Triggered by situation</term>
+       <listitem><para>onCreate, onUpdate, onDelete, onLink, onUnlink</para></listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>Object filter</term>
+       <listitem><para>vaildSource, validTarget</para></listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>Correlating objects</term>
+       <listitem><para>correlationQuery</para></listitem>
+      </varlistentry>
+       <varlistentry>
+        <term>Triggered on any reconciliation</term>
+        <listitem><para>result</para></listitem>
+       </varlistentry>
+       <varlistentry>
+        <term>Scripts inside properties</term>
+        <listitem><para>condition, transform</para></listitem>
+       </varlistentry> 
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   
+   <varlistentry>
+    <term>In <filename>openidm/conf/managed.json</filename></term>
+    <listitem><para>onRetreive, onValidate</para></listitem>
+   </varlistentry>
+   
+   <varlistentry>
+    <term>In <filename>openidm/conf/router.json</filename></term>
+    <listitem><para>onRequest, onResponse</para></listitem>
+   </varlistentry>
+  
+  </variablelist>
+ </section>
+ 
+ <section xml:id="debugging-scripts">
+  <title>Debugging OpenIDM Scripts</title>
+
+  <para>OpenIDM includes Eclipse JSDT libraries so you can use Eclipse to debug
+  your OpenIDM scripts during development.</para>
+
+  <procedure xml:id="enable-debugging">
+   <title>To Enable Debugging</title>
+
+   <para>Follow these steps to enable debugging using Eclipse.</para>
+
+   <step>
+    <para>Install the environment to support JavaScript development in either
+    of the following ways.</para>
+    <stepalternatives>
+     <step>
+      <para>Download and install Eclipse IDE for JavaScript Web Developers
+      from the <link xlink:href="http://www.eclipse.org/downloads/"
+      xlink:show="new">Eclipse download page</link>.</para>
+     </step>
+     <step>
+      <para>Add <link xlink:href="http://wiki.eclipse.org/JSDT"
+      xlink:show="new">JavaScript Development Tools</link> to your existing
+      Eclipse installation.</para>
+     </step>
+    </stepalternatives>
+   </step>
+   <step>
+    <para>Create an empty JavaScript project called <literal>External JavaScript
+    Source</literal> in Eclipse.</para>
+
+    <para>Eclipse then uses the <filename>External JavaScript Source</filename>
+    directory in the default workspace location to store sources that it
+    downloads from OpenIDM.</para>
+   </step>
+   <step>
+    <para>Stop OpenIDM.</para>
+   </step>
+   <step>
+    <para>Edit <filename>openidm/conf/boot/boot.properties</filename> to
+    enable debugging.</para>
+    <substeps>
+     <step>
+      <para>Uncomment and edit the following line.</para>
+
+      <programlisting language="none" width="84">
+#openidm.script.javascript.debug=transport=socket,suspend=y,address=9888,trace=true</programlisting>
+
+      <para>Here <literal>suspend=y</literal> prevents OpenIDM from starting
+      until the remote JavaScript debugger has connected. You might therefore
+      choose to set this to <literal>suspend=n</literal>.</para>
+     </step>
+     <step>
+      <para>Uncomment and edit the following line.</para>
+
+      <programlisting language="none" width="81">
+#openidm.script.javascript.sources=/Eclipse/workspace/External JavaScript Source/</programlisting>
+
+      <para>Adjust <literal>/Eclipse/workspace/External JavaScript
+      Source/</literal> to match the absolute path to this folder including the
+      trailing <literal>/</literal> character. On Windows, also use forward
+      slashes, such as <literal>C:/Eclipse/workspace/External JavaScript
+      Source/</literal>.</para>
+
+      <para>Each time OpenIDM loads a new script, it then creates or overwrites
+      the file in the <filename>External JavaScript Source</filename> directory.
+      Before toggling breakpoints, be sure to refresh the source manually in
+      Eclipse so you have the latest version.</para>
+     </step>
+    </substeps>
+   </step>
+   <!-- Fix for OPENIDM-566: JavaScript debugger configuration description refinement -->
+   <step>
+    <para>Prepare the Eclipse debugger to allow you to set breakpoints.</para>
+    <para>In the Eclipse Debug perspective, select the Breakpoints tab, and
+    then click the Add Script Load Breakpoint icon to open the list of
+    scripts.</para>
+    <para>In the Add Script Load Breakpoint window, select your scripts, and
+    then click OK.</para>
+   </step>
+   <step>
+    <para>Start OpenIDM, and connect the debugger.</para>
+    <para>To create a new debug, configuration click Run &gt; Debug
+    Configurations... &gt; Remote JavaScript &gt; New button, and then set
+    the port to 9888 as shown above.</para>
+   </step>
+  </procedure>
+ </section>
+</appendix>

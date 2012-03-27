@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-auth'
+ xmlns='http://docbook.org/ns/docbook'
+ version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>Managing Authentication, Authorization &amp; RBAC</title>
+ <indexterm>
+  <primary>Authentication</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Authorization</primary>
+ </indexterm>
+
+ <para>OpenIDM currently provides a simple, yet flexible authentication and
+ authorization mechanism based on REST interface URLs and on roles stored in
+ the repository.</para>
+
+ <section xml:id="openidm-users">
+  <title>OpenIDM Users</title>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Internal users</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Managed users</secondary>
+  </indexterm>
+
+  <para>OpenIDM distinguishes between internal users and managed users.</para>
+  
+  <section xml:id="internal-users">
+   <title>Internal Users</title>
+   
+   <para>OpenIDM sets up two internal users by default, anonymous and
+   openidm-admin. OpenIDM separates these accounts from all other accounts
+   to protect them from any reconciliation or sync processes. You can add
+   or remove internal users at any time.</para>
+
+   <variablelist>
+    <varlistentry>
+     <term>anonymous</term>
+     <listitem><para>This user serves to access OpenIDM anonymously, for users
+     who do not have their own accounts. The anonymous user is primarily
+     intended to allow self-registration.</para>
+     <para>OpenIDM stores the anonymous user's password,
+     <literal>amonymous</literal>, in clear text in the repository internal
+     user table. The password is not considered to be secret.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>openidm-admin</term>
+     <listitem><para>This user serves as the super administrator. After
+     installation, the <literal>openidm-admin</literal> user has full access,
+     and provides a fall back in case other users are locked out. Do not use
+     <literal>openidm-admin</literal> for normal tasks. Usually no one is
+     associated with the <literal>openidm-admin</literal> user, so audit log
+     records pertaining to <literal>openidm-admin</literal> do not reflect
+     the actions of any real person.</para>
+     <para>OpenIDM encrypts the password, <literal>openidm-admin</literal>, by
+     dfault. Change the password immediately after installation. For
+     instructions, see <link xlink:role="http://docbook.org/xlink/role/olink"
+     xlink:href="integrators-guide#security-replace-default-user-password"
+     ><citetitle>To Replace the Default User &amp;
+     Password</citetitle></link>.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <para>OpenIDM stores internal users and their role membership in a table
+   in the repository called <literal>internaluser</literal> when implemented
+   in MySQL.</para>
+  </section>
+  
+  <section xml:id="managed-users">
+   <title>Managed Users</title>
+  <indexterm>
+   <primary>Objects</primary>
+   <secondary>Managed objects</secondary>
+  </indexterm>
+
+   <para>External users that OpenIDM manages are referred to as managed users.
+   OpenIDM stores managed users in the managed objects table of the repository,
+   called <literal>managedobjects</literal> when implemented in MySQL. A second
+   table, <literal>managedobjectproperties</literal> in MySQL, serves as the
+   index table.</para>
+
+   <para>By default, the attribute names for managed user login and password
+   are <literal>email</literal> and <literal>password</literal>,
+   respectively.</para>
+  </section>
+ </section>
+ 
+ <section xml:id="openidm-authentication">
+  <title>Authentication</title>
+  
+  <para>OpenIDM does not allow access to the REST interface unless you
+  authenticate. If a project requires anonymous access, to allow users to
+  self-register for example, then allow access by user
+  <literal>anonymous</literal>, password <literal>anonymous</literal>, as
+  described in <xref linkend="internal-users" />. In production, only
+  applications are expected to access the REST interface.</para>
+
+  <variablelist>
+   <para>OpenIDM supports an improved authentication mechanism on the REST interface. The reason for not using standards, like basic authentication or form based authentication, is their leak of compatibility with AJAX.</para>
+   <varlistentry>
+    <term>OpenIDM authentication with standard header fields</term>
+    <listitem>
+     <screen>$ curl --user userName:password</screen>
+     <para>This authentication is compatible with standard basic authentication except that it will not prompt for credentials if they are missing in the request.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>OpenIDM  authentication with OpenIDM header fields</term>
+    <listitem>
+     <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"</screen>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  
+  <para>For more details about the OpenIDM authentication mechanism please see <link
+  xlink:href="integrators-guide#security-messages"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Use Message Level Security</citetitle>
+</link>.</para>
+  
+  <para>You can change the attributes OpenIDM uses to store user login and
+  password values. The attribute names are shown in a database query
+  defined in
+  <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
+  </para>
+
+  <variablelist>
+   <para>Two queries are defined by default.</para>
+   <varlistentry>
+    <term><literal>credential-internaluser-query</literal></term>
+    <listitem>
+     <para>Uses the user object ID for login</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term><literal>credential-query</literal></term>
+    <listitem>
+     <para>Uses the user email attribute for login</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+
+  <para>The <filename>openidm/conf/authentication.json</filename> file defines
+  the currently active query as the value of the <literal>queryId</literal>
+  property. In the following example, <literal>credential-query</literal> is
+  active.</para>
+
+   <programlisting language="javascript">
+{
+    "queryId": <emphasis role="strong">"credential-query"</emphasis>,
+    "queryOnResource": "managed/user",
+    "defaultUserRoles": [
+        "openidm-authorized"
+    ]
+}</programlisting>
+ </section>
+
+ <section xml:id="openidm-roles">
+  <title>Roles</title>
+  <indexterm>
+   <primary>Authentication</primary>
+   <secondary>Roles</secondary>
+  </indexterm>
+  <indexterm>
+   <primary>Roles</primary>
+  </indexterm>
+
+  <variablelist>
+   <para>OpenIDM sets up the following roles by default.</para>
+   <varlistentry>
+    <term>openidm-reg</term>
+    <listitem>
+     <para>Role for users accessing OpenIDM with the default anonymous
+     account</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>openidm-admin</term>
+    <listitem>
+     <para>OpenIDM administrator role</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>openidm-authorized</term>
+    <listitem>
+     <para>Default role for any user authenticated with a user name and
+     password</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>openidm-cert</term>
+    <listitem>
+     <para>Default role for any user authenticated with mutual SSL
+     authentication</para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  
+  <para>You configure default roles assigned to successfully authenticated
+  users authentication using the <literal>defaultUserRoles</literal> property
+  in <filename>openidm/conf/authentication.json</filename>, which takes a list.
+  The default value is <literal>openidm-authorized</literal>.</para>
+
+   <programlisting language="javascript">
+{
+    "queryId": "credential-query",
+    "queryOnResource": "managed/user",
+    "defaultUserRoles": [
+        <emphasis role="strong">"openidm-authorized"</emphasis>
+    ]
+}</programlisting>
+ </section>
+ 
+ <section xml:id="openidm-authorization">
+  <title>Authorization</title>
+  <indexterm>
+   <primary>Authorization</primary>
+  </indexterm>
+
+  <para>OpenIDM access control can be based on REST interface URLs.</para>
+
+  <para>The <filename>openidm/script/router-authz.js</filename> script
+  controls access to REST interface URLs. OpenIDM calls the script for each
+  request. The script either throws the string <literal>Access denied</literal>,
+  or nothing. If it throws <literal>Access denied</literal>, then OpenIDM
+  denies the request. The default script is shown below.</para>
+
+   <programlisting language="javascript">
+const allowCert = false;
+
+function contains(a, o) {
+    if (typeof(a) != 'undefined' &amp;&amp; a != null) {
+        for (var i = 0; i &lt;= a.length; i++) {
+            if (a[i] === o) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function allow() {
+    if (typeof(request.parent) === 'undefined' ||
+            request.parent.type != 'http') {
+        return true;
+    }
+    var roles = request.parent.security['openidm-roles'];
+    if (contains(roles, 'openidm-admin')) {
+        return true;
+    } else if (allowCert &amp;&amp; contains(roles, 'openidm-cert')) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+if (!allow()) {
+    throw "Access denied";
+}</programlisting>
+
+  <variablelist>
+   <para>The script can be seen as having three parts: constants, functions,
+   and a decision.</para>
+   <varlistentry>
+    <term>constants</term>
+    <listitem>
+     <para>The constants can function as global switches, for example to toggle
+     whether certificate-based authentication is allowed.</para>
+     <para>The example that follows shows a constant used to toggle whether
+     anonymous authentication is allowed.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>functions</term>
+    <listitem>
+     <para>The default script defines two functions. The
+     <literal>allow()</literal> function is called by the final if-statement.
+     The <literal>contains()</literal> function takes the list of roles
+     assigned to an authenticated user, and checks whether the list contains
+     the role specified as the second argument. If the list does contain the
+     role, then <literal>contains()</literal> returns
+     <literal>true</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>decision</term>
+    <listitem>
+     <para>The if-statement at the end of the script executes first. It calls
+     the <literal>allow()</literal> function, which calls other functions.
+     The <literal>allow()</literal> function returns true or false, triggering
+     the behavior of the final if-statement. </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+  
+  <para>The following example extends the script to filter out requests not
+  under <literal>/openidm/config</literal> or
+  <literal>/openidm/managed</literal>.</para>
+
+   <programlisting language="javascript">
+const allowCert = false;
+const allowAnon = false;
+
+function contains(a, o) {
+    if (typeof(a) != 'undefined' &amp;&amp; a != null) {
+        for (var i = 0; i &lt;= a.length; i++) {
+            if (a[i] === o) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+function matchesContext(path, context, allowRoot, allowSubcontext) {
+    if (allowRoot &amp;&amp; path === context) {
+        return true;
+    }
+    if (allowSubcontext &amp;&amp; path.substring(0, context.length + 1)
+            === context + "/") {
+        return true;
+    }
+    return false;
+}
+
+function allow() {
+    if (typeof(request.parent) === 'undefined' ||
+            request.parent.type != 'http') {
+        return true;
+    }
+
+    // Restrict the URLs that are accessible externally
+    var path = request.parent.path;
+    if (!(matchesContext(path, "/openidm/config", true, true)
+            || matchesContext(path, "/openidm/managed", false, true))) {
+        return false;
+    }
+
+    var roles = request.parent.security['openidm-roles'];
+    if (contains(roles, 'openidm-admin')) {
+        return true;
+    } else if (allowCert &amp;&amp; contains(roles, 'openidm-cert')) {
+        return true;
+    } else if (allowAnon &amp;&amp; contains(roles, 'openidm-reg')) {
+        return true;    
+    } else {
+        return false;
+    }
+}
+
+if (!allow()) {
+    throw "Access denied";
+}</programlisting>
+
+  <para>Compared to the default, this example has a second global constant,
+  <literal>allowAnon</literal>, used to allow or deny anonymous access. The
+  new constant serves in the <literal>allow()</literal> function when checking
+  for <literal>openidm-reg</literal> membership, the role for anonymous
+  users.</para>
+
+  <para>Furthermore this example includes an additional function,
+  <literal>matchesContext()</literal>, called from the
+  <literal>allow()</literal> function before the role test. The additional test
+  filters out all requests not to <literal>/openidm/config</literal> or below
+  <literal>/openidm/managed</literal>. The context root itself is excluded in
+  the latter call to avoid actions like patch by query on
+  <filename>/openidm/managed/user</filename>.</para>
+ </section>
+</chapter>

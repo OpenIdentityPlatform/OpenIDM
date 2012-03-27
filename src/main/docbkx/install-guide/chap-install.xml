@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011 ForgeRock AS
+  !      Copyright 2011-2012 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-install'
@@ -32,7 +32,8 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Installing OpenIDM Services</title>
 
- <para>This chapter covers the tasks required to install the OpenIDM services.</para>
+ <para>This chapter covers the tasks required to install and start
+ OpenIDM.</para>
 
  <section xml:id="before-you-start">
   <title>Before You Run OpenIDM</title>
@@ -42,23 +43,30 @@
   
   <section xml:id="java-prerequisites">
    <title>Java Environment</title>
-   
+   <indexterm>
+    <primary>Java</primary>
+    <secondary>Requirements</secondary>
+   </indexterm>
    <para>OpenIDM requires Oracle Java SE JDK 6 update 24 or later.</para>
    <!-- TODO: When this doc has been reviewed, either the next sentence should
               be removed, or this entire section should change to something
               like: OpenIDM requires Java SE 6 JDK update 24 or later. OpenIDM
               has been tested with both the Oracle JDK and also OpenJDK. -->
-   <para>The equivalent version of OpenJDK should work too.</para>
+   <para>The equivalent version of OpenJDK should work for evaluation,
+   too.</para>
   </section>
   
   <section xml:id="application-container-prerequisites">
    <title>Application Container</title>
-  
+   <indexterm>
+    <primary>Application container</primary>
+    <secondary>Requirements</secondary>
+   </indexterm>
    <para>OpenIDM services run in an OSGi container with an embedded Servlet
    container, and an embedded noSQL database. By default the OSGi container is
-   Apache Felix. The default Servlet container is Jetty. The default noSQL
-   database is OrientDB. At this time the only supported configuration is
-   running the services in Apache Felix.</para>
+   Apache Felix. The default Servlet container is Jetty. For OpenIDM
+   <?eval ${docTargetVersion}?>, the only supported configuration is running
+   the services in Apache Felix and Jetty.</para>
   </section>
  </section>
 
@@ -70,63 +78,86 @@
 
    <procedure xml:id="install-openidm">
     <title>To Install OpenIDM Services</title>
+    <indexterm>
+     <primary>Installing</primary>
+    </indexterm>
+
     <para>Follow these steps to install OpenIDM.</para>
     <step>
-     <para>Make sure you have the correct version of Java installed.</para>
+     <para>Make sure you have an appropriate version of Java installed.</para>
      <screen>$ java -version
 java version "1.6.0_24"
 Java(TM) SE Runtime Environment (build 1.6.0_24-b07-334)
 Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
+     <para>Check the release notes for Java requirements in the chapter, <link
+     xlink:href="release-notes#chap-before-you-install"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You
+     Install OpenIDM Software</citetitle></link>.</para>
     </step>
     <step>
+     <indexterm>
+      <primary>Downloading</primary>
+     </indexterm>
      <para>Download OpenIDM from the <link
      xlink:href='http://forgerock.org/openidm.html'>download page</link>.</para>
     </step>
     <step>
      <para>Unpack the contents of the .zip file into the install location.</para>
      <screen>$ cd /path/to
-$ unzip ~/Downloads/openidm-*.zip
+$ unzip ~/Downloads/openidm-<?eval ${docTargetVersion}?>.zip
 ...
-inflating: openidm/src/site/index.htm
+  inflating: openidm/connectors/openicf-scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
+  inflating: openidm/bin/felix.jar   
+  inflating: openidm/bin/openidm.jar
 $</screen>
     </step>
     <step performance="optional">
-     <para>By default the OpenIDM servlet container listens on port 8080. To
-     change the default port, edit the
-     <literal>org.osgi.service.http.port</literal> property in the
-     <filename>openidm/conf/config.properties</filename> file.</para>
+     <para>By default, OpenIDM listens for HTTP connections on port 8080. To
+     change the default port, edit
+     <filename>openidm/conf/jetty.xml</filename>.</para>
+    </step>
+    <step performance="optional">
+     <indexterm>
+      <primary>Repository database</primary>
+      <secondary>Requirements</secondary>
+     </indexterm>
+     <para>Before running OpenIDM in production, replace the default OrientDB
+     repository provided for evaluation with a JDBC repository.</para>
+     <para>See the chapter on <link xlink:href="install-guide#chap-repository"
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
+     a Repository For Production</citetitle></link> for details.</para>
     </step>
    </procedure>
 
    <procedure xml:id="run-openidm">
     <title>To Start OpenIDM Services</title>
-<!-- When I install OpenIDM, I notice "enabled" : false in the file mentioned
-     in this note, so I'm assuming that this note is out of date.
-    <note>
-     <para>OpenIDM currently comes with the reconciliation sample enabled by
-     default. The sample consists of a source and a target connector, and a
-     reconcilation task scheduled to run every minute. To learn more about the
-     sample, refer to the <link xlink:href="install-guide#chap-sample"
-     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>OpenIDM
-     Sample</citetitle></link> chapter. To disable the sample, set the
-     <literal>enabled</literal> attribute to <literal>false</literal> in the
-     scheduler configuration file
-     <filename>conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</filename>.
-     </para>
-    </note> -->
-    <para>Follow these steps to run OpenIDM.</para>
+   <indexterm>
+    <primary>Starting OpenIDM</primary>
+   </indexterm>
+    <para>Follow these steps to run OpenIDM interactively.</para>
+
+    <para>To run OpenIDM as a background process, see the chapter on <link
+    xlink:href="integrators-guide#chap-services"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Starting &amp;
+    Stopping OpenIDM</citetitle></link> in the <citetitle>Integrator's
+    Guide</citetitle>.</para>
+
     <step>
      <para>Start the Felix container, load all OpenIDM services, and start a
      command shell to allow you to manage the container.</para>
      <stepalternatives>
       <step>
-       <para>On UNIX, Linux, and Mac OS X</para>
-       <screen>$ cd /path/to/openidm
-$ ./startup.sh
+       <para>Start OpenIDM (UNIX).</para>
+       <screen>$ ./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
 -&gt;</screen>
       </step>
       <step>
-       <para>On Windows</para>
+       <para>Start OpenIDM (Windows).</para>
        <screen>$ cd \path\to\openidm
 $ startup.bat
 Start in debug mode [1] default
@@ -145,35 +176,36 @@ Listening for transport dt_socket at address: 5005
      the OpenIDM core services and their states, enter the following
      command.</para>
      <screen>-&gt; scr list
-Id     State           Name
-[  17] [active       ] org.forgerock.openidm.config.starter
+   Id   State          Name
+[  16] [active       ] org.forgerock.openidm.config.starter
 [   7] [active       ] org.forgerock.openidm.external.rest
-[   9] [active       ]
+[  11] [active       ]
  org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[  13] [active       ] org.forgerock.openidm.ui.simple
-[   5] [active       ] org.forgerock.openidm.router
-[  11] [active       ] org.forgerock.openidm.restlet
-[  12] [active       ] org.forgerock.openidm.scheduler
+[   1] [active       ] org.forgerock.openidm.router
+[  18] [active       ] org.forgerock.openidm.scheduler
+[  13] [active       ] org.forgerock.openidm.restlet
 [   6] [unsatisfied  ] org.forgerock.openidm.external.email
 [  15] [active       ] org.forgerock.openidm.repo.orientdb
-[   3] [active       ] org.forgerock.openidm.sync
-[   2] [active       ] org.forgerock.openidm.script
-[   1] [active       ] org.forgerock.openidm.scope
-[  16] [active       ] org.forgerock.openidm.config
+[   5] [active       ] org.forgerock.openidm.sync
+[   3] [active       ] org.forgerock.openidm.script
+[   2] [active       ] org.forgerock.openidm.scope
+[   9] [active       ] org.forgerock.openidm.http.contextregistrator
+[  17] [active       ] org.forgerock.openidm.config
 [   0] [active       ] org.forgerock.openidm.audit
 [  14] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
 [   4] [active       ] org.forgerock.openidm.managed
-[  10] [active       ] org.forgerock.openidm.provisioner.openicf
-[   8] [active       ] org.forgerock.openidm.provisioner
+[  12] [active       ] org.forgerock.openidm.provisioner.openicf
+[   8] [active       ] org.forgerock.openidm.authentication
+[  10] [active       ] org.forgerock.openidm.provisioner
 -&gt;</screen>
      <para>If startup was successful, all states except <literal>email</literal>
      and <literal>repo.jdbc</literal> are active. If any other services remain
      <literal>unsatisfied</literal>, check <filename>openidm/logs</filename>
      for errors, and refer to the chapter on <link
-     xlink:href="admin-guide#chap-troubleshooting"
+     xlink:href="integrators-guide#chap-troubleshooting"
      xlink:role="http://docbook.org/xlink/role/olink"
      ><citetitle>Troubleshooting</citetitle></link> in the
-     <citetitle>Administration Guide</citetitle>.</para>
+     <citetitle>Integrator's Guide</citetitle>.</para>
     </step>
     <step>
      <para>Alternatively, you can manage the container and services from the
@@ -213,17 +245,24 @@ Id     State           Name
 
    <procedure xml:id="first-steps-with-rest">
     <title>To Get Started With the OpenIDM REST Interface</title>
+    <indexterm>
+     <primary>Getting started</primary>
+    </indexterm>
     <para>OpenIDM provides RESTful access to users in the OpenIDM
     repository.</para>
     <step>
      <para>Access the following URL to get a JSON file including all users in
-     the OpenIDM repository: <link xlink:show="new"
-     xlink:href="http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids">
-     http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</link>.</para>
+     the OpenIDM repository.</para>
+
+     <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</screen>
+
      <para>When you first install OpenIDM with an empty repository, no users
-     exist. What the result looks like depends on your browser settings.</para>
-     <para>You can use the URL with the <command>curl</command> command line
-     tool, included with most operating systems.<footnote><para>For more
+     exist.</para>
+     <para>The <command>curl</command> command line tool is included with most
+     operating systems.<footnote><para>For more
      information on <command>curl</command>, see <link
      xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>.</para>
      </footnote></para>
@@ -234,70 +273,68 @@ Id     State           Name
      <literal>joe</literal> in the repository.</para>
      <stepalternatives>
       <step>
-       <para>On UNIX, Linux, and Mac OS X</para>
+       <para>Create <literal>joe</literal> (UNIX).</para>
        <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data '{
- "name":"joe",
- "firstname":"joe",
- "lastname":"smith",
- "email":"joe@abc.com",
- "userPassword":"11111111"
+ "userName":"joe",
+ "givenName":"joe",
+ "familyName":"smith",
+ "email":["joe@example.com"],
+ "description":"My first user"
  }'
  http://localhost:8080/openidm/managed/user/joe
-{"_rev":"0","_id":"joe"}</screen>
+
+{"_id":"joe","_rev":"0"}</screen>
       </step>
       <step>
-       <para>On Windows</para>
+       <para>Create <literal>joe</literal> (Windows).</para>
        <screen>C:\&gt;curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data {
- \"name\":\"joe",
- \"firstname\":\"joe\",
- \"lastname\":\"smith\",
- \"email\":\"joe@abc.com\",
- \"userPassword\":\"11111111\"
+ \"userName\":\"joe\",
+ \"givenName\":\"joe\",
+ \"familyName\":\"smith\",
+ \"email\":[\"joe@example.com\"],
+ \"description\":\"My first user\"
  }
  http://localhost:8080/openidm/managed/user/joe
-{"_rev":"0","_id":"joe"}</screen>
+
+{"_id":"joe","_rev":"0"}</screen>
       </step>
      </stepalternatives>
     </step>
     <step>
      <para>Fetch the newly created user from the repository with a RESTful
      GET.</para>
-     <stepalternatives>
-      <step>
-       <para>Browse to <link xlink:show="new"
-       xlink:href="http://localhost:8080/openidm/managed/user/joe"
-       >http://localhost:8080/openidm/managed/user/joe</link>.</para>
-      </step>
-      <step>
-       <para>Use the <command>curl</command> command.</para>
-       <screen>$ curl
+     <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  http://localhost:8080/openidm/managed/user/joe
- {
- "lastname":"smith",
- "userpassword":"11111111",
- "firstname":"joe",
- "_id":"joe",
- "_rev":"0",
- "email":"joe@abc.com",
- "name":"joe"
+
+{
+    "familyName": "smith",
+    "userName": "joe",
+    "givenName": "joe",
+    "_id": "joe",
+    "_rev": "0",
+    "email": [ "joe@example.com" ],
+    "description": "My first user"
  }</screen>
-      </step>
-     </stepalternatives>
+     <para>The JSON output shown above is formatted for easier reading. OpenIDM
+     returns the JSON object all on one line.</para>
     </step>
    </procedure>
 
    <procedure xml:id="stop-openidm">
     <title>To Stop the OpenIDM Services</title>
+    <indexterm>
+     <primary>Stopping OpenIDM</primary>
+    </indexterm>
     <step>
     <para>You can stop OpenIDM Services from the <literal>-&gt;</literal>
     prompt, or through the Felix console.</para>

@@ -31,33 +31,20 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Preface</title>
  
- <para>This guide shows you how to install core OpenIDM services for identity
- management, provisioning, and compliance. Unless you are planning a throwaway
- evaluation or test installation, read the <link
- xlink:href="release-notes#release-notes"
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Release
- Notes</citetitle></link> before you get started.</para>
+ <para>This guide shows you how to integrate OpenIDM as part of a complete
+ identity management solution.</para>
 
  <section>
   <title>Who Should Use this Guide</title>
-  <para>This guide is written for anyone installing OpenIDM to manage and to
-  provision identities, and to ensure compliance with identity management
-  regulations.</para>
-
-  <para>This guide covers the install, upgrade, and removal (uninstall)
-  procedures that you theoretically perform only once per version. This
-  guide aims to provide you with at least some idea of what happens
-  behind the scenes when you perform the steps.</para>
-
-  <para>This guide also takes you through all of the samples provided with
-  OpenIDM.</para>
-
+  
+  <para>This guide is written for systems integrators building identity
+  management solutions based on OpenIDM services. This guide describes
+  OpenIDM, and shows you how to set up OpenIDM as part of your identity
+  management solution.</para>
+   
   <para>You do not need to be an OpenIDM wizard to learn something from
-  this guide, though a background in identity management and maintaining
-  web application software can help. You do need some background in
-  managing services on your operating systems and in your application
-  servers. You can nevertheless get started with this guide, and then
-  learn more as you go along.</para>
+  this guide, though a background in identity management and building
+  identity management solutions can help.</para>
  </section>
 
  <xinclude:include href="../shared/sec-formatting-conventions.xml" />

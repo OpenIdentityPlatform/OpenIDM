@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<book xml:id='integrators-guide'
+ xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <info>
+  <title>OpenIDM <?eval ${docTargetVersion}?> Integrator's Guide</title>
+  <abstract>
+   <para>Guide to configurating and integrating OpenIDM into identity
+   management solutions. The OpenIDM project offers flexible, open source
+   services for automating management of the identity life cycle.</para>
+  </abstract>
+  <copyright>
+   <year>2011-2012</year>
+   <holder>ForgeRock AS</holder>
+  </copyright>
+  <authorgroup>
+   <author>
+    <personname>
+     <firstname>Anders</firstname><surname>Askåsen</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Paul</firstname><surname>Bryan</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Mark</firstname><surname>Craig</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Andi</firstname><surname>Egloff</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Laszlo</firstname><surname>Hordos</surname>
+    </personname>
+   </author>
+   <author>
+    <personname>
+     <firstname>Matthias</firstname><surname>Tristl</surname>
+    </personname>
+   </author>
+  </authorgroup>
+  <xinclude:include href="../legal.xml" />
+  <date><?dbtimestamp format="B d, Y"?></date>
+  <pubdate>Last updated: <?dbtimestamp format="B d, Y"?></pubdate>
+ </info>
+
+ <toc />
+ 
+ <xinclude:include href="preface.xml" />
+ <xinclude:include href='chap-overview.xml' />
+ <xinclude:include href='chap-services.xml' />
+ <xinclude:include href='chap-configuration.xml' />
+ <xinclude:include href='chap-logs.xml' />
+ <xinclude:include href='chap-resource-conf.xml' />
+ <xinclude:include href='chap-synchronization.xml' />
+ <xinclude:include href='chap-scheduler-conf.xml' />
+ <xinclude:include href='chap-passwords.xml' />
+ <xinclude:include href='chap-auth.xml' />
+ <xinclude:include href='chap-security.xml' />
+ <xinclude:include href='chap-workflow.xml' />
+ <xinclude:include href='chap-auditing.xml' />
+<!-- Consider adding this chapter after 2.0.x:
+ <xinclude:include href='chap-reporting.xml' />
+ -->
+ <xinclude:include href='chap-mail.xml' />
+ <xinclude:include href='chap-best-practices.xml' />
+ <xinclude:include href='chap-troubleshooting.xml' />
+
+ <xinclude:include href="appendix-file-layout.xml" />
+ <xinclude:include href="appendix-ports-used.xml" />
+ <xinclude:include href='appendix-objects.xml' />
+ <xinclude:include href="appendix-synchronization.xml" />
+ <xinclude:include href="appendix-rest.xml" />
+ <xinclude:include href="appendix-scripting.xml" />
+ <xinclude:include href='appendix-scheduling.xml' />
+ <xinclude:include href='appendix-router.xml' />
+ <xinclude:include href='appendix-jetty.xml' />
+
+ <index />
+</book>
