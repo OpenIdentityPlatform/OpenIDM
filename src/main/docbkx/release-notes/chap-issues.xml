@@ -45,34 +45,28 @@
    2.0.1, and 2.0.2.</para>
 
    <listitem>
+    <para>OPENIDM-577: System object audit logging</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-576: Support writing to newly created audit log file after moving/deleting the existing</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-574: Document Router filter behavior and order of hook invocations more clearly</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-573: Keystore password change not possible</para>
+   </listitem>
+   <listitem>
     <para>OPENIDM-556: NPE during patch action due to logger level</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-555: Allow mappings in scheduler config without requiring referencing of link type from other mappings</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-553: Authorization re-configuration and re-registration issues</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-551: onStore, onRetrieve at managed object level not initialized</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-550: Using "*" condition on PUT to relax MVCC fails</para>
    </listitem>
    <listitem>
     <para>OPENIDM-549: onValidate hook should only be invoked before managed object accepts changes to store, not upon retrieval</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-548: If-None-Match tries to read the object and fails</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-547: NPE with the ETag header when not using quotes</para>
-   </listitem>
-   <listitem>
     <para>OPENIDM-542: ManagedObjectProperty#onStore does not put the encrypted value into JsonCrypto</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-541: REST POST managed/user?_action=patch returning with no response the status should be 204</para>
+    <para>OPENIDM-541: Rest POST managed/user?_action=patch returning with no response the status should be 204</para>
    </listitem>
    <listitem>
     <para>OPENIDM-538: SSL Mutual auth should set openidm-cert role</para>
@@ -129,7 +123,10 @@
     <para>OPENIDM-487: JAAS authentication fails on some platforms</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-477: SQL locking issue when multiple threads try to create or update object</para>
+    <para>OPENIDM-477: There is SQL locking issue when multiple thread try to create or update object.</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-467: Cannot save JSON object in repository if it contains a list</para>
    </listitem>
    <listitem>
     <para>OPENIDM-448: Reconciliation process is stopped when the first readObject throws SynchronizationException</para>
@@ -150,16 +147,16 @@
     <para>OPENIDM-438: Make embedded OrientDB server admin user details configurable</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-436: Cleanup system properties file</para>
+    <para>OPENIDM-436: Cleanup of system properties file</para>
    </listitem>
    <listitem>
     <para>OPENIDM-435: Tool to validate basic validity of all .json configurations</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-434: Ability to attach JavaScript debugger</para>
+    <para>OPENIDM-434: Ability to attach javascript debugger</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-433: Cleanup and align Windows start/stop scripts</para>
+    <para>OPENIDM-433: Cleanup and align windows start/stop scripts</para>
    </listitem>
    <listitem>
     <para>OPENIDM-432: Link inheritance, eliminate back-links</para>
@@ -174,8 +171,9 @@
     <para>OPENIDM-428: REST inbound policy enforcement point and default policy</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-426: Default OrientDB dbURL generation on Windows contains backslashes which OrientDB does not handle well</para>
+    <para>OPENIDM-426: Default OrientDB dbURL generation on windows contains backslashes which OrientDB does not handle well</para>
    </listitem>
+
   </itemizedlist>
  </section>
 
@@ -192,11 +190,36 @@
   <itemizedlist>
    <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
    issues.</para>
+
+   <listitem>
+    <para>OPENIDM-583: Unable to set different passwords for keys in the key store</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-568: X-OpenIDM-NoSession=false header interpretation</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-565: Uploading provisioner configuration via REST stops reconciliation from working, restarting OpenIDM solves issue</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-564: OpenIDM and the Connector Server, under some conditions, fails to esatablish a connection with each other</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-562: Unordered filter script invocation</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-558: Internal server errors and uncaught exceptions on erroneous REST invocation</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-554: Running OpenIDM from any directory</para>
+   </listitem>
    <listitem>
     <para>OPENIDM-545: Command line help not working</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-527: All connectors must distinguish between successful empty results, and failure to obtain results</para>
+    <para>OPENIDM-536: Missing "_from" request param and "from" default causes NPE</para>
+   </listitem>
+   <listitem>
+    <para>OPENIDM-527: All connectors must distinguish between successful empty results, and failures to obtain results</para>
    </listitem>
    <listitem>
     <para>OPENIDM-521: Spurious 4xx errors if HTTP service starts before others</para>
@@ -211,10 +234,10 @@
     <para>OPENIDM-491: Running recon with misconfigured or empty connector results in the error "Cowardly refusing to perform recon"</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-470: OpenIDM can not rename objects. If the identifier of the object has been changed the link breaks.</para>
+    <para>OPENIDM-470: OpenIDM cannot rename objects. If the identifier of the object has been changed the link became broken.</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-469: The ObjectMapping can change the _id and then OpenIDM cannot find the original target object any more</para>
+    <para>OPENIDM-469: The ObjectMapping can change the _id and then the OpenIDM can not find the original target object any more</para>
    </listitem>
    <listitem>
     <para>OPENIDM-467: Cannot save JSON object in OrientDB based repository if it contains a list</para>
