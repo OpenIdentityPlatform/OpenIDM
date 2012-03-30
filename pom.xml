@@ -22,7 +22,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
-    <version>2.0.3-SNAPSHOT</version>
+    <version>2.0.3</version>
     <packaging>pom</packaging>
     <name>OpenIDM project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution. Experience shows that the most important features of an identity management product are: high flexibility in Business Process handling and compliance with open standards and interfaces. A highly flexible user interface combined with a very robust workflow engine make OpenIDM ready for any Identity Management project.</description>
@@ -199,7 +199,7 @@
         <gaId>UA-23412190-9</gaId>
 
         <!-- version management -->
-        <openidm.version>2.0.3-SNAPSHOT</openidm.version>
+        <openidm.version>2.0.3</openidm.version>
         <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <!--<orientdb.version>1.0rc7-SNAPSHOT</orientdb.version>-->
