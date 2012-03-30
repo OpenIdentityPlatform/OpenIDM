@@ -33,6 +33,13 @@
  </properties>
  <body>
   <section name="New Releases">
+   <p>March 30, 2012. OpenIDM 2.0.3 is now available. This is the latest update
+   on the 2.0.x branch. You can download OpenIDM 2.0.3 from the
+   <a href="http://www.forgerock.org/openidm.html">download page</a>.
+   Also read the <a
+   href="http://docs.forgerock.org/en/openidm/2.0.3/release-notes/index.html"
+   >release notes</a>.</p>
+
    <p>February 9, 2012. OpenIDM 2.0.2 has been released as the latest supported
    version on the 2.0.x branch. Get it now from the
    <a href="http://www.forgerock.org/openidm.html">download page</a>.
