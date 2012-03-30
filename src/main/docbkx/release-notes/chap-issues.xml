@@ -54,9 +54,6 @@
     <para>OPENIDM-574: Document Router filter behavior and order of hook invocations more clearly</para>
    </listitem>
    <listitem>
-    <para>OPENIDM-573: Keystore password change not possible</para>
-   </listitem>
-   <listitem>
     <para>OPENIDM-556: NPE during patch action due to logger level</para>
    </listitem>
    <listitem>
@@ -202,9 +199,6 @@
    </listitem>
    <listitem>
     <para>OPENIDM-564: OpenIDM and the Connector Server, under some conditions, fails to esatablish a connection with each other</para>
-   </listitem>
-   <listitem>
-    <para>OPENIDM-562: Unordered filter script invocation</para>
    </listitem>
    <listitem>
     <para>OPENIDM-558: Internal server errors and uncaught exceptions on erroneous REST invocation</para>
