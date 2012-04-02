@@ -576,7 +576,7 @@ access.csv activity.csv recon.csv</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
- --data {
+ --data "{
  \"name\":\"james\",
  \"lastname\":\"Berg\",
  \"firstname\":\"James\",
@@ -584,7 +584,7 @@ access.csv activity.csv recon.csv</screen>
  \"fullname\":\"hallo2\",
  \"description\":\"Created by OpenIDM REST.\",
  \"userPassword\":\"asdfkj23\"
- }
+ }"
  http://localhost:8080/openidm/managed/user/james
 
 {"_id":"james","_rev":"0"}</screen>
