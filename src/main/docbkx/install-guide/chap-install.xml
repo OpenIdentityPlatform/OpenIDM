@@ -295,13 +295,13 @@ Listening for transport dt_socket at address: 5005
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
- --data {
+ --data "{
  \"userName\":\"joe\",
  \"givenName\":\"joe\",
  \"familyName\":\"smith\",
  \"email\":[\"joe@example.com\"],
  \"description\":\"My first user\"
- }
+ }"
  http://localhost:8080/openidm/managed/user/joe
 
 {"_id":"joe","_rev":"0"}</screen>
