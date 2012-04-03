@@ -561,11 +561,10 @@ access.csv activity.csv recon.csv</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data '{
-  "name":"james",
-  "lastname":"Berg",
-  "firstname":"James",
-  "email":"james2@examplerock.com",
-  "fullname":"hallo2",
+  "userName":"james",
+  "familyName":"Berg",
+  "givenName":"James",
+  "email": ["james2@examplerock.com"],
   "description":"Created by OpenIDM REST.",
   "userPassword":"asdfkj23"
  }'
@@ -579,11 +578,10 @@ access.csv activity.csv recon.csv</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
  --data "{
- \"name\":\"james\",
- \"lastname\":\"Berg\",
- \"firstname\":\"James\",
+ \"userName\":\"james\",
+ \"familyName\":\"Berg\",
+ \"givenName\":\"James\",
  \"email\":\"james2@examplerock.com\",
- \"fullname\":\"hallo2\",
  \"description\":\"Created by OpenIDM REST.\",
  \"userPassword\":\"asdfkj23\"
  }"
