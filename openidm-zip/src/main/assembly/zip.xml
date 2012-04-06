@@ -71,6 +71,7 @@
                 <exclude>org.ops4j.pax.web:pax-web-jetty-bundle</exclude>
                 <exclude>org.ops4j.pax.web:pax-web-extender-whiteboard</exclude>
                 <exclude>org.apache.felix:org.apache.felix.gogo.shell</exclude>
+                <exclude>org.eclipse.osgi:org.eclipse.osgi</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
