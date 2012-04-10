@@ -81,7 +81,7 @@ public class JsonUser extends JsonValue implements User {
     }
 
     public String getLastName() {
-        return get(SCIM_NAME).get(SCIM_NAME_GIVENNAME).asString();
+        return get(SCIM_NAME).get(SCIM_NAME_FAMILYNAME).asString();
     }
 
     public void setEmail(String email) {
