@@ -34,6 +34,9 @@
  <body>
   <section name="Core Documentation">
    <p>This core documentation is in progress as part of the OpenIDM project.</p>
+   <p>For completed, released documentation, see <a
+   href="http://docs.forgerock.org/en/index.html?product=openidm"
+   >docs.forgerock.org</a>.</p>
    <dl>
     <dt>Release Notes</dt>
     <dd><a href="./doc/OpenIDM-Release-Notes.epub">EPUB</a>,
