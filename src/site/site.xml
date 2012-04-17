@@ -54,8 +54,13 @@
    <item name="Partners" href="http://forgerock.com/partners.html" />
    <item name="Wiki" href="http://wikis.forgerock.org/openidm/" />
   </menu>
-  
-  <menu name="OpenIDM Documentation">
+
+  <menu name="Released Documentation">
+   <item name="OpenIDM 2.0.3" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.0.3" />
+   <item name="OpenIDM 2.0.3" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.0.2" />
+  </menu>
+
+  <menu name="OpenIDM Docs (in progress)">
   <item name="All Formats" href="docs.html" />
   <item name="Release Notes" href="./doc/release-notes/index.html" />
   <item name="Installation Guide" href="./doc/install-guide/index.html" />
