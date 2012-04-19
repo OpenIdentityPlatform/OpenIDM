@@ -1,0 +1,28 @@
+{
+    "objects": [
+        {
+            "name" : "user",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/uuid-generator.js"
+            },
+            "properties" : [
+                {
+                    "name" : "securityanswer",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    }
+                },
+                {
+                    "name" : "password",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "group"
+        }
+    ]
+}

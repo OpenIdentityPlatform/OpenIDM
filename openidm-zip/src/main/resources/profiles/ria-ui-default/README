@@ -1,0 +1,8 @@
+So far there is no XML sample data created for that profile. 
+In order to create first two users
+login: admin@admin.com pass: CCxxaa11!!
+login: user@user.com pass: CCxxaa11!!
+please run following curl commands:
+
+curl --request PUT --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --data '{"phonenumber":"123456","postalcode":"","state_province":"","passwordAttempts":"","passphrase":"1234","address1":"","lastPasswordSet":"", "lastname":"Admin","image":"mail.png","address2":"","firstname":"Admin","securityquestion":"1","password":"CCxxaa11!!","country":"","city":"","email":"admin@admin.com","accountStatus":"active","userName":"admin@admin.com","securityanswer":"1234", "role":"admin"}' http://localhost:8080/openidm/managed/user/admin
+curl --request PUT --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --data '{"phonenumber":"123456","postalcode":"","state_province":"","passwordAttempts":"","passphrase":"1234","address1":"","lastPasswordSet":"", "lastname":"User","image":"mail.png","address2":"","firstname":"User","securityquestion":"1","password":"CCxxaa11!!","country":"","city":"","email":"user@user.com","accountStatus":"active","userName":"user@user.com","securityanswer":"1234"}' http://localhost:8080/openidm/managed/user/user

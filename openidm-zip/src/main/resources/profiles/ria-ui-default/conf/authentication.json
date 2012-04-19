@@ -1,0 +1,7 @@
+{
+    "queryId" : "credential-internaluser-query",
+    "queryOnResource" : "managed/user",
+    "defaultUserRoles" : [
+        "openidm-admin"
+    ]
+}

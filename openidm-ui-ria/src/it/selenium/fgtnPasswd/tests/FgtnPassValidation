@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:28080/" />
+<title>New Test</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">New Test</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>1000</td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;test&quot;, lastname :&quot;test&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalcode : &quot;&quot;, phonenumber : &quot;&quot;, country : &quot;&quot;, state_province : &quot;&quot;, securityquestion : &quot;1&quot;, securityanswer : &quot;qqq&quot; }); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>1000</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=registerButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=email</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=email</td>
+	<td>test@test.test</td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>Forgot your password</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=frgtPasswrdSelfReg</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>1000</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=forgottenEmail</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForValue</td>
+	<td>name=forgottenEmail</td>
+	<td>test@test.test</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=forgottenEmail</td>
+	<td>blur</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=fgtnSecurityAnswer</td>
+	<td>focus</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>css=span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=fgtnSecurityAnswer</td>
+	<td>qqq</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=fgtnSecurityAnswer</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=div.fields &gt; div.field &gt; span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=password</td>
+	<td>Dapu123_</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=password</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=div.groupFieldInputs.floatLeft &gt; div.field &gt; span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passwordConfirm</td>
+	<td>Dapu123_</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=passwordConfirm</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='fgtnAnswerDiv']/form/fieldset/div/div[2]/div[2]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForValue</td>
+	<td>id=dialogOk</td>
+	<td>Update</td>
+</tr>
+</tbody></table>
+</body>
+</html>

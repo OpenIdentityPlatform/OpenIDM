@@ -1,0 +1,19 @@
+{
+	"actions": 
+	[
+		{
+			"action": "copyFile",
+			"description": {
+				"sourcePath": "${profile-dir}/conf",
+				"targetPath": "${openidm-dir}/conf"
+			}
+		},
+		{
+			"action": "copyFile",
+			"description": {
+				"sourcePath": "${profile-dir}/script",
+				"targetPath": "${openidm-dir}/script"
+			}
+		}
+	]
+}
