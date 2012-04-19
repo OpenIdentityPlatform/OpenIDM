@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:28080/" />
+<title>updateCountrySet</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">updateCountrySet</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>10000</td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;test&quot;, lastname :&quot;test&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalcode : &quot;&quot;, phonenumber : &quot;+48666666666&quot;, country : &quot;&quot;, state_province : &quot;&quot;, securityquestion : &quot;&quot;, securityanswer : &quot;&quot; }); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>10000</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=loginText</td>
+	<td>test@test.test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=loginPassword</td>
+	<td>tesT#1#Test</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=loginButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=country</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1500</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifySelectedLabel</td>
+	<td>//select[@name='country']</td>
+	<td>Please Select</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>//select[@name='country']</td>
+	<td>Germany</td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>300</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifySelectedLabel</td>
+	<td>//select[@name='country']</td>
+	<td>Germany</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=saveButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>10000</td>
+</tr>
+<tr>
+	<td>verifySelectedLabel</td>
+	<td>//select[@name='country']</td>
+	<td>Germany</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=logout_link</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=loginText</td>
+	<td>test@test.test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=loginPassword</td>
+	<td>tesT#1#Test</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=loginButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=country</td>
+	<td></td>
+</tr>
+<tr>
+	<td>pause</td>
+	<td>1500</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifySelectedLabel</td>
+	<td>//select[@name='country']</td>
+	<td>Germany</td>
+</tr>
+</tbody></table>
+</body>
+</html>

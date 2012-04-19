@@ -41,6 +41,14 @@
             <directory>${project.build.directory}/orientstudio/orientdb-${orientdb.version}/www</directory>
             <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
         </fileSet>
+        <!-- Create empty logs directory  -->
+        <fileSet>
+        	<directory>${project.build.directory}</directory>
+            <excludes>
+    			<exclude>**/*</exclude>
+  			</excludes>
+            <outputDirectory>/openidm/logs</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
@@ -66,6 +74,8 @@
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-security-jetty</exclude>
                 <exclude>org.forgerock.openidm:openidm-scheduler</exclude>
+                <exclude>org.forgerock.openidm:openidm-ui-ria:zip</exclude>
+                <exclude>*:*:js</exclude>
                 <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
                 <exclude>org.apache.felix:org.apache.felix.configadmin</exclude>
                 <exclude>org.ops4j.pax.web:pax-web-jetty-bundle</exclude>
@@ -91,6 +101,14 @@
                 <include>org.ops4j.pax.web:pax-web-jetty-bundle</include>
                 <include>org.ops4j.pax.web:pax-web-extender-whiteboard</include>
                 <include>org.apache.felix:org.apache.felix.gogo.shell</include>
+            </includes>
+        </dependencySet>
+        <!-- Include UI in distribution for use in various web servers -->
+        <dependencySet>
+        	<unpack>true</unpack>
+            <outputDirectory>/openidm/ui</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-ui-ria</include>
             </includes>
         </dependencySet>
         <dependencySet>

@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /
+
+RewriteCond %{QUERY_STRING} ^(.*)$
+RewriteRule ^profile/(.*)$ /$1 [P,L]
+
+RewriteCond %{QUERY_STRING} ^(.*)$
+RewriteRule ^userAdmin/(.*)$ /$1 [P,L]
+
+RewriteRule ^register$ / [P,L]
+RewriteRule ^register/(.*)$ /$1 [P,L]

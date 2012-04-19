@@ -1,0 +1,58 @@
+{
+    "filters" : [
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/router-authz.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/onResponse-user-query-hide-sensitive-attributes.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "read"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/onResponse-user-read-hide-sensitive-attributes.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'for-credentials'"
+            },
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/onResponse-for-credentials.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'for-security-answer'"
+            },
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/onResponse-for-securityAnswer.js"
+            }
+        }
+    ]
+}

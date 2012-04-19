@@ -1,0 +1,31 @@
+{
+	"actions": 
+	[
+		{
+			"action": "removeFile",
+			"description": {
+				"path": "${openidm-dir}/conf"
+			}
+		},
+		{
+			"action": "removeFile",
+			"description": {
+				"path": "${openidm-dir}/script"
+			}
+		},
+		{
+			"action": "symlink",
+			"description": {
+				"symlinkPath": "${openidm-dir}/script",
+				"targetPath": "${home-dir}/openidm-debug/script"
+			}
+		},
+		{
+			"action": "symlink",
+			"description": {
+				"symlinkPath": "${openidm-dir}/conf",
+				"targetPath": "${home-dir}/openidm-debug/conf"
+			}
+		}
+	]
+}
