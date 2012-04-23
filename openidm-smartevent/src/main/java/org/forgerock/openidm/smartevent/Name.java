@@ -79,8 +79,9 @@ public class Name {
     
     private Name(String stringifiedName) {
         this.stringifiedName = stringifiedName;
-        // Default to enabled
-        setEventsEnabled(Boolean.valueOf(System.getProperty("openidm.smartevent.enabled",Boolean.TRUE.toString())));
+        // Default Setting
+        setEventsEnabled(Boolean.valueOf(System.getProperty("openidm.smartevent.enabled",
+                Boolean.FALSE.toString())));
         // Name parsing can be added here
     }
 
