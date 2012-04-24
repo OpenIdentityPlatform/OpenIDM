@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -146,7 +146,8 @@ public class DBHelper {
                 pool.close();
             }
             pool = new ODatabaseDocumentPool(); 
-            //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global(); // Moving from 0.9.25 to 1.0 RC had to change this
+            // Moving from 0.9.25 to 1.0 RC had to change this
+            //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global();
             pool.setup(minSize, maxSize);
             warmUpPool(pool, dbURL, user, password, minSize);
             
@@ -169,7 +170,9 @@ public class DBHelper {
      * Perform a basic access on the DB for a rudimentary test 
      * @return whether the basic access succeeded
      */
-    private static boolean test(ODatabaseDocumentPool pool, String dbURL, String user, String password, boolean finalTry) {
+    private static boolean test(ODatabaseDocumentPool pool, String dbURL, String user,
+            String password, boolean finalTry) {
+        
         ODatabaseDocumentTx db = null;
         try {
             logger.info("Verifying the DB.");
@@ -198,7 +201,9 @@ public class DBHelper {
      * Cuts down on some (small) initial latency with lazy init
      * Do not call with a min past the real pool max, it will block.
      */
-    private static void warmUpPool(ODatabaseDocumentPool pool, String dbURL, String user, String password, int minSize) {
+    private static void warmUpPool(ODatabaseDocumentPool pool, String dbURL, String user,
+            String password, int minSize) {
+        
         logger.trace("Warming up pool up to minSize {}", Integer.valueOf(minSize));
         List<ODatabaseDocumentTx> list = new ArrayList<ODatabaseDocumentTx>();
         for (int count=0; count < minSize; count++) {
@@ -223,7 +228,9 @@ public class DBHelper {
     /**
      * Ensures the DB is present in the expected form.
      */
-    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig) throws InvalidException {
+    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig) 
+            throws InvalidException {
+        
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
         ODatabaseDocumentTx db = null;
         try {
@@ -248,7 +255,8 @@ public class DBHelper {
     }
 
     // TODO: Review the initialization mechanism
-    private static void populateSample(ODatabaseDocumentTx db, JsonValue completeConfig) throws InvalidException {
+    private static void populateSample(ODatabaseDocumentTx db, JsonValue completeConfig) 
+            throws InvalidException {
         
         JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
         if (dbStructure == null) {
@@ -274,51 +282,7 @@ public class DBHelper {
                         // TODO: update indexes too if changed
                         logger.trace("OrientDB class {} already exists, skipping", orientClassName);
                     } else {
-                        logger.info("Creating OrientDB class {}", orientClassName);
-                        OClass orientClass = schema.createClass(orientClassName, db.getStorage().addCluster(orientClassName, OStorage.CLUSTER_TYPE.PHYSICAL));
-                        
-                        JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
-                        for (JsonValue index : indexes) {
-                            String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
-                            String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
-                            
-                            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
-                            String[] propertyNames = null; 
-                            if (propertyName != null) {
-                                propertyNames = new String[] {propertyName};
-                            } else {
-                                List propNamesList = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
-                                if (propNamesList == null) {
-                                    throw new InvalidException("Invalid index configuration. Missing property name(s) on index configuration for property type "
-                                            + propertyType + " with index type " + indexType + " on " + orientClassName);
-                                }
-                                propertyNames = (String[]) propNamesList.toArray(new String[0]);
-                            }
-                            
-                            logger.info("Creating index on property {} of type {} with index type {} on {} for OrientDB class ", 
-                                    new Object[] {propertyName, propertyType, indexType, orientClassName});
-                
-                            OType orientPropertyType = null;
-                            try {
-                                orientPropertyType = OType.valueOf(propertyType.toUpperCase());
-                            } catch (IllegalArgumentException ex) {
-                                throw new InvalidException("Invalid property type '" + propertyType + "' in configuration on property "
-                                        + propertyName + " with index type " + indexType + " on " 
-                                        + orientClassName + " valid values: " + OType.values() 
-                                        + " failure message: " + ex.getMessage(), ex);
-                            }
-                            
-                            try {
-                                OClass.INDEX_TYPE orientIndexType = OClass.INDEX_TYPE.valueOf(indexType.toUpperCase());
-                                OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
-                                orientClass.createIndex(propertyName + "Idx", orientIndexType, propertyNames);
-                            } catch (IllegalArgumentException ex) {
-                                throw new InvalidException("Invalid index type '" + indexType + "' in configuration on property "
-                                        + propertyName + " of type " + propertyType + " on " 
-                                        + orientClassName + " valid values: " + OClass.INDEX_TYPE.values() 
-                                        + " failure message: " + ex.getMessage(), ex);
-                            }
-                        }
+                        createOrientDBClass(db,schema, orientClassName, orientClassConfig);
                         if ("internal_user".equals(orientClassName)) {
                             populateDefaultUsers(orientClassName, db, completeConfig);
                         }
@@ -330,14 +294,85 @@ public class DBHelper {
         }
     }
     
+    private static void createOrientDBClass(ODatabaseDocumentTx db, OSchema schema,
+            String orientClassName, JsonValue orientClassConfig) {
+        
+        logger.info("Creating OrientDB class {}", orientClassName);
+        OClass orientClass = schema.createClass(orientClassName, 
+                db.getStorage().addCluster(orientClassName, 
+                OStorage.CLUSTER_TYPE.PHYSICAL));
+        
+        JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
+        for (JsonValue index : indexes) {
+            String propertyType = index.get(OrientDBRepoService.CONFIG_PROPERTY_TYPE).asString();
+            String indexType = index.get(OrientDBRepoService.CONFIG_INDEX_TYPE).asString();
+            
+            String propertyName = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAME).asString();
+            String[] propertyNames = null; 
+            if (propertyName != null) {
+                propertyNames = new String[] {propertyName};
+            } else {
+                List propNamesList = index.get(OrientDBRepoService.CONFIG_PROPERTY_NAMES).asList();
+                if (propNamesList == null) {
+                    throw new InvalidException("Invalid index configuration. " 
+                            + "Missing property name(s) on index configuration for property type "
+                            + propertyType + " with index type " + indexType + " on " + orientClassName);
+                }
+                propertyNames = (String[]) propNamesList.toArray(new String[0]);
+            }
+            
+            // Determine a unique name to use for the index
+            // Naming pattern used is <class>|property1[|propertyN]*|Idx
+            StringBuilder indexName = new StringBuilder(orientClassName);
+            indexName.append("|"); // Not using dot as is reserved for (simple index) naming convention
+            for (String entry : propertyNames) {
+                indexName.append(entry);
+                indexName.append("|");
+            }
+            indexName.append("Idx");
+            
+            logger.info("Creating index on propertis {} of type {} with index type {} on {} for OrientDB class ", 
+                    new Object[] {propertyNames, propertyType, indexType, orientClassName});
+
+            OType orientPropertyType = null;
+            try {
+                orientPropertyType = OType.valueOf(propertyType.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                throw new InvalidException("Invalid property type '" + propertyType + 
+                        "' in configuration on properties "
+                        + propertyNames + " with index type " + indexType + " on " 
+                        + orientClassName + " valid values: " + OType.values() 
+                        + " failure message: " + ex.getMessage(), ex);
+            }
+            
+            try {
+                OClass.INDEX_TYPE orientIndexType = OClass.INDEX_TYPE.valueOf(indexType.toUpperCase());
+                OProperty prop = orientClass.createProperty(propertyName, orientPropertyType);
+                orientClass.createIndex(indexName.toString(), orientIndexType, propertyNames);
+            } catch (IllegalArgumentException ex) {
+                throw new InvalidException("Invalid index type '" + indexType + 
+                        "' in configuration on properties "
+                        + propertyNames + " of type " + propertyType + " on " 
+                        + orientClassName + " valid values: " + OClass.INDEX_TYPE.values() 
+                        + " failure message: " + ex.getMessage(), ex);
+            }
+        }
+    }
+    
     // Populates the default user, the pwd needs to be changed by the installer
-    private static void populateDefaultUsers(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig) throws InvalidException {
+    private static void populateDefaultUsers(String defaultTableName, ODatabaseDocumentTx db, 
+            JsonValue completeConfig) throws InvalidException {
+        
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
-        String defaultAdminPwd = "{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},\"type\":\"x-simple-encryption\"}}";
+        String defaultAdminPwd = "{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":"
+                + "\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},"
+                + "\"type\":\"x-simple-encryption\"}}";
         String defaultAdminRoles = "openidm-admin,openidm-authorized";
-        populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, defaultAdminPwd, defaultAdminRoles);
-        logger.trace("Created default user {}. Please change the assigned default password.", defaultAdminUser);
+        populateDefaultUser(defaultTableName, db, completeConfig, defaultAdminUser, 
+                defaultAdminPwd, defaultAdminRoles);
+        logger.trace("Created default user {}. Please change the assigned default password.", 
+                defaultAdminUser);
         
         String anonymousUser = "anonymous";
         String anonymousPwd = "anonymous";
@@ -346,7 +381,8 @@ public class DBHelper {
         logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }    
     
-    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, JsonValue completeConfig, String user, String pwd, String roles) throws InvalidException {        
+    private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db, 
+            JsonValue completeConfig, String user, String pwd, String roles) throws InvalidException {        
         
         JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
         defaultAdmin.put("_openidm_id", user);
