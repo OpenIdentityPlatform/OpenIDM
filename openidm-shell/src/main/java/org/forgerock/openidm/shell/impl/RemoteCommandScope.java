@@ -1,7 +1,7 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,28 +20,32 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.shell.impl;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.shell.CustomCommandScope;
-import org.forgerock.openidm.util.DateUtil;
-
-import java.io.*;
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * @author $author$
@@ -70,21 +74,22 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
     }
 
     @Descriptor("imports the configuration set from local 'conf' directory")
-    public void configimport(CommandSession session,
-                             @Descriptor("Replace the entire config set by deleting the additional configuration")
-                             @Parameter(names = {"-r", "--replaceall"}, presentValue = "true", absentValue = "false") boolean replaceall) {
+    public void configimport(
+            CommandSession session,
+            @Descriptor("Replace the entire config set by deleting the additional configuration") @Parameter(
+                    names = { "-r", "--replaceall" }, presentValue = "true", absentValue = "false") boolean replaceall) {
         configimport(session, replaceall, "conf");
     }
 
     @Descriptor("imports the configuration set from local file/directory")
-    public void configimport(CommandSession session,
-                             @Descriptor("Replace the entire config set by deleting the additional configuration")
-                             @Parameter(names = {"-r", "--replaceall"}, presentValue = "true", absentValue = "false")
-                             boolean replaceall,
-                             @Descriptor("source directory")
-                             String source) {
+    public void configimport(
+            CommandSession session,
+            @Descriptor("Replace the entire config set by deleting the additional configuration") @Parameter(
+                    names = { "-r", "--replaceall" }, presentValue = "true", absentValue = "false") boolean replaceall,
+            @Descriptor("source directory") String source) {
         File file = IdentityServer.getFileForPath(source);
-        session.getConsole().println("...................................................................");
+        session.getConsole().println(
+                "...................................................................");
         if (file.isDirectory()) {
             session.getConsole().println("[ConfigImport] Load JSON configuration files from:");
             session.getConsole().append("[ConfigImport] \t").println(file.getAbsolutePath());
@@ -98,28 +103,34 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
             File[] files = file.listFiles(filter);
             Map<String, File> localConfigSet = new HashMap<String, File>(files.length);
             for (File subFile : files) {
-                if (subFile.isDirectory()) continue;
+                if (subFile.isDirectory())
+                    continue;
                 String configName = subFile.getName().replaceFirst("-", "/");
-                configName = ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName.length() - 5));
+                configName =
+                        ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName
+                                .length() - 5));
                 if (configName.indexOf("-") > -1) {
-                    session.getConsole().append("[WARN] ").append("Invalid file name found with multiple '-' character. The normalized config id: ").println(configName);
+                    session.getConsole()
+                            .append("[WARN] ")
+                            .append("Invalid file name found with multiple '-' character. The normalized config id: ")
+                            .println(configName);
                 }
                 localConfigSet.put(configName, subFile);
             }
 
-            JsonValue requestValue = new JsonValue(new HashMap());
-            requestValue.put("id", "config");
-            requestValue.put("method", "read");
+            JsonResourceAccessor accessor = new JsonResourceAccessor(getRouter(), null);
 
             Map<String, JsonValue> remoteConfigSet = new HashMap<String, JsonValue>();
             try {
-                JsonValue responseValue = getRouter().handle(requestValue);
+                JsonValue responseValue = accessor.read("config");
                 Iterator<JsonValue> iterator = responseValue.get("configurations").iterator();
                 while (iterator.hasNext()) {
 
                     JsonValue configValue = iterator.next();
-                    //TODO catch JsonValueExceptions
-                    String id = ConfigBootstrapHelper.unqualifyPid(configValue.get("_id").required().asString());
+                    // TODO catch JsonValueExceptions
+                    String id =
+                            ConfigBootstrapHelper.unqualifyPid(configValue.get("_id").required()
+                                    .asString());
                     if (!id.startsWith("org.apache")) {
                         remoteConfigSet.put(id, configValue);
                     }
@@ -132,45 +143,39 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                 return;
             }
 
-
             for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
                 try {
-                    requestValue = new JsonValue(new HashMap());
-                    requestValue.put("id", "config/" + entry.getKey());
-                    requestValue.put("value", getMapper().readValue(entry.getValue(), Map.class));
                     if (remoteConfigSet.containsKey(entry.getKey())) {
-                        //Update
-                        requestValue.put("method", "update");
-                        requestValue.put("rev", "*");
-                        JsonValue responseValue = getRouter().handle(requestValue);
-                        // Do not remove the remote old config if the update seceded otherwise remove the old config.
+                        // Update
+                        accessor.update("config/" + entry.getKey(), "\"FIX\"", new JsonValue(
+                                getMapper().readValue(entry.getValue(), Map.class)));
+                        // Do not remove the remote old config if the update
+                        // seceded otherwise remove the old config.
                         remoteConfigSet.remove(entry.getKey());
                     } else {
-                        //Create
-                        requestValue.put("method", "create");
-                        JsonValue responseValue = getRouter().handle(requestValue);
+                        // Create
+                        accessor.create("config/" + entry.getKey(), new JsonValue(getMapper()
+                                .readValue(entry.getValue(), Map.class)));
                     }
                     prettyPrint(session.getConsole(), "ConfigImport", entry.getKey(), null);
                 } catch (Exception e) {
-                    prettyPrint(session.getConsole(), "ConfigImport", entry.getKey(), e.getMessage());
+                    prettyPrint(session.getConsole(), "ConfigImport", entry.getKey(), e
+                            .getMessage());
                 }
             }
 
             // Delete all additional config objects
             if (replaceall) {
-                requestValue = new JsonValue(new HashMap());
-                requestValue.put("method", "delete");
-                requestValue.put("rev", "*");
                 for (String configId : remoteConfigSet.keySet()) {
-                    if ("authentication".equals(configId) || "router".equals(configId) || "audit".equals(configId) ||
-                            configId.startsWith("repo")) {
-                        prettyPrint(session.getConsole(), "ConfigDelete", configId, "Protected configuration can not be deleted");
+                    if ("authentication".equals(configId) || "router".equals(configId)
+                            || "audit".equals(configId) || configId.startsWith("repo")) {
+                        prettyPrint(session.getConsole(), "ConfigDelete", configId,
+                                "Protected configuration can not be deleted");
                         continue;
                     }
 
                     try {
-                        requestValue.put("id", "config/" + configId);
-                        JsonValue responseValue = getRouter().handle(requestValue);
+                        accessor.delete("config/" + configId, "\"FIX\"");
                         prettyPrint(session.getConsole(), "ConfigDelete", configId, null);
                     } catch (Exception e) {
                         prettyPrint(session.getConsole(), "ConfigDelete", configId, e.getMessage());
@@ -179,10 +184,11 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
             }
 
         } else if (file.exists()) {
-            //TODO import archive file
+            // TODO import archive file
             session.getConsole().println("Input path must be a directory not a file.");
         } else {
-            session.getConsole().append("[ConfigImport] ").append("Configuration directory not found at: ").println(file.getAbsolutePath());
+            session.getConsole().append("[ConfigImport] ").append(
+                    "Configuration directory not found at: ").println(file.getAbsolutePath());
         }
     }
 
@@ -201,27 +207,29 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
         session.getConsole().println("[ConfigExport] Export JSON configurations to:");
         session.getConsole().append("[ConfigExport] \t").println(targetDir.getAbsolutePath());
 
-        JsonValue requestValue = new JsonValue(new HashMap());
-        requestValue.put("id", "config");
-        requestValue.put("method", "read");
+        JsonResourceAccessor accessor = new JsonResourceAccessor(getRouter(), null);
 
         try {
-            JsonValue responseValue = getRouter().handle(requestValue);
+            JsonValue responseValue = accessor.read("config");
             Iterator<JsonValue> iterator = responseValue.get("configurations").iterator();
             URI configSet = new URI("config/");
-            String bkpPostfix = "." + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date()) + ".bkp";
+            String bkpPostfix =
+                    "." + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date())
+                            + ".bkp";
             while (iterator.hasNext()) {
                 String id = iterator.next().get("_id").required().asString();
                 if (!id.startsWith("org.apache")) {
-                    requestValue.put("id", configSet.resolve(id).toString());
                     try {
-                        responseValue = getRouter().handle(requestValue);
-                        if (null != responseValue && !requestValue.isNull()) {
+                        responseValue = accessor.read(configSet.resolve(id).toString());
+                        if (null != responseValue && !responseValue.isNull()) {
                             File configFile = new File(targetDir, id.replace("/", "-") + ".json");
                             if (configFile.exists()) {
-                                configFile.renameTo(new File(configFile.getParentFile(), configFile.getName() + bkpPostfix));
+                                configFile.renameTo(new File(configFile.getParentFile(), configFile
+                                        .getName()
+                                        + bkpPostfix));
                             }
-                            getMapper().writerWithDefaultPrettyPrinter().writeValue(configFile, responseValue.getObject());
+                            getMapper().writerWithDefaultPrettyPrinter().writeValue(configFile,
+                                    responseValue.getObject());
                             prettyPrint(session.getConsole(), "ConfigExport", id, null);
                         }
                     } catch (Exception e) {
@@ -241,43 +249,43 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
     }
 
     @Descriptor("Generate connector configuration.")
-    public void configureconnector(CommandSession session, @Descriptor("Name of the new connector configuration.") String name) {
+    public void configureconnector(CommandSession session,
+            @Descriptor("Name of the new connector configuration.") String name) {
         try {
             // Prepare temp folder and file
             File temp = IdentityServer.getFileForPath("temp");
             if (!temp.exists()) {
                 temp.mkdir();
             }
-            //TODO Make safe file name
+            // TODO Make safe file name
 
             if (!name.matches("\\w++")) {
-                session.getConsole().append("The given name \"").append(name).println("\" must match [a-zA-Z_0-9] pattern");
+                session.getConsole().append("The given name \"").append(name).println(
+                        "\" must match [a-zA-Z_0-9] pattern");
                 return;
             }
             File finalConfig = new File(temp, "provisioner.openicf-" + name + ".json");
 
             // Common request attributes
-            Map params = new HashMap();
+            JsonValue params = new JsonValue(new HashMap());
             params.put(ServerConstants.ACTION_NAME, "CREATECONFIGURATION");
-            JsonValue requestValue = new JsonValue(new HashMap());
-            requestValue.put("id", "system");
-            requestValue.put("method", "action");
-            requestValue.put("params", params);
 
+            JsonResourceAccessor accessor = new JsonResourceAccessor(getRouter(), null);
 
             JsonValue responseValue;
             Map<String, Object> configuration = null;
 
-            //Phase#1 - Get available connectors
+            // Phase#1 - Get available connectors
             if (!finalConfig.exists()) {
-                responseValue = getRouter().handle(requestValue);
+                responseValue = accessor.action("system", params, null);
 
                 JsonValue connectorRef = responseValue.get("connectorRef");
                 if (!connectorRef.isNull() && connectorRef.isList()) {
                     List<Object> connectorRefs = connectorRef.asList();
                     if (connectorRefs.size() > 0) {
                         for (int i = 0; i < connectorRefs.size(); i++) {
-                            Map<String, String> connectorKey = (Map<String, String>) connectorRefs.get(i);
+                            Map<String, String> connectorKey =
+                                    (Map<String, String>) connectorRefs.get(i);
                             String displayName = connectorKey.get("displayName");
                             if (null == displayName) {
                                 displayName = connectorKey.get("connectorName");
@@ -285,22 +293,24 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
                             String version = connectorKey.get("bundleVersion");
                             String connectorHostRef = connectorKey.get("connectorHostRef");
 
-                            session.getConsole().append(Integer.toString(i)).append(". ").append(displayName);
+                            session.getConsole().append(Integer.toString(i)).append(". ").append(
+                                    displayName);
                             if (null != connectorHostRef) {
-                                session.getConsole().append(" Remote (").append(connectorHostRef).append(")");
+                                session.getConsole().append(" Remote (").append(connectorHostRef)
+                                        .append(")");
                             }
                             session.getConsole().append(" version ").println(version);
                         }
 
-                        session.getConsole().append(Integer.toString(connectorRef.size())).println(". Exit");
+                        session.getConsole().append(Integer.toString(connectorRef.size())).println(
+                                ". Exit");
                         Scanner input = new Scanner(session.getKeyboard());
                         int index = -1;
                         do {
-                            session.getConsole().append("Select [0..").append(Integer.toString(connectorRef.size()))
-                                    .append("]: ");
+                            session.getConsole().append("Select [0..").append(
+                                    Integer.toString(connectorRef.size())).append("]: ");
                             index = input.nextInt();
-                        }
-                        while (index < 0 || index > connectorRefs.size());
+                        } while (index < 0 || index > connectorRefs.size());
                         if (index == connectorRefs.size()) {
                             return;
                         }
@@ -321,11 +331,12 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
             }
 
             // Repeatable phase #2 and #3
-            requestValue.put("value", configuration);
-            responseValue = getRouter().handle(requestValue);
+            responseValue = accessor.action("system", params, new JsonValue(configuration));
             responseValue.put("name", name);
-            getMapper().writerWithDefaultPrettyPrinter().writeValue(finalConfig, responseValue.getObject());
-            session.getConsole().append("Edit the configuration file and run the command again. The configuration was saved to ")
+            getMapper().writerWithDefaultPrettyPrinter().writeValue(finalConfig,
+                    responseValue.getObject());
+            session.getConsole()
+                    .append("Edit the configuration file and run the command again. The configuration was saved to ")
                     .println(finalConfig.getAbsolutePath());
 
         } catch (JsonResourceException e) {
@@ -336,7 +347,8 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
     }
 
     private void prettyPrint(PrintStream out, String cmd, String name, String reason) {
-        out.append("[").append(cmd).append("] ").append(name).append(" ").append(DOTTED_PLACEHOLDER.substring(Math.min(name.length(), DOTTED_PLACEHOLDER.length())));
+        out.append("[").append(cmd).append("] ").append(name).append(" ").append(
+                DOTTED_PLACEHOLDER.substring(Math.min(name.length(), DOTTED_PLACEHOLDER.length())));
         if (null == reason) {
             out.println(" SUCCESS");
         } else {
