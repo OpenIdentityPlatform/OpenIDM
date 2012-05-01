@@ -48,7 +48,7 @@ shift
 
 rem Ensure that any user defined CLASSPATH variables are not used on startup,
 rem but allow them to be specified here, in rare case when it is needed.
-set CLASSPATH="%OPENIDM_HOME%\bin\felix.jar"
+set CLASSPATH="%OPENIDM_HOME%\bin\felix.jar;%OPENIDM_HOME%\bin\openidm.jar"
 
 echo "Using OPENIDM_HOME:   %OPENIDM_HOME%"
 echo "Using OPENIDM_OPTS:   %OPENIDM_OPTS%"
@@ -77,10 +77,13 @@ goto setArgs
 set MAINCLASS=org.apache.felix.main.Main
 
 rem Execute Java with the applicable properties
+pushd %OPENIDM_HOME%
 if not "%JPDA%" == "" goto doJpda
 call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS%  -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" -Djava.security.auth.login.config="%OPENIDM_HOME%\security\jaas-repo.conf" %MAINCLASS% %CMD_LINE_ARGS%
 goto end
 :doJpda
 call %_EXECJAVA% %JAVA_OPTS% %OPENIDM_OPTS% %JPDA_OPTS% -Djava.endorsed.dirs="%JAVA_ENDORSED_DIRS%" -classpath "%CLASSPATH%" -Dopenidm.system.server.root="%OPENIDM_HOME%" -Djava.security.auth.login.config="%OPENIDM_HOME%\security\jaas-repo.conf" %MAINCLASS% %CMD_LINE_ARGS%
+popd
 
 :end
+
