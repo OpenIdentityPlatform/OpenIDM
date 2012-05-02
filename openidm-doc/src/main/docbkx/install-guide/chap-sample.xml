@@ -506,7 +506,7 @@ access.csv activity.csv recon.csv</screen>
   reconciliation. This formatted excerpt from the log covers two
   reconciliation runs.</para>
 
-  <programlisting width="110"><?dbfo pgwide="1"?>
+  <programlisting language="csv" width="110"><?dbfo pgwide="1"?>
 "_id",  "action",...,"reconId","situation","sourceObjectId",...,              "targetObjectId","timestamp";
 "02...","CREATE",...,"cc0...", "ABSENT",   "system/xmlfile/account/1",...,    "managed/user/DDOE1",...;
 "47...","IGNORE",...,"cc0...", "UNQUALIFIED",""            ,...,              "managed/user/joe",...;
