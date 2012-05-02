@@ -228,7 +228,7 @@ $ curl
    <para>The resulting JSON object should look something like this, but all on
    one line.</para>
 
-   <screen>
+   <programlisting language="javascript">
 {
     "query-time-ms": 1,
     "result": [
@@ -238,7 +238,7 @@ $ curl
         }
     ],
     "conversion-time-ms": 0
- }</screen>
+ }</programlisting>
 
    <para>To retrieve the user, get the object by ID.</para>
 
@@ -320,7 +320,7 @@ $ curl
    <para>The resulting JSON object should look something like this, but all on
    one line.</para>
 
-   <screen>
+   <programlisting language="javascript">
 {
     "query-time-ms": 1,
     "result": [
@@ -330,7 +330,7 @@ $ curl
         }
     ],
     "conversion-time-ms": 0
- }</screen>
+ }</programlisting>
 
    <para>To retrieve the user, get the object by ID.</para>
 
@@ -378,16 +378,15 @@ $ curl
 $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
 
    <para>If you already installed sample 2b, then simply two properties need to be added to both mappings, "systemLdapAccounts_managedUser" and "managedUser_systemLdapAccounts" (it is the same property since source and target use the same property name!): </para>
-   <screen>
+   <programlisting language="javascript">
                 {
                     "source" : "ldapGroups",
                     "target" : "ldapGroups"
-                }   
-   </screen>
+                }</programlisting>
    
    <para>In addition the following property needs to be added to the "objectTypes"/"accounts" part of the provisioner configuration: </para>
    
-   <screen>
+   <programlisting language="javascript">
                 "ldapGroups" : {
                     "type" : "array",
                     "items" : {
@@ -396,11 +395,10 @@ $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
                     },
                     "nativeName" : "ldapGroups",
                     "nativeType" : "string"
-                }   
-   </screen>
+                }</programlisting>
    
    <warning><para>If you change from a previous provisioner configuration then also make sure that the LDAP groups to sync are within the search scope: </para>
-   <programlisting>
+   <programlisting language="javascript">
         "baseContexts" : [
             "dc=example,dc=com"
         ],        
@@ -419,7 +417,7 @@ $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
    
    <para>In addition two LDAP Gropus should be created, which can be found in the ldif file: <filename>openidm/samples/sample2c/data/Example.ldif</filename>:</para>
    
-   <screen>
+   <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
 ou: Groups
 objectClass: organizationalUnit
@@ -434,8 +432,7 @@ objectClass: top
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
-objectClass: top   
-   </screen>
+objectClass: top</programlisting>
    
    <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before yo import this groups.</para> 
   </section>
@@ -468,7 +465,7 @@ $ curl
    <para>The resulting JSON object should look something like this, but all on
    one line.</para>
 
-   <screen>
+   <programlisting language="javascript">
 {
     "query-time-ms": 1,
     "result": [
@@ -478,7 +475,7 @@ $ curl
         }
     ],
     "conversion-time-ms": 0
- }</screen>
+ }</programlisting>
 
    <para>To retrieve the user, get the object by ID.</para>
 
@@ -724,7 +721,7 @@ $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
    
    <para>In addition two LDAP Gropus should be created, which can be found in the ldif file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> if not already aded through sample 2c:</para>
    
-   <screen>
+   <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
 ou: Groups
 objectClass: organizationalUnit
@@ -739,8 +736,8 @@ objectClass: top
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
-objectClass: top   
-   </screen>
+objectClass: top
+</programlisting>
    
    <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before yo import this groups.</para> 
   </section>
@@ -772,7 +769,7 @@ $ curl
    <para>The resulting JSON object should look something like this, but all on
    one line.</para>
 
-   <screen>
+   <programlisting language="javascript">
 {
    "query-time-ms":1,
    "result":[
@@ -783,7 +780,7 @@ $ curl
          "_id":"b0982152-5099-4358-bdd1-45a39ebe0d77"
       }
    ]
-}</screen>
+}</programlisting>
 
    <para>To retrieve a group, get the object by ID.</para>
 
@@ -922,14 +919,14 @@ $ curl
 
    <para>The result should resemble the following JSON object.</para>
 
-   <screen>
+   <programlisting language="javascript">
 {"query-time-ms":2,"result":[
  {"_id":"dc870bff-c2e9-4378-8ac1-45ee085b09bf","_rev":"0"},
  {"_id":"9046dea4-1dea-4ae8-8335-070839b12b9c","_rev":"0"},
  {"_id":"17fc954f-828a-454c-b05e-f8e9934c6e64","_rev":"0"},
  {"_id":"371855d1-44c9-4854-a576-3397275211e4","_rev":"0"},
  {"_id":"97066201-e0de-48d9-8c9e-bdf7f0f0c7e5","_rev":"0"}],
- "conversion-time-ms":0}</screen>
+ "conversion-time-ms":0}</programlisting>
 
    <para>To view the JSON for one of the users, get the user by
    the value of the <literal>_id</literal>.</para>
@@ -1008,7 +1005,7 @@ $ curl
    <para>The result should resemble the following JSON object, but all on one
    line.</para>
 
-   <screen>
+   <programlisting language="javascript">
 {
     "query-time-ms": 1,
     "result": [
@@ -1022,8 +1019,7 @@ $ curl
         }
     ],
     "conversion-time-ms": 0
- }
-   </screen>
+ }</programlisting>
 
    <para>To view the JSON for one of the users, get the user by
    the value of the <literal>_id</literal>.</para>
@@ -1298,7 +1294,8 @@ objectclass: organizationalunit
     <para>The result of a successful reconciliation is a
     <literal>reconId</literal> object.</para>
 
-    <screen>{"reconId":"7da56fc0-54de-4c7b-bae3-de7c7a999387"}</screen>
+    <programlisting language="javascript"
+    >{"reconId":"7da56fc0-54de-4c7b-bae3-de7c7a999387"}</programlisting>
 
     <para>With the configuration for sample 6, OpenIDM creates user objects
     from LDAP in the repository, and also in the target AD suffix.</para>
@@ -1531,8 +1528,7 @@ $ curl -u openidm-admin:openidm-admin
          "display":"EU Employees"
       }
    ]
-}   
-   </programlisting>
+}</programlisting>
    <para>Transforming the user date from the resource into the json object is performed with a couple of java script files. Please examine the files in the <filename>openidm/script</filename> folder of the installation.</para>
   </section>
  </section> 
