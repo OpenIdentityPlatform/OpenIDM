@@ -142,14 +142,15 @@
 /*
  * Calling 'myWorkflow' workflow
  */
-var map = {    
- "_action" : "myWorkflow",
- "_workflowParams" : {
-    "foo" : "bar"
-  }
+var workflow = {    
+ "_action" : "myWorkflow"
+};
+ 
+var params = {
+ "foo" : "bar"
 };
 
-openidm.action("workflow/activiti", map);</programlisting>
+openidm.action("workflow/activiti", workflow, params);</programlisting>
  </section>
 
  <section xml:id="sample-activiti-workflows">
@@ -278,15 +279,16 @@ openidm.action("workflow/activiti", map);</programlisting>
 /*
  * Calling 'EmailNotification' workflow
  */
-var map = {    
- "_action" : "emailNotification",
- "_workflowParams" : {
-    "fromSender" : "noreply@openidm",
-    "toEmail" : "john.doe@corp.com"
-  }
+var workflow = {    
+ "_action" : "emailNotification"
 };
 
-openidm.action("workflow/activiti", map);</programlisting>
+var params = {
+ "fromSender" : "noreply@openidm",
+ "toEmail" : "john.doe@corp.com"
+};
+
+openidm.action("workflow/activiti", workflow, params);</programlisting>
 
    <para>Also, create a schedule configuration object in
    <filename>openidm/conf/schedule-EmailNotification.json</filename>. The
@@ -477,18 +479,19 @@ firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","a
 /*
  * Calling 'sunrise' workflow
  */
-var map = {    
- "_action" : "sunrise",
- "_workflowParams" : {
+var workflow = {    
+ "_action" : "sunrise"
+ };
+ 
+ var params = {
     "userName" : target.__UID__,
     "system" : "system/xmlfile/account/",
     "time" : source.sunset,
     "toEmail" : "manager@corp.org",
     "fromSender" : "noreply@openidm"
- }
 };
 
-openidm.action("workflow/activiti", map);
+openidm.action("workflow/activiti", workflow, params);
 
 "LINK"</programlisting>
 
