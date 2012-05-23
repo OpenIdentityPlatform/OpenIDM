@@ -1,12 +1,51 @@
-The sample configuration connects to a local OpenDJ with the following paramers:
+One-way LDAP -> Internal Repository Sample
+------------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-"host" : "localhost",
-"port" : 4389,
-"principal" : "cn=Directory Manager",
-"credentials" : "password",
+The sample shows you reconciliation between the OpenIDM internal repository
+and a local LDAP directory server, such as OpenDJ, with data flowing from
+OpenDJ into the internal repository. No changes are pushed from OpenIDM
+to OpenDJ.
 
-The sync configuration contains only one mapping from OpenDJ to OpenIDM and a limited number of attributes. 
-It contains a scheduler configuration which can be used to schedule reconciliation.
-New users will be created from LDAP or existing will be updated.
-No changes will be pushed from OpenIDM into the LDAP server!
+The following documentation shows how to get started with this sample:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample2
 
+The sample includes these configuration files.
+
+*   conf/provisioner.openicf-ldap.json configures the LDAP connector.
+    By default, the LDAP connector uses the following parameters:
+    "host" : "localhost",
+    "port" : 1389,
+    "principal" : "cn=Directory Manager",
+    "credentials" : "password",
+    "baseContextsToSynchronize" : [ "ou=People,dc=example,dc=com" ],
+    "attributesToSynchronize" : [ "uid", "sn", "cn", "givenName", "mail", "description" ],
+*   conf/scheduler-recon.json configures a scheduler you can use to run
+    reconciliation periodically.
+*   conf/sync.json describes how identities in the directory server map to
+    identities in the internal repository target.
+
+Data for this sample is stored in data/Example.ldif. After you import
+the data, ou=People,dc=example,dc=com contains a single user entry for
+the user from the first sample. Although all attributes to synchronize 
+can be multi-valued in LDAP, this sample defines only mail as a multi-
+valued attribute in OpenIDM, in order to match the definition in the
+first sample.
+
+The following curl command runs reconciliation once, creating users defined
+in OpenDJ in OpenIDM's internal repository:
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemLdapAccounts_managedUser"
+
+Alternatively, edit conf/scheduler-recon.json to enable scheduled
+reconciliation:
+
+    "enabled" : true,
+
+The following curl command requests all identifiers in OpenIDM's internal
+repository. Use it to see the results after reconciliation for example.
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
