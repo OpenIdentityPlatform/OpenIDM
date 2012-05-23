@@ -1,21 +1,38 @@
-XML connector sample
+One-Way XML -> Internal Repository Sample
+-----------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-Please refer to the sample documentation
+This sample is built into OpenIDM by default. The documentation at
+http://openidm.forgerock.org/doc/install-guide/index.html#chap-sample
+describes how to get started with this sample.
 
-http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-sample
+The sample shows you reconciliation between the OpenIDM internal
+repository and an external XML file, with data flowing from the XML
+file into the internal repository.
 
-Short description:
-In this example a very basic reconciliation between OpenIDM and an external XML based resource will be set up. The steps that have to be performed are:
+The sample includes these configuration files also installed in the conf/
+directory when you unpack OpenIDM.
 
-# Configure the OpenIDM internal repository (repo.orient.json)
-# Have an example xml file with at least one user ready
-# Configure the flow of objects and attributes from the external system into OpenIDM (sync.json)
+*   conf/provisioner.openicf-xml.json shows the XML connector configuration.
+*   conf/scheduler-reconcile_systemXmlAccounts_managedUser.json includes a
+    scheduler configuration you can use to run reconciliation periodically.
+*   conf/sync.json describes how identities in the XML file source map to
+    identities in the internal repository target.
 
-Alternatively all files from the sample can be copied to a fresh installation. In the openidm folder execute the following to copy all needed files:
-cp -r samples/sample1/conf .
+Data for this sample is stored in data/xmlConnectorData.xml. The initial
+XML file contains a single identity.
 
-The following command will start a one time reconciliation which will create the users from the xml file in the OpenIDM repository of a running server:
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
-$ curl --user openidm-admin:openidm-admin -X POST  "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+Alternatively, edit conf/scheduler-reconcile_systemXmlAccounts_managedUser.json
+to enable scheduled reconciliation:
 
+    "enabled" : true,
 
+The following curl command requests all identifiers in OpenIDM's internal
+repository. Use it to see the results after reconciliation for example.
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
