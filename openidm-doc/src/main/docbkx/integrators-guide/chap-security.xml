@@ -273,6 +273,7 @@ $ </screen>
    user password.</para>
    <step>
     <para>Get the encrypted version of the new password.</para>
+    <para>TODO: Replace these commands, as json-crypto-cli-* is no longer in bundle/.</para>
     <screen>$ cd /path/to/openidm/
 $ echo \"newpwd\" &gt; /tmp/newpwd.json
 $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar

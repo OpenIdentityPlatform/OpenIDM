@@ -176,15 +176,6 @@ Stopping OpenIDM (454)</screen>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><command>java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar</command></term>
-    <listitem>
-     <indexterm>
-      <primary>Encryption</primary>
-     </indexterm>
-     <para>Utility to encrypt and decrypt values in JSON objects</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
     <term><command>startup.bat</command></term>
     <term><command>startup.sh</command></term>
     <listitem>
