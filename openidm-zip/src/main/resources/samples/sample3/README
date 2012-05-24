@@ -17,15 +17,18 @@ http://openidm.forgerock.org/doc/install-guide/index.html#more-sample3
 To try the example, follow these steps.
 
     1. Copy the configuration into place but do not start OpenIDM.
+
     $ cd /path/to/openidm
     $ cp -r samples/sample3/conf samples/sample3/tools .
 
     2. Also copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
+
     $ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/
 
     3. Set up MySQL to listen on localhost:3306, connecting as root:password.
 
     4. Import the sample data definition language file into MySQL.
+
     $ ./bin/mysql -u root -p < /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
     Enter password:
     $ ./bin/mysql -u root -p
@@ -47,6 +50,7 @@ To try the example, follow these steps.
     Bye
 
     5. Start OpenIDM.
+
     $ cd /path/to/openidm/
     $ ./startup.sh
     ...
@@ -56,54 +60,54 @@ To try the example, follow these steps.
     john
     jdoe
 
-After everything is working, you can run reconciliation:
+    6. Run reconciliation:
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemHrdb_managedUser"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemHrdb_managedUser"
 
-Retrieve the list of users from OpenIDM's internal repository:
+    7. Retrieve the list of users from OpenIDM's internal repository:
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
-{
-    "query-time-ms": 0,
-    "result": [
-        {
-            "_id": "9d1a92bf-aa88-4b48-b607-ec6d95e7b178",
-            "_rev": "0"
-        },
-        {
-            "_id": "d781ba76-33ba-4581-8cda-8ed9c6d4903d",
-            "_rev": "0"
-        },
-        {
-            "_id": "40b7ca4f-f112-4878-ae6b-6aa97503fac6",
-            "_rev": "0"
-        },
-        {
-            "_id": "3afb15e5-8713-4ba4-a464-fa9c5f952bff",
-            "_rev": "0"
-        },
-        {
-            "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
-            "_rev": "0"
-        }
-    ],
-    "conversion-time-ms": 0
-}
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+    {
+        "query-time-ms": 0,
+        "result": [
+            {
+                "_id": "9d1a92bf-aa88-4b48-b607-ec6d95e7b178",
+                "_rev": "0"
+            },
+            {
+                "_id": "d781ba76-33ba-4581-8cda-8ed9c6d4903d",
+                "_rev": "0"
+            },
+            {
+                "_id": "40b7ca4f-f112-4878-ae6b-6aa97503fac6",
+                "_rev": "0"
+            },
+            {
+                "_id": "3afb15e5-8713-4ba4-a464-fa9c5f952bff",
+                "_rev": "0"
+            },
+            {
+                "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
+                "_rev": "0"
+            }
+        ],
+        "conversion-time-ms": 0
+    }
 
-In your terminal the response appears all on one line.
+    In your terminal the response appears all on one line.
 
-Retrieve an individual user, using an ID value from the previous GET:
+    8. Retrieve an individual user, using an ID value from the previous GET:
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/5474ff66-31af-4097-b1fb-a394f9a60d95"
-{
-    "familyName": "Doe",
-    "userName": "jdoe",
-    "givenName": "John",
-    "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
-    "_rev": "0",
-    "email": [
-        "John.Does@example.com"
-    ]
-}
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/5474ff66-31af-4097-b1fb-a394f9a60d95"
+    {
+        "familyName": "Doe",
+        "userName": "jdoe",
+        "givenName": "John",
+        "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
+        "_rev": "0",
+        "email": [
+            "John.Does@example.com"
+        ]
+    }
 
-Again, in your terminal the response appears all on one line.
+    Again, in your terminal the response appears all on one line.

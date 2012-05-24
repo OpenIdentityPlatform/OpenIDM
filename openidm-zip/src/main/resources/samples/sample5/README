@@ -1,16 +1,52 @@
-The sample explains the flow of attributes from an LDAP to an AD resource with some attribute manipulation in between. 
+Sample 5 - Synchronization of Two Resources
+-------------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-Both resources are simulated by the XML file adapter.
+This sample demonstrates flowing data between external resources. It simulates
+two directory resources using XML files.
 
-The sync.json contains examples for:
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample5
 
-*) mapping of two resources
-*) validTarget filter
-*) setting "default" values for attributes 
-*) "onCreate" actions
-*) "onUpdate" actions
-*) "correlationQuery" to correlate user with external accounts
+To try the sample, follow these steps.
 
-Attribute flow:
+    1. Copy the sample configuration and data.
+    $ cd /path/to/openidm
+    $ cp -r samples/sample5/conf samples/sample5/script .
 
-LDAP ---> OpenIDM ---> AD
+    2. Start OpenIDM.
+    $ ./startup.sh
+    When you start OpenIDM, it creates a data in the new external resource
+    file that represents an AD directory, samples/sample5/data/xml_AD_Data.xml.
+    The new file is empty until you run reconciliation.
+
+    3. Run reconciliation.
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemLdapAccounts_managedUser"
+    {"reconId":"b149f0e3-4bb9-4790-9266-fab2e5c80ec6"}
+    
+    4. Check 
+    $ cat /path/to/openidm/samples/sample5/data/xml_AD_Data.xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <icf:OpenICFContainer xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+                          xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension samples/sample5/data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd samples/sample5/data/resource-schema-1.xsd">
+       <ri:__ACCOUNT__>
+          <ri:firstname>Darth</ri:firstname>
+          <icf:__DESCRIPTION__/>
+          <icf:__GROUPS__/>
+          <icf:__UID__>68077c05-32ae-4438-b250-d23be784ea07</icf:__UID__>
+          <icf:__NAME__>DDOE1</icf:__NAME__>
+          <ri:email>mail1@example.com</ri:email>
+          <icf:__PASSWORD__>initial_Passw0rd</icf:__PASSWORD__>
+          <icf:__ENABLE__/>
+          <ri:lastname>Doe</ri:lastname>
+       </ri:__ACCOUNT__>
+    </icf:OpenICFContainer>
+
+    5. Create a new user in the source external resource file,
+       samples/sample5/data/xml_LDAP_Data.xml, and run reconciliation again
+       to see the result show up in samples/sample5/data/xml_AD_Data.xml.
