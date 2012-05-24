@@ -69,7 +69,21 @@
   <varlistentry>
    <term><filename>openidm/bin/</filename></term>
    <listitem>
-    <para>OpenIDM core libraries</para>
+    <para>OpenIDM core libraries and scripts for UNIX &amp; Linux systems</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/bin/create-openidm-logrotate.sh</filename></term>
+   <listitem>
+    <para>Script to create an <filename>openidmlog</filename> log rotation
+    scheduler for inclusion under <filename>/etc/logrotate.d/</filename>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/bin/create-openidm-rc.sh</filename></term>
+   <listitem>
+    <para>Script to create an <filename>openidm</filename> resource definition
+    file for inclusion under <filename>/etc/init.d/</filename>.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -80,12 +94,7 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term><filename>openidm/bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar</filename></term>
-   <listitem>
-    <para>Utility to encrypt and decrypt values in JSON objects</para>
-   </listitem>
-  </varlistentry>
-  <varlistentry>
+   <term><filename>openidm/cli.bat</filename></term>
    <term><filename>openidm/cli.sh</filename></term>
    <listitem>
     <para>Management commands for operations such as validating configuration
@@ -221,6 +230,21 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/OS X - Run OpenIDM In Background.command</filename></term>
+   <term><filename>openidm/OS X - Run OpenIDM In Terminal Window.command</filename></term>
+   <term><filename>openidm/OS X - Stop OpenIDM.command</filename></term>
+   <listitem>
+    <para>Clickable commands for Mac OS X</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/profiles/</filename></term>
+   <listitem>
+    <para>OpenIDM configuration profiles to simplify installation,
+    configuration, and upgrade</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/samples/</filename></term>
    <listitem>
     <para>OpenIDM sample configurations</para>
@@ -257,6 +281,18 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/sample/sample2c/</filename></term>
+   <listitem>
+    <para>OpenDJ connector sample synchronizing users' LDAP group membership</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/sample/sample2d/</filename></term>
+   <listitem>
+    <para>OpenDJ connector sample synchronizing LDAP groups</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/sample/sample3/</filename></term>
    <listitem>
     <para>Scripted SQL connector sample for MySQL</para>
@@ -279,6 +315,18 @@
    <term><filename>openidm/sample/sample6/</filename></term>
    <listitem>
     <para>LiveSync sample for use with one or two LDAP servers</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/sample/sample7/</filename></term>
+   <listitem>
+    <para>Sample exposing identities with a SCIM-line schema</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/sample/sample8/</filename></term>
+   <listitem>
+    <para>Sample demonstrating logging in scripts</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -329,6 +377,12 @@
    <term><filename>openidm/startup.sh</filename></term>
    <listitem>
     <para>Script to start OpenIDM services</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><filename>openidm/ui/</filename></term>
+   <listitem>
+    <para>OpenIDM graphical UI files</para>
    </listitem>
   </varlistentry>
   <varlistentry>
