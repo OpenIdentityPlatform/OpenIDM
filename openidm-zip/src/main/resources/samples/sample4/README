@@ -1,9 +1,65 @@
-The sample configuration connects to a local csv file. An example file is located at:
+Sample 4 - CSV File
+-------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-.../openidm/samples/sample4/data/Hr.csv
+This sample demonstrates using a comma-separated value file as an external
+resource. The synchronization mapping is defined only from the CSV file to
+the OpenIDM internal repository, so changes flow only from the CSV to OpenIDM.
 
-The idea of the sample is to demonstrate how a CSV file can be used as an authoratative source feed to OpenIDM. 
-Therefor no updates should be written to the csv file by OpenIDM and sync.json contains only one mapping, from the csv file to the managed user object.
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample4
 
-uid is used as the unique id in the csv file and configured so in the connector configuration.
+To try the sample, follow these steps.
 
+    1. Copy the sample configuration and data.
+
+    $ cd /path/to/openidm
+    $ cp -r samples/sample4/conf samples/sample4/data .
+    $ cat data/hr.csv
+    firstName, uid, "lastName","email", "employeeNumber", password
+    "Darth", "DDOE", "Doe", "doe@forgerock.org", "123456", "Z29vZA=="
+    "Darth", "VDART", "Vader", "vader@forgerock.org", "654321", "Z29vZA=="
+
+    2. Start OpenIDM.
+
+    $ ./startup.sh
+
+    3. Run reconciliation.
+
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemHrAccounts_managedUser"
+    {"reconId":"84b55592-a2d5-438a-ba71-c5e9a7a93938"}
+
+    4. See the users from the CSV file show up in the OpenIDM repository.
+
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+    {
+        "query-time-ms": 0,
+        "result": [
+            {
+                "_id": "1f914f71-032e-48ad-a39c-dcd972deaae4",
+                "_rev": "0"
+            },
+            {
+                "_id": "67cb30a4-0ad7-48e4-95b1-39b351ee2353",
+                "_rev": "0"
+            }
+        ],
+        "conversion-time-ms": 0
+    }
+
+    In your terminal the response appears all on one line.
+
+    5. Retrieve an individual user using the ID value from the response.
+
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/67cb30a4-0ad7-48e4-95b1-39b351ee2353"
+    {
+        "userName": "Vader",
+        "givenName": "Darth",
+        "employeeNumber": "654321",
+        "_id": "67cb30a4-0ad7-48e4-95b1-39b351ee2353",
+        "_rev": "0",
+        "email": "vader@forgerock.org"
+    }

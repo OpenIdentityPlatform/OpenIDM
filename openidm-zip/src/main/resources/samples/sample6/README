@@ -1,13 +1,82 @@
-The sample configuration connects to two local OpenDJ with the following paramers:
+Sample 6 - LiveSync Between Two LDAP Servers
+--------------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-In the sample config both provisioners point to the same ldap server but on different baseContexts!
-To change the example and use two independent ldap processes they need to listen to different ports and the provisioner configurations need to be changed accordingly.
+This sample demonstrates use of two real LDAP connections, and both
+reconciliation and LiveSync. To simplify setup, both provisioners point to the
+same LDAP server, and only use different base DNs, so you can simulate use of
+two directory servers with a single OpenDJ directory server, for example.
 
-"host" : "localhost",
-"port" : 4389,
-"principal" : "cn=Directory Manager",
-"credentials" : "password",
-"baseContexts" : "ou=people,o=ad" -> AD (is represented by an OpenDJ)
-"baseContexts" : "ou=people,o=aaa" -> LDAP (is represented by an OpenDJ)
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample6
 
-The example configuration will pick up new and changed users from LDAP (i.e. ou=people,o=aaa) and send the updates to AD. For simplicity no flow from AD to LDAP is configured!
+To prepare to run the sample, download OpenDJ directory server from
+http://forgerock.org/opendj.html. Install OpenDJ using QuickSetup:
+
+    * Use "password" as the password for cn=Directory Manager.
+    * When presented with Topology Options, be sure to choose "This server
+      will be part of a replication topology" to ensure the change log is set
+      up.
+    * Import samples/sample6/data/Example.ldif during installation.
+    * After OpenDJ installation completes, click Launch Control Panel, then
+      use the New Base DN... window to create ou=people,o=ad and import
+      samples/sample6/data/AD.ldif into the same userRoot database as
+      you used by default for Example.ldif.
+
+The directory server should now show one user under dc=example,dc=com with DN,
+uid=jdoe,ou=People,dc=example,dc=com, and no other entries under ou=people,o=ad.
+
+To run the sample in OpenIDM, follow these steps.
+
+    1. Copy the sample configuration and data.
+
+    $ cd /path/to/openidm
+    $ cp -r samples/sample6/conf .
+
+    2. Edit conf/provisioner.openicf-ad.json to change the port from 4389 to
+       1389 (or other port number where OpenDJ listens for LDAP).
+
+    3. Start OpenIDM.
+
+    $ ./startup.sh
+
+    4. Run reconciliation.
+
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemLdapAccounts_managedUser"
+    {"reconId":"d88ca423-d5f2-4eb5-a451-a229399f92af"}
+
+    5. Check that the user was added under ou=people,o=ad.
+
+    $ cd /path/to/OpenDJ/bin
+    $ ./ldapsearch -p 1389 -b ou=people,o=ad "(uid=jdoe)"
+    dn: uid=jdoe,ou=people,o=ad
+    objectClass: person
+    objectClass: inetOrgPerson
+    objectClass: organizationalPerson
+    objectClass: top
+    givenName: John
+    description: Created for OpenIDM
+    uid: jdoe
+    cn: John Doe
+    sn: Doe
+    mail: jdoe@example.com
+
+    6. Edit conf/scheduler-activeSynchroniser_systemLdapAccount.json to set
+       "enabled" : true. LiveSync causes synchronization to happen as you
+       make changes.
+
+    7. Using the OpenDJ Control Panel, add a new user under
+       ou=People,dc=example,dc=com, and then check the result under
+       ou=people,o=ad.
+
+    $ ./ldapsearch -p 1389 -b ou=people,o=ad "(uid=*)" cn description
+    dn: uid=jdoe,ou=people,o=ad
+    description: Created for OpenIDM
+    cn: John Doe
+    
+    dn: uid=bdobbs,ou=people,o=ad
+    description: Created to see LiveSync work
+    cn: Bob Dobbs
