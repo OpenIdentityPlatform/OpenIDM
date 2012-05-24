@@ -1,9 +1,109 @@
-Scripted SQL sample using mySQL
+Sample 3 - Scripted SQL
+-----------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-Before the example can be started a mySQL db must be running and available.
-There is a script in smaple3/data called sample_HR_DB.mysql which will create a sample db with some sample users. 
-It will also grant access to that db for the user "root" with the password "password" (no quotes).
+This sample demonstrates an example configuration for a scripted SQL
+connector, a connector that communicates with a database through configurable
+SQL scripts. This example requires a fresh installation of OpenIDM, and
+a MySQL database as an external resource to hold user objects, as well as
+MySQL Connector/J to connect to the database.
 
-The mysql jdbc driver must be available in the bundle folder too!
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample3
 
-For the moment the example's sync and repo json files only support recon against the DB. Pushing changes from openidm to the DB will follow soon.
+To try the example, follow these steps.
+
+    1. Copy the configuration into place but do not start OpenIDM.
+    $ cd /path/to/openidm
+    $ cp -r samples/sample3/conf samples/sample3/tools .
+
+    2. Also copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
+    $ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/
+
+    3. Set up MySQL to listen on localhost:3306, connecting as root:password.
+
+    4. Import the sample data definition language file into MySQL.
+    $ ./bin/mysql -u root -p < /path/to/openidm/samples/sample3/data/sample_HR_DB.mysql
+    Enter password:
+    $ ./bin/mysql -u root -p
+    Enter password:
+    mysql> use HRDB;
+    mysql> select * from Users;
+    +----+--------+----------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    | id | uid    | password | firstname | lastname | fullname      | email                     | organization | timestamp           |
+    +----+--------+----------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    |  1 | bob    | password | Bob       | Fleming  | Bob Fleming   | Bob.Fleming@example.com   | HR           | 2012-02-20 12:16:44 |
+    |  2 | rowley | password | Rowley    | Birkin   | Rowley Birkin | Rowley.Birkin@example.com | SALES        | 2012-02-20 12:16:44 |
+    |  3 | louis  | password | Louis     | Balfour  | Louis Balfour | Louis.Balfour@example.com | SALES        | 2012-02-20 12:16:44 |
+    |  4 | john   | password | John      | Smith    | John Smith    | John.Smith@example.com    | SUPPORT      | 2012-02-20 12:16:44 |
+    |  5 | jdoe   | password | John      | Doe      | John Doe      | John.Does@example.com     | ENG          | 2012-02-20 12:16:44 |
+    +----+--------+----------+-----------+----------+---------------+---------------------------+--------------+---------------------+
+    5 rows in set (0.01 sec)
+    
+    mysql> quit
+    Bye
+
+    5. Start OpenIDM.
+    $ cd /path/to/openidm/
+    $ ./startup.sh
+    ...
+    -> bob
+    rowley
+    louis
+    john
+    jdoe
+
+After everything is working, you can run reconciliation:
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemHrdb_managedUser"
+
+Retrieve the list of users from OpenIDM's internal repository:
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+{
+    "query-time-ms": 0,
+    "result": [
+        {
+            "_id": "9d1a92bf-aa88-4b48-b607-ec6d95e7b178",
+            "_rev": "0"
+        },
+        {
+            "_id": "d781ba76-33ba-4581-8cda-8ed9c6d4903d",
+            "_rev": "0"
+        },
+        {
+            "_id": "40b7ca4f-f112-4878-ae6b-6aa97503fac6",
+            "_rev": "0"
+        },
+        {
+            "_id": "3afb15e5-8713-4ba4-a464-fa9c5f952bff",
+            "_rev": "0"
+        },
+        {
+            "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
+            "_rev": "0"
+        }
+    ],
+    "conversion-time-ms": 0
+}
+
+In your terminal the response appears all on one line.
+
+Retrieve an individual user, using an ID value from the previous GET:
+
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/5474ff66-31af-4097-b1fb-a394f9a60d95"
+{
+    "familyName": "Doe",
+    "userName": "jdoe",
+    "givenName": "John",
+    "_id": "5474ff66-31af-4097-b1fb-a394f9a60d95",
+    "_rev": "0",
+    "email": [
+        "John.Does@example.com"
+    ]
+}
+
+Again, in your terminal the response appears all on one line.
