@@ -144,6 +144,16 @@
    <literal>openidm</literal> object, which is included in the top-level scope
    provided to each script.</para>
 
+   <para>OpenIDM also provides a <literal>logger</literal> object to access
+   SLF4J facilities. The following code shows an example:</para>
+
+   <programlisting language="javascript"
+>logger.info("Parameters passed in: {} {} {}", param1, param2, param3);</programlisting>
+   
+   <para>To set the log level, use
+   <literal>org.forgerock.openidm.script.javascript.JavaScript.level</literal>
+   in <filename>openidm/conf/logging.properties</filename>.</para>
+
   <section xml:id="function-create">
    <title>openidm.create(id, value)</title>
 
@@ -459,6 +469,201 @@
     <listitem>
      <para>An exception is thrown if the object could not be decrypted for any
      reason.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-logger-debug">
+   <title>logger.debug(string message, object... params)</title>
+
+   <para>Logs a message at DEBUG level.</para>
+
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>message</term>
+     <listitem>
+      <para>string</para>
+      <para>The message format to log. Params replace <literal>{}</literal>
+      in your message.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>Arguments to include in the message.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the message could not be logged.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-logger-error">
+   <title>logger.error(string message, object... params)</title>
+
+   <para>Logs a message at ERROR level.</para>
+
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>message</term>
+     <listitem>
+      <para>string</para>
+      <para>The message format to log. Params replace <literal>{}</literal>
+      in your message.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>Arguments to include in the message.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the message could not be logged.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-logger-info">
+   <title>logger.info(string message, object... params)</title>
+
+   <para>Logs a message at INFO level.</para>
+
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>message</term>
+     <listitem>
+      <para>string</para>
+      <para>The message format to log. Params replace <literal>{}</literal>
+      in your message.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>Arguments to include in the message.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the message could not be logged.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-logger-trace">
+   <title>logger.trace(string message, object... params)</title>
+
+   <para>Logs a message at TRACE level.</para>
+
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>message</term>
+     <listitem>
+      <para>string</para>
+      <para>The message format to log. Params replace <literal>{}</literal>
+      in your message.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>Arguments to include in the message.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the message could not be logged.</para>
+    </listitem>
+   </itemizedlist>
+  </section>
+
+  <section xml:id="function-logger-warn">
+   <title>logger.warn(string message, object... params)</title>
+
+   <para>Logs a message at WARN level.</para>
+
+   <variablelist>
+    <title>Parameters</title>
+    <varlistentry>
+     <term>message</term>
+     <listitem>
+      <para>string</para>
+      <para>The message format to log. Params replace <literal>{}</literal>
+      in your message.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>params</term>
+     <listitem>
+      <para>object</para>
+      <para>Arguments to include in the message.</para>
+     </listitem>
+    </varlistentry>
+   </variablelist>
+
+   <itemizedlist>
+    <title>Returns</title>
+    <listitem>
+     <para>A <literal>null</literal> value if successful.</para>
+    </listitem>
+   </itemizedlist>
+
+   <itemizedlist>
+    <title>Throws</title>
+    <listitem>
+     <para>An exception is thrown if the message could not be logged.</para>
     </listitem>
    </itemizedlist>
   </section>

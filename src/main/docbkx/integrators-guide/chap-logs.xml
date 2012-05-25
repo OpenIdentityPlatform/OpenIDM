@@ -35,7 +35,6 @@
   <primary>Server logs</primary>
  </indexterm>
 
-
  <para>This chapter briefly describes server logging. For audit information,
  see the chapter on <link xlink:href="integrators-guide#chap-auditing"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using Audit
@@ -60,4 +59,14 @@ CONFIG
 FINE
 FINER
 FINEST (lowest value)</programlisting>
+
+ <para>If you use <literal>logger</literal> functions in your scripts, then
+ you can set the log level for the scripts:</para>
+
+ <literallayout class="monospaced"
+>org.forgerock.openidm.script.javascript.JavaScript.level=<replaceable>level</replaceable></literallayout>
+
+ <para> You can override the log level settings per script by using
+ <literal>org.forgerock.openidm.script.javascript.JavaScript.<replaceable
+ >script-name</replaceable>.level</literal>.</para>
 </chapter>

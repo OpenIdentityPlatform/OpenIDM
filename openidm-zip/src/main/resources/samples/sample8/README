@@ -1,20 +1,39 @@
-XML connector sample to demo logging in scripts and the situation dependent content of the source object
+Logging in Scripts Sample
+-------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-Please refer to the sample documentation
+This sample demonstrates logging capabilities available to OpenIDM scripts,
+providing you an alternative method for debugging your scripts.
 
-http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-sample
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample8
 
+To try the sample, follow these steps.
 
-Short description:
-In this example a basic reconciliation between OpenIDM and an external XML based resource will be set up. The steps that have to be performed are:
+    1. Copy the sample configuration and data.
 
-$ cd /path/to/openidm
-$ cp -r samples/sample8/conf .
-$ cp -r samples/sample8/script .
+    $ cd /path/to/openidm
+    $ cp -r samples/sample8/conf samples/sample8/script .
 
+    2. Start OpenIDM.
 
-The following command will start a one time reconciliation which will create the users from the xml file in the OpenIDM repository of a running server:
+    $ ./startup.sh
 
-curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+    3. Run reconciliation.
 
-Hint: the log level in the demo scripts is set to "warn" to make OpenIDM show the messages on the Felix console with the default console logging configuration. 
+    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+
+    4. Observe messages from your scripts that are logged to the OpenIDM
+       (Felix) console:
+
+    2012-05-25 01:37:41:276 WARN [LoggerPropertyFactory$1$2] Case no Source: the source object contains: = null 
+    2012-05-25 01:37:41:277 WARN [LoggerPropertyFactory$1$2] Case emptySource: the source object contains: = {__UID__=1, email=[mail1@example.com], name=DDOE1, lastname=Doe1, firstname=Darth1, description=Created By XML1, _id=1} 
+    2012-05-25 01:37:41:278 WARN [LoggerPropertyFactory$1$2] Case sourceDescription: the source object contains: = Created By XML1 
+    2012-05-25 01:37:41:279 WARN [LoggerPropertyFactory$1$2] Case onCreate: the source object contains: = {__UID__=1, email=[mail1@example.com], name=DDOE1, lastname=Doe1, firstname=Darth1, description=Created By XML1, _id=1} 
+    2012-05-25 01:37:41:341 WARN [LoggerPropertyFactory$1$2] Case result: the source object contains: = {UNQUALIFIED={count=0, ids=[]}, NOTVALID={count=0, ids=[]}, reconId=561d1deb-db21-4642-98e6-bd33e3421ad2, TARGET_IGNORED={count=0, ids=[]}, ABSENT={count=1, ids=[1]}, AMBIGUOUS={count=0, ids=[]}, endTime=5/25/12 1:37 PM, FOUND={count=0, ids=[]}, startTime=5/25/12 1:37 PM, allIds=247, SOURCE_IGNORED={count=0, ids=[]}, duration=121, UNASSIGNED={count=0, ids=[]}, entries=1, reconName=system/xmlfile/account, CONFIRMED={count=0, ids=[]}, MISSING={count=0, ids=[]}, SOURCE_MISSING={count=0, ids=[]}}
+
+    Read the short scripts in samples/sample8/script/ to see examples of how
+    to use the logger object.
