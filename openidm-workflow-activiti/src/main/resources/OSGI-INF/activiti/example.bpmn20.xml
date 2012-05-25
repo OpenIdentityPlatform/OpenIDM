@@ -16,7 +16,7 @@
     <sequenceFlow sourceRef="serviceTask" targetRef="scripttask1"/>
     <scriptTask id="scripttask1" scriptFormat="groovy">
       <script>
-        out:println "script task name " + openidm.read('workflow/activiti');
+        out:println "script task: " + openidm.read('workflow');
       </script>
     </scriptTask>
     <sequenceFlow sourceRef="scripttask1" targetRef="end"/>

@@ -288,6 +288,7 @@
         <module>openidm-ui-ria</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
+        <module>openidm-workflow-remote</module>
         <module>openidm-zip</module>
     </modules>
 
