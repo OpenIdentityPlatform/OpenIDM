@@ -49,7 +49,7 @@ public class ConfigMeta implements MetaDataProvider {
     public ConfigMeta() {
         propertiesToEncrypt = new HashMap<String, List<JsonPointer>>();
         List<JsonPointer> props = new ArrayList<JsonPointer>();
-        props.add(new JsonPointer("password"));
+        props.add(new JsonPointer("engine/password"));
         propertiesToEncrypt.put(ActivitiServiceImpl.PID, props);
     }
 

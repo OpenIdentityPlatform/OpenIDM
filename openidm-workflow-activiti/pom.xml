@@ -209,6 +209,52 @@
             <artifactId>h2</artifactId>
             <version>1.3.162</version>
         </dependency>
+        
+        <!-- REST Dependencies-->
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet.ext.httpclient</artifactId>
+            <version>${restlet.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpcore</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpmime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.jcip</groupId>
+                    <artifactId>jcip-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.james</groupId>
+                    <artifactId>apache-mime4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
+            </exclusions>            
+        </dependency>
+        <dependency>
+            <groupId>org.restlet.jee</groupId>
+            <artifactId>org.restlet.ext.jackson</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -244,7 +290,8 @@
                     <instructions>
                         <Private-Package>org.forgerock.openidm.workflow.activiti.impl.*</Private-Package>
                         <Export-Package>
-							org.forgerock.openidm.workflow.activiti.*;version=${openidm.version}
+                            org.forgerock.openidm.workflow.activiti.*;version=${openidm.version},
+                            org.forgerock.openidm.workflow.*;version=${openidm.version}
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
