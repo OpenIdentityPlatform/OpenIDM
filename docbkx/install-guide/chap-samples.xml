@@ -1531,5 +1531,54 @@ $ curl -u openidm-admin:openidm-admin
 }</programlisting>
    <para>Transforming the user date from the resource into the json object is performed with a couple of java script files. Please examine the files in the <filename>openidm/script</filename> folder of the installation.</para>
   </section>
- </section> 
+ </section>
+
+ <section xml:id="more-sample8">
+  <title>Sample 8 - Logging in Scripts</title>
+
+  <para>OpenIDM provides a <literal>logger</literal> object with
+  <literal>debug()</literal>, <literal>error()</literal>,
+  <literal>info()</literal>, <literal>trace()</literal>, and
+  <literal>warn()</literal> functions that you can use to log messages to 
+  the OpenIDM console from your scripts.</para>
+
+  <section xml:id="install-sample8">
+   <title>Install the Sample</title>
+   <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>,
+   copying the configuration for sample 8.</para>
+
+   <screen>$ cd /path/to/openidm
+$ cp -r samples/sample8/conf samples/sample8/script .</screen>
+
+   <para>The scripts under <filename>samples/sample8/script/</filename>
+   show brief log message examples.</para>
+  </section>
+
+  <section xml:id="run-sample8">
+   <title>Running the Sample</title>
+
+   <para>First start OpenIDM. Then run reconciliation over the REST
+   interface.</para>
+
+   <screen width="93"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+"http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+
+   <para>Successful reconciliation returns a "reconId" object.</para>
+
+   <para>Notice the log messages displayed on the OpenIDM (Felix) console.
+   The following example omits timestamps and so forth to show only the message
+   strings.</para>
+
+   <programlisting language="none">-&gt;
+...Case no Source: the source object contains: = null
+...Case emptySource: the source object contains: = {__UID__=1, email=[mail1@...
+...Case sourceDescription: the source object contains: = Created By XML1
+...Case onCreate: the source object contains: = {__UID__=1, email=[mail1@...
+...Case result: the source object contains: = {UNQUALIFIED={count=0, ids=[]},...
+</programlisting>
+  </section>
+ </section>
 </chapter>
