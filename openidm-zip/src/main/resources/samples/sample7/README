@@ -1,20 +1,132 @@
-XML connector sample using a SCIM like schema in OpenIDM
+Sample 7 - Scripting a SCIM-like Schema
+---------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-Please refer to the sample documentation
+This sample demonstrates using scripting to expose users according to a
+SCIM-like schema.
 
-http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-sample
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample7
 
-Curently the sample only works when using a mysql repository!
+To try the sample, follow these steps.
 
-Short description:
-In this example a basic reconciliation between OpenIDM and an external XML based resource will be set up. The steps that have to be performed are:
+    1. If you have not already done so, set up MySQL to store the
+       OpenIDM internal repository as described in
+       http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository
 
-$ cd /path/to/openidm
-$ cp -r samples/sample7/conf .
-$ cp -r samples/sample7/data .
-$ cp -r samples/sample7/script .
+    2. Copy the sample configuration, data, and scripts.
 
+    $ cd /path/to/openidm
+    $ cp -r samples/sample7/conf samples/sample7/data samples/sample7/script .
 
-The following command will start a one time reconciliation which will create the users from the xml file in the OpenIDM repository of a running server:
+    3. Run reconciliation to copy the user from the XML file under data/ to
+       the OpenIDM internal repository.
 
-curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+
+    4. Retrieve the user from the repository. The scripts you copied transform
+       the user data to fit the SCIM-like schema.
+
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/DDOE1"
+    {
+        "schemas": "['urn:scim:schemas:core:1.0']",
+        "ims": [
+            {
+                "value": "jonyOnAim",
+                "type": "aim"
+            },
+            {
+                "value": "skyperHiasl",
+                "type": "skype"
+            }
+        ],
+        "locale": null,
+        "phoneNumbers": [
+            {
+                "value": "1234567",
+                "type": "work"
+            },
+            {
+                "value": "1234568",
+                "type": "home"
+            }
+        ],
+        "emails": [
+            {
+                "type": "work",
+                "value": "hallo@example.com",
+                "primary": true
+            },
+            {
+                "value": "jdoe@forgerock.com",
+                "type": "home"
+            }
+        ],
+        "externalId": "DDOE1",
+        "preferredLanguage": "en_US",
+        "meta": {
+            "lastModified": "Mon May 28 2012 12:45:45 GMT+0200 (CEST)"
+        },
+        "userType": "permanent",
+        "_rev": "0",
+        "photos": [
+            {
+                "value": "https://photos.example.com/profilephoto/72930000000Ccne/F",
+                "type": "photo"
+            },
+            {
+                "value": "https://photos.example.com/profilephoto/72930000000Ccne/T",
+                "type": "thumbnail"
+            }
+        ],
+        "title": "Mr.Univers",
+        "timezone": "America/Denver",
+        "_id": "DDOE1",
+        "profileUrl": "https://login.example.com/DDOE1",
+        "nickName": "Jonny",
+        "name": {
+            "familyName": "Doe",
+            "middleName": "Hias",
+            "formatted": "Dr. John H Doe III",
+            "givenName": "John",
+            "honorificSuffix": "III",
+            "honorificPrefix": "Dr."
+        },
+        "userName": "DDOE1",
+        "displayName": "John Doe",
+        "addresses": [
+            {
+                "streetAddress": "100 Universal City Plaza",
+                "region": "CA",
+                "formatted": "100 Universal City Plaza\nHollywood, CA 91608 USA",
+                "postalCode": "91608",
+                "primary": "true",
+                "locality": "Hollywood",
+                "type": "work",
+                "country": "USA"
+            },
+            {
+                "streetAddress": "222 Universal City Plaza",
+                "region": "CA",
+                "formatted": "222 Universal City Plaza\nHollywood, CA 91622 USA",
+                "postalCode": "91622",
+                "primary": "false",
+                "locality": "Hollywood",
+                "type": "home",
+                "country": "USA"
+            }
+        ],
+        "groups": [
+            {
+                "value": "usemploys",
+                "display": "US Employees"
+            },
+            {
+                "value": "euemploys",
+                "display": "EU Employees"
+            }
+        ]
+    }
