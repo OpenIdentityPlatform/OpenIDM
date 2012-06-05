@@ -380,7 +380,7 @@ firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","a
            &lt;script&gt;
                &lt;![CDATA[
                invokecontext =
-                       org.forgerock.openidm.context.InvokeContext.getContext()
+                 org.forgerock.openidm.objset.ObjectSetContext.get()
               ]]&gt;
            &lt;/script&gt;
        &lt;/scriptTask&gt;
@@ -418,13 +418,6 @@ firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","a
            &lt;script&gt;
                &lt;![CDATA[
                out:println '********Sunset date for user ' + userName
-               org.forgerock.openidm.context.InvokeContext.getContext().
-                       putApprover(invokecontext.getApprover())
-               org.forgerock.openidm.context.InvokeContext.getContext().
-                       putRequester(invokecontext.getRequester())
-               org.forgerock.openidm.context.InvokeContext.getContext().
-                       pushActivityId(invokecontext.popActivityId())
-
                user = openidm.read(system + userName);
                ]]&gt;
            &lt;/script&gt;
