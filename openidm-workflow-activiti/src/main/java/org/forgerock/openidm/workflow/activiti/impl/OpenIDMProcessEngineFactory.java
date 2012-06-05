@@ -29,6 +29,7 @@ import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.activiti.engine.impl.el.ExpressionManager;
 import org.activiti.engine.impl.el.VariableScopeElResolver;
 import org.activiti.engine.impl.javax.el.*;
+import org.activiti.engine.impl.persistence.entity.VariableScopeImpl;
 import org.activiti.engine.impl.variable.CustomObjectType;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.forgerock.openidm.objset.ObjectSet;
@@ -62,6 +63,26 @@ public class OpenIDMProcessEngineFactory extends ProcessEngineFactory {
             compositeElResolver.add(new BeanELResolver());
             return compositeElResolver;
 
+        }
+
+        @Override
+        public ELContext getElContext(VariableScope variableScope) {
+            ELContext elContext = null;
+            if (variableScope instanceof VariableScopeImpl) {
+                if (variableScope.getVariable("openidm") == null) {
+                    variableScope.removeVariable("openidm");
+                }
+                VariableScopeImpl variableScopeImpl = (VariableScopeImpl) variableScope;
+                elContext = variableScopeImpl.getCachedElContext();
+            }
+
+            if (elContext == null) {
+                elContext = createElContext(variableScope);
+                if (variableScope instanceof VariableScopeImpl) {
+                    ((VariableScopeImpl) variableScope).setCachedElContext(elContext);
+                }
+            }
+            return elContext;
         }
     }
 
