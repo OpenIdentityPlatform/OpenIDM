@@ -93,6 +93,12 @@ public class ActivitiServiceImpl implements JsonResource {
     public static final String CONFIG_ENGINE_URL = "engine/url";
     public static final String CONFIG_ENGINE_USERNAME = "engine/username";
     public static final String CONFIG_ENGINE_PASSWORD = "engine/password";
+    public static final String CONFIG_MAIL = "mail";
+    public static final String CONFIG_MAIL_HOST = "host";
+    public static final String CONFIG_MAIL_PORT = "port";
+    public static final String CONFIG_MAIL_USERNAME = "username";
+    public static final String CONFIG_MAIL_PASSWORD = "password";
+    public static final String CONFIG_MAIL_STARTTLS = "starttls";
     public static final String CONFIG_CONNECTION = "connection";
     public static final String CONFIG_JNDI_NAME = "jndiName";
     private String jndiName;
@@ -133,10 +139,23 @@ public class ActivitiServiceImpl implements JsonResource {
             EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
             JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
             EngineLocation location = EngineLocation.embedded;
+            String mailhost = "localhost";
+            int mailport = 25;
+            String mailusername = null;
+            String mailpassword = null;
+            boolean starttls = false;
             if (!config.isNull()) {
                 location = config.get(new JsonPointer(CONFIG_ENGINE)).asEnum(EngineLocation.class);
                 JsonValue connectionConfig = config.get(CONFIG_CONNECTION);
                 jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
+                JsonValue mailconfig = config.get("mail");
+                if (!mailconfig.isNull()) {
+                    mailhost = mailconfig.get(new JsonPointer(CONFIG_MAIL_HOST)).asString();
+                    mailport = mailconfig.get(new JsonPointer(CONFIG_MAIL_PORT)).asInteger();
+                    mailusername = mailconfig.get(new JsonPointer(CONFIG_MAIL_USERNAME)).asString();
+                    mailpassword = mailconfig.get(new JsonPointer(CONFIG_MAIL_PASSWORD)).asString();
+                    starttls = mailconfig.get(new JsonPointer(CONFIG_MAIL_STARTTLS)).asBoolean();
+                }
             }
 
             switch (location) {
@@ -183,6 +202,16 @@ public class ActivitiServiceImpl implements JsonResource {
 
                     configuration.setTransactionManager(transactionManager);
                     configuration.setDatabaseSchemaUpdate("true");
+                    
+                    configuration.setMailServerHost(mailhost);
+                    configuration.setMailServerPort(mailport);
+                    configuration.setMailServerUseTLS(starttls);
+                    if (mailusername != null) {
+                        configuration.setMailServerUsername(mailusername);
+                    }
+                    if (mailpassword != null) {
+                        configuration.setMailServerPassword(mailpassword);
+                    }
 
                     //needed for async workflows
                     configuration.setJobExecutorActivate(true);
