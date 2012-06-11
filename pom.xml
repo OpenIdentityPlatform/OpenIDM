@@ -94,7 +94,19 @@
             </snapshots>
         </repository>
         <!-- OrientDB -->
-        <repository>
+		<repository>
+		  <id>sonatype-nexus-releases</id>
+		  <name>Sonatype Nexus Snapshots</name>
+		  <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		  <releases>
+              <enabled>false</enabled>
+          </releases>
+          <snapshots>
+              <enabled>true</enabled>
+              <updatePolicy>daily</updatePolicy>
+          </snapshots>
+		</repository>
+        <!--repository>
             <id>orientechnologies-repository</id>
             <name>Orient Technologies Maven2 Repository</name>
             <url>http://www.orientechnologies.com/listing/m2</url>
@@ -102,7 +114,7 @@
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
             </snapshots>
-        </repository>
+        </repository-->
         <repository>
             <id>maven-restlet</id>
             <name>Public online Restlet repository</name>
@@ -216,7 +228,7 @@
         <openidm.version>2.1.0-SNAPSHOT</openidm.version>
         <slf4j.version>1.6.4</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
-        <orientdb.version>1.0rc9-SNAPSHOT</orientdb.version>
+        <orientdb.version>1.0rc9</orientdb.version>
         <!--<orientdb.version>1.0rc6</orientdb.version>-->
         <jackson.version>1.9.5</jackson.version>
         <restlet.version>2.0.9</restlet.version>
