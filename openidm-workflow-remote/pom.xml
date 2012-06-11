@@ -30,7 +30,7 @@
         <repository>
             <id>activiti-repository</id>
             <name>Activiti Maven Repository</name>
-            <url>http://maven.alfresco.com/nexus/content/groups/public</url>
+            <url>https://maven.alfresco.com/nexus/content/groups/public</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
