@@ -145,11 +145,11 @@ public class DBHelper {
             if (pool != null) {
                 pool.close();
             }
-            pool = new ODatabaseDocumentPool(); 
+            pool = ODatabaseDocumentPool.global();
             // Moving from 0.9.25 to 1.0 RC had to change this
             //ODatabaseDocumentPool pool = ODatabaseDocumentPool.global();
-            pool.setup(minSize, maxSize);
-            warmUpPool(pool, dbURL, user, password, minSize);
+            //pool.setup(minSize, maxSize);
+            warmUpPool(pool, dbURL, user, password, 1);
             
             boolean finalTry = (retryCount >= maxRetry);
             success = test(pool, dbURL, user, password, finalTry);
