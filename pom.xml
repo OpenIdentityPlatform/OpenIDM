@@ -85,12 +85,12 @@
         <repository>
             <id>ops4j</id>
             <name>OPS4J Maven Repository</name>
-            <url>http://repository.ops4j.org/maven2</url>
+            <url>https://oss.sonatype.org/content/repositories/ops4j-releases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
         <!-- OrientDB -->
