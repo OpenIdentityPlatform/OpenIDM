@@ -135,7 +135,14 @@ public class AuthModule {
                 } else if (!key.startsWith("_")) {
                     ++nonInternalCount;                    
                     if (nonInternalCount == 1) {
-                        retrCred = entry.get(key).asString(); // By convention the first property is the cred
+                    	// By convention the first property is the cred
+                    	//decrypt if necessary
+                    	if (getCrypto().isEncrypted(entry.get(key))) {
+                    		JsonValue decrypted = getCrypto().decrypt(entry.get(key));
+                    		retrCred = decrypted.asString();
+                    	} else {
+                    		retrCred = entry.get(key).asString(); 
+                    	}
                         retrCredPropName = key;
                     } else if (nonInternalCount == 2) {
                         retrRoles = entry.get(key).getObject(); // By convention the second property can define roles
