@@ -419,15 +419,25 @@ class Mapping {
     public JsonValue mapToJsonValue(ResultSet rs) throws SQLException {
         JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
         
+        // Create list of column names
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnCount = rsmd.getColumnCount();
+        ArrayList names = new ArrayList();
+        for(int i=1; i<=columnCount; i++) {
+            names.add(rsmd.getColumnName(i));
+        }
+        
         for (ColumnMapping entry: columnMappings) {
             Object value = null;
-            if ("STRING".equals(entry.dbColType)) { 
-                value = rs.getString(entry.dbColName);
-            } else {
-                // TODO: support for more complex type conversions
-                value = rs.getObject(entry.dbColName);
+            if(names.contains(entry.dbColName)) {
+                if ("STRING".equals(entry.dbColType)) { 
+                    value = rs.getString(entry.dbColName);
+                } else {
+                    // TODO: support for more complex type conversions
+                    value = rs.getObject(entry.dbColName);
+                }
+                mappedResult.put(entry.objectColPointer, value);
             }
-            mappedResult.put(entry.objectColPointer, value);
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
         return mappedResult; 
