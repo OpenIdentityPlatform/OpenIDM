@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -257,7 +257,12 @@ define("app/comp/user/profile/ProfileCtrl",[
             selfProfileUpdate = true;
         }
         obj.delegate.patchUserDifferences(obj.user, obj.view.getUser(), function() {
-            obj.delegate.readEntity(obj.user._id, function(user) {
+            if(selfProfileUpdate && obj.user.userName !== obj.view.getUser().email) {
+                eventManager.sendEvent(constants.EVENT_USERNAME_UPDATED_SUCCESSFULY);
+                eventManager.sendEvent(constants.EVENT_LOGOUT);
+                return;
+            }
+            obj.delegate.getForUserName(obj.view.getUser().email, function(user) {
                 obj.setUser(user);
                 if(selfProfileUpdate) {
                     globalConfiguration.loggedUser = user;

@@ -1,4 +1,4 @@
-/*! @license 
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,16 +22,33 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+/*global define, require */
+
 /**
  * @author yaromin
  */
-if (response && response.result) {
-	for (var i = 0; i < response.result.length; i++) {
-		if (response.result[i].password) {
-			delete response.result[i].password;
-		}
-		if (response.result[i].securityanswer) {
-			delete response.result[i].securityanswer;
-		}
-	}
-}       
+
+define(["org/forgerock/common/js/typeextentions/String"],function(cut) {
+    QUnit.module("Strings");
+    
+    QUnit.test("removeLastChar", function() {
+        QUnit.equal("abcde".removeLastChars(1), "abcd");
+        QUnit.equal("abcde".removeLastChars(), "abcd");
+        QUnit.equal("abcde".removeLastChars(2), "abc");
+    });
+    
+    QUnit.test("endsWith", function() {
+        QUnit.ok(!"abcde".endsWith("abcd"));
+        QUnit.ok("abcde".endsWith("de"));
+        QUnit.ok("abcde".endsWith("e"));
+        QUnit.ok(!"abcde".endsWith("aaa"));
+    });
+    
+    QUnit.test("startsWith", function() {
+        QUnit.ok(!"abcde".startsWith("bdsa"));
+        QUnit.ok("abcde".startsWith("abc"));
+        QUnit.ok("abcde".startsWith("abcde"));
+        QUnit.ok(!"abcde".startsWith("abcdef"));
+    });
+});
+

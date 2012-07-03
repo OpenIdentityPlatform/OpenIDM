@@ -1,10 +1,14 @@
 {
-    "objects": [
+    "objects" : [
         {
             "name" : "user",
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "script/uuid-generator.js"
+                "file" : "script/onCreate-user-set-default-fields.js"
+            },
+            "onValidate" : {
+                "type" : "text/javascript",
+                "file" : "script/onValidate-user-sensitive-fields.js"
             },
             "properties" : [
                 {
@@ -22,7 +26,7 @@
             ]
         },
         {
-            "name": "group"
+            "name" : "group"
         }
     ]
 }

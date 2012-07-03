@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -49,12 +49,16 @@ define("app/comp/user/login/LoginCtrl",
             obj.view.showCredentialFields();
         }
 
-        if(obj.configuration.showCredentialFields) {
+        if(obj.configuration.loginButtonDisabledByDefault) {
             obj.view.disableLoginButton();
         }
-
+        
+        if(obj.configuration.hideLoginButton) {
+            obj.view.hideLoginButton();
+        }    
+        
         obj.view.renderLogin();
-        obj.registerListeners();
+        obj.registerListeners();        
     };
 
     obj.registerListeners = function() {

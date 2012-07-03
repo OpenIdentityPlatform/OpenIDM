@@ -1,4 +1,4 @@
-/*! @license 
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,16 +22,21 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+
+package org.forgerock.openidm;
+
+import org.codehaus.jstestrunner.junit.JSTestSuiteRunner;
+import org.codehaus.jstestrunner.junit.JSTestSuiteRunner.Include;
+import org.codehaus.jstestrunner.junit.JSTestSuiteRunner.ResourceBase;
+import org.junit.runner.RunWith;
+
 /**
+ * 
  * @author yaromin
+ *
  */
-if (response && response.result) {
-	for (var i = 0; i < response.result.length; i++) {
-		if (response.result[i].password) {
-			delete response.result[i].password;
-		}
-		if (response.result[i].securityanswer) {
-			delete response.result[i].securityanswer;
-		}
-	}
-}       
+@RunWith(JSTestSuiteRunner.class)
+@ResourceBase({"target/test-classes", "target/classes"})
+@Include({ "StringTest.html" })
+public class StringTest {
+}

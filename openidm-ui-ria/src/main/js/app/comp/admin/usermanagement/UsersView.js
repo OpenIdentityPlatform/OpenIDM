@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,7 +32,6 @@ define("app/comp/admin/usermanagement/UsersView", ["app/util/UIUtils"],function(
 	
 	var obj = {};
 	
-	obj.maxUsers = 10;
 	obj.users = 0;
 	
 	obj.init = function() {
@@ -61,7 +60,7 @@ define("app/comp/admin/usermanagement/UsersView", ["app/util/UIUtils"],function(
 	 * userNumber - user index in UserCtrl's users array
 	 */
 	obj.addUser = function(user, userNumber, callback) {
-		if( obj.users < obj.maxUsers && !obj.hasUser(userNumber) ) {			
+		if( !obj.hasUser(userNumber) ) {			
 			var i = 0, u, userRow; 
 			
 			u = $("#usersTable").find("input[type='hidden']").first();
@@ -139,14 +138,6 @@ define("app/comp/admin/usermanagement/UsersView", ["app/util/UIUtils"],function(
 	
 	obj.getAddUserButton = function() {
 		return $("#addUserButton");
-	};
-	
-	obj.getMaxUsers = function() {
-		return obj.maxUsers;
-	};
-	
-	obj.setMaxUsers = function(max) {
-		obj.maxUsers = max;
 	};
 	
 	obj.getUsers = function() {

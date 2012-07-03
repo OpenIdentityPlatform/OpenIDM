@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -61,8 +61,8 @@ function(usersView, userDelegate, breadcrumbsCtrl, profileCtrl, popupCtrl, confi
 		
 		obj.view.init();
 		obj.view.show(function() {
-			obj.loadUsers();
-			obj.view.getFilterInput().bind('keyup', obj.filterUsers);		
+			obj.findUsersMatchingFilterInput();
+			obj.view.getFilterInput().bind('keyup', obj.findUsersMatchingFilterInput);		
 			
 			obj.view.getAddUserButton().unbind();
 			obj.view.getAddUserButton().bind('click', function(event) {
@@ -71,23 +71,6 @@ function(usersView, userDelegate, breadcrumbsCtrl, profileCtrl, popupCtrl, confi
 			});
 		});		
 	};
-	
-	obj.loadUsers = function() {
-		obj.delegate.getAllUsers(function(r) {
-		    var i;
-			obj.allUsers = r;
-			
-			r = r.sort(comparators.userComparator);
-			
-			for(i = 0; i < r.length; i++) {
-				obj.view.addUser(r[i], i);
-			}
-			
-			obj.filterUsers();
-		}, function(r) {
-			console.log('error:' + r);
-		});
-	};		
 	
 	obj.registerListener = function(userNumber) {
 		var editButton = obj.view.getEditButton(userNumber);
@@ -115,34 +98,51 @@ function(usersView, userDelegate, breadcrumbsCtrl, profileCtrl, popupCtrl, confi
 		});
 	};
 	
-	obj.filterUsers = function() {
-		var i, k = 0, indexes = [], usersToAdd = [], registerListenerForUser, filter = obj.view.getFilterInput().val();
+	obj.findUsersMatchingFilterInput = function() {
+		var i, k = 0, limit = 2, indexes = [], usersToAdd = [], registerListenerForUser, filter = obj.view.getFilterInput().val();
 		
-		for(i = 0; i < obj.allUsers.length; i++ ) {
-			if( obj.includeUser(obj.allUsers[i], filter) ) {
-				usersToAdd[k] = obj.allUsers[i];
-				indexes[k] = i;
-				k++;
-			} else {
+		if(obj.allUsers){
+			for(i = 0; i < obj.allUsers.length; i++ ) {
 				obj.view.removeUser(i);
 			}
-		}
-		
-		registerListenerForUser = function() {
-            obj.registerListener(indexes[i]);
-        };  
-		
-		for(i = 0; i < k; i++ ) {
-			obj.view.addUser(usersToAdd[i], indexes[i], registerListenerForUser);			
-		}
-		
-		if( k - obj.view.getMaxUsers() > 0 ) {
-			obj.view.getRemainingUsers().html(k - obj.view.getMaxUsers());
-		} else {
 			obj.view.getRemainingUsers().html('0');
 		}
 		
-		obj.registerPopups();
+		obj.delegate.getUsersCountByMatchingNames(filter, function(result) {
+			if( result.count - limit > 0 ) {
+				obj.view.getRemainingUsers().html( result.count - limit );
+			} else {
+				obj.view.getRemainingUsers().html('0');
+			}
+		}, function(r) {
+			console.log('error:' + r);
+		}); 
+		
+		
+		obj.delegate.getUsersByMatchingNamesWithLimit(filter, limit, function(r) {
+			var i;
+			obj.allUsers = r;
+			r = r.sort(comparators.userComparator);
+		
+			for(i = 0; i < obj.allUsers.length; i++ ) {
+				indexes[k] = i;
+				usersToAdd[k] = obj.allUsers[i];
+				k++;
+			}
+			
+			registerListenerForUser = function() {
+		           obj.registerListener(indexes[i]);
+		       };  
+			
+			for(i = 0; i < obj.allUsers.length; i++ ) {
+				obj.view.addUser(usersToAdd[i], indexes[i], registerListenerForUser);			
+			}
+			
+			obj.registerPopups();
+			
+		}, function(r) {
+			console.log('error:' + r);
+		}); 
 	};
 	
 	obj.registerPopups = function() {
@@ -187,7 +187,7 @@ function(usersView, userDelegate, breadcrumbsCtrl, profileCtrl, popupCtrl, confi
 	obj.afterUserDeletedSuccesfully = function (number) {
 		confirmationDialogCtrl.close();
 		obj.view.removeUser(number);
-		obj.loadUsers();
+		obj.findUsersMatchingFilterInput();
 	};
 	
 	obj.afterUserDeleteFailed = function () {

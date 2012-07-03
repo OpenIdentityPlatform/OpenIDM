@@ -1,7 +1,7 @@
 /*! @license 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,4 +27,6 @@
  */
 if(response.result && (!response.result.length || !response.result[0].securityanswer || openidm.decrypt(response.result[0].securityanswer)!=request.params['securityanswer'])) {
 	delete response.result;
+} else {
+	response.result = "correct";
 }

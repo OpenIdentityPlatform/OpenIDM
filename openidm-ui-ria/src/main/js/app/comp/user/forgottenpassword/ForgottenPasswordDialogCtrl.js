@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -93,7 +93,7 @@ define("app/comp/user/forgottenpassword/ForgottenPasswordDialogCtrl",
     obj.changePassword = function() {
         console.log("changing password");
 
-        obj.delegate.patchEntityAttribute({ "_query-id": "for-userName", uid: obj.view.getEmailInput().val()}, "password", obj.view.getPasswordInput().val(),
+        obj.delegate.setNewPassword(obj.view.getEmailInput().val(), obj.view.getFgtnSecurityAnswer().val(), obj.view.getPasswordInput().val(),
                 function(r) {
             eventManager.sendEvent(constants.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY, { userName: obj.view.getEmailInput().val(), password: obj.view.getPasswordInput().val()});
             obj.dispose();
@@ -237,7 +237,7 @@ define("app/comp/user/forgottenpassword/ForgottenPasswordDialogCtrl",
             } else {
                 console.debug("Not last email question phase");
                 obj.lastEmailQuestionPhase = obj.view.getEmailInput().val();
-                obj.showQuestionPanel();		
+                obj.loadUser();
             }
         }
     };

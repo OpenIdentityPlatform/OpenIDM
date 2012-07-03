@@ -31,6 +31,13 @@ Dual licensed under the MIT and GPL licenses.
  *   >>> Math.uuid(8, 16) // 8 character ID (base=16)
  *   "098F4D35"
  */
+
+/**
+ * Generation of uuid should be in other file.
+ * Move after https://bugster.forgerock.org/jira/browse/OPENIDM-563 is resolved
+ */
+
+
   // Private array of chars to use
   var CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
 
@@ -62,4 +69,60 @@ Dual licensed under the MIT and GPL licenses.
     return uuid.join('');
   };
 
-object._id=generateUUID();
+function requiredUniqeUserName(userName) {
+	var params = {
+		    "_query-id": "check-userName-availability",
+		    "uid": userName
+	};
+	result = openidm.query("managed/user", params);
+	if ((result.result && result.result.length!=0) || (result.results && result.results.length!=0)) {
+		throw "Failed to create user. User with userName " + userName + " exists";
+	}
+}
+
+object._id = generateUUID();
+
+requiredUniqeUserName(object.userName);
+
+object.role = 'openidm-authorized';
+object.accountStatus = 'active';
+
+if (!object.lastPasswordSet) {
+	object.lastPasswordSet = "";
+}
+
+if (!object.postalcode) {
+	object.postalcode = "";
+}
+
+if (!object.state_province) {
+	object.state_province = "";
+}
+
+if (!object.passwordAttempts) {
+	object.passwordAttempts = "0";
+}
+
+if (!object.address1) {
+	object.address1 = "";
+}
+
+if (!object.address2) {
+	object.address2 = "";
+}
+
+if (!object.country) {
+	object.country = "";
+}
+
+if (!object.city) {
+	object.city = "";
+}
+
+if (!object.image) {
+	object.image = "";
+}
+
+if (!object.passphrase) {
+	object.passphrase = "";
+}

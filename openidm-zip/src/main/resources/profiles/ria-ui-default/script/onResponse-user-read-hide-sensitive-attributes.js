@@ -1,7 +1,7 @@
 /*! @license 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,9 +25,9 @@
 /**
  * @author yaromin
  */
-if(response.password) {
+if (response.password) {
 	delete response.password;
 }
-if(response.securityanswer) {
+if (response.securityanswer) {
 	delete response.securityanswer;
 }

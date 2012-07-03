@@ -9,3 +9,5 @@ RewriteRule ^userAdmin/(.*)$ /$1 [P,L]
 
 RewriteRule ^register$ / [P,L]
 RewriteRule ^register/(.*)$ /$1 [P,L]
+
+RewriteRule ^openidm/managed/(.*)$ http://localhost:8090/openidm/managed/$1 [P,L]

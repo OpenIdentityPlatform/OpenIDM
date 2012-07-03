@@ -37,9 +37,8 @@ define("config/AppConfiguration",["app/util/Constants", "app/comp/common/eventma
                                    configuration: {
                                        loginHelperClass: "app/comp/user/login/InternalLoginHelper",
                                        showCredentialFields: true,
+                                       hideLoginButton: false,
                                        loginButtonDisabledByDefault: true
-//                                     showCredentialFields: false,
-//                                     loginButtonDisabledByDefault: false,
 //                                     loginHelperClass: "app/comp/user/login/OpenAMLoginHelper"
                                    } 
                                },
