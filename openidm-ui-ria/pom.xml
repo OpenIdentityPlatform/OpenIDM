@@ -11,7 +11,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright © 2011 ForgeRock AS. All rights reserved.
+  Copyright © 2011-2012 ForgeRock AS. All rights reserved.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -233,6 +233,31 @@
 			<properties>
 				<skipTests>false</skipTests>
 			</properties>
+			<build>
+				<plugins>
+					<plugin>
+					    <groupId>org.apache.maven.plugins</groupId>
+					    <artifactId>maven-dependency-plugin</artifactId>
+					    <executions>
+					      <execution>
+					        <id>unpack</id>
+					        <phase>process-resources</phase>
+					        <goals>
+					          <goal>unpack-dependencies</goal>
+					        </goals>
+					        <configuration>
+					          <includeGroupIds>org.codehaus.mojo</includeGroupIds>
+					          <includeArtifactIds>qunit-amd</includeArtifactIds>
+					          <outputDirectory>
+					             ${project.build.directory}/test-classes/js
+					          </outputDirectory>
+					          <useRepositoryLayout>true</useRepositoryLayout>
+					        </configuration>
+					      </execution>
+					    </executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 

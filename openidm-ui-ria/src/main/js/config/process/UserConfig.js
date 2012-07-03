@@ -1,7 +1,7 @@
 /* @license 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -89,6 +89,16 @@ define("config/process/UserConfig",["app/util/Constants", "app/comp/common/event
                             ],
                             processDescription: function(event, messagesCtrl) {
                                 messagesCtrl.displayMessage('info', 'Profile has been updated');
+                            }
+         },
+         {
+             startEvent: constants.EVENT_USERNAME_UPDATED_SUCCESSFULY,
+             description: "",
+             dependencies: [
+                            "app/comp/common/messages/MessagesCtrl"
+                            ],
+                            processDescription: function(event, messagesCtrl) {
+                                messagesCtrl.displayMessage('info', 'Username has been modified succesfully. You have been logged out.');
                             }
          },
          {
@@ -209,7 +219,7 @@ define("config/process/UserConfig",["app/util/Constants", "app/comp/common/event
                             ],
                             processDescription: function(event, mainCtrl, loginCtrl, breadcrumbsCtrl, conf, navigationCtrl) {
                                 loginCtrl.logoutUser();
-
+                                loginCtrl.init();
                                 eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                                 mainCtrl.clearContent();
                                 breadcrumbsCtrl.clearPath();

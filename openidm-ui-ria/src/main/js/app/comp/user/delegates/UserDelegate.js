@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -53,6 +53,34 @@ define("app/comp/user/delegates/UserDelegate",
             }
         }, error: errorCallback} );
     };
+    
+    obj.getUsersByMatchingNamesWithLimit = function(userNameToMatch, limit, successCallback, errorCallback) {
+        console.info("getting users by matching username");
+
+        obj.usersCallback = successCallback;
+        obj.numberOfUsers = 0;
+
+        obj.serviceCall({url: "/?_query-id=query-matching-username&fields=*&"+ $.param({usernameToMatch: userNameToMatch, limit: limit}), success: function(data) {
+            if(successCallback) {
+                obj.users = data.result;
+                successCallback(data.result);
+            }
+        }, error: errorCallback} );
+    };
+    
+    obj.getUsersCountByMatchingNames = function(userNameToMatch, successCallback, errorCallback) {
+        console.info("getting users by matching username");
+
+        obj.usersCallback = successCallback;
+        obj.numberOfUsers = 0;
+
+        obj.serviceCall({url: "/?_query-id=query-count-matching-username&"+ $.param({usernameToMatch: userNameToMatch}), success: function(data) {
+            if(successCallback) {
+                obj.users = data.result;
+                successCallback(data.result[0]);
+            }
+        }, error: errorCallback} );
+    };
 
     //TODO this is only test utility method should be moved to the special test package
     obj.removeAllUsers = function() {
@@ -85,12 +113,12 @@ define("app/comp/user/delegates/UserDelegate",
     };
 
     /**
-     * Check credentials method
+     * Starting session. Sending username and password to authenticate and returns user data.
      */
-    obj.getByCredentials = function(uid, password, successCallback, errorCallback) {
+    obj.logAndGetUserDataByCredentials = function(uid, password, successCallback, errorCallback) {
         var headers = {};
-        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = "openidm-admin";
-        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = "openidm-admin";
+        headers[constants.OPENIDM_HEADER_PARAM_USERNAME] = uid.toLowerCase();
+        headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
         headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
         obj.serviceCall({
             url: "/?_query-id=for-credentials&" + $.param({password: password, uid: uid.toLowerCase()}),
@@ -104,6 +132,18 @@ define("app/comp/user/delegates/UserDelegate",
                     successCallback(data.result[0]);
                 }
             },
+            error: errorCallback
+        });
+        delete headers[constants.OPENIDM_HEADER_PARAM_PASSWORD];
+    };
+    
+    /**
+     * Check credentials method
+     */
+    obj.checkCredentials = function(uid, password, successCallback, errorCallback) {
+        obj.serviceCall({
+            url: "/?_query-id=for-credentials&" + $.param({password: password, uid: uid.toLowerCase()}),
+            success: successCallback,
             error: errorCallback
         });
     };
@@ -208,6 +248,18 @@ define("app/comp/user/delegates/UserDelegate",
     obj.patchSelectedUserAttributes = function(userName, patchDefinitionObject, successCallback, errorCallback, noChangesCallback) {
         console.info("updating user");
         obj.patchEntity({"_query-id": "for-userName", uid: userName.toLowerCase()}, patchDefinitionObject, successCallback, errorCallback, noChangesCallback);
+    };
+    
+    /**
+     * Setting new password for username if security answer is correct
+     */
+    obj.setNewPassword = function(userName, securityAnswer, newPassword, successCallback, errorCallback) {
+        console.info("setting new password for user and security question");
+        obj.serviceCall({
+            url: "/?_query-id=set-newPassword-for-userName-and-security-answer&" + $.param({newpassword: newPassword, username: userName, securityanswer: securityAnswer}),
+            success: successCallback,
+            error: errorCallback
+        });
     };
 
     return obj;

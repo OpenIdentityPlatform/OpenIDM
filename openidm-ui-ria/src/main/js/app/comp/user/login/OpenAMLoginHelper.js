@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -30,10 +30,14 @@ define("app/comp/user/login/OpenAMLoginHelper",[
                                                 "app/util/Constants",
                                                 "app/comp/common/configuration/AbstractConfigurationAware",
                                                 "app/comp/common/delegate/ServiceInvoker",
-                                                "app/util/UIUtils"],
-                                                function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, uiUtils) {
+                                                "app/util/UIUtils",
+                                                "org/forgerock/common/js/CookieHelper"],
+                                                function (userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, uiUtils, cookieHelper) {
     var obj = new AbstractConfigurationAware();
 
+    /**
+     * Pass credentials provided on OpenIDM site to OpenAM site. 
+     */
     obj.loginRequest = function(login, password) {
         var completeUrl, queryParameters = {}, url = obj.configuration.loginURL;
          
@@ -54,6 +58,9 @@ define("app/comp/user/login/OpenAMLoginHelper",[
         }
     };
 
+    /**
+     * Logout from OpenAM 
+     */
     obj.logoutRequest = function() {
         if(!obj.configuration.logoutTestOnly) {
             if(obj.configuration.ajaxLogout) {
@@ -65,6 +72,20 @@ define("app/comp/user/login/OpenAMLoginHelper",[
         } else {
             console.debug("Test mode. Not redirecting");
         }
+    };
+    
+    /**
+     * Redirect to OpenAM post registration site 
+     */
+    obj.redirectToPostPostRegistrationSite = function(login) {
+        uiUtils.setUrl(obj.configuration.loginURL + "?" + obj.configuration.postSelfRegistrationQueryParameters + "?uid=" + login);
+    };
+    
+    /**
+     * Set OpenAM cookie obtained 
+     */
+    obj.setAuthenticationCookie = function(tokenId) {
+        cookieHelper.setCookie(obj.configuration.authenticationTokenCookieName,tokenId, null,"/",obj.configuration.cookieDomain);
     };
 
     return obj;

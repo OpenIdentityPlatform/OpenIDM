@@ -53,6 +53,20 @@
                 "type" : "text/javascript",
                 "file" : "script/onResponse-for-securityAnswer.js"
             }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'set-newPassword-for-userName-and-security-answer'"
+            },
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/onResponse-set-newPassword-for-userName-and-security-answer.js"
+            }
         }
     ]
 }

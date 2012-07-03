@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -68,13 +68,38 @@ define("app/comp/user/registration/RegistrationView",
         if( obj.mode === "admin" ) {
             user.passphrase = "";
             user.image = "mail.png";
-            user.securityquestion = "";
-            user.securityanswer = "";
+            user.securityquestion = obj.getSecurityQuestionOrZeroIfNotSet();
+            user.securityanswer = obj.getSecurityAnswerOrRandomIfNotSet();
         }
 
         return user;
     };
-
+    
+    obj.getSecurityQuestionOrZeroIfNotSet = function(){
+        var securityQuestion = obj.getSecurityQuestion().val();
+        if(securityQuestion){
+            console.log("Setting security question:" + securityQuestion);
+            return securityQuestion;
+        } else {
+            console.log("Setting security question as 0");
+            return "0";
+        }
+    };
+    
+    obj.getSecurityAnswerOrRandomIfNotSet = function(){
+        var securityAnswer = obj.getSecurityAnswer().val();
+        if(securityAnswer){
+            return securityAnswer;
+        } else {
+            securityAnswer = "";
+            securityAnswer += String.fromCharCode((Math.floor((Math.random() * 100)) % 26) + 97);
+            securityAnswer += String.fromCharCode((Math.floor((Math.random() * 100)) % 26) + 97);
+            securityAnswer += String.fromCharCode((Math.floor((Math.random() * 100)) % 26) + 97);
+            securityAnswer += String.fromCharCode((Math.floor((Math.random() * 100)) % 26) + 97);
+            return securityAnswer.toLowerCase();
+        }
+    };
+    
     obj.getFirstNameInput = function() {
         return $("#registration input[name='firstName']");
     };

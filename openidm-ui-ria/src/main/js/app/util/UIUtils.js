@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,7 +25,7 @@
 /*global $, define, window , Mustache*/
 
 define("app/util/UIUtils",
-        [],
+        ["org/forgerock/common/js/typeextentions/String"],
         function () {
     var obj = {};
 
@@ -49,17 +49,31 @@ define("app/util/UIUtils",
         window.location.href = url;	
     };
 
+    obj.normalizeSubPath = function(subPath) {
+        if(subPath.endsWith('/')) {
+            return subPath.removeLastChars();
+        }
+        return subPath;
+    };
+    
     obj.convertCurrentUrlToJSON = function() {
         var result = {}, parsedQueryParams;
 
         result.url = obj.getCurrentUrlBasePart();
-        result.pathName = obj.getCurrentPathName();
-        result.pathname = obj.getCurrentPathName();
-        parsedQueryParams = decodeURI(obj.getCurrentUrlQueryParameters().replace("/&/g", "\",\"").replace("/=/g","\":\""));
-        if(parsedQueryParams) {
-            result.params = JSON.parse('{"' + parsedQueryParams + '"}');
-        }
+        result.pathName = obj.normalizeSubPath(obj.getCurrentPathName());
+        
+        result.params = obj.convertQueryParametersToJSON(obj.getCurrentUrlQueryParameters());
         return result;
+    };
+    
+    obj.convertQueryParametersToJSON = function(queryParameters) {
+        var parsedQueryParams;
+        
+        if(queryParameters) {
+            parsedQueryParams = decodeURI(queryParameters.replace(/&/g, "\",\"").replace(/\=/g,"\":\""));
+            return JSON.parse('{"' + parsedQueryParams + '"}');
+        }
+        return null;
     };
 
     obj.fillTemplateWithData = function(templateUrl, data,callback) {
@@ -79,7 +93,103 @@ define("app/util/UIUtils",
             error: callback
         });
     };
+    
+    $.fn.emptySelect = function() {
+        return this.each(function() {
+            if (this.tagName === 'SELECT') {
+                this.options.length = 0;
+            }
+        });
+    };
 
+    $.fn.loadSelect = function(optionsDataArray) {
+        return this.emptySelect().each(function() {
+            if (this.tagName === 'SELECT') {
+                var i, option, selectElement = this;
+                for(i=0;i<optionsDataArray.length;i++){
+                    option = new Option(optionsDataArray[i].value, optionsDataArray[i].key);
+                    if ($.browser.msie) {
+                        selectElement.add(option);
+                    } else {
+                        selectElement.add(option, null);
+                    }
+                }
+            }
+        });
+    };
+    
+    return obj;
+});
+define("app/util/UIUtils",
+        ["org/forgerock/common/js/typeextentions/String"],
+        function () {
+    var obj = {};
+
+    obj.getUrl = function() {
+        return window.location.href;	
+    };
+
+    obj.getCurrentUrlBasePart = function() {
+        return window.location.protocol + "//" + window.location.host;	
+    };
+
+    obj.getCurrentUrlQueryParameters = function() {
+        return window.location.search.substr(1,window.location.search.lenght);	
+    };
+
+    obj.getCurrentPathName = function() {
+        return window.location.pathname;
+    };
+
+    obj.setUrl = function(url) {
+        window.location.href = url;	
+    };
+
+    obj.normalizeSubPath = function(subPath) {
+        if(subPath.endsWith('/')) {
+            return subPath.removeLastChars();
+        }
+        return subPath;
+    };
+    
+    obj.convertCurrentUrlToJSON = function() {
+        var result = {}, parsedQueryParams;
+
+        result.url = obj.getCurrentUrlBasePart();
+        result.pathName = obj.normalizeSubPath(obj.getCurrentPathName());
+        
+        result.params = obj.convertQueryParametersToJSON(obj.getCurrentUrlQueryParameters());
+        return result;
+    };
+    
+    obj.convertQueryParametersToJSON = function(queryParameters) {
+        var parsedQueryParams;
+        
+        if(queryParameters) {
+            parsedQueryParams = decodeURI(queryParameters.replace(/&/g, "\",\"").replace(/\=/g,"\":\""));
+            return JSON.parse('{"' + parsedQueryParams + '"}');
+        }
+        return null;
+    };
+
+    obj.fillTemplateWithData = function(templateUrl, data,callback) {
+        $.ajax({
+            type: "GET",
+            url: templateUrl,
+            dataType: "html",
+            success: function(template) {
+                if(data === 'unknown' || data === null) {
+                    //don't fill the template
+                    callback(template);
+                } else {
+                    //fill the template
+                    callback(Mustache.to_html(template,data));
+                }
+            },
+            error: callback
+        });
+    };
+    
     $.fn.emptySelect = function() {
         return this.each(function() {
             if (this.tagName === 'SELECT') {

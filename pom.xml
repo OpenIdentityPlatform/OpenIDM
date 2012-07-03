@@ -232,7 +232,7 @@
         <!--<orientdb.version>1.0rc6</orientdb.version>-->
         <jackson.version>1.9.5</jackson.version>
         <restlet.version>2.0.9</restlet.version>
-		<javascript.maven.plugin.version>2.0.0-SNAPSHOT</javascript.maven.plugin.version>
+		<javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
 		
         <!-- Commons JSON versions -->
         <commons.json-fluent.version>1.1.0</commons.json-fluent.version>
@@ -574,7 +574,7 @@
             <dependency>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jquery-amd</artifactId>
-				<version>1.7.1-SNAPSHOT</version>
+				<version>1.7.1-alpha-1</version>
 				<type>js</type>
 			</dependency>
 			<dependency>
@@ -702,7 +702,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>webminifier-maven-plugin</artifactId>
-					<version>1.0.1-SNAPSHOT</version>
+					<version>1.0.1</version>
 					<executions>
 						<execution>
 							<id>default-minify-js</id>

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -96,7 +96,7 @@ define("app/comp/user/changesecurityinfo/SecurityDialogCtrl",
         console.log("register dialog validators");
 
         obj.view.getOldPasswordInput().off().on('focusout', function() {
-            userDelegate.getByCredentials(obj.userName, obj.view.getOldPasswordInput().val(), function() {
+            userDelegate.checkCredentials(obj.userName, obj.view.getOldPasswordInput().val(), function() {
                 obj.view.showMore();
                 obj.oldPassword = obj.view.getOldPasswordInput().val();
             });

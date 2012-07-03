@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -36,13 +36,16 @@ define("app/comp/common/urltools/URLActionDispatcher",
     var obj = new AbstractConfigurationAware();
 
     obj.decodeURLAndPerformAction = function() {
-        var eventName, decodedUrl = uiUtils.convertCurrentUrlToJSON();
+        var i, eventMappings, eventName, decodedUrl = uiUtils.convertCurrentUrlToJSON();
         console.debug("url=" + decodedUrl);
 
         if(decodedUrl.pathName) {
-            eventName = obj.configuration.pathNameEventMappings[decodedUrl.pathName];
-            if(eventName) {
-                eventManager.sendEvent(eventName, decodedUrl.params);
+            eventMappings = obj.configuration.pathNameEventMappings; 
+            for(i in eventMappings) {
+                if(decodedUrl.pathName.startsWith(i)) {
+                    eventManager.sendEvent(eventMappings[i], decodedUrl.params);
+                    return;
+                }
             }
         }
 

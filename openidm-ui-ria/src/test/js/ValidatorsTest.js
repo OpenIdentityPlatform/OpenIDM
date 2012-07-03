@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,30 +22,33 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global QUnit, define, require */
+/*global define, require */
 
 /**
  * @author yaromin
  */
-QUnit.module("Name validators");
 
 define(["app/util/Validators"],function(cut) {
+    QUnit.module("Name validators");
     
     QUnit.test("correct name validation", function() {
+        console.log("a");
         var testedName = 'somename';
         var inputs = [{ val: function () { return testedName; } }];
         
-        QUnit.equals(cut.nameValidator(inputs), undefined, 'simple name should pass');
+        QUnit.equal(cut.nameValidator(inputs), undefined, 'simple name should pass');
     });
     
     QUnit.test("international characters in name", function() {
+        console.log("b");
         var testedName = '\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B';
         var inputs = [{ val: function () { return testedName; } }];
         
-        QUnit.equals(cut.nameValidator(inputs), undefined, 'should allow international characters');
+        QUnit.equal(cut.nameValidator(inputs), undefined, 'should allow international characters');
     });
     
     QUnit.test("digits in username", function() {
+        console.log("c");
         var testedName = 'aa123aa';
         var inputs = [{ val: function () { return testedName; } }];
         

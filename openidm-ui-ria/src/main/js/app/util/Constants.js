@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -65,6 +65,7 @@ define("app/util/Constants",
     obj.EVENT_SHOW_PROFILE_REQUEST = "user.profile.EVENT_SHOW_PROFILE_REQUEST";
     obj.EVENT_USER_PROFILE_UPDATE_FAILED = "user.profile.EVENT_USER_PROFILE_UPDATE_FAILED";
     obj.EVENT_USER_PROFILE_UPDATED_SUCCESSFULY = "user.profile.EVENT_USER_PROFILE_UPDATED_SUCCESSFULY";
+    obj.EVENT_USERNAME_UPDATED_SUCCESSFULY = "user.profile.EVENT_USERNAME_UPDATED_SUCCESSFULY";
     obj.EVENT_PROFILE_DELETE_USER_REQUEST = "user.profile.EVENT_PROFILE_DELETE_USER_REQUEST";
     obj.EVENT_GO_BACK_REQUEST = "user.profile.EVENT_GO_BACK_REQUEST";
 

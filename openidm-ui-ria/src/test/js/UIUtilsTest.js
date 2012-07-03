@@ -1,4 +1,4 @@
-/*! @license 
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,16 +22,27 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+/*global define, require */
+
 /**
  * @author yaromin
  */
-if (response && response.result) {
-	for (var i = 0; i < response.result.length; i++) {
-		if (response.result[i].password) {
-			delete response.result[i].password;
-		}
-		if (response.result[i].securityanswer) {
-			delete response.result[i].securityanswer;
-		}
-	}
-}       
+
+define(["app/util/UIUtils"],function(cut) {
+    QUnit.module("UIUtils");
+    
+    QUnit.test("convertQueryParametersToJSON", function() {
+        var result = cut.convertQueryParametersToJSON("action=user.SOME_EVENT")
+        QUnit.equal(result.action, "user.SOME_EVENT");
+        
+        result = cut.convertQueryParametersToJSON("action=user.user.SOME_EVENT&otherparam=some")
+        QUnit.equal(result.otherparam, "some");
+    });
+    
+    QUnit.test("normalizeSubPath", function() {
+        console.debug(cut.normalizeSubPath("/path/"));
+        QUnit.equal(cut.normalizeSubPath("/path/"), "/path");
+        QUnit.equal(cut.normalizeSubPath("/path"), "/path");
+    });
+});
+
