@@ -52,7 +52,7 @@
    <item name="Mailing List" href="mail-lists.html" />
    <item name="Support" href="http://forgerock.com/subscriptions.html" />
    <item name="Partners" href="http://forgerock.com/partners.html" />
-   <item name="Wiki" href="http://wikis.forgerock.org/openidm/" />
+   <item name="Wiki" href="https://wikis.forgerock.org/confluence/display/OPENIDM/Home" />
   </menu>
 
   <menu name="Released Documentation">
