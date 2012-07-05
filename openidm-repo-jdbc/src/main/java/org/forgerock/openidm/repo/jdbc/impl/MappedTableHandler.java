@@ -147,8 +147,9 @@ public class MappedTableHandler implements TableHandler {
         
         logger.debug("Executing: {}", readStatement);
         ResultSet rs = readStatement.executeQuery();
+        
         if (rs.next()) {
-            result = explicitMapping.mapToJsonValue(rs);
+            result = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
             Object rev = result.get("_rev");  
             logger.debug(" full id: {}, rev: {}, obj {}", new Object[] {fullId, rev, result});  
         } else {
@@ -382,10 +383,11 @@ class ExplicitQueryResultMapper implements QueryResultMapper {
     
     public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params,  TableQueries tableQueries) 
             throws SQLException {
-
+        
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+        List names = Mapping.getColumnNames(rs);
         while (rs.next()) {
-            JsonValue obj = explicitMapping.mapToJsonValue(rs);
+            JsonValue obj = explicitMapping.mapToJsonValue(rs, names);
             result.add(obj.asMap());
         }
         return result;
@@ -416,20 +418,12 @@ class Mapping {
         }
     }
     
-    public JsonValue mapToJsonValue(ResultSet rs) throws SQLException {
+    public JsonValue mapToJsonValue(ResultSet rs, List columnNames) throws SQLException {
         JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
-        
-        // Create list of column names
-        ResultSetMetaData rsmd = rs.getMetaData();
-        int columnCount = rsmd.getColumnCount();
-        ArrayList names = new ArrayList();
-        for(int i=1; i<=columnCount; i++) {
-            names.add(rsmd.getColumnName(i));
-        }
         
         for (ColumnMapping entry: columnMappings) {
             Object value = null;
-            if(names.contains(entry.dbColName)) {
+            if (columnNames.contains(entry.dbColName)) {
                 if ("STRING".equals(entry.dbColType)) { 
                     value = rs.getString(entry.dbColName);
                 } else {
@@ -454,6 +448,14 @@ class Mapping {
             sb.append(entry.toString());
         }
         return sb.toString();
+    }
+    
+    public static List getColumnNames(ResultSet rs) throws SQLException {
+    	ArrayList names = new ArrayList();
+        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+            names.add(rs.getMetaData().getColumnName(i));
+        }
+        return names;
     }
 }
 
