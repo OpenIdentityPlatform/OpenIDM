@@ -35,9 +35,10 @@ import org.forgerock.json.fluent.JsonPointer;
  * a meta data provider for a bundle*
  * 
  * @author aegloff
+ * @author ckienle
  */
 public interface MetaDataProvider {
-    
+
     /**
      * Meta-data describing which configuration properties need to be encrypted
      * for a given configuration.
@@ -54,4 +55,11 @@ public interface MetaDataProvider {
      * has associated meta-data, but the meta-data is not yet available. 
      */
     List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) throws WaitForMetaData;
+
+    /**
+     * Sets a callback to be used to refresh/update the configuration requirements/properties 
+     * 
+     * @param callback a MetaDataProviderCallback implementation
+     */
+    public void setCallback(MetaDataProviderCallback callback);
 }

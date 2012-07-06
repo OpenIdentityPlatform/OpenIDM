@@ -27,6 +27,7 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.external.email.impl.EmailServiceImpl;
 import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +41,13 @@ import java.util.Map;
  * requirements of this bundle
  *
  * @author aegloff
+ * @author ckienle
  */
 public class ConfigMeta implements MetaDataProvider {
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);
 
     Map<String, List<JsonPointer>> propertiesToEncrypt;
+    private MetaDataProviderCallback callback = null;
 
     public ConfigMeta() {
         propertiesToEncrypt = new HashMap<String, List<JsonPointer>>();
@@ -61,5 +64,13 @@ public class ConfigMeta implements MetaDataProvider {
             return propertiesToEncrypt.get(pidOrFactory);
         }
         return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setCallback(MetaDataProviderCallback callback) {
+        this.callback = callback;
     }
 }

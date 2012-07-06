@@ -35,6 +35,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
@@ -73,8 +74,8 @@ import java.util.jar.JarInputStream;
 @Component(name = ConnectorInfoProviderService.PID, policy = ConfigurationPolicy.OPTIONAL, description = "OpenICF Connector Info Service", immediate = true)
 @Service
 @Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service")
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenICF Connector Info Service")
 })
 public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider, ConfigurationService {
     private final static Logger TRACE = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
@@ -88,6 +89,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     //Private
     private Map<String, RemoteFrameworkConnectionInfo> remoteFrameworkConnectionInfo = new HashMap<String, RemoteFrameworkConnectionInfo>();
     private URL[] connectorURLs = null;
+    private MetaDataProviderCallback callback = null;
+
     /*
      * If this instance was instantiated for MetaDataProvider by Class#newInstance then this is false.
      * If this instance was activated by OSGi SCR then this is true.
@@ -221,9 +224,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         TRACE.info("Component is deactivated.");
     }
 
-//    @Modified
-//    protected void update(ComponentContext context) {
-//    }
+    //    @Modified
+    //    protected void update(ComponentContext context) {
+    //    }
 
 
     /**
@@ -566,5 +569,13 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     private JsonValue getConfiguration(ComponentContext componentContext) {
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         return new JsonValue(enhancedConfig.getConfiguration(componentContext));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setCallback(MetaDataProviderCallback callback) {
+        this.callback = callback;
     }
 }

@@ -31,6 +31,7 @@ import java.util.Map;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
 
 import org.slf4j.Logger;
@@ -41,19 +42,21 @@ import org.slf4j.LoggerFactory;
  * requirements of this bundle
  *
  * @author aegloff
+ * @author ckienle
  */
 public class ConfigMeta implements MetaDataProvider {
     final static Logger logger = LoggerFactory.getLogger(ConfigMeta.class);
 
     Map<String, List<JsonPointer>> propertiesToEncrypt;
-    
+    private MetaDataProviderCallback callback = null;
+
     public ConfigMeta() {
         propertiesToEncrypt = new HashMap<String, List<JsonPointer>>();
         List props = new ArrayList<JsonPointer>();
         props.add(new JsonPointer("password"));
         propertiesToEncrypt.put(OrientDBRepoService.PID, props);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -63,4 +66,12 @@ public class ConfigMeta implements MetaDataProvider {
         }
         return null;
     } 
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setCallback(MetaDataProviderCallback callback) {
+        this.callback = callback;
+    }
 }
