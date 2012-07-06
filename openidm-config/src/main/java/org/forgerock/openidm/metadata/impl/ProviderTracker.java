@@ -16,8 +16,16 @@
 
 package org.forgerock.openidm.metadata.impl;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.osgi.framework.Bundle;
@@ -28,34 +36,28 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
-
 /**
  * Keep track of meta data providers, either declared in bundle meta-data, or 
  * registered as services
  * 
  * @author aegloff
+ * @author ckienle
  *
  */
 public class ProviderTracker implements ServiceTrackerListener {
     final static Logger logger = LoggerFactory.getLogger(ProviderTracker.class);
-    
+
     static ServiceTracker providerTracker;
     ProviderListener providerListener;
     BundleContext context;
     ObjectMapper mapper = new ObjectMapper();
-    
+
     // Map from origin identifiers to MetaDataProvider
     // Long type key are bundle identifiers
     // String keys are service pids
     // This map MUST be thread safe to avoid the java.util.ConcurrentModificationException
     Map<String, MetaDataProvider> providers = new ConcurrentSkipListMap<String, MetaDataProvider>();
-    
+
     /**
      * Constructor
      * @param context a bundle context to access OSGi
@@ -71,7 +73,7 @@ public class ProviderTracker implements ServiceTrackerListener {
         providerTracker = initServiceTracker(context);
         // TODO: add bundle listeners to track new installs and remove uninstalls
     }
-    
+
     private void initBundleProviders(BundleContext context, boolean notifyDuringInit) { 
         Bundle[] bundles = context.getBundles();
         for (Bundle bundle : bundles) {
@@ -94,7 +96,11 @@ public class ProviderTracker implements ServiceTrackerListener {
                         logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
                         Class providerClazz = bundle.loadClass(providerClazzName);
                         MetaDataProvider provider = (MetaDataProvider) providerClazz.newInstance();
-                        addProvider(Long.valueOf(bundle.getBundleId()).toString(), provider, notifyDuringInit);
+                        String id = Long.valueOf(bundle.getBundleId()).toString();
+                        // Instantiate and set the provider callback
+                        provider.setCallback(new ProviderTrackerCallback(provider, id));
+                        // Add the provider to the listener
+                        addProvider(id, provider, notifyDuringInit);
                         logger.debug("Registered MetaDataProvider {} for {}", providerClazzName, bundle.getSymbolicName());
                     }
                 }
@@ -103,7 +109,7 @@ public class ProviderTracker implements ServiceTrackerListener {
             }
         }
     }
-    
+
     private void addProvider(String originId, MetaDataProvider provider, boolean notify) {
         providers.put(originId, provider);
         if (providerListener != null && notify) {
@@ -111,29 +117,36 @@ public class ProviderTracker implements ServiceTrackerListener {
             providerListener.addedProvider(originId, provider);
         }
     }
-    
+
     private ServiceTracker initServiceTracker(BundleContext context) {
         ServiceTracker tracker = new ServiceTrackerNotifier(context, MetaDataProvider.class.getName(), null, this);
         tracker.open();
         return tracker;
-        
     }
-    
+
     public void addedService(ServiceReference reference, Object service) {
         String pid = (String) reference.getProperty(Constants.SERVICE_PID);
-        addProvider(pid, (MetaDataProvider) service, true);
+        MetaDataProvider provider = (MetaDataProvider) service;
+        // Instantiate and set the provider callback
+        provider.setCallback(new ProviderTrackerCallback(provider, pid));
+        // Add the provider to the listener
+        addProvider(pid, provider, true);
     }
 
     public void removedService(ServiceReference reference, Object service) {
         String pid = (String) reference.getProperty(Constants.SERVICE_PID);
         providers.remove(pid);
     }
-    
+
     public void modifiedService(ServiceReference reference, Object service) {
         String pid = (String) reference.getProperty(Constants.SERVICE_PID);
-        addProvider(pid, (MetaDataProvider) service, true);
+        modifiedProvider(pid, (MetaDataProvider) service, true);
     }
     
+    public void modifiedProvider(String pid, MetaDataProvider provider, boolean notify) {
+        addProvider(pid, provider, notify);
+    }
+
     /**
      * Get the current registered providers
      * Providers can be backed by an OSGi services, 
@@ -143,5 +156,31 @@ public class ProviderTracker implements ServiceTrackerListener {
     public Collection<MetaDataProvider> getProviders() {
         //The returned value MUST be thread safe!
         return providers.values();
+    }
+
+    /**
+     * A MetaDataProviderCallback implementation that is used to notify the ProvicerListener
+     * when a MetaDataProvider calls refresh()
+     */
+    private class ProviderTrackerCallback implements MetaDataProviderCallback {
+
+        private MetaDataProvider provider = null;
+        private String originId = null;
+
+        /**
+         * Constructor
+         * @param provider the MetaDataProvider instance
+         * @param originId the MetaDataProvider id
+         */
+        public ProviderTrackerCallback(MetaDataProvider provider, String originId) {
+            this.provider = provider;
+            this.originId = originId;
+        }
+
+        @Override
+        public void refresh() {
+            modifiedProvider(originId, provider, true);
+        }
+
     }
 }
