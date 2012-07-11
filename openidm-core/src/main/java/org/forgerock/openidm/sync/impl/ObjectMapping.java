@@ -19,26 +19,17 @@ package org.forgerock.openidm.sync.impl;
 // Java SE
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-
-// JSON Patch
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.JsonResourceContext;
-
-// OpenIDM
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetContext;
@@ -52,6 +43,8 @@ import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Description.
@@ -506,7 +499,7 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
     }
-
+    
     /**
      * TEMPORARY. Future version will have this break-down into discrete units of work.
      * @param reconId
@@ -516,6 +509,7 @@ class ObjectMapping implements SynchronizationListener {
         
         EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);
         JsonValue context = ObjectSetContext.get();
+        context.add("trigger", "recon");
         JsonValue rootContext = JsonResourceContext.getRootContext(context);
         logReconStart(reconId, rootContext, context);
         sourceStats = new ReconStats(reconId,sourceObjectSet);
