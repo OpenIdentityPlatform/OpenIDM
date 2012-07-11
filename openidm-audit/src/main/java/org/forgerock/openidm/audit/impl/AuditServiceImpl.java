@@ -41,8 +41,10 @@ import org.apache.felix.scr.annotations.Modified;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.JsonResourceContext;
 
 import org.forgerock.openidm.audit.util.Action;
+import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
@@ -56,6 +58,7 @@ import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.PreconditionFailedException;
@@ -84,7 +87,8 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
 
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-    Map<String, List<String>> filters;
+    Map<String, List<String>> actionFilters;
+    Map<String, Map<String, List<String>>> triggerFilters;
 
     List<AuditLogger> auditLoggers;
 
@@ -148,14 +152,30 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         String type = splitTypeAndId[0];
         String localId = splitTypeAndId[1];
 
+        String trigger = getTrigger();
+        
         // Filter
-        List<String> actionFilter = filters.get(type);
+        List<String> actionFilter = actionFilters.get(type);
+        Map<String, List<String>> triggerFilter = triggerFilters.get(type);
+        
+        if (triggerFilter != null && trigger != null) {
+            List<String> triggerActions = triggerFilter.get(trigger);
+            if (triggerActions == null) {
+                logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
+            } else if (!triggerActions.contains(obj.get("action"))) {
+                logger.debug("Filtered by trigger filter");
+                return; 
+            }
+        } 
+        
         if (actionFilter != null) {
             // TODO: make filters that can operate on a variety of conditions
             if (!actionFilter.contains(obj.get("action"))) {
+                logger.debug("Filtered by action filter");
                 return;
             }
         }
+        
 
         // Generate an ID if there is none
         if (localId == null) {
@@ -184,6 +204,23 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
     }
 
+    /**
+     * Searches ObjectSetContext for the value of "trigger" and return it.
+     */
+    private String getTrigger() {
+        JsonValue context = ObjectSetContext.get();
+        String trigger = null;
+        // Loop through parent contexts, and return highest "trigger"
+        while (!context.isNull()) {
+            JsonValue tmp = context.get("trigger");
+            if (!tmp.isNull()) {
+                trigger = tmp.asString();
+            }
+            context = context.get("parent");
+        }
+        return trigger;
+    }
+    
     /**
      * Audit service does not support changing audit entries.
      */
@@ -270,8 +307,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             auditLoggers = getAuditLoggers(config, compContext);
-            filters = getFilters(config);
-            logger.debug("Audit service filters enabled: {}", filters);
+            actionFilters = getActionFilters(config);
+            triggerFilters = getTriggerFilters(config);
+            logger.debug("Audit service filters enabled: {}", actionFilters);
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
@@ -279,7 +317,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         logger.info("Audit service started.");
     }
 
-    Map<String, List<String>> getFilters(JsonValue config) {
+    Map<String, List<String>> getActionFilters(JsonValue config) {
         Map<String, List<String>> configFilters = new HashMap<String, List<String>>();
 
         Map<String, Object> eventTypes = config.get("eventTypes").asMap();
@@ -300,6 +338,43 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 configFilters.put(eventTypeName, filter);
             }
         }
+        return configFilters;
+    }
+    
+    Map<String, Map<String, List<String>>> getTriggerFilters(JsonValue config) {
+        Map<String, Map<String, List<String>>> configFilters = new HashMap<String, Map<String, List<String>>>();
+
+        JsonValue eventTypes = config.get("eventTypes");
+        if(!eventTypes.isNull()) {
+            Set<String> eventTypesKeys = eventTypes.keys();
+            // Loop through event types ("activity", "recon", etc..)
+            for (String eventTypeKey : eventTypesKeys) {
+                JsonValue eventType = eventTypes.get(eventTypeKey);
+                JsonValue filterTriggers = eventType.get("filter").get("triggers");
+                if (!filterTriggers.isNull()) {
+                    // Create map of the trigger's actions
+                    Map<String, List<String>> filter = new HashMap<String, List<String>>();
+                    Set<String> keys = filterTriggers.keys();
+                    // Loop through individual triggers (that each contain a list of actions)
+                    for (String key : keys) {
+                        JsonValue trigger = filterTriggers.get(key);
+                        // Create a empty list of actions for this trigger
+                        List<String> triggerActions = new ArrayList<String>();
+                        // Loop through the trigger's actions
+                        for (JsonValue triggerAction : trigger) {
+                            // Add action to list
+                            Enum actionEnum = triggerAction.asEnum(Action.class);
+                            triggerActions.add(actionEnum.toString());
+                        }
+                        // Add list of actions to map of trigger's actions
+                        filter.put(key, triggerActions);
+                    }
+                    // add filter to map of filters
+                    configFilters.put(eventTypeKey, filter);
+                }
+            }
+        }
+        
         return configFilters;
     }
 
