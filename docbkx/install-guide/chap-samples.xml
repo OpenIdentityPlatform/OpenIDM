@@ -434,7 +434,7 @@ cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top</programlisting>
    
-   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before yo import this groups.</para> 
+   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you import these groups.</para> 
   </section>
   
   <section xml:id="run-sample2c">
