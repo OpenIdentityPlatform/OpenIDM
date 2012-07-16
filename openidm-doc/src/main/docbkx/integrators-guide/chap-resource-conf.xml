@@ -114,7 +114,7 @@
 
   <para>When configuring remote connectors, the connector info provider
   service to connect through remote connector servers must be used. The configuration is
-  stored in the the configuration file,
+  stored in the configuration file,
   <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
   A sample can be found under <filename>openidm/samples/provisioners/</filename>.</para>
 
