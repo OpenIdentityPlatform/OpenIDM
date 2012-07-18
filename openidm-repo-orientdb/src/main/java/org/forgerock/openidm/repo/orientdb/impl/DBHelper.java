@@ -299,7 +299,7 @@ public class DBHelper {
         
         logger.info("Creating OrientDB class {}", orientClassName);
         OClass orientClass = schema.createClass(orientClassName, 
-                db.getStorage().addCluster(orientClassName, 
+                db.addCluster(orientClassName, 
                 OStorage.CLUSTER_TYPE.PHYSICAL));
         
         JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);
