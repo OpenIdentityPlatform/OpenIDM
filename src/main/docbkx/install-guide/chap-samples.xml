@@ -719,7 +719,7 @@ $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
    
-   <para>In addition two LDAP Gropus should be created, which can be found in the ldif file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> if not already aded through sample 2c:</para>
+   <para>In addition two LDAP Groups should be created, which can be found in the ldif file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> if not already aded through sample 2c:</para>
    
    <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
