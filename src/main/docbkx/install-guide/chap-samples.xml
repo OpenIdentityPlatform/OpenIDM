@@ -48,7 +48,7 @@
 
   <para>OpenIDM comes with an internal noSQL database, OrientDB, for use as
   the internal repository out of the box. This makes it easy to get started
-  with OpenIDM. OrientDB is not yet supported for production use, however,
+  with OpenIDM. OrientDB is not yet supported for production use, however, 
   so use a supported JDBC database when moving to production.</para>
 
   <section xml:id="install-samples">
@@ -365,7 +365,7 @@ $ curl
   </indexterm>
 
   <para>Like sample 2b, sample 2c also connects to an external LDAP
-  server. The difference is just that in sample 2c Ldap Group Memberships are synchronized.</para>
+  server. The difference is just that in sample 2c LDAP Group Memberships are synchronized.</para>
   
   <section xml:id="install-sample2c">
    <title>Install the Sample</title>
@@ -415,7 +415,7 @@ $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
    
-   <para>In addition two LDAP Groups should be created, which can be found in the ldif file: <filename>openidm/samples/sample2c/data/Example.ldif</filename>:</para>
+   <para>In addition, two LDAP Groups should be created, which can be found in the LDIF file: <filename>openidm/samples/sample2c/data/Example.ldif</filename>:</para>
    
    <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
@@ -719,7 +719,7 @@ $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
    
-   <para>In addition two LDAP Groups should be created, which can be found in the ldif file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> if not already aded through sample 2c:</para>
+   <para>In addition two LDAP Groups should be created, which can be found in the LDIF file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> (if not already added through sample 2c):</para>
    
    <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
@@ -734,12 +734,13 @@ objectClass: groupOfUniqueNames
 objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
+uniqueMember: uid=jdoe,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top
 </programlisting>
    
-   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before yo import this groups.</para> 
+   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you import these groups.</para> 
   </section>
   
   <section xml:id="run-sample2d">
@@ -802,7 +803,6 @@ $ curl
    ],
    "uniqueMember":[
       "uid=jdoe,ou=People,dc=example,dc=com",
-      "uid=feli,ou=People,dc=example,dc=com"
    ],
    "name":[
       "openidm2"
@@ -851,7 +851,7 @@ $ cp -r samples/sample3/conf samples/sample3/tools .</screen>
    <para>You do not need to copy the <filename>sample3/data/</filename> folder,
    as its content is needed only to set up the external user database.</para>
 
-   <para>In this example OpenIDM communicates with MySQL database server.
+   <para>In this example OpenIDM communicates with a MySQL database server.
    OpenIDM requires a MySQL driver, the MySQL Connector/J. Download <link
    xlink:show="new" xlink:href="http://www.mysql.com/downloads/connector/j/"
    >MySQL Connector/J</link>, unpack the delivery, and copy the .jar into the
@@ -889,7 +889,19 @@ $ </screen>
 $ ./startup.sh</screen>
 
    <para>If the configuration of the external database is correct, then
-   OpenIDM should show five users during startup. The check method, executed
+   OpenIDM should show five users during startup, for example:</para>
+   <screen>./startup.sh
+Using OPENIDM_HOME:   /path/to/openidm
+Using OPENIDM_OPTS:   -Xmx1024m
+Using LOGGING_CONFIG: -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
+Using boot properties at /path/to/openidm/conf/boot/boot.properties
+OpenIDM version "2.1.0-SNAPSHOT" (revision: 1096)
+bob
+rowley
+louis
+john
+jdoe</screen>
+   <para>The check method, executed
    for each connected resource, executes a
    <literal>select * from Users</literal> statement.</para>
   </section>
@@ -898,7 +910,7 @@ $ ./startup.sh</screen>
    <title>Run the Sample</title>
 
    <para>The sample 3 <filename>sync.json</filename> configuration file
-   contains a mapping to reconcile OpenIDM and the external databasee.
+   contains a mapping to reconcile OpenIDM and the external database.
    Run the reconciliation with the following command.</para>
 
    <screen width="83"><?dbfo pgwide="1"?>$ curl
