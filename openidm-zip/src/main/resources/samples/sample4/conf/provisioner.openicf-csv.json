@@ -30,7 +30,7 @@
     "configurationProperties" : {
         "filePath" : "data/hr.csv",
         "uniqueAttribute" : "uid",
-        "nameAttribute" : "lastName",
+        "nameAttribute" : "uid",
         "passwordAttribute" : "password"
     },
     "objectTypes" : {
@@ -60,7 +60,7 @@
                     "type" : "string",
                     "nativeName" : "__PASSWORD__",
                     "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
-                    "flags" : [ "NOT_RETURNED_BY_DEFAULT" ]
+                    "flags" : [ ]
                 },
                 "lastName" : {
                     "type" : "string",
