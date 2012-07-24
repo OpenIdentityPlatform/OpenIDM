@@ -977,7 +977,7 @@ $ cp -r samples/sample4/conf samples/sample4/data .</screen>
    <title>External Configuration</title>
 
    <para>The only external resource you need is the
-   <filename>data/hr.csv</filename> file you copied.</para>
+   <filename>data/hr.csv</filename> file that you copied in the previous step.</para>
   </section>
 
   <section xml:id="run-sample4">
@@ -1123,8 +1123,11 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
   </indexterm>
 
   <para>Sample 6 resembles sample 5, but sample 6 uses two real LDAP
-  connections. To simplify setup, both provisioners point to the same LDAP
-  server, and only use different base DNs, so you can simulate use of two
+  connections. The default sample configuration assumes two LDAP
+  server instances running on the local host, but listening on different 
+  LDAP ports.</para>
+  <para>To simplify setup, you can configure both provisioners to point to the 
+  same LDAP server, and only use different base DNs, so you can simulate use of two
   directory servers with a single <link xlink:show="new"
   xlink:href="http://www.forgerock.org/opendj.html">OpenDJ</link> server,
   for example.</para>
@@ -1149,10 +1152,11 @@ $ cp -r samples/sample6/conf .</screen>
    <title>External Configuration</title>
 
    <para>Out of the box, the sample provisioners are configured to use two
-   independent LDAP servers. Change the sample to connect to a single LDAP
+   independent LDAP servers, one listening on port 1389 and one on port 4389.</para>
+   <para>To simplify your setup, you can change the sample to connect to a single LDAP
    server representing both external resources by using the same port numbers
    in both provisioner .json files. For example, change
-   <filename>conf/provisioner.openicf-ad.json</filename> so the port number
+   <filename>conf/provisioner.openicf-ad.json</filename> so that the port number
    line reads <literal>"port" : 1389</literal>.</para>
 
    <section xml:id="prepare-livesync-sample6">
@@ -1163,15 +1167,15 @@ $ cp -r samples/sample6/conf .</screen>
     (ECL). The ECL is presented as an LDAP subtree with base DN
     <literal>cn=changelog</literal>. Each change is represented as an
     entry in the subtree. Each change entry remains in the subtree until the
-    log is purged (by default three days).</para>
+    log is purged (by default every three days).</para>
 
-    <para>You turn on the change log in OpenDJ by enabling replication. OpenDJ
-    provides the change log even if it does not in fact replicate data to
-    another OpenDJ server (though it can log, in this case, harmless error
-    messages because it is not connected to another replica).</para>
+    <para>You turn on the external change log in OpenDJ by enabling replication. OpenDJ
+    provides the change log even if it does not, in fact, replicate data to
+    another OpenDJ server. Note that OpenDJ will log, in this case, harmless error
+    messages if replication is enabled without a connection to another replica.</para>
 
     <para>To enable replication without another server, set up replication when
-    installing OpenDJ.</para>
+    you install OpenDJ.</para>
 
     <mediaobject xml:id="figure-replication-setup">
      <alt>Topology Options screen from the OpenDJ QuickSetup wizard</alt>
@@ -1189,13 +1193,13 @@ $ cp -r samples/sample6/conf .</screen>
     <title>LDAP Configuration</title>
 
     <itemizedlist>
-    <para>Sample 6 is configuration for an external LDAP server set up as
+    <para>Sample 6 provides the configuration for two external LDAP servers, set up as
     follows.</para>
-     <listitem><para>The LDAP server runs on the local host.</para></listitem>
+     <listitem><para>Both LDAP servers run on the local host.</para></listitem>
      <listitem><para>The LDAP server "LDAP" listens on port 1389.</para></listitem>
-     <listitem><para>The LDAP server "AD" listens on port 4389. Change this to
-     1389 to use a single LDAP server.</para></listitem>
-     <listitem><para>The LDAP server both have a user with DN
+     <listitem><para>The LDAP server "AD" listens on port 4389. (If you want to 
+     use a single LDAP server instance, change this to 1389.)</para></listitem>
+     <listitem><para>Both LDAP servers have a user with DN
      <literal>cn=Directory Manager</literal> and password
      <literal>password</literal> who can read and write to the data and read
      the change log.</para></listitem>
@@ -1234,10 +1238,9 @@ description: Created by OpenIDM
      </listitem>
     </itemizedlist>
 
-    <para>Prepare the LDAP server by creating two base DNs,
-    <literal>dc=example,dc=com</literal> and <literal>o=AD</literal>,
-    and then importing the following objects.</para>
-
+    <para>Prepare the LDAP servers by creating the base DN 
+    <literal>dc=example,dc=com</literal> on the first server and 
+    <literal>o=AD</literal> on the second server, and then importing the following objects.</para>
     <para>For the "LDAP" directory, import
     <filename>samples/sample6/data/Example.ldif</filename>.</para>
     <programlisting language="ldif">
@@ -1290,12 +1293,12 @@ objectclass: organizationalunit
   <section xml:id="run-sample6">
    <title>Running the Sample</title>
 
-   <para>The following sections show how to run the sample both once with
+   <para>The following sections show how to run the sample once off, with
    reconciliation, and continuously with LiveSync.</para>
 
    <section xml:id="run-sample6-reconciliation">
     <title>Using Reconciliation</title>
-    <para>Start up OpenIDM, and then run reconciliation.</para>
+    <para>Start up OpenIDM, and then run reconciliation over the REST interface.</para>
 
     <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -1310,9 +1313,9 @@ objectclass: organizationalunit
     >{"reconId":"7da56fc0-54de-4c7b-bae3-de7c7a999387"}</programlisting>
 
     <para>With the configuration for sample 6, OpenIDM creates user objects
-    from LDAP in the repository, and also in the target AD suffix.</para>
+    from LDAP in the internal repository, and also in the target AD suffix.</para>
 
-    <para>After reconciliation, list all users.</para>
+    <para>After reconciliation, list all users in the repository.</para>
 
     <screen>
 $ curl
@@ -1344,15 +1347,29 @@ $ curl
  --request GET
  "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
 
+   <para>The result should resemble the following JSON object, though all
+   on one line.</para>
+
+    <programlisting language="javascript">
+{
+    "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+    "_rev":"0",
+    "email":"jdoe@example.com",
+    "description":"Created for OpenIDM",
+    "familyName":"Doe",
+    "userName":"jdoe",
+    "givenName":"John",
+    "displayName":"John Doe"
+}</programlisting>
+
     <para>You can also view users created in the AD suffix with the following
-    <literal>ldapsearch</literal> command, assuming you changed the port number
-    to 1389.</para>
+    <literal>ldapsearch</literal> command:</para>
 
     <screen>$ /path/to/OpenDJ/bin/ldapsearch
  --bindDN "cn=Directory Manager"
  --bindPassword password
  --hostname `hostname`
- --port 1389
+ --port 4389
  --baseDN o=AD
  "(uid=*)"
 
@@ -1373,15 +1390,15 @@ mail: jdoe@example.com
    <section xml:id="run-sample6-live-sync">
     <title>Using LiveSync</title>
 
-    <para>In contrast to reconciliation, which you can start by using a
-    scheduler configuration or by using the REST interface directly, you must
+    <para>You can start reconciliation by using a scheduler configuration or 
+    by using the REST interface directly. However, you must
     start LiveSync using a scheduler. The sample comes with the following
     scheduler configuration file for LiveSync in
     <filename>conf/scheduler-activeSynchroniser_systemLdapAccount.json</filename>.</para>
 
     <programlisting language="javascript">
 {
-    "enabled" : true,
+    "enabled" : false,
     "type" : "cron",
     "schedule" : "0/15 * * * * ?",
     "invokeService" : "provisioner",
@@ -1391,10 +1408,10 @@ mail: jdoe@example.com
     }
 }</programlisting>
 
-    <para>Activated LiveSync by editing the file,
+    <para>LiveSync is disabled by default. Activate LiveSync by editing the file,
     <filename>conf/scheduler-activeSynchroniser_systemLdapAccount.json</filename>,
     to change the "enabled" property value to <literal>true</literal>. With
-    LiveSync enabled, you can change LDAP users and see them show up in AD
+    LiveSync enabled, you can add and change LDAP users, and see the changes in AD
     as OpenIDM flows the data between resources dynamically.</para>
    </section>
   </section>
