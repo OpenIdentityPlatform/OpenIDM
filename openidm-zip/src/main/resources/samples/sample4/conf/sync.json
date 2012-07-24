@@ -1,48 +1,73 @@
 {
-    "mappings" : [ {
+    "mappings" : [
+        {
         "name" : "systemHrAccounts_managedUser",
         "source" : "system/HR/account",
         "target" : "managed/user",
-        "properties" : [ {
-            "source" : "employeeNumber",
-            "target" : "employeeNumber"
-        }, {
-            "source" : "mail",
-            "target" : "email"
-        }, {
-            "source" : "uid",
-            "target" : "userName"
-        }, {
-            "source" : "lastName",
-            "target" : "familyName"
-        }, {
-            "source" : "givenName",
-            "target" : "givenName"
-        } ],
-        "policies" : [ {
-            "situation" : "CONFIRMED",
-            "action" : "UPDATE"
-        }, {
-            "situation" : "FOUND",
-            "action" : "UPDATE"
-        }, {
-            "situation" : "ABSENT",
-            "action" : "CREATE"
-        }, {
-            "situation" : "AMBIGUOUS",
-            "action" : "EXCEPTION"
-        }, {
-            "situation" : "MISSING",
-            "action" : "UNLINK"
-        }, {
-            "situation" : "SOURCE_MISSING",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "UNQUALIFIED",
-            "action" : "IGNORE"
-        }, {
-            "situation" : "UNASSIGNED",
-            "action" : "IGNORE"
-        } ]
-    } ]
+            "properties" : [
+                {
+                    "source" : "employeeNumber",
+                    "target" : "employeeNumber"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "lastName",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "password",
+                    "target" : "password"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
 }
