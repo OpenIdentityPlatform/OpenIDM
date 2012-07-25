@@ -241,12 +241,12 @@ input.orange {
 
 input.gray {
 	background-color: #5a646d;
-	margin-right: 1px;
+	margin-right: 2px;
 }
 
 input.ashy {
 	background-color: #C2C2C2;
-	margin-right: 1px;
+	margin-right: 2px;
 }
 
 input.textFieldGray {
@@ -288,6 +288,12 @@ form div.validationMessage {
 	color: #f3851e;
 	padding-top: 8px;
 	margin: 0 0 10px 463px;
+}
+
+form div.inputValidationMessage {
+	margin: 0px 0px 10px 363px;
+	color: #f3851e;
+	padding-top: 7px;
 }
 
 form div.fields {
@@ -388,7 +394,7 @@ form div.groupFieldErrors label {
 }
 
 #loginForm input.field {
-  width: 150px;
+  width: 147px;
 }
 
 .login_toggle {
@@ -592,7 +598,7 @@ span#remainingUsers {
 }
 
 #profile input[type=text] {
-	width: 220px;	
+	width: 218px;	
 }
 
 #profile form div.validationMessage {
@@ -602,7 +608,7 @@ span#remainingUsers {
 
 #profile form div.field {
 	height: 70px;
-	width: 434px;
+	width: 433px;
 }
 
 #profile form label {

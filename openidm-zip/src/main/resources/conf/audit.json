@@ -1,15 +1,27 @@
 {
-    "eventTypes": {
-        "activity": {
-            "filter": {
-                 "actions": [ "create", "update", "delete", "patch", "action" ]
+    "eventTypes" : {
+        "activity" : {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
             }
         },
-        "recon": {
+        "recon" : {
         }
     },
-    "logTo": [
-        { "logType": "csv", "location": "audit", "recordDelimiter": ";" },
-        { "logType": "repository" }
+    "logTo" : [
+        {
+            "logType" : "csv",
+            "location" : "audit",
+            "recordDelimiter" : ";"
+        },
+        {
+            "logType" : "repository"
+        }
     ]
 }

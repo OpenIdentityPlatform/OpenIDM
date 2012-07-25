@@ -51,7 +51,7 @@ define("app/comp/common/navigation/NavigationCtrl",
     };
 
     obj.addLinks = function() {
-        if( !obj.mode || obj.mode === constants.MODE_USER ) {
+        if( !obj.mode || obj.mode !== constants.MODE_ADMIN ) {
             obj.view.addOuterLink('http://forgerock.com/openam.html', 'OpenAM');
             obj.view.addOuterLink('http://forgerock.com/opendj.html', 'OpenDJ');
             obj.view.addOuterLink('http://forgerock.com/openidm.html', 'OpenIDM');	

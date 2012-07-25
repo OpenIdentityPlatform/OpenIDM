@@ -95,7 +95,7 @@ define("app/comp/user/changesecurityinfo/SecurityDialogCtrl",
     obj.registerPasswordValidators = function() {
         console.log("register dialog validators");
 
-        obj.view.getOldPasswordInput().off().on('focusout', function() {
+        obj.view.getOldPasswordInput().off().on('change', function() {
             userDelegate.checkCredentials(obj.userName, obj.view.getOldPasswordInput().val(), function() {
                 obj.view.showMore();
                 obj.oldPassword = obj.view.getOldPasswordInput().val();

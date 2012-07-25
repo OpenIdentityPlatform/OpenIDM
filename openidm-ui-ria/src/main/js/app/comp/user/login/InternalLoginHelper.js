@@ -35,7 +35,7 @@ define("app/comp/user/login/InternalLoginHelper",
 
     obj.loginRequest = function(userName, password, successCallback, errorCallback) {
         userDelegate.logAndGetUserDataByCredentials(userName, password, function(user) {
-            eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, user.userName);
+            eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, user);
         }, function() {
             eventManager.sendEvent(constants.EVENT_LOGIN_FAILED);
         });

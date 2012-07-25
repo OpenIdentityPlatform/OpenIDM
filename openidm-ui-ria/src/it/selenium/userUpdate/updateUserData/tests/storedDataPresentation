@@ -33,7 +33,7 @@
 </tr>
 <tr>
 	<td>runScript</td>
-	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;FirstName&quot;, lastname :&quot;LastName&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;Test Address Line 1&quot;, address2 : &quot;Test Address Line 2&quot;, city : &quot;TestCity&quot;, postalcode : &quot;Any postal code&quot;, phonenumber : &quot;+48666666666&quot;, country : &quot;poland&quot;, state_province : &quot;dolnoslaskie&quot;, securityquestion : &quot;&quot;, securityanswer : &quot;&quot; }); });</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;FirstName&quot;, lastname :&quot;LastName&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;Test Address Line 1&quot;, address2 : &quot;Test Address Line 2&quot;, city : &quot;TestCity&quot;, postalcode : &quot;Any postal code&quot;, phonenumber : &quot;+48666666666&quot;, country : &quot;poland&quot;, state_province : &quot;dolnoslaskie&quot;, securityquestion : &quot;1&quot;, securityanswer : &quot;qwe&quot; }); });</td>
 	<td></td>
 </tr>
 <tr>

@@ -33,13 +33,18 @@
 </tr>
 <tr>
 	<td>runScript</td>
-	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;test&quot;, lastname :&quot;test&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalcode : &quot;&quot;, phonenumber : &quot;&quot;, country : &quot;&quot;, state_province : &quot;&quot;, securityquestion : &quot;&quot;, securityanswer : &quot;&quot; }); });</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ password : &quot;tesT#1#Test&quot;, userName : &quot;test@test.test&quot;, firstname : &quot;test&quot;, lastname :&quot;test&quot;, email : &quot;test@test.test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalcode : &quot;&quot;, phonenumber : &quot;123&quot;, country : &quot;&quot;, state_province : &quot;&quot;, securityquestion : &quot;1&quot;, securityanswer : &quot;qwe&quot; }); });</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForCondition</td>
 	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
 	<td>10000</td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
 </tr>
 <tr>
 	<td>type</td>

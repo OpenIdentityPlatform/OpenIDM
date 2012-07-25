@@ -92,6 +92,9 @@ public class AuthFilter implements Filter {
 
     /** Attribute in session and request containing assigned roles. */
     public static final String ROLES_ATTRIBUTE = "openidm.roles";
+    
+    /** Attribute in session containing user's resource (managed_user or internal_user) */
+    public static final String RESOURCE_ATTRIBUTE = "openidm.resource";
 
 
     // name of the header containing the client IPAddress, used for the audit record
@@ -106,6 +109,7 @@ public class AuthFilter implements Filter {
        String username;
        List<String> roles = new ArrayList<String>();
        boolean status = false;
+       String resource = "default";
     };
 
     // A list of ports that allow authentication purely based on client certificates (SSL mutual auth)
@@ -161,6 +165,7 @@ public class AuthFilter implements Filter {
             } else if (session != null) {
                 authData.username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
                 authData.roles = (List)session.getAttribute(ROLES_ATTRIBUTE);
+                authData.resource = (String)session.getAttribute(RESOURCE_ATTRIBUTE);
             } else {
                 authFailed(req, res, authData.username);
                 return;
@@ -171,6 +176,7 @@ public class AuthFilter implements Filter {
         }
         LOGGER.debug("Found valid session for {} with roles {}", authData.username, authData.roles);
         req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
+        req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
         chain.doFilter(new UserWrapper(req, authData.username, authData.roles), res);
     }
  
@@ -232,7 +238,9 @@ public class AuthFilter implements Filter {
             throw new AuthException("");
         }
         ad.username = t[0];
-        ad.status = AuthModule.authenticate(ad.username, t[1], ad.roles);
+        StringBuilder resource = new StringBuilder();
+        ad.status = AuthModule.authenticate(ad.username, t[1], ad.roles, resource);
+        ad.resource = resource.toString();
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }
@@ -244,7 +252,12 @@ public class AuthFilter implements Filter {
             sess = req.getSession();
             sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
             sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
-            LOGGER.debug("Created session for: {} with roles {}", ad.username, ad.roles);
+            sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
+            
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Created session for: {} with roles {} and resource: {}", 
+                    new Object[] {ad.username, ad.roles, ad.resource});
+            }
         }
     }
 
@@ -258,7 +271,9 @@ public class AuthFilter implements Filter {
             LOGGER.debug("Failed authentication, missing or empty headers");
             throw new AuthException();
         }
-        ad.status = AuthModule.authenticate(ad.username, password, ad.roles);
+        StringBuilder resource = new StringBuilder();
+        ad.status = AuthModule.authenticate(ad.username, password, ad.roles, resource);
+        ad.resource = resource.toString();
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }

@@ -1,7 +1,72 @@
 {
-    "filters": [
+    "filters" : [
         {
-            "onRequest": { "type" : "text/javascript", "file" : "script/router-authz.js" }
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/router-authz.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onResponse-user-query-hide-sensitive-attributes.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "read"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onResponse-user-read-hide-sensitive-attributes.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'for-credentials'"
+            },
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onRequest-for-credentials.js"
+            }
+        },        
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'for-security-answer'"
+            },
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onResponse-for-securityAnswer.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'set-newPassword-for-userName-and-security-answer'"
+            },
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onResponse-set-newPassword-for-userName-and-security-answer.js"
+            }
         }
     ]
 }

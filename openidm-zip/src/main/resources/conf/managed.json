@@ -1,10 +1,32 @@
 {
-    "objects": [
+    "objects" : [
         {
-            "name": "user"
+            "name" : "user",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onCreate-user-set-default-fields.js"
+            },
+            "onValidate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onValidate-user-sensitive-fields.js"
+            },
+            "properties" : [
+                {
+                    "name" : "securityanswer",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    }
+                },
+                {
+                    "name" : "password",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    }
+                }
+            ]
         },
         {
-            "name": "group"
+            "name" : "group"
         }
     ]
 }

@@ -19,7 +19,6 @@ package org.forgerock.openidm.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,21 +26,22 @@ import java.util.Map;
 import org.eclipse.jetty.http.security.Credential;
 import org.eclipse.jetty.http.security.Password;
 
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceAccessor;
+import org.forgerock.json.resource.JsonResourceContext;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.QueryConstants;
 
-import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
-import org.eclipse.jetty.http.security.Credential;
-import org.eclipse.jetty.http.security.Password;
 
 // Deprecated
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
@@ -73,12 +73,15 @@ public class AuthModule {
             new Object[] {defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
     }
     
-    public static boolean authenticate(String login, String password, List<String> roles) {
+    public static boolean authenticate(String login, String password, List<String> roles, StringBuilder resource) {
         
-        boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);
+        boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);        
         if (!authenticated) {
             // Authenticate against the internal user table if authentication against managed users failed
             authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, login, password, roles);
+            resource.append("internal_user");
+        } else {
+            resource.append("managed_user");
         }
         return authenticated;
     }
@@ -106,7 +109,7 @@ public class AuthModule {
         UserInfo user = null;
         Credential credential = null;
         List roleNames = new ArrayList();
-
+        
         Map props = new HashMap();
         props.put(QueryConstants.QUERY_ID, repoQueryId);
         props.put("username", username);
@@ -135,14 +138,14 @@ public class AuthModule {
                 } else if (!key.startsWith("_")) {
                     ++nonInternalCount;                    
                     if (nonInternalCount == 1) {
-                    	// By convention the first property is the cred
-                    	//decrypt if necessary
-                    	if (getCrypto().isEncrypted(entry.get(key))) {
-                    		JsonValue decrypted = getCrypto().decrypt(entry.get(key));
-                    		retrCred = decrypted.asString();
-                    	} else {
-                    		retrCred = entry.get(key).asString(); 
-                    	}
+                        // By convention the first property is the cred
+                        //decrypt if necessary
+                        if (getCrypto().isEncrypted(entry.get(key))) {
+                            JsonValue decrypted = getCrypto().decrypt(entry.get(key));
+                            retrCred = decrypted.asString();
+                        } else {
+                            retrCred = entry.get(key).asString(); 
+                        }
                         retrCredPropName = key;
                     } else if (nonInternalCount == 2) {
                         retrRoles = entry.get(key).getObject(); // By convention the second property can define roles

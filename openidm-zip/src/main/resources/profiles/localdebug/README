@@ -1,5 +1,0 @@
-Development profile
-
-Localdebug profile which allows to modify workspace configuration files and scripts without need of rebuilding openidm-zip.
-It creates symlinks to the conf and script folders in home directory. If home directory conf and script folders are in fact symlinks pointing to
-your workspace folders, you can easily manipulate workspace configuration and see results without recompiling the project.

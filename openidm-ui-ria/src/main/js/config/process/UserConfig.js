@@ -113,7 +113,7 @@ define("config/process/UserConfig",["app/util/Constants", "app/comp/common/event
                                 if(event.selfRegistration) {
                                     eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, { userName: event.user.userName, password: event.user.password});
                                 } else {
-                                    breadcrumbsCtrl.goBack();	
+                                    breadcrumbsCtrl.goBack();    
                                 }
                             }
          },
@@ -162,7 +162,7 @@ define("config/process/UserConfig",["app/util/Constants", "app/comp/common/event
                             }
          },
          {
-             startEvent: constants.EVENT_SUCCESFULY_LOGGGED_IN,
+             startEvent: constants.EVENT_SUCCESFULY_LOGGGED_IN, 
              description: "",
              dependencies: [
                             "app/comp/user/delegates/UserDelegate",
@@ -173,26 +173,49 @@ define("config/process/UserConfig",["app/util/Constants", "app/comp/common/event
                             "app/comp/main/Configuration",
                             "app/comp/common/navigation/NavigationCtrl"
                             ],
-                            processDescription: function(userName, userDelegate, conf, profileCtrl, loginCtrl, messagesCtrl, appConfiguration, navigationCtrl) {
+                            processDescription: function(loggedUser, userDelegate, conf, profileCtrl, loginCtrl, messagesCtrl, appConfiguration, navigationCtrl) {
                                 eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                                
+                                if(loggedUser.roles && loggedUser.roles.indexOf("openidm-admin") !== -1) {
+                                    eventManager.sendEvent(constants.EVENT_OPENIDM_ADMIN_LOGGED_IN, loggedUser);
+                                    return;
+                                }
+                                
                                 userDelegate.getForUserName( 
-                                        userName, 
+                                        loggedUser.userName, 
                                         function(user) {
                                             conf.setProperty('loggedUser', user);
 
-
-                                            if(appConfiguration.forceUserRole === constants.MODE_ADMIN || user.role === constants.MODE_ADMIN) {
+                                            if(appConfiguration.forceUserRole === constants.MODE_ADMIN || user.roles === constants.MODE_ADMIN) {
                                                 eventManager.sendEvent(constants.EVENT_SWITCH_VIEW_REQUEST, {viewId: "app/comp/admin/usermanagement/UsersCtrl"});
                                             } else {
                                                 profileCtrl.init(constants.MODE_USER);
                                             }
-                                            navigationCtrl.init(user.role);
+                                            navigationCtrl.init(user.roles);
                                             loginCtrl.afterSuccessfulLogin(user);
                                             messagesCtrl.displayMessage('info', 'You have been successfully logged in.');
                                          }, 
                                          function() { messagesCtrl.displayMessage('error', 'Error fetching user data');
                                         }
                                 );
+                            }
+         },
+         {
+             startEvent: constants.EVENT_OPENIDM_ADMIN_LOGGED_IN,
+             description: "",
+             dependencies: [
+                            "app/comp/main/Configuration",
+                            "app/comp/user/login/LoginCtrl",
+                            "app/comp/common/messages/MessagesCtrl",
+                            "app/comp/common/navigation/NavigationCtrl"
+                           ],
+                            processDescription: function(loggedUser, conf, loginCtrl, messagesCtrl, navigationCtrl) {
+                                conf.setProperty('loggedUser', loggedUser);
+                                
+                                eventManager.sendEvent(constants.EVENT_SWITCH_VIEW_REQUEST, {viewId: "app/comp/admin/usermanagement/UsersCtrl"});
+                                navigationCtrl.init("admin");
+                                loginCtrl.afterSuccessfulLogin(loggedUser);
+                                messagesCtrl.displayMessage('info', 'You have been successfully logged in.');
                             }
          },
          {
