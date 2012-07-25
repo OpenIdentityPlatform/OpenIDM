@@ -42,7 +42,7 @@
 
  <para>OpenIDM stores configuration objects in its internal repository.
  You can manage the configuration by using either the REST access to the
- configuration objects, or by using the JSON file based views</para>
+ configuration objects, or by using the JSON file based views.</para>
 
  <section xml:id="configuration-objects">
   <title>About Configuration Objects</title>
@@ -56,7 +56,7 @@
   </indexterm>
 
   <para>OpenIDM exposes internal configuration objects in JSON. Configuration
-  elements can be either have single instances or multiple instances for
+  elements can be either single instance or multiple instance for
   an OpenIDM installation.</para>
 
   <itemizedlist xml:id="single-instance-configuration-objects">
@@ -98,10 +98,10 @@
    can have many instances per installation.</para>
    <para><emphasis>Configuration objects</emphasis> are named
    <literal><replaceable>objectname</replaceable>/<replaceable
-   >instancename</replaceable></literal>. For instance <filename>provisioner.openicf/xml</filename>.</para>
+   >instancename</replaceable></literal>. For example, <filename>provisioner.openicf/xml</filename>.</para>
    <para><emphasis>JSON file</emphasis> views of these configuration objects are named
    <filename><replaceable>objectname</replaceable>-<replaceable
-   >instancename</replaceable>.json</filename>. For instance <filename>provisioner.openicf-xml.json.</filename></para>
+   >instancename</replaceable>.json</filename>. For example, <filename>provisioner.openicf-xml.json.</filename></para>
    <listitem>
     <para>Multiple <literal>scheduler</literal> configurations can run
     reconciliations on different schedules.</para>
