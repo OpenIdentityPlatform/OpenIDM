@@ -203,6 +203,7 @@ public class Servlet extends RestletRouterServlet {
             JsonValue result = super.newContext(request);
             JsonValue security = result.get("security");
             security.put("openidm-roles", request.getAttributes().get("openidm.roles"));
+            security.put("openidm-resource", request.getAttributes().get("openidm.resource"));
             return result;
         }
     }

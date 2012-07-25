@@ -75,6 +75,8 @@ define("app/comp/user/forgottenpassword/ForgottenPasswordDialogCtrl",
             }
             obj.view.getEmailInput().focus();
             obj.view.getConfirmButton().focus();
+            
+            obj.view.getEmailInput().trigger('change');
         });
 
     };
@@ -108,7 +110,7 @@ define("app/comp/user/forgottenpassword/ForgottenPasswordDialogCtrl",
         console.log("registerValidatorsEmail");
         obj.validatorsEmail[0] = new Validator([obj.view.getEmailInput()], [ new Condition('email', validators.emailValidator),
                                                                                      new Condition('forgottenEmail', validators.nonuniqueEmailValidator)],
-                                                                                     'focusout', 'simple', obj.validateEmailForm);
+                                                                                     'change', 'simple', obj.validateEmailForm);
 
     };
 

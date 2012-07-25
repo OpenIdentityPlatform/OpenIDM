@@ -1,7 +1,5 @@
 {
     "queryId" : "credential-query",
     "queryOnResource" : "managed/user",
-    "defaultUserRoles" : [
-        "openidm-authorized"
-    ]
+    "defaultUserRoles" : [ ]
 }

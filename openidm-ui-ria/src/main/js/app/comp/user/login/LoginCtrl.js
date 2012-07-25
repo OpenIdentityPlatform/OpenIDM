@@ -129,6 +129,12 @@ define("app/comp/user/login/LoginCtrl",
         obj.registerListeners();
         obj.view.renderLogged();
         obj.view.setUserName(event.userName);
+        
+        if(event.roles && event.roles.indexOf("openidm-admin") !== -1) {
+            obj.view.hideProfileButton();
+        } else {
+            obj.view.showProfileButton();
+        }
     };
 
     obj.setUserName = function(userName) {

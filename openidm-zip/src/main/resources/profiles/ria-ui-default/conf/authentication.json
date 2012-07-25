@@ -1,5 +1,0 @@
-{
-    "queryId" : "credential-query",
-    "queryOnResource" : "managed/user",
-    "defaultUserRoles" : []
-}

@@ -53,7 +53,7 @@ define("app/comp/user/login/LoginView",
             self.isOverLogin = false;
         });
 
-        $("#loginForm input[type!=submit]").mousedown(function() {
+        $("#loginForm").click(function() {
             self.toggle();
         });
 
@@ -89,11 +89,11 @@ define("app/comp/user/login/LoginView",
     };
 
     obj.enableLoginButton = function() {
-        obj.getLoginButton().removeClass('gray').addClass('orange');		
+        obj.getLoginButton().removeClass('gray').addClass('orange');        
     };
 
     obj.disableLoginButton = function() {
-        obj.getLoginButton().removeClass('orange').addClass('gray');		
+        obj.getLoginButton().removeClass('orange').addClass('gray');        
     };
 
     obj.getProfileButton = function() {
@@ -121,11 +121,19 @@ define("app/comp/user/login/LoginView",
     };
 
     obj.getLoginInput = function() {
-        return $("#loginForm input[name='loginText']");		
+        return $("#loginForm input[name='loginText']");        
     };
 
     obj.getPasswordInput = function() {
         return $("#loginForm input[name='loginPassword']");
+    };
+    
+    obj.hideProfileButton = function() {
+        obj.getProfileButton().hide();
+    };
+    
+    obj.showProfileButton = function() {
+        obj.getProfileButton().show();
     };
 
     obj.untoggle = function() {

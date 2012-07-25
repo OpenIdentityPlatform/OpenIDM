@@ -43,17 +43,18 @@ define("app/comp/user/registration/RegistrationView",
 
     obj.getUser = function() {
         var user = {
+                password : $("#registration input[name='password']").val(),    
+                roles: "",
                 userName : $("#registration input[name='email']").val(),
                 firstname : $("#registration input[name='firstName']").val(),
                 lastname : $("#registration input[name='lastName']").val(),
-                email : $("#registration input[name='email']").val(),
-                password : $("#registration input[name='password']").val(),				
+                email : $("#registration input[name='email']").val(),                            
                 //TODO: Until 'replace' won't add new values
                 address1 : "",
                 address2 : "",
                 city : "",
                 postalcode : "",
-                phonenumber : $("#registration input[name='phone']").val(),			
+                phonenumber : $("#registration input[name='phone']").val(),            
                 country : "",
                 state_province : "",
                 passwordAttempts: "",
@@ -190,16 +191,18 @@ define("app/comp/user/registration/RegistrationView",
             $("#dialogClose").on('click', function(event) {
                 self.dialogs.close();
             });
-            self.dialogs.show();
-        });		
+            self.dialogs.show(); 
+        });        
     };
 
     obj.enableRegisterButton = function() {
         obj.getRegisterButton().removeClass('gray').addClass('orange');
+        $(".inputValidationMessage").hide();
     };
 
     obj.disableRegisterButton = function() {
         obj.getRegisterButton().removeClass('orange').addClass('gray');
+        $(".inputValidationMessage").show();
     };
 
     //pasphrase

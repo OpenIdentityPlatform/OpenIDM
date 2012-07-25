@@ -4,13 +4,20 @@
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
     "queries" : {
+        "for-credentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
+        "get-security-question" : "select securityquestion FROM ${_resource} WHERE userName = '${uid}'",
+        "for-security-answer" : "select securityanswer FROM ${_resource} WHERE userName = '${uid}'",
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
+        "query-count-matching-username" : "select count(*) from ${_resource} where userName like '%${usernameToMatch}%' or firstname like '%${usernameToMatch}%' or lastname like '%${usernameToMatch}%'",
+        "query-matching-username" : "select ${fields} from ${_resource} where userName like '%${usernameToMatch}%' or firstname like '%${usernameToMatch}%' or lastname like '%${usernameToMatch}%' limit ${limit}",
         "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND firstId = '${firstId}'",
         "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'",
-        "credential-query" : "select _openidm_id, password from managed_user WHERE userName = ${username}",
+        "credential-query" : "select _openidm_id, password, roles from ${_resource} WHERE userName = '${username}'",
         "credential-internaluser-query" : "select _openidm_id, password, roles from internal_user WHERE _openidm_id = ${username}",
-        "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"
+        "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
+        "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'"
     },
     "dbStructure" : {
         "orientdbClass" : {

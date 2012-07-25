@@ -115,6 +115,7 @@ define("config/process/AdminConfig",["app/util/Constants", "app/comp/common/even
                                     usersCtrl.init();
                                     return false;
                                 });
+                                breadcrumbsCtrl.set("Add user");
                             }
          },
          {

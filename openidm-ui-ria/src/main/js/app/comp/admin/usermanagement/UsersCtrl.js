@@ -99,7 +99,7 @@ function(usersView, userDelegate, breadcrumbsCtrl, profileCtrl, popupCtrl, confi
 	};
 	
 	obj.findUsersMatchingFilterInput = function() {
-		var i, k = 0, limit = 2, indexes = [], usersToAdd = [], registerListenerForUser, filter = obj.view.getFilterInput().val();
+		var i, k = 0, limit = 30, indexes = [], usersToAdd = [], registerListenerForUser, filter = obj.view.getFilterInput().val();
 		
 		if(obj.allUsers){
 			for(i = 0; i < obj.allUsers.length; i++ ) {

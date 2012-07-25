@@ -33,13 +33,18 @@
 </tr>
 <tr>
 	<td>runScript</td>
-	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;test&quot;, lastname :&quot;test&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalcode : &quot;&quot;, phonenumber : &quot;&quot;, country : &quot;&quot;, state_province : &quot;&quot;, securityquestion : &quot;1&quot;, securityanswer : &quot;qqq&quot; }); });</td>
+	<td>require([&quot;app/comp/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, firstname : &quot;test&quot;, lastname :&quot;test&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalcode : &quot;&quot;, phonenumber : &quot;123&quot;, country : &quot;&quot;, state_province : &quot;&quot;, securityquestion : &quot;1&quot;, securityanswer : &quot;qwe&quot; }); });</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForCondition</td>
 	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
 	<td>1000</td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
 </tr>
 <tr>
 	<td>click</td>
@@ -59,6 +64,11 @@
 <tr>
 	<td>waitForTextPresent</td>
 	<td>Forgot your password</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>id=frgtPasswrdSelfReg</td>
 	<td></td>
 </tr>
 <tr>
@@ -84,12 +94,12 @@
 <tr>
 	<td>fireEvent</td>
 	<td>name=forgottenEmail</td>
-	<td>blur</td>
+	<td>change</td>
 </tr>
 <tr>
-	<td>fireEvent</td>
-	<td>name=fgtnSecurityAnswer</td>
-	<td>focus</td>
+	<td>pause</td>
+	<td>300</td>
+	<td></td>
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
@@ -104,7 +114,7 @@
 <tr>
 	<td>type</td>
 	<td>name=fgtnSecurityAnswer</td>
-	<td>qqq</td>
+	<td>qwe</td>
 </tr>
 <tr>
 	<td>fireEvent</td>
@@ -297,14 +307,14 @@
 	<td>test@test.test</td>
 </tr>
 <tr>
-	<td>fireEvent</td>
-	<td>name=forgottenEmail</td>
-	<td>blur</td>
+	<td>pause</td>
+	<td>300</td>
+	<td></td>
 </tr>
 <tr>
 	<td>fireEvent</td>
-	<td>name=fgtnSecurityAnswer</td>
-	<td>focus</td>
+	<td>name=forgottenEmail</td>
+	<td>change</td>
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
@@ -319,7 +329,7 @@
 <tr>
 	<td>type</td>
 	<td>name=fgtnSecurityAnswer</td>
-	<td>qqq</td>
+	<td>qwe</td>
 </tr>
 <tr>
 	<td>fireEvent</td>
@@ -386,7 +396,6 @@
 	<td>id=logout_link</td>
 	<td></td>
 </tr>
-
 </tbody></table>
 </body>
 </html>
