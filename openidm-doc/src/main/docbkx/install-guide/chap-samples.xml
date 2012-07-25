@@ -1424,19 +1424,19 @@ mail: jdoe@example.com
    <secondary>Sample 7 - Scripting a SCIM-like Schema</secondary>
   </indexterm>
 
-  <para>Sample 7 demonstrate how you can use OpenIDM to expose user data with a
+  <para>Sample 7 demonstrates how you can use OpenIDM to expose user data with a
   SCIM-like schema. The sample uses the XML file connector to read in attributes
   from external accounts and construct a JSON object for users stored in the
-  OpenIDM repository. For more on SCIM schema, see <link xlink:show="new"
+  OpenIDM repository. For more information about SCIM schema, see <link xlink:show="new"
   xlink:href='http://www.simplecloud.info/specs/draft-scim-core-schema-01.html'
   >SCIM schema 1.0 - draft</link>.</para>
 
   <note>
-   <para>The sample requires that you set up MySQL to hold the OpenIDM internal
-   repository as described in the chapter, <link
+   <para>This sample requires that you set up MySQL to hold the OpenIDM internal
+   repository, as described in the chapter, <link
    xlink:href="install-guide#chap-repository"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a
-   Repository For Production</citetitle></link></para>
+   Repository For Production</citetitle></link>.</para>
   </note>
 
   <section xml:id="install-sample7">
