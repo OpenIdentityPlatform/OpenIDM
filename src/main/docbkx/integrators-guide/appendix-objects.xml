@@ -32,7 +32,7 @@
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Data Models &amp; Objects Reference</title>
 
- <para>OpenIDM allows you to customize of a variety of objects that can be
+ <para>OpenIDM allows you to customize a variety of objects that can be
  addressed via a URL or URI, and that have a common set of functions that
  OpenIDM can perform on them such as CRUD, query, and action.</para>
 
