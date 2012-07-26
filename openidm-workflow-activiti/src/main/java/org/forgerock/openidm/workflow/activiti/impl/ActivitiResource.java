@@ -36,19 +36,20 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 
 /**
- *
+ * Implementation of the Activiti Engine Resource
+ * 
  * @author orsolyamebold
  */
 public class ActivitiResource implements JsonResource {
 
     private ProcessEngine processEngine;
 
-    public void setProcessEngine(ProcessEngine processEngine) {
-        this.processEngine = processEngine;
-    }
-
     public ActivitiResource(ProcessEngine engine) {
         this.processEngine = engine;
+    }
+
+    public void setProcessEngine(ProcessEngine processEngine) {
+        this.processEngine = processEngine;
     }
 
     public JsonValue action(JsonValue params) throws JsonResourceException {
@@ -57,10 +58,9 @@ public class ActivitiResource implements JsonResource {
         //POST openidm/workflow/activiti?_action=TestWorkFlow will trigger the process
         Map<String, Object> variables = ActivitiUtil.getProcessVariablesFromRequest(params);
 
-        ProcessInstance instance;
         //TODO consider to put only the parent into the params. parent/security may contain confidential access token
-        variables.put("openidm-context", params);
-        instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, variables);
+        //variables.put("openidm-context", new HashMap(params.get("parent").asMap()));
+        ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, variables);
         if (null != instance) {
             result = new JsonValue(new HashMap<String, Object>());
             result.put("status", instance.isEnded() ? "ended" : "suspended");
@@ -73,6 +73,11 @@ public class ActivitiResource implements JsonResource {
         return result;
     }
 
+    /**
+     * Query the available workflow definitions
+     * @return workflow definitions
+     * @throws JsonResourceException 
+     */
     public JsonValue read() throws JsonResourceException {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         List<ProcessDefinition> definitionList = processEngine.getRepositoryService().createProcessDefinitionQuery().list();

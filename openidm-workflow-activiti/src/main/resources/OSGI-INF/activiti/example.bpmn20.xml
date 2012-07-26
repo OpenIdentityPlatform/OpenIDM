@@ -8,20 +8,22 @@
              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
 
 
-  <process id="osgiProcess" name="Osgi process">
+    <process id="osgiProcess" name="Osgi process">
 
-    <startEvent id="start" />
-    <sequenceFlow sourceRef="start" targetRef="serviceTask"/>
-    <serviceTask id="serviceTask" activiti:delegateExpression="${openidm}" />
-    <sequenceFlow sourceRef="serviceTask" targetRef="scripttask1"/>
-    <scriptTask id="scripttask1" scriptFormat="groovy">
-      <script>
-        out:println "script task: " + openidm.read('workflow');
-      </script>
-    </scriptTask>
-    <sequenceFlow sourceRef="scripttask1" targetRef="end"/>
-    <endEvent id="end"/>
+        <startEvent id="start" />
+        <sequenceFlow sourceRef="start" targetRef="serviceTask"/>
+        <serviceTask id="serviceTask" activiti:expression="${openidm.read('workflow')}"
+                 activiti:resultVariableName="idmresult"/>
+        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask1"/>
+        <scriptTask id="scripttask1" scriptFormat="groovy">
+            <script>
+                out:println "script task using expression resolver: " + idmresult
+                out:println "script task using resolver: " + openidm.read('workflow')
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="scripttask1" targetRef="end"/>
+        <endEvent id="end"/>
 
-  </process>
+    </process>
 
 </definitions>

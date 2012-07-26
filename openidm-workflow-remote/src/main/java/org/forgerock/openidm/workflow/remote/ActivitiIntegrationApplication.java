@@ -25,25 +25,9 @@ package org.forgerock.openidm.workflow.remote;
 
 import java.util.logging.Level;
 import org.activiti.engine.ProcessEngine;
-import org.activiti.engine.ProcessEngineConfiguration;
 import org.activiti.engine.ProcessEngines;
-import org.activiti.engine.delegate.VariableScope;
-import org.activiti.engine.impl.bpmn.data.ItemInstance;
-import org.activiti.engine.impl.cfg.ProcessEngineConfigurationImpl;
-import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
-import org.activiti.engine.impl.el.ExpressionManager;
-import org.activiti.engine.impl.el.VariableScopeElResolver;
-import org.activiti.engine.impl.javax.el.*;
-import org.activiti.engine.impl.persistence.entity.VariableScopeImpl;
-import org.activiti.engine.impl.variable.CustomObjectType;
 import org.forgerock.json.resource.restlet.JsonResourceRestlet;
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
-import org.forgerock.openidm.workflow.activiti.impl.JsonValueType;
-import org.forgerock.openidm.workflow.activiti.impl.OpenIDMELResolver;
 import org.forgerock.openidm.workflow.activiti.impl.ActivitiResource;
-import org.h2.jdbcx.JdbcDataSource;
 import org.restlet.Application;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -59,15 +43,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Remote client for OpenIDM-Activiti integration
  * @author orsolyamebold
  */
 public class ActivitiIntegrationApplication extends Application {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ActivitiIntegrationApplication.class);
-    public static final String PROCESS_ENGINE_NAME = "openidmengine";
+
     private ProcessEngine engine;
-    private OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
     private ChallengeAuthenticator authenticator;
 
     /**
@@ -76,22 +59,7 @@ public class ActivitiIntegrationApplication extends Application {
     @Override
     public synchronized Restlet createInboundRoot() {
         try {
-            if (ProcessEngines.getProcessEngines().isEmpty()) {
-                //initialise the default h2 DataSource
-                JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource();
-                jdbcDataSource.setURL("jdbc:h2:tcp://localhost/activiti");
-                jdbcDataSource.setUser("sa");
-                ProcessEngineConfiguration configuration = new StandaloneProcessEngineConfiguration();
-                configuration.setDatabaseType("h2");
-                configuration.setProcessEngineName(PROCESS_ENGINE_NAME);
-                openIDMELResolver.setRouter(new JsonResourceObjectSet(new HttpRemoteJsonResource()));
-                ((ProcessEngineConfigurationImpl) configuration).setExpressionManager(new org.forgerock.openidm.workflow.remote.ActivitiIntegrationApplication.OpenIDMExpressionManager());
-
-                configuration.setJobExecutorActivate(true);
-                engine = configuration.buildProcessEngine();
-                ((ProcessEngineConfigurationImpl) configuration).getVariableTypes().addType(new CustomObjectType("openidm", ObjectSet.class));
-                ((ProcessEngineConfigurationImpl) configuration).getVariableTypes().addType(new JsonValueType());
-            }
+            engine = ProcessEngines.getDefaultProcessEngine();
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(ActivitiIntegrationApplication.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -128,43 +96,5 @@ public class ActivitiIntegrationApplication extends Application {
         JsonResourceRestlet root = new JsonResourceRestlet(new ActivitiResource(engine));
         authenticator.setNext(root);
         return authenticator;
-    }
-
-    public class OpenIDMExpressionManager extends ExpressionManager {
-
-        @Override
-        protected ELResolver createElResolver(VariableScope variableScope) {
-            CompositeELResolver compositeElResolver = new CompositeELResolver();
-            compositeElResolver.add(new VariableScopeElResolver(variableScope));
-            openIDMELResolver.setRouter(new JsonResourceObjectSet(new HttpRemoteJsonResource()));
-            compositeElResolver.add(openIDMELResolver);
-            compositeElResolver.add(new ArrayELResolver());
-            compositeElResolver.add(new ListELResolver());
-            compositeElResolver.add(new MapELResolver());
-            compositeElResolver.add(new DynamicBeanPropertyELResolver(ItemInstance.class, "getFieldValue", "setFieldValue")); //TODO: needs verification
-            compositeElResolver.add(new BeanELResolver());
-            return compositeElResolver;
-        }
-        
-        @Override
-        public ELContext getElContext(VariableScope variableScope) {
-            ELContext elContext = null;
-            if (variableScope instanceof VariableScopeImpl) {
-                if (variableScope.getVariable("openidm") == null) {
-                    variableScope.removeVariable("openidm");
-                }
-                VariableScopeImpl variableScopeImpl = (VariableScopeImpl) variableScope;
-                elContext = variableScopeImpl.getCachedElContext();
-            }
-
-            if (elContext == null) {
-                elContext = createElContext(variableScope);
-                if (variableScope instanceof VariableScopeImpl) {
-                    ((VariableScopeImpl) variableScope).setCachedElContext(elContext);
-                }
-            }
-
-            return elContext;
-        }
     }
 }

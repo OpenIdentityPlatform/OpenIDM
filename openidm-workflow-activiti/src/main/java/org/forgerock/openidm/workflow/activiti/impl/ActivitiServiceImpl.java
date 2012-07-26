@@ -26,8 +26,10 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import javax.naming.InitialContext;
@@ -37,6 +39,9 @@ import javax.transaction.TransactionManager;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration;
+import org.activiti.engine.impl.interceptor.SessionFactory;
+import org.activiti.engine.impl.scripting.ResolverFactory;
+import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -49,6 +54,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
+import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
@@ -58,7 +64,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Local Activiti ProcessEngine resource
+ * Workflow service implementation
  *
  * @author $author$
  * @version $Revision$ $Date$
@@ -66,7 +72,7 @@ import org.slf4j.LoggerFactory;
 @Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.OPTIONAL)
 @Service
 @Properties({
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Activiti Workflow Service"),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Workflow Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = ActivitiServiceImpl.ROUTER_PREFIX)})
 @References({
@@ -86,10 +92,11 @@ import org.slf4j.LoggerFactory;
 public class ActivitiServiceImpl implements JsonResource {
 
     final static Logger logger = LoggerFactory.getLogger(ActivitiServiceImpl.class);
-    public final static String PID = "org.forgerock.openidm.workflow.activiti";
+    public final static String PID = "org.forgerock.openidm.workflow";
     public final static String ROUTER_PREFIX = "workflow";
     // Keys in the JSON configuration
-    public static final String CONFIG_ENGINE = "engine/location";
+    public static final String CONFIG_LOCATION = "location";
+    public static final String CONFIG_ENGINE = "engine";
     public static final String CONFIG_ENGINE_URL = "engine/url";
     public static final String CONFIG_ENGINE_USERNAME = "engine/username";
     public static final String CONFIG_ENGINE_PASSWORD = "engine/password";
@@ -123,9 +130,20 @@ public class ActivitiServiceImpl implements JsonResource {
     private DataSource dataSource;
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
     private final SharedIdentityService identityService = new SharedIdentityService();
-    private OpenIDMProcessEngineFactory processEngineFactory;
+    private final OpenIDMSessionFactory idmSessionFactory = new OpenIDMSessionFactory();
+    private ProcessEngineFactory processEngineFactory;
     private Configuration barInstallerConfiguration;
     private JsonResource activitiResource;
+    //Configuration variables
+    private EngineLocation location = EngineLocation.embedded;
+    private String url;
+    private String username;
+    private String password;
+    private String mailhost = "localhost";
+    private int mailport = 25;
+    private String mailusername;
+    private String mailpassword;
+    private boolean starttls;
 
     public enum EngineLocation {
 
@@ -136,28 +154,7 @@ public class ActivitiServiceImpl implements JsonResource {
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         try {
-            EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-            JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
-            EngineLocation location = EngineLocation.embedded;
-            String mailhost = "localhost";
-            int mailport = 25;
-            String mailusername = null;
-            String mailpassword = null;
-            boolean starttls = false;
-            if (!config.isNull()) {
-                location = config.get(new JsonPointer(CONFIG_ENGINE)).asEnum(EngineLocation.class);
-                JsonValue connectionConfig = config.get(CONFIG_CONNECTION);
-                jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
-                JsonValue mailconfig = config.get("mail");
-                if (!mailconfig.isNull()) {
-                    mailhost = mailconfig.get(new JsonPointer(CONFIG_MAIL_HOST)).asString();
-                    mailport = mailconfig.get(new JsonPointer(CONFIG_MAIL_PORT)).asInteger();
-                    mailusername = mailconfig.get(new JsonPointer(CONFIG_MAIL_USERNAME)).asString();
-                    mailpassword = mailconfig.get(new JsonPointer(CONFIG_MAIL_PASSWORD)).asString();
-                    starttls = mailconfig.get(new JsonPointer(CONFIG_MAIL_STARTTLS)).asBoolean();
-                }
-            }
-
+            readConfiguration(compContext);
             switch (location) {
                 case embedded: //start our embedded ProcessEngine
                     try {
@@ -202,7 +199,15 @@ public class ActivitiServiceImpl implements JsonResource {
 
                     configuration.setTransactionManager(transactionManager);
                     configuration.setDatabaseSchemaUpdate("true");
-                    
+
+                    List<SessionFactory> customSessionFactories = configuration.getCustomSessionFactories();
+                    if (customSessionFactories == null) {
+                        customSessionFactories = new ArrayList<SessionFactory>();
+                    }
+                    customSessionFactories.add(idmSessionFactory);
+                    configuration.setCustomSessionFactories(customSessionFactories);
+                    configuration.setExpressionManager(new OpenIDMExpressionManager());
+
                     configuration.setMailServerHost(mailhost);
                     configuration.setMailServerPort(mailport);
                     configuration.setMailServerUseTLS(starttls);
@@ -216,11 +221,15 @@ public class ActivitiServiceImpl implements JsonResource {
                     //needed for async workflows
                     configuration.setJobExecutorActivate(true);
 
-                    processEngineFactory = new OpenIDMProcessEngineFactory();
+                    processEngineFactory = new ProcessEngineFactory();
                     processEngineFactory.setProcessEngineConfiguration(configuration);
                     processEngineFactory.setBundle(compContext.getBundleContext().getBundle());
-                    processEngineFactory.setOpenIDMELResolver(openIDMELResolver);
                     processEngineFactory.init();
+
+                    //ScriptResolverFactory
+                    List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
+                    resolverFactories.add(new OpenIDMResolverFactory());
+                    configuration.setResolverFactories(resolverFactories);
 
                     //We are done!!
                     processEngine = processEngineFactory.getObject();
@@ -256,13 +265,10 @@ public class ActivitiServiceImpl implements JsonResource {
                     activitiResource = new ActivitiResource(processEngine);
                     break;
                 case remote: //fetch remote connection parameters
-                    String url = config.get(new JsonPointer(CONFIG_ENGINE_URL)).asString();
-                    String userName = config.get(new JsonPointer(CONFIG_ENGINE_USERNAME)).asString();
-                    String password = config.get(new JsonPointer(CONFIG_ENGINE_PASSWORD)).asString();
-                    activitiResource = new HttpRemoteJsonResource(url, userName, password);
+                    activitiResource = new HttpRemoteJsonResource(url, username, password);
                     break;
                 default:
-                    throw new InvalidException(CONFIG_ENGINE + " invalid, can not start workflow service.");
+                    throw new InvalidException(CONFIG_LOCATION + " invalid, can not start workflow service.");
             }
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start Activiti ProcessEngine service.", ex);
@@ -294,6 +300,35 @@ public class ActivitiServiceImpl implements JsonResource {
         logger.info(" Activiti ProcessEngine stopped.");
     }
 
+    /**
+     * Read and process Workflow configuration file
+     *
+     * @param compContext
+     */
+    private void readConfiguration(ComponentContext compContext) {
+        EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+        JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
+        if (!config.isNull()) {
+            location = config.get(new JsonPointer(CONFIG_LOCATION)).asEnum(EngineLocation.class);
+            JsonValue connectionConfig = config.get(CONFIG_CONNECTION);
+            jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
+            JsonValue mailconfig = config.get(CONFIG_MAIL);
+            if (!mailconfig.isNull()) {
+                mailhost = mailconfig.get(new JsonPointer(CONFIG_MAIL_HOST)).asString();
+                mailport = mailconfig.get(new JsonPointer(CONFIG_MAIL_PORT)).asInteger();
+                mailusername = mailconfig.get(new JsonPointer(CONFIG_MAIL_USERNAME)).asString();
+                mailpassword = mailconfig.get(new JsonPointer(CONFIG_MAIL_PASSWORD)).asString();
+                starttls = mailconfig.get(new JsonPointer(CONFIG_MAIL_STARTTLS)).asBoolean();
+            }
+            JsonValue engineConfig = config.get(CONFIG_ENGINE);
+            if (!engineConfig.isNull()) {
+                url = config.get(new JsonPointer(CONFIG_ENGINE_URL)).asString();
+                username = config.get(new JsonPointer(CONFIG_ENGINE_USERNAME)).asString();
+                password = config.get(new JsonPointer(CONFIG_ENGINE_PASSWORD)).asString();
+            }
+        }
+    }
+
     //This method called before activate if there is a ProcessEngine service in the Service Registry
     protected void bindProcessEngine(ProcessEngine processEngine) {
         logger.info("Some other process already created the ProcessEngine so we don't need to make our own");
@@ -311,12 +346,12 @@ public class ActivitiServiceImpl implements JsonResource {
     }
 
     protected void bindRouter(JsonResource router) {
-        this.openIDMELResolver.setRouter(new JsonResourceObjectSet(router));
+        this.idmSessionFactory.setRouter(new JsonResourceObjectSet(router));
         this.identityService.setRouter(router);
     }
 
     protected void unbindRouter(JsonResource router) {
-        this.openIDMELResolver.setRouter(null);
+        this.idmSessionFactory.setRouter(null);
         this.identityService.setRouter(null);
     }
 

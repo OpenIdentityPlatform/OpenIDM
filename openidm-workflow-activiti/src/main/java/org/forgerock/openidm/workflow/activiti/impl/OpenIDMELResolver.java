@@ -34,11 +34,16 @@ import java.beans.FeatureDescriptor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-// Deprecated
+import org.activiti.engine.impl.context.Context;
+import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
 
 /**
+ * Custom ExpressionResolver for OpenIDM
  * @author $author$
  * @version $Revision$ $Date$
  */
@@ -46,16 +51,15 @@ public class OpenIDMELResolver extends ELResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenIDMELResolver.class);
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
-    private ObjectSet router = null;
+    private ObjectSet router;
 
     public Object getValue(ELContext context, Object base, Object property) {
+        OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
+        router = session.getOpenIDM();
         if (base == null) {
             // according to javadoc, can only be a String
             String key = (String) property;
             if (null != router && "openidm".equals(key)) {
-                context.setPropertyResolved(true);
-                return new OpenIDMDelegate(router);
-            } else if (null != router && "openidm.router".equals(key)) {
                 context.setPropertyResolved(true);
                 return router;
             } else {
@@ -104,8 +108,44 @@ public class OpenIDMELResolver extends ELResolver {
         return Object.class;
     }
 
-    public void setRouter(ObjectSet router) {
-        this.router = router;
+    /**
+     * Called when openidm.xxx() is called from an Expression
+     * @return result of the call
+     */
+    @Override
+    public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
+        OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
+        router = session.getOpenIDM();
+        context.setPropertyResolved(true);
+        try {
+            switch (SimpleJsonResource.Method.valueOf((String) method)) {
+                case read:
+                    return router.read((String) params[0]);
+                case query:
+                    return router.query((String) params[0], (Map<String, Object>) params[1]);
+                case create:
+                    router.create((String) params[0], (Map<String, Object>) params[1]);
+                    return null;
+                case update:
+                    router.update((String) params[0], (String) params[1], (Map<String, Object>) params[2]);
+                    return null;
+                case delete:
+                    router.delete((String) params[0], (String) params[1]);
+                    return null;
+                case action:
+                    return router.action((String) params[0], (Map<String, Object>) params[1]);
+                case patch:
+                    router.patch((String) params[0], (String) params[1], (Patch) params[2]);
+                    return null;
+                default:
+                    throw new BadRequestException("The requested method is not available: " + method);
+            }
+
+        } catch (ObjectSetException ex) {
+            LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+        } catch (IllegalArgumentException ex) {
+            LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+        }
+        return super.invoke(context, base, method, paramTypes, params);
     }
 }
-
