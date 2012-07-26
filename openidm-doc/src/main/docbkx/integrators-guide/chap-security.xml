@@ -225,8 +225,9 @@ HTTP/1.1 204 No Content</screen>
    <primary>Passwords</primary>
   </indexterm>
 
-  <para>Default security settings facilitate evaluation. Change the default
-  encryption key, and then replace the default user password</para>
+  <para>The default security settings are adequate for evaluation purposes. For 
+  production, change the default encryption key, and then replace the default user 
+  password.</para>
 
   <procedure xml:id="security-change-encryption-keys">
    <title>To Change Default Encryption Keys</title>
@@ -379,13 +380,12 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
   the <filename>openidm/</filename> directory.</para>
  
   <screen>$ cd /path/to/openidm
-$ java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar</screen>
-
-  <para>This utility helps obfuscate passwords to prevent casual observation.
-   It is not securely encrypted and needs further measures to prevent disclosure.
-   Please enter the password:
-   <literal>OBF:1v2j1uum1xtv1zej1zer1xtn1uvk1v1v
-CRYPT:1206319abab995251d745b151b73131c</literal></para>
+$ java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar
+  This utility helps obfuscate passwords to prevent casual observation.
+  It is not securely encrypted and needs further measures to prevent disclosure.
+  Please enter the password:
+  OBF:1v2j1uum1xtv1zej1zer1xtn1uvk1v1v
+  CRYPT:1206319abab995251d745b151b73131c</screen>
  </section>
 
  <section xml:id="security-remove-dev-tools">
