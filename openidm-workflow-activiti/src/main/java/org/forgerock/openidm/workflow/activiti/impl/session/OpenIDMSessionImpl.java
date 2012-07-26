@@ -1,18 +1,18 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
+ * 
  * Copyright © 2012 ForgeRock Inc. All rights reserved.
- *
+ * 
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License). You may not use this file except in
  * compliance with the License.
- *
+ * 
  * You can obtain a copy of the License at
  * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
- *
+ * 
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at http://forgerock.org/license/CDDLv1.0.html
@@ -21,33 +21,40 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.workflow.activiti.impl;
+package org.forgerock.openidm.workflow.activiti.impl.session;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.objset.ObjectSet;
 
 /**
- * Utility class for Activiti workflow integration
+ * Custom Session providing access to OpenIDM functions from Activiti
  * @author orsolyamebold
  */
-public class ActivitiUtil {
-    /**
-     * Fetch OpenIDM action from the request
-     * @param request Request to be processed
-     * @return requested action
-     */
-    public static String getActionFromRequest(JsonValue request) {
-        return request.get("params").get("_action").required().asString();
+public class OpenIDMSessionImpl implements OpenIDMSession {
+
+    private ObjectSet router;
+
+    public OpenIDMSessionImpl() {
     }
-    
-    /**
-     * Fetch Activiti process variables from the request
-     * @param request Request to be processed
-     * @return process variables
-     */
-    public static Map<String, Object> getProcessVariablesFromRequest(JsonValue request) {
-        return request.get("value").isNull() ? 
-                new HashMap(1) : new HashMap<String, Object>(request.get("value").expect(Map.class).asMap());
+
+    public OpenIDMSessionImpl(ObjectSet router) {
+        this.router = router;
+    }
+
+    @Override
+    public ObjectSet getOpenIDM() {
+        return router;
+    }
+
+    @Override
+    public void setOpenIDM(ObjectSet router) {
+        this.router = router;
+    }
+
+    @Override
+    public void flush() {
+    }
+
+    @Override
+    public void close() {
     }
 }
