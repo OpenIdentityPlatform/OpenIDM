@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Export-Package: org.forgerock.openidm.scheduler;uses:="org.quartz,org.
+ forgerock.json.fluent,org.quartz.utils,org.quartz.core,org.quartz.spi
+ ,org.forgerock.openidm.repo,org.apache.commons.codec.binary,org.slf4j
+ ,org.forgerock.json.resource,org.osgi.framework,org.forgerock.openidm
+ .objset,org.forgerock.openidm.config,org.osgi.util.tracker"
+Bundle-Name: OpenIDM Quartz Fragment
+Created-By: Apache Maven Bundle Plugin
+Bundle-Vendor: ForgeRock AS
+Fragment-Host: org.apache.servicemix.bundles.quartz
+SCM-Revision: 0
+Bundle-Version: 2.1.0.SNAPSHOT
+Bundle-ManifestVersion: 2
+Bundle-Description: OpenIDM is an open standards based Identity Manage
+ ment, Provisioning and Compliance solution. Experience shows that the
+  most important features of an identity management product are: high 
+ flexibility in Business Process handling and compliance with open sta
+ ndards and interfaces. A highly flexible user interface combined with
+  a very robust workflow engine make OpenIDM ready for any Identity Ma
+ nagement project.
+Bundle-License: http://www.opensource.org/licenses/cddl1.php, http://c
+ reativecommons.org/licenses/by-nc-nd/3.0/
+Import-Package: org.apache.commons.codec.binary;version="[1.5,2)",org.
+ forgerock.json.fluent;version="[1.1.0,1.1.1)",org.forgerock.json.reso
+ urce;version="[1.2,2)",org.forgerock.openidm.config;version="[2.1,2.2
+ )",org.forgerock.openidm.objset;version="[2.1,2.2)",org.forgerock.ope
+ nidm.repo;version="[2.1,2.2)",org.osgi.framework;version="[1.5,2)",or
+ g.osgi.util.tracker;version="[1.4,2)",org.quartz;version="[1.8,2)",or
+ g.quartz.core;version="[1.8,2)",org.quartz.spi;version="[1.8,2)",org.
+ quartz.utils;version="[1.8,2)",org.slf4j;version="[1.6,2)"
+Implementation-Build: 0
+Bundle-SymbolicName: org.forgerock.openidm.quartz-fragment
+
