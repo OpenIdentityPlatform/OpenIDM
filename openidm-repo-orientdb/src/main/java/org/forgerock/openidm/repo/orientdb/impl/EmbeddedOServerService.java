@@ -127,10 +127,11 @@ public class EmbeddedOServerService {
         protocol2.name = "http";
         protocol2.implementation = "com.orientechnologies.orient.server.network.protocol.http.ONetworkProtocolHttpDb";
         configuration.network.protocols.add(protocol2);
-        OServerNetworkProtocolConfiguration protocol3 = new OServerNetworkProtocolConfiguration();
-        protocol3.name = "distributed";
-        protocol3.implementation = "com.orientechnologies.orient.server.network.protocol.distributed.ONetworkProtocolDistributed";
-        configuration.network.protocols.add(protocol3);
+//        NOTE: No longer exists as of 1.1.0-SNAPSHOT evidently
+//        OServerNetworkProtocolConfiguration protocol3 = new OServerNetworkProtocolConfiguration();
+//        protocol3.name = "distributed";
+//        protocol3.implementation = "com.orientechnologies.orient.server.network.protocol.distributed.ONetworkProtocolDistributed";
+//        configuration.network.protocols.add(protocol3);
 
         configuration.network.listeners = new ArrayList<OServerNetworkListenerConfiguration>();
         OServerNetworkListenerConfiguration listener1 = new OServerNetworkListenerConfiguration();
