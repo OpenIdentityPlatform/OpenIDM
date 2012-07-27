@@ -61,7 +61,6 @@
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
                 <exclude>org.osgi:**</exclude>
-                <exclude>com.orientechnologies:**</exclude>
                 <exclude>javax.persistence:persistence-api</exclude>
                 <exclude>javax.transaction:jta</exclude>
                 <exclude>org.forgerock.openicf.connectors.*:openicf-*</exclude>
