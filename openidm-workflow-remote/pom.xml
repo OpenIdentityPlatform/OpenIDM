@@ -76,6 +76,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>1.8.6</version>
+        </dependency>
         <!-- REST Dependencies-->
         <dependency>
             <groupId>org.restlet.jee</groupId>
