@@ -58,6 +58,9 @@ public class AuthModule {
     static String queryOnResource;
     static String internalUserQueryId;
     static String queryOnInternalUserResource;
+    static String userIdProperty;
+    static String userCredentialProperty;
+    static String userRolesProperty;
     static List<String> defaultRoles;
 
     // configuration conf/authentication.json
@@ -68,14 +71,30 @@ public class AuthModule {
         queryOnResource = (String)config.get("queryOnResource").defaultTo("managed/user").asString();
         internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
         queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
-        
+
+        // User properties - default to NULL if not defined
+        JsonValue properties = config.get("propertyMapping");
+        userIdProperty = properties.get("userId").asString();
+        userCredentialProperty = properties.get("userCredential").asString();
+        userRolesProperty = properties.get("userRoles").asString();
+
         logger.info("AuthModule config params userRoles: {} queryId 1: {} resource 1: {} queryId 2: {} resource 2: {}",
             new Object[] {defaultRoles, queryId, queryOnResource, internalUserQueryId, queryOnInternalUserResource} );
+
+        if ((userIdProperty != null && userCredentialProperty == null) ||
+                (userIdProperty == null && userCredentialProperty != null)) {
+            logger.warn("AuthModule config does not fully define the necessary properties."
+                    + " Both \"userId\" ({}) and \"userCredential\" ({}) should be defined."
+                    + " Defaulting to manual role query.", userIdProperty, userCredentialProperty);
+        }
+
+        logger.info("AuthModule config explicit user properties userId: {}, userCredentials: {}, userRoles: {}",
+            new Object[] {userIdProperty, userCredentialProperty, userRolesProperty} );
     }
-    
+
     public static boolean authenticate(String login, String password, List<String> roles, StringBuilder resource) {
-        
-        boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);        
+
+        boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);
         if (!authenticated) {
             // Authenticate against the internal user table if authentication against managed users failed
             authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, login, password, roles);
@@ -86,8 +105,21 @@ public class AuthModule {
         return authenticated;
     }
 
-        
-    private static boolean authPass(String passQueryId, String passQueryOnResource, String login, String password, List roles) {
+    /**
+     * Gets an (optionally) encrypted JsonValue and returns the decrypted version.
+     * If the value is not encrypted, returns entry.
+     * @param entry A potentially encrypted JsonValue
+     * @return Decrypted JsonValue
+     */
+    private static JsonValue decryptValue(JsonValue entry) {
+        if (getCrypto().isEncrypted(entry)) {
+             return getCrypto().decrypt(entry);
+        }
+        return entry;
+    }
+
+    private static boolean authPass(String passQueryId, String passQueryOnResource,
+            String login, String password, List roles) {
         UserInfo userInfo = null;
         try {
             userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login);
@@ -105,11 +137,12 @@ public class AuthModule {
         return false;
     }
 
-    private static UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username) throws Exception {
+    private static UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username)
+            throws Exception {
         UserInfo user = null;
         Credential credential = null;
         List roleNames = new ArrayList();
-        
+
         Map props = new HashMap();
         props.put(QueryConstants.QUERY_ID, repoQueryId);
         props.put("username", username);
@@ -127,38 +160,53 @@ public class AuthModule {
             Object retrRoles = null;
             String retrRolesPropName = null;
             JsonValue entry = jsonView.get(QueryConstants.QUERY_RESULT).get(0);
-            int nonInternalCount = 0;
-            // Repo supports returning the map entries in the order of the query, 
-            // even though JSON itself does not guarantee order.
-            // TODO: support explicit role query for more flexiblity and to allow for not relying on this support
-            for (Map.Entry<String, Object> ordered : entry.asMap().entrySet()) {
-                String key = ordered.getKey();
-                if (key.equals("_id")) {
-                    retrId = entry.get(key).asString(); // It is optional to include the record identifier
-                } else if (!key.startsWith("_")) {
-                    ++nonInternalCount;                    
-                    if (nonInternalCount == 1) {
-                        // By convention the first property is the cred
-                        //decrypt if necessary
-                        if (getCrypto().isEncrypted(entry.get(key))) {
-                            JsonValue decrypted = getCrypto().decrypt(entry.get(key));
-                            retrCred = decrypted.asString();
-                        } else {
-                            retrCred = entry.get(key).asString(); 
+
+            // If all of the required user parameters are defined
+            // we can just fetch that info instead of iterating/requiring it in-order
+            if (userIdProperty != null && userCredentialProperty != null) {
+                logger.debug("AuthModule using explicit role query");
+                retrId = entry.get(userIdProperty).asString();
+
+                retrCredPropName = userCredentialProperty;
+                retrCred = decryptValue(entry.get(userCredentialProperty)).asString();
+
+                // Since userRoles are optional, check before we go to retrieve it
+                if (userRolesProperty != null && entry.isDefined(userRolesProperty)) {
+                    retrRolesPropName = userRolesProperty;
+                    retrRoles = entry.get(userRolesProperty).getObject();
+                }
+            } else {
+                logger.debug("AuthModule using default role query");
+                int nonInternalCount = 0;
+                // Repo supports returning the map entries in the order of the query,
+                // even though JSON itself does not guarantee order.
+                for (Map.Entry<String, Object> ordered : entry.asMap().entrySet()) {
+                    String key = ordered.getKey();
+                    if (key.equals("_id")) {
+                        retrId = entry.get(key).asString(); // It is optional to include the record identifier
+                    } else if (!key.startsWith("_")) {
+                        ++nonInternalCount;
+                        if (nonInternalCount == 1) {
+                            // By convention the first property is the cred
+                            //decrypt if necessary
+                            retrCred = decryptValue(entry.get(key)).asString();
+                            retrCredPropName = key;
+                        } else if (nonInternalCount == 2) {
+                            // By convention the second property can define roles
+                            retrRoles = entry.get(key).getObject();
+                            retrRolesPropName = key;
                         }
-                        retrCredPropName = key;
-                    } else if (nonInternalCount == 2) {
-                        retrRoles = entry.get(key).getObject(); // By convention the second property can define roles
-                        retrRolesPropName = key;
                     }
                 }
             }
+
             if (retrCred == null && retrCredPropName == null) {
                 logger.warn("Query for credentials did not contain expected result properties.");
             } else {
                 credential = getCredential(retrCred, retrId, username, retrCredPropName, true);
                 roleNames = addRoles(roleNames, retrRoles, retrRolesPropName, defaultRoles);
-                logger.debug("User information for {}: id: {} credential available: {} roles from repo: {} total roles: {}",
+                logger.debug("User information for {}: id: {} credential available: {} " +
+                		"roles from repo: {} total roles: {}",
                         new Object[] {username, retrId, (retrCred != null), retrRoles, roleNames});
 
                 user = new UserInfo(username, credential, roleNames);
@@ -168,7 +216,7 @@ public class AuthModule {
         return user;
     }
 
-    static Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName, 
+    static Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName,
             boolean allowStringifiedEncryption) {
         Credential credential = null;
         if (retrCred instanceof String) {
@@ -198,7 +246,7 @@ public class AuthModule {
         }
         return credential;
     }
-  
+
     static List addRoles(List existingRoleNames, Object retrRoles, String retrRolesPropName, List defaultRoles) {
         if (retrRoles instanceof Collection) {
             existingRoleNames.addAll((Collection) retrRoles);
@@ -214,7 +262,7 @@ public class AuthModule {
         }
         return existingRoleNames;
     }
-    
+
     private static List parseCommaDelimitedRoles(String rawRoles) {
         List result = new ArrayList();
         if (rawRoles != null) {
@@ -224,14 +272,14 @@ public class AuthModule {
         return result;
     }
 
-   
+
     static JsonResourceObjectSet getRepo() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference repoRef = ctx.getServiceReference(RepositoryService.class.getName());
         return new JsonResourceObjectSet((RepositoryService)ctx.getService(repoRef));
     }
-   
+
     static CryptoService getCrypto() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
