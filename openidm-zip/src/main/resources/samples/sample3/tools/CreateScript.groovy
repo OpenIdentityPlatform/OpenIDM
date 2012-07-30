@@ -45,7 +45,7 @@ def sql = new Sql(connection);
 
 switch ( objectClass ) {
     case "__ACCOUNT__":
-    sql.execute("INSERT INTO Users (uid, firstname,lastname,fullname,email,organization) values (?,?,?,?,?;?)",
+    sql.execute("INSERT INTO Users (uid, firstname,lastname,fullname,email,organization) values (?,?,?,?,?,?)",
         [
             id,
             attributes.get("firstname").get(0),
@@ -53,7 +53,8 @@ switch ( objectClass ) {
             attributes.get("fullname").get(0),
             attributes.get("email").get(0),
             attributes.get("organization").get(0)
-        ])
+        ]);
+    sql.commit();
     break
 
     case "__GROUP__":
@@ -62,7 +63,8 @@ switch ( objectClass ) {
             attributes.get("gid").get(0),
             id,
             attributes.get("description").get(0)
-        ])
+        ]);
+    sql.commit();
     break
 
     case "organization":
@@ -70,7 +72,8 @@ switch ( objectClass ) {
         [
             id,
             attributes.get("description").get(0)
-        ])
+        ]);
+    sql.commit();
     break
 
     default:
