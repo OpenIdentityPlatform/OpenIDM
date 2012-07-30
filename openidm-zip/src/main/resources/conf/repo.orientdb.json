@@ -14,8 +14,8 @@
         "query-matching-username" : "select ${fields} from ${_resource} where userName like '%${usernameToMatch}%' or firstname like '%${usernameToMatch}%' or lastname like '%${usernameToMatch}%' limit ${limit}",
         "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND firstId = '${firstId}'",
         "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'",
-        "credential-query" : "select _openidm_id, password, roles from ${_resource} WHERE userName = '${username}'",
-        "credential-internaluser-query" : "select _openidm_id, password, roles from internal_user WHERE _openidm_id = ${username}",
+        "credential-query" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
+        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'"
     },

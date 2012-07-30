@@ -1,5 +1,12 @@
 {
     "queryId" : "credential-query",
     "queryOnResource" : "managed/user",
+
+    "propertyMapping" : {
+        "userId" : "_id",
+        "userCredential" : "password",
+        "userRoles" : "roles"
+    },
+
     "defaultUserRoles" : [ ]
 }
