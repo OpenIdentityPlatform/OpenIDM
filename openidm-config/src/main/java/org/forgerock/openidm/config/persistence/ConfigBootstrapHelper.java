@@ -92,7 +92,7 @@ public class ConfigBootstrapHelper {
      * Configuration keys returned are lower case, whether they originate from system properties or
      * configuration files.
      * 
-     * @param repoType the type of the boostrap repository, 
+     * @param repoType the type of the bootstrap repository, 
      * equivalent to the last part of its PID 
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
@@ -129,12 +129,12 @@ public class ConfigBootstrapHelper {
                 rawConfig = JSONConfigInstaller.loadConfigFile(qualified);
                 loadedFile = qualified;
             } else {
-                logger.debug("No configuration to boostrap {}", repoType);
+                logger.debug("No configuration to bootstrap {}", repoType);
                 
                 // Check at least one configuration exists
                 String[] repoConfigFiles = getRepoConfigFiles(confDir);
                 if (warnMissingConfig && (repoConfigFiles == null || repoConfigFiles.length == 0)) {
-                    logger.error("No configuration to boostrap the repository found.");
+                    logger.error("No configuration to bootstrap the repository found.");
                     warnMissingConfig = false;
                 }
                 
@@ -146,8 +146,8 @@ public class ConfigBootstrapHelper {
                 result.put(entry.getKey().toLowerCase(), entry.getValue());
             }
         } catch (Exception ex) {
-            logger.warn("Failed to load configuration file to boostrap repository " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to load configuration file to boostrap repository " 
+            logger.warn("Failed to load configuration file to bootstrap repository " + ex.getMessage(), ex);
+            throw new RuntimeException("Failed to load configuration file to bootstrap repository " 
                     + ex.getMessage(), ex);
         }
         logger.info("Bootstrapping with settings from configuration file {}", loadedFile);
