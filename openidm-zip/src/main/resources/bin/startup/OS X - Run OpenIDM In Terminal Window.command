@@ -4,4 +4,4 @@
 
 export JAVA_HOME=/Library/Java/Home
 
- `dirname "$0"`/startup.sh
+ `dirname "$0"`/../../startup.sh
