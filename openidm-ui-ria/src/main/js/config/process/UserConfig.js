@@ -195,7 +195,10 @@ define("config/process/UserConfig",["app/util/Constants", "app/comp/common/event
                                             loginCtrl.afterSuccessfulLogin(user);
                                             messagesCtrl.displayMessage('info', 'You have been successfully logged in.');
                                          }, 
-                                         function() { messagesCtrl.displayMessage('error', 'Error fetching user data');
+                                         function() { 
+                                            messagesCtrl.displayMessage('error', 'Error fetching user data');
+                                            loginCtrl.afterLoginFailed();
+                                            loginCtrl.logoutUser();
                                         }
                                 );
                             }
