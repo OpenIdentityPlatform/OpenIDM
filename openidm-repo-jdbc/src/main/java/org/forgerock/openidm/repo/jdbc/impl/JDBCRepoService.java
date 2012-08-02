@@ -196,12 +196,12 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             try {
                 connection = getConnection();
                 connection.setAutoCommit(false);
-    
+
                 getTableHandler(type).create(fullId, type, localId, obj, connection);
-    
+
                 connection.commit();
                 logger.debug("Commited created object for id: {}", fullId);
-    
+
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("SQL Exception in create of {} with error code {}, sql state {}",
@@ -226,7 +226,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             } catch (ObjectSetException ex) {
                 logger.debug("ObjectSetException in create of {}", fullId, ex);
                 rollback(connection);
-                throw ex;    
+                throw ex;
             } catch (java.io.IOException ex) {
                 logger.debug("IO Exception in create of {}", fullId, ex);
                 rollback(connection);
@@ -280,9 +280,9 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                 previousIsolationLevel = new Integer(connection.getTransactionIsolation());
                 connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 connection.setAutoCommit(false);
-    
+
                 getTableHandler(type).update(fullId, type, localId, rev, obj, connection);
-    
+
                 connection.commit();
                 logger.debug("Commited updated object for id: {}", fullId);
             } catch (SQLException ex) {
@@ -355,9 +355,9 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             try {
                 connection = getConnection();
                 connection.setAutoCommit(false);
-    
+
                 getTableHandler(type).delete(fullId, type, localId, rev, connection);
-    
+
                 connection.commit();
                 logger.debug("Commited deleted object for id: {}", fullId);
             } catch (IOException ex) {
@@ -382,7 +382,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             } catch (ObjectSetException ex) {
                 logger.debug("ObjectSetException in delete of {}", fullId, ex);
                 rollback(connection);
-                throw ex;    
+                throw ex;
             } catch (RuntimeException ex) {
                 logger.debug("Runtime Exception in delete of {}", fullId, ex);
                 rollback(connection);
@@ -442,7 +442,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             List<Map<String, Object>> docs = getTableHandler(type).query(type, params, connection);
             long end = System.currentTimeMillis();
             result.put(QueryConstants.QUERY_RESULT, docs);
-            // TODO: split out conversion time 
+            // TODO: split out conversion time
             //result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
 
             result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end - start));
@@ -577,7 +577,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             JsonValue connectionConfig = config.get(CONFIG_CONNECTION).isNull() ? config : config.get(CONFIG_CONNECTION);
 
             maxTxRetry = connectionConfig.get("maxTxRetry").defaultTo(5).asInteger().intValue();
-            
+
             // Data Source configuration
             jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
             String jtaName = connectionConfig.get(CONFIG_JTA_NAME).asString();
@@ -644,7 +644,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             String dbSchemaName = connectionConfig.get(CONFIG_DB_SCHEMA).defaultTo(null).asString();
             JsonValue genericQueries = config.get("queries").get("genericTables");
             int maxBatchSize = connectionConfig.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
-            
+
             tableHandlers = new HashMap<String, TableHandler>();
             //TODO Make safe the database type detection
             DatabaseType databaseType = DatabaseType.valueOf(connectionConfig.get(CONFIG_DB_TYPE).defaultTo(DatabaseType.ANSI_SQL99.name()).asString());
@@ -699,7 +699,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         key = key.substring(0, key.length() - 1);
                     }
                     TableHandler handler = getMappedTableHandler(
-                            databaseType, 
+                            databaseType,
                             value,
                             value.get("table").required().asString(),
                             value.get("objectToColumn").required().asMap(),
@@ -787,10 +787,10 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         }
         return handler;
     }
-    
-    MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig, String table, 
+
+    MappedTableHandler getMappedTableHandler(DatabaseType databaseType, JsonValue tableConfig, String table,
             Map objectToColumn, String dbSchemaName, JsonValue explicitQueries, int maxBatchSize) {
-            
+
         MappedTableHandler handler = null;
 
         // TODO: make pluggable

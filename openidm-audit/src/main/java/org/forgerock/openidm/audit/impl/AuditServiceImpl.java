@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.audit.impl;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -51,6 +53,7 @@ import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.util.DateUtil;
 
 // Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
@@ -91,22 +94,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     Map<String, Map<String, List<String>>> triggerFilters;
 
     List<AuditLogger> auditLoggers;
-
-    // TODO: replace with proper formatter
-    SimpleDateFormat ISO8601_FORMAT = new SimpleDateFormat(ServerConstants.DATE_FORMAT_ISO8601_TIME);
-    public String formatDateTime(Date date) {
-        if (date == null) {
-            return formatDateTime(new Date());
-        }
-
-        // format in (almost) ISO8601 format
-        String dateStr = ISO8601_FORMAT.format(date);
-
-        // remap the timezone from 0000 to 00:00 (starts at char 22)
-        return dateStr.substring(0, 22)
-                + ":" + dateStr.substring(22);
-    }
-
+    DateUtil dateUtil;
 
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
@@ -153,21 +141,21 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         String localId = splitTypeAndId[1];
 
         String trigger = getTrigger();
-        
+
         // Filter
         List<String> actionFilter = actionFilters.get(type);
         Map<String, List<String>> triggerFilter = triggerFilters.get(type);
-        
+
         if (triggerFilter != null && trigger != null) {
             List<String> triggerActions = triggerFilter.get(trigger);
             if (triggerActions == null) {
                 logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
             } else if (!triggerActions.contains(obj.get("action"))) {
                 logger.debug("Filtered by trigger filter");
-                return; 
+                return;
             }
-        } 
-        
+        }
+
         if (actionFilter != null) {
             // TODO: make filters that can operate on a variety of conditions
             if (!actionFilter.contains(obj.get("action"))) {
@@ -175,7 +163,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 return;
             }
         }
-        
+
 
         // Generate an ID if there is none
         if (localId == null) {
@@ -187,7 +175,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
 
         // Generate unified timestamp
         if (null == obj.get("timestamp")) {
-            obj.put("timestamp",formatDateTime(null));
+            obj.put("timestamp", dateUtil.now());
         }
 
         logger.debug("Create audit entry for {} with {}", id, obj);
@@ -220,7 +208,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
         return trigger;
     }
-    
+
     /**
      * Audit service does not support changing audit entries.
      */
@@ -309,6 +297,8 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             auditLoggers = getAuditLoggers(config, compContext);
             actionFilters = getActionFilters(config);
             triggerFilters = getTriggerFilters(config);
+            // TODO make dateUtil configurable (needs to be done in all locations)
+            dateUtil = DateUtil.getDateUtil("UTC");
             logger.debug("Audit service filters enabled: {}", actionFilters);
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
@@ -340,7 +330,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
         return configFilters;
     }
-    
+
     Map<String, Map<String, List<String>>> getTriggerFilters(JsonValue config) {
         Map<String, Map<String, List<String>>> configFilters = new HashMap<String, Map<String, List<String>>>();
 
@@ -374,7 +364,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 }
             }
         }
-        
+
         return configFilters;
     }
 

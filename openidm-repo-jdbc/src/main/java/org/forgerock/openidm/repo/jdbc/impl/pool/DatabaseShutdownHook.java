@@ -36,18 +36,20 @@ import org.slf4j.LoggerFactory;
  */
 public class DatabaseShutdownHook extends AbstractConnectionHook {
     private final static Logger logger = LoggerFactory.getLogger(DatabaseShutdownHook.class);
+    // Only used for logging, so it's okay to use the default timezone
+    private final static DateUtil dateUtil = DateUtil.getDateUtil();
 
     @Override
     public boolean onConnectionException(ConnectionHandle connection, String state, Throwable t) {
         // handle notifications here: SNMP or SMTP
-        logger.warn("Database down at {}", DateUtil.now());
+        logger.warn("Database down at {}", dateUtil.now());
         return super.onConnectionException(connection, state, t);
     }
 
     @Override
     public boolean onAcquireFail(Throwable t, AcquireFailConfig acquireConfig) {
         // handle notifications here: SNMP or SMTP
-        logger.warn("Failure to acquire connection at {}. Retry attempts remaining : {}", DateUtil.now(), acquireConfig.getAcquireRetryAttempts());
+        logger.warn("Failure to acquire connection at {}. Retry attempts remaining : {}", dateUtil.now(), acquireConfig.getAcquireRetryAttempts());
         return super.onAcquireFail(t, acquireConfig);
     }
 
