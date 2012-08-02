@@ -83,7 +83,7 @@
      records pertaining to <literal>openidm-admin</literal> do not reflect
      the actions of any real person.</para>
      <para>OpenIDM encrypts the password, <literal>openidm-admin</literal>, by
-     dfault. Change the password immediately after installation. For
+     default. Change the password immediately after installation. For
      instructions, see <link xlink:role="http://docbook.org/xlink/role/olink"
      xlink:href="integrators-guide#security-replace-default-user-password"
      ><citetitle>To Replace the Default User &amp;
@@ -127,7 +127,7 @@
   applications are expected to access the REST interface.</para>
 
   <variablelist>
-   <para>OpenIDM supports an improved authentication mechanism on the REST interface. The reason for not using standards, like basic authentication or form based authentication, is their leak of compatibility with AJAX.</para>
+   <para>OpenIDM supports an improved authentication mechanism on the REST interface. The reason for not using standards, like basic authentication or form-based authentication, is lack of compatibility with AJAX.</para>
    <varlistentry>
     <term>OpenIDM authentication with standard header fields</term>
     <listitem>
@@ -148,8 +148,7 @@
   <para>For more details about the OpenIDM authentication mechanism please see <link
   xlink:href="integrators-guide#security-messages"
   xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Use Message Level Security</citetitle>
-</link>.</para>
+  <citetitle>Use Message Level Security</citetitle></link>.</para>
   
   <para>You can change the attributes OpenIDM uses to store user login and
   password values. The attribute names are shown in a database query
