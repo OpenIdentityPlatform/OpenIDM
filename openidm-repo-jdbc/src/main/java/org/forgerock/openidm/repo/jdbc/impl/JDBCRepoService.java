@@ -142,10 +142,9 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         Map<String, Object> result = null;
         try {
             connection = getConnection();
+            connection.setAutoCommit(true); // Ensure this does not get transaction isolation handling
             TableHandler handler = getTableHandler(type);
             result = handler.read(fullId, type, localId, connection);
-
-            connection.close();
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
                 logger.debug("SQL Exception in read of {} with error code {}, sql state {}",
@@ -159,13 +158,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             logger.debug("IO Exception in read of {}", fullId, ex);
             throw new InternalServerErrorException("Conversion of read object failed", ex);
         } finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during connection close ", ex);
-                }
-            }
+            CleanupHelper.loggedClose(connection);
         }
 
         return result;
@@ -243,13 +236,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                 rollback(connection);
                 throw new InternalServerErrorException("Creating object failed with unexpected failure: " + ex.getMessage(), ex);
             } finally {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException ex) {
-                        logger.warn("Failure during connection close ", ex);
-                    }
-                }
+                CleanupHelper.loggedClose(connection);
             }
         } while (retry);
     }
@@ -334,11 +321,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                     } catch (SQLException ex) {
                         logger.warn("Failure in resetting connection isolation level ", ex);
                     }
-                    try {
-                        connection.close();
-                    } catch (SQLException ex) {
-                        logger.warn("Failure during connection close ", ex);
-                    }
+                    CleanupHelper.loggedClose(connection);
                 }
             }
         } while (retry);
@@ -405,13 +388,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                 rollback(connection);
                 throw new InternalServerErrorException("Deleting object failed with unexpected failure: " + ex.getMessage(), ex);
             } finally {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (SQLException ex) {
-                        logger.warn("Failure during connection close ", ex);
-                    }
-                }
+                CleanupHelper.loggedClose(connection);
             }
         } while (retry);
     }
@@ -460,6 +437,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         Connection connection = null;
         try {
             connection = getConnection();
+            connection.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
             long start = System.currentTimeMillis();
             List<Map<String, Object>> docs = getTableHandler(type).query(type, params, connection);
             long end = System.currentTimeMillis();
@@ -485,13 +463,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             logger.debug("ObjectSetException in query of {}", fullId, ex);
             throw ex;
         }  finally {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException ex) {
-                    logger.warn("Failure during connection close", ex);
-                }
-            }
+            CleanupHelper.loggedClose(connection);
         }
         return result;
     }
@@ -751,6 +723,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         try {
             // Check if we can get a connection
             testConn = getConnection();
+            testConn.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
         } catch (Exception ex) {
             logger.warn("JDBC Repository start-up experienced a failure getting a DB connection: " + ex.getMessage()
                     + ". If this is not temporary or resolved, Repository operation will be affected.", ex);
@@ -780,14 +753,14 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         maxBatchSize,
                         new DB2SQLExceptionHandler());
                 break;
-			case ORACLE:
-				handler = new OracleTableHandler(
-						tableConfig,
+            case ORACLE:
+                handler = new OracleTableHandler(
+                        tableConfig,
                         dbSchemaName,
                         queries,
                         maxBatchSize,
                         new DefaultSQLExceptionHandler());
-				break;
+                break;
             case POSTGRESQL:
                 handler = new PostgreSQLTableHandler(
                         tableConfig,
@@ -830,7 +803,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         explicitQueries,
                         new DB2SQLExceptionHandler());
                 break;
-			case ORACLE:
+            case ORACLE:
                 handler = new MappedTableHandler(
                         table,
                         objectToColumn,
