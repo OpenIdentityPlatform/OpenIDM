@@ -499,123 +499,127 @@ class ObjectMapping implements SynchronizationListener {
             }
         }
     }
-    
+
     /**
      * TEMPORARY. Future version will have this break-down into discrete units of work.
      * @param reconId
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
     private void doRecon(String reconId) throws SynchronizationException {
-        
+
         EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);
         JsonValue context = ObjectSetContext.get();
-        context.add("trigger", "recon");
-        JsonValue rootContext = JsonResourceContext.getRootContext(context);
-        logReconStart(reconId, rootContext, context);
-        sourceStats = new ReconStats(reconId,sourceObjectSet);
-        globalStats = new ReconStats(reconId,name);
-        globalStats.start();
+        try {
+            context.add("trigger", "recon");
+            JsonValue rootContext = JsonResourceContext.getRootContext(context);
+            logReconStart(reconId, rootContext, context);
+            sourceStats = new ReconStats(reconId,sourceObjectSet);
+            globalStats = new ReconStats(reconId,name);
+            globalStats.start();
 
-        // Get all the source and target identifiers before we assess the situations
-        sourceStats.startAllIds();
-        Iterator<String> sourceIds = queryAllIdsIterable(sourceObjectSet).iterator();
-        sourceStats.endAllIds();
-        if (!sourceIds.hasNext()) {
-            throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
-        }
-        targetStats = new ReconStats(reconId,targetObjectSet);
-        targetStats.startAllIds();
-        List<String> remainingTargetIds = queryAllIds(targetObjectSet);
-        targetStats.endAllIds();
-        measureIdQueries.end();
-        
-        EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
-        sourceStats.start();
-        while (sourceIds.hasNext()) {
-            String sourceId = sourceIds.next();
-            SourceSyncOperation op = new SourceSyncOperation();
-            ReconEntry entry = new ReconEntry(op, rootContext);
-            op.sourceId = sourceId;
-            entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
-            sourceStats.entries++;
-            op.reconId = reconId;
-            try {
-                op.sourceObject = readObject(entry.sourceId);
-                op.sync();
-            } catch (SynchronizationException se) {
-                if (op.action != Action.EXCEPTION) {
-                    entry.status = Status.FAILURE; // exception was not intentional
-                    LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
-                }
-                Throwable throwable = se;
-                while (throwable.getCause() != null) { // want message associated with original cause
-                    throwable = throwable.getCause();
-                }
-                if (se != throwable) {
-                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                } else {
-                    entry.message = throwable.getMessage();
-                }
+            // Get all the source and target identifiers before we assess the situations
+            sourceStats.startAllIds();
+            Iterator<String> sourceIds = queryAllIdsIterable(sourceObjectSet).iterator();
+            sourceStats.endAllIds();
+            if (!sourceIds.hasNext()) {
+                throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
             }
-            String[] targetIds = op.getTargetIds();
-            for (String handledId : targetIds) {
-                remainingTargetIds.remove(handledId);
-            }
-            
-            if (entry.status == Status.FAILURE || op.action != null) {
-                entry.timestamp = new Date();
-                entry.reconciling = "source";
-                if (op.targetObject != null) {
-                    entry.targetId = qualifiedId(targetObjectSet, op.targetObject.get("_id").asString());
-                }
-                entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
-                logReconEntry(entry);
-            }
-        }
-        sourceStats.end();
-        measureSource.end();
+            targetStats = new ReconStats(reconId,targetObjectSet);
+            targetStats.startAllIds();
+            List<String> remainingTargetIds = queryAllIds(targetObjectSet);
+            targetStats.endAllIds();
+            measureIdQueries.end();
 
-        EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
-        targetStats.start();
-        for (String targetId : remainingTargetIds) {
-            TargetSyncOperation op = new TargetSyncOperation();
-            ReconEntry entry = new ReconEntry(op, rootContext);
-            entry.targetId = qualifiedId(targetObjectSet, targetId);
-            targetStats.entries++;
-            op.reconId = reconId;
-            try {
-                op.targetObject = readObject(entry.targetId);
-                op.sync();
-            } catch (SynchronizationException se) {
-                if (op.action != Action.EXCEPTION) {
-                    entry.status = Status.FAILURE; // exception was not intentional
-                    LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
+            EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
+            sourceStats.start();
+            while (sourceIds.hasNext()) {
+                String sourceId = sourceIds.next();
+                SourceSyncOperation op = new SourceSyncOperation();
+                ReconEntry entry = new ReconEntry(op, rootContext);
+                op.sourceId = sourceId;
+                entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
+                sourceStats.entries++;
+                op.reconId = reconId;
+                try {
+                    op.sourceObject = readObject(entry.sourceId);
+                    op.sync();
+                } catch (SynchronizationException se) {
+                    if (op.action != Action.EXCEPTION) {
+                        entry.status = Status.FAILURE; // exception was not intentional
+                        LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
+                    }
+                    Throwable throwable = se;
+                    while (throwable.getCause() != null) { // want message associated with original cause
+                        throwable = throwable.getCause();
+                    }
+                    if (se != throwable) {
+                        entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+                    } else {
+                        entry.message = throwable.getMessage();
+                    }
                 }
-                Throwable throwable = se;
-                while (throwable.getCause() != null) { // want message associated with original cause
-                    throwable = throwable.getCause();
+                String[] targetIds = op.getTargetIds();
+                for (String handledId : targetIds) {
+                    remainingTargetIds.remove(handledId);
                 }
-                if (se != throwable) {
-                    entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                } else {
-                    entry.message = throwable.getMessage();
+
+                if (entry.status == Status.FAILURE || op.action != null) {
+                    entry.timestamp = new Date();
+                    entry.reconciling = "source";
+                    if (op.targetObject != null) {
+                        entry.targetId = qualifiedId(targetObjectSet, op.targetObject.get("_id").asString());
+                    }
+                    entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
+                    logReconEntry(entry);
                 }
             }
-            if (entry.status == Status.FAILURE || op.action != null) {
-                entry.timestamp = new Date();
-                entry.reconciling = "target";
-                if (op.sourceObject != null) {
-                    entry.sourceId = qualifiedId(sourceObjectSet, op.sourceObject.get("_id").asString());
+            sourceStats.end();
+            measureSource.end();
+
+            EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
+            targetStats.start();
+            for (String targetId : remainingTargetIds) {
+                TargetSyncOperation op = new TargetSyncOperation();
+                ReconEntry entry = new ReconEntry(op, rootContext);
+                entry.targetId = qualifiedId(targetObjectSet, targetId);
+                targetStats.entries++;
+                op.reconId = reconId;
+                try {
+                    op.targetObject = readObject(entry.targetId);
+                    op.sync();
+                } catch (SynchronizationException se) {
+                    if (op.action != Action.EXCEPTION) {
+                        entry.status = Status.FAILURE; // exception was not intentional
+                        LOGGER.warn("Unexpected failure during target reconciliation {}", reconId, se);
+                    }
+                    Throwable throwable = se;
+                    while (throwable.getCause() != null) { // want message associated with original cause
+                        throwable = throwable.getCause();
+                    }
+                    if (se != throwable) {
+                        entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+                    } else {
+                        entry.message = throwable.getMessage();
+                    }
                 }
-                logReconEntry(entry);
+                if (entry.status == Status.FAILURE || op.action != null) {
+                    entry.timestamp = new Date();
+                    entry.reconciling = "target";
+                    if (op.sourceObject != null) {
+                        entry.sourceId = qualifiedId(sourceObjectSet, op.sourceObject.get("_id").asString());
+                    }
+                    logReconEntry(entry);
+                }
             }
+            targetStats.end();
+            measureTarget.end();
+            globalStats.end();
+            logReconEnd(reconId, rootContext, context);
+            doResults();
+        } finally {
+            context.remove("trigger");
         }
-        targetStats.end();
-        measureTarget.end();
-        globalStats.end();
-        logReconEnd(reconId, rootContext, context);
-        doResults();
-        
+
 // TODO: cleanup orphan link objects (no matching source or target) here 
     }
 
