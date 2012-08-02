@@ -15,36 +15,112 @@
  */
 package org.forgerock.openidm.util;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * @author $author$
  * @version $Revision$ $Date$
  */
 public class DateUtil {
-
-    private static final SimpleDateFormat ISO8601_FORMAT = new SimpleDateFormat(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND);
+    private SimpleDateFormat formatter;
 
     /**
-     * Generate the current time string in ISO8601 format with milliseconds
-     * 2011-09-09T14:58:17.6+02:00
-     * 2011-09-09T14:58:17.65+02:00
-     * 2011-09-09T14:58:17.654+02:00
+     * Create a new DateUtil with the default timezone that generates ISO8601 format timestamps with milliseconds
+     * <p>2011-09-09T14:58:17.6+02:00
+     * <p>2011-09-09T14:58:17.65+02:00
+     * <p>2011-09-09T14:58:17.654+02:00
      *
-     * @return
+     *
+     * @return new DateUtil with default formatting
      */
-    public static String now() {
-        // format in (almost) ISO8601 format
-        String dateStr = ISO8601_FORMAT.format(new Date());
+    public static DateUtil getDateUtil() {
+        return new DateUtil(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND, TimeZone.getDefault());
+    }
 
-        // remap the timezone from 0000 to 00:00
+    /**
+     * Create a new DateUtil using a specified TimeZone that generates ISO8601 format timestamps with milliseconds
+     * <p>2011-09-09T14:58:17.6+02:00
+     * <p>2011-09-09T14:58:17.65+02:00
+     * <p>2011-09-09T14:58:17.654+02:00
+     *
+     *
+     * @param zone the given time zone
+     * @return new DateUtil with specified time zone
+     */
+    public static DateUtil getDateUtil(TimeZone zone) {
+        return new DateUtil(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND, zone);
+    }
+
+    /**
+     * Create a new DateUtil using a TimeZone for the specified ID that generates
+     * ISO8601 format timestamps with milliseconds
+     * <p>2011-09-09T14:58:17.6+02:00
+     * <p>2011-09-09T14:58:17.65+02:00
+     * <p>2011-09-09T14:58:17.654+02:00
+     *
+     * @param timeZoneID the ID for a TimeZone, either an abbreviation such as "PST",
+     *                   a full name such as "America/Los_Angeles", or a custom ID such as "GMT-8:00".
+     *                   Note that the support of abbreviations is for JDK 1.1.x compatibility only and
+     *                   full names should be used.
+     * @return DateUtil with specified time zone
+     */
+    public static DateUtil getDateUtil(String timeZoneID) {
+        return new DateUtil(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND, TimeZone.getTimeZone(timeZoneID));
+    }
+
+    /**
+     * Create a new DateUtil using a Json object for configuration
+     *
+     * @param config Json object defining the configuration of the object. Expects "timezone" field to be defined
+     *               otherwise uses the system default timezone
+     * @return dateUtil object using the provided configuration object
+     */
+    public static DateUtil getDateUtil(JsonValue config) {
+        TimeZone zone;
+        String zoneID = config.get("timezone").asString(); // Returns null if object is undefined
+        if (zoneID == null) {
+            zone = TimeZone.getDefault();
+        } else {
+            zone = TimeZone.getTimeZone(zoneID);
+        }
+        return getDateUtil(zone);
+    }
+
+    /**
+     * Private constructor
+     * @param format string that defines the timestamp format
+     * @param zone time zone to configure the formatter
+     */
+    private DateUtil(String format, TimeZone zone) {
+        formatter = new SimpleDateFormat(format);
+        formatter.setTimeZone(zone);
+    }
+
+    /**
+     * Generate a formatted timestamp for the current time
+     *
+     * @return String containing a timestamp
+     */
+    public String now() {
+        return formatDateTime(new Date());
+    }
+
+    /**
+     * Formats a given date into a timestamp
+     * @param date date object to convert
+     * @return String containing the formatted timestamp
+     */
+    public String formatDateTime(Date date) {
+        String dateStr = formatter.format(date);
+
         int colonPos = dateStr.length() - 2;
         return dateStr.substring(0, colonPos)
                 + ":" + dateStr.substring(colonPos);
-
     }
 
     /**

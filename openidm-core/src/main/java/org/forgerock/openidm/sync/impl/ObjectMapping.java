@@ -43,6 +43,7 @@ import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
+import org.forgerock.openidm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,7 @@ class ObjectMapping implements SynchronizationListener {
     public static final Name EVENT_DELETE_TARGET = Name.get("openidm/internal/discovery-engine/sync/delete-target");
     public static final String EVENT_OBJECT_MAPPING_PREFIX = "openidm/internal/discovery-engine/sync/objectmapping/";
 
-    
+
     /**
      * Event names for monitoring Reconciliation behavior
      */
@@ -71,10 +72,10 @@ class ObjectMapping implements SynchronizationListener {
     public static final Name EVENT_RECON_ID_QUERIES = Name.get("openidm/internal/discovery-engine/reconciliation/id-queries-phase");
     public static final Name EVENT_RECON_SOURCE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
     public static final Name EVENT_RECON_TARGET = Name.get("openidm/internal/discovery-engine/reconciliation/target-phase");
-        
+
     /** TODO: Description. */
     private enum Status { SUCCESS, FAILURE }
-    
+
     /** TODO: Description. */
     private static final Logger LOGGER = LoggerFactory.getLogger(ObjectMapping.class);
 
@@ -168,7 +169,7 @@ class ObjectMapping implements SynchronizationListener {
         resultScript = Scripts.newInstance("ObjectMapping", config.get("result"));
         LOGGER.debug("Instantiated {}", name);
     }
-    
+
     public void initRelationships(SynchronizationService syncSvc, List<ObjectMapping> allMappings) {
         linkType = LinkType.getLinkType(this, allMappings);
     }
@@ -187,35 +188,35 @@ class ObjectMapping implements SynchronizationListener {
     public String getName() {
         return name;
     }
-    
+
     /**
      * @return The configured name of the link set to use for this object mapping
      */
     public String getLinkTypeName() {
         return linkTypeName;
     }
-    
+
     /**
      * @return The resolved name of the link set to use for this object mapping
      */
     public LinkType getLinkType() {
         return linkType;
     }
-    
+
     /**
      * @return The mapping source object set
      */
     public String getSourceObjectSet() {
         return sourceObjectSet;
     }
-    
+
     /**
      * @return The mapping target object set
      */
     public String getTargetObjectSet() {
         return targetObjectSet;
     }
-    
+
     /**
      * TODO: Description.
      *
@@ -225,7 +226,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private void doSourceSync(String id, JsonValue value) throws SynchronizationException {
         LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
-        
+
         String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
@@ -253,8 +254,8 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * Get all IDs for a given object set as a list 
-     * 
+     * Get all IDs for a given object set as a list
+     *
      * @param objectSet the object set to query
      * @return the list of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
@@ -275,11 +276,11 @@ class ObjectMapping implements SynchronizationListener {
         }
         return ids;
     }
-    
+
     /**
-     * Get all IDs for a given object set as a iterable. 
-     * May allow for further optimizations over direct list access and is the preferred way to access. 
-     * 
+     * Get all IDs for a given object set as a iterable.
+     * May allow for further optimizations over direct list access and is the preferred way to access.
+     *
      * @param objectSet the object set to query
      * @return the list of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
@@ -289,7 +290,7 @@ class ObjectMapping implements SynchronizationListener {
         // For now we pull all into memory immediately
         return queryAllIds(objectSet);
     }
-    
+
     /**
      * TODO: Description.
      *
@@ -620,7 +621,7 @@ class ObjectMapping implements SynchronizationListener {
             context.remove("trigger");
         }
 
-// TODO: cleanup orphan link objects (no matching source or target) here 
+// TODO: cleanup orphan link objects (no matching source or target) here
     }
 
     /**
@@ -636,7 +637,7 @@ class ObjectMapping implements SynchronizationListener {
             throw new SynchronizationException(ose);
         }
     }
-    
+
     private void logReconStart(String reconId, JsonValue rootContext, JsonValue context) throws SynchronizationException {
         ReconEntry reconStartEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_START);
         reconStartEntry.timestamp = new Date();
@@ -644,7 +645,7 @@ class ObjectMapping implements SynchronizationListener {
         reconStartEntry.message = "Reconciliation initiated by " + ActivityLog.getRequester(context);
         logReconEntry(reconStartEntry);
     }
-    
+
     private void logReconEnd(String reconId, JsonValue rootContext, JsonValue context) throws SynchronizationException {
         ReconEntry reconEndEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_END);
         reconEndEntry.timestamp = new Date();
@@ -654,7 +655,7 @@ class ObjectMapping implements SynchronizationListener {
         logReconEntry(reconEndEntry);
         LOGGER.info("Reconciliation completed. " + simpleSummary);
     }
-    
+
     /*
      * Execute a sync engine action explicitly, without going through situation assessment.
      * @param sourceObject the source object if applicable to the action
@@ -663,7 +664,7 @@ class ObjectMapping implements SynchronizationListener {
      * @param action the explicit action to invoke
      * @param reconId an optional identifier for the recon context if this is done in the context of reconciliation
      */
-    public void explicitOp(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId) 
+    public void explicitOp(JsonValue sourceObject, JsonValue targetObject, Situation situation, Action action, String reconId)
             throws SynchronizationException {
         ExplicitSyncOperation linkOp = new ExplicitSyncOperation();
         linkOp.init(sourceObject, targetObject, situation, action, reconId);
@@ -735,12 +736,12 @@ class ObjectMapping implements SynchronizationListener {
                         targetObject = new JsonValue(new HashMap<String, Object>());
                         applyMappings(sourceObject, targetObject); // apply property mappings to target
                         execScript("onCreate", onCreateScript);
-                        
+
                         JsonValue context = ObjectSetContext.get();
                         // Allow the early link creation as soon as the target identifier is known
                         String sourceId = sourceObject.get("_id").required().asString();
                         PendingLink.populate(context, ObjectMapping.this.name, sourceId, sourceObject, reconId, situation);
-                        
+
                         createTargetObject(targetObject);
                         boolean wasLinked = PendingLink.wasLinked(context);
                         if (wasLinked) {
@@ -803,7 +804,7 @@ class ObjectMapping implements SynchronizationListener {
                 throw new SynchronizationException(jve);
             }
         }
-        
+
         protected void createLink(String sourceId, String targetId, String reconId) throws SynchronizationException {
             Link linkObject = new Link(ObjectMapping.this);
             execScript("onLink", onLinkScript);
@@ -873,7 +874,7 @@ class ObjectMapping implements SynchronizationListener {
             LOGGER.trace("isTargetValid of {} evaluated: {}", null != targetObject ? targetObject.get("_id").getObject() : "[NULL]", result);
             return result;
         }
-        
+
         /**
          * Executes the given script with the appropriate context information
          *
@@ -904,8 +905,8 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * Explicit execution of a sync operation where the appropriate 
-     * action is known without having to assess the situation and apply 
+     * Explicit execution of a sync operation where the appropriate
+     * action is known without having to assess the situation and apply
      * policy to decide the action
      */
     private class ExplicitSyncOperation extends SyncOperation {
@@ -917,7 +918,7 @@ class ObjectMapping implements SynchronizationListener {
             this.situation = situation;
             this.action = action;
         }
-        
+
         @Override
         public void sync() throws SynchronizationException {
             LOGGER.debug("Initiate explicit operation call for situation: {}, action: {}", situation, action);
@@ -925,7 +926,7 @@ class ObjectMapping implements SynchronizationListener {
             LOGGER.debug("Complected explicit operation call for situation: {}, action: {}", situation, action);
         }
     }
-    
+
     /**
      * TODO: Description.
      */
@@ -936,14 +937,14 @@ class ObjectMapping implements SynchronizationListener {
 
         // If it can not uniquely identify a target, the list of ambiguous target ids
         public List<String> ambiguousTargetIds;
-        
+
         @Override
         public void sync() throws SynchronizationException {
             assessSituation();
             determineAction(true);
             performAction();
         }
-        
+
         /**
          * @return all found matching target identifer(s), or a 0 length array if none.
          * More than one target identifier is possible for ambiguous matches
@@ -959,14 +960,14 @@ class ObjectMapping implements SynchronizationListener {
             }
             return targetIds;
         }
-        
+
         /**
          * @return the ambiguous target identifier(s), or an empty list if no ambiguous entries are present
          */
         public List getAmbiguousTargetIds() {
             return ambiguousTargetIds;
         }
-        
+
         private void setAmbiguousTargetIds(JsonValue results) {
             ambiguousTargetIds = new ArrayList<String>(results == null ? 0 : results.size());
             for (JsonValue resultValue : results) {
@@ -1015,7 +1016,7 @@ class ObjectMapping implements SynchronizationListener {
                     situation = Situation.UNQUALIFIED;
                 } else {
                     JsonValue results = correlateTarget();
-                    if (results == null || results.size() == 0) { 
+                    if (results == null || results.size() == 0) {
                         situation = Situation.SOURCE_IGNORED; // source not valid for mapping, and no link or target exist
                     } else if (results.size() == 1) {
                         // TODO: Consider if we can optimize out the read for unqualified conditions
@@ -1062,10 +1063,10 @@ class ObjectMapping implements SynchronizationListener {
             }
             return result;
         }
-        
+
         /**
          * Given a result entry from a correlation query get the full correlated target object
-         * @param resultValue an entry from the correlation query result list. 
+         * @param resultValue an entry from the correlation query result list.
          * May already be the full target object, or just contain the id.
          * @return the target object
          * @throws SynchronizationException
@@ -1156,7 +1157,7 @@ class ObjectMapping implements SynchronizationListener {
      * TEMPORARY.
      */
     private class ReconEntry {
-        
+
         public final static String RECON_START = "start";
         public final static String RECON_END = "summary";
         public final static String RECON_ENTRY = ""; // regular reconciliation entry has an empty entry type
@@ -1181,9 +1182,9 @@ class ObjectMapping implements SynchronizationListener {
         public String reconciling;
         /** TODO: Description. */
         public String message;
-// TODO: replace with proper formatter
-        SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        
+
+        private DateUtil dateUtil;
+
         // A comma delimited formatted representation of any ambiguous identifiers
         protected String ambigiousTargetIds;
         public void setAmbiguousTargetIds(List<String> ambiguousIds) {
@@ -1202,7 +1203,7 @@ class ObjectMapping implements SynchronizationListener {
                 ambigiousTargetIds = "";
             }
         }
-        
+
         private String getReconId() {
             return (reconId == null && op != null) ? op.reconId : reconId;
         }
@@ -1214,8 +1215,10 @@ class ObjectMapping implements SynchronizationListener {
             this.op = op;
             this.rootContext = rootContext;
             this.entryType = entryType;
+            // TODO find a way to configure this
+            this.dateUtil = DateUtil.getDateUtil("UTC");
         }
-        
+
         /**
          * Constructor for regular reconciliation log entries
          */
@@ -1237,7 +1240,7 @@ class ObjectMapping implements SynchronizationListener {
             jv.put("sourceObjectId", sourceId);
             jv.put("targetObjectId", targetId);
             jv.put("ambiguousTargetObjectIds", ambigiousTargetIds);
-            jv.put("timestamp", isoFormatter.format(timestamp));
+            jv.put("timestamp", dateUtil.formatDateTime(timestamp));
             jv.put("situation", ((op == null || op.situation == null) ? null : op.situation.toString()));
             jv.put("action", ((op == null || op.action == null) ? null : op.action.toString()));
             jv.put("status", (status == null ? null : status.toString()));

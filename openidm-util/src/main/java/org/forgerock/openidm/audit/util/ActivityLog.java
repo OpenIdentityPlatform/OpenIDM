@@ -48,6 +48,7 @@ public class ActivityLog {
 
     private final static boolean suspendException;
     private final static ObjectMapper mapper;
+    private static DateUtil dateUtil;
 
     /**
      * Creates a Jackson object mapper. By default, it
@@ -60,6 +61,8 @@ public class ActivityLog {
         mapper = new ObjectMapper(jsonFactory);
         String config = IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
         suspendException = "suspend".equals(config);
+        // TODO Allow for configured dateUtil
+        dateUtil = DateUtil.getDateUtil("UTC");
     }
 
 
@@ -138,7 +141,7 @@ public class ActivityLog {
         JsonValue parent = JsonResourceContext.getParentContext(request);
 
         Map<String, Object> activity = new HashMap<String, Object>();
-        activity.put("timestamp", DateUtil.now());
+        activity.put("timestamp", dateUtil.now());
         activity.put("action", request.get("method").getObject());
         activity.put("message", message);
         activity.put("objectId", objectId);

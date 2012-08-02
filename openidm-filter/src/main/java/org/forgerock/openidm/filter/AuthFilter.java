@@ -68,6 +68,7 @@ import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.util.DateUtil;
 
 import org.forgerock.openidm.audit.util.Status;
 
@@ -92,7 +93,7 @@ public class AuthFilter implements Filter {
 
     /** Attribute in session and request containing assigned roles. */
     public static final String ROLES_ATTRIBUTE = "openidm.roles";
-    
+
     /** Attribute in session containing user's resource (managed_user or internal_user) */
     public static final String RESOURCE_ATTRIBUTE = "openidm.resource";
 
@@ -100,6 +101,7 @@ public class AuthFilter implements Filter {
     // name of the header containing the client IPAddress, used for the audit record
     // typically X-Forwarded-For
     static String logClientIPHeader = null;
+    private static DateUtil dateUtil;
 
     public enum Action {
         authenticate, logout
@@ -118,7 +120,7 @@ public class AuthFilter implements Filter {
     private FilterConfig config = null;
     public void init(FilterConfig config) throws ServletException {
           this.config = config;
-          
+
           String clientAuthOnlyStr = System.getProperty("openidm.auth.clientauthonlyports");
           if (clientAuthOnlyStr != null) {
               String[] split = clientAuthOnlyStr.split(",");
@@ -134,7 +136,7 @@ public class AuthFilter implements Filter {
         if (router == null) {
             throw new ServletException("Internal services not ready to process requests.");
         }
-        
+
         HttpServletRequest req = (HttpServletRequest)request;
         HttpServletResponse res = (HttpServletResponse)response;
         AuthData authData = new AuthData();
@@ -153,10 +155,10 @@ public class AuthFilter implements Filter {
               // if we see the certficate port this request is for client auth only
             } else if (allowClientCertOnly(req)) {
                 authData = hasClientCert(req);
-                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS); 
+                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
             } else if (session == null && headerLogin != null) {
                 authData = authenticateUser(req);
-                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS); 
+                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
                 createSession(req, session, authData);
             } else if (session == null && basicAuth != null) {
                 authData = doBasicAuth(basicAuth);
@@ -179,20 +181,19 @@ public class AuthFilter implements Filter {
         req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
         chain.doFilter(new UserWrapper(req, authData.username, authData.roles), res);
     }
- 
-    private void authFailed(HttpServletRequest req, HttpServletResponse res, 
+
+    private void authFailed(HttpServletRequest req, HttpServletResponse res,
                                             String username) throws IOException {
 
         logAuth(req, username, null, Action.authenticate, Status.FAILURE);
         res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
-    private static void logAuth(HttpServletRequest req, String username, 
+    private static void logAuth(HttpServletRequest req, String username,
                             List<String> roles, Action action, Status status) {
         try {
-            SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             Map<String,Object> entry = new HashMap<String,Object>();
-            entry.put("timestamp", isoFormatter.format(new Date()));
+            entry.put("timestamp", dateUtil.now());
             entry.put("action", action.toString());
             entry.put("status", status.toString());
             entry.put("principal", username);
@@ -253,9 +254,9 @@ public class AuthFilter implements Filter {
             sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
             sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
             sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
-            
+
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Created session for: {} with roles {} and resource: {}", 
+                LOGGER.debug("Created session for: {} with roles {} and resource: {}",
                     new Object[] {ad.username, ad.roles, ad.resource});
             }
         }
@@ -319,7 +320,7 @@ public class AuthFilter implements Filter {
 
     /**
      * Whether to allow authentication purely based on client certificates
-     * Note that the checking of the certificates MUST be done by setting 
+     * Note that the checking of the certificates MUST be done by setting
      * jetty up for client auth required.
      * @return true if authentication via client certificate only is sufficient
      */
@@ -362,6 +363,8 @@ public class AuthFilter implements Filter {
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         logClientIPHeader = (String) config.get("clientIPHeader").asString();
         AuthModule.setConfig(config);
+        // TODO make this configurable
+        dateUtil = DateUtil.getDateUtil("UTC");
 
         /*String urlPatterns[] = {"/openidm/*"};
         String servletNames[] = null;
