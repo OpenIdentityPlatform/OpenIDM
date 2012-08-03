@@ -17,7 +17,6 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java SE
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -72,6 +71,11 @@ class ObjectMapping implements SynchronizationListener {
     public static final Name EVENT_RECON_ID_QUERIES = Name.get("openidm/internal/discovery-engine/reconciliation/id-queries-phase");
     public static final Name EVENT_RECON_SOURCE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
     public static final Name EVENT_RECON_TARGET = Name.get("openidm/internal/discovery-engine/reconciliation/target-phase");
+
+    /**
+     * Date util used when creating ReconObject timestamps
+     */
+    private static final DateUtil dateUtil = DateUtil.getDateUtil("UTC");
 
     /** TODO: Description. */
     private enum Status { SUCCESS, FAILURE }
@@ -536,7 +540,7 @@ class ObjectMapping implements SynchronizationListener {
             while (sourceIds.hasNext()) {
                 String sourceId = sourceIds.next();
                 SourceSyncOperation op = new SourceSyncOperation();
-                ReconEntry entry = new ReconEntry(op, rootContext);
+                ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
                 op.sourceId = sourceId;
                 entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
                 sourceStats.entries++;
@@ -581,7 +585,7 @@ class ObjectMapping implements SynchronizationListener {
             targetStats.start();
             for (String targetId : remainingTargetIds) {
                 TargetSyncOperation op = new TargetSyncOperation();
-                ReconEntry entry = new ReconEntry(op, rootContext);
+                ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
                 entry.targetId = qualifiedId(targetObjectSet, targetId);
                 targetStats.entries++;
                 op.reconId = reconId;
@@ -639,7 +643,7 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     private void logReconStart(String reconId, JsonValue rootContext, JsonValue context) throws SynchronizationException {
-        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_START);
+        ReconEntry reconStartEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_START, dateUtil);
         reconStartEntry.timestamp = new Date();
         reconStartEntry.reconId = reconId;
         reconStartEntry.message = "Reconciliation initiated by " + ActivityLog.getRequester(context);
@@ -647,7 +651,7 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     private void logReconEnd(String reconId, JsonValue rootContext, JsonValue context) throws SynchronizationException {
-        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_END);
+        ReconEntry reconEndEntry = new ReconEntry(null, rootContext, ReconEntry.RECON_END, dateUtil);
         reconEndEntry.timestamp = new Date();
         reconEndEntry.reconId = reconId;
         String simpleSummary = ReconStats.simpleSummary(globalStats, sourceStats, targetStats);
@@ -1211,19 +1215,18 @@ class ObjectMapping implements SynchronizationListener {
         /**
          * Constructor that allows specifying the type of reconciliation log entry
          */
-        public ReconEntry(SyncOperation op, JsonValue rootContext, String entryType) {
+        public ReconEntry(SyncOperation op, JsonValue rootContext, String entryType, DateUtil dateUtil) {
             this.op = op;
             this.rootContext = rootContext;
             this.entryType = entryType;
-            // TODO find a way to configure this
-            this.dateUtil = DateUtil.getDateUtil("UTC");
+            this.dateUtil = dateUtil;
         }
 
         /**
          * Constructor for regular reconciliation log entries
          */
-        public ReconEntry(SyncOperation op, JsonValue rootContext) {
-            this(op, rootContext, RECON_ENTRY);
+        public ReconEntry(SyncOperation op, JsonValue rootContext, DateUtil dateUtil) {
+            this(op, rootContext, RECON_ENTRY, dateUtil);
         }
 
         /**
