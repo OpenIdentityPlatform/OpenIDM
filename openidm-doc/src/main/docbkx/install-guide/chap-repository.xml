@@ -136,7 +136,8 @@ mysql&gt; show tables;
     "password" : "",</emphasis>
     "defaultCatalog" : "openidm",
     "maxBatchSize" : 100,
-    "maxTxRetry" : 5
+    "maxTxRetry" : 5,
+    "enableConnectionPool" : true 
 },</programlisting>
   </step>
  </procedure>
