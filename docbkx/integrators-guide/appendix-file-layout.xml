@@ -87,6 +87,30 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term><filename>openidm/bin/startup/</filename></term>
+   <listitem>
+    <para>Clickable commands for Mac OS X.</para>
+   </listitem>
+  </varlistentry>
+    <varlistentry>
+   <term><filename>openidm/bin/startup/OS X - Run OpenIDM In Background.command</filename></term>
+   <listitem>
+    <para>Clickable commands for Mac OS X.</para>
+   </listitem>
+  </varlistentry>
+    <varlistentry>
+   <term><filename>openidm/bin/startup/OS X - Run OpenIDM In Terminal Window.command</filename></term>
+   <listitem>
+    <para>Clickable commands for Mac OS X.</para>
+   </listitem>
+  </varlistentry>
+    <varlistentry>
+   <term><filename>openidm/bin/startup/OS X - Stop OpenIDM.command</filename></term>
+   <listitem>
+    <para>Clickable commands for Mac OS X.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term><filename>openidm/bundle/</filename></term>
    <listitem>
     <para>OSGi bundles and modules required by OpenIDM. Upgrade can install
@@ -227,14 +251,6 @@
    <listitem>
     <para>OpenIDM service log files as configured in
     <filename>openidm/conf/logging.properties</filename></para>
-   </listitem>
-  </varlistentry>
-  <varlistentry>
-   <term><filename>openidm/OS X - Run OpenIDM In Background.command</filename></term>
-   <term><filename>openidm/OS X - Run OpenIDM In Terminal Window.command</filename></term>
-   <term><filename>openidm/OS X - Stop OpenIDM.command</filename></term>
-   <listitem>
-    <para>Clickable commands for Mac OS X</para>
    </listitem>
   </varlistentry>
   <varlistentry>
