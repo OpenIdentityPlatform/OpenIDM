@@ -89,7 +89,7 @@
    </varlistentry>
   </variablelist>
 
-  <para>Where an action happens the context of a higher level business
+  <para>Where an action happens in the context of a higher level business
   function, the log entry points to a parent activity for the context.
   The relationships are hierarchical. For example, a synchronization operation
   could result from scheduled reconciliation for an object type. OpenIDM also
@@ -150,8 +150,8 @@
    <varlistentry>
     <term><literal>"timestamp"</literal></term>
     <listitem>
-     <para>Time when OpenIDM logged the message, such as
-     <literal>"2012-01-10T10:45:42"</literal></para>
+     <para>Time when OpenIDM logged the message, in UTC format, for example 
+     <literal>"2012-08-03T08:57:11.902+00:00"</literal></para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -243,8 +243,8 @@
    <varlistentry>
     <term><literal>"timestamp"</literal></term>
     <listitem>
-     <para>Time when OpenIDM logged the message, such as
-     <literal>"2012-01-10T10:45:42"</literal></para>
+     <para>Time when OpenIDM logged the message, in UTC format, for example 
+     <literal>"2012-08-03T08:57:11.902+00:00"</literal></para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -343,8 +343,8 @@
    <varlistentry>
     <term><literal>"timestamp"</literal></term>
     <listitem>
-     <para>Time when OpenIDM logged the message, such as
-     <literal>"2012-01-10T10:45:42"</literal>.</para>
+    <para>Time when OpenIDM logged the message, in UTC format, for example 
+    <literal>"2012-08-03T08:57:11.902+00:00"</literal></para>
     </listitem>
    </varlistentry>
   </variablelist>
