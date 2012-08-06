@@ -17,9 +17,10 @@ package org.forgerock.openidm.util;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
+import org.apache.commons.lang3.time.FastDateFormat;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -27,7 +28,8 @@ import java.util.TimeZone;
  * @version $Revision$ $Date$
  */
 public class DateUtil {
-    private SimpleDateFormat formatter;
+    private FastDateFormat formatter;
+    private static final Locale LOCALE = new Locale("EN");
 
     /**
      * Create a new DateUtil with the default timezone that generates ISO8601 format timestamps with milliseconds
@@ -97,8 +99,7 @@ public class DateUtil {
      * @param zone time zone to configure the formatter
      */
     private DateUtil(String format, TimeZone zone) {
-        formatter = new SimpleDateFormat(format);
-        formatter.setTimeZone(zone);
+        formatter = FastDateFormat.getInstance(format, zone, LOCALE);
     }
 
     /**
