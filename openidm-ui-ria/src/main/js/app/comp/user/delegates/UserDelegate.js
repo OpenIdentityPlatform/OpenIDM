@@ -121,7 +121,7 @@ define("app/comp/user/delegates/UserDelegate",
         headers[constants.OPENIDM_HEADER_PARAM_PASSWORD] = password;
         headers[constants.OPENIDM_HEADER_PARAM_NO_SESION] = false;
         obj.serviceCall({
-            url: "/?_query-id=for-credentials&" + $.param({password: password, uid: uid.toLowerCase()}),
+            url: "/?_query-id=for-credentials",
             headers: headers,
             success: function (data) {
                 if(!data.result) {
