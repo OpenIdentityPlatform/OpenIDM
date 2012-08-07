@@ -31,6 +31,7 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelperTest;
