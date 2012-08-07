@@ -60,7 +60,6 @@
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
             <version>1.1.0.1-SNAPSHOT</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
@@ -115,7 +114,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
-            <version>1.1.0.0</version>
+            <version>1.1.0.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

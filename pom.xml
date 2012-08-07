@@ -230,11 +230,11 @@
 
         <!-- version management -->
         <openidm.version>2.1.0-SNAPSHOT</openidm.version>
-        <slf4j.version>1.6.4</slf4j.version>
+        <slf4j.version>1.6.6</slf4j.version>
         <log4j.version>1.2.16</log4j.version>
         <orientdb.version>1.1.0</orientdb.version>
-        <jackson.version>1.9.5</jackson.version>
-        <restlet.version>2.0.9</restlet.version>
+        <jackson.version>1.9.9</jackson.version>
+        <restlet.version>2.0.14</restlet.version>
 		<javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
 		
         <!-- Commons JSON versions -->
@@ -447,12 +447,12 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.3</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.main</artifactId>
-                <version>4.0.2</version>
+                <version>4.0.3</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -472,7 +472,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin</artifactId>
-                <version>1.2.8</version>
+                <version>1.4.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -482,7 +482,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.fileinstall</artifactId>
-                <version>3.1.10</version>
+                <version>3.2.4</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -570,7 +570,7 @@
 			<dependency>
 				<groupId>org.codehaus.jstestrunner</groupId>
 				<artifactId>jstestrunner-junit</artifactId>
-				<version>1.0.1</version>
+				<version>1.0.2</version>
 			</dependency>
             
             <!-- UI -->
