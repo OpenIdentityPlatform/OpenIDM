@@ -39,7 +39,6 @@ import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
 import org.forgerock.openidm.provisioner.openicf.query.operators.BooleanOperator;
 import org.forgerock.openidm.provisioner.openicf.query.operators.Operator;
 import org.identityconnectors.common.Assertions;
-import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
 import org.identityconnectors.framework.common.objects.*;
 import org.identityconnectors.framework.common.objects.filter.Filter;
@@ -59,7 +58,6 @@ import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
  */
 public class OperationHelperImpl implements OperationHelper {
 
-    private final APIConfiguration configuration;
     private final ObjectClassInfoHelper objectClassInfoHelper;
     private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
     private final List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
@@ -67,17 +65,15 @@ public class OperationHelperImpl implements OperationHelper {
     private final CryptoService cryptoService;
 
     /**
-     * @param configuration
      * @param systemObjectSetId
      * @param objectClassInfoHelper
      * @param connectorObjectOptions
      * @param cryptoService
      * @throws NullPointerException if any of the input values is null.
      */
-    public OperationHelperImpl(APIConfiguration configuration, Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
+    public OperationHelperImpl(Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
                                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions,
                                CryptoService cryptoService) {
-        this.configuration = Assertions.nullChecked(configuration, "configuration");
         this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
         this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");
         this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");
@@ -85,9 +81,6 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
-    public APIConfiguration getRuntimeAPIConfiguration() {
-        return configuration;
-    }
 
 
     public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws JsonResourceException {

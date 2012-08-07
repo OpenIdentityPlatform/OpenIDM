@@ -144,7 +144,7 @@ public class ConnectorUtilTest {
         Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
         ObjectClassInfoHelper objectClassInfoHelper = org.mockito.Mockito.mock(ObjectClassInfoHelper.class);
         org.mockito.Mockito.when(objectClassInfoHelper.getObjectClass()).thenReturn(new ObjectClass("__ACCOUNT__"));
-        OperationHelper helper = new OperationHelperImpl(new APIConfigurationImpl(), new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"), null);
+        OperationHelper helper = new OperationHelperImpl(new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"), null);
 
         Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class), "Create - ALLOWED");
         Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class), "Sync - DENIED");

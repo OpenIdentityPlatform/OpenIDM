@@ -102,7 +102,7 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
 
     @Override
     protected ProvisionerService createInitialService() {
-        return new TestOpenICFProvisionerService();
+        return new OpenICFProvisionerService();
     }
 
     @Override
