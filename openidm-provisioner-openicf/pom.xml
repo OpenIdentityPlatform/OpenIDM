@@ -43,12 +43,12 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework</artifactId>
-            <version>1.1.0.0</version>
+            <version>1.1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-internal</artifactId>
-            <version>1.1.0.0</version>
+            <version>1.1.0.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.forgerock.openicf.framework</groupId>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
-            <version>1.1.0.0</version>
+            <version>1.1.0.1-SNAPSHOT</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -225,17 +225,17 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework</artifactId>
-                                    <version>1.1.0.0</version>
+                                    <version>1.1.0.1-SNAPSHOT</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework-internal</artifactId>
-                                    <version>1.1.0.0</version>
+                                    <version>1.1.0.1-SNAPSHOT</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-all</artifactId>
-                                    <version>1.8.3</version>
+                                    <version>1.8.7</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.testOutputDirectory}/connectorServer/lib</outputDirectory>

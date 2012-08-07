@@ -77,7 +77,7 @@ public class OperationHelperBuilder {
 //        }
 
 
-        return new OperationHelperImpl(_configuration, new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType), cryptoService);
+        return new OperationHelperImpl(new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType), cryptoService);
     }
 
 

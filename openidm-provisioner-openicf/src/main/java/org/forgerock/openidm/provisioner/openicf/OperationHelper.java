@@ -44,15 +44,6 @@ import java.util.Map;
 public interface OperationHelper {
 
     /**
-     * Gets the {@link APIConfiguration} for the given session.
-     * <p/>
-     * The return value is already configured and can be modified.
-     *
-     * @return new instance of {@link APIConfiguration}
-     */
-    public APIConfiguration getRuntimeAPIConfiguration();
-
-    /**
      * Gets the {@link ObjectClass} value of this instance.
      *
      * @return
