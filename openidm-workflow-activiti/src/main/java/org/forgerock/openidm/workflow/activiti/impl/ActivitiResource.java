@@ -56,12 +56,18 @@ public class ActivitiResource implements JsonResource {
         JsonValue result = null;
         String action = ActivitiUtil.getActionFromRequest(params);
         //POST openidm/workflow/activiti?_action=TestWorkFlow will trigger the process
+        String processDefinitionId = ActivitiUtil.getProcessDefinitionIdFromRequest(params);
         Map<String, Object> variables = ActivitiUtil.getProcessVariablesFromRequest(params);
 
         //TODO consider to put only the parent into the params. parent/security may contain confidential access token
         //variables.put("openidm-context", new HashMap(params.get("parent").asMap()));
-        ProcessInstance instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, variables);
-        if (null != instance) {
+        ProcessInstance instance;
+        if (processDefinitionId == null) {
+            instance = processEngine.getRuntimeService().startProcessInstanceByKey(action, variables);
+        } else {
+            instance = processEngine.getRuntimeService().startProcessInstanceById(processDefinitionId, variables);
+        }
+        if (instance != null) {
             result = new JsonValue(new HashMap<String, Object>());
             result.put("status", instance.isEnded() ? "ended" : "suspended");
             result.put("processInstanceId", instance.getProcessInstanceId());
@@ -85,8 +91,8 @@ public class ActivitiResource implements JsonResource {
             for (ProcessDefinition processDefinition : definitionList) {
                 Map<String, Object> processMap = new HashMap<String, Object>();
                 processMap.put("key", processDefinition.getKey());
-                processMap.put("id", processDefinition.getId());
-                result.put(processDefinition.getName(), processMap);
+                processMap.put("name", processDefinition.getName());
+                result.put(processDefinition.getId(), processMap);
             }
         }
         return result;

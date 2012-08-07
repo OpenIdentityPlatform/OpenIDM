@@ -42,6 +42,15 @@ public class ActivitiUtil {
     }
     
     /**
+     * Fetch Activiti workflow processDefinitionId if present
+     * @param request Request to be processed
+     * @return processDefinitionId
+     */
+    public static String getProcessDefinitionIdFromRequest(JsonValue request) {
+        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().get("processDefinitionId"));
+    }
+    
+    /**
      * Fetch Activiti process variables from the request
      * @param request Request to be processed
      * @return process variables
