@@ -41,6 +41,15 @@ enum Action {
     /** The link situation is flagged as an exception. */
     EXCEPTION,
 
-    /** No change to the link or target object state should be made. */
+    /** Does not perform the action. It reports only and then performs the postAction. */
+    REPORT,
+
+    /** Does not perform the action nor the report. It performs the postAction only. */
+    NOREPORT,
+
+    /** Asynchronous process has been started so it does not perform the action nor the report nor the postAction */
+    ASYNC,
+
+    /** Jumps to the end and ignores every further steps, not even assess the situation. */
     IGNORE
 }

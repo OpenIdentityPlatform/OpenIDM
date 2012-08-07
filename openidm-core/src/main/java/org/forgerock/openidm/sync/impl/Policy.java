@@ -17,9 +17,11 @@
 package org.forgerock.openidm.sync.impl;
 
 // Java Standard Edition
+import java.util.HashMap;
 import java.util.Map;
 
 // SLF4J
+import org.forgerock.openidm.core.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +57,9 @@ class Policy {
     /** TODO: Description. */
     private final Script script;
 
+    /** TODO: Description. */
+    private Script postAction;
+
     /**
      * TODO: Description.
      *
@@ -73,6 +78,12 @@ class Policy {
             this.action = null;
             this.script = Scripts.newInstance("Policy", action);
         }
+        JsonValue pAction = config.get("postAction");
+        if (pAction.isNull()) {
+            this.postAction = null;
+        } else {
+            this.postAction = Scripts.newInstance("PostAction", pAction);
+        }
     }
 
     /**
@@ -88,18 +99,30 @@ class Policy {
      *
      * @param source
      * @param target
-     * @param sourceAction true if the {@link Action} is determined for the {@link org.forgerock.openidm.sync.impl.ObjectMapping.SourceSyncOperation}
-     * and false if the action is determined for the {@link org.forgerock.openidm.sync.impl.ObjectMapping.TargetSyncOperation}.
+     * @param syncOperation the parent {@link ObjectMapping.SyncOperation} instance
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    public Action getAction(JsonValue source, JsonValue target, boolean sourceAction) throws SynchronizationException {
+    public Action getAction(JsonValue source, JsonValue target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
         Action result = null;
         if (action != null) { // static action specified
             result = action;
         } else if (script != null) { // action is dynamically determine 
             Map<String, Object> scope = service.newScope();
-            scope.put("sourceAction", sourceAction);
+            Map<String, Object> recon = new HashMap<String, Object>();
+            scope.put("recon",recon);
+            JsonValue actionParam  = null;
+            if (syncOperation instanceof ObjectMapping.TargetSyncOperation) {
+                actionParam = ((ObjectMapping.TargetSyncOperation) syncOperation).toJsonValue();
+            } else if (syncOperation instanceof ObjectMapping.SourceSyncOperation) {
+                actionParam = ((ObjectMapping.SourceSyncOperation)syncOperation).toJsonValue();
+            }
+            if (null != actionParam){
+                actionParam.put(ServerConstants.ACTION_NAME,"performAction");
+                recon.put("actionParam",actionParam.getObject());
+            }
+
+            scope.put("sourceAction", (syncOperation instanceof ObjectMapping.SourceSyncOperation));
             if (source != null) {
                 scope.put("source", source.asMap());
             }
@@ -118,5 +141,26 @@ class Policy {
             }
         }
         return result;
+    }
+
+    public void evaluatePostAction(JsonValue source, JsonValue target, Action action, boolean sourceAction) throws SynchronizationException {
+        if (postAction != null) {
+            Map<String, Object> scope = service.newScope();
+            scope.put("sourceAction", sourceAction);
+            scope.put("action", action.name());
+            scope.put("situation", situation.name());
+            if (source != null) {
+                scope.put("source", source.asMap());
+            }
+            if (target != null) {
+                scope.put("target", target.asMap());
+            }
+            try {
+                postAction.exec(scope);
+            } catch (ScriptException se) {
+                LOGGER.debug("action script encountered exception", se);
+                throw new SynchronizationException(se);
+            }
+        }
     }
 }
