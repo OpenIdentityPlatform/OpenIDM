@@ -95,7 +95,7 @@ public class SynchronizationService extends ObjectSetJsonResource
 
     /** TODO: Description. */
     private enum Action {
-        onCreate, onUpdate, onDelete, recon
+        onCreate, onUpdate, onDelete, recon, performAction
     }
 
     /** TODO: Description. */
@@ -273,6 +273,15 @@ public class SynchronizationService extends ObjectSetJsonResource
     }
 
     /**
+     *
+     * @deprecated Use the discovery engine.
+     */
+    private void performAction(JsonValue params) throws SynchronizationException {
+        ObjectMapping mapping = getMapping(params.get("mapping").required().asString());
+        mapping.performAction(params);
+    }
+
+    /**
      * @deprecated Use {@code sync} resource interface.
      */
     @Override // ScheduledService
@@ -310,28 +319,34 @@ public class SynchronizationService extends ObjectSetJsonResource
         Action action = _params.get("_action").required().asEnum(Action.class);
         try {
             switch (action) {
-            case onCreate:
-                id = _params.get("id").required().asString();
-                LOGGER.debug("Synchronization _action=onCreate, id={}", id);
-                onCreate(id, _params.get("_entity").expect(Map.class));
-                break;
-            case onUpdate:
-                id = _params.get("id").required().asString();
-                LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
-                onUpdate(id, null, _params.get("_entity").expect(Map.class));
-                break;
-            case onDelete:
-                id = _params.get("id").required().asString();
-                LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
-                onDelete(id);
-                break;
-            case recon:
-                result = new HashMap<String, Object>();
-                JsonValue mapping = _params.get("mapping").required();
-                LOGGER.debug("Synchronization _action=recon, mapping={}", mapping);
-                result.put("reconId", reconcile(mapping));
+                case onCreate:
+                    id = _params.get("id").required().asString();
+                    LOGGER.debug("Synchronization _action=onCreate, id={}", id);
+                    onCreate(id, _params.get("_entity").expect(Map.class));
+                    break;
+                case onUpdate:
+                    id = _params.get("id").required().asString();
+                    LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
+                    onUpdate(id, null, _params.get("_entity").expect(Map.class));
+                    break;
+                case onDelete:
+                    id = _params.get("id").required().asString();
+                    LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
+                    onDelete(id);
+                    break;
+                case recon:
+                    result = new HashMap<String, Object>();
+                    JsonValue mapping = _params.get("mapping").required();
+                    LOGGER.debug("Synchronization _action=recon, mapping={}", mapping);
+                    result.put("reconId", reconcile(mapping));
 // TODO: Make asynchronous, and provide polling mechanism for reconciliation status.
-                break;
+                    break;
+                case performAction:
+                    LOGGER.debug("Synchronization _action=performAction, params={}", _params);
+                    performAction(_params);
+                    result = new HashMap<String, Object>();
+                    //result.put("status", performAction(_params));
+                    break;
             }
         } catch (SynchronizationException se) {
             throw new ConflictException(se);

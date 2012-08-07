@@ -68,16 +68,16 @@ enum Situation {
     /**
      * The mapping is not qualified for a target object and there is no link or matching
      * target object. Detected during source object changes and reconciliation.
-     * Default action: {@code IGNORE}.
+     * Default action: {@code REPORT}.
      */
-    SOURCE_IGNORED(Action.IGNORE),
+    SOURCE_IGNORED(Action.REPORT),
 
     /**
      * The mapping is not qualified for a source object.
      * Only detected during reconciliation.
-     * Default action: {@code IGNORE}.
+     * Default action: {@code REPORT}.
      */
-    TARGET_IGNORED(Action.IGNORE),
+    TARGET_IGNORED(Action.REPORT),
     
     /**
      * There is target object for which there is no link. Only detected during reconciliation.
