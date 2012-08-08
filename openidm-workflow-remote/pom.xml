@@ -1,21 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  The contents of this file are subject to the terms of the Common Development and
-  Distribution License (the License). You may not use this file except in compliance with the
-  License.
-
-  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
-  specific language governing permission and limitations under the License.
-
-  When distributing Covered Software, include this CDDL Header Notice in each file and include
-  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
-  Header, with the fields enclosed by brackets [] replaced by your own identifying
-  information: "Portions Copyrighted [year] [name of copyright owner]".
-
-  Copyright © 2012 ForgeRock AS. All rights reserved.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
@@ -44,22 +51,9 @@
     <dependencies>
         <!-- mvn versions:display-dependency-updates -->
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.json.resource.restlet</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
             <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.activiti</groupId>
@@ -83,13 +77,12 @@
         </dependency>
         <!-- REST Dependencies-->
         <dependency>
-            <groupId>org.restlet.jee</groupId>
-            <artifactId>org.restlet</artifactId>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>org.forgerock.json.resource.restlet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.httpclient</artifactId>
-            <version>2.0.9</version>
             <!-- Prevent it from pulling in non-bundle transient dependencies -->
             <exclusions>
                 <exclusion>
@@ -116,12 +109,7 @@
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
-            <artifactId>org.restlet.ext.jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.servlet</artifactId>
-            <version>2.0.9</version>
         </dependency>
 
         <!-- Test Dependencies -->

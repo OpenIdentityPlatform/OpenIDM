@@ -86,7 +86,7 @@ class ScriptableFunction implements org.mozilla.javascript.Function, Wrapper {
 
     @Override
     public String getClassName() {
-        return "ScriptableMap";
+        return "ScriptableFunction";
     }
 
     @Override

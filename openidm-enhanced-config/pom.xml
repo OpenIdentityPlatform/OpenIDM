@@ -25,46 +25,12 @@
     <artifactId>openidm-enhanced-config</artifactId>
     <name>OpenIDM enhanced Configuration classes</name>
     <packaging>bundle</packaging>
+
     <dependencies>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-util</artifactId>
-            <version>${openidm.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-crypto</artifactId>
             <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-fluent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-crypto-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-core-asl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-mapper-asl</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <!-- Test Dependencies -->
@@ -80,14 +46,6 @@
         </dependency>
     </dependencies>
     <build>
-        <resources>
-            <resource>
-                <directory>${basedir}/src/main/java</directory>
-                <includes>
-                    <include>META-INF/**/*</include>
-                </includes>
-            </resource>
-        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>

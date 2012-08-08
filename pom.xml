@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  The contents of this file are subject to the terms of the Common Development and
-  Distribution License (the License). You may not use this file except in compliance with the
-  License.
-
-  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
-  specific language governing permission and limitations under the License.
-
-  When distributing Covered Software, include this CDDL Header Notice in each file and include
-  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
-  Header, with the fields enclosed by brackets [] replaced by your own identifying
-  information: "Portions Copyrighted [year] [name of copyright owner]".
-
-  Copyright © 2011-2012 ForgeRock AS. All rights reserved.
---><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-project</artifactId>
@@ -401,10 +410,17 @@
                 <artifactId>org.forgerock.restlet</artifactId>
                 <version>1.0.0</version>
             </dependency>
+
+            <!-- Commons -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>org.forgerock.util</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>1.6</version>
             </dependency>
 
             <!-- SLF4J -->
@@ -435,6 +451,11 @@
             <dependency>
                 <groupId>org.restlet.jee</groupId>
                 <artifactId>org.restlet.ext.jackson</artifactId>
+                <version>${restlet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.restlet.jee</groupId>
+                <artifactId>org.restlet.ext.httpclient</artifactId>
                 <version>${restlet.version}</version>
             </dependency>
 
@@ -515,6 +536,11 @@
                 <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
                 <version>1.8.4_2</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
+                <version>1.7R2_3</version>
+            </dependency>
 
             <!-- Jackson JSON parser -->
             <dependency>
@@ -556,21 +582,25 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>6.3.1</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-all</artifactId>
                 <version>1.9.0</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.10</version>
+                <scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jstestrunner</groupId>
 				<artifactId>jstestrunner-junit</artifactId>
 				<version>1.0.2</version>
+                <scope>test</scope>
 			</dependency>
             
             <!-- UI -->
@@ -579,12 +609,6 @@
 				<artifactId>jquery-amd</artifactId>
 				<version>1.7.1-alpha-1</version>
 				<type>js</type>
-			</dependency>
-			<dependency>
-				<groupId>rhino</groupId>
-				<artifactId>js</artifactId>
-				<version>1.7R2</version>
-				<scope>provided</scope>
 			</dependency>
         </dependencies>
     </dependencyManagement>
@@ -619,7 +643,7 @@
                     <configuration>
                         <author>false</author>
                         <links>
-                            <link>http://java.sun.com/javase/6/docs/api/</link>
+                            <link>http://docs.oracle.com/javase/6/docs/api</link>
                         </links>
                     </configuration>
                     <executions>
@@ -716,26 +740,6 @@
 						</execution>
 					</executions>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.4</version>
-				</plugin>
-	            <plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.7</version>
-				</plugin>
-				<plugin>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<groupId>org.apache.maven.plugins</groupId>
-					<version>2.2.2</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-shade-plugin</artifactId>
-					<version>1.5</version>
-				</plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -809,42 +813,12 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <aggregate>${openidm.parent.reports.aggregate}</aggregate>
-                    <windowTitle>OpenIDM ${project.version} Reference</windowTitle>
-                    <linkJavadoc>true</linkJavadoc>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>taglist-maven-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <aggregate>${openidm.parent.reports.aggregate}</aggregate>
-                    <tags>
-                        <tag>@FIXME</tag>
-                        <tag>@fixme</tag>
-                        <tag>FIXME</tag>
-                        <tag>fixme</tag>
-                        <tag>@TODO</tag>
-                        <tag>@todo</tag>
-                        <tag>TODO</tag>
-                        <tag>todo</tag>
-                        <tag>HACK</tag>
-                        <tag>hack</tag>
-                    </tags>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>2.8</version>
                 <configuration>
                     <author>false</author>
                     <links>
-                        <link>http://java.sun.com/javase/6/docs/api/</link>
+                        <link>http://docs.oracle.com/javase/6/docs/api</link>
                     </links>
                 </configuration>
                 <reportSets>

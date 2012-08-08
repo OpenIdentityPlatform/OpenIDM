@@ -35,9 +35,7 @@ import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.QueryConstants;
 
-import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

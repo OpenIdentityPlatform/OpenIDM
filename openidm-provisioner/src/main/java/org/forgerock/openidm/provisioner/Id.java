@@ -25,7 +25,7 @@
  */
 package org.forgerock.openidm.provisioner;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.resource.JsonResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +119,7 @@ public class Id {
         }
     }
 
+    @SuppressWarnings("fallthrough")
     public Id(String id) throws JsonResourceException {
         if (StringUtils.isBlank(id)) {
             throw new JsonResourceException(400, "Id can not be blank");
