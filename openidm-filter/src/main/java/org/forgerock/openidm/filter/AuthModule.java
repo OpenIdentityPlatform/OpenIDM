@@ -26,9 +26,6 @@ import java.util.Map;
 import org.eclipse.jetty.http.security.Credential;
 import org.eclipse.jetty.http.security.Password;
 
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceAccessor;
-import org.forgerock.json.resource.JsonResourceContext;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.repo.RepositoryService;
@@ -37,8 +34,6 @@ import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.json.fluent.JsonValue;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
@@ -67,8 +62,8 @@ public class AuthModule {
 
     public static void setConfig(JsonValue config) {
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
-        queryId = (String)config.get("queryId").defaultTo("credential-query").asString();
-        queryOnResource = (String)config.get("queryOnResource").defaultTo("managed/user").asString();
+        queryId = config.get("queryId").defaultTo("credential-query").asString();
+        queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
         internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
         queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
 
