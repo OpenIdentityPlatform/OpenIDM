@@ -28,40 +28,40 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
+
 import javax.xml.bind.DatatypeConverter;
 
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.resource.JsonResource;
+import org.forgerock.openidm.config.EnhancedConfig;
+import org.forgerock.openidm.config.InvalidException;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.scheduler.impl.Activator;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.scheduler.impl.Activator;
-
 import org.quartz.CronTrigger;
-import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
-import org.quartz.Trigger;
-import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Scheduler service using Quartz
@@ -94,6 +94,7 @@ public class SchedulerService  {
     
     // Internal service tracker
     final static String SERVICE_TRACKER = "scheduler.service-tracker";
+    final static String SERVICE_PID = "scheduler.service-pid";
     
     EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
     
@@ -117,6 +118,23 @@ public class SchedulerService  {
     
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
+    
+    /** Internal object set router service. */
+    @Reference(
+        name = "ref_RepoJobStore_JsonResourceRouterService",
+        referenceInterface = JsonResource.class,
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC,
+        target = "(service.pid=org.forgerock.openidm.router)"
+    )
+    private ObjectSet routerService;  // The same router instance across all RepoJobStore instances
+    protected void bindRouter(JsonResource router) {
+        routerService = new JsonResourceObjectSet(router);
+    }
+    protected void unbindRouter(JsonResource router) {
+    }
     
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException { 
@@ -143,7 +161,7 @@ public class SchedulerService  {
             if (scheduler != null && cronSchedule != null && cronSchedule.length() > 0) {
                 JobDetail job = new JobDetail(jobName, groupName, SchedulerServiceJob.class);
                 JobDataMap context = new JobDataMap();
-                context.put(SERVICE_TRACKER, scheduledServiceTracker);
+                //context.put(SERVICE_TRACKER, scheduledServiceTracker);
                 context.put(ScheduledService.CONFIG_NAME,
                         "scheduler"+ (configFactoryPID != null ? "-" + configFactoryPID : ""));
                 context.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
@@ -160,9 +178,13 @@ public class SchedulerService  {
                 if (timeZone != null) {
                     trigger.setTimeZone(timeZone);
                 }
-                scheduler.scheduleJob(job, trigger);
-                logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.", 
-                        new Object[] {jobName, cronSchedule, timeZone, startTime, endTime});
+                try {
+                    scheduler.scheduleJob(job, trigger);
+                    logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.", 
+                            new Object[] {jobName, cronSchedule, timeZone, startTime, endTime});
+                } catch (ObjectAlreadyExistsException e) {
+                    logger.debug("Job {} already scheduled", job.getFullName());
+                }
             }
         } catch (ParseException ex) {
             logger.warn("Parsing of scheduler configuration failed, can not create scheduler service for " 
