@@ -303,6 +303,7 @@
         <module>openidm-repo</module>
         <module>openidm-restlet</module>
         <module>openidm-filter</module>
+        <module>openidm-quartz-fragment</module>
         <module>openidm-scheduler</module>
         <module>openidm-security-jetty</module>
         <module>openidm-shell</module>
@@ -631,6 +632,7 @@
                             <Implementation-Build>${ci.build.number}</Implementation-Build>
                             <SCM-Revision>${ci.svn.revision}</SCM-Revision>
                             <_removeheaders>Bnd-LastModified,Built-By,Private-Package,Tool,Build-Jdk,Include-Resource,Ignore-Package,Private-Package,Bundle-DocURL</_removeheaders>
+                            <Include-Resource>{maven-resources}</Include-Resource>
                         </instructions>
                         <versions>
                             <openidm.osgi.version.clean>${openidm.version}</openidm.osgi.version.clean>
