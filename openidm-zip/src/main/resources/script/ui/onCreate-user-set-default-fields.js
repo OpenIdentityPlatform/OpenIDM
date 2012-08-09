@@ -88,12 +88,17 @@ function requiredUniqeUserName(userName) {
     }
 }
 
-object._id = generateUUID();
-
 requiredUniqeUserName(object.userName);
 
-object.roles = 'openidm-authorized';
+if(!object._id) {
+    object._id = generateUUID();
+}
+
 object.accountStatus = 'active';
+
+if(!object.roles) {
+    object.roles = 'openidm-authorized';    
+}
 
 if (!object.lastPasswordSet) {
     object.lastPasswordSet = "";
@@ -133,4 +138,25 @@ if (!object.image) {
 
 if (!object.passphrase) {
     object.passphrase = "";
+}
+
+if (!object.firstName) {
+    object.firstName = "";
+}
+
+if (!object.lastName) {
+    object.lastName = "";
+}
+
+if (!object.phone) {
+    object.phone = "";
+}
+
+//password and security answer are generated if missing just to keep those attributes filled
+if (!object.password) {
+    object.password = generateUUID();
+}
+
+if (!object.securityAnswer) {
+    object.securityAnswer = generateUUID();
 }
