@@ -32,4 +32,4 @@
  * meta-data for Quartz scheduling objects, and other utility
  * classes.
  */
-package org.forgerock.openidm.scheduler;
+package org.forgerock.openidm.quartz.impl;
