@@ -23,7 +23,7 @@
 *
 */
 
-package org.forgerock.openidm.scheduler;
+package org.forgerock.openidm.quartz.impl;
 
 import java.util.HashMap;
 import java.util.Map;
