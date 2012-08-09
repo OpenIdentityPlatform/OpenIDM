@@ -34,8 +34,8 @@ import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
-import org.forgerock.openidm.scheduler.ExecutionException;
-import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
@@ -193,7 +193,7 @@ public class SystemObjectSetService implements JsonResource,
      * Invoked by the scheduler when the scheduler triggers.
      *
      * @param schedulerContext Context information passed by the scheduler service
-     * @throws org.forgerock.openidm.scheduler.ExecutionException
+     * @throws org.forgerock.openidm.quartz.impl.ExecutionException
      *          if execution of the scheduled work failed.
      *          Implementations can also throw RuntimeExceptions which will get logged.
      */

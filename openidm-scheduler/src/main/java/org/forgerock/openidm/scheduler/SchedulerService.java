@@ -47,6 +47,8 @@ import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.scheduler.impl.Activator;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
