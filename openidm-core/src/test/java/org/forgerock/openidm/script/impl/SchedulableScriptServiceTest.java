@@ -18,7 +18,7 @@ package org.forgerock.openidm.script.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.scope.impl.ScopeFactoryService;
 import org.testng.annotations.Test;
 

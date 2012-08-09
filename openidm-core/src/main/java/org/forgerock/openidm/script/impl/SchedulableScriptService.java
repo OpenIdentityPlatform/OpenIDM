@@ -44,8 +44,8 @@ import org.forgerock.json.resource.JsonResourceContext;
 
 // OpenIDM
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.scheduler.ExecutionException;
-import org.forgerock.openidm.scheduler.ScheduledService;
+import org.forgerock.openidm.quartz.impl.ExecutionException;
+import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;

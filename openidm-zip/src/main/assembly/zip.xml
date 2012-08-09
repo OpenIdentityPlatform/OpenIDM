@@ -72,6 +72,7 @@
                 <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-security-jetty</exclude>
+                <exclude>org.forgerock.openidm:openidm-quartz-fragment</exclude>
                 <exclude>org.forgerock.openidm:openidm-scheduler</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria:zip</exclude>
                 <exclude>*:*:js</exclude>
@@ -95,6 +96,7 @@
                 <include>org.forgerock.openidm:openidm-repo-orientdb</include>
                 <include>org.forgerock.openidm:openidm-scheduler</include>
                 <include>org.forgerock.openidm:openidm-security-jetty</include>
+                <include>org.forgerock.openidm:openidm-quartz-fragment</include>
                 <include>org.apache.felix:org.apache.felix.fileinstall</include>
                 <include>org.apache.felix:org.apache.felix.configadmin</include>
                 <include>org.ops4j.pax.web:pax-web-jetty-bundle</include>
