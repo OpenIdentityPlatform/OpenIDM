@@ -76,7 +76,7 @@
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.apache.servicemix.bundles.quartz</Fragment-Host>
-                        <Export-Package>org.forgerock.openidm.scheduler;version="${openidm.version}"</Export-Package>
+                        <Export-Package>org.forgerock.openidm.quartz.impl;version="${openidm.version}"</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>
