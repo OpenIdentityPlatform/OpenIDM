@@ -115,4 +115,5 @@ function isUserValid() {
     }
 };
 
-isUserValid();
+//TODO Backend validation defined here supports specific data format required by the default OpenIDM UI. If OpenIDM is used only with default UI this line can be uncommented to ensure proper stored data format
+//isUserValid();
