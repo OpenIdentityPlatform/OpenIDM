@@ -501,7 +501,6 @@ CREATE TABLE SOPENIDM.LINKS
        ,REV                        VARCHAR(38)    NOT NULL
        ,SOURCEID                   VARCHAR(255)   NOT NULL
        ,TARGETID                   VARCHAR(255)   NOT NULL
-       ,RECONID                    VARCHAR(36)
        ,PRIMARY KEY (OBJECTTYPES_ID, OBJECTID)
        ,CONSTRAINT FK_CONFIGOBJECTS_OBJECTTYPES
           FOREIGN KEY

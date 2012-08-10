@@ -126,7 +126,6 @@ CREATE TABLE "openidm"."links" (
   "linktype" VARCHAR(510) NOT NULL,
   "firstid" VARCHAR(255) NOT NULL,
   "secondid" VARCHAR(255) NOT NULL,
-  "reconid" VARCHAR(36) DEFAULT NULL,
   PRIMARY KEY ("objectid")
 );
 
