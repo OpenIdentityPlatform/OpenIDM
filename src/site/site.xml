@@ -82,7 +82,7 @@
    <src>./images/openidm-tagline-200x65.png</src>
    <alt>OpenIDM</alt>
   </openproject>
-  <siteSearchFQDN>openidm.forgerock.org</siteSearchFQDN>
+  <siteSearchFQDN>forgerock.org</siteSearchFQDN>
  </custom>
 
 </project>
