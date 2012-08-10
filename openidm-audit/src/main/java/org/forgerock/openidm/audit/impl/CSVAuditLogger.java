@@ -53,6 +53,9 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 
 /**
  * Comma delimited audit logger
@@ -64,6 +67,11 @@ public class CSVAuditLogger implements AuditLogger {
 
     public final static String CONFIG_LOG_LOCATION = "location";
     public final static String CONFIG_LOG_RECORD_DELIM = "recordDelimiter";
+    
+    /**
+     * Event names for monitoring audit behavior
+     */
+    public static final Name EVENT_AUDIT_CREATE = Name.get("openidm/internal/audit/csv/create");
 
     File auditLogDir;
     String recordDelim;
@@ -87,7 +95,7 @@ public class CSVAuditLogger implements AuditLogger {
                     + "' is invalid " + ex.getMessage(), ex);
         }
     }
-
+    
     public void cleanup() {
         for (Map.Entry<String, FileWriter> entry : fileWriters.entrySet()) {
             try {
@@ -126,6 +134,16 @@ public class CSVAuditLogger implements AuditLogger {
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
+        EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
+        try {
+            createImpl(fullId, obj);
+        } finally {
+            measure.end();
+        }
+    }
+    
+    
+    private void createImpl(String fullId, Map<String, Object> obj) throws ObjectSetException {
         // TODO: replace ID handling utility
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];

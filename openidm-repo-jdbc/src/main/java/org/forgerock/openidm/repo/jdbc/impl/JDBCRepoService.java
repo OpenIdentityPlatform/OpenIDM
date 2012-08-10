@@ -438,6 +438,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         try {
             connection = getConnection();
             connection.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
+
             long start = System.currentTimeMillis();
             List<Map<String, Object>> docs = getTableHandler(type).query(type, params, connection);
             long end = System.currentTimeMillis();

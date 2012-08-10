@@ -59,8 +59,15 @@ class ObjectMapping implements SynchronizationListener {
      */
     public static final Name EVENT_CREATE_OBJ = Name.get("openidm/internal/discovery-engine/sync/create-object");
     public static final Name EVENT_READ_OBJ = Name.get("openidm/internal/discovery-engine/sync/read-object");
+    public static final Name EVENT_SOURCE_ASSESS_SITUATION = Name.get("openidm/internal/discovery-engine/sync/source/assess-situation");
+    public static final Name EVENT_SOURCE_DETERMINE_ACTION = Name.get("openidm/internal/discovery-engine/sync/source/determine-action");
+    public static final Name EVENT_SOURCE_PERFORM_ACTION = Name.get("openidm/internal/discovery-engine/sync/source/perform-action");
+    public static final Name EVENT_CORRELATE_TARGET = Name.get("openidm/internal/discovery-engine/sync/source/correlate-target");
     public static final Name EVENT_UPDATE_TARGET = Name.get("openidm/internal/discovery-engine/sync/update-target");
     public static final Name EVENT_DELETE_TARGET = Name.get("openidm/internal/discovery-engine/sync/delete-target");
+    public static final Name EVENT_TARGET_ASSESS_SITUATION = Name.get("openidm/internal/discovery-engine/sync/target/assess-situation");
+    public static final Name EVENT_TARGET_DETERMINE_ACTION = Name.get("openidm/internal/discovery-engine/sync/target/determine-action");
+    public static final Name EVENT_TARGET_PERFORM_ACTION = Name.get("openidm/internal/discovery-engine/sync/target/perform-action");
     public static final String EVENT_OBJECT_MAPPING_PREFIX = "openidm/internal/discovery-engine/sync/objectmapping/";
 
 
@@ -904,10 +911,8 @@ class ObjectMapping implements SynchronizationListener {
                                 String targetId = targetObject.get("_id").required().asString();
                                 if (linkObject._id == null) {
                                     createLink(sourceObject.get("_id").required().asString(), targetId, reconId);
-                                } else if (!targetId.equals(linkObject.targetId) || (reconId != null && !reconId
-                                        .equals(linkObject.reconId))) {
+                                } else if (!targetId.equals(linkObject.targetId)) {
                                     linkObject.targetId = targetId;
-                                    linkObject.reconId = reconId;
                                     linkObject.update();
                                 }
 // TODO: Detect change of source id, and update link accordingly.
@@ -977,7 +982,6 @@ class ObjectMapping implements SynchronizationListener {
             execScript("onLink", onLinkScript);
             linkObject.sourceId = sourceId;
             linkObject.targetId = targetId;
-            linkObject.reconId = reconId;
             linkObject.create();
             LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", new Object[] {sourceId, targetId, reconId});
         }
@@ -1114,9 +1118,24 @@ class ObjectMapping implements SynchronizationListener {
         @Override
         @SuppressWarnings("fallthrough")
         public void sync() throws SynchronizationException {
-            assessSituation();
-            determineAction(true);
-            performAction();
+            EventEntry measureSituation = Publisher.start(EVENT_SOURCE_ASSESS_SITUATION, sourceId, null);
+            try {
+                assessSituation();
+            } finally {
+                measureSituation.end();
+            }
+            EventEntry measureDetermine = Publisher.start(EVENT_SOURCE_DETERMINE_ACTION, sourceId, null);
+            try {
+                determineAction(true);
+            } finally {
+                measureDetermine.end();
+            }
+            EventEntry measurePerform = Publisher.start(EVENT_SOURCE_PERFORM_ACTION, sourceId, null);
+            try {
+                performAction();
+            } finally {
+                measurePerform.end();
+            }
         }
 
         protected boolean isSourceToTarget() {
@@ -1247,6 +1266,8 @@ class ObjectMapping implements SynchronizationListener {
                 result = new JsonValue(new ArrayList<Map<String, Object>>(1));
                 result.add(0, targetObject);
             } else if (correlationQuery != null) {
+                EventEntry measure = Publisher.start(EVENT_CORRELATE_TARGET, sourceObject, null);
+                
                 Map<String, Object> queryScope = service.newScope();
                 queryScope.put("source", sourceObject.asMap());
                 try {
@@ -1258,6 +1279,8 @@ class ObjectMapping implements SynchronizationListener {
                 } catch (ScriptException se) {
                     LOGGER.debug("{} correlationQuery script encountered exception", name, se);
                     throw new SynchronizationException(se);
+                } finally {
+                    measure.end();
                 }
             }
             return result;
@@ -1305,10 +1328,25 @@ class ObjectMapping implements SynchronizationListener {
 
         @Override
         public void sync() throws SynchronizationException {
-            assessSituation();
-            determineAction(false);
+            EventEntry measureSituation = Publisher.start(EVENT_TARGET_ASSESS_SITUATION, targetObject, null);
+            try {
+                assessSituation();
+            } finally {
+                measureSituation.end();
+            }
+            EventEntry measureDetermine = Publisher.start(EVENT_TARGET_DETERMINE_ACTION, targetObject, null);
+            try {
+                determineAction(false);
+            } finally {
+                measureDetermine.end();
+            }
+            EventEntry measurePerform = Publisher.start(EVENT_TARGET_PERFORM_ACTION, targetObject, null);
+            try {
 // TODO: Option here to just report what action would be performed?
-            performAction();
+                performAction();
+            } finally {
+                measurePerform.end();
+            }
         }
 
         protected boolean isSourceToTarget() {

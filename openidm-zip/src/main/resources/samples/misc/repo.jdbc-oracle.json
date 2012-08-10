@@ -48,8 +48,7 @@
                     "_rev" : "rev",
                     "linkType" : "linktype",
                     "firstId" : "firstid",
-                    "secondId" : "secondid",
-                    "reconId" : "reconid"
+                    "secondId" : "secondid"
                 }
             },
             "internal/user" : {
