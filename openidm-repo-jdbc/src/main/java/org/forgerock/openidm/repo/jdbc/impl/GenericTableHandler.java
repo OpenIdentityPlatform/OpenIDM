@@ -24,6 +24,7 @@
 package org.forgerock.openidm.repo.jdbc.impl;
 
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.objset.InternalServerErrorException;
@@ -50,6 +51,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,7 +71,11 @@ public class GenericTableHandler implements TableHandler {
     String propTableName;
     final String dbSchemaName;
 
-    ObjectMapper mapper = new ObjectMapper();
+    // Jackson parser
+    final ObjectMapper mapper = new ObjectMapper();
+    // Type information for the Jackson parser
+    final TypeReference<LinkedHashMap<String,Object>> typeRef = new TypeReference<LinkedHashMap<String,Object>>() {};
+    
     final TableQueries queries;
 
     Map<QueryDefinition, String> queryMap;
@@ -89,6 +95,8 @@ public class GenericTableHandler implements TableHandler {
         PROPDELETEQUERYSTR,
         QUERYALLIDS
     }
+    
+    
 
     public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
@@ -179,8 +187,7 @@ public class GenericTableHandler implements TableHandler {
             if (rs.next()) {
                 String rev = rs.getString("rev");
                 String objString = rs.getString("fullobject");
-                ObjectMapper mapper = new ObjectMapper();
-                result = (Map<String, Object>) mapper.readValue(objString, Map.class);
+                result = mapper.readValue(objString, typeRef);
                 result.put("_rev", rev);
                 logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, result});
             } else {
@@ -586,6 +593,11 @@ public class GenericTableHandler implements TableHandler {
 class GenericQueryResultMapper implements QueryResultMapper {
     final static Logger logger = LoggerFactory.getLogger(GenericQueryResultMapper.class);
     
+    // Jackson parser
+    ObjectMapper mapper = new ObjectMapper();
+    // Type information for the Jackson parser
+    TypeReference<LinkedHashMap<String,Object>> typeRef = new TypeReference<LinkedHashMap<String,Object>>() {};
+    
     public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params,  TableQueries tableQueries) 
             throws SQLException, IOException {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
@@ -604,8 +616,7 @@ class GenericQueryResultMapper implements QueryResultMapper {
         while (rs.next()) {
             if (hasFullObject) {
                 String objString = rs.getString("fullobject");
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> obj = (Map<String, Object>) mapper.readValue(objString, Map.class);
+                Map<String, Object> obj = mapper.readValue(objString, typeRef);
 
                 // TODO: remove data logging            
                 logger.trace("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});  

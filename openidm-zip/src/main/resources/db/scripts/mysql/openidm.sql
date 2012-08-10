@@ -139,7 +139,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `linktype` VARCHAR(510) NOT NULL ,
   `firstid` VARCHAR(255) NOT NULL ,
   `secondid` VARCHAR(255) NOT NULL ,
-  `reconid` VARCHAR(36) NULL ,
   INDEX `idx_links_first` (`linktype` ASC, `firstid` ASC) ,
   INDEX `idx_links_second` (`linktype` ASC, `secondid` ASC) ,
   PRIMARY KEY (`objectid`) )

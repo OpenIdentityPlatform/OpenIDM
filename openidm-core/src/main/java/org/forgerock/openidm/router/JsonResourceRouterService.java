@@ -103,7 +103,7 @@ public class JsonResourceRouterService implements JsonResource {
     /**
      * Event name prefix for monitoring the router
      */
-    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router";
+    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
     
     /** TODO: Description. */
     private final Router router = new Router();
@@ -209,20 +209,45 @@ public class JsonResourceRouterService implements JsonResource {
         this.context = null;
     }
     
+    /**
+     * @param request the router request
+     * @return an event name For monitoring purposes
+     */
     Name getRouterEventName(JsonValue request) {
         String method = request.get("method").asString();
         String idContext = "";
-        
-        switch (request.get("method").required().asEnum(Method.class)) {
-            // For query and action group statistics by full URI
-            case query: // fall through
-            case action: 
-                idContext = "/" + request.get("id").asString();
+
+        // For query and action group statistics by full URI
+        if ("query".equals(method) || "action".equals(method)) {
+            idContext = request.get("id").asString();
+        } else {
             // For CRUD, patch group statistics without the local resource identifier
-            default:
-                idContext = request.get("id").asPointer().parent().toString();
+            idContext = stripLastId(request.get("id").asString());
         }
-        return Name.get(EVENT_ROUTER_PREFIX + idContext + "/" + request.get("method").asString());
+
+        String eventName = new StringBuilder(EVENT_ROUTER_PREFIX)
+                .append(idContext)
+                .append("/")
+                .append(method)
+                .toString();
+        
+        return Name.get(eventName);
+    }
+    
+    /**
+     * Strips the local resource identifier from a qualified resource identifier
+     * @param a qualified resource identifier in String form
+     * @return the resource context
+     */
+    private String stripLastId(String id) {
+        String result = id;
+        if (id != null) {
+            int lastSlash = id.lastIndexOf("/");
+            if (lastSlash >= 0) {
+                result = id.substring(0, lastSlash);
+            }
+        }
+        return result;
     }
     
     @Override
@@ -439,7 +464,9 @@ public class JsonResourceRouterService implements JsonResource {
         @Override
         public JsonValue filter(JsonValue request, JsonResource next) throws JsonResourceException {
             Map<String, Object> scope = null;
+            // TODO: can this be removed? Why do we need to guard against changes of the request?
             request = request.copy(); // allows modification of request by onRequest script
+            
             if (matches(request.get("method").asString(), request.get("id").asString())) {
                 scope = scopeFactory.newInstance(request);
                 scope.put("request", request.getObject());

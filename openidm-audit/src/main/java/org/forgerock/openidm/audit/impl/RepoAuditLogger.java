@@ -47,6 +47,9 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 
 /**
  * Audit logger that logs to a repository
@@ -54,6 +57,11 @@ import org.forgerock.openidm.objset.ServiceUnavailableException;
  */
 public class RepoAuditLogger implements AuditLogger {
     final static Logger logger = LoggerFactory.getLogger(RepoAuditLogger.class);
+    
+    /**
+     * Event names for monitoring audit behavior
+     */
+    public static final Name EVENT_AUDIT_CREATE = Name.get("openidm/internal/audit/repo/create");
 
     BundleContext ctx;
 
@@ -109,6 +117,15 @@ public class RepoAuditLogger implements AuditLogger {
      */
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
+        EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
+        try {
+            createImpl(fullId, obj);
+        } finally {
+            measure.end();
+        }
+    }
+    
+    private void createImpl(String fullId, Map<String, Object> obj) throws ObjectSetException {
         JsonResourceObjectSet svc = getRepoService();
         try {
             svc.create(fullIdPrefix + fullId, obj);

@@ -70,9 +70,6 @@ class Link {
     // This link view is specific to the direction of the mapping context 
     public String targetId;
 
-    // The id of the last reconciliation to change the link for optimization purposes
-    public String reconId;
-
     /**
      * TODO: Description.
      *
@@ -134,7 +131,6 @@ class Link {
             sourceId = jv.get("firstId").required().asString();
             targetId = jv.get("secondId").required().asString();
         }
-        reconId = jv.get("reconId").asString(); // optional
     }
 
     /**
@@ -152,7 +148,6 @@ class Link {
             jv.put("firstId", sourceId);
             jv.put("secondId", targetId);
         }
-        jv.put("reconId", reconId);
         return jv;
     }
 
@@ -164,7 +159,6 @@ class Link {
         this._rev = null;
         this.sourceId = null;
         this.targetId = null;
-        this.reconId = null;
     }
 
     /**
