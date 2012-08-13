@@ -11,5 +11,6 @@
         "username" : "yourusername",
         "password" : "yourpassword",
         "starttls" : true
-    }
+    },
+    "history" : "audit"
 }

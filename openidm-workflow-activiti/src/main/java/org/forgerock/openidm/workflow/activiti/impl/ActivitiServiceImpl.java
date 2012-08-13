@@ -108,6 +108,7 @@ public class ActivitiServiceImpl implements JsonResource {
     public static final String CONFIG_MAIL_STARTTLS = "starttls";
     public static final String CONFIG_CONNECTION = "connection";
     public static final String CONFIG_JNDI_NAME = "jndiName";
+    public static final String CONFIG_HISTORY = "history";
     private String jndiName;
     private boolean selfMadeProcessEngine = true;
     @Reference(name = "processEngine",
@@ -144,6 +145,7 @@ public class ActivitiServiceImpl implements JsonResource {
     private String mailusername;
     private String mailpassword;
     private boolean starttls;
+    private String historyLevel;
 
     public enum EngineLocation {
 
@@ -218,6 +220,10 @@ public class ActivitiServiceImpl implements JsonResource {
                         configuration.setMailServerPassword(mailpassword);
                     }
 
+                    if (historyLevel != null) {
+                        configuration.setHistory(historyLevel);
+                    }
+                    
                     //needed for async workflows
                     configuration.setJobExecutorActivate(true);
 
@@ -326,6 +332,7 @@ public class ActivitiServiceImpl implements JsonResource {
                 username = config.get(new JsonPointer(CONFIG_ENGINE_USERNAME)).asString();
                 password = config.get(new JsonPointer(CONFIG_ENGINE_PASSWORD)).asString();
             }
+            historyLevel = config.get(CONFIG_HISTORY).asString();
         }
     }
 
