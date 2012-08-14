@@ -410,14 +410,14 @@ public class OpenICFProvisionerService implements ProvisionerService {
     public JsonValue update(Id id, String rev, JsonValue object, JsonValue params) throws Exception {
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         if (allowModification && helper.isOperationPermitted(UpdateApiOp.class)) {
-            Object newName = object.get(ServerConstants.OBJECT_PROPERTY_ID);
+            JsonValue newName = object.get(ServerConstants.OBJECT_PROPERTY_ID);
             ConnectorObject connectorObject = null;
             Set<Attribute> attributeSet = null;
 
             //TODO support case sensitive and insensitive rename detection!
-            if (newName instanceof String && !id.getLocalId().equals(newName)) {
+            if (newName.isString() && !id.getLocalId().equals(newName.asString())) {
                 //This is a rename
-                connectorObject = helper.build(UpdateApiOp.class, (String) newName, object);
+                connectorObject = helper.build(UpdateApiOp.class, newName.asString(), object);
                 attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
             } else {
                 connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(), object);
