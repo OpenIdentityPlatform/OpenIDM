@@ -974,7 +974,9 @@ class ObjectMapping implements SynchronizationListener {
          * @throws SynchronizationException TODO.
          */
         protected void postAction(boolean sourceAction) throws SynchronizationException {
-            activePolicy.evaluatePostAction(sourceObject, targetObject, action, sourceAction);
+            if (null != activePolicy) {
+                activePolicy.evaluatePostAction(sourceObject, targetObject, action, sourceAction);
+            }
         }
 
         protected void createLink(String sourceId, String targetId, String reconId) throws SynchronizationException {
@@ -1260,7 +1262,7 @@ class ObjectMapping implements SynchronizationListener {
          * @throws SynchronizationException TODO.
          */
         @SuppressWarnings("unchecked")
-        private JsonValue correlateTarget() throws SynchronizationException {
+            private JsonValue correlateTarget() throws SynchronizationException {
             JsonValue result = null;
             if (null != targetObject) {
                 result = new JsonValue(new ArrayList<Map<String, Object>>(1));
