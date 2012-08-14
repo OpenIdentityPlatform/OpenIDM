@@ -1160,7 +1160,7 @@ val = openidm.read("config/custom/myconfig")</programlisting>
    <secondary>Links</secondary>
   </indexterm>
 
-  <para>Link objects define relations between source objects and a target
+  <para>Link objects define relations between source objects and target
   objects, usually relations between managed objects and system objects.
   The link relationship is established by provisioning activity that either
   results in a new account on a target system, or a reconciliation or
