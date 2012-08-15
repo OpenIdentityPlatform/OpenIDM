@@ -207,11 +207,8 @@ public class GenericTableHandler implements TableHandler {
     @Override
     public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection)
             throws SQLException, IOException, InternalServerErrorException {
-        // Do this outside of the main tx.
-        connection.setAutoCommit(true);
-        long typeId = getTypeId(type, connection);
 
-        connection.setAutoCommit(false);
+        long typeId = getTypeId(type, connection); // Note this call can commit and start a new transaction in some cases
 
         PreparedStatement createStatement = null;
         try {
@@ -361,12 +358,15 @@ public class GenericTableHandler implements TableHandler {
     }
     
     // Ensure type is in objecttypes table and get its assigned id
+    // Callers should note that this may commit a transaction and start a new one if a new type gets added
     long getTypeId(String type, Connection connection) throws SQLException, InternalServerErrorException {
         Exception detectedEx = null;
         long typeId = readTypeId(type, connection);
         if (typeId < 0) {
+            connection.setAutoCommit(true); // Commit the new type right away, and have no transaction isolation for read
             try {
                 createTypeId(type, connection);
+                
             } catch (SQLException ex) {
                 // Rather than relying on DB specific ignore if exists functionality handle it here
                 // Could extend this in the future to more explicitly check for duplicate key error codes, but these again can be DB specific
@@ -376,6 +376,7 @@ public class GenericTableHandler implements TableHandler {
             if (typeId < 0) {
                 throw new InternalServerErrorException("Failed to populate and look up objecttypes table, no id could be retrieved for " + type, detectedEx);
             }
+            connection.setAutoCommit(false); // Start another transaction
         }
         return typeId;
     }

@@ -82,6 +82,10 @@ public class OperationHelperBuilder {
 
 
     public APIConfiguration getRuntimeAPIConfiguration() {
+        return runtimeAPIConfiguration;
+                
+        // TODO: check if it would be better to do the below clone only in case local configuration overrides are passed
+/*
         //Assertions.nullCheck(runtimeAPIConfiguration,"runtimeAPIConfiguration");
         //clone in case application tries to modify
         //after the fact. this is necessary to
@@ -92,5 +96,6 @@ public class OperationHelperBuilder {
         //parent ref not included in the clone
         _configuration.setConnectorInfo(runtimeAPIConfiguration.getConnectorInfo());
         return _configuration;
+*/
     }
 }
