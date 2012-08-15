@@ -9,10 +9,11 @@
                     "patch",
                     "action"
                 ]
-            }
+            },
+            "watchedFields" : [ ],
+            "passwordFields" : [ "password" ]
         },
-        "recon" : {
-        }
+        "recon" : { }
     },
     "logTo" : [
         {

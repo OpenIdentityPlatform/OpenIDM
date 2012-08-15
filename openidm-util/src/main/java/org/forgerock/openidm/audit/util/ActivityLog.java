@@ -16,16 +16,13 @@
 
 package org.forgerock.openidm.audit.util;
 
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
-
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +44,22 @@ public class ActivityLog {
     final static Logger logger = LoggerFactory.getLogger(ActivityLog.class);
 
     private final static boolean suspendException;
-    private final static ObjectMapper mapper;
     private static DateUtil dateUtil;
+
+    public final static String TIMESTAMP = "timestamp";
+    public final static String ACTION = "action";
+    public final static String MESSAGE = "message";
+    public final static String OBJECT_ID = "objectId";
+    public final static String REVISION = "rev";
+    public final static String ACTIVITY_ID = "activityId";
+    public final static String ROOT_ACTION_ID = "rootActionId";
+    public final static String PARENT_ACTION_ID = "parentActionid";
+    public final static String REQUESTER = "requester";
+    public final static String BEFORE = "before";
+    public final static String AFTER = "after";
+    public final static String STATUS = "status";
+    public final static String CHANGED_FIELDS = "changedFields";
+    public final static String PASSWORD_CHANGED = "passwordChanged";
 
     /**
      * Creates a Jackson object mapper. By default, it
@@ -56,9 +67,6 @@ public class ActivityLog {
      *
      */
     static {
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
         String config = IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
         suspendException = "suspend".equals(config);
         // TODO Allow for configured dateUtil
@@ -141,26 +149,19 @@ public class ActivityLog {
         JsonValue parent = JsonResourceContext.getParentContext(request);
 
         Map<String, Object> activity = new HashMap<String, Object>();
-        activity.put("timestamp", dateUtil.now());
-        activity.put("action", request.get("method").getObject());
-        activity.put("message", message);
-        activity.put("objectId", objectId);
-        activity.put("rev", rev);
-        activity.put("activityId", request.get("uuid").getObject());
-        activity.put("rootActionId", root.get("uuid").getObject());
-        activity.put("parentActionId", parent.get("uuid").getObject());
-        activity.put("requester", getRequester(request));
-        try {
-            activity.put("before", (before == null || before.isNull()) ? null : mapper.writeValueAsString(before.getObject()));
-        } catch (IOException e) {
-            activity.put("before", (before == null || before.isNull()) ? null : before.getObject().toString());
-        }
-        try {
-            activity.put("after", (after == null || after.isNull()) ? null : mapper.writeValueAsString(after.getObject())); // how can we know for system objects?
-        } catch (IOException e) {
-            activity.put("after", (after == null || after.isNull()) ? null : after.getObject().toString()); // how can we know for system objects?
-        }
-        activity.put("status", status == null ? null : status.toString());
+        activity.put(TIMESTAMP, dateUtil.now());
+        activity.put(ACTION, request.get("method").getObject());
+        activity.put(MESSAGE, message);
+        activity.put(OBJECT_ID, objectId);
+        activity.put(REVISION, rev);
+        activity.put(ACTIVITY_ID, request.get("uuid").getObject());
+        activity.put(ROOT_ACTION_ID, root.get("uuid").getObject());
+        activity.put(PARENT_ACTION_ID, parent.get("uuid").getObject());
+        activity.put(REQUESTER, getRequester(request));
+        activity.put(BEFORE,  JsonUtil.jsonIsNull(before) ? null : before.getWrappedObject());
+        activity.put(AFTER, JsonUtil.jsonIsNull(after) ? null : after.getWrappedObject());
+        activity.put(STATUS, status == null ? null : status.toString());
+
         return activity;
     }
 }

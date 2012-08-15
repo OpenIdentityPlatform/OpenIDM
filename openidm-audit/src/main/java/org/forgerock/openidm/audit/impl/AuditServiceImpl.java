@@ -23,12 +23,11 @@
  */
 package org.forgerock.openidm.audit.impl;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
+import java.io.IOException;
 import java.util.*;
 
-import org.forgerock.openidm.core.ServerConstants;
+
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +38,12 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
+import org.codehaus.jackson.JsonFactory;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.JsonResourceContext;
 
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
@@ -51,9 +51,10 @@ import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.util.JsonUtil;
 
 // Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
@@ -66,7 +67,6 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 
 /**
  * Audit module
@@ -81,6 +81,7 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 })
 public class AuditServiceImpl extends ObjectSetJsonResource implements AuditService {
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
+    private final static ObjectMapper mapper;
 
     // Keys in the JSON configuration
     public final static String CONFIG_LOG_TO = "logTo";
@@ -92,9 +93,17 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
 
     Map<String, List<String>> actionFilters;
     Map<String, Map<String, List<String>>> triggerFilters;
+    List<JsonPointer> watchFieldFilters;
+    List<JsonPointer> passwordFieldFilters;
 
     List<AuditLogger> auditLoggers;
     DateUtil dateUtil;
+
+    static {
+        JsonFactory jsonFactory = new JsonFactory();
+        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
+        mapper = new ObjectMapper(jsonFactory);
+    }
 
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
@@ -164,6 +173,10 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             }
         }
 
+        // Activity log preprocessing
+        if (type.equals("activity")) {
+            processActivityLog(obj);
+        }
 
         // Generate an ID if there is none
         if (localId == null) {
@@ -190,6 +203,89 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
                 throw ex;
             }
         }
+    }
+
+    /**
+     * Do any preprocessing for activity log objects
+     * Checks for any changed fields and adds those to the object
+     * Also adds a flag to detect if any of the flagged password fields have changed
+     * NOTE: both the watched fields and the password fields will be in the list of "changedField" if they differ
+     * @param activity activity object to update
+     */
+    private void processActivityLog(Map<String, Object> activity) {
+        List<String> changedFields = new ArrayList<String>();
+        boolean passwordChanged = false;
+
+        Object rawBefore = activity.get(ActivityLog.BEFORE);
+        Object rawAfter = activity.get(ActivityLog.AFTER);
+
+        if (!(rawBefore == null && rawAfter == null)) {
+            JsonValue before = new JsonValue(rawBefore);
+            JsonValue after = new JsonValue(rawAfter);
+
+            // Check to see if any of the watched fields have changed and add them to the comprehensive list
+            List<String> changedWatchFields = checkForFields(watchFieldFilters, before, after);
+            changedFields.addAll(changedWatchFields);
+
+            // Check to see if any of the password fields have changed -- also update our flag
+            List<String> changedPasswordFields = checkForFields(passwordFieldFilters, before, after);
+            passwordChanged = !changedPasswordFields.isEmpty();
+            changedFields.addAll(changedPasswordFields);
+
+            // Update the before and after fields with their proper string values now that we're done diffing
+            // TODO Figure out if this is even necessary? Doesn't seem to be... Once it goes to the log,
+            // the object will have toString() called on it anyway which will convert it to (seemingly) the same format
+            try {
+                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : mapper.writeValueAsString(before.getObject()));
+            } catch (IOException e) {
+                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : before.getObject().toString());
+            }
+            try {
+                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : mapper.writeValueAsString(after.getObject())); // how can we know for system objects?
+            } catch (IOException e) {
+                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : after.getObject().toString()); // how can we know for system objects?
+            }
+        }
+
+        // Add the list of changed fields to the object
+        activity.put(ActivityLog.CHANGED_FIELDS, changedFields.isEmpty() ? null : changedFields);
+        // Add the flag indicating password fields have changed
+        activity.put(ActivityLog.PASSWORD_CHANGED, passwordChanged);
+    }
+
+    /**
+     * Checks to see if there are differences between the values in two JsonValues before and after
+     * Returns a list containing the changed fields
+     *
+     * @param fieldsToCheck list of JsonPointers to search for
+     * @param before prior JsonValue
+     * @param after JsonValue after applied changes
+     * @return list of strings indicating which values changed
+     */
+    private List<String> checkForFields(List<JsonPointer> fieldsToCheck,  JsonValue before, JsonValue after) {
+        List<String> changedFields = new ArrayList<String>();
+        for (JsonPointer jpointer : fieldsToCheck) {
+            // Need to be sure to decrypt any encrypted values so we can compare their string value
+            // (JsonValue does not have an #equals method that works for this purpose)
+            CryptoService crypto = CryptoServiceFactory.getInstance();
+            Object beforeValue = crypto.decryptIfNecessary(before.get(jpointer)).getObject();
+            Object afterValue = crypto.decryptIfNecessary(after.get(jpointer)).getObject();
+            if (!fieldsEqual(beforeValue, afterValue)) {
+                changedFields.add(jpointer.toString());
+            }
+        }
+
+        return changedFields;
+    }
+
+    /**
+     * Checks to see if two objects are equal either as nulls or through their comparator
+     * @param a first object to compare
+     * @param b reference object to compare against
+     * @return boolean indicating equality either as nulls or as objects
+     */
+    private static boolean fieldsEqual(Object a, Object b) {
+        return a == b || (a != null && a.equals(b));
     }
 
     /**
@@ -297,6 +393,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             auditLoggers = getAuditLoggers(config, compContext);
             actionFilters = getActionFilters(config);
             triggerFilters = getTriggerFilters(config);
+            watchFieldFilters =  getEventJsonPointerList(config, "activity", "watchedFields");
+            passwordFieldFilters = getEventJsonPointerList(config, "activity", "passwordFields");
+
             // TODO make dateUtil configurable (needs to be done in all locations)
             dateUtil = DateUtil.getDateUtil("UTC");
             logger.debug("Audit service filters enabled: {}", actionFilters);
@@ -366,6 +465,35 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
 
         return configFilters;
+    }
+
+    /**
+     * Fetches a list of JsonPointers from the config file under a specified event and field name
+     * Expects it to look similar to:
+     *
+     *<PRE>
+     * {
+     *    "eventTypes": {
+     *      "activity" : {
+     *        "watchedFields": [ "email" ],
+     *        "passwordFields": [ "password1", "password2" ]
+     *      }
+     *    }
+     * }
+     * </PRE>
+     *
+     * @param config the config object to draw from
+     * @param event which event to draw from. ie "activity"
+     * @param fieldName which fieldName to draw from. ie "watchedFields"
+     * @return list containing the JsonPointers generated by the strings in the field
+     */
+    List<JsonPointer> getEventJsonPointerList(JsonValue config, String event, String fieldName) {
+        ArrayList<JsonPointer> fieldList = new ArrayList<JsonPointer>();
+        JsonValue fields = config.get("eventTypes").get(event).get(fieldName);
+        for (JsonValue field : fields) {
+            fieldList.add(field.asPointer());
+        }
+        return fieldList;
     }
 
     List<AuditLogger> getAuditLoggers(JsonValue config, ComponentContext compContext) {

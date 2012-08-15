@@ -45,7 +45,7 @@ public interface CryptoService {
      * @throws JsonCryptoException TODO.
      */
     JsonEncryptor getEncryptor(String cipher, String alias) throws JsonCryptoException;
-    
+
     /**
      * Returns a list of decryption transformers that can decrypt JSON values.
      *
@@ -82,7 +82,30 @@ public interface CryptoService {
      * @throws JsonException if an exception occurred decrypting the value.
      */
     JsonValue decrypt(String value) throws JsonException;
-    
+
+    /**
+     * Decrypts a JSON value and all of its children if necessary. If not, returns the original object.
+     *
+     * <p>Note that if the argument is null, this return a JsonValue wrapping null.
+     *
+     * @param value the JSON value to be decrypted.
+     * @return The structure value, decrypted if necessary.
+     * @throws JsonException if an exception occurred decrypting the value.
+     */
+    JsonValue decryptIfNecessary(JsonValue value) throws JsonException;
+
+    /**
+     * Decrypts a String if in a format supported by this service and is decryption is necessary.
+     * If decryption is unnecessary, it returns the structure value.
+     *
+     * <p>Note that if the argument is null, this will return a JsonValue wrapping null.
+     *
+     * @param value the Stringified value to be decrypted.
+     * @return The structure value, decrypted if necessary.
+     * @throws JsonException if an exception occurred decrypting the value.
+     */
+    JsonValue decryptIfNecessary(String value) throws JsonException;
+
     /**
      * Detects if a JSON value is encrypted in a format supported by this service
      *
@@ -90,7 +113,7 @@ public interface CryptoService {
      * @return true if encrypted, false otherwise.
      */
     boolean isEncrypted(JsonValue value);
-    
+
     /**
      * Detects if a String is encrypted in a format supported by this service
      *

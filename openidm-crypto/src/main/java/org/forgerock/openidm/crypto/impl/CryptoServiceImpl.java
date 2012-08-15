@@ -68,6 +68,7 @@ import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 // OpenIDM
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.util.JsonUtil;
 
 /**
  * Cryptography Service
@@ -78,7 +79,7 @@ import org.forgerock.openidm.crypto.CryptoService;
 public class CryptoServiceImpl implements CryptoService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
-    
+
     /** TODO: Description. */
     private BundleContext context;
 
@@ -87,7 +88,7 @@ public class CryptoServiceImpl implements CryptoService {
 
     /** TODO: Description. */
     private final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<JsonTransformer>();
-    
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -123,7 +124,7 @@ public class CryptoServiceImpl implements CryptoService {
                 String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
                 String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
                 String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
-                
+
                 try {
                     LOGGER.info("Activating cryptography service of type: {} provider: {} location: {}", new Object[] {type, provider, location});
                     KeyStore ks = (provider == null || provider.trim().length() == 0 ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
@@ -139,13 +140,13 @@ public class CryptoServiceImpl implements CryptoService {
                         }
                     }
                 } catch (IOException ioe) {
-                    LOGGER.error("IOException when loading KeyStore file of type: " 
+                    LOGGER.error("IOException when loading KeyStore file of type: "
                             + type + " provider: " + provider + " location:" + location, ioe);
-                    throw new RuntimeException("IOException when loading KeyStore file of type: " 
+                    throw new RuntimeException("IOException when loading KeyStore file of type: "
                             + type + " provider: " + provider + " location:" + location + " message: " + ioe.getMessage(), ioe);
                 } catch (GeneralSecurityException gse) {
                     LOGGER.error("GeneralSecurityException when loading KeyStore file", gse);
-                    throw new RuntimeException("GeneralSecurityException when loading KeyStore file of type: " 
+                    throw new RuntimeException("GeneralSecurityException when loading KeyStore file of type: "
                         + type + " provider: " + provider + " location:" + location + " message: " + gse.getMessage(), gse);
                 }
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
@@ -201,18 +202,38 @@ public class CryptoServiceImpl implements CryptoService {
         }
         return result;
     }
-    
+
     @Override
     public JsonValue decrypt(String value) throws JsonException {
         JsonValue jsonValue = parseStringified(value);
         return decrypt(jsonValue);
     }
-    
+
+    @Override
+    public JsonValue decryptIfNecessary(JsonValue value) throws JsonException {
+        if (value == null) {
+            return new JsonValue(null);
+        }
+        if (value.isNull() || !isEncrypted(value)) {
+            return value;
+        }
+        return decrypt(value);
+    }
+
+    @Override
+    public JsonValue decryptIfNecessary(String value) throws JsonException {
+        JsonValue jsonValue = null;
+        if (value != null) {
+            jsonValue = parseStringified(value);
+        }
+        return decryptIfNecessary(jsonValue);
+    }
+
     @Override
     public boolean isEncrypted(JsonValue value) {
         return JsonCrypto.isJsonCrypto(value);
     }
-    
+
     @Override
     public boolean isEncrypted(String value) {
         boolean encrypted = false;
@@ -228,7 +249,7 @@ public class CryptoServiceImpl implements CryptoService {
         }
         return encrypted;
     }
-    
+
     private JsonValue parseStringified(String stringified) {
         JsonValue jsonValue = null;
         try {
@@ -239,4 +260,5 @@ public class CryptoServiceImpl implements CryptoService {
         }
         return jsonValue;
     }
+
 }
