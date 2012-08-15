@@ -193,7 +193,6 @@ public class MappedTableHandler implements TableHandler {
     @Override
     public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection) 
                 throws SQLException, IOException {
-        connection.setAutoCommit(false);
         PreparedStatement createStatement = queries.getPreparedStatement(connection, createQueryStr);
 
         logger.debug("Create with fullid {}", fullId);
