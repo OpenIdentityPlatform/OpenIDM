@@ -100,19 +100,6 @@ public class AuthModule {
         return authenticated;
     }
 
-    /**
-     * Gets an (optionally) encrypted JsonValue and returns the decrypted version.
-     * If the value is not encrypted, returns entry.
-     * @param entry A potentially encrypted JsonValue
-     * @return Decrypted JsonValue
-     */
-    private static JsonValue decryptValue(JsonValue entry) {
-        if (getCrypto().isEncrypted(entry)) {
-             return getCrypto().decrypt(entry);
-        }
-        return entry;
-    }
-
     private static boolean authPass(String passQueryId, String passQueryOnResource,
             String login, String password, List roles) {
         UserInfo userInfo = null;
@@ -163,7 +150,7 @@ public class AuthModule {
                 retrId = entry.get(userIdProperty).asString();
 
                 retrCredPropName = userCredentialProperty;
-                retrCred = decryptValue(entry.get(userCredentialProperty)).asString();
+                retrCred = getCrypto().decryptIfNecessary(entry.get(userCredentialProperty)).asString();
 
                 // Since userRoles are optional, check before we go to retrieve it
                 if (userRolesProperty != null && entry.isDefined(userRolesProperty)) {
@@ -184,7 +171,7 @@ public class AuthModule {
                         if (nonInternalCount == 1) {
                             // By convention the first property is the cred
                             //decrypt if necessary
-                            retrCred = decryptValue(entry.get(key)).asString();
+                            retrCred = getCrypto().decryptIfNecessary(entry.get(key)).asString();
                             retrCredPropName = key;
                         } else if (nonInternalCount == 2) {
                             // By convention the second property can define roles

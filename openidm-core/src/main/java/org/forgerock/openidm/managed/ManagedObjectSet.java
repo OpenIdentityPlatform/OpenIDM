@@ -221,7 +221,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
      * @param value an json value with poentially encrypted value(s)
      * @return object with values decrypted
      * @throws InternalServerErrorException if decryption failed for any reason
-     */ 
+     */
     private JsonValue decrypt(JsonValue value) throws InternalServerErrorException {
         try {
             return service.getCryptoService().decrypt(value); // makes a copy, which we can modify
@@ -236,7 +236,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
      * @param object in map format with potentially encrypted value(s)
      * @return object with decrypted values
      * @throws InternalServerErrorException TODO.
-     */ 
+     */
     private JsonValue decrypt(Map<String, Object> object) throws InternalServerErrorException {
         return decrypt(new JsonValue(object));
     }
@@ -321,7 +321,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     private JsonValue patchAction(String id, JsonValue params) throws ObjectSetException {
         String _id = id; // identifier provided in path
         if (_id == null) {
-            _id = params.get("_id").asString(); // identifier provided as query parameter 
+            _id = params.get("_id").asString(); // identifier provided as query parameter
         }
         String _rev = params.get("_rev").asString();
         if (_id == null) { // identifier not provided in URI; this is patch-by-query
@@ -429,11 +429,12 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         LOGGER.debug("patch name={} id={}", name, id);
         idRequired(id);
         noSubObjects(id);
-        JsonValue oldValue = decrypt(service.getRouter().read(repoId(id))); // decrypt any incoming encrypted properties
-        JsonValue newValue = oldValue.copy();
+        JsonValue oldValue = new JsonValue(service.getRouter().read(repoId(id))); // Get the oldest value for diffing in the log
+        JsonValue decrypted = decrypt(oldValue); // decrypt any incoming encrypted properties
+        JsonValue newValue = decrypted.copy();
         patch.apply(newValue.asMap());
-        update(id, rev, oldValue, newValue);
-        logActivity(id, "Patch " + patch, null, null);
+        update(id, rev, decrypted, newValue);
+        logActivity(id, "Patch " + patch, oldValue, newValue);
     }
 
     @Override
