@@ -185,7 +185,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `subjectafter` MEDIUMTEXT NULL ,
   `status` VARCHAR(7) NULL ,
   `changedfields` VARCHAR(255) NULL ,
-  `passwordchanged` TINYINT(1) NULL ,
+  `passwordchanged` VARCHAR(5) NULL ,
   PRIMARY KEY (`objectid`) ,
   INDEX `idx_auditactivity_rootactionid` (`rootactionid` ASC) )
 ENGINE = InnoDB;
