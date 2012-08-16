@@ -168,7 +168,7 @@ CREATE TABLE "openidm"."auditactivity" (
   "subjectbefore" TEXT,
   "subjectafter" TEXT,
   "changedfields" VARCHAR(255) DEFAULT NULL,
-  "passwordchanged" VARCHAR(1) DEFAULT NULL,
+  "passwordchanged" VARCHAR(5) DEFAULT NULL,
   "status" VARCHAR(7) DEFAULT NULL,
   PRIMARY KEY ("objectid")
 );
