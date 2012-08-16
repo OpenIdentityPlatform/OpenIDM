@@ -71,6 +71,8 @@ CREATE TABLE auditactivity (
   approver CLOB,
   subjectbefore CLOB,
   subjectafter CLOB,
+  changedfields VARCHAR2(255 CHAR),
+  passwordchanged VARCHAR2(1 CHAR),
   status VARCHAR2(7 CHAR)
 );
 

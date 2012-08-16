@@ -184,6 +184,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `subjectbefore` MEDIUMTEXT NULL ,
   `subjectafter` MEDIUMTEXT NULL ,
   `status` VARCHAR(7) NULL ,
+  `changedfields` VARCHAR(255) NULL ,
+  `passwordchanged` TINYINT(1) NULL ,
   PRIMARY KEY (`objectid`) ,
   INDEX `idx_auditactivity_rootactionid` (`rootactionid` ASC) )
 ENGINE = InnoDB;
@@ -237,4 +239,3 @@ COMMIT;
 GRANT ALL PRIVILEGES on openidm.* TO openidm IDENTIFIED BY 'openidm';
 GRANT ALL PRIVILEGES on openidm.* TO openidm@'%' IDENTIFIED BY 'openidm';
 GRANT ALL PRIVILEGES on openidm.* TO openidm@localhost IDENTIFIED BY 'openidm';
-
