@@ -646,6 +646,8 @@ CREATE TABLE SOPENIDM.AUDITACTIVITY
        ,SUBJECTBEFORE              CLOB(2M)
        ,SUBJECTAFTER               CLOB(2M)
        ,STATUS                     VARCHAR(7)
+       ,CHANGEDFIELDS              VARCHAR(255)
+       ,CHANGEDPASSWORD            VARCHAR(1)
        ,PRIMARY KEY (OBJECTID)
        )
        IN DOPENIDM.SOIDM09

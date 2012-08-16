@@ -75,7 +75,9 @@
                     "approver" : "approver",
                     "before" : "subjectbefore",
                     "after" : "subjectafter",
-                    "status" : "status"
+                    "status" : "status",
+                    "changedFields" : "changedfields",
+                    "passwordChanged" : "passwordchanged"
                 }
             },
             "audit/recon" : {
