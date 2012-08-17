@@ -121,7 +121,7 @@ public class RepoJobStore implements JobStore {
     private static JsonResourceAccessor accessor = null;
     
     /**
-     * Creates a new <code>RestJobStore</code>.
+     * Creates a new <code>RepoJobStore</code>.
      */
     public RepoJobStore() {
     }
@@ -134,9 +134,34 @@ public class RepoJobStore implements JobStore {
      */
     @Override
     public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler schedSignaler) {
-        logger.info("Initializing RestJobStore");
+        logger.info("Initializing RepoJobStore");
         this.schedulerSignaler = schedSignaler;
         this.loadHelper = loadHelper;
+        
+        try {
+            // Make sure all available triggers are "waiting"
+            WaitingTriggers wt = getWaitingTriggers();
+            List<String> waitingTriggers = wt.getTriggerNamesList();
+            String [] groupNames = getTriggerGroupNames(null);
+            for (String groupName : groupNames) {
+                String [] triggerNames = getTriggerNames(null, groupName);
+                for (String triggerName : triggerNames) {
+                    // Check if the trigger is not "waiting"
+                    // This would happen if the trigger was acquired or if the system shutdown 
+                    //  (or an error occurred) during the acquireNextTrigger()
+                    if (!waitingTriggers.contains(triggerName)) {
+                        // Check if trigger should be "waiting"
+                        TriggerWrapper tw = getTriggerWrapper(groupName, triggerName);
+                        if(!tw.isAcquired()) {
+                            // Add the trigger to waitingTriggers
+                            addWaitingTrigger(tw.getTrigger(), wt);
+                        }
+                    }
+                }
+            }
+        } catch (JobPersistenceException e) {
+            logger.warn("Error initializing RepoJobStore", e);
+        }
     }
 
     /**
@@ -559,7 +584,7 @@ public class RepoJobStore implements JobStore {
                 TriggerWrapper tw = getTriggerWrapper(trigger.getGroup(), trigger.getName());
                 
                 if (hasTriggerMisfired(trigger)) {
-                    logger.debug("Attempting to process misfired trigger");
+                    logger.info("Attempting to process misfired trigger");
                     processTriggerMisfired(tw, waitingTriggers);
                     if (trigger.getNextFireTime() != null) {
                         addWaitingTrigger(trigger, waitingTriggers);
@@ -780,7 +805,7 @@ public class RepoJobStore implements JobStore {
             throws JobPersistenceException {
         String id = getTriggerId(triggerGroup, triggerName);
         int state = 0;
-        logger.debug("Getting trigger state {}", id);
+        logger.trace("Getting trigger state {}", id);
         JsonValue trigger = getTriggerFromRepo(triggerGroup, triggerName);
         if (trigger.isNull()) {
             return Trigger.STATE_NONE;
@@ -1225,7 +1250,9 @@ public class RepoJobStore implements JobStore {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
             }
-                logger.debug("Getting job {}", getJobsRepoId(jobGroup, jobName));
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Getting job {}", getJobsRepoId(jobGroup, jobName));
+                }
                 JobWrapper jw = getJobWrapper(jobGroup, jobName);
                 if (jw == null) {
                     return null;
@@ -1242,7 +1269,9 @@ public class RepoJobStore implements JobStore {
     
     public JobWrapper getJobWrapper(String jobGroup, String jobName) throws JobPersistenceException {
         try {
-            logger.debug("Getting job {}", getJobsRepoId(jobGroup, jobName));
+            if (logger.isTraceEnabled()) {
+                logger.trace("Getting job {}", getJobsRepoId(jobGroup, jobName));
+            }
             Map<String, Object> jobMap = readFromRepo(getJobsRepoId(jobGroup, jobName)).asMap();
             if (jobMap == null) {
                 return null;
@@ -1262,7 +1291,9 @@ public class RepoJobStore implements JobStore {
             throws JobPersistenceException {
         synchronized (lock) {
             try {
-                logger.debug("Getting calendar {}", getCalendarsRepoId(name));
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Getting calendar {}", getCalendarsRepoId(name));
+                }
                 Map<String, Object> calMap = readFromRepo(getCalendarsRepoId(name)).asMap();
                 if (calMap == null) {
                     return null;
@@ -1340,7 +1371,7 @@ public class RepoJobStore implements JobStore {
             
             Date previousFireTime = trigger.getPreviousFireTime();
             removeWaitingTrigger(trigger, waitingTriggers);
-            
+
             localTrigger.triggered(triggerCalendar);
             tw.updateTrigger(localTrigger);
             updateTriggerInRepo(localTrigger.getGroup(), localTrigger.getName(), tw, tw.getRevision());
@@ -1389,8 +1420,7 @@ public class RepoJobStore implements JobStore {
             WaitingTriggers waitingTriggers = getWaitingTriggers();
             String jobKey = getJobNameKey(jobDetail);
             JobWrapper jw = getJobWrapper(jobDetail.getGroup(), jobDetail.getName());
-            TriggerWrapper tw = new TriggerWrapper(getTriggerFromRepo(trigger.getGroup(), 
-                    trigger.getName()).asMap());
+            TriggerWrapper tw = new TriggerWrapper(getTriggerFromRepo(trigger.getGroup(), trigger.getName()).asMap());
             
             if (jw != null) {
                 JobDetail jd;
@@ -1870,7 +1900,7 @@ public class RepoJobStore implements JobStore {
                 throw new JobPersistenceException("Repo router is null");
             }
             try {
-                logger.debug("Getting trigger {} in group {} from repo", new Object[]{name, group});
+                logger.trace("Getting trigger {} in group {} from repo", name, group);
                 return readFromRepo(getTriggersRepoId(group, name));
             } catch (JsonResourceException e) {
                 logger.warn("Error getting trigger from repo", e);
@@ -1894,7 +1924,9 @@ public class RepoJobStore implements JobStore {
                 throw new JobPersistenceException("Repo router is null");
             }
             try {
-                logger.debug("Getting trigger {}", getTriggersRepoId(group, name));
+                if(logger.isTraceEnabled()) {
+                    logger.trace("Getting trigger {}", getTriggersRepoId(group, name));
+                }
                 String repoId = getTriggersRepoId(group, name);
                 accessor.update(repoId, rev, tw.getValue());
             } catch (JsonResourceException e) {
@@ -1961,6 +1993,8 @@ public class RepoJobStore implements JobStore {
         schedulerSignaler.notifyTriggerListenersMisfired(trigger);
         Calendar calendar = retrieveCalendar(null, trigger.getCalendarName());
         trigger.updateAfterMisfire(calendar);
+        triggerWrapper.updateTrigger(trigger);
+        updateTriggerInRepo(trigger.getGroup(), trigger.getName(), triggerWrapper, triggerWrapper.getRevision());
         if (trigger.getNextFireTime() == null) {
             schedulerSignaler.notifySchedulerListenersFinalized(trigger);
             triggerWrapper.setState(Trigger.STATE_COMPLETE);

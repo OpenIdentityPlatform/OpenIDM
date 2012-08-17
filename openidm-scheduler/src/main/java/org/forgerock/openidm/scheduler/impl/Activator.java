@@ -23,16 +23,17 @@
  */
 package org.forgerock.openidm.scheduler.impl;
 
+import java.util.Properties;
+
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SchedulerFactory;
+import org.quartz.impl.DirectSchedulerFactory;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.CascadingClassLoadHelper;
-import org.quartz.Scheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * OSGi bundle activator for scheduler facility
@@ -41,52 +42,84 @@ import org.quartz.Scheduler;
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
-     static Scheduler scheduler;
-    
-     public void start(BundleContext context) throws SchedulerException {
-         initScheduler(context);
-         logger.debug("Bundle started", context);
-     }
+    static Scheduler inMemoryScheduler;
+    static Scheduler persistentScheduler;
 
-     public void stop(BundleContext context) {
-         if (scheduler != null) {
-             try {
-                 scheduler.shutdown();
-             } catch (SchedulerException ex) {
-                 logger.warn("Failure during shutdown of scheduler", ex);
-             }
-             logger.info("Scheduler facility shut down");
-         }
-         logger.debug("Bundle stopped", context);
-     }
-     
-     public static Scheduler getScheduler() {
-         return scheduler;
-     }
-     
-     private void initScheduler(BundleContext context) throws SchedulerException {
-         try {
-             
-             // Quartz tries to be too smart about classloading, 
-             // but relies on the thread context classloader to load classload helpers
-             // That is not a good idea in OSGi, 
-             // hence, hand it the OSGi classloader for the ClassLoadHelper we want it to find
-             ClassLoader original = Thread.currentThread().getContextClassLoader();
-             Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());
-             
-             SchedulerFactory sf = new StdSchedulerFactory(); 
-             //sf.initialize(properties);
-             scheduler = sf.getScheduler();
+    public void start(BundleContext context) throws SchedulerException {
+        initScheduler(context);
+        logger.debug("Bundle started", context);
+    }
 
-             // Set back to the original thread context classloader
-             Thread.currentThread().setContextClassLoader(original);
-             
-             // Start processing schedules
-             scheduler.start();
-         } catch (SchedulerException ex) {
-             logger.warn("Failure in initializing the scheduler facility " + ex.getMessage(), ex);
-             throw ex;
-         }
-         logger.info("Scheduler facility started");
-     }
+    public void stop(BundleContext context) {
+        if (inMemoryScheduler != null) {
+            try {
+                inMemoryScheduler.shutdown();
+            } catch (SchedulerException ex) {
+                logger.warn("Failure during shutdown of scheduler", ex);
+            }
+            logger.info("Scheduler facility shut down");
+        }
+        logger.debug("Bundle stopped", context);
+    }
+
+    public static Scheduler getInMemoryScheduler() {
+        return inMemoryScheduler;
+    }
+
+    public static Scheduler getPersistentScheduler() {
+        return persistentScheduler;
+    }
+
+    private void initScheduler(BundleContext context) throws SchedulerException {
+        try {
+
+            // Quartz tries to be too smart about classloading, 
+            // but relies on the thread context classloader to load classload helpers
+            // That is not a good idea in OSGi, 
+            // hence, hand it the OSGi classloader for the ClassLoadHelper we want it to find
+            ClassLoader original = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());
+            
+            
+            // Create a properties object for our custom JobStore implementation
+            // TODO: Makes some (or all) of these properties configurable?
+            // TODO: Add setting of org.quartz.scheduler.idleWaitTime (time between acquireNextTrigger calls)?
+            Properties persistentProps = new Properties();
+            persistentProps.put("org.quartz.scheduler.instanceName", "DefaultQuartzScheduler");
+            persistentProps.put("org.quartz.scheduler.rmi.export", "false");
+            persistentProps.put("org.quartz.scheduler.rmi.proxy", "false");
+            persistentProps.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", "false");
+            persistentProps.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+            persistentProps.put("org.quartz.threadPool.threadCount", "10");
+            persistentProps.put("org.quartz.threadPool.threadPriority", "5");
+            persistentProps.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "true");
+            persistentProps.put("org.quartz.jobStore.class", "org.forgerock.openidm.quartz.impl.RepoJobStore");
+            
+            // Get the in-memory scheduler
+            // Must use DirectSchedulerFactory instance so that it does not confict with
+            // the StdSchedulerFactory (used to create the persistent schedulers below).
+            logger.info("Creating In-Memory Scheduler");
+            DirectSchedulerFactory.getInstance().createVolatileScheduler(10);
+            inMemoryScheduler = DirectSchedulerFactory.getInstance().getScheduler();
+
+            // Get the persistent scheduler using our custom JobStore implementation
+            logger.info("Creating Persistent Scheduler");
+            StdSchedulerFactory sf = new StdSchedulerFactory();
+            sf.initialize(persistentProps);
+            persistentScheduler = sf.getScheduler();
+
+            // Set back to the original thread context classloader
+            Thread.currentThread().setContextClassLoader(original);
+
+            // Start processing schedules
+            logger.info("Starting Volatile Scheduler");
+            inMemoryScheduler.start();
+            logger.info("Starting Persistent Scheduler");
+            persistentScheduler.start();
+        } catch (SchedulerException ex) {
+            logger.warn("Failure in initializing the scheduler facility " + ex.getMessage(), ex);
+            throw ex;
+        }
+        logger.info("Scheduler facility started");
+    }
 }
