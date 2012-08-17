@@ -66,7 +66,36 @@ public class Activator implements BundleActivator {
         return inMemoryScheduler;
     }
 
-    public static Scheduler getPersistentScheduler() {
+    public static Scheduler getPersistentScheduler() throws SchedulerException {
+        if (persistentScheduler == null) {
+            try {
+                // Create a properties object for our custom JobStore implementation
+                // TODO: Makes some (or all) of these properties configurable?
+                // TODO: Add setting of org.quartz.scheduler.idleWaitTime (time between acquireNextTrigger calls)?
+                Properties persistentProps = new Properties();
+                persistentProps.put("org.quartz.scheduler.instanceName", "DefaultQuartzScheduler");
+                persistentProps.put("org.quartz.scheduler.rmi.export", "false");
+                persistentProps.put("org.quartz.scheduler.rmi.proxy", "false");
+                persistentProps.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", "false");
+                persistentProps.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
+                persistentProps.put("org.quartz.threadPool.threadCount", "10");
+                persistentProps.put("org.quartz.threadPool.threadPriority", "5");
+                persistentProps.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "true");
+                persistentProps.put("org.quartz.jobStore.class", "org.forgerock.openidm.quartz.impl.RepoJobStore");
+
+                // Get the persistent scheduler using our custom JobStore implementation
+                logger.info("Creating Persistent Scheduler");
+                StdSchedulerFactory sf = new StdSchedulerFactory();
+                sf.initialize(persistentProps);
+                persistentScheduler = sf.getScheduler();
+                
+                logger.info("Starting Persistent Scheduler");
+                persistentScheduler.start();
+            } catch (SchedulerException e) {
+                logger.warn("Failure in initializing the scheduler facility " + e.getMessage(), e);
+                throw e;
+            }
+        }
         return persistentScheduler;
     }
 
@@ -80,21 +109,6 @@ public class Activator implements BundleActivator {
             ClassLoader original = Thread.currentThread().getContextClassLoader();
             Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());
             
-            
-            // Create a properties object for our custom JobStore implementation
-            // TODO: Makes some (or all) of these properties configurable?
-            // TODO: Add setting of org.quartz.scheduler.idleWaitTime (time between acquireNextTrigger calls)?
-            Properties persistentProps = new Properties();
-            persistentProps.put("org.quartz.scheduler.instanceName", "DefaultQuartzScheduler");
-            persistentProps.put("org.quartz.scheduler.rmi.export", "false");
-            persistentProps.put("org.quartz.scheduler.rmi.proxy", "false");
-            persistentProps.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", "false");
-            persistentProps.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-            persistentProps.put("org.quartz.threadPool.threadCount", "10");
-            persistentProps.put("org.quartz.threadPool.threadPriority", "5");
-            persistentProps.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", "true");
-            persistentProps.put("org.quartz.jobStore.class", "org.forgerock.openidm.quartz.impl.RepoJobStore");
-            
             // Get the in-memory scheduler
             // Must use DirectSchedulerFactory instance so that it does not confict with
             // the StdSchedulerFactory (used to create the persistent schedulers below).
@@ -102,20 +116,12 @@ public class Activator implements BundleActivator {
             DirectSchedulerFactory.getInstance().createVolatileScheduler(10);
             inMemoryScheduler = DirectSchedulerFactory.getInstance().getScheduler();
 
-            // Get the persistent scheduler using our custom JobStore implementation
-            logger.info("Creating Persistent Scheduler");
-            StdSchedulerFactory sf = new StdSchedulerFactory();
-            sf.initialize(persistentProps);
-            persistentScheduler = sf.getScheduler();
-
             // Set back to the original thread context classloader
             Thread.currentThread().setContextClassLoader(original);
 
             // Start processing schedules
             logger.info("Starting Volatile Scheduler");
             inMemoryScheduler.start();
-            logger.info("Starting Persistent Scheduler");
-            persistentScheduler.start();
         } catch (SchedulerException ex) {
             logger.warn("Failure in initializing the scheduler facility " + ex.getMessage(), ex);
             throw ex;
