@@ -415,7 +415,7 @@ public class OpenICFProvisionerService implements ProvisionerService {
             Set<Attribute> attributeSet = null;
 
             //TODO support case sensitive and insensitive rename detection!
-            if (newName.isString() && !id.getLocalId().equals(newName.asString())) {
+            if (newName.isString() && !id.getLocalId().equals(Id.unescapeUid(newName.asString()))) {
                 //This is a rename
                 connectorObject = helper.build(UpdateApiOp.class, newName.asString(), object);
                 attributeSet = AttributeUtil.filterUid(connectorObject.getAttributes());
