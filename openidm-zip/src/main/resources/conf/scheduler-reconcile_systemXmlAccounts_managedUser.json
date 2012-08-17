@@ -2,6 +2,8 @@
     "enabled" : false,
     "type" : "cron",
     "schedule" : "0 0/1 * * * ?",
+    "persisted" : false,
+    "misfirePolicy" : "fireAndProceed",
     "invokeService" : "org.forgerock.openidm.sync",
     "invokeContext" : {
         "action" : "reconcile",

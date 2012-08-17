@@ -1,26 +1,28 @@
-/*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
- *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
- *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- */
+/**
+* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+*
+* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+*
+* The contents of this file are subject to the terms
+* of the Common Development and Distribution License
+* (the License). You may not use this file except in
+* compliance with the License.
+*
+* You can obtain a copy of the License at
+* http://forgerock.org/license/CDDLv1.0.html
+* See the License for the specific language governing
+* permission and limitations under the License.
+*
+* When distributing Covered Code, include this CDDL
+* Header Notice in each file and include the License file
+* at http://forgerock.org/license/CDDLv1.0.html
+* If applicable, add the following below the CDDL Header,
+* with the fields enclosed by brackets [] replaced by
+* your own identifying information:
+* "Portions Copyrighted [year] [name of copyright owner]"
+*
+*/
+
 package org.forgerock.openidm.scheduler;
 
 import java.text.ParseException;
@@ -67,7 +69,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Scheduler service using Quartz
+ * 
  * @author aegloff
+ * @author ckienle
  */
 @Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE, configurationFactory=true)
 @Service(value = SchedulerService.class, serviceFactory=false) 
@@ -87,6 +91,8 @@ public class SchedulerService  {
     public final static String SCHEDULE_TIME_ZONE = "timeZone";
     public final static String SCHEDULE_INVOKE_SERVICE = "invokeService";
     public final static String SCHEDULE_INVOKE_CONTEXT = "invokeContext";
+    public final static String SCHEDULE_PERSISTED = "persisted";
+    public final static String SCHEDULE_MISFIRE_POLICY = "misfirePolicy";
 
     // Valid configuration values
     public final static String SCHEDULE_TYPE_CRON = "cron"; 
@@ -94,14 +100,20 @@ public class SchedulerService  {
     // Default service PID prefix to use if the invokeService name is a fragment
     public final static String SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
     
+    // Misfire Policies
+    public final static String MISFIRE_POLICY_DO_NOTHING = "doNothing";
+    public final static String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
+    
     // Internal service tracker
     final static String SERVICE_TRACKER = "scheduler.service-tracker";
     final static String SERVICE_PID = "scheduler.service-pid";
     
-    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
     
     // Configuration
     Boolean enabled;
+    Boolean persisted;
+    String misfirePolicy;
     String scheduleType;
     Date startTime;
     Date endTime;
@@ -121,23 +133,6 @@ public class SchedulerService  {
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
     
-    /** Internal object set router service. */
-    @Reference(
-        name = "ref_RepoJobStore_JsonResourceRouterService",
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private ObjectSet routerService;  // The same router instance across all RepoJobStore instances
-    protected void bindRouter(JsonResource router) {
-        routerService = new JsonResourceObjectSet(router);
-    }
-    protected void unbindRouter(JsonResource router) {
-    }
-    
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
@@ -151,7 +146,11 @@ public class SchedulerService  {
         scheduledServiceTracker = createServiceTracker(compContext, invokeService);
 
         try {
-            scheduler = Activator.getScheduler();
+            if (persisted) {
+                scheduler = Activator.getPersistentScheduler();
+            } else {
+                scheduler = Activator.getInMemoryScheduler();
+            }
             
             if (configFactoryPID != null) {
                 jobName = configFactoryPID;
@@ -163,7 +162,6 @@ public class SchedulerService  {
             if (scheduler != null && cronSchedule != null && cronSchedule.length() > 0) {
                 JobDetail job = new JobDetail(jobName, groupName, SchedulerServiceJob.class);
                 JobDataMap context = new JobDataMap();
-                //context.put(SERVICE_TRACKER, scheduledServiceTracker);
                 context.put(ScheduledService.CONFIG_NAME,
                         "scheduler"+ (configFactoryPID != null ? "-" + configFactoryPID : ""));
                 context.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
@@ -174,12 +172,20 @@ public class SchedulerService  {
                 if (startTime != null) {
                     trigger.setStartTime(startTime); // TODO: review time zone consistency with cron trigger timezone
                 }
+                
                 if (endTime != null) {
                     trigger.setEndTime(endTime);
                 }
                 if (timeZone != null) {
                     trigger.setTimeZone(timeZone);
                 }
+                
+                if (misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED)) {
+                    trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
+                } else if (misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
+                    trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);
+                }
+                
                 try {
                     scheduler.scheduleJob(job, trigger);
                     logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.", 
@@ -214,6 +220,18 @@ public class SchedulerService  {
         enabled = (Boolean) config.get(SCHEDULE_ENABLED);
         if (enabled == null) {
             enabled = Boolean.TRUE; // Default to enabled
+        }
+        
+        persisted = (Boolean) config.get(SCHEDULE_PERSISTED);
+        if (persisted == null) {
+            persisted = Boolean.FALSE; // Default to not persisted
+        }
+        
+        misfirePolicy = (String) config.get(SCHEDULE_MISFIRE_POLICY);
+        if (misfirePolicy == null) {
+            misfirePolicy = MISFIRE_POLICY_FIRE_AND_PROCEED;
+        } else if (!misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED) && !misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
+            throw new InvalidException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
         }
         
         cronSchedule = (String) config.get(SCHEDULE_CRON_SCHEDULE);
@@ -284,14 +302,14 @@ public class SchedulerService  {
     }
     
     @Deactivate
-    void deactivate(ComponentContext compContext) { 
+    void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
         try {
             boolean deleted = false;
-            if (scheduler != null) {
+            if (scheduler != null && !persisted) {
                 deleted = scheduler.deleteJob(jobName, groupName);
+                logger.trace("Scheduler job deleted: ", deleted);
             }
-            logger.trace("Scheduler job deleted: ", deleted);
         } catch (SchedulerException ex) {
             logger.warn("Failure during removal of scheduled job ", ex);
         }
