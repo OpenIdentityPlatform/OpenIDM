@@ -133,6 +133,23 @@ public class SchedulerService  {
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
     
+    /** Internal object set router service. */
+    @Reference(
+        name = "ref_RepoJobStore_JsonResourceRouterService",
+        referenceInterface = JsonResource.class,
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC,
+        target = "(service.pid=org.forgerock.openidm.router)"
+    )
+    private ObjectSet routerService;
+    protected void bindRouter(JsonResource router) {
+        routerService = new JsonResourceObjectSet(router);
+    }
+    protected void unbindRouter(JsonResource router) {
+    }
+    
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
