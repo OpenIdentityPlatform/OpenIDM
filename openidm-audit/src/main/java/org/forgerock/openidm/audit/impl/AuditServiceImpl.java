@@ -139,10 +139,9 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     @Override
     public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
         logger.debug("Audit create called for {} with {}", fullId, obj);
-        // Work-around until router id strategy in sync
-        if (fullId.startsWith(ROUTER_PREFIX)) {
-            String[] withoutAuditLevel = splitFirstLevel(fullId);
-            fullId = withoutAuditLevel[1];
+        
+        if (fullId == null) {
+            throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
         }
 
         String[] splitTypeAndId =  splitFirstLevel(fullId);
@@ -179,7 +178,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
 
         // Generate an ID if there is none
-        if (localId == null) {
+        if (localId == null || localId.isEmpty()) {
             localId = UUID.randomUUID().toString();
             obj.put(ObjectSet.ID, localId);
             logger.debug("Assigned id {}", localId);
