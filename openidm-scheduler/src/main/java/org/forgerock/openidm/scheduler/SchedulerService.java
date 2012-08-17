@@ -40,17 +40,13 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.scheduler.impl.Activator;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -133,22 +129,8 @@ public class SchedulerService  {
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
     
-    /** Internal object set router service. */
-    @Reference(
-        name = "ref_RepoJobStore_JsonResourceRouterService",
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private ObjectSet routerService;
-    protected void bindRouter(JsonResource router) {
-        routerService = new JsonResourceObjectSet(router);
-    }
-    protected void unbindRouter(JsonResource router) {
-    }
+    @Reference
+    RepositoryService repo;
     
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException { 
