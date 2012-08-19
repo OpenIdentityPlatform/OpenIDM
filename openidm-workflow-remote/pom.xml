@@ -111,6 +111,11 @@
             <groupId>org.restlet.jee</groupId>
             <artifactId>org.restlet.ext.servlet</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.6.6</version>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
