@@ -136,11 +136,11 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `objectid` VARCHAR(38) NOT NULL ,
   `rev` VARCHAR(38) NOT NULL ,
-  `linktype` VARCHAR(510) NOT NULL ,
+  `linktype` VARCHAR(255) NOT NULL ,
   `firstid` VARCHAR(255) NOT NULL ,
   `secondid` VARCHAR(255) NOT NULL ,
-  INDEX `idx_links_first` (`linktype` ASC, `firstid` ASC) ,
-  INDEX `idx_links_second` (`linktype` ASC, `secondid` ASC) ,
+  UNIQUE INDEX `idx_links_first` (`linktype` ASC, `firstid` ASC) ,
+  UNIQUE INDEX `idx_links_second` (`linktype` ASC, `secondid` ASC) ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 

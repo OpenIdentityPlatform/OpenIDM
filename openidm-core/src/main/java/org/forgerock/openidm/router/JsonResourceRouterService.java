@@ -464,8 +464,6 @@ public class JsonResourceRouterService implements JsonResource {
         @Override
         public JsonValue filter(JsonValue request, JsonResource next) throws JsonResourceException {
             Map<String, Object> scope = null;
-            // TODO: can this be removed? Why do we need to guard against changes of the request?
-            request = request.copy(); // allows modification of request by onRequest script
             
             if (matches(request.get("method").asString(), request.get("id").asString())) {
                 scope = scopeFactory.newInstance(request);
