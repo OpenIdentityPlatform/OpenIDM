@@ -51,8 +51,8 @@
  LiveSync and reconciliation. You schedule the operations using
  <command>cron</command>-like syntax.</para>
  
- <para>This chapter describes scheduling for reconciliation and LiveSync.
- Yet, you can use OpenIDM's scheduler service to schedule other events, too.
+ <para>This chapter describes scheduling for reconciliation and LiveSync, 
+ however, you can also use OpenIDM's scheduler service to schedule other events. 
  See the <link xlink:href="integrators-guide#appendix-scheduling"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler
  Reference</citetitle></link> appendix for details.</para>
@@ -159,6 +159,42 @@
   </itemizedlist>
  </section>
 
+ <section xml:id="persistent-schedules">
+  <title>Configuring Persistent Schedules</title>
+  <para>By default, the scheduling configuration is stored in RAM. This means 
+  that scheduling information is lost when OpenIDM is rebooted. You can 
+  configure schedules to be persistent, which means that the scheduling 
+  configuration is stored in the internal repository rather than in RAM. With 
+  persistent schedules, the scheduling configuration is retained when OpenIDM 
+  is shut down. Any previously scheduled jobs can be rescheduled when OpenIDM 
+  is restarted.</para>
+  <para>You can use persistent schedules with the default OrientDB repository, 
+  or with the MySQL repository (see <link xlink:href="install-guide#chap-repository"
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a 
+    Repository For Production</citetitle></link>).
+  </para>
+  <para>To configure persistent schedules, set the <literal>"persisted"</literal> 
+  property to <literal>true</literal> in the schedule configuration file 
+  (<filename>scheduler-<replaceable>schedule-name</replaceable>.json)</filename>.
+  </para>
+  <para>If OpenIDM is down when a scheduled task was set to occur, one or more 
+  executions of that schedule might be missed. To specify what action should be 
+  taken if schedules are missed, set the <literal>misfirePolicy</literal> in the 
+  schedule configuration file. The <literal>misfirePolicy</literal> determines 
+  what OpenIDM should do if scheduled tasks are missed. Possible values are as 
+  follows:
+    </para>
+    <itemizedlist>
+     <listitem><para><literal>fireAndProceed</literal>. The first execution of 
+     a missed schedule is immediately executed when the server is back online. 
+     Subsequent executions are discarded. After this, the normal schedule is 
+     resumed.</para></listitem>
+     <listitem><para><literal>doNothing</literal>. All missed schedules are 
+     discarded and the normal schedule is resumed when the server is back 
+     online.</para></listitem>
+    </itemizedlist>
+  </section>
+
  <section xml:id="scheduler-examples">
   <title>Scheduler Examples</title>
   <indexterm>
@@ -173,6 +209,7 @@
   <programlisting language="javascript">
 {
     "enabled": false,
+    "persisted": false,
     "type": "cron",
     "schedule": "0 0/30 * * * ?",
     "invokeService": "sync",
@@ -182,12 +219,19 @@
     }
 }</programlisting>
 
-  <para>The following example shows a schedule for LiveSync enabled
-  to run every 15 seconds, starting at the beginning of the minute.</para>
+  <para>The following example shows a schedule for LiveSync enabled to run 
+  every 15 seconds, starting at the beginning of the minute. The schedule is 
+  persisted, that is, stored in the internal repository rather than in memory. 
+  If one or more LiveSync executions are missed, as a result of OpenIDM being 
+  unavailable, the first execution of the LiveSync action is executed when the 
+  server is back online. Subsequent executions are discarded. After this, the 
+  normal schedule is resumed.</para>
 
   <programlisting language="javascript">
 {
     "enabled": false,
+    "persisted": true,
+    "misfirePolicy" : "fireAndProceed",
     "type": "cron",
     "schedule": "0/15 * * * * ?",
     "invokeService": "provisioner",
@@ -196,5 +240,6 @@
         "source": "system/ldap/account"
     }
 }</programlisting>
+
  </section>
 </chapter>
