@@ -951,7 +951,9 @@ class ObjectMapping implements SynchronizationListener {
                                         // Try to read again to see if that is the issue
                                         linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
                                         if (linkObject._id == null) {
-                                            LOGGER.warn("Failed to create link between {}-{}", new Object[] {sourceObject.get("_id"), targetId, ex});
+                                            LOGGER.warn("Failed to create link between {}-{}", 
+                                                    new Object[] {qualifiedId(sourceObjectSet, sourceObject.get("_id").asString()), 
+                                                    qualifiedId(targetObjectSet,targetId), ex});
                                             throw ex; // it was a different issue
                                         }
                                     }
