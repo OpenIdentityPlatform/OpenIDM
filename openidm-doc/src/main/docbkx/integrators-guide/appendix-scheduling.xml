@@ -36,20 +36,21 @@
   <primary>Scheduler</primary>
  </indexterm>
 
- <para>OpenIDM lets you schedule many tasks and events including reconciliation
- and synchronization, but also arbitrary events by use of scheduler
- objects.</para>
+ <para>OpenIDM scheduler objects enable you to schedule many tasks and events, 
+ including reconciliation and synchronization, but also arbitrary events.</para>
 
  <para>OpenIDM supports <command>cron</command>-like syntax to schedule events
- and tasks, based on expressions supported by the Quartz Scheduler that OpenIDM
- bundles.</para>
+ and tasks, based on expressions supported by the Quartz Scheduler (bundled 
+ with OpenIDM).</para>
 
- <para>If you use configuration files to schedule tasks and events, then the
- scheduler files are located in the <filename>openidm/conf</filename> directory.
+ <para>If you use configuration files to schedule tasks and events, you must 
+ place the scheduler files in the <filename>openidm/conf</filename> directory.
  By convention, OpenIDM uses file names of the form
- <filename>scheduler-<replaceable>schedule-name</replaceable>.json</filename>.
- OpenIDM dynamically picks up changes to scheduled tasks and events both,
- during initialization and also during runtime.</para>
+ <filename>scheduler-<replaceable>schedule-name</replaceable>.json</filename>. 
+ There are several example scheduler configuration files in the 
+ <filename>openidm/samples/schedulers</filename> directory. OpenIDM dynamically 
+ picks up changes to scheduled tasks and events, during initialization and also 
+ at runtime.</para>
 
  <variablelist xml:id="scheduler-configuration-objects">
   <title>Scheduler Configuration Objects</title>
@@ -63,6 +64,8 @@
  "startTime"     : "<replaceable>optional time</replaceable>",
  "endTime"       : "<replaceable>optional time</replaceable>",
  "schedule"      : "<replaceable>cron expression</replaceable>",
+ "persisted"     : false,
+ "misfirePolicy" : "<replaceable>optional, string</replaceable>",
  "timeZone"      : "<replaceable>optional time zone</replaceable>",
  "invokeService" : "<replaceable>service identifier</replaceable>",
  "invokeContext" : "<replaceable>service specific context info</replaceable>"
@@ -124,6 +127,39 @@
    </listitem>
   </varlistentry>
   <varlistentry>
+   <term>persisted (optional)</term>
+   <listitem>
+    <para>Specifies whether the schedule should be persisted or stored in RAM. 
+    Boolean (<literal>true</literal> or <literal>false</literal>), 
+    <literal>false</literal> by default.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>misfirePolicy (optional)</term>
+   <listitem>
+    <para>For persistent schedules, specifies the behavior if the scheduled 
+    task is missed, for some reason. Possible values are as follows:
+    </para>
+    <itemizedlist>
+     <listitem><para><literal>fireAndProceed</literal>. The first execution 
+     of a missed schedule is immediately executed when the server is back 
+     online. Subsequent executions are discarded. After this, the normal 
+     schedule is resumed.</para></listitem>
+     <listitem><para><literal>doNothing</literal>, all missed schedules are 
+     discarded and the normal schedule is resumed when the server is back 
+     online.</para></listitem>
+    </itemizedlist>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>startTime (optional)</term>
+   <listitem>
+    <para>Used to start the schedule at some time in the future. If this 
+    parameter is omitted or set to a time in the past, the task or event is 
+    scheduled to start immediately.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
    <term>schedule</term>
    <listitem>
     <para>Takes <command>cron</command> expression syntax.</para>
@@ -138,8 +174,8 @@
   <varlistentry>
    <term>invokeService</term>
    <listitem>
-    <para>Defines the type of scheduled event or action. OpenIDM accepts the
-    following values.</para>
+    <para>Defines the type of scheduled event or action. The value of this 
+    parameter can be one of the following:</para>
     <itemizedlist>
      <listitem><para><literal>provisioner</literal></para></listitem>
      <listitem><para><literal>script</literal></para></listitem>
@@ -183,8 +219,8 @@
     }
 }</programlisting>
 
-    <para>Actual configuration differs from these examples depending on your
-    configuration.</para>
+    <para>Note that these are sample configurations only. Your own scheduler 
+    configuration will differ according to your specific requirements.</para>
    </listitem>
   </varlistentry>
  </variablelist>
@@ -192,10 +228,10 @@
  <section xml:id="scheduled-task-use-cases">
   <title>Scheduled Task Use Cases</title>
 
-  <para>OpenIDM lets you schedule not only reconciliation and synchronization,
-  but also lets you use scheduling to trigger scripts, collect and run reports,
-  trigger workflows, perform custom logging, and so forth. You can find a
-  set of samples in the <filename>openidm/samples/schedules</filename>
+  <para>OpenIDM enables you to schedule reconciliation and synchronization tasks. 
+  You can also use scheduling to trigger scripts, collect and run reports,
+  trigger workflows, perform custom logging, and so forth. A set of sample 
+  schedules is provided in the <filename>openidm/samples/schedules</filename>
   directory.</para>
  </section>
 
