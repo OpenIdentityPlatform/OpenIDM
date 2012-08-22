@@ -137,6 +137,12 @@ class ObjectMapping implements SynchronizationListener {
 
     /** TODO: Description. */
     private Script resultScript;
+    
+    /** 
+     * Whether existing links should be fetched in one go along with the source and target id lists. 
+     * false indicates links should be retrieved individually as they are needed.
+     */
+    private Boolean prefetchLinks;
 
     /** TODO: Description. */
     private SynchronizationService service;
@@ -178,6 +184,8 @@ class ObjectMapping implements SynchronizationListener {
         onLinkScript = Scripts.newInstance("ObjectMapping", config.get("onLink"));
         onUnlinkScript = Scripts.newInstance("ObjectMapping", config.get("onUnlink"));
         resultScript = Scripts.newInstance("ObjectMapping", config.get("result"));
+        prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
+        
         LOGGER.debug("Instantiated {}", name);
     }
 
@@ -651,10 +659,18 @@ class ObjectMapping implements SynchronizationListener {
             if (!sourceIds.hasNext()) {
                 throw new SynchronizationException("Cowardly refusing to perform reconciliation with an empty source object set");
             }
+            
             targetStats = new ReconStats(reconId,targetObjectSet);
             targetStats.startAllIds();
             List<String> remainingTargetIds = queryAllIds(targetObjectSet);
             targetStats.endAllIds();
+            
+            // Optionally get all links up front as well
+            Map<String, Link> allLinks = null;
+            if (prefetchLinks) {
+                allLinks = Link.getLinksForMapping(ObjectMapping.this);
+            }
+            
             measureIdQueries.end();
 
             EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
@@ -664,6 +680,9 @@ class ObjectMapping implements SynchronizationListener {
                 SourceSyncOperation op = new SourceSyncOperation();
                 ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
                 op.sourceId = sourceId;
+                if (allLinks != null) {
+                    op.initializeLink(allLinks.get(sourceId));
+                }
                 entry.sourceId = qualifiedId(sourceObjectSet, sourceId);
                 sourceStats.entries++;
                 op.reconId = reconId;
@@ -808,8 +827,12 @@ class ObjectMapping implements SynchronizationListener {
         public JsonValue sourceObject;
         /** TODO: Description. */
         public JsonValue targetObject;
-        /** TODO: Description. */
-        public final Link linkObject = new Link(ObjectMapping.this);
+        /** 
+         * Holds the link representation
+         * An initialized link can be interpreted as representing state retrieved from the repository,
+         * i.e. a linkObject with id of null represents a link that does not exist (yet)
+         */
+        public Link linkObject = new Link(ObjectMapping.this); 
         /** TODO: Description. */
         public Situation situation;
         /** TODO: Description. */
@@ -825,6 +848,20 @@ class ObjectMapping implements SynchronizationListener {
         public abstract void sync() throws SynchronizationException;
 
         protected abstract boolean isSourceToTarget();
+        
+        /**
+         * Initializes the link representation
+         * @param link the link object for links that were found/exist in the repository, null to represent no existing link
+         */
+        protected void initializeLink(Link link) {
+            if (link != null) {
+                this.linkObject = link;
+            } else {
+                // Keep track of the fact that we did not find a link
+                this.linkObject.clear();
+                this.linkObject.initialized = true;
+            }
+        }
 
         protected Action getAction() {
             return (this.action == null ? Action.IGNORE : this.action);
@@ -903,15 +940,23 @@ class ObjectMapping implements SynchronizationListener {
                                 if (targetObject == null) {
                                     throw new SynchronizationException("no target object to link");
                                 }
-                                if (linkObject._id == null) {
-                                    // try to read again as it may have been created in a cascade
-                                    linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
-                                }
 
                                 String targetId = targetObject.get("_id").required().asString();
                                 if (linkObject._id == null) {
-                                    createLink(sourceObject.get("_id").required().asString(), targetId, reconId);
-                                } else if (!targetId.equals(linkObject.targetId)) {
+                                    try {
+                                        createLink(sourceObject.get("_id").required().asString(), targetId, reconId);
+                                    } catch (SynchronizationException ex) {
+                                        // Allow for link to have been created in the meantime, e.g. programmatically
+                                        // create would fail with a failed precondition for link already existing
+                                        // Try to read again to see if that is the issue
+                                        linkObject.getLinkForSource(sourceObject.get("_id").required().asString());
+                                        if (linkObject._id == null) {
+                                            LOGGER.warn("Failed to create link between {}-{}", new Object[] {sourceObject.get("_id"), targetId, ex});
+                                            throw ex; // it was a different issue
+                                        }
+                                    }
+                                }
+                                if (linkObject._id != null && !targetId.equals(linkObject.targetId)) {
                                     linkObject.targetId = targetId;
                                     linkObject.update();
                                 }
@@ -1200,7 +1245,7 @@ class ObjectMapping implements SynchronizationListener {
          */
         private void assessSituation() throws SynchronizationException {
             situation = null;
-            if (sourceId != null) {
+            if (sourceId != null && linkObject.initialized == false) { // In case the link was not pre-read get it here
                 linkObject.getLinkForSource(sourceId);
             }
             if (linkObject._id != null) {

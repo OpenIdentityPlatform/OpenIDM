@@ -21,6 +21,7 @@ package org.forgerock.openidm.sync.impl;
 // Java Standard Edition
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 // SLF4J
@@ -32,6 +33,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
+import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -69,6 +71,10 @@ class Link {
     // The id linked in the target object set of the mapping. 
     // This link view is specific to the direction of the mapping context 
     public String targetId;
+    
+    // Whether this link representation has been initialized.
+    // Once initialized is true, _id == null can be interpreted as a link that doesn't exist in our repository yet
+    public boolean initialized = false;
 
     /**
      * TODO: Description.
@@ -80,11 +86,11 @@ class Link {
     }
 
     /**
-     * TODO: Description.
-     * @param id
-     * @return
+     * For a local link identifier this creates an identifier for the link stored in the repository.
+     * @param id the local (unqualified) link identifier
+     * @return the qualified id, qualified to the repository
      */
-    private String linkId(String id) {
+    private static String linkId(String id) {
         //StringBuilder sb = new StringBuilder("repo/link/").append(mapping.getLinkType().getName());
         StringBuilder sb = new StringBuilder("repo/link");
         if (id != null) {
@@ -94,25 +100,38 @@ class Link {
     }
 
     /**
-     * TODO: Description.
+     * Queries a single link and populates the object with its settings
      *
-     * @param query TODO.
-     * @throws SynchronizationException TODO.
+     * @param The query parameters
+     * @throws SynchronizationException if getting and initializing the link details fail
      */
     private void getLink(JsonValue query) throws SynchronizationException {
+        JsonValue results = linkQuery(mapping.getService().getRouter(), query);
+        if (results.size() == 1) {
+            fromJsonValue(results.get(0));
+        } else if (results.size() > 1) { // shouldn't happen if index is unique
+            throw new SynchronizationException("More than one link found");
+        }
+    }
+    
+    /**
+     * Issues a query on link(s)
+     *
+     * @param The query parameters
+     * @return The query results
+     * @throws SynchronizationException if getting and initializing the link details fail
+     */
+    private static JsonValue linkQuery(ObjectSet router, JsonValue query) throws SynchronizationException {
+        JsonValue results = null;
         try {
-            JsonValue results = new JsonValue(mapping.getService().getRouter().query(linkId(null),
-             query.asMap())).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
-            if (results.size() == 1) {
-                fromJsonValue(results.get(0));
-            } else if (results.size() > 1) { // shouldn't happen if index is unique
-                throw new SynchronizationException("More than one link found");
-            }
+            results = new JsonValue(router.query(linkId(null), 
+                    query.asMap())).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
         } catch (JsonValueException jve) {
             throw new SynchronizationException("Malformed link query response", jve);
         } catch (ObjectSetException ose) {
             throw new SynchronizationException("Link query failed", ose);
         }
+        return results;
     }
 
     /**
@@ -131,6 +150,7 @@ class Link {
             sourceId = jv.get("firstId").required().asString();
             targetId = jv.get("secondId").required().asString();
         }
+        initialized = true;
     }
 
     /**
@@ -228,6 +248,32 @@ class Link {
             getLink(query);
         }
     }
+    
+    /**
+     * Queries all the links for a given mapping, indexed by the source identifier
+     * <p>
+     * This method expects a {@code "links-for-linkType"} defined with a parameter of
+     * {@code "linkType"}.
+     *
+     * @param mapping the mapping to look up the links for 
+     * @throws SynchronizationException if the query could not be performed.
+     * @return the mapping from source identifier to the link object for it
+     */
+    public static Map<String, Link> getLinksForMapping(ObjectMapping mapping) throws SynchronizationException {
+        Map<String, Link> sourceIdToLink = new HashMap<String, Link>();
+        if (mapping != null) {
+            JsonValue query = new JsonValue(new HashMap<String, Object>());            
+            query.put(QueryConstants.QUERY_ID, "links-for-linkType");
+            query.put("linkType", mapping.getLinkType().getName());
+            JsonValue queryResults = linkQuery(mapping.getService().getRouter(), query);
+            for (JsonValue entry : queryResults) {
+                Link link = new Link(mapping);
+                link.fromJsonValue(entry);
+                sourceIdToLink.put(link.sourceId, link);
+            }
+        }
+        return sourceIdToLink;
+    }
 
     /**
      * TODO: Description.
@@ -240,7 +286,7 @@ class Link {
         try {
             mapping.getService().getRouter().create(linkId(_id), jv.asMap());
         } catch (ObjectSetException ose) {
-            LOGGER.warn("Failed to create link", ose);
+            LOGGER.debug("Failed to create link", ose);
             throw new SynchronizationException(ose);
         }
         this._id = jv.get("_id").required().asString();

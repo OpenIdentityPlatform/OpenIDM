@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.googlecode.disruptor</groupId>
             <artifactId>disruptor</artifactId>
-            <version>2.10.1</version>
+            <version>2.10.2</version>
             <!-- Other module test cases can not see the embedded jar
                  Hence allowing a direct dependency, but excluding it for OSGi packaging-->
             <!--<scope>provided</scope>-->
