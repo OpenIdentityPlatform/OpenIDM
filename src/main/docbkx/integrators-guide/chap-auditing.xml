@@ -37,7 +37,7 @@
 
  <para>OpenIDM auditing can publish and log all relevant system activity to
  the targets you specify. Auditing can include data from reconciliation as
- a basis for reporting, to access details, to activity logs that capture
+ a basis for reporting, access details, and activity logs that capture
  operations on internal (managed) objects and external (system) objects.
  Auditing provides the data for all the relevant reports, including orphan
  account reports.</para>
@@ -295,14 +295,15 @@
     <term><literal>"reconciling"</literal></term>
     <listitem>
      <para>What OpenIDM is reconciling, 
-     <literal>"source"</literal> for the first phase, <literal>"target"</literal> for the second phase</para>
+     <literal>"source"</literal> for the first phase, 
+     <literal>"target"</literal> for the second phase</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>"reconId"</literal></term>
     <listitem>
      <para>UUID for the reconciliation operation, which is the same for all
-     entries pertaining to the reconciliation run</para>
+     entries pertaining to the reconciliation run.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -371,7 +372,9 @@
                     "patch",
                     "action"
                 ]
-            }
+            },
+            "watchedFields" : [ ],
+            "passwordFields" : [ "password" ]
         },
         "recon": {}
     },
@@ -398,13 +401,13 @@
    objects for which OpenIDM writes to the activity log.</para>
 
    <variablelist>
-    <para>The <literal>filter</literal> <literal>actions</literal> list lets
-    you configure under what conditions OpenIDM writes to the activity
-    log.</para>
+    <para>The <literal>filter</literal> <literal>actions</literal> list enables 
+    you to configure the conditions that result in actions being written to the 
+    activity log.</para>
     <varlistentry>
      <term><literal>read</literal></term>
      <listitem>
-      <para>When an object is read by using its identifier</para>
+      <para>When an object is read by using its identifier.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -444,6 +447,22 @@
      </listitem>
     </varlistentry>
    </variablelist>
+   
+   <para>The <literal>watchedFields</literal> parameter enables you to specify 
+   a list of fields that should be "watched" for changes. When the value of one 
+   of the fields in this list changes, the change is logged in the audit log, 
+   under the column <literal>"changedFields"</literal>. Fields are listed in 
+   comma-separated format, for example:</para>
+   <screen>"watchedFields" : [ "email", "address" ]</screen>
+   <para>The <literal>passwordFields</literal> parameter enables you to specify 
+   a list of fields that are considered passwords. This parameter functions much 
+   like the <literal>watchedFields</literal> parameter in that changes to these 
+   field values are logged in the audit log, under the column 
+   <literal>"changedFields"</literal>. In addition, when a password field is 
+   changed, the boolean <literal>"passwordChanged"</literal> flag is set to 
+   <literal>true</literal> in the audit log. Fields are listed in 
+   comma-separated format, for example:</para>
+   <screen>"passwordFields" : [ "password", "username" ]</screen>
 
    <variablelist>
     <para>The <literal>logTo</literal> list lets you define where OpenIDM
