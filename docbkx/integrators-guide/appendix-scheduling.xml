@@ -71,27 +71,6 @@
  "invokeContext" : "<replaceable>service specific context info</replaceable>"
 }</programlisting>
 
-  <para>The following simple example prints <literal>Hello World</literal> to
-  the OpenIDM log, <filename>/openidm/logs/openidm0.log.X</filename>,
-  each minute.</para>
-
-  <programlisting language="javascript">
-{
-    "enabled": true,
-    "type": "cron",
-    "schedule": "0 0/1 * * * ?",
-    "invokeService": "script",
-    "invokeContext": {
-        "script": {
-            "type": "text/javascript",
-            "source": "java.lang.System.out.println('Hello World’);"
-        },
-        "input": {
-            "edit": 26
-        }
-    }
-}</programlisting>
-
   <para>Scheduler configuration objects take the following properties.</para>
   <varlistentry>
    <term>enabled</term>
@@ -115,9 +94,9 @@
   <varlistentry>
    <term>startTime (optional)</term>
    <listitem>
-    <para>Used to start the schedule some time in the future. If omitted or
-    set to a time in the past, the task or event is scheduled starting
-    immediately.</para>
+    <para>Used to start the schedule at some time in the future. If this 
+    parameter is omitted or set to a time in the past, the task or event is 
+    scheduled to start immediately.</para>
    </listitem>
   </varlistentry>
   <varlistentry>
@@ -152,14 +131,6 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term>startTime (optional)</term>
-   <listitem>
-    <para>Used to start the schedule at some time in the future. If this 
-    parameter is omitted or set to a time in the past, the task or event is 
-    scheduled to start immediately.</para>
-   </listitem>
-  </varlistentry>
-  <varlistentry>
    <term>schedule</term>
    <listitem>
     <para>Takes <command>cron</command> expression syntax.</para>
@@ -177,19 +148,18 @@
     <para>Defines the type of scheduled event or action. The value of this 
     parameter can be one of the following:</para>
     <itemizedlist>
+     <listitem><para><literal>sync</literal></para></listitem>
      <listitem><para><literal>provisioner</literal></para></listitem>
      <listitem><para><literal>script</literal></para></listitem>
-     <listitem><para><literal>sync</literal></para></listitem>
     </itemizedlist>
    </listitem>
   </varlistentry>
   <varlistentry>
    <term>invokeContext</term>
    <listitem>
-    <para>Specifies contextual information, such as the JavaScript to invoke.
-    The discovery engine provides two mechanisms, reconciliation and
-    synchronization. Both require that you specify the
-    <literal>invokeContext</literal>.</para>
+    <para>Specifies contextual information, depending on the type of scheduled 
+    event (the value of the <literal>invokeService</literal> parameter).
+   </para>
 
     <para>The following example invokes reconciliation.</para>
     <programlisting language="javascript">
@@ -206,7 +176,7 @@
     <para>For reconciliation tasks, you can add the mapping definition inline
     rather than define it in <filename>openidm/conf/sync.json</filename>.</para>
 
-    <para>The following example shows a scheduler for LiveSync.</para>
+    <para>The following example shows invokes a LiveSync action.</para>
     <programlisting language="javascript">
 {
     "enabled": true,
@@ -216,6 +186,23 @@
     "invokeContext": {
         "action": "liveSync",
         "source": "system/OpenDJ/__ACCOUNT__"
+    }
+}</programlisting>
+  <para>The following example invokes a script, which prints the string 
+  <literal>Hello World</literal> to the OpenIDM log 
+  (<filename>/openidm/logs/openidm0.log.X</filename>) each minute.</para>
+
+  <programlisting language="javascript">
+{
+    "enabled": true,
+    "type": "cron",
+    "schedule": "0 0/1 * * * ?",
+    "invokeService": "script",
+    "invokeContext": {
+        "script": {
+            "type": "text/javascript",
+            "source": "java.lang.System.out.println('Hello World’);"
+        },
     }
 }</programlisting>
 
