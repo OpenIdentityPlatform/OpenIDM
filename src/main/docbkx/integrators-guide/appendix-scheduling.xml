@@ -48,9 +48,13 @@
  By convention, OpenIDM uses file names of the form
  <filename>scheduler-<replaceable>schedule-name</replaceable>.json</filename>. 
  There are several example scheduler configuration files in the 
- <filename>openidm/samples/schedulers</filename> directory. OpenIDM dynamically 
- picks up changes to scheduled tasks and events, during initialization and also 
- at runtime.</para>
+ <filename>openidm/samples/schedulers</filename> directory.</para>
+ 
+ <para>OpenIDM can be configured to pick up changes to scheduled tasks and 
+ events dynamically, during initialization and also at runtime. For more 
+ information, see <link xlink:href="integrators-guide#when-configuring-notes" 
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Changing the 
+ Configuration</citetitle></link>.</para>
 
  <variablelist xml:id="scheduler-configuration-objects">
   <title>Scheduler Configuration Objects</title>
@@ -108,8 +112,8 @@
   <varlistentry>
    <term>persisted (optional)</term>
    <listitem>
-    <para>Specifies whether the schedule should be persisted or stored in RAM. 
-    Boolean (<literal>true</literal> or <literal>false</literal>), 
+    <para>Specifies whether the schedule state should be persisted or stored 
+    in RAM. Boolean (<literal>true</literal> or <literal>false</literal>), 
     <literal>false</literal> by default.</para>
    </listitem>
   </varlistentry>

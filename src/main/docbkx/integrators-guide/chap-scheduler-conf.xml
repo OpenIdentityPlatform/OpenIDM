@@ -52,20 +52,19 @@
  <command>cron</command>-like syntax.</para>
  
  <para>This chapter describes scheduling for reconciliation and LiveSync, 
- however, you can also use OpenIDM's scheduler service to schedule other events. 
- See the <link xlink:href="integrators-guide#appendix-scheduling"
+ however, you can also use OpenIDM's scheduler service to schedule any other 
+ event by supplying a link to a script file, in which that event is defined.  
+ For more information on scheduling other events, see the 
+ <link xlink:href="integrators-guide#appendix-scheduling"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler
- Reference</citetitle></link> appendix for details.</para>
+ Reference</citetitle></link> appendix.</para>
  
  <para>You configure the scheduler through JSON objects. The corresponding
- configuration file names take the form
- <filename>openidm/conf/[org.forgerock.openidm.]scheduler-<replaceable
- >schedule-name</replaceable>.json</filename>, where
- <literal>[org.forgerock.openidm.]</literal> is optional and added
- automatically when OpenIDM reads the configuration, and
- <replaceable>schedule-name</replaceable> is the logical name for the
- scheduled operation, such as
- <literal>reconcile_systemXmlAccounts_managedUser</literal>.</para>
+ configuration file names take the form <filename>openidm/conf/scheduler-
+ <replaceable>schedule-name</replaceable>.json</filename>, where 
+ <replaceable>schedule-name</replaceable> is the logical name for the scheduled 
+ operation, such as <literal>reconcile_systemXmlAccounts_managedUser</literal>.
+ </para>
 
  <section xml:id="scheduler-configuration-file">
   <title>Scheduler Configuration</title>
@@ -74,12 +73,13 @@
    <secondary>Configuration</secondary>
   </indexterm>
 
-  <para>The scheduler configuration file,
-  <filename>openidm/conf/[org.forgerock.openidm.]scheduler-<replaceable
-  >schedule-name</replaceable>.json</filename> has the following format.</para>
+  <para>The scheduler configuration file, <filename>openidm/conf/scheduler-
+  <replaceable>schedule-name</replaceable>.json</filename> has the following 
+  format.</para>
 
   <programlisting language="javascript">{
   "enabled"       : true,
+  "persisted"     : false,
   "type"          : "<replaceable>cron</replaceable>",
   "startTime"     : "<replaceable>(optional) time</replaceable>",
   "endTime"       : "<replaceable>(optional) time</replaceable>",
@@ -92,7 +92,7 @@
   <itemizedlist>
    <listitem>
     <para>The optional properties <literal>"startTime"</literal>,
-    <literal>"endTime"</literal>, and <literal>"timeZone"</literal> properties
+    <literal>"endTime"</literal>, and <literal>"timeZone"</literal> 
     can be absent, or empty.</para>
     <para>When specifying times and dates, use ISO 8601 format,
     <literal><replaceable>YYYY</replaceable>-<replaceable>MM</replaceable
@@ -108,11 +108,20 @@
     xlink:show="new"><citetitle>Lesson 6: CronTrigger</citetitle></link>.</para>
    </listitem>
    <listitem>
-    <para>The <literal>"invokeService"</literal> property takes either
-    <literal>"sync"</literal> for reconciliation or
-    <literal>"provisioner"</literal> for LiveSync.</para>
-    <para>You can also specify the service identifier by its full name as in
-    <literal>"invokeService" : "org.forgerock.openidm.sync"</literal>.</para>
+     <itemizedlist>
+      <para>The <literal>"invokeService"</literal> property takes one of the 
+      following values:</para>
+      <listitem><para><literal>"sync"</literal> for reconciliation</para>
+      </listitem>
+      <listitem><para><literal>"provisioner"</literal> for LiveSync.</para>
+      </listitem>
+      <listitem><para><literal>"script"</literal> to call some other scheduled 
+       operation defined in a script. This is discussed in more detail in the 
+       <link xlink:href="integrators-guide#appendix-scheduling" 
+       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler 
+       Reference</citetitle></link> appendix
+       </para></listitem>
+     </itemizedlist>
    </listitem>
    <listitem>
     <para>The <literal>"invokeContext"</literal> property depends on the
@@ -130,8 +139,8 @@
 }</programlisting>
 
     <para>For reconciliation, <literal>"mapping"</literal> takes the name of
-    the mapping configured in
-    <filename>openidm/conf/sync.json</filename>.</para>
+    the mapping configured in <filename>openidm/conf/sync.json</filename>.
+    </para>
     <programlisting language="javascript">
 {
     "invokeService": "sync",
@@ -147,7 +156,7 @@
   <itemizedlist>
    <listitem>
     <para>Referencing the mapping by its name in <filename>sync.json</filename>
-    as shown in the example above. The mapping must exist in the
+    as shown in the previous example. The mapping must exist in the
     <filename>sync.json</filename> file.</para></listitem>
    <listitem>
     <para>Configuring the mapping in the scheduler configuration by using the
@@ -161,13 +170,26 @@
 
  <section xml:id="persistent-schedules">
   <title>Configuring Persistent Schedules</title>
-  <para>By default, the scheduling configuration is stored in RAM. This means 
-  that scheduling information is lost when OpenIDM is rebooted. You can 
-  configure schedules to be persistent, which means that the scheduling 
-  configuration is stored in the internal repository rather than in RAM. With 
-  persistent schedules, the scheduling configuration is retained when OpenIDM 
-  is shut down. Any previously scheduled jobs can be rescheduled when OpenIDM 
-  is restarted.</para>
+  <para>By default, scheduling information, such as schedule state and details 
+  of the schedule execution, is stored in RAM. This means that such 
+  information is lost when OpenIDM is rebooted. The scheduler configuration 
+  itself (defined in the <filename>openidm/conf/scheduler-
+  <replaceable>schedule-name</replaceable>.json</filename> file) is not lost 
+  when OpenIDM is shut down, and normal scheduling continues when the server is 
+  restarted. However, there are no details of missed schedule executions that 
+  should have occurred during the period the server was unavailable.</para>
+  <para>You can configure schedules to be persistent, which means that the 
+  scheduling information is stored in the internal repository rather than in 
+  RAM. With persistent schedules, scheduling information is retained when OpenIDM 
+  is shut down. Any previously scheduled jobs can be rescheduled automatically 
+  when OpenIDM is restarted.</para>
+  <para>Persistent schedules also enable you to manage scheduling across a 
+  cluster (multiple OpenIDM instances). When scheduling is persistent, a 
+  particular schedule will be executed only once across the cluster, rather than 
+  once on every OpenIDM instance. For example, if your deployment includes a 
+  cluster of OpenIDM nodes for high availability, you can use persistent 
+  scheduling to start a reconciliation action on only one node in the cluster, 
+  instead of starting several competing reconciliation actions on each node.</para>
   <para>You can use persistent schedules with the default OrientDB repository, 
   or with the MySQL repository (see <link xlink:href="install-guide#chap-repository"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a 
