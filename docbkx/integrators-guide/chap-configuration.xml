@@ -114,10 +114,10 @@
  </section>
 
  <section xml:id="when-configuring-notes">
-  <title>When Changing the Configuration</title>
+  <title>Changing the Configuration</title>
 
   <itemizedlist>
-   <para>When changing OpenIDM's configuration objects, take the following
+   <para>When you change OpenIDM's configuration objects, take the following
    points into account.</para>
    <listitem>
     <para>OpenIDM's authoritative configuration source is the internal
@@ -159,7 +159,7 @@
   </indexterm>
   <para>You can list the configuration on the local host by performing a GET
   <literal>http://localhost:8080/openidm/config</literal>.</para>
-  <screen>$ curl
+  <screen>$ curl --request GET 
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  http://localhost:8080/openidm/config
@@ -215,7 +215,7 @@
     ]
 }</screen>
 
-  <para>You can find single instance configuration objects under
+  <para>Single instance configuration objects are located under
   <literal>openidm/config/<replaceable>object-name</replaceable></literal>.
   The following example shows the default <literal>audit</literal>
   configuration.</para>
@@ -361,5 +361,263 @@
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
   Reference</citetitle></link> appendix for additional details and
   examples using REST access to update and patch objects.</para>
+ </section>
+ 
+  <section xml:id="using-property-substitution">
+  <title>Using Property Value Substitution in the Configuration</title>
+  <para>In an environment where you have more than one OpenIDM instance, you 
+  might require a configuration that is similar, but not identical, across the 
+  different OpenIDM hosts. OpenIDM supports variable replacement in its 
+  configuration which means that you can modify the effective configuration 
+  according to the requirements of a specific environment or OpenIDM instance.</para>
+  <itemizedlist><para>Property substitution enables you to achieve the following:</para>
+   <listitem><para>Define a configuration that is specific to a single OpenIDM 
+   instance, for example, setting the location of the keystore on a particular 
+   host.</para></listitem>
+   <listitem><para>Define a configuration whose parameters vary between different 
+   environments, for example, the URLs and passwords for test, development, 
+   and production environments.</para></listitem>
+  </itemizedlist>
+  <para>When OpenIDM starts up, it combines the system configuration, which 
+  might contain specific environment variables, with the defined OpenIDM 
+  configuration properties. This combination makes up the effective configuration 
+  for that OpenIDM instance. By varying the environment properties, you can 
+  change specific configuration items that vary between OpenIDM instances or 
+  environments.</para>
+  
+  <para>Property references are contained within the construct 
+  <literal>&amp;{ }</literal>. When such references are found, OpenIDM replaces 
+  them with the appropriate property value, defined in the 
+  <filename>boot.properties</filename> file.</para>
+  
+  <!-- To do - add a simple example here - waiting for Laszlo. Otherwise 
+  come up with a simple example
+  <example>
+   <para>The following example modifies the port on which OpenIDM </para>
+  </example>
+  </section>
+  -->
+  
+  <section>
+   <title>Using Property Value Substitution With System Properties</title>
+  
+  <para>You can use property value substitution in conjunction with the system 
+  properties, to modify the configuration according to the system on which 
+  the OpenIDM instance runs.</para>
+  
+  <example>
+   <para>The following example modifies the <literal>audit.json</literal> file so 
+   that the log file is written to the user's directory. The 
+   <literal>user.home</literal> property is a default Java System property.</para>
+   <programlisting language="javascript">{
+    "logTo" : [
+        {
+            "logType" : "csv",
+            "location" : "&amp;{user.home}/audit",
+            "recordDelimiter" : ";"
+        }
+    ]
+}
+   </programlisting>
+  </example>
+ 
+ <para>You can define <emphasis>nested</emphasis> properties (that is a property 
+ definition within another property definition) and you can combine system 
+ properties and boot properties.</para>
+ 
+ <example>
+   <para>The following example uses the <literal>user.country</literal> property, 
+   a default Java System property. The example defines specific LDAP ports, 
+   depending on the country (identified by the country code) in the 
+   <literal>boot.properties</literal> file. The value of the LDAP port (set in 
+   the <literal>provisioner.openicf-ldap.json</literal> file) depends on the 
+   value of the <literal>user.country</literal> System property.</para>
+   <para>The port numbers are defined in the <literal>boot.properties</literal> 
+   file as follows:</para>
+   <programlisting language="javascript">
+   openidm.NO.ldap.port=2389
+   openidm.EN.ldap.port=3389
+   openidm.US.ldap.port=1389</programlisting>
+   <para>The following extract from the 
+   <literal>provisioner.openicf-ldap.json</literal> file shows how the value of 
+   the LDAP port is eventually determined, based on the System property:</para>
+   <programlisting language="javascript">
+   "configurationProperties" :
+   {
+      "credentials" : "Passw0rd",
+      "port" : "&amp;{openidm.&amp;{user.country}.ldap.port}",
+      "principal" : "cn=Directory Manager",
+      "baseContexts" :
+         [
+            "dc=example,dc=com"
+         ],
+      "host" : "localhost"
+   }
+   </programlisting>
+ </example>
+ 
+ <section>
+ <title>Limitations of Property Value Substitution</title>
+ <itemizedlist>
+ <para>Note the following limitations when you use property value substitution:
+ </para>
+ <listitem><para>You cannot reference complex objects or properties with syntaxes 
+ other than String. Property values are resolved from the 
+ <literal>boot.properties</literal> file or from the System properties and the 
+ value of these properties is always in String format.</para></listitem>
+ <listitem><para>Substitution of encrypted property values is currently not 
+ supported.</para></listitem>
+ <!--  For now, encypted property substitution is not supported. Check and 
+ replace with this chunk when it is
+ <listitem><para>Encryption is performed before the property value substitution. 
+ This can be problematic for properties whose values should be encrypted after 
+ substitution, for example, passwords.</para>
+ <para>To use encrypted values with property substitution break the encrypted 
+ object down into separate string properties, as shown in the following 
+ example.</para>
+ <para>The following extract of the <literal>repo.jdbc.json</literal> file shows 
+ the expected encrypted object:</para>
+ <programlisting language="javascript">"credentials" : {
+    "$crypto" : {
+        "value" : {
+            "iv" : "6Lk0/4WL8VsobGNCSh7bNQ==",
+            "data" : "R0L0E0h8opPFANzb2iYrlg==",
+            "cipher" : "AES/CBC/PKCS5Padding",
+            "key" : "openidm-sym-default"
+        },
+        "type" : "x-simple-encryption"
+    }
+}
+ </programlisting>
+ <para>To use property substitution for the <literal>iv</literal> and 
+ <literal>data</literal> properties, define two string properties in the 
+ <literal>boot.properties</literal> file:</para>
+ <programlisting language="javascript">
+  ldap.credentials.iv=6Lk0/4WL8VsobGNCSh7bNQ==
+  ldap.credentials.data=R0L0E0h8opPFANzb2iYrlg==
+ </programlisting>
+ <para>You can then change the configuration in <literal>repo.jdbc.json</literal>
+  as follows:</para>
+  <programlisting language="javascript">"credentials" : {
+    "$crypto" : {
+        "value" : {
+            "iv" : "&amp;{ldap.credentials.iv}",
+            "data" : "&amp;{ldap.credentials.data}",
+            "cipher" : "AES/CBC/PKCS5Padding",
+            "key" : "openidm-sym-default"
+        },
+        "type" : "x-simple-encryption"
+    }
+}
+  </programlisting></listitem>
+  -->
+ </itemizedlist>
+ </section>
+ </section>
+ 
+ <!-- Add this section when you have been able to test the example
+ </section>
+ <section xml:id="optimizing-the-openidm-object-model">
+ <title>Optimizing the OpenIDM Object Model</title>
+ <para>You can improve performance in specific deployment scenarios by 
+ customizing the way in which OpenIDM objects are mapped to the relational 
+ database. This section assumes that you are using MySQL as an internal 
+ repository (for more information, see 
+ <link xlink:href="install-guide#chap-repository"
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Installing a Repository For Production</citetitle></link>).</para>
+  <itemizedlist>
+  <para>There are two ways in which OpenIDM objects can be mapped to the 
+  relational database tables:</para>
+  <listitem><para><emphasis>Using a generic mapping</emphasis>, which allows 
+  arbitrary objects to be stored without specific setup or administration.</para>
+  <para>The generic mapping facilitates rapid development, and makes system 
+  evolution and maintenance simpler by providing a more stable database structure. 
+  However, the generic mapping incurs a performance cost because it does not 
+  take full advantage of the benefits of a relational database. The object model 
+  is not normalized in the traditional sense and there is less flexibility in 
+  indexing.</para></listitem>
+  <listitem><para><emphasis>Using an explicit mapping</emphasis>, which allows you 
+  to optimize storage and queries by explicitly mapping a specific object type to 
+  the database.</para>
+  <para>The explicit mapping provides a traditional object-relational mapping 
+  and can therefore take greater advantage of relational database capabilities. 
+  However, an explicit mapping implies that, as an administrator, you must 
+  ensure that the mapping and objects remain synchronized at all times, and 
+  must manage any migration or upgrade procedures carefully when objects are 
+  added or changed. There are currently some limitations to an explicit table 
+  mapping, and it has not been extensively tested for managed objects.</para>
+  </listitem>
+  </itemizedlist>
+ <para>Out of the box, OpenIDM uses an explicit mapping for a few specific tables 
+ whose structure will remain stable, tables for which easy external queries are 
+ required, or tables for which performance is particularly important. Tables for 
+ managed objects (such as "managed/user") use a generic mapping by default.</para>
+ <para>The generic mapping provided out of the box indexes every property to 
+ make it searchable, as shown in the following <literal>repo.jdbc.json</literal> 
+ extract:</para>
+ <programlisting language="javascript">"credentials" : {
+ "genericMapping" : {
+            "managed/*" : {
+                "mainTable" : "managedobjects", 
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : true            
+            }
+        },
+  </programlisting>
+ <para>In certain deployments, such a configuration might not 
+ meet your performance requirements. You can optimize the performance of the 
+ generic mapping by restricting the properties that are indexed (searchable). 
+ To do this, change the <literal>searchableDefault</literal> property to 
+ <literal>false</literal> and explicitly specify the properties that can be 
+ searched by using the <literal>searchable</literal> setting.</para>
+ <para>Alternatively, leave the <literal>searchableDefault</literal> property 
+ set to <literal>true</literal> and specify which properties should 
+ <emphasis>not</emphasis> be indexed by setting the 
+ <literal>searchableDefault</literal> property to <literal>false</literal> for 
+ those properties.</para>
+ <para>The following example creates a separate generic table for managed/user 
+ objects and indexes only two properties, <literal>_id</literal> and 
+ <literal>username</literal>:</para>
+ <programlisting language="javascript">
+   "genericMapping" : {
+            "managed/user" : {
+                "mainTable" : "manageduserobjects", 
+                "propertiesTable" : "manageduserobjectproperties",
+                "searchableDefault" : false,
+                "properties" : {
+                    "/_id" : {
+                        "searchable" : true
+                    },
+                    "/username" : {
+                        "searchable" : true
+                    }
+                }            
+            }
+        },
+ </programlisting>
+ <para>Another way to optimize performance is to change the mapping 
+ configuration to use a different mapping table type. For example, you can 
+ change the configuration for a managed object such as "managed/user" to an 
+ explicit table mapping, in which you specifically define the columns and 
+ indexes. For example:</para>
+ <programlisting language="javascript">
+  "explicitMapping" : {
+            "managed/user" : {
+            ...
+ </programlisting>
+ <orderedlist>
+ <para>In general, you should assess the following performance improvement 
+ strategies, in order:</para>
+ <listitem><para>Optimize the generic mapping by explicitly defining which 
+ properties should be searchable.</para></listitem>
+ <listitem><para>Place different managed object types in different generic 
+ tables (by default, all managed object types are mapped to the 
+<literal>managedobjects</literal> and <literal>managedobjectproperties</literal> 
+tables).</para></listitem>
+<listitem><para>Finally, consider explicit mappings where appropriate.</para></listitem>
+</orderedlist>
+ </section>
+ -->
  </section>
 </chapter>
