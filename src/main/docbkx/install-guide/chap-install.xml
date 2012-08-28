@@ -47,11 +47,7 @@
     <primary>Java</primary>
     <secondary>Requirements</secondary>
    </indexterm>
-   <para>OpenIDM requires Oracle Java SE JDK 6 update 24 or later.</para>
-   <!-- TODO: When this doc has been reviewed, either the next sentence should
-              be removed, or this entire section should change to something
-              like: OpenIDM requires Java SE 6 JDK update 24 or later. OpenIDM
-              has been tested with both the Oracle JDK and also OpenJDK. -->
+   <para>OpenIDM requires Oracle Java SE 6 update 24 or later.</para>
    <para>The equivalent version of OpenJDK should work for evaluation,
    too.</para>
   </section>
