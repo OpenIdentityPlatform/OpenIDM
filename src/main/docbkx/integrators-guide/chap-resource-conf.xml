@@ -62,7 +62,11 @@
  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
  where <replaceable>name</replaceable> corresponds to the name of the
  connector. <emphasis>Do not include dash characters ( <literal>-</literal> )
- in the connector <replaceable>name</replaceable>.</emphasis></para>
+ in the connector <replaceable>name</replaceable>.</emphasis> A number of 
+ sample connectors are available in the <filename>openidm/samples/provisioners
+ </filename> directory. To use these connectors, edit the configuration files 
+ as required, and copy them to the <filename>openidm/conf</filename> directory.
+ </para>
 
  <section xml:id="openidm-openicf">
   <title>About OpenIDM &amp; OpenICF</title>
@@ -84,23 +88,23 @@
   </mediaobject>
 
   <para>OpenICF provides a common service provider interface to allow identity
-  services access to the resources containing user information. OpenICF uses
+  services access to the resources that contain user information. OpenICF uses
   a connection server that can run as a local connector server inside OpenIDM,
-  or as a remote connector server that is a stand-alone process.</para>
+  or as a remote connector server that is a standalone process.</para>
 
-  <para>A remote connector server is needed when access
-  libraries that cannot be included as part of the OpenIDM process are needed. If a
-  resource, such as Microsoft ADSI, does not provide a connection library that
-  can be included inside the Java Virtual Machine, then OpenICF can use the
-  native .dll with a remote .NET connector server. (OpenICF connects to ADSI through
-  a remote connector server implemented as a .NET service.)</para>
+  <para>A remote connector server is required when access libraries that cannot 
+  be included as part of the OpenIDM process are needed. If a resource, such as 
+  Microsoft ADSI, does not provide a connection library that can be included 
+  inside the Java Virtual Machine, then OpenICF can use the native .dll with a 
+  remote .NET connector server. (OpenICF connects to ADSI through a remote 
+  connector server implemented as a .NET service.)</para>
 
   <tip>
-   <para>Not only .NET connector servers but also Java connector
-   servers can be run as stand alone, remote services. Run them as remote services for
+   <para>Not only .NET connector servers but also Java connector servers can be 
+   run as standalone, remote services. Run them as remote services for 
    scalability, or to have the service run in the cloud.</para>
 
-   <para>By default and for convenience, OpenIDM includes a Java connector
+   <para>By default, and for convenience, OpenIDM includes a Java connector
    server that runs as a <literal>"#LOCAL"</literal> service.</para>
   </tip>
  </section>
@@ -112,13 +116,15 @@
    <secondary>Remote</secondary>
   </indexterm>
 
-  <para>When configuring remote connectors, the connector info provider
-  service to connect through remote connector servers must be used. The configuration is
+  <para>When you configure remote connectors, you must use the connector info 
+  provider service to connect through remote connector servers. The configuration is
   stored in the configuration file,
   <filename>openidm/conf/provisioner.openicf.connectorinfoprovider.json</filename>.
-  A sample can be found under <filename>openidm/samples/provisioners/</filename>.</para>
+  A sample can be found under <filename>openidm/samples/provisioners/</filename>. 
+  To use the file, edit it as required, and then copy it to the 
+  <filename>openidm/conf</filename> directory.</para>
 
-  <para>The connector info provider service takes this configuration.</para>
+  <para>The connector info provider service takes the following configuration:</para>
 <programlisting language="javascript">
 {
   "connectorsLocation"     : <replaceable>string</replaceable>,
@@ -130,7 +136,7 @@
     <term>connectorsLocation</term>
     <listitem>
      <para>string, optional</para>
-     <para>Specifies the directory where OpenICF connectors are located. The
+     <para>Specifies the directory where the OpenICF connectors are located. The
      default location is <filename>openidm/connectors</filename>.
      </para>
     </listitem>
@@ -194,7 +200,7 @@
    <term>useSSL</term>
    <listitem>
     <para>boolean, optional</para>
-    <para>Specifies to use or not SSL to connect. Default value:
+    <para>Specifies whether or not to use SSL to connect. Default value:
     <literal>false</literal></para>
    </listitem>
   </varlistentry>
@@ -228,12 +234,21 @@
  <section xml:id="openicf-provisioner-conf">
   <title>Configuring Connectors</title>
 
-  <para>Connectors are configured through the OpenICF provisioner service. Each configuration is stored in an extra file/object in the  <filename>openidm/conf/</filename> folder or under the same URL respectively. The file name convention is <filename>provisioner.openicf-<replaceable>name</replaceable>.json</filename>.</para>
-  
-  <note><para>Though the <replaceable>name</replaceable> part of the file name is free text, it must not contain any "-" character!</para></note>
+  <para>Connectors are configured through the OpenICF provisioner service. 
+  Each connector configuration is stored in a file in the 
+  <filename>openidm/conf/</filename> folder or under the same URL respectively. 
+  Configuration files are named
+  <filename>openidm/conf/provisioner.openicf-<replaceable>name</replaceable></filename>
+  where <replaceable>name</replaceable> corresponds to the name of the
+  connector. <emphasis>Do not include dash characters ( <literal>-</literal> )
+  in the connector <replaceable>name</replaceable>.</emphasis> A number of 
+  sample connectors are available in the <filename>openidm/samples/provisioners
+  </filename> directory. To use these connectors, edit the configuration files 
+  as required, and copy them to the <filename>openidm/conf</filename> directory.
+  </para>
   
   <para>The following example shows an OpenICF provisioner service
-  configuration.</para>
+  configuration for an XML file resource.</para>
 
   <programlisting language="javascript">{
  "name"                    : "xml",
@@ -1223,7 +1238,7 @@
     records that changed.</para>
 
    <para>The following example shows an excerpt of the provisioner
-   configuration. The default connector-jar location is now, like all other connectors, in <filename>openidm/connectors</filename>. Therefore the  <literal>connectorHostRef</literal> must point to <literal>"#LOCAL"</literal>.</para>
+   configuration. The default connector-jar location is <filename>openidm/connectors</filename>. Therefore the  <literal>connectorHostRef</literal> must point to <literal>"#LOCAL"</literal>.</para>
 
    <programlisting language="javascript">
 {
@@ -1316,6 +1331,78 @@
 
    <para>See the <filename>openidm/samples/sample3/tools/</filename> directory
    for example scripts.</para>
+   <para>The scripted SQL connector runs with autocommit mode enabled by default. 
+   As soon as a statement is executed that modifies a table, the update is stored 
+   on disk and the change cannot be rolled back. This setting applies to all 
+   database actions (search, create, delete, test, synch, and update). 
+   You can disable autocommit in the connector configuration file 
+   (<literal>conf/provisioner.openicf-scriptedsql.json</literal>) by adding the 
+   <literal>autocommit</literal> property and setting it to 
+   <literal>false</literal>, for example:</para>
+   <programlisting language="javascript">
+  "configurationProperties" : {
+        "host" : "localhost",
+        "port" : "3306",
+        ...
+        "database" : "HRDB",
+        "autoCommit" : false,
+        "reloadScriptOnExecution" : true,
+        "createScriptFileName" : "/path/to/openidm/tools/CreateScript.groovy",
+   </programlisting>
+   <para>If you require a traditional transaction with a manual commit for 
+   a specific script, you can disable autocommit mode in the script or scripts 
+   for each action that requires a manual commit.</para>
+   
+   <!--  TO DO Test this example before committing this section 
+   <para>The following example edits the <literal>CreateScript.groovy</literal> 
+   sample script to disable autocommit for CREATE actions in the 
+   scripted SQL connector, adds a manual commit statement to the 
+   transaction, and restores autocommit to true at the end of the transaction.</para>
+   <programlisting language="javascript">
+   connection.setAutoCommit(false);
+   def sql = new Sql(connection);
+   
+switch ( objectClass ) {
+    case "__ACCOUNT__":
+    sql.execute("INSERT INTO Users (uid, firstname,lastname,fullname,email,organization) values (?,?,?,?,?;?)",
+        [
+            id,
+            attributes.get("firstname").get(0),
+            attributes.get("lastname").get(0),
+            attributes.get("fullname").get(0),
+            attributes.get("email").get(0),
+            attributes.get("organization").get(0)
+        ])
+    break
+
+    case "__GROUP__":
+    sql.execute("INSERT INTO Groups (gid,name,description) values (?,?,?)",
+        [
+            attributes.get("gid").get(0),
+            id,
+            attributes.get("description").get(0)
+        ])
+    break
+
+    case "organization":
+    sql.execute("INSERT INTO Organizations (name,description) values (?,?)",
+        [
+            id,
+            attributes.get("description").get(0)
+        ])
+    break
+
+    default:
+    id;
+    
+    sql.commit()
+    connection.setAutoCommit(false);
+    
+}
+
+return id;
+   </programlisting>
+   -->
   </section>
  </section>
 
