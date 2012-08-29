@@ -390,13 +390,51 @@
   them with the appropriate property value, defined in the 
   <filename>boot.properties</filename> file.</para>
   
-  <!-- To do - add a simple example here - waiting for Laszlo. Otherwise 
-  come up with a simple example
   <example>
-   <para>The following example modifies the port on which OpenIDM </para>
+   <para>The following example defines two separate OpenIDM environments - 
+   a development environment and a production environment. You can specify the 
+   environment at startup time and, depending on the environment, the database 
+   URL is set accordingly.</para>
+   
+   <para>The environments are defined by adding the following lines to the 
+   <filename>conf/boot.properties</filename> file:</para>
+   
+   <programlisting language="javascript">
+   PROD.location=production
+   DEV.location=development
+   </programlisting>
+   
+   <para>The database URL is then specified as follows in the 
+   <filename>repo.orientdb.json</filename> file:</para>
+   
+   <programlisting language="javascript">
+    {
+    "dbUrl" : "local:./db/&amp;{&amp;{environment}.location}-openidm",
+    "user" : "admin",
+    "poolMinSize" : 5,
+    "poolMaxSize" : 20,
+    ...
+    }
+   </programlisting>
+   
+   <para>The effective database URL is determined by setting the 
+   <literal>OPENIDM_OPTS</literal> environment variable when you start OpenIDM. 
+   To use the production environment, start OpenIDM as follows:</para>
+   
+   <screen>
+   $ export OPENIDM_OPTS="-Xmx1024m -Denvironment=PROD"
+   $ ./startup.sh
+   </screen>
+   
+   <para>To use the development environment, start OpenIDM as follows:</para>
+   
+   <screen>
+   $ export OPENIDM_OPTS="-Xmx1024m -Denvironment=DEV"
+   $ ./startup.sh
+   </screen>
+   
   </example>
   </section>
-  -->
   
   <section>
    <title>Using Property Value Substitution With System Properties</title>
@@ -467,8 +505,10 @@
  value of these properties is always in String format.</para></listitem>
  <listitem><para>Substitution of encrypted property values is currently not 
  supported.</para></listitem>
- <!--  For now, encypted property substitution is not supported. Check and 
+ <!--  TO DO
+ For now, encypted property substitution is not supported. Check and 
  replace with this chunk when it is
+ 
  <listitem><para>Encryption is performed before the property value substitution. 
  This can be problematic for properties whose values should be encrypted after 
  substitution, for example, passwords.</para>
@@ -619,5 +659,5 @@ tables).</para></listitem>
 </orderedlist>
  </section>
  -->
- </section>
+
 </chapter>
