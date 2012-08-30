@@ -45,7 +45,7 @@
  <para>The Wiki has information on how to check out OpenIDM source code.
  There is also a mailing list for OpenIDM development which can be found at
  <link xlink:href='https://lists.forgerock.org/mailman/listinfo/openidm-dev'
- xlink:show="new">https://lists.forgerock.org/mailman/listinfo/openidm-dev</link>
+ xlink:show="new">https://lists.forgerock.org/mailman/listinfo/openidm-dev</link>.
  Should you want to contribute a patch, test, or feature, or want to author
  part of the core documentation, first have a look on the ForgeRock site
  at <link xlink:href='http://www.forgerock.org/get_involved.html'>how to get
