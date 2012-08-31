@@ -283,6 +283,14 @@
         <openicfBundleVersion>1.1.0.0</openicfBundleVersion>
         <orientdbVersion>${orientdb.version}</orientdbVersion>
         <gaId>UA-23412190-9</gaId>
+        <!--
+            Release date is specified only when building the documentation
+            for publication. For example:
+                -D"releaseDate=Software release date: January 1, 1970"
+            Otherwise release date should remain empty.
+        -->
+        <releaseDate />
+        <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
     </properties>
 
     <modules>
