@@ -218,7 +218,14 @@ public class AttributeInfoHelper {
             }
             resultValue = value;
         } else {
-            resultValue = ConnectorUtil.coercedTypeCasting(AttributeUtil.getSingleValue(source), type);
+            try {
+                resultValue = ConnectorUtil.coercedTypeCasting(AttributeUtil.getSingleValue(source), type);
+            } catch (IllegalArgumentException e) {
+                logger.warn(
+                        "Incorrect schema configuration. Expecting {} attribute to be single but it has multi value.",
+                        attributeInfo.getName());
+                throw e;
+            }
         }
         if (isConfidential()) {
             if (null == cryptoService) {

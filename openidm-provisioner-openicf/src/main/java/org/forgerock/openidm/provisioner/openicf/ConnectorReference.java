@@ -26,6 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf;
 
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.framework.api.ConnectorKey;
 
 /**
@@ -38,10 +39,26 @@ import org.identityconnectors.framework.api.ConnectorKey;
  */
 public class ConnectorReference {
     public static final String SINGLE_LOCAL_CONNECTOR_MANAGER = "#LOCAL";
-    public static final String OSGI_SERVICE_CONNECTOR_MANAGER = "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager";
-    public static final String OSGI_SERVICE_CONNECTOR_MANAGER_11 = "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager/(ConnectorBundle-FrameworkVersion=1.1)";
-    private ConnectorKey connectorKey;
-    private String connectorHost = SINGLE_LOCAL_CONNECTOR_MANAGER;
+    public static final String OSGI_SERVICE_CONNECTOR_MANAGER = "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager";
+    public static final String OSGI_SERVICE_CONNECTOR_MANAGER_11 = "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager/(ConnectorBundle-FrameworkVersion=1.1)";
+
+    public enum ConnectorLocation {
+        /**
+         * Connector loaded with {@code LocalConnectorInfoManagerImpl}.
+         */
+        LOCAL,
+        /**
+         * Connector loaded with {@code OsgiConnectorInfoManagerImpl}.
+         */
+        OSGI,
+        /**
+         * Connector loaded with {@code RemoteConnectorInfoManagerImpl}.
+         */
+        REMOTE;
+    }
+    private final ConnectorKey connectorKey;
+    private final String connectorLocationName;
+    private final ConnectorLocation connectorLocation;
 
     /**
      *
@@ -49,8 +66,7 @@ public class ConnectorReference {
      * @throws AssertionError when the {@code connectorKey} is null.
      */
     public ConnectorReference(ConnectorKey connectorKey) {
-        assert null != connectorKey;
-        this.connectorKey = connectorKey;
+        this(connectorKey, null);
     }
 
     /**
@@ -62,7 +78,18 @@ public class ConnectorReference {
     public ConnectorReference(ConnectorKey connectorKey, String connectorHost) {
         assert null != connectorKey;
         this.connectorKey = connectorKey;
-        this.connectorHost = null != connectorHost ? connectorHost : SINGLE_LOCAL_CONNECTOR_MANAGER;
+        if (StringUtil.isBlank(connectorHost) || SINGLE_LOCAL_CONNECTOR_MANAGER
+                .equalsIgnoreCase(connectorHost)) {
+            connectorLocationName = SINGLE_LOCAL_CONNECTOR_MANAGER;
+            connectorLocation = ConnectorLocation.LOCAL;
+        } else {
+            connectorLocationName = connectorHost;
+            if (connectorHost.toLowerCase().startsWith("osgi")) {
+                connectorLocation = ConnectorLocation.OSGI;
+            } else {
+                connectorLocation = ConnectorLocation.REMOTE;
+            }
+        }
     }
 
     /**
@@ -79,11 +106,15 @@ public class ConnectorReference {
      * @return if no other value was specified the default value is {#SINGLE_LOCAL_CONNECTOR_MANAGER}
      */
     public String getConnectorHost() {
-        return connectorHost;
+        return connectorLocationName;
     }
 
     @Override
     public String toString() {
-        return (new StringBuffer(connectorKey.toString())).append(" on host: ").append(connectorHost).toString();
+        return (new StringBuilder(connectorKey.toString())).append(" on host: ").append(connectorLocationName).toString();
+    }
+
+    public ConnectorLocation getConnectorLocation() {
+       return connectorLocation;
     }
 }

@@ -33,6 +33,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
+import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.common.FrameworkUtil;
@@ -160,6 +161,10 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
         public void testConnector(APIConfiguration configuration) {
         }
 
+        public void addConnectorEventHandler(ConnectorReference connectorReference, ConnectorEventHandler handler){};
+
+        public void deleteConnectorEventHandler(ConnectorEventHandler handler){};
+
         /**
          * Create a new configuration object from the {@code configuration} parameter.
          * <p/>
@@ -169,8 +174,8 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
          * @return
          */
         @Override
-        public Map<String, Object> createSystemConfiguration(APIConfiguration configuration, boolean validate) {
-            return new HashMap<String, Object>();
+        public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate) {
+            return new JsonValue(new HashMap<String, Object>());
         }
     }
 

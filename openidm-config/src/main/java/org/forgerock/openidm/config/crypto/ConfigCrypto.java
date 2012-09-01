@@ -88,6 +88,7 @@ public class ConfigCrypto {
     private ConfigCrypto(BundleContext context, ProviderListener delayedHandler) {
         this.context = context;
         this.delayedHandler = delayedHandler;
+        this.delayedHandler.init(this);
         alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", "openidm-config-default");
         logger.info("Using keystore alias {} to handle config encryption", alias);
 

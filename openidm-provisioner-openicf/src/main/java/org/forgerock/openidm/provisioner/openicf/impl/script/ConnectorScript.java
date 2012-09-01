@@ -1,18 +1,18 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
- * Copyright © 2011 ForgeRock AS. All rights reserved.
- * 
+ *
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License). You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the License at
  * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at http://forgerock.org/license/CDDLv1.0.html
@@ -33,12 +33,14 @@ import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
 
 /**
  * Sample Class Doc
+ * <pre>
  * {
- * "_script-type" : "Boo|SHELL|Groovy",
- * "_script-expression" : "echo OPENIDM_attr1",
- * "_script-execute-mode" : "CONNECTOR|RESOURCE",
- * "attr1" : "Hello World!"
+ *  "_script-type" : "Boo|SHELL|Groovy",
+ *  "_script-expression" : "echo OPENIDM_attr1",
+ *  "_script-execute-mode" : "CONNECTOR|RESOURCE",
+ *  "attr1" : "Hello World!"
  * }
+ * </pre>
  *
  * @author $author$
  * @version $Revision$ $Date$
@@ -67,7 +69,7 @@ public class ConnectorScript {
 
     private void init(JsonValue params) {
         getScriptContextBuilder().setScriptLanguage(params.get(SCRIPT_TYPE).required().expect(String.class).asString());
-        if (getScriptContextBuilder().getScriptLanguage().equalsIgnoreCase("SHELL")) {
+        if (!getScriptContextBuilder().getScriptLanguage().equalsIgnoreCase("SHELL")) {
             getOperationOptionsBuilder().setOption("variablePrefix", "OPENIDM_");
         }
         getScriptContextBuilder().setScriptText(params.get(SCRIPT_EXPRESSION).required().expect(String.class).asString());

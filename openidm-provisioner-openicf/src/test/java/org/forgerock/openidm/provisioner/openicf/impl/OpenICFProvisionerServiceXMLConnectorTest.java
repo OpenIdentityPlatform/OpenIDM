@@ -76,7 +76,6 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         JsonValue status = new JsonValue(getService().getStatus());
         status.expect(Map.class).get("name").required().asString().equals("XML");
         assertThat(status.asMap()).as("OK MUST be true").includes(MapAssert.entry("ok", true));
-        assertThat(status.asMap()).includes(MapAssert.entry(ComponentConstants.COMPONENT_ID, 42));
     }
 
     @Test
