@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.metadata.impl;
 
+import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 
 import org.osgi.framework.BundleContext;
@@ -29,6 +30,14 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * @author aegloff
  */
 public interface ProviderListener {
+
+    /**
+     * Initialize the listener to make it ready to handle listener events
+     * @param configCrypto The configuration cryptography facility holding the 
+     * meta-data about encrypted properties
+     */
+    public void init(ConfigCrypto configCrypto);
+    
     /**
      * Notified when a provider was added
      * @param originId an identifier indicating where the meta data provider is coming from

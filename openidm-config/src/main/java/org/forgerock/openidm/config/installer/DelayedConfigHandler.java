@@ -46,6 +46,12 @@ public class DelayedConfigHandler implements ProviderListener {
     ConfigCrypto configCrypto;
     List<DelayedConfig> delayedConfigs = new ArrayList<DelayedConfig>();
     
+    /**
+     * {@inheritDoc}
+     */
+    public void init(ConfigCrypto configCrypto) {
+        this.configCrypto = configCrypto;
+    }
     
     /**
      * Add a configuration to the delayed pool

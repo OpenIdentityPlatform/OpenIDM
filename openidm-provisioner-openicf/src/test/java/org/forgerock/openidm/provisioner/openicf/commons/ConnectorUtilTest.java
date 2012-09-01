@@ -100,7 +100,7 @@ public class ConnectorUtilTest {
 
     //@Test
     public void testGetConfiguration() throws Exception {
-        Map<String, Object> target = new LinkedHashMap<String, Object>();
+        JsonValue target = new JsonValue(new LinkedHashMap<String, Object>());
         ConnectorUtil.createSystemConfigurationFromAPIConfiguration(runtimeAPIConfiguration, target);
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
         ConnectorUtil.configureDefaultAPIConfiguration(new JsonValue(target), clonedConfiguration);
@@ -116,7 +116,6 @@ public class ConnectorUtilTest {
         APIConfiguration clonedConfiguration = getRuntimeAPIConfiguration();
         ConnectorUtil.configureDefaultAPIConfiguration(jsonConfiguration, clonedConfiguration);
         Assert.assertFalse(clonedConfiguration.getResultsHandlerConfiguration().isEnableFilteredResultsHandler(), "\"enableFilteredResultsHandler\":false");
-        Assert.assertTrue(clonedConfiguration.getResultsHandlerConfiguration().isEnableCaseInsensitiveFilter(), "\"enableCaseInsensitiveFilter\":true");
     }
 
     @Test
@@ -124,7 +123,7 @@ public class ConnectorUtilTest {
         ConnectorFacade connectorFacade = getFacade();
         Schema schema = connectorFacade.schema();
         Assert.assertNotNull(schema);
-        Map<String, Object> schemaMAP = new LinkedHashMap<String, Object>(2);
+        JsonValue schemaMAP = new JsonValue(new LinkedHashMap<String, Object>(2));
         ConnectorUtil.setObjectAndOperationConfiguration(schema, schemaMAP);
         try {
             ObjectMapper mapper = new ObjectMapper();

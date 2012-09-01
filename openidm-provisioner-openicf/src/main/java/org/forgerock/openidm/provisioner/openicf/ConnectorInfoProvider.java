@@ -24,11 +24,12 @@
  */
 package org.forgerock.openidm.provisioner.openicf;
 
+import org.forgerock.json.fluent.JsonValue;
+import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Sample Class Doc
@@ -44,6 +45,19 @@ public interface ConnectorInfoProvider {
      * @return null if there is no {@link ConnectorInfo} available.
      */
     public ConnectorInfo findConnectorInfo(ConnectorReference connectorReference);
+
+    /**
+     * Adds a {@code ConnectorListener}
+     * @param connectorReference
+     * @param handler
+     */
+    public void addConnectorEventHandler(ConnectorReference connectorReference, ConnectorEventHandler handler);
+
+    /**
+     *
+     * @param handler
+     */
+    public void deleteConnectorEventHandler(ConnectorEventHandler handler);
 
     /**
      * Get all available {@link ConnectorInfo} from the local and the remote
@@ -69,5 +83,5 @@ public interface ConnectorInfoProvider {
      * @param validate
      * @return
      */
-    public Map<String, Object> createSystemConfiguration(APIConfiguration configuration, boolean validate);
+    public JsonValue createSystemConfiguration(APIConfiguration configuration, boolean validate);
 }

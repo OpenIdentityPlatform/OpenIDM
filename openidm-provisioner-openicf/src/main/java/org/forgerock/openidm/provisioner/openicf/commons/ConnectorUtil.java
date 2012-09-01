@@ -81,7 +81,6 @@ public class ConnectorUtil {
     private static final String OPENICF_RESULTSHANDLER_CONFIG_OPTION = "resultsHandlerConfig";
     private static final String OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER = "enableNormalizingResultsHandler";
     private static final String OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER = "enableFilteredResultsHandler";
-    private static final String OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER = "enableCaseInsensitiveFilter";
     private static final String OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER = "enableAttributesToGetSearchResultsHandler";
     private static final String OPENICF_OPERATION_TIMEOUT = "operationTimeout";
     public static final String OPENICF_CONFIGURATION_PROPERTIES = "configurationProperties";
@@ -280,9 +279,6 @@ public class ConnectorUtil {
         if (!source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).isNull()) {
             target.setEnableFilteredResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER).asBoolean());
         }
-        if (!source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).isNull()) {
-            target.setEnableCaseInsensitiveFilter(source.get(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER).asBoolean());
-        }
         if (!source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).isNull()) {
             target.setEnableAttributesToGetSearchResultsHandler(source.get(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER).asBoolean());
         }
@@ -299,7 +295,6 @@ public class ConnectorUtil {
         Map<String, Object> config = new LinkedHashMap<String, Object>(5);
         config.put(OPENICF_RESULTSHANDLER_ENABLENORMALIZINGRESULTSHANDLER, info.isEnableNormalizingResultsHandler());
         config.put(OPENICF_RESULTSHANDLER_ENABLEFILTEREDRESULTSHANDLER, info.isEnableFilteredResultsHandler());
-        config.put(OPENICF_RESULTSHANDLER_ENABLECASEINSENSITIVEFILTER, info.isEnableCaseInsensitiveFilter());
         config.put(OPENICF_RESULTSHANDLER_ENABLEATTRIBUTESTOGETSEARCHRESULTSHANDLER, info.isEnableAttributesToGetSearchResultsHandler());
         return config;
     }
@@ -455,7 +450,7 @@ public class ConnectorUtil {
         configureConfigurationProperties(configurationProperties, target.getConfigurationProperties());
     }
 
-    public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, Map<String, Object> target) {
+    public static void createSystemConfigurationFromAPIConfiguration(APIConfiguration source, JsonValue target) {
         target.put(OPENICF_POOL_CONFIG_OPTION, getObjectPoolConfiguration(source.getConnectorPoolConfiguration()));
         target.put(OPENICF_RESULTSHANDLER_CONFIG_OPTION, getResultsHandlerConfiguration(source.getResultsHandlerConfiguration()));
         target.put(OPENICF_OPERATION_TIMEOUT, getTimeout(source));
@@ -508,27 +503,22 @@ public class ConnectorUtil {
      * @return
      * @throws IllegalArgumentException if the configuration can not be read from {@code info}
      */
-    public static RemoteFrameworkConnectionInfo getRemoteFrameworkConnectionInfo(Map<String, Object> info) {
-        String _host = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_HOST), String.class);
-        int _port = 8759;
-        Object port = info.get(OPENICF_PORT);
-        if (null != port) {
-            _port = ConnectorUtil.coercedTypeCasting(port, int.class);
-        }
-        GuardedString _key = ConnectorUtil.coercedTypeCasting(info.get(OPENICF_KEY), GuardedString.class);
-        boolean _useSSL = false;
-        Object useSSL = info.get(OPENICF_USE_SSL);
-        if (null != useSSL) {
-            _useSSL = ConnectorUtil.coercedTypeCasting(useSSL, boolean.class);
-        }
-        //List<TrustManager> _trustManagers;
-        int _timeout = 0;
-        Object timeout = info.get(OPENICF_TIMEOUT);
-        if (null != timeout) {
-            _timeout = ConnectorUtil.coercedTypeCasting(timeout, int.class);
-        }
-        return new RemoteFrameworkConnectionInfo(_host, _port, _key, _useSSL, null, _timeout);
+    public static RemoteFrameworkConnectionInfo getRemoteFrameworkConnectionInfo(JsonValue info) {
+        String _host = info.get(OPENICF_HOST).required().asString();
 
+        JsonValue port = info.get(OPENICF_PORT).defaultTo(8759);
+        int _port = ConnectorUtil.coercedTypeCasting(port, int.class);
+
+        GuardedString _key = ConnectorUtil
+                .coercedTypeCasting(info.get(OPENICF_KEY).required(), GuardedString.class);
+        JsonValue useSSL = info.get(OPENICF_USE_SSL).defaultTo(Boolean.FALSE);
+        boolean _useSSL = ConnectorUtil.coercedTypeCasting(useSSL, boolean.class);
+
+        //List<TrustManager> _trustManagers;
+        JsonValue timeout = info.get(OPENICF_TIMEOUT).defaultTo(0);
+        int _timeout = ConnectorUtil.coercedTypeCasting(timeout, int.class);
+
+        return new RemoteFrameworkConnectionInfo(_host, _port, _key, _useSSL, null, _timeout);
     }
 
 
@@ -545,14 +535,13 @@ public class ConnectorUtil {
 
 
     public static ConnectorReference getConnectorReference(JsonValue configuration) throws JsonValueException {
-        JsonValue connectorRef = configuration.get(OPENICF_CONNECTOR_REF);
-        connectorRef.expect(Map.class);
+        JsonValue connectorRef = configuration.get(OPENICF_CONNECTOR_REF).required().expect(Map.class);
         ConnectorKey key = getConnectorKey(connectorRef);
         String connectorHost = connectorRef.get(OPENICF_CONNECTOR_HOST_REF).defaultTo(ConnectorReference.SINGLE_LOCAL_CONNECTOR_MANAGER).asString();
         return new ConnectorReference(key, connectorHost);
     }
 
-    public static void setConnectorReference(ConnectorReference source, Map<String, Object> target) {
+    public static void setConnectorReference(ConnectorReference source, JsonValue target) {
         Map<String, Object> connectorReference = getConnectorKey(source.getConnectorKey());
         connectorReference.put(OPENICF_CONNECTOR_HOST_REF, source.getConnectorHost());
         target.put(OPENICF_CONNECTOR_REF, connectorReference);
@@ -569,7 +558,7 @@ public class ConnectorUtil {
     }
 
 
-    public static void setObjectAndOperationConfiguration(Schema source, Map<String, Object> target) {
+    public static void setObjectAndOperationConfiguration(Schema source, JsonValue target) {
         Map<String, Object> objectTypes = new LinkedHashMap<String, Object>(source.getObjectClassInfo().size());
         for (ObjectClassInfo objectClassInfo : source.getObjectClassInfo()) {
             objectTypes.put(objectClassInfo.getType(), getObjectClassInfoMap(objectClassInfo));
@@ -797,6 +786,9 @@ public class ConnectorUtil {
     public static <T> T coercedTypeCasting(Object source, Class<T> clazz) throws IllegalArgumentException {
         if (null == clazz) {
             throw new IllegalArgumentException("Target Class can not be null");
+        }
+        if (source instanceof JsonValue) {
+            source = ((JsonValue)source).getObject();
         }
 
         Class<T> targetClazz = clazz;
