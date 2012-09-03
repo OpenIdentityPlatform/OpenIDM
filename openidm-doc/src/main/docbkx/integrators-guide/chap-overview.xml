@@ -169,12 +169,22 @@
 
        <para>A <firstterm>managed object</firstterm> is an object that
        represents the identity-related data managed by OpenIDM. Managed objects
-       are configurable, JSON-based data structures OpenIDM stores in its
-       pluggable repository. While the default configuration of managed objects
-       is that of a user, any object may be defined through
-       configuration.</para>
+       are configurable, JSON-based data structures that OpenIDM stores in its
+       pluggable repository. The default configuration of a managed object is 
+       that of a user, but you can define any kind of managed object, for 
+       example, groups or roles.</para>
+       <para>You can access managed objects over the REST interface with a query 
+       similar to the following:</para>
+       <screen>
+       $ curl
+         --header "X-OpenIDM-Username: openidm-admin"
+         --header "X-OpenIDM-Password: openidm-admin"
+         --request GET
+         "http://localhost:8080/openidm/managed/..."
+       </screen>
       </listitem>
      </varlistentry>
+     
      <varlistentry>
       <term>System Objects</term>
       <listitem>
@@ -184,10 +194,21 @@
        </indexterm>
 
        <para><firstterm>System objects</firstterm> are pluggable representations
-       of objects on external systems. They follow the same RESTful resource
-       based design principles as managed objects. There is a default
-       implementation for the OpenICF framework, which allows any connector
-       object to be represented as a system object.</para>
+       of objects on external systems. For example, a user entry that is stored 
+       in an external LDAP directory is represented as a system object in 
+       OpenIDM.</para>
+       <para>System objects follow the same RESTful resource-based design 
+       principles as managed objects. They can be accessed over the REST 
+       interface with a query similar to the following:</para>
+       <screen>
+       $ curl
+         --header "X-OpenIDM-Username: openidm-admin"
+         --header "X-OpenIDM-Password: openidm-admin"
+         --request GET
+         "http://localhost:8080/openidm/system/..."
+       </screen>
+       <para>There is a default implementation for the OpenICF framework, that 
+       allows any connector object to be represented as a system object.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
