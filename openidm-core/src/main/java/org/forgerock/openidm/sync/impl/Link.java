@@ -218,7 +218,7 @@ class Link {
     /**
      * Gets the link for a given object mapping source
      *
-     * @param sourceId the object mapping source system identifier
+     * @param targetId the object mapping target system identifier
      * @throws SynchronizationException if the query could not be performed.
      */
     void getLinkForTarget(String targetId) throws SynchronizationException {

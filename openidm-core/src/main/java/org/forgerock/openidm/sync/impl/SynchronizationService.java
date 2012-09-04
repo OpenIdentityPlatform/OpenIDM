@@ -99,7 +99,7 @@ public class SynchronizationService extends ObjectSetJsonResource
     }
 
     /** TODO: Description. */
-    private final static Logger LOGGER = LoggerFactory.getLogger(SynchronizationService.class);
+    private final static Logger logger = LoggerFactory.getLogger(SynchronizationService.class);
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private final ArrayList<ObjectMapping> mappings = new ArrayList<ObjectMapping>();
@@ -256,20 +256,21 @@ public class SynchronizationService extends ObjectSetJsonResource
     @Deprecated
     private String reconcile(JsonValue mapping) throws SynchronizationException {
         JsonValue context = ObjectSetContext.get();
-        String reconId = context.get("uuid").asString();
+        //String reconId = context.get("uuid").asString();
+        ReconciliationContext reconContext = new ReconciliationContext(context); // TODO: track, expose, manage instances
         if (mapping.isString()) {
-            getMapping(mapping.asString()).recon(reconId); // throws SynchronizationException
+            getMapping(mapping.asString()).recon(reconContext); // throws SynchronizationException
         } else if (mapping.isMap()) {
 // FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB 
             ObjectMapping schedulerMapping = new ObjectMapping(this, mapping);
             List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
             augmentedMappings.add(schedulerMapping);
             schedulerMapping.initRelationships(this, augmentedMappings);
-            schedulerMapping.recon(reconId);
+            schedulerMapping.recon(reconContext);
         } else {
             throw new SynchronizationException("Unknown mapping type");
         }
-        return reconId;
+        return reconContext.getReconId();
     }
 
     /**
@@ -321,28 +322,28 @@ public class SynchronizationService extends ObjectSetJsonResource
             switch (action) {
                 case onCreate:
                     id = _params.get("id").required().asString();
-                    LOGGER.debug("Synchronization _action=onCreate, id={}", id);
+                    logger.debug("Synchronization _action=onCreate, id={}", id);
                     onCreate(id, _params.get("_entity").expect(Map.class));
                     break;
                 case onUpdate:
                     id = _params.get("id").required().asString();
-                    LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
+                    logger.debug("Synchronization _action=onUpdate, id={}", id);
                     onUpdate(id, null, _params.get("_entity").expect(Map.class));
                     break;
                 case onDelete:
                     id = _params.get("id").required().asString();
-                    LOGGER.debug("Synchronization _action=onUpdate, id={}", id);
+                    logger.debug("Synchronization _action=onUpdate, id={}", id);
                     onDelete(id);
                     break;
                 case recon:
                     result = new HashMap<String, Object>();
                     JsonValue mapping = _params.get("mapping").required();
-                    LOGGER.debug("Synchronization _action=recon, mapping={}", mapping);
+                    logger.debug("Synchronization _action=recon, mapping={}", mapping);
                     result.put("reconId", reconcile(mapping));
 // TODO: Make asynchronous, and provide polling mechanism for reconciliation status.
                     break;
                 case performAction:
-                    LOGGER.debug("Synchronization _action=performAction, params={}", _params);
+                    logger.debug("Synchronization _action=performAction, params={}", _params);
                     performAction(_params);
                     result = new HashMap<String, Object>();
                     //result.put("status", performAction(_params));
