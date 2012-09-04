@@ -103,7 +103,7 @@ class Policy {
      * @return TODO.
      * @throws SynchronizationException TODO.
      */
-    public Action getAction(JsonValue source, JsonValue target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
+    public Action getAction(LazyObjectAccessor source, LazyObjectAccessor target, final ObjectMapping.SyncOperation syncOperation) throws SynchronizationException {
         Action result = null;
         if (action != null) { // static action specified
             result = action;
@@ -143,7 +143,7 @@ class Policy {
         return result;
     }
 
-    public void evaluatePostAction(JsonValue source, JsonValue target, Action action, boolean sourceAction) throws SynchronizationException {
+    public void evaluatePostAction(LazyObjectAccessor source, LazyObjectAccessor target, Action action, boolean sourceAction) throws SynchronizationException {
         if (postAction != null) {
             Map<String, Object> scope = service.newScope();
             scope.put("sourceAction", sourceAction);
