@@ -158,13 +158,14 @@
 
   <programlisting language="javascript">
 {
-  "name"          : "testServer",
-  "host"          : "127.0.0.1",
-  "port"          : 8759,
-  "useSSL"        : false,
-  "timeout"       : 0,
-  "key"           : "Passw0rd",
-  "trustManagers" :
+  "name"               : "testServer",
+  "host"               : "127.0.0.1",
+  "port"               : 8759,
+  "heartbeatInterval"  : 60,
+  "useSSL"             : false,
+  "timeout"            : 0,
+  "key"                : "changeit",
+  "trustManagers"      :
     [
        "X509TrustManager",
        "BlindTrustManager"
@@ -196,6 +197,16 @@
      Remote port to connect to. Default value: 8759</para>
    </listitem>
   </varlistentry>
+  <varlistentry>
+   <term>heartbeatInterval</term>
+   <listitem>
+    <para>integer, optional</para>
+    <para>Specifies the interval, in seconds, at which heartbeat packets are 
+    transmitted. If the connector server is unreachable, based on this heartbeat 
+    interval, all services that use the connector server are made unavailable 
+    until the connector server can be reached again. Default value: 60</para>
+   </listitem>
+  </varlistentry>  
   <varlistentry>
    <term>useSSL</term>
    <listitem>
