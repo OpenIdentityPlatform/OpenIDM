@@ -141,6 +141,13 @@ class ObjectMapping implements SynchronizationListener {
      * false indicates links should be retrieved individually as they are needed.
      */
     private Boolean prefetchLinks;
+    
+    /** 
+     * Whether when at the outset of correlation the target set is empty (query all ids returns empty),
+     * it should try to correlate source entries to target when necessary.
+     * Default to {@code FALSE} 
+     */
+    private Boolean correlateEmptyTargetSet;
 
     /** TODO: Description. */
     private SynchronizationService service;
@@ -183,6 +190,7 @@ class ObjectMapping implements SynchronizationListener {
         onUnlinkScript = Scripts.newInstance("ObjectMapping", config.get("onUnlink"));
         resultScript = Scripts.newInstance("ObjectMapping", config.get("result"));
         prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
+        correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         
         LOGGER.debug("Instantiated {}", name);
     }
@@ -1412,7 +1420,7 @@ class ObjectMapping implements SynchronizationListener {
             if (hasTargetObject()) {
                 result = new JsonValue(new ArrayList<Map<String, Object>>(1));
                 result.add(0, getTargetObject());
-            } else if (correlationQuery != null && !hadEmptyTargetObjectSet()) {
+            } else if (correlationQuery != null && (correlateEmptyTargetSet || !hadEmptyTargetObjectSet())) {
                 EventEntry measure = Publisher.start(EVENT_CORRELATE_TARGET, getSourceObject(), null);
                 
                 Map<String, Object> queryScope = service.newScope();
