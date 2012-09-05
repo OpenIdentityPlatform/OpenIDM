@@ -103,46 +103,43 @@
 <section xml:id="setting-up-local-integration">
   <title>Setting Up Local Integration</title>
 
-  <para>The embedded workflow and business process engine is currently
-  provided as part of a separate, experimental download, the OpenIDM
-  <?eval ${project.version}?> Experimental Nightly build, available
-  from the <link xlink:href="http://www.forgerock.org/openidm.html"
-  xlink:show="new">download page</link>.</para>
-  
-  <para>Contact ForgeRock at <link xlink:href="mailto:info@forgerock.com"
-  >info@forgerock.com</link> for details on support for the experimental
-  embedded workflow and business process engine.</para>
+  <para>The embedded workflow and business process engine is provided as part 
+  of the standard OpenIDM build.</para>
 
-  <para>You install the experimental download in the same way as the standard 
-  OpenIDM build. See the <link xlink:href="install-guide#chap-install"
+  <para>Install the OpenIDM build, as described in the 
+  <link xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
-  Guide</citetitle></link> for instructions. After starting OpenIDM, run
-  the <command>scr list</command> command at the console, and check that the 
-  bundle is active.</para>
+  Guide</citetitle></link>. Start OpenIDM, and run the 
+  <command>scr list</command> command at the console to check that the 
+  workflow bundle is active.</para>
 
   <screen>-&gt; scr list
 ...
 [  14] [active       ] org.forgerock.openidm.workflow
 ...</screen>
   
-  <para>The experimental OpenIDM build contains the local Activiti integration 
-  by default. When you have unzipped and started OpenIDM, you can verify the 
-  the integration by using the REST API. The following REST call lists the 
-  defined workflows:</para>
+  <para>You can verify the workflow integration by using the REST API. The 
+  following REST call lists the defined workflows:</para>
+  
   <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" --header 
   "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/workflow"
-  {"osgiProcess:1:3":{"name":"Osgi process","key":"osgiProcess"}}
   </screen>
   <para>By default there is one sample workflow definition (named 
   <literal>osgiProcess</literal>) in the embedded Activiti instance. The 
-  <literal>osgiProcess</literal> definition calls OpenIDM, queries the available 
-  workflow definitions from Activiti, and then prints the list of workflow 
-  definitions to the OpenIDM logs. If you invoke the <literal>osgiProcess</literal> 
+  result of the preceding REST call is therefore something like:</para>
+  
+  <screen>
+  {"osgiProcess:1:3":{"name":"Osgi process","key":"osgiProcess"}}
+  </screen>
+  
+  <para>The <literal>osgiProcess</literal> definition calls OpenIDM, queries 
+  the available workflow definitions from Activiti, then prints the list of workflow 
+  definitions to the OpenIDM logs. Invoke the <literal>osgiProcess</literal> 
   workflow with the following REST call to OpenIDM:</para>
   <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" --header 
   "X-OpenIDM-Password: openidm-admin" --request POST 
   "http://localhost:8080/openidm/workflow?_action=osgiProcess"</screen>
-  <para>the workflow prints the list of workflow definitions to the OpenIDM 
+  <para>The workflow prints the list of workflow definitions to the OpenIDM 
   console. With the default sample, you should see something like this on the 
   console:</para>
   <screen>
@@ -153,7 +150,7 @@
    <section xml:id="openidm-activity-limitations">
     <title>Known Issues &amp; Limitations</title>
     <itemizedlist>
-     <para>The following issues and limitations exist for the experimental 
+     <para>The following issues and limitations exist for the  
      embedded workflow and business process engine.</para>
      <listitem>
      <para>OpenIDM does not include a form generator, making it difficult to
@@ -170,12 +167,271 @@
  <section xml:id="setting-up-remote-integration">
   <title>Setting Up Remote Integration</title>
   <para>Currently, to set up remote integration with Activiti, you must build 
-  OpenIDM from source, with the Activiti profile.</para>
-  <!-- TO DO - need to add this section to the wiki before including the link 
-  here:
-  <para>For more information, see the 
-  <link xlink:href="https://wikis.forgerock.org/confluence/display/openidm/Home" 
-  xlink:show="new">OpenIDM wiki</link>. </para> --> 
+  OpenIDM from source as described in the following steps.</para>
+  
+  <orderedlist>
+   <listitem>
+    <para>Download </para>
+   </listitem>
+   <listitem>
+    <para>Build OpenIDM from the source files, as described in <link
+  xlink:href="https://wikis.forgerock.org/confluence/display/openidm/OpenIDM+2.0+-+Howto+build+OpenIDM+from+source"
+  xlink:show="new">How to Build OpenIDM From Source</link>.</para>
+    <para>After this build process, you should have the following files:</para>
+    <screen>
+     /build-path/trunk/openidm-zip/target/openidm-2.1.0-SNAPSHOT.zip
+     /build-path/trunk/openidm-workflow-activiti/target/openidm-workflow-activiti-2.1.0-SNAPSHOT-jar-with-dependencies.jar
+     /build-path/trunk/openidm-workflow-remote/target/openidm-workflow-remote-2.1.0-SNAPSHOT.war
+    </screen>
+   </listitem>
+   <listitem>
+    <para>Unpack the contents of the OpenIDM .zip file into the install location.</para>
+    <screen>$ cd /path/to
+    $ unzip /build-path/trunk/openidm-zip/target/openidm-2.1.0-SNAPSHOT.zip</screen>
+   </listitem>
+   <!-- If I start up the OpenIDM instance that I built (with the profiles, as in step 1), it doesn't actually have the workflow listed with scr list. Did I miss a step here? -->
+   <listitem>
+    <para>Download and unzip the Activiti zip file 
+    (<filename>activiti-5.10.zip</filename>) from http://activiti.org/download.html.</para>
+   </listitem>
+   <listitem>
+    <para>Edit the Activiti configuration file to avoid a port conflict with 
+    OpenIDM. OpenIDM runs on port 8080 by default. Edit the file so that 
+    Activiti Explorer runs on port 9090 (by replacing each instance of 8080 
+    with 9090).
+    </para>
+    <screen>
+    $ cd /<replaceable>path/to/activiti</replaceable>/setup/
+    $ vi build.xml
+    ...
+    </screen>
+    <note><para>There is currently a bug in the Activiti demo which might mean 
+    that all port replacements are not made. If you cannot access Activiti 
+    Explorer (in the next step) after making this change, <emphasis>also</emphasis> 
+    edit the following file to find and replace each instance of 8080 with 9090: 
+    <filename>/path/to/activiti/apps/apache-tomcat-6.0.32/conf/server.xml</filename>.
+    </para></note>
+   </listitem>
+   <listitem>
+    <para>Set up the default Activiti demo.</para>
+    <screen>
+    $ cd /<replaceable>path/to/activiti</replaceable>/setup/
+    $ ant start.demo
+    </screen>
+   </listitem>
+   <listitem>
+    <para>In a browser, check that Activiti Explorer is running 
+    (on localhost:9090/activiti-explorer). Login with the default userid 
+    <literal>kermit</literal> and password <literal>kermit</literal>. If all 
+    is well, log out.
+    </para>
+   </listitem>
+   <listitem>
+    <para>Configure Tomcat to operate with OpenIDM.</para>
+    <orderedlist>
+     <listitem>
+      <para>Stop Tomcat.</para>
+      <screen>
+      $ <replaceable>/path/to/activiti</replaceable>/setup/
+      $ ant tomcat.stop 
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Copy the OpenIDM remote workflow WAR file to the Tomcat webapps 
+      folder.</para>
+      <screen>
+      $ cp /<replaceable>build-path</replaceable>/trunk/openidm-workflow-remote/
+      target/openidm-workflow-remote-2.1.0-SNAPSHOT.war 
+      /<replaceable>path/to/activiti</replaceable>/apps/apache-tomcat-6.0.32/webapps/
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Copy the OpenIDM workflow Activiti demo jar file to the Tomcat 
+      Activiti Explorer library.</para>
+      <screen>
+      $ cp /<replaceable>build-path</replaceable>/trunk/openidm-workflow-activiti/
+      target/openidm-workflow-activiti-2.1.0-SNAPSHOT-jar-with-dependencies.jar 
+      /<replaceable>path/to/activiti</replaceable>/apps/apache-tomcat-6.0.32/
+      webapps/activiti-explorer/WEB-INF/lib/
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Edit the Activiti Explorer configuration file to be able to use the 
+      OpenIDM extensions.</para>
+      <screen>
+      $ vi /<replaceable>path/to/activiti</replaceable>/apps/apache-tomcat-6.0.32/
+      webapps/activiti-explorer/WEB-INF/applicationContext.xml
+      </screen>
+      <para>Replace the <literal>processEngineConfiguration</literal> with the 
+      OpenIDM extended configuration. So remove this section:
+      </para>
+      <programlisting language="xml">
+       &lt;bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"&gt;
+        &lt;property name="dataSource" ref="dataSource" /&gt;
+        &lt;property name="transactionManager" ref="transactionManager" /&gt;
+        &lt;property name="databaseSchemaUpdate" value="true" /&gt;
+        &lt;property name="jobExecutorActivate" value="true" /&gt;
+        &lt;property name="customFormTypes"&gt;
+         &lt;list&gt;
+          &lt;ref bean="userFormType"/&gt;
+         &lt;/list&gt;
+        &lt;/property&gt;
+       &lt;/bean&gt;
+      </programlisting>
+      <para>and replace it with this:</para>
+      <programlisting>
+      &lt;bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration"&gt;
+       &lt;property name="dataSource" ref="dataSource" /&gt;
+       &lt;property name="transactionManager" ref="transactionManager" /&gt;
+       &lt;property name="databaseSchemaUpdate" value="true" /&gt;
+       &lt;property name="jobExecutorActivate" value="true" /&gt;
+       &lt;property name="customFormTypes"&gt;
+         &lt;list&gt;
+          &lt;ref bean="userFormType"/&gt;
+         &lt;/list&gt;
+        &lt;/property&gt;
+      &lt;property name="customSessionFactories"&gt;
+        &lt;list&gt;
+          &lt;bean class="org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory"&gt;
+            &lt;property name="url" value="http://localhost:8080/openidm/"/&gt;
+            &lt;property name="user" value="openidm-admin"/&gt;
+            &lt;property name="password" value="openidm-admin"/&gt;
+          &lt;/bean&gt;
+        &lt;/list&gt;
+      &lt;/property&gt;
+      &lt;property name="resolverFactories"&gt;
+        &lt;list&gt;
+          &lt;bean class="org.forgerock.openidm.workflow.activiti.impl.OpenIDMResolverFactory"&gt;&lt;/bean&gt;
+          &lt;bean class="org.activiti.engine.impl.scripting.VariableScopeResolverFactory"&gt;&lt;/bean&gt;
+          &lt;bean class="org.activiti.engine.impl.scripting.BeansResolverFactory"&gt;&lt;/bean&gt;
+        &lt;/list&gt;
+      &lt;/property&gt;
+      &lt;property name="expressionManager"&gt;
+        &lt;bean class="org.forgerock.openidm.workflow.activiti.impl.OpenIDMExpressionManager"&gt; &lt;/bean&gt;
+      &lt;/property&gt;
+     &lt;/bean&gt;
+      </programlisting>
+     </listitem>
+     <listitem>
+     <para>Restart Tomcat.</para>
+     <screen>
+     $ cd /<replaceable>path/to/activiti</replaceable>/setup/
+     $ ant tomcat.start 
+     </screen>
+     </listitem>
+     <listitem>
+      <para>Check that Activiti Explorer is running on 
+      localhost:9090/activiti-explorer, as you did in the previous section.
+      </para>
+     </listitem>
+    </orderedlist> 
+   </listitem>
+   <listitem>
+    <para>Configure OpenIDM to use the remote Activiti engine instead of the 
+    local, bundled Activiti engine.</para>
+    <orderedlist>
+     <listitem>
+      <para>Copy the <filename>workflow.json</filename> configuration file to 
+      the OpenIDM configuration directory.</para>
+      <screen>
+      $ cd /<replaceable>path/to/openidm/</replaceable>
+      $ cp samples/misc/workflow.json conf/
+      </screen>
+     </listitem>
+     <listitem>
+      <para>Edit the workflow configuration file to specify the remote Activiti 
+      engine.</para>
+      <screen>
+      $ vi conf/workflow.json
+      </screen>
+      <para>Ensure that the url, username, and password fields contain the values 
+      that correspond to your remote Activiti engine.</para>
+      <programlisting language="javascript">
+      {
+       "location"  : "remote",
+       "engine"    : {
+        "url"      : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
+        "username" : "kermit",
+        "password" : "kermit"
+       },
+      </programlisting>
+     </listitem>
+    </orderedlist>
+   </listitem>
+   <listitem>
+   <para>Start up OpenIDM.</para>
+   <screen>
+   $ cd /<replaceable>path/to/openidm/</replaceable>
+   $ ./startup.sh
+   </screen>
+   </listitem>
+   <listitem>
+    <para>Test the integration by sending the following CURL request to list 
+    the available workflows:</para>
+    <screen>
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header 
+    "X-OpenIDM-Password: openidm-admin" --request GET 
+    "http://localhost:8080/openidm/workflow"
+    </screen>
+   </listitem>
+   <listitem>
+    <para>Log in to the Activiti Explorer of the remote Activiti engine (with 
+    the default username (kermit) and password (kermit).
+    </para>
+   </listitem>
+   <listitem>
+    <para>Install the sample workflow (<filename>example.bpmn20.xml</filename>) 
+    from the openidm-workflow-activiti project.</para>
+    <orderedlist>
+     <listitem>
+      <para>In Activiti Explorer, click Manage.</para>
+     </listitem>
+     <listitem>
+      <para>From the Deployments menu, select Upload New.</para>
+     </listitem>
+     <listitem>
+      <para>Navigate to the sample workflow (<filename>/<replaceable>build-path
+      </replaceable>/trunk/openidm-workflow-activiti/openidm-workflow-activiti/
+      src/main/resources/OSGI-INF/activiti/example.bpmn20.xml)</filename></para>
+     </listitem>
+    </orderedlist>
+   </listitem>
+   <listitem>
+    <para>Verify the integration by sending the following CURL request:</para>
+    <screen>
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header 
+    "X-OpenIDM-Password: openidm-admin" --request POST 
+    "http://localhost:8080/openidm/workflow?_action=osgiProcess"
+    </screen>
+    <para>The request should return a process ID, similar to the following:</para>
+    <screen>
+    {"id":"301","processInstanceId":"301","status":"ended","businessKey":null,"processDefinitionId":"osgiProcess:1:3"}
+    </screen>
+    <para>This request starts the osgiProcess and writes the list of installed 
+    workflows to the Tomcat server log file (
+    <filename>/path/to/activiti/apps/apache-tomcat-6.0.32/logs/catalina.out</filename>).
+    </para>
+    <!-- This curl request didn't actually result in the list of installed workflows 
+    being written to catalina.out in my test -->
+   </listitem>
+   <listitem>
+    <para>Test the integration with Activiti Explorer.</para>
+    <orderedlist>
+     <listitem>
+      <para>Click Processes and select Osgi Process from the list of process 
+      definitions.</para>
+     </listitem>
+     <listitem>
+      <para>Click Start Process.</para>
+     </listitem>
+     <listitem>
+      <para>Check the output in the Tomcat server log file (
+    <filename>/path/to/activiti/apps/apache-tomcat-6.0.32/logs/catalina.out</filename>. 
+    The list of installed workflows is written to the log file.</para>
+     </listitem>
+    </orderedlist>
+   </listitem>
+  </orderedlist>
  </section>
  </section>
 
@@ -183,15 +439,34 @@
   <title>Configuring the Activiti Engine</title>
 
   <para>Whether you use the embedded Activiti engine, or a remote Activiti 
-  engine, you configure the OpenIDM Activiti module in a file named <literal>
-  workflow.json</literal>. In the default build, a sample of this file is 
-  provided in <literal>/path/to/openidm/samples/misc</literal>. To use the 
-  Activiti module, you must edit this file as required, and then copy the file 
-  to the <literal>/path/to/openidm/conf</literal> directory.</para>
+  engine, you configure the OpenIDM Activiti module in a file named 
+  <filename><replaceable>/path/to/openidm</replaceable>/conf/workflow.json
+  </filename>. If this file is absent from the configuration, the workflow 
+  module is unavailable for use. In the default OpenIDM installation, the 
+  <filename>workflow.json</filename> file assumes an embedded Activiti engine, 
+  and has the following configuration</para>
+  
+  <programlisting language="javascript">
+  {
+    "enabled"  : "true",
+    "location" : "embedded",
+    },
+  </programlisting>
+  
+  <para>You can disable the workflow module by setting the "enabled" property 
+  in this file to "false".</para>
+  
+  <para>A sample <filename>workflow.json</filename> file, with all configurable 
+  properties, is provided in <literal>/path/to/openidm/samples/misc</literal>. 
+  To configure an Activiti engine beyond the default configuration that is 
+  provided, edit this file as required and copy it to the 
+  <literal>/path/to/openidm/conf</literal> directory.</para>
+  
   <para>The sample <literal>workflow.json</literal> file contains the following 
   configuration:</para>
   <programlisting language="javascript">
   {
+    "enabled"  : "true",
     "location" : "remote",
     "engine" : {
         "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
@@ -209,6 +484,11 @@
 }
   </programlisting>
   <itemizedlist><para>These fields have the following meaning:</para>
+   <listitem>
+    <para><literal>enabled</literal>. Indicates whether the Activiti module is 
+    enabled for use. Possible values are <literal>true</literal> or 
+    <literal>false</literal>. The default value is <literal>true</literal>.</para>
+   </listitem>
    <listitem><para><literal>location</literal>. Indicates whether the Activiti 
    engine is embedded with OpenIDM, or remote. Possible values are 
    <literal>embedded</literal> or <literal>remote</literal>. If 
