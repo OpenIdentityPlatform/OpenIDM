@@ -53,6 +53,7 @@ import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
@@ -69,7 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.OPTIONAL)
+@Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Workflow Service"),
@@ -95,6 +96,7 @@ public class ActivitiServiceImpl implements JsonResource {
     public final static String PID = "org.forgerock.openidm.workflow";
     public final static String ROUTER_PREFIX = "workflow";
     // Keys in the JSON configuration
+    public static final String CONFIG_ENABLED = "enabled";
     public static final String CONFIG_LOCATION = "location";
     public static final String CONFIG_ENGINE = "engine";
     public static final String CONFIG_ENGINE_URL = "engine/url";
@@ -136,6 +138,7 @@ public class ActivitiServiceImpl implements JsonResource {
     private Configuration barInstallerConfiguration;
     private JsonResource activitiResource;
     //Configuration variables
+    private boolean enabled;
     private EngineLocation location = EngineLocation.embedded;
     private String url;
     private String username;
@@ -157,124 +160,126 @@ public class ActivitiServiceImpl implements JsonResource {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         try {
             readConfiguration(compContext);
-            switch (location) {
-                case embedded: //start our embedded ProcessEngine
-                    try {
-                        // Data Source configuration
-                        if (jndiName != null && jndiName.trim().length() > 0) {
-                            // Get DB connection via JNDI
-                            logger.info("Using DB connection configured via Driver Manager");
-                            InitialContext ctx = null;
-                            try {
-                                ctx = new InitialContext();
-                            } catch (NamingException ex) {
-                                logger.warn("Getting JNDI initial context failed: " + ex.getMessage(), ex);
-                            }
-                            if (ctx == null) {
-                                throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. "
-                                        + " Use embedded OpenIDM repository instead.");
-                            }
-                            dataSource = (DataSource) ctx.lookup(jndiName);
-                        }
-                    } catch (RuntimeException ex) {
-                        logger.warn("Configuration invalid, can not start JDBC repository.", ex);
-                        throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
-                    } catch (NamingException ex) {
-                        throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
-                    }
-
-                    //we need a TransactionManager to use this
-                    JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
-
-                    if (null == dataSource) {
-                        //initialise the default h2 DataSource
-                        JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
-                        File root = IdentityServer.getFileForPath("db/activiti/database");
-                        jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_DELAY=1000");
-                        jdbcDataSource.setUser("sa");
-                        configuration.setDatabaseType("h2");
-                        configuration.setDataSource(jdbcDataSource);
-                    } else {
-                        configuration.setDataSource(dataSource);
-                        configuration.setIdentityService(identityService);
-                    }
-
-                    configuration.setTransactionManager(transactionManager);
-                    configuration.setDatabaseSchemaUpdate("true");
-
-                    List<SessionFactory> customSessionFactories = configuration.getCustomSessionFactories();
-                    if (customSessionFactories == null) {
-                        customSessionFactories = new ArrayList<SessionFactory>();
-                    }
-                    customSessionFactories.add(idmSessionFactory);
-                    configuration.setCustomSessionFactories(customSessionFactories);
-                    configuration.setExpressionManager(new OpenIDMExpressionManager());
-
-                    configuration.setMailServerHost(mailhost);
-                    configuration.setMailServerPort(mailport);
-                    configuration.setMailServerUseTLS(starttls);
-                    if (mailusername != null) {
-                        configuration.setMailServerUsername(mailusername);
-                    }
-                    if (mailpassword != null) {
-                        configuration.setMailServerPassword(mailpassword);
-                    }
-
-                    if (historyLevel != null) {
-                        configuration.setHistory(historyLevel);
-                    }
-                    
-                    //needed for async workflows
-                    configuration.setJobExecutorActivate(true);
-
-                    processEngineFactory = new ProcessEngineFactory();
-                    processEngineFactory.setProcessEngineConfiguration(configuration);
-                    processEngineFactory.setBundle(compContext.getBundleContext().getBundle());
-                    processEngineFactory.init();
-
-                    //ScriptResolverFactory
-                    List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
-                    resolverFactories.add(new OpenIDMResolverFactory());
-                    configuration.setResolverFactories(resolverFactories);
-
-                    //We are done!!
-                    processEngine = processEngineFactory.getObject();
-                    //We need to register the service because the Activiti-OSGi need this to deploy new BAR or BPMN
-                    Hashtable<String, String> prop = new Hashtable<String, String>();
-                    prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.workflow.activiti.engine");
-                    prop.put("openidm.activiti.engine", "true");
-                    compContext.getBundleContext().registerService(ProcessEngine.class.getName(), processEngine, prop);
-
-                    if (null != configurationAdmin) {
+            if (enabled) {
+                switch (location) {
+                    case embedded: //start our embedded ProcessEngine
                         try {
-                            barInstallerConfiguration = configurationAdmin.createFactoryConfiguration("org.apache.felix.fileinstall", null);
-                            Dictionary props = barInstallerConfiguration.getProperties();
-                            if (props == null) {
-                                props = new Hashtable();
+                            // Data Source configuration
+                            if (jndiName != null && jndiName.trim().length() > 0) {
+                                // Get DB connection via JNDI
+                                logger.info("Using DB connection configured via Driver Manager");
+                                InitialContext ctx = null;
+                                try {
+                                    ctx = new InitialContext();
+                                } catch (NamingException ex) {
+                                    logger.warn("Getting JNDI initial context failed: " + ex.getMessage(), ex);
+                                }
+                                if (ctx == null) {
+                                    throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. "
+                                            + " Use embedded OpenIDM repository instead.");
+                                }
+                                dataSource = (DataSource) ctx.lookup(jndiName);
                             }
-                            props.put("felix.fileinstall.poll", "2000");
-                            props.put("felix.fileinstall.noInitialDelay", "true");
-                            //TODO java.net.URLDecoder.decode(IdentityServer.getFileForPath("workflow").getAbsolutePath(),"UTF-8")
-                            props.put("felix.fileinstall.dir", IdentityServer.getFileForPath("workflow").getAbsolutePath());
-                            props.put("felix.fileinstall.filter", ".*\\.bar");
-                            props.put("felix.fileinstall.bundles.new.start", "true");
-                            props.put("config.factory-pid", "activiti");
-                            barInstallerConfiguration.update(props);
-                        } catch (IOException ex) {
-                            java.util.logging.Logger.getLogger(ActivitiServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (RuntimeException ex) {
+                            logger.warn("Configuration invalid, can not start JDBC repository.", ex);
+                            throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
+                        } catch (NamingException ex) {
+                            throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
                         }
-                    }
-                    activitiResource = new ActivitiResource(processEngine);
-                    logger.debug("Activiti ProcessEngine is enabled");
-                    break;
-                case local: //ProcessEngine is connected by @Reference
-                    activitiResource = new ActivitiResource(processEngine);
-                    break;
-                case remote: //fetch remote connection parameters
-                    activitiResource = new HttpRemoteJsonResource(url, username, password);
-                    break;
-                default:
-                    throw new InvalidException(CONFIG_LOCATION + " invalid, can not start workflow service.");
+
+                        //we need a TransactionManager to use this
+                        JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
+
+                        if (null == dataSource) {
+                            //initialise the default h2 DataSource
+                            JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
+                            File root = IdentityServer.getFileForPath("db/activiti/database");
+                            jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_DELAY=1000");
+                            jdbcDataSource.setUser("sa");
+                            configuration.setDatabaseType("h2");
+                            configuration.setDataSource(jdbcDataSource);
+                        } else {
+                            configuration.setDataSource(dataSource);
+                            configuration.setIdentityService(identityService);
+                        }
+
+                        configuration.setTransactionManager(transactionManager);
+                        configuration.setDatabaseSchemaUpdate("true");
+
+                        List<SessionFactory> customSessionFactories = configuration.getCustomSessionFactories();
+                        if (customSessionFactories == null) {
+                            customSessionFactories = new ArrayList<SessionFactory>();
+                        }
+                        customSessionFactories.add(idmSessionFactory);
+                        configuration.setCustomSessionFactories(customSessionFactories);
+                        configuration.setExpressionManager(new OpenIDMExpressionManager());
+
+                        configuration.setMailServerHost(mailhost);
+                        configuration.setMailServerPort(mailport);
+                        configuration.setMailServerUseTLS(starttls);
+                        if (mailusername != null) {
+                            configuration.setMailServerUsername(mailusername);
+                        }
+                        if (mailpassword != null) {
+                            configuration.setMailServerPassword(mailpassword);
+                        }
+
+                        if (historyLevel != null) {
+                            configuration.setHistory(historyLevel);
+                        }
+
+                        //needed for async workflows
+                        configuration.setJobExecutorActivate(true);
+
+                        processEngineFactory = new ProcessEngineFactory();
+                        processEngineFactory.setProcessEngineConfiguration(configuration);
+                        processEngineFactory.setBundle(compContext.getBundleContext().getBundle());
+                        processEngineFactory.init();
+
+                        //ScriptResolverFactory
+                        List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
+                        resolverFactories.add(new OpenIDMResolverFactory());
+                        configuration.setResolverFactories(resolverFactories);
+
+                        //We are done!!
+                        processEngine = processEngineFactory.getObject();
+                        //We need to register the service because the Activiti-OSGi need this to deploy new BAR or BPMN
+                        Hashtable<String, String> prop = new Hashtable<String, String>();
+                        prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.workflow.activiti.engine");
+                        prop.put("openidm.activiti.engine", "true");
+                        compContext.getBundleContext().registerService(ProcessEngine.class.getName(), processEngine, prop);
+
+                        if (null != configurationAdmin) {
+                            try {
+                                barInstallerConfiguration = configurationAdmin.createFactoryConfiguration("org.apache.felix.fileinstall", null);
+                                Dictionary props = barInstallerConfiguration.getProperties();
+                                if (props == null) {
+                                    props = new Hashtable();
+                                }
+                                props.put("felix.fileinstall.poll", "2000");
+                                props.put("felix.fileinstall.noInitialDelay", "true");
+                                //TODO java.net.URLDecoder.decode(IdentityServer.getFileForPath("workflow").getAbsolutePath(),"UTF-8")
+                                props.put("felix.fileinstall.dir", IdentityServer.getFileForPath("workflow").getAbsolutePath());
+                                props.put("felix.fileinstall.filter", ".*\\.bar");
+                                props.put("felix.fileinstall.bundles.new.start", "true");
+                                props.put("config.factory-pid", "activiti");
+                                barInstallerConfiguration.update(props);
+                            } catch (IOException ex) {
+                                java.util.logging.Logger.getLogger(ActivitiServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        activitiResource = new ActivitiResource(processEngine);
+                        logger.debug("Activiti ProcessEngine is enabled");
+                        break;
+                    case local: //ProcessEngine is connected by @Reference
+                        activitiResource = new ActivitiResource(processEngine);
+                        break;
+                    case remote: //fetch remote connection parameters
+                        activitiResource = new HttpRemoteJsonResource(url, username, password);
+                        break;
+                    default:
+                        throw new InvalidException(CONFIG_LOCATION + " invalid, can not start workflow service.");
+                }
             }
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start Activiti ProcessEngine service.", ex);
@@ -315,7 +320,8 @@ public class ActivitiServiceImpl implements JsonResource {
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
         if (!config.isNull()) {
-            location = config.get(new JsonPointer(CONFIG_LOCATION)).asEnum(EngineLocation.class);
+            enabled = config.get(CONFIG_ENABLED).defaultTo(true).asBoolean();
+            location = config.get(CONFIG_LOCATION).defaultTo(EngineLocation.embedded.name()).asEnum(EngineLocation.class);
             JsonValue connectionConfig = config.get(CONFIG_CONNECTION);
             jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
             JsonValue mailconfig = config.get(CONFIG_MAIL);
@@ -348,8 +354,9 @@ public class ActivitiServiceImpl implements JsonResource {
     protected void unbindProcessEngine(ProcessEngine processEngine) {
         if (!selfMadeProcessEngine) {
             this.processEngine = null;
+            this.activitiResource = null;
         }
-        logger.info("Ops! The ProcessEngine was stopped. Shell I create my own one or just say. We did run out of the ProcessEngine :)");
+        logger.info("ProcessEngine stopped.");
     }
 
     protected void bindRouter(JsonResource router) {
@@ -372,6 +379,10 @@ public class ActivitiServiceImpl implements JsonResource {
 
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
-        return activitiResource.handle(request);
+        if (activitiResource != null) {
+            return activitiResource.handle(request);
+        } else {
+            throw new ServiceUnavailableException("No workflow resource is available");
+        }
     }
 }

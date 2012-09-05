@@ -143,6 +143,11 @@
                 </exclusion>
             </exclusions> 
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-workflow-activiti</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -363,16 +368,6 @@
         </plugins>
     </build>
     <profiles>
-        <profile>
-            <id>activiti</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.forgerock.openidm</groupId>
-                    <artifactId>openidm-workflow-activiti</artifactId>
-                    <version>${openidm.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
         <profile>
             <id>jdk-logger</id>
             <activation>
