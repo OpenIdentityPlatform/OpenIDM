@@ -281,7 +281,7 @@
      example, if you want data flows from an LDAP server to the repository
      and also from the repository to the LDAP server, you must define two
      separate mappings.</para>
-
+     
      <para>You identify external resource sources and targets as
      <literal>system/<replaceable>name</replaceable>/<replaceable
      >object-type</replaceable></literal>, where
@@ -614,8 +614,9 @@
         }
     ]
 }</programlisting>
-  </section>
- </section>
+   
+   </section>
+</section>
  
  <section xml:id="handling-sync">
   <title>Synchronization Situations &amp; Actions</title>
@@ -682,10 +683,10 @@
    <title>Synchronization Situations</title>
 
    <para>OpenIDM performs synchronization action in two phases. First, OpenIDM
-   performs the so called source reconciliation, where OpenIDM accounts for source objects
-   and associated links based on the mapping configured. Second, OpenIDM runs
-   the target reconciliation, where OpenIDM iterates over the target objects not
-   processed in the first phase.</para>
+   performs the so called source reconciliation, where OpenIDM accounts for source 
+   objects and associated links based on the mapping configured. Second, OpenIDM 
+   runs the target reconciliation, where OpenIDM iterates over the target objects 
+   not processed in the first phase.</para>
 
    <orderedlist>
     <para>During reconciliation OpenIDM builds three lists, assigning values
@@ -1098,6 +1099,56 @@
    </table>
   </section>
 
+  <section xml:id="reconciliation-optimization">
+   <title>Reconciliation Optimization</title>
+   
+  <para>To optimize a reconciliation operation, the reconciliation process does 
+  not attempt to correlate source objects to target objects if the set of 
+  target objects is empty when the correlation is started. This considerably 
+  speeds up the process the first time the reconciliation is run. You can change 
+  this behavior for a specific mapping by adding the 
+  <literal>correlateEmptyTargetSet</literal> property to the mapping definition 
+  and setting it to <literal>true</literal>. For example:</para>
+   
+  <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name"                     : "systemMyLDAPAccounts_managedUser",
+            "source"                   : "system/MyLDAP/account",
+            "target"                   : "managed/user",
+            "correlateEmptyTargetSet"  : "true"
+        },
+    ]
+}</programlisting>
+
+   <para>Be aware that this setting will have a performance impact on the 
+   reconciliation process.</para>
+  
+   <para>All links are queried at the start of a correlation and the results of 
+   that query are used. You can disable the prefetching of links, so that the 
+   correlation process looks up each link in the database as it processes each 
+   source or target object. You can disable the prefetching of links by adding 
+   the <literal>prefetchLinks</literal> property to the mapping, and setting it 
+   to <literal>false</literal>, for example:</para>
+  
+   <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name": "systemMyLDAPAccounts_managedUser",
+            "source": "system/MyLDAP/account",
+            "target": "managed/user"
+            "prefetchLinks" : "false"
+        }
+    ]
+}</programlisting>
+   
+   <para>Be aware that this setting will have a performance impact on the 
+   reconciliation process.</para>
+   
+  </section>
+  
   <section xml:id="sync-actions">
    <title>Synchronization Actions</title>
 
@@ -1179,7 +1230,7 @@
   therefore depends on the target system, and is either specific to the data
   store underlying the OpenIDM repository, or to OpenICF query
   capabilities.</para>
-
+  
   <section xml:id="correlation-query-managed-object">
    <title>Managed Object as Correlation Query Target</title>
 
@@ -1478,4 +1529,5 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
     }
 }</programlisting>
  </section>
+ 
 </chapter>
