@@ -37,8 +37,8 @@ public class ActivitiUtil {
      * @param request Request to be processed
      * @return requested action
      */
-    public static String getActionFromRequest(JsonValue request) {
-        return request.get("params").get("_action").required().asString();
+    public static String getKeyFromRequest(JsonValue request) {
+          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().get("key"));
     }
     
     /**
@@ -51,12 +51,26 @@ public class ActivitiUtil {
     }
     
     /**
-     * Fetch Activiti process variables from the request
+     * Fetch the body of the request
      * @param request Request to be processed
-     * @return process variables
+     * @return request body
      */
-    public static Map<String, Object> getProcessVariablesFromRequest(JsonValue request) {
+    public static Map<String, Object> getRequestBodyFromRequest(JsonValue request) {
         return request.get("value").isNull() ? 
                 new HashMap(1) : new HashMap<String, Object>(request.get("value").expect(Map.class).asMap());
+    }
+    
+    /**
+     * 
+     * @param request incoming request
+     * @return 
+     */
+    public static String getIdFromRequest(JsonValue request) {
+        String[] id = request.get("id").asString().split("/");
+        return id[id.length-1];
+    }
+    
+    public static String getQueryIdFromRequest(JsonValue request) {
+        return request.get("params").get("_query-id").asString();
     }
 }

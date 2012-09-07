@@ -2,7 +2,7 @@
     "enabled" : true,
     "location" : "remote",
     "engine" : {
-        "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
+        "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT/",
         "username" : "youractivitiuser",
         "password" : "youractivitipassword"
     },
