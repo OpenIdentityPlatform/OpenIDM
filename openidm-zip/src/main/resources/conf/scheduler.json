@@ -1,0 +1,14 @@
+{
+    "threadPool" : 
+    {
+        "threadCount" : "10"
+    },
+    "scheduler" : 
+    {
+        "instanceId" : "scheduler1234"
+    },
+    "advancedProperties" : 
+    {
+        "org.quartz.scheduler.instanceName" : "ChadsPersistentScheduler"
+    }
+}

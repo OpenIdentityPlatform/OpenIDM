@@ -26,12 +26,14 @@
 package org.forgerock.openidm.scheduler;
 
 import java.text.ParseException;
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
-
-import javax.xml.bind.DatatypeConverter;
+import java.util.UUID;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -41,17 +43,24 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.scheduler.impl.Activator;
 import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.quartz.CronTrigger;
@@ -60,6 +69,10 @@ import org.quartz.JobDetail;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.impl.DirectSchedulerFactory;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.simpl.CascadingClassLoadHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,13 +82,15 @@ import org.slf4j.LoggerFactory;
  * @author aegloff
  * @author ckienle
  */
-@Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE, configurationFactory=true)
-@Service(value = SchedulerService.class, serviceFactory=false) 
+
+@Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.OPTIONAL)
+@Service(value = {SchedulerService.class, JsonResource.class}, serviceFactory=false) 
 @Properties({
-    @Property(name = "service.description", value = "Scheduler Service using Quartz"),
-    @Property(name = "service.vendor", value = "ForgeRock AS")
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Scheduler Service using Quartz"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "scheduler")
 })
-public class SchedulerService  {
+public class SchedulerService extends ObjectSetJsonResource {
     final static Logger logger = LoggerFactory.getLogger(SchedulerService.class);
 
     // Keys in the OSGi configuration     
@@ -104,30 +119,34 @@ public class SchedulerService  {
     final static String SERVICE_TRACKER = "scheduler.service-tracker";
     final static String SERVICE_PID = "scheduler.service-pid";
     
+    final static String GROUP_NAME = "scheduler-service-group";
+    
+    private Scheduler inMemoryScheduler;
+    private Scheduler persistentScheduler;
+    private SchedulerConfig schedulerConfig = null;
+    
+    private Map<String, ScheduleConfigService> configMap = new HashMap<String, ScheduleConfigService>();
+    private static Object CONFIG_SERVICE_LOCK = new Object();
+    
+    private static Object LOCK = new Object();
+    
+    private boolean started = false;
+    
     EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
     
-    // Configuration
-    Boolean enabled;
-    Boolean persisted;
-    String misfirePolicy;
-    String scheduleType;
-    Date startTime;
-    Date endTime;
-    String cronSchedule;
-    TimeZone timeZone;
-    String invokeService;
-    Object invokeContext;
-
     // Optional user defined name for this instance, derived from the file install name
     String configFactoryPID;
     
     // Scheduling
-    Scheduler scheduler;
-    String jobName;
-    String groupName;
+    Boolean localSchedulePersisted = false;
+    Scheduler localScheduler = null;
+    String localJobName = null;
     
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
+    
+    @Reference
+    ConfigurationAdmin configAdmin;
     
     @Reference
     RepositoryService repo;
@@ -135,71 +154,40 @@ public class SchedulerService  {
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException { 
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-                
-        initConfig(compContext);
-        if (!enabled) {
-            logger.info("Scheduler for {} is disabled", configFactoryPID);
+        
+        String pid = (String)compContext.getProperties().get("config.factory-pid");
+        if (pid != null) {
+            logger.warn("Please rename the schedule configuration file for " + pid 
+                    + " to conform the 'schedule-<name>.json' format");
             return;
         }
         
-        scheduledServiceTracker = createServiceTracker(compContext, invokeService);
-
-        try {
-            if (persisted) {
-                scheduler = Activator.getPersistentScheduler();
-            } else {
-                scheduler = Activator.getInMemoryScheduler();
-            }
+        // Initialize the schedulers (if they haven't been already)
+        initInMemoryScheduler();
+        initPersistentScheduler(compContext);
+        
+        synchronized (CONFIG_SERVICE_LOCK) {
+            // TODO: This should be reworked to start after all "core" services are available
+            logger.info("Starting Scheduler Service");
+            started = true;
             
-            if (configFactoryPID != null) {
-                jobName = configFactoryPID;
-            } else {
-                jobName = (String) compContext.getProperties().get(Constants.SERVICE_PID);
-            }
-            groupName = "scheduler-service-group";
+            // Start processing schedules
+            logger.info("Starting Volatile Scheduler");
+            inMemoryScheduler.start();
+            logger.info("Starting Persistent Scheduler");
+            persistentScheduler.start();
             
-            if (scheduler != null && cronSchedule != null && cronSchedule.length() > 0) {
-                JobDetail job = new JobDetail(jobName, groupName, SchedulerServiceJob.class);
-                JobDataMap context = new JobDataMap();
-                context.put(ScheduledService.CONFIG_NAME,
-                        "scheduler"+ (configFactoryPID != null ? "-" + configFactoryPID : ""));
-                context.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
-                context.put(ScheduledService.CONFIGURED_INVOKE_CONTEXT, invokeContext);
-                job.setJobDataMap(context);
-                
-                CronTrigger trigger = new CronTrigger("trigger-" + jobName, groupName, cronSchedule);
-                if (startTime != null) {
-                    trigger.setStartTime(startTime); // TODO: review time zone consistency with cron trigger timezone
-                }
-                
-                if (endTime != null) {
-                    trigger.setEndTime(endTime);
-                }
-                if (timeZone != null) {
-                    trigger.setTimeZone(timeZone);
-                }
-                
-                if (misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED)) {
-                    trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
-                } else if (misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
-                    trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);
-                }
-                
+            logger.info("There are {} jobs waiting to be scheduled", configMap.size());
+            Set<String> keys = configMap.keySet();
+            for (String key : keys) {
+                ScheduleConfigService service = configMap.get(key);
                 try {
-                    scheduler.scheduleJob(job, trigger);
-                    logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.", 
-                            new Object[] {jobName, cronSchedule, timeZone, startTime, endTime});
+                    addSchedule(service.getScheduleConfig(), service.getJobName(), false, true);
                 } catch (ObjectAlreadyExistsException e) {
-                    logger.debug("Job {} already scheduled", job.getFullName());
+                    logger.debug("Job {} already scheduled", service.getJobName());
                 }
             }
-        } catch (ParseException ex) {
-            logger.warn("Parsing of scheduler configuration failed, can not create scheduler service for " 
-                    + jobName + ": " + ex.getMessage(), ex);
-            throw ex;
-        } catch (SchedulerException ex) {
-            logger.warn("Failed to create scheduler service for " + jobName + ": " + ex.getMessage(), ex);
-            throw ex;
+            logger.info("Scheduling waiting schedules");
         }
     }
     
@@ -208,115 +196,455 @@ public class SchedulerService  {
      * @param compContext
      * @throws InvalidException if the configuration is invalid.
      */
-    void initConfig(ComponentContext compContext) throws InvalidException {
+    /*private ScheduleConfig initConfig(ComponentContext compContext) throws InvalidException {
         
         // Optional property SERVICE_FACTORY_PID set by JSONConfigInstaller
         configFactoryPID = (String) compContext.getProperties().get("config.factory-pid");
-        
         Map<String, Object> config = enhancedConfig.getConfiguration(compContext);
         logger.debug("Scheduler service activating with configuration {}", config);
-        
-        enabled = (Boolean) config.get(SCHEDULE_ENABLED);
-        if (enabled == null) {
-            enabled = Boolean.TRUE; // Default to enabled
+        if (config == null) {
+            return null;
         }
-        
-        persisted = (Boolean) config.get(SCHEDULE_PERSISTED);
-        if (persisted == null) {
-            persisted = Boolean.FALSE; // Default to not persisted
-        }
-        
-        misfirePolicy = (String) config.get(SCHEDULE_MISFIRE_POLICY);
-        if (misfirePolicy == null) {
-            misfirePolicy = MISFIRE_POLICY_FIRE_AND_PROCEED;
-        } else if (!misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED) && !misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
-            throw new InvalidException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
-        }
-        
-        cronSchedule = (String) config.get(SCHEDULE_CRON_SCHEDULE);
-        scheduleType = (String) config.get(SCHEDULE_TYPE);
-        invokeService = (String) config.get(SCHEDULE_INVOKE_SERVICE);
-
-        if (invokeService == null || invokeService.trim().length() == 0) {
-            throw new InvalidException("Invalid scheduler configuration, the " 
-                    + SCHEDULE_INVOKE_SERVICE + " property needs to be set but is empty. "
-                    + "Complete config:" + config);
-        } else {
-            // service PIDs fragments are prefixed with openidm qualifier
-            if (!invokeService.contains(".")) {
-                String fragment = invokeService;
-                invokeService = SERVICE_RDN_PREFIX + fragment;
-                logger.info("InvokeService configured with a fragment {}, expanded to qualified {}", 
-                        fragment, invokeService);
-            }
-        }
-        
-        invokeContext = config.get(SCHEDULE_INVOKE_CONTEXT);
-        
-        String timeZoneString = (String) config.get(SCHEDULE_TIME_ZONE);
-        String startTimeString = (String) config.get(SCHEDULE_START_TIME);
-        String endTimeString = (String) config.get(SCHEDULE_END_TIME);
-        
-        if (timeZoneString != null && timeZoneString.trim().length() > 0) {
-            timeZone = TimeZone.getTimeZone(timeZoneString);
-            // JDK has fall-back behavior to GMT if it doesn't understand timezone passed
-            if (!timeZoneString.equals(timeZone.getID())) {
-                throw new InvalidException("Scheduler configured timezone is not understood: " + timeZoneString);
-            }
-        }
-        if (startTimeString != null && startTimeString.trim().length() > 0) {
-            Calendar parsed = DatatypeConverter.parseDateTime(startTimeString);
-            startTime = parsed.getTime();
-            // TODO: enhanced logging for failure
-        }
-        
-        if (endTimeString != null && endTimeString.trim().length() > 0) {
-            Calendar parsed = DatatypeConverter.parseDateTime(endTimeString);
-            endTime = parsed.getTime();
-            // TODO: enhanced logging for failure
-        }
-        
-        if (scheduleType != null && scheduleType.trim().length() > 0) {
-            if (!scheduleType.equals(SCHEDULE_TYPE_CRON)) {
-                throw new InvalidException("Scheduler configuration contains unknown schedule type " 
-                        + scheduleType + ". Known types include " + SCHEDULE_TYPE_CRON);
+        return new ScheduleConfig(config);
+    }*/
+    
+    public void registerConfigService(ScheduleConfigService service) throws SchedulerException, ParseException {
+        logger.debug("Registering new ScheduleConfigService");
+        synchronized (CONFIG_SERVICE_LOCK) {
+            configMap.put(service.getJobName(), service);
+            if (!started) {
+                logger.debug("The Scheduler Service has not been started yet, storing new Schedule {}", service.getJobName());
+            } else {
+                logger.debug("Adding new Schedule {}", service.getJobName());
+                try {
+                    addSchedule(service.getScheduleConfig(), service.getJobName(), false, true);
+                } catch (ObjectAlreadyExistsException e) {
+                    logger.debug("Job {} already scheduled", service.getJobName());
+                }
             }
         }
     }
     
-    ServiceTracker createServiceTracker(ComponentContext compContext, String servicePID) throws InvalidException {
-        Filter filter = null;
-        try {
-            filter = FrameworkUtil.createFilter(
-                    "(&(" + Constants.OBJECTCLASS + "=" + ScheduledService.class.getName() + ")" 
-                    + "(service.pid=" + invokeService + "))");
-        } catch (InvalidSyntaxException ex) {
-            throw new InvalidException("Failure in setting up scheduler to find service to invoke. One possible cause is an invalid " 
-                    + SCHEDULE_INVOKE_SERVICE + " property. :  " + ex.getMessage(), ex);
+    public void unregisterConfigService(ScheduleConfigService service) {
+        synchronized (CONFIG_SERVICE_LOCK) {
+            if (!started) {
+                configMap.remove(service.getJobName());                                                                                                                    
+            } else {
+                
+            }
         }
-        ServiceTracker serviceTracker = new ServiceTracker(compContext.getBundleContext(), filter, null);
-        serviceTracker.open();
-        
-        return serviceTracker;
     }
     
     @Deactivate
     void deactivate(ComponentContext compContext) {
-        logger.debug("Deactivating Service {}", compContext);
-        try {
-            boolean deleted = false;
-            if (scheduler != null && !persisted) {
-                deleted = scheduler.deleteJob(jobName, groupName);
-                logger.trace("Scheduler job deleted: ", deleted);
-            }
-        } catch (SchedulerException ex) {
-            logger.warn("Failure during removal of scheduled job ", ex);
+        logger.debug("Deactivating Scheduler Service {}", compContext);
+    }   
+    
+    /**
+     * Schedules a job.
+     * 
+     * @param scheduleConfig    The schedule configuration
+     * @param jobName           The job name
+     * @param update            Whether to delete the old job if present
+     * @param fromConfFile      Whether the job was configured in a "/conf" file
+     * @return                  true if the job was scheduled, false otherwise
+     * @throws SchedulerException
+     * @throws ParseException
+     * @throws ObjectAlreadyExistsException
+     */
+    public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update, boolean fromConfFile) 
+            throws SchedulerException, ParseException, ObjectAlreadyExistsException {
+        Scheduler scheduler = null;
+        if (!scheduleConfig.getEnabled()) {
+            logger.info("Scheduler for {} is disabled", configFactoryPID);
+            return false;
         }
         
-        if (scheduledServiceTracker != null) {
-            scheduledServiceTracker.close();
+        try {
+            // Lock access to the scheduler so that a schedule is not added during a config update
+            synchronized (LOCK) {
+                scheduler = getScheduler(scheduleConfig);
+                if (fromConfFile) {
+                    // Schedule is configured from a file in the "conf" directory, store local parameters
+                    localScheduler = scheduler;
+                    localJobName = jobName;
+                    localSchedulePersisted = scheduleConfig.getPersisted();
+                }
+                if (scheduler != null && scheduleConfig.getCronSchedule() != null 
+                        && scheduleConfig.getCronSchedule().length() > 0) {
+                    JobDetail job = new JobDetail(jobName, GROUP_NAME, SchedulerServiceJob.class);
+                    job.setVolatility(scheduleConfig.getPersisted());
+                    job.setJobDataMap(createJobDataMap(scheduleConfig));
+                    Trigger trigger = createTrigger(scheduleConfig, jobName);
+                    if (update) {
+                        // Update the job by first deleting it, then scheduling the new version
+                        scheduler.deleteJob(jobName, GROUP_NAME);
+                    }
+                    // Schedule the Job
+                    scheduler.scheduleJob(job, trigger);
+                    logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.",
+                            new Object[] { jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                                    scheduleConfig.getStartTime(), scheduleConfig.getEndTime() });
+                }
+            }
+        } catch (ParseException ex) {
+            logger.warn("Parsing of scheduler configuration failed, can not create scheduler service for " 
+                    + jobName + ": " + ex.getMessage(), ex);
+            throw ex;
+        } catch (ObjectAlreadyExistsException ex) {
+            throw ex;
+        } catch (SchedulerException ex) {
+            logger.warn("Failed to create scheduler service for " + jobName + ": " + ex.getMessage(), ex);
+            throw ex;
         }
+        
+        return true;
+    }
+    
+    /**
+     * Creates and returns a CronTrigger using the supplied schedule configuration.
+     * 
+     * @param scheduleConfig    The schedule configuration
+     * @param jobName           The name of the job to associate the trigger with
+     * @return                  The created Trigger
+     * @throws ParseException
+     */
+    private Trigger createTrigger(ScheduleConfig scheduleConfig, String jobName) throws ParseException {
+        String cronSchedule = scheduleConfig.getCronSchedule();
+        Date startTime = scheduleConfig.getStartTime();
+        Date endTime = scheduleConfig.getEndTime();
+        String misfirePolicy = scheduleConfig.getMisfirePolicy();
+        TimeZone timeZone = scheduleConfig.getTimeZone();
+        
+        CronTrigger trigger = new CronTrigger("trigger-" + jobName, GROUP_NAME, cronSchedule);
+        
+        if (startTime != null) {
+            trigger.setStartTime(startTime); // TODO: review time zone consistency with cron trigger timezone
+        }
+        
+        if (endTime != null) {
+            trigger.setEndTime(endTime);
+        }
+        if (timeZone != null) {
+            trigger.setTimeZone(timeZone);
+        }
+        
+        if (misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED)) {
+            trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
+        } else if (misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
+            trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);
+        }
+        return trigger;
+    }
+    
+    /**
+     * Creates and returns a JobDataMap using the supplied schedule configuration.
+     * 
+     * @param scheduleConfig    The schedule configuration
+     * @return                  The created JobDataMap
+     */
+    private JobDataMap createJobDataMap(ScheduleConfig scheduleConfig) {
+        String invokeService = scheduleConfig.getInvokeService();
+        Object invokeContext = scheduleConfig.getInvokeContext();
+        JobDataMap map = new JobDataMap();
+        map.put(ScheduledService.CONFIG_NAME, "scheduler"+ (configFactoryPID != null ? "-" + configFactoryPID : ""));
+        map.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
+        map.put(ScheduledService.CONFIGURED_INVOKE_CONTEXT, invokeContext);
+        return map;
+    }
+    
+    /**
+     * Returns the Scheduler corresponding to whether the supplied schedule configuration is persistent.
+     * 
+     * @param scheduleConfig    The schedule configuration
+     * @return                  The Scheduler
+     * @throws SchedulerException
+     */
+    private Scheduler getScheduler(ScheduleConfig scheduleConfig) throws SchedulerException {
+        if (scheduleConfig.getPersisted()) {
+            return persistentScheduler;
+        }
+        return inMemoryScheduler;
+    }
+    
+    /**
+     * Creates a random Job name.
+     * 
+     * @return  A job name
+     */
+    private String createJobName() {
+        StringBuilder sb = new StringBuilder("job_");
+        sb.append(UUID.randomUUID());
+        return sb.toString();
+    }
+    
+    /**
+     * Determines if a job already exists.
+     * 
+     * @param jobName       The name of the job
+     * @param persisted     If the job is persisted or not
+     * @return              True if the job exists, false otherwise
+     * @throws SchedulerException
+     */
+    private boolean jobExists(String jobName, boolean persisted) throws SchedulerException {
+        if (!persisted) {
+            return (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null);
+            
+        }
+        return (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null);
+        
+    }
 
-        logger.info("Scheduler service for {} stopped.", jobName);
+    @Override
+    public void create(String id, Map<String, Object> object) throws ObjectSetException {
+        try {
+            if (id == null) {
+                id = createJobName();
+            } else {
+                id = trimTrailingSlash(id);
+            }
+            object.put("_id", id);
+            ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
+
+            // Check defaults
+            if (scheduleConfig.getEnabled() == null) {
+                scheduleConfig.setEnabled(true);
+            }
+            if (scheduleConfig.getPersisted() == null) {
+                scheduleConfig.setPersisted(true);
+            }
+
+            try {
+                addSchedule(scheduleConfig, id, false, false);
+            } catch (ParseException e) {
+                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, e);
+            } catch (ObjectAlreadyExistsException e) {
+                throw new ObjectSetException(ObjectSetException.CONFLICT, e);
+            } catch (SchedulerException e) {
+                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+            }
+        } catch (JsonException e) {
+            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error creating schedule", e);
+        }
+    }
+
+    @Override
+    public Map<String, Object> read(String id) throws ObjectSetException {
+        Map<String, Object> resultMap = null;
+        try {
+            Scheduler scheduler = null;
+            JobDetail job = null;
+            boolean persisted = false;
+            if (jobExists(id, true)) {
+                persisted = true;
+                scheduler = persistentScheduler;
+            } else if (jobExists(id, false)) {
+                scheduler = inMemoryScheduler;
+            } else {
+                throw new ObjectSetException(ObjectSetException.NOT_FOUND, "Schedule does not exist");
+            }
+            job = scheduler.getJobDetail(id, GROUP_NAME);
+            CronTrigger trigger = (CronTrigger)scheduler.getTrigger("trigger-" + id, GROUP_NAME);
+            JobDataMap dataMap = job.getJobDataMap();
+            ScheduleConfig config = new ScheduleConfig(trigger, dataMap, persisted);
+            resultMap = (Map<String, Object>)config.getConfig().getObject();
+            resultMap.put("_id", id);
+
+        } catch (SchedulerException e) {
+            throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+        }
+        return resultMap;
+    }
+
+    @Override
+    public void update(String id, String rev, Map<String, Object> object)
+            throws ObjectSetException {
+        try {
+            if (id == null) {
+                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "No ID specified");
+            }
+            object.put("_id", id);
+            
+            // Default incoming config to "persisted" if not specified
+            Object persistedValue = object.get(SchedulerService.SCHEDULE_PERSISTED);
+            if (persistedValue == null) {
+                object.put(SchedulerService.SCHEDULE_PERSISTED, new Boolean(true));
+            }
+            
+            ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
+
+            try {
+                if (!jobExists(id, scheduleConfig.getPersisted())) {
+                    throw new NotFoundException();
+                } else {
+                    // Update the Job
+                    addSchedule(scheduleConfig, id, true, false);
+                }
+            } catch (ParseException e) {
+                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, e);
+            } catch (ObjectAlreadyExistsException e) {
+                throw new ObjectSetException(ObjectSetException.CONFLICT, e);
+            } catch (SchedulerException e) {
+                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+            }
+        } catch (JsonException e) {
+            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule", e);
+        }
+    }
+
+    @Override
+    public void delete(String id, String rev) throws ObjectSetException {
+        try {
+            if (id == null) {
+                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "No ID specified");
+            }
+            try {
+                if (jobExists(id, true)) {
+                    persistentScheduler.deleteJob(id, GROUP_NAME);
+                } else if (jobExists(id, false)) {
+                    inMemoryScheduler.deleteJob(id, GROUP_NAME);
+                } else {
+                    throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Schedule does not exist");
+                }
+            } catch (SchedulerException e) {
+                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+            }
+        } catch (JsonException e) {
+            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule", e);
+        }
+    }
+
+    @Override
+    public void patch(String id, String rev, Patch patch)
+            throws ObjectSetException {
+        throw new ForbiddenException();
+    }
+
+    @Override
+    public Map<String, Object> query(String id, Map<String, Object> params)
+            throws ObjectSetException {
+        String queryId = (String)params.get(QueryConstants.QUERY_ID);
+        if (queryId == null) {
+            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "query-id parameters");
+        }
+        Map<String, Object> resultMap = null;
+        try {
+            try {
+                if (queryId.equals("query-all-ids")) {
+                    // Query all the Job IDs in both schedulers
+                    String[] persistentJobNames = persistentScheduler.getJobNames(GROUP_NAME);
+                    String[] inMemoryJobNames = inMemoryScheduler.getJobNames(GROUP_NAME);
+                    List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
+                    if (persistentJobNames != null) {
+                        for (String job : persistentJobNames) {
+                            Map<String, String> idMap = new HashMap<String, String>();
+                            idMap.put("_id", job);
+                            resultList.add(idMap);
+                        }
+                    }
+                    if (inMemoryJobNames != null) {
+                        for (String job : inMemoryJobNames) {
+                            Map<String, String> idMap = new HashMap<String, String>();
+                            idMap.put("_id", job);
+                            resultList.add(idMap);
+                        }
+                    }
+                    resultMap = new HashMap<String, Object>();
+                    resultMap.put(QueryConstants.QUERY_RESULT, resultList);
+                } else {
+                    throw new ObjectSetException(ObjectSetException.FORBIDDEN, "Unsupported query-id: " + queryId);
+                }
+            } catch (SchedulerException e) {
+                throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+            }
+        } catch (JsonException e) {
+            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule", e);
+        }
+        return resultMap;
+    }
+
+    @Override
+    public Map<String, Object> action(String id, Map<String, Object> params)
+            throws ObjectSetException {
+        String action = (String)params.get("_action");
+        try {
+            if (action.equals("create")) {
+                id = createJobName();
+                params.put("_id", id);
+                try {
+                    if (jobExists(id, true) || jobExists(id, false)) {
+                        throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Schedule already exists");
+                    }
+                    create(id, params);
+                    return params;
+                } catch (SchedulerException e) {
+                    throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                }
+            } else {
+                throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Unknown action: " + action);
+            }
+        } catch (JsonException e) {
+            throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule", e);
+        }
+    }
+    
+    private String trimTrailingSlash(String id) {
+        if (id.endsWith("/")) {
+            return id.substring(0, id.length()-1);
+        }
+        return id;
+    }
+    
+    public boolean isConfigured() {
+        if (schedulerConfig == null) {
+            return false;
+        }
+        return true;
+    }
+    
+    public void initPersistentScheduler(ComponentContext compContext) throws SchedulerException {
+        boolean alreadyConfigured = (schedulerConfig != null);
+        JsonValue configValue = enhancedConfig.getConfigurationAsJson(compContext);
+        schedulerConfig = new SchedulerConfig(configValue);
+        if (alreadyConfigured) {
+            // Close current scheduler
+            if (persistentScheduler != null && persistentScheduler.isStarted()) {
+                persistentScheduler.shutdown();
+            }
+        }
+        createPersistentScheduler();
+    }
+    
+    private void createPersistentScheduler() throws SchedulerException {
+        // Get the persistent scheduler using our custom JobStore implementation
+        logger.info("Creating Persistent Scheduler");
+        StdSchedulerFactory sf = new StdSchedulerFactory();
+        sf.initialize(schedulerConfig.toProps());
+        persistentScheduler = sf.getScheduler();
+    }
+
+    private void initInMemoryScheduler() throws SchedulerException {
+        try {
+            if (inMemoryScheduler == null) {
+                // Quartz tries to be too smart about classloading, 
+                // but relies on the thread context classloader to load classload helpers
+                // That is not a good idea in OSGi, 
+                // hence, hand it the OSGi classloader for the ClassLoadHelper we want it to find
+                ClassLoader original = Thread.currentThread().getContextClassLoader();
+                Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());
+                // Get the in-memory scheduler
+                // Must use DirectSchedulerFactory instance so that it does not confict with
+                // the StdSchedulerFactory (used to create the persistent schedulers).
+                logger.info("Creating In-Memory Scheduler");
+                DirectSchedulerFactory.getInstance().createVolatileScheduler(10);
+                inMemoryScheduler = DirectSchedulerFactory.getInstance().getScheduler();
+                // Set back to the original thread context classloader
+                Thread.currentThread().setContextClassLoader(original);
+            }
+        } catch (SchedulerException ex) {
+            logger.warn("Failure in initializing the scheduler facility " + ex.getMessage(), ex);
+            throw ex;
+        }
+        logger.info("Scheduler facility started");
     }
 }
