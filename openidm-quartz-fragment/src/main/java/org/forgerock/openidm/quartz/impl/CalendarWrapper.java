@@ -59,7 +59,6 @@ public class CalendarWrapper {
      */
     public CalendarWrapper(Map<String, Object> map) {
         serialized = (String)map.get("serialized");
-        System.out.println("serialized: " + serialized);
         name = (String)map.get("name");
         revision = (String)map.get("_rev");
     }

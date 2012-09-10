@@ -75,7 +75,6 @@ public class MockRepositoryService implements RepositoryService {
                     patch(id, rev, null);
                     return new JsonValue(null);
                 default: 
-                    System.out.println(request.get("method"));
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
                 }
             } catch (JsonValueException jve) {

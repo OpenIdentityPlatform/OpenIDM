@@ -26,6 +26,7 @@ import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
 
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
@@ -77,8 +78,6 @@ public class SchedulerServiceTest {
     @Test
     public void configParsingTest() throws InvalidException {
         // Check valid configuration succeeds
-        SchedulerService schedulerService = new SchedulerService();
-        
         Map config = new HashMap();
         config.put(SchedulerService.SCHEDULE_TYPE, SchedulerService.SCHEDULE_TYPE_CRON);
         config.put(SchedulerService.SCHEDULE_START_TIME, "2011-05-03T10:00:00");
@@ -88,19 +87,16 @@ public class SchedulerServiceTest {
         config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
         config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
         
-        ComponentContext validConfig = getMockedContext(config, schedulerService);
-        
-        schedulerService.initConfig(validConfig);
+        //schedulerService.initConfig(validConfig);
+        ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
         
         // mimimize trying to these impl details, basic sanity check on one
-        assertNotNull(schedulerService.startTime); 
+        assertNotNull(scheduleConfig.getStartTime()); 
     }
     
     @Test(enabled = false, expectedExceptions = InvalidException.class)
     public void invalidConfigParsingTest() throws InvalidException {
         // Check invalid configuration fails
-        SchedulerService schedulerService = new SchedulerService();
-        
         Map config = new HashMap();
         config.put(SchedulerService.SCHEDULE_TYPE, SchedulerService.SCHEDULE_TYPE_CRON);
         config.put(SchedulerService.SCHEDULE_START_TIME, "2011-05-03T10:00:00");
@@ -110,9 +106,7 @@ public class SchedulerServiceTest {
         // test missing config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
         config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
         
-        ComponentContext invalidConfig = getMockedContext(config, schedulerService);
-        
-        schedulerService.initConfig(invalidConfig);
+        ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
         
     }
 }

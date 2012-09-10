@@ -152,7 +152,7 @@ public class RepoJobStore implements JobStore {
                     if (!waitingTriggers.contains(triggerName)) {
                         // Check if trigger should be "waiting"
                         TriggerWrapper tw = getTriggerWrapper(groupName, triggerName);
-                        if(!tw.isAcquired()) {
+                        if (!tw.isAcquired()) {
                             // Add the trigger to waitingTriggers
                             addWaitingTrigger(tw.getTrigger(), wt);
                         }
@@ -702,13 +702,17 @@ public class RepoJobStore implements JobStore {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
             }
-            JobGroupWrapper jgw = new JobGroupWrapper(readFromRepo(getJobGroupsRepoId(groupName)));
-            List<String> names = jgw.getJobNames();
-            return names.toArray(new String[names.size()]);    
+            JsonValue fromRepo = readFromRepo(getJobGroupsRepoId(groupName));
+            if (fromRepo != null && !fromRepo.isNull()) {
+                JobGroupWrapper jgw = new JobGroupWrapper(fromRepo);
+                List<String> names = jgw.getJobNames();
+                return names.toArray(new String[names.size()]);
+            }
         } catch (JsonResourceException e) {
             logger.warn("Error getting job names", e);
             throw new JobPersistenceException("Error getting job names", e);
         }
+        return null;
     }
 
     @Override
@@ -791,13 +795,17 @@ public class RepoJobStore implements JobStore {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
             }
-            TriggerGroupWrapper tgw = new TriggerGroupWrapper(readFromRepo(getTriggerGroupsRepoId(groupName)));
-            List<String> names = tgw.getTriggerNames();
-            return names.toArray(new String[names.size()]);    
+            JsonValue fromRepo = readFromRepo(getTriggerGroupsRepoId(groupName));
+            if (fromRepo != null && !fromRepo.isNull()) {
+                TriggerGroupWrapper tgw = new TriggerGroupWrapper(fromRepo);
+                List<String> names = tgw.getTriggerNames();
+                return names.toArray(new String[names.size()]);
+            }    
         } catch (JsonResourceException e) {
             logger.warn("Error getting trigger names", e);
             throw new JobPersistenceException("Error getting trigger names", e);
         }
+        return null;
     }
 
     @Override
@@ -1058,6 +1066,28 @@ public class RepoJobStore implements JobStore {
                     rev = tw.getRevision();
                     logger.debug("Deleting trigger {} in group {}", new Object[]{triggerName, groupName});
                     accessor.delete(triggerId, rev);
+                    
+                    String jobName = tw.getTrigger().getJobName();
+                    JobWrapper jw = getJobWrapper(groupName, jobName);
+                    if (jw != null) {
+                        if (!jw.getJobDetail().isDurable()) {
+                            String jobId = getJobsRepoId(groupName, jobName);
+                            // Get job group
+                            JobGroupWrapper jgw = getOrCreateJobGroupWrapper(groupName);
+                            List<String> jobNames = jgw.getJobNames();
+                            // Check if job name exists
+                            if (jobNames.contains(jobName)) {
+                                // Remove job from list
+                                jgw.removeJob(jobName);
+                                // Update job group
+                                accessor.update(getJobGroupsRepoId(groupName),
+                                        jgw.getRevision(), jgw.getValue());
+                            }
+                            // Delete job
+                            logger.debug("Deleting job {} in group {}", new Object[] { jobName, groupName });
+                            accessor.delete(jobId, jw.getRevision());
+                        }
+                    }
                     return true;
                 }
                 return false;
@@ -1924,7 +1954,7 @@ public class RepoJobStore implements JobStore {
                 throw new JobPersistenceException("Repo router is null");
             }
             try {
-                if(logger.isTraceEnabled()) {
+                if (logger.isTraceEnabled()) {
                     logger.trace("Getting trigger {}", getTriggersRepoId(group, name));
                 }
                 String repoId = getTriggersRepoId(group, name);
