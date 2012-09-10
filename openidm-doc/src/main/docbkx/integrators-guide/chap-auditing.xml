@@ -482,14 +482,14 @@
      <listitem>
       <para>Write to the OpenIDM database repository.</para>
       <para>OpenIDM stores entries under the
-      <literal>/openidm/repo/audit/</literal> context, such entries appear as
+      <literal>/openidm/repo/audit/</literal> context. Such entries appear as
       <literal>audit/access/<replaceable>_id</replaceable></literal>,
       <literal>audit/activity/<replaceable>_id</replaceable></literal>, and
       <literal>audit/recon/<replaceable>_id</replaceable></literal>, where
-      the <replaceable>_id</replaceable> is the UUID of the entry such as
+      the <replaceable>_id</replaceable> is the UUID of the entry, such as
       <literal>0419d364-1b3d-4e4f-b769-555c3ca098b0</literal>.</para>
       <para>In the OrientDB repository, OpenIDM stores records in
-      <literal>audit_activity</literal>, <literal>audit_activity</literal>,
+      <literal>audit_access</literal>, <literal>audit_activity</literal>,
       and <literal>audit_recon</literal> tables.</para>
       <para>In a JDBC repository, OpenIDM stores records in
       <literal>auditaccess</literal>, <literal>auditactivity</literal>, and
