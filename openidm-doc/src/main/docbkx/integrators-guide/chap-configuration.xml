@@ -494,6 +494,8 @@
    </programlisting>
  </example>
  
+ </section>
+ 
  <section>
  <title>Limitations of Property Value Substitution</title>
  <itemizedlist>
@@ -552,7 +554,6 @@
   </programlisting></listitem>
   -->
  </itemizedlist>
- </section>
  </section>
  
  <!-- Add this section when you have been able to test the example
