@@ -121,8 +121,8 @@ public class SchedulerService extends ObjectSetJsonResource {
     
     final static String GROUP_NAME = "scheduler-service-group";
     
-    private Scheduler inMemoryScheduler;
-    private Scheduler persistentScheduler;
+    private static Scheduler inMemoryScheduler;
+    private static Scheduler persistentScheduler;
     private SchedulerConfig schedulerConfig = null;
     
     private Map<String, ScheduleConfigService> configMap = new HashMap<String, ScheduleConfigService>();
