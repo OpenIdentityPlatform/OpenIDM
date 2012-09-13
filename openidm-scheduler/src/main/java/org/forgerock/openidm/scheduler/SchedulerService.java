@@ -83,7 +83,7 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 
-@Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.OPTIONAL)
+@Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE)
 @Service(value = {SchedulerService.class, JsonResource.class}, serviceFactory=false) 
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -158,18 +158,18 @@ public class SchedulerService extends ObjectSetJsonResource {
         String pid = (String)compContext.getProperties().get("config.factory-pid");
         if (pid != null) {
             logger.warn("Please rename the schedule configuration file for " + pid 
-                    + " to conform the 'schedule-<name>.json' format");
+                    + " to conform to the 'schedule-<name>.json' format");
             return;
         }
-        
-        // Initialize the schedulers (if they haven't been already)
-        initInMemoryScheduler();
-        initPersistentScheduler(compContext);
         
         synchronized (CONFIG_SERVICE_LOCK) {
             // TODO: This should be reworked to start after all "core" services are available
             logger.info("Starting Scheduler Service");
             started = true;
+
+            // Initialize the schedulers (if they haven't been already)
+            initInMemoryScheduler();
+            initPersistentScheduler(compContext);
             
             // Start processing schedules
             logger.info("Starting Volatile Scheduler");

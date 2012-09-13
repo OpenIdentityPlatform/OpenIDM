@@ -6,9 +6,5 @@
     "scheduler" : 
     {
         "instanceId" : "scheduler1234"
-    },
-    "advancedProperties" : 
-    {
-        "org.quartz.scheduler.instanceName" : "ChadsPersistentScheduler"
     }
 }
