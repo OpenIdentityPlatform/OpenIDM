@@ -26,13 +26,15 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
-import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
+import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
@@ -51,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.MapAssert.entry;
 
 /**
  * @author $author$
@@ -62,36 +63,29 @@ public class OpenICFProvisionerServiceTestConnectorTest extends OpenICFProvision
     @Test
     public void testHelloWorldAction() throws Exception {
         Map<String, Object> action = getEmptyScript();
+        action.put(SystemAction.SCRIPT_ID, "ConnectorScript#1");
         JsonValue result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
-        assertThat(result.asMap()).includes(entry("result", "Arthur Dent"));
+        assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo("Arthur Dent");
 
-        action.put(ConnectorScript.SCRIPT_EXPRESSION, "return testArgument");
+        action.put(SystemAction.SCRIPT_ID, "ConnectorScript#2");
         action.put("testArgument", "Zaphod Beeblebrox");
         result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
-        assertThat(result.asMap()).includes(entry("result", "Zaphod Beeblebrox"));
+        assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo("Zaphod Beeblebrox");
 
-        action.put(ConnectorScript.SCRIPT_VARIABLE_PREFIX, "openidm_");
-        action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument");
-        action.put("testArgument", "Ford Prefect");
-        result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
-        assertThat(result.asMap()).includes(entry("result", "Ford Prefect"));
-
-        action.put(ConnectorScript.SCRIPT_EXPRESSION, "return openidm_testArgument.length");
+        action.put(SystemAction.SCRIPT_ID, "ConnectorScript#3");
         action.put("testArgument", Arrays.asList("Ford Prefect", "Tricia McMillan"));
         result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
-        assertThat(result.asMap()).includes(entry("result", 2));
+        assertThat(result.get(new JsonPointer("actions/0/result")).getObject()).isEqualTo(2);
 
-        action.put(ConnectorScript.SCRIPT_EXPRESSION, "throw new RuntimeException(\"Marvin\")");
+        action.put(SystemAction.SCRIPT_ID, "ConnectorScript#4");
         result = getService().handle(buildRequest("action", "system/Test/account", null, action, null));
-        assertThat(result.asMap()).includes(entry("error", "Marvin"));
+        assertThat(result.get(new JsonPointer("actions/0/error")).getObject()).isEqualTo("Marvin");
     }
 
 
     protected Map<String, Object> getEmptyScript() {
         Map<String, Object> result = new HashMap<String, Object>(4);
-        result.put(ConnectorScript.SCRIPT_EXECUTE_MODE, ConnectorScript.ExecutionMode.CONNECTOR.name());
-        result.put(ConnectorScript.SCRIPT_TYPE, "Groovy");
-        result.put(ConnectorScript.SCRIPT_EXPRESSION, "return \"Arthur Dent\"");
+        result.put(ServerConstants.ACTION_NAME, "script");
         return result;
     }
 

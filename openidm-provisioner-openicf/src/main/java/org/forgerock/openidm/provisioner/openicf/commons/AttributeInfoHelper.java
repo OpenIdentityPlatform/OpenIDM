@@ -212,11 +212,13 @@ public class AttributeInfoHelper {
     public Object build(Attribute source, CryptoService cryptoService) throws JsonCryptoException {
         Object resultValue = null;
         if (attributeInfo.isMultiValued()) {
-            List<Object> value = new ArrayList<Object>(source.getValue().size());
-            for (Object o : source.getValue()) {
-                value.add(ConnectorUtil.coercedTypeCasting(o, Object.class));
+            if (null != source.getValue()) {
+                List<Object> value = new ArrayList<Object>(source.getValue().size());
+                for (Object o : source.getValue()) {
+                    value.add(ConnectorUtil.coercedTypeCasting(o, Object.class));
+                }
+                resultValue = value;
             }
-            resultValue = value;
         } else {
             try {
                 resultValue = ConnectorUtil.coercedTypeCasting(AttributeUtil.getSingleValue(source), type);

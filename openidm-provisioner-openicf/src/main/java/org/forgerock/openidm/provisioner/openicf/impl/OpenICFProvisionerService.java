@@ -51,7 +51,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
-import org.forgerock.openidm.provisioner.openicf.impl.script.ConnectorScript;
+import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationListener;
@@ -109,6 +109,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     private boolean serviceAvailable = false;
     private JsonValue jsonConfiguration = null;
     private ConnectorReference connectorReference = null;
+    private Map<String, SystemAction> systemActions = new HashMap<String, SystemAction>();
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
@@ -160,6 +161,12 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         }
         if (!connectorReference.getConnectorLocation().equals(ConnectorReference.ConnectorLocation.LOCAL)) {
             connectorInfoProvider.addConnectorEventHandler(connectorReference, this);
+        }
+        if (jsonConfiguration.isDefined("systemActions")) {
+            for (JsonValue actionValue : jsonConfiguration.get("systemActions").expect(List.class)) {
+                SystemAction action = new SystemAction(actionValue);
+                systemActions.put(action.getName(), action);
+            }
         }
         logger.info("OpenICF Provisioner Service component {} is activated{}", systemIdentifier,
                 (serviceAvailable ? "." : " although the service is not available yet."));
@@ -330,7 +337,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                         before = new JsonValue(new HashMap());
                         before.put("value", value);
                         before.put("params", params);
-                        after = action(id, value, params.required());
+                        ActionId actionId = params.get(ServerConstants.ACTION_NAME).required().asEnum(ActionId.class);
+                        after = action(id, actionId, value, params.required());
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
                         return after;
                     default:
@@ -584,75 +592,113 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         }
     }
 
-    public JsonValue action(Id id, JsonValue entity, JsonValue params) throws JsonResourceException {
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
-        JsonValue result = new JsonValue(new HashMap<String, Object>());
-        ConnectorScript script = new ConnectorScript(params);
-        if (helper.isOperationPermitted(script.getAPIOperation())) {
-            JsonValue vpo = params.get(ConnectorScript.SCRIPT_VARIABLE_PREFIX);
-            String variablePrefix = null;
-            if (!vpo.isNull() && vpo.isString()) {
-                variablePrefix = vpo.asString();
-            }
+    /** TODO: Description. */
+    private enum ActionId {
+        script;
+    }
 
-            for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
-                if (entry.getKey().startsWith("_")) {
-                    continue;
-                }
-                Object value = entry.getValue();
-                Object newValue = value;
-                if (null != value) {
-                    if (value instanceof Collection) {
-                        newValue = Array.newInstance(Object.class, ((Collection) value).size());
-                        int i = 0;
-                        for (Object v : (Collection) value) {
-                            if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
-                                Array.set(newValue, i, v);
-                            } else {
-                                //Serializable may not be acceptable
-                                Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
+    public JsonValue action(Id id, ActionId actionId, JsonValue entity, JsonValue params) throws JsonResourceException {
+        switch (actionId) {
+            case script:
+                SystemAction action = systemActions.get(params.get(SystemAction.SCRIPT_ID).required().asString());
+                if (null != action) {
+                    String systemType = connectorReference.getConnectorKey().getConnectorName();
+                    List<ScriptContextBuilder> scriptContextBuilderList = action.getScriptContextBuilders(systemType);
+                    if (null != scriptContextBuilderList) {
+                        OperationHelper helper = operationHelperBuilder
+                                .build(id.getObjectType(), params, cryptoService);
+                        JsonValue result = new JsonValue(new HashMap<String, Object>());
+
+                        boolean onConnector = !"resource"
+                                .equalsIgnoreCase(params.get(SystemAction.SCRIPT_EXECUTE_MODE).asString());
+
+                        if (helper.isOperationPermitted(
+                                onConnector ? ScriptOnConnectorApiOp.class : ScriptOnResourceApiOp.class)) {
+                            JsonValue vpo = params.get(SystemAction.SCRIPT_VARIABLE_PREFIX);
+                            String variablePrefix = null;
+                            if (!vpo.isNull() && vpo.isString()) {
+                                variablePrefix = vpo.asString();
                             }
-                            i++;
+                            List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>(
+                                    scriptContextBuilderList.size());
+                            result.put("actions", resultList);
+
+                            for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
+
+                                for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
+                                    if (entry.getKey().startsWith("_")) {
+                                        continue;
+                                    }
+                                    Object value = entry.getValue();
+                                    Object newValue = value;
+                                    if (null != value) {
+                                        if (value instanceof Collection) {
+                                            newValue = Array.newInstance(Object.class, ((Collection) value).size());
+                                            int i = 0;
+                                            for (Object v : (Collection) value) {
+                                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
+                                                    Array.set(newValue, i, v);
+                                                } else {
+                                                    //Serializable may not be acceptable
+                                                    Array.set(newValue, i,
+                                                            v instanceof Serializable ? v : v.toString());
+                                                }
+                                                i++;
+                                            }
+
+                                        } else if (value.getClass().isArray()) {
+                                            //TODO implement the array support later
+                                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
+                                            //Serializable may not be acceptable
+                                            newValue = value instanceof Serializable ? value : value.toString();
+                                        }
+                                    }
+                                    contextBuilder.addScriptArgument(entry.getKey(), newValue);
+                                }
+                                contextBuilder.addScriptArgument("openidm_id", id.toString());
+
+                                //ScriptContext scriptContext = script.getScriptContextBuilder().build();
+                                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
+
+                                //It's necessary to keep the backward compatibility with Waveset IDM
+                                if (null != variablePrefix && contextBuilder.getScriptLanguage()
+                                        .equalsIgnoreCase("Shell")) {
+                                    operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
+                                }
+
+                                Map<String, Object> actionResult = new HashMap<String, Object>(2);
+                                try {
+                                    Object scriptResult = null;
+                                    if (onConnector) {
+                                        scriptResult = getConnectorFacade().runScriptOnConnector(contextBuilder.build(),
+                                                operationOptionsBuilder.build());
+                                    } else {
+                                        scriptResult = getConnectorFacade().runScriptOnResource(contextBuilder.build(),
+                                                operationOptionsBuilder.build());
+                                    }
+                                    actionResult.put("result",
+                                            ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
+                                } catch (Throwable t) {
+                                    if (logger.isDebugEnabled()) {
+                                        logger.error("Script execution error.", t);
+                                    }
+                                    actionResult.put("error", t.getMessage());
+                                }
+                                resultList.add(actionResult);
+                            }
+                        } else {
+                            logger.debug("Operation ACTION of {} is not permitted", id);
                         }
-
-                    } else if (value.getClass().isArray()) {
-                        //TODO implement the array support later
-                    } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                        //Serializable may not be acceptable
-                        newValue = value instanceof Serializable ? value : value.toString();
+                        return result;
+                    } else {
+                        return null;
                     }
-                }
-
-                if (null != variablePrefix) {
-                    script.getScriptContextBuilder().addScriptArgument(variablePrefix + entry.getKey(), newValue);
                 } else {
-                    script.getScriptContextBuilder().addScriptArgument(entry.getKey(), newValue);
+                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                            "SystemAction not found: " + params.get("name").getObject());
                 }
-            }
-            script.getScriptContextBuilder().addScriptArgument("openidm_id", id.toString());
-
-            Object scriptResult = null;
-            ConnectorFacade facade = getConnectorFacade();
-            ScriptContext scriptContext = script.getScriptContextBuilder().build();
-            OperationOptions oo = script.getOperationOptionsBuilder().build();
-            try {
-                if (ConnectorScript.ExecutionMode.CONNECTOR.equals(script.getExecMode())) {
-                    scriptResult = facade.runScriptOnConnector(scriptContext, oo);
-                } else {
-                    scriptResult = facade.runScriptOnResource(scriptContext, oo);
-                }
-            } catch (Throwable t) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Script execution error.", t);
-                }
-                result.put("error", t.getMessage());
-            }
-            result.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
-
-        } else {
-            logger.debug("Operation ACTION of {} is not permitted", id);
         }
-        return result;
+        return null;
     }
 
     /**

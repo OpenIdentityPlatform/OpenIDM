@@ -108,6 +108,7 @@
                 <configuration>
                     <systemPropertyVariables>
                         <bundles.configuration.location>${project.build.testOutputDirectory}/connectorServer/</bundles.configuration.location>
+                        <openidm.system.server.root>${project.build.testOutputDirectory}/connectorServer/</openidm.system.server.root>
                         <openicfServerPort>${openicf.port}</openicfServerPort>
                     </systemPropertyVariables>
                 </configuration>
@@ -130,7 +131,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Private-Package>org.forgerock.openidm.provisioner.openicf.impl.*</Private-Package>
+                        <Private-Package>
+                            org.forgerock.openidm.provisioner.openicf.impl.*,
+                            org.forgerock.openidm.provisioner.openicf.internal.*
+                        </Private-Package>
                         <Export-Package>
                             org.forgerock.openidm.provisioner.openicf;version=${openidm.version},
                             org.forgerock.openidm.provisioner.openicf.commons;version=${openidm.version},
