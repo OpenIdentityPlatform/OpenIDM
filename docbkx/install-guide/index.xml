@@ -86,6 +86,7 @@
  <xinclude:include href='chap-samples.xml' />
  <xinclude:include href='chap-repository.xml' />
  <xinclude:include href='chap-uninstall.xml' />
+ <xinclude:include href='../shared/glossary.xml' />
 
  <index />
 </book>
