@@ -34,8 +34,8 @@ if (response && response.result) {
         if (response.result[i].password) {
             delete response.result[i].password;
         }
-        if (response.result[i].securityanswer) {
-            delete response.result[i].securityanswer;
+        if (response.result[i].securityAnswer) {
+            delete response.result[i].securityAnswer;
         }
     }
 }       

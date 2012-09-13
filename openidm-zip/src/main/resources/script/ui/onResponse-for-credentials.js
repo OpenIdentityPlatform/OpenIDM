@@ -25,4 +25,3 @@
 if (request.params['password'] && response.result && (!response.result.length || !response.result[0].password || openidm.decrypt(response.result[0].password) !== request.params['password'])) {
     delete response.result;
 }
-

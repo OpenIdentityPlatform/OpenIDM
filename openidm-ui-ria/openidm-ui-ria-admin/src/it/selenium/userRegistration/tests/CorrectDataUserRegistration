@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:28080/" />
+<title>CorrectDataUserRegistration</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">CorrectDataUserRegistration</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>2000</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>link=Register your account</td>
+    <td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=email</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=email</td>
+	<td>test@test.com</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=givenName</td>
+	<td></td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=email</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=givenName</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=familyName</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=givenName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=familyName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=password</td>
+	<td>tesT#1#Test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passwordConfirm</td>
+	<td>tesT#1#Test</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=password</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=passwordConfirm</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>name=securityQuestion</td>
+	<td>label=What was your first pet's name?</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=securityAnswer</td>
+	<td>test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>666333666</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=terms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=securityQuestion</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=securityAnswer</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=terms</td>
+	<td>click</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=passPhrase</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passPhrase</td>
+	<td>dogg</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertElementNotPresent</td>
+	<td>css=span.error</td>
+	<td></td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=passPhrase</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=register</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>User has been registered</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>User has been registered</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

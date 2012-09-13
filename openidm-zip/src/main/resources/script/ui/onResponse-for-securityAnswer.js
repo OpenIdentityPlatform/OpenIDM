@@ -31,7 +31,7 @@
  * It is run on response to for-securityAnswer query.
  */
 
-if(response.result && (!response.result.length || !response.result[0].securityanswer || openidm.decrypt(response.result[0].securityanswer)!=request.params['securityanswer'])) {
+if(response.result && (!response.result.length || !response.result[0].securityAnswer || openidm.decrypt(response.result[0].securityAnswer)!=request.params['securityAnswer'])) {
     delete response.result;
 } else {
     response.result = "correct";

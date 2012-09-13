@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:28080/" />
+<title>openidmAdminLogin</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">openidmAdminLogin</td></tr>
+</thead><tbody>
+<tr>
+    <td>deleteAllVisibleCookies</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+	<td>open</td>
+	<td>/index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>10000</td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=login</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=login</td>
+	<td>openidm-admin</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=password</td>
+	<td>openidm-admin</td>
+</tr>
+<tr>
+    <td>fireEvent</td>
+    <td>name=password</td>
+    <td>keyup</td>
+</tr>
+<tr>
+    <td>fireEvent</td>
+    <td>name=login</td>
+    <td>keyup</td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>name=loginButton</td>
+    <td></td>
+</tr>
+<tr>
+    <td>waitForElementPresent</td>
+    <td>link=User Management</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>link=User Management</td>
+    <td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>id=user_name</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>openidm-admin</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>openidm-admin</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=logout_link</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=loginButton</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>name=loginButton</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

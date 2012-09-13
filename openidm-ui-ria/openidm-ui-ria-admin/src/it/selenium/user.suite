@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="userRegistration/tests/UserLogin">UserLogin</a></td></tr>
+<tr><td><a href="userRegistration/tests/UserLogout">UserLogout</a></td></tr>
+<tr><td><a href="userRegistration/tests/PasswordValidation">PasswordValidation</a></td></tr>
+<tr><td><a href="userRegistration/tests/CorrectDataUserRegistration">CorrectDataUserRegistration</a></td></tr>
+<tr><td><a href="userRegistration/tests/EmailValidation">EmailValidation</a></td></tr>
+<tr><td><a href="userRegistration/tests/IncorrectDataUserRegistration">IncorrectDataUserRegistration</a></td></tr>
+<tr><td><a href="userUpdate/validators/tests/LastName">LastName</a></td></tr>
+<tr><td><a href="userUpdate/validators/tests/FirstName">FirstName</a></td></tr>
+<tr><td><a href="userUpdate/validators/tests/PhoneNumber">PhoneNumber</a></td></tr>
+<tr><td><a href="userUpdate/validators/tests/CountryAndState">CountryAndState</a></td></tr>
+<tr><td><a href="userUpdate/validators/tests/CountryAndStateCorrectSettingIfSet">CountryAndStateCorrectSettingIfSet</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/multiFieldChange">multiFieldChange</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/storedDataPresentation">storedDataPresentation</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateAddress1">updateAddress1</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateAddress2">updateAddress2</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateCity">updateCity</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateCountryChange">updateCountryChange</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateCountryRemove">updateCountryRemove</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateCountrySet">updateCountrySet</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateFirstName">updateFirstName</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateLastName">updateLastName</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updatePhoneNumber">updatePhoneNumber</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updatePhoneNumberRemoveAdditionalChars">updatePhoneNumberRemoveAdditionalChars</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updatePostalCode">updatePostalCode</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateStateProvinceChange">updateStateProvinceChange</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateStateProvinceRemove">updateStateProvinceRemove</a></td></tr>
+<tr><td><a href="userUpdate/updateUserData/tests/updateStateProvinceSet">updateStateProvinceSet</a></td></tr>
+<tr><td><a href="passwordChange/tests/NotTheSameAsOldPassword">NotTheSameAsOldPassword</a></td></tr>
+<tr><td><a href="passwordChange/tests/PasswordChange">PasswordChange</a></td></tr>
+<tr><td><a href="securityQuestionChange/tests/SequrityQuestionChange">SequrityQuestionChange</a></td></tr>
+<tr><td><a href="fgtnPasswd/tests/AccessFromLoginDialog">AccessFromLoginDialog</a></td></tr>
+<tr><td><a href="fgtnPasswd/tests/AccessFromRegistration">AccessFromRegistration</a></td></tr>
+<tr><td><a href="fgtnPasswd/tests/FgtnPassValidation">ForgottenPasswordValidation</a></td></tr>
+<tr><td><a href="fgtnPasswd/tests/FgtnPassValidationAfterLogin">FgtnPassValidationAfterLogin</a></td></tr>
+<tr><td><a href="admin/tests/adminAddUser">adminAddUser</a></td></tr>
+<tr><td><a href="admin/tests/openidmAdminLogin">openidmAdminLogin</a></td></tr>
+</tbody></table>
+</body>
+</html>

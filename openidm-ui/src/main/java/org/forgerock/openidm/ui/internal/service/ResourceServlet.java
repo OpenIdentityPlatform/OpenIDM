@@ -92,8 +92,6 @@ public final class ResourceServlet
         String target = req.getPathInfo();
         if (target == null || "/".equals(target)) {
             res.sendRedirect(req.getServletPath() + "/index.html");
-        } else if (target.startsWith("/org")) {
-            res.sendError(HttpServletResponse.SC_NOT_FOUND);
         } else {
             if (!target.startsWith("/")) {
                 target += "/" + target;

@@ -1,0 +1,12 @@
+{
+    "enabled" : false,
+    "type" : "cron",
+    "schedule" : "15 0/1 * * * ?",
+    "persisted" : true,
+    "misfirePolicy" : "fireAndProceed",
+    "invokeService" : "org.forgerock.openidm.sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "systemXmlfileUserApplicationStates_managedUserApplicationState"
+    }
+}

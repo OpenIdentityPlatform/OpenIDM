@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icf:OpenICFContainer
+    xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+    xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+    
+    <ri:__USER_APPLICATION_STATE__>
+        <icf:__UID__>B65FA6A2-D43D-49CD-BEA0-CE98E275A8CD</icf:__UID__>
+        <icf:__NAME__>pending</icf:__NAME__>
+        <ri:description>Request is pending for approval</ri:description>
+    </ri:__USER_APPLICATION_STATE__>
+
+    <ri:__USER_APPLICATION_STATE__>
+        <icf:__UID__>B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD</icf:__UID__>
+        <icf:__NAME__>approved</icf:__NAME__>
+        <ri:description>Request has been approved</ri:description>
+    </ri:__USER_APPLICATION_STATE__>
+
+    <ri:__USER_APPLICATION_STATE__>
+        <icf:__UID__>B65FA6A2-D43D-49CD-BEA0-CE9CE275A8CD</icf:__UID__>
+        <icf:__NAME__>rejected</icf:__NAME__>
+        <ri:description>Request has been rejected</ri:description>
+    </ri:__USER_APPLICATION_STATE__>
+
+</icf:OpenICFContainer>
