@@ -1,6 +1,7 @@
 {
     "filters" : [
         {
+            "pattern" : "^managed/user/.*",
             "onRequest" : {
                 "type" : "text/javascript",
                 "file" : "script/router-authz.js"
@@ -98,6 +99,26 @@
             "onResponse" : {
                 "type" : "text/javascript",
                 "file" : "script/ui/onResponse-set-newPassword-for-userName-and-security-answer.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user_application_lnk/.*",
+            "methods" : [
+                "create"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/user_application_lnk/onResponse-user_application_lnk_create.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user/.*",
+            "methods" : [
+                "create"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onResponse-user_create.js"
             }
         }
     ]

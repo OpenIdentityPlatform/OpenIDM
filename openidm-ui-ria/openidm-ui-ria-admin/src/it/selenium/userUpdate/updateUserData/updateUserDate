@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  <title>Test Suite</title>
+</head>
+<body>
+<table id="suiteTable" cellpadding="1" cellspacing="1" border="1" class="selenium"><tbody>
+<tr><td><b>Test Suite</b></td></tr>
+<tr><td><a href="tests/multiFieldChange">multiFieldChange</a></td></tr>
+<tr><td><a href="tests/storedDataPresentation">storedDataPresentation</a></td></tr>
+<tr><td><a href="tests/updateAddress1">updateAddress1</a></td></tr>
+<tr><td><a href="tests/updateAddress2">updateAddress2</a></td></tr>
+<tr><td><a href="tests/updateCity">updateCity</a></td></tr>
+<tr><td><a href="tests/updateCountryChange">updateCountryChange</a></td></tr>
+<tr><td><a href="tests/updateCountryRemove">updateCountryRemove</a></td></tr>
+<tr><td><a href="tests/updateCountrySet">updateCountrySet</a></td></tr>
+<tr><td><a href="tests/updategivenName">updategivenName</a></td></tr>
+<tr><td><a href="tests/updatefamilyName">updatefamilyName</a></td></tr>
+<tr><td><a href="tests/updatePhoneNumber">updatePhoneNumber</a></td></tr>
+<tr><td><a href="tests/updatePhoneNumberRemoveAdditionalChars">updatePhoneNumberRemoveAdditionalChars</a></td></tr>
+<tr><td><a href="tests/updatePostalCode">updatePostalCode</a></td></tr>
+<tr><td><a href="tests/updateStateProvinceChange">updateStateProvinceChange</a></td></tr>
+<tr><td><a href="tests/updateStateProvinceRemove">updateStateProvinceRemove</a></td></tr>
+<tr><td><a href="tests/updateStateProvinceSet">updateStateProvinceSet</a></td></tr>
+</tbody></table>
+</body>
+</html>

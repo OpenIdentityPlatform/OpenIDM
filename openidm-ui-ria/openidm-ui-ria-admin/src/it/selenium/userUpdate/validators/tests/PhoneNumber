@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:28080" />
+<title>PhoneNumber</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">PhoneNumber</td></tr>
+</thead><tbody>
+<tr>
+    <td>deleteAllVisibleCookies</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>1000</td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ password : &quot;tesT#1#Test&quot;, userName : &quot;test@test.test&quot;, givenName : &quot;test&quot;, familyName :&quot;test&quot;, email : &quot;test@test.test&quot;, address1 : &quot;&quot;, address2 : &quot;&quot;, city : &quot;&quot;, postalCode : &quot;&quot;, phoneNumber : &quot;123&quot;, country : &quot;&quot;, stateProvince : &quot;&quot;, securityQuestion : &quot;1&quot;, securityAnswer : &quot;qwe&quot; }); });</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForCondition</td>
+	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
+	<td>1000</td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=login</td>
+	<td>test@test.test</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=password</td>
+	<td>tesT#1#Test</td>
+</tr>
+<tr>
+    <td>fireEvent</td>
+    <td>name=password</td>
+    <td>keyup</td>
+</tr>
+<tr>
+    <td>fireEvent</td>
+    <td>name=login</td>
+    <td>keyup</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=loginButton</td>
+	<td></td>
+</tr>
+<tr>
+    <td>waitForElementPresent</td>
+    <td>id=profile_link</td>
+    <td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>id=profile_link</td>
+    <td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=phoneNumber</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextNotPresent</td>
+	<td>Only numbers and special characters</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>d</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Only numbers and special characters</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=saveButton@class</td>
+	<td>*gray*</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>500000000</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>verifyTextNotPresent</td>
+	<td>Only numbers and special characters</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=saveButton@class</td>
+	<td>*orange*</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>+48 500-500 500</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>verifyTextNotPresent</td>
+	<td>Only numbers and special characters</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=saveButton@class</td>
+	<td>*orange*</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>++48 500-500 500</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Only numbers and special characters</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=saveButton@class</td>
+	<td>*gray*</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>+48500000000</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>verifyTextNotPresent</td>
+	<td>Only numbers and special characters</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=saveButton@class</td>
+	<td>*orange*</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=logout_link</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

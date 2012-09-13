@@ -12,7 +12,7 @@
             },
             "properties" : [
                 {
-                    "name" : "securityanswer",
+                    "name" : "securityAnswer",
                     "encryption" : {
                         "key" : "openidm-sym-default"
                     }
@@ -27,6 +27,42 @@
         },
         {
             "name" : "group"
+        },
+        {
+            "name" : "notification",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/notification/onCreate-notification-set-default-fields.js"
+            },
+            "onValidate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/notification/onValidate-notification.js"
+            }
+        },
+        {
+            "name" : "application",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/application/onCreate-application-set-default-fields.js"
+            },
+            "onValidate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/application/onValidate-application.js"
+            }
+        },
+        {
+            "name" : "user_application_lnk",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/user_application_lnk/onCreate-user_application_lnk-set-default-fields.js"
+            },
+            "onValidate" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/user_application_lnk/onValidate-user_application_lnk.js"
+            }
+        },
+        {
+            "name" : "user_application_state"
         }
     ]
 }

@@ -109,7 +109,7 @@
         	<unpack>true</unpack>
             <outputDirectory>/openidm/ui</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-ria</include>
+                <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
             </includes>
         </dependencySet>
         <dependencySet>

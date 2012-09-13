@@ -32,6 +32,6 @@
 if (response.password) {
     delete response.password;
 }
-if (response.securityanswer) {
-    delete response.securityanswer;
+if (response.securityAnswer) {
+    delete response.securityAnswer;
 }

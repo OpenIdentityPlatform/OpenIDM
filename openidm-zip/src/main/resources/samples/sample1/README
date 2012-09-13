@@ -5,8 +5,7 @@ This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-This sample is built into OpenIDM by default. The documentation at
-http://openidm.forgerock.org/doc/install-guide/index.html#chap-sample
+The documentation at http://openidm.forgerock.org/doc/install-guide/index.html#chap-sample
 describes how to get started with this sample.
 
 The sample shows you reconciliation between the OpenIDM internal

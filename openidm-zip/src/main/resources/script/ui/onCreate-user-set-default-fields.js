@@ -104,12 +104,12 @@ if (!object.lastPasswordSet) {
     object.lastPasswordSet = "";
 }
 
-if (!object.postalcode) {
-    object.postalcode = "";
+if (!object.postalCode) {
+    object.postalCode = "";
 }
 
-if (!object.state_province) {
-    object.state_province = "";
+if (!object.stateProvince) {
+    object.stateProvince = "";
 }
 
 if (!object.passwordAttempts) {
@@ -132,24 +132,32 @@ if (!object.city) {
     object.city = "";
 }
 
-if (!object.image) {
-    object.image = "";
+if (!object.siteImage) {
+    object.siteImage = "1";
 }
 
-if (!object.passphrase) {
-    object.passphrase = "";
+if (!object.passPhrase) {
+    object.passPhrase = "";
 }
 
-if (!object.firstName) {
-    object.firstName = "";
+if (!object.givenName) {
+    object.givenName = "";
 }
 
-if (!object.lastName) {
-    object.lastName = "";
+if (!object.familyName) {
+    object.familyName = "";
 }
 
-if (!object.phone) {
-    object.phone = "";
+if (!object.phoneNumber) {
+    object.phoneNumber = "";
+}
+
+if (!object.frequentlyUsedApplications) {
+    object.frequentlyUsedApplications = "";
+}
+
+if (!object.userApplicationsOrder) {
+    object.userApplicationsOrder = "";
 }
 
 //password and security answer are generated if missing just to keep those attributes filled

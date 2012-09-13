@@ -62,9 +62,10 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-ui-ria</artifactId>
+            <artifactId>openidm-ui-ria-admin</artifactId>
             <version>${openidm.version}</version>
             <type>zip</type>
+            <classifier>www</classifier>
         </dependency>
     </dependencies>
 
@@ -112,16 +113,16 @@
 							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<relocations>
 								<relocation>
-									<pattern>openidm-ui-ria</pattern>
+									<pattern>openidm-ui-ria-admin</pattern>
 									<shadedPattern>ui</shadedPattern>
 									<includes>
-										<include>openidm-ui-ria.**</include>
+										<include>openidm-ui-ria-admin.**</include>
 									</includes>
 								</relocation>
 							</relocations>
 							<artifactSet>
 								<includes>
-									<include>org.forgerock.openidm:openidm-ui-ria</include>
+									<include>org.forgerock.openidm:openidm-ui-ria-admin</include>
 								</includes>
 							</artifactSet>
 						</configuration>
@@ -131,3 +132,4 @@
 		</plugins>
 	</build>
 </project>
+

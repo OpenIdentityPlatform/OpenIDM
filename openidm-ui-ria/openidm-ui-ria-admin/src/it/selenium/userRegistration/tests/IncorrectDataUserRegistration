@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:28080/" />
+<title>IncorrectDataUserRegistration</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">IncorrectDataUserRegistration</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>index.html</td>
+	<td></td>
+</tr>
+<tr>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>runScript</td>
+	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td></td>
+</tr>
+<tr>
+    <td>click</td>
+    <td>link=Register your account</td>
+    <td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=email</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=email</td>
+	<td>test@test.pl</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=email</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>123qwe</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>Only numbers</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Only numbers</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=phoneNumber</td>
+	<td>12345678</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=phoneNumber</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=givenName</td>
+	<td>123qwe</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=givenName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[2]/div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[2]/div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=givenName</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=givenName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[2]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[2]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=familyName</td>
+	<td>123</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=familyName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[3]/div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[3]/div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=familyName</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=familyName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[3]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>//div[@id='registration']/div[2]/form/fieldset/div/div[3]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>name=securityQuestion</td>
+	<td>label=What is the name of the street you lived on as a child?</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=securityQuestion</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=div.groupField &gt; div.field &gt; span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>css=div.groupField &gt; div.field &gt; span.ok</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=securityAnswer</td>
+	<td>Test</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=securityAnswer</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=.groupFieldErrors span.error</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>css=.groupFieldErrors span.error</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=terms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>css=.groupFieldErrors span.error</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>css=.groupFieldErrors span.error</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=terms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>Acceptance required for registration</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Acceptance required for registration</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>name=terms</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=password</td>
+	<td>qweqweqweQ1</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passwordConfirm</td>
+	<td>qweqweqweQ1</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=password</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=passwordConfirm</td>
+	<td>keyup</td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>name=passPhrase</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passPhrase</td>
+	<td>dog</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=passPhrase</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForTextPresent</td>
+	<td>Minimum</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyTextPresent</td>
+	<td>Minimum</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=passPhrase</td>
+	<td>dog123</td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>name=register@class</td>
+	<td>*orange*</td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=register@class</td>
+	<td>*orange*</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=givenName</td>
+	<td>123</td>
+</tr>
+<tr>
+	<td>fireEvent</td>
+	<td>name=givenName</td>
+	<td>change</td>
+</tr>
+<tr>
+	<td>waitForAttribute</td>
+	<td>name=register@class</td>
+	<td>*gray*</td>
+</tr>
+<tr>
+	<td>verifyAttribute</td>
+	<td>name=register@class</td>
+	<td>*gray*</td>
+</tr>
+</tbody></table>
+</body>
+</html>

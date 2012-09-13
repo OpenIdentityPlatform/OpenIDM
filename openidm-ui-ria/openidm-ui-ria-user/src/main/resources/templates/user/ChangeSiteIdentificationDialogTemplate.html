@@ -1,0 +1,32 @@
+<h1>Site Image</h1>
+<form action='#' method='post'>
+    <fieldset>
+        <label>Site Image</label> 
+        <p style="width: 400px; margin-left: 220px; margin-bottom: 10px;">The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site</p>
+               
+        <input type="hidden" name="oldSiteImage" /> 
+               
+        <div class="ContentFlow" id="siteImageFlow">
+            <div class="loadIndicator"><div class="indicator"></div></div>
+            <div class="flow">
+                <img class="item" src="images/passphrase/mail.png" data-site-image="mail.png" />
+                <img class="item" src="images/passphrase/user.png" data-site-image="user.png" />
+                <img class="item" src="images/passphrase/report.png" data-site-image="report.png" />
+                <img class="item" src="images/passphrase/twitter.png" data-site-image="twitter.png" />
+            </div>
+            <div class="scrollbar"><div class="slider"></div></div>
+        </div>   
+
+        <input type="hidden" name="siteImage" data-validator="siteImage" data-validation-status="disabled"/> 
+
+        <input type="hidden" name="oldPassPhrase" />
+		<div class="field">
+			<label>Site Phrase</label> 
+			<input type="text" name="passPhrase" data-validator="passPhrase" data-validation-status="disabled"/> 
+			<span class='error'>x</span>
+			<div class="validationMessage"></div>
+		</div>
+	</fieldset>
+</form>
+
+
