@@ -18,10 +18,6 @@ package org.forgerock.openidm.filter;
 
 // Java Standard Edition
 import java.io.IOException;
-
-
-import org.apache.commons.codec.binary.Base64;
-
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -31,26 +27,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpSession;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-// OSGi Framework
-import org.forgerock.openidm.http.ContextRegistrator;
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.NamespaceException;
-
-// Apache Felix Maven SCR Plugin
+import org.apache.commons.codec.binary.Base64;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -58,25 +46,24 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
-
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-
-// JSON Resource
 import org.forgerock.json.resource.JsonResource;
-
-// Deprecated
+import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.util.DateUtil;
-
-import org.forgerock.openidm.audit.util.Status;
+import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
+import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.http.NamespaceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Auth Filter
@@ -188,11 +175,10 @@ public class AuthFilter implements Filter {
         chain.doFilter(new UserWrapper(req, authData.username, authData.roles), res);
     }
 
-    private void authFailed(HttpServletRequest req, HttpServletResponse res,
-                                            String username) throws IOException {
-
+    private void authFailed(HttpServletRequest req, HttpServletResponse res, String username) throws IOException {
         logAuth(req, username, null, Action.authenticate, Status.FAILURE);
-        res.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        JsonResourceException jre = new JsonResourceException(401, "Access denied");
+        res.getWriter().write(jre.toJsonValue().toString());
     }
 
     private static void logAuth(HttpServletRequest req, String username,
@@ -226,6 +212,7 @@ public class AuthFilter implements Filter {
         }
     }
 
+        //res.sendError(HttpServletResponse.SC_UNAUTHORIZED, new JsonValue(respMap).toString());
     private AuthData doBasicAuth(String data) throws AuthException {
 
         LOGGER.debug("HTTP basic authentication request");
