@@ -113,6 +113,7 @@
  <xinclude:include href='appendix-scheduling.xml' />
  <xinclude:include href='appendix-router.xml' />
  <xinclude:include href='appendix-jetty.xml' />
+ <xinclude:include href='../shared/glossary.xml' />
 
  <index />
 </book>
