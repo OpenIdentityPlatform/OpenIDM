@@ -181,7 +181,6 @@ public class ConnectorInfoProviderServiceTest {
         String rootPath = URLDecoder.decode(root.getPath(), "UTF-8");
         Map<String, String> systemProperties = new HashMap<String, String>(1);
         systemProperties.put(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
-        System.setProperty(ServerConstants.PROPERTY_SERVER_ROOT, rootPath);
         return systemProperties;
     }
 

@@ -30,5 +30,63 @@
       },
    "operationOptions" :
       {
-      }
+      },
+    "systemActions" :
+      [
+          {
+              "_script-id" : "ConnectorScript#1",
+              "actions" :
+                      [
+                          {
+                              "systemType" : ".*TestConnector",
+                              "actionType" : "Groovy",
+                              "actionSource" : "return \"Arthur Dent\""
+                          }
+                      ]
+          },
+          {
+              "_script-id" : "ConnectorScript#2",
+              "actions" :
+                      [
+                          {
+                              "systemType" : ".*TestConnector",
+                              "actionType" : "Groovy",
+                              "actionSource" : "return testArgument"
+                          }
+                      ]
+          },
+          {
+              "_script-id" : "ConnectorScript#3",
+              "actions" :
+                      [
+                          {
+                              "systemType" : ".*TestConnector",
+                              "actionType" : "Groovy",
+                              "actionSource" : "return testArgument.length"
+                          }
+                      ]
+          },
+          {
+              "_script-id" : "ConnectorScript#4",
+              "actions" :
+                      [
+                          {
+                              "systemType" : ".*TestConnector",
+                              "actionType" : "Groovy",
+                              "actionSource" : "throw new RuntimeException(\"Marvin\")"
+                          }
+                      ]
+          },
+          {
+              "_script-id" : "ConnectorScript#5",
+              "actions" :
+                      [
+                          {
+                              "systemType" : ".*TestConnector",
+                              "actionType" : "Shell",
+                              "actionFile" : "login.cmd"
+                          }
+                      ]
+          }
+      ]
 }
