@@ -864,7 +864,7 @@ class ObjectMapping implements SynchronizationListener {
          * @throws SynchronizationException if on-demand load of the object failed
          */
         protected JsonValue getTargetObject() throws SynchronizationException {
-            if (targetObjectAccessor == null || targetObjectAccessor.getLocalId() == null) {
+            if (targetObjectAccessor == null || (!targetObjectAccessor.isLoaded() && targetObjectAccessor.getLocalId() == null)) {
                 return null;
             } else {
                 return targetObjectAccessor.getObject();
@@ -887,6 +887,14 @@ class ObjectMapping implements SynchronizationListener {
          */
         protected String getTargetObjectId() {
             return targetObjectAccessor == null ? null : targetObjectAccessor.getLocalId();
+        }
+        
+        /**
+          * @return Whether the target representation is loaded, i.e. the getObject represents what it found.
+          * IF a target was not found, the state is loaded with a payload / object of null.
+         */
+        protected boolean isTargetLoaded() {
+            return targetObjectAccessor == null ? false : targetObjectAccessor.isLoaded();
         }
         
         /**
@@ -922,10 +930,10 @@ class ObjectMapping implements SynchronizationListener {
          */
         protected boolean hasTargetObject() throws SynchronizationException {
             boolean defined = false;
-            if (targetObjectAccessor == null || targetObjectAccessor.getLocalId() == null) {
+            if (targetObjectAccessor == null || (!isTargetLoaded() && targetObjectAccessor.getLocalId() == null)) {
                 defined = false;
             } else {
-                if (targetObjectAccessor.isLoaded() && targetObjectAccessor.getObject() != null) {
+                if (isTargetLoaded() && targetObjectAccessor.getObject() != null) {
                     // Check against already laoded/defined object first, without causing new load
                     defined = true;
                 } else if (reconContext != null && reconContext.getTargetIds() != null) {
@@ -1019,6 +1027,8 @@ class ObjectMapping implements SynchronizationListener {
                                 }
                                 JsonValue createTargetObject = new JsonValue(new HashMap<String, Object>());
                                 applyMappings(getSourceObject(), createTargetObject); // apply property mappings to target
+                                targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, 
+                                        createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
 
                                 JsonValue context = ObjectSetContext.get();
@@ -1216,8 +1226,12 @@ class ObjectMapping implements SynchronizationListener {
                 if (getSourceObjectId() != null) {
                     scope.put("source", getSourceObject().asMap());
                 }
-                if (getTargetObjectId() != null) {
-                    scope.put("target", getTargetObject().asMap());
+                // Target may not have ID yet, e.g. an onCreate with the target object defined, 
+                // but not stored/id assigned.
+                if (isTargetLoaded() || getTargetObjectId() != null) {
+                    if (getTargetObject() != null) {
+                        scope.put("target", getTargetObject().asMap());
+                    }
                 }
                 if (situation != null) {
                     scope.put("situation", situation.toString());
