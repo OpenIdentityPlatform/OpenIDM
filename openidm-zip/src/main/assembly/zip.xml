@@ -135,5 +135,12 @@
             </includes>
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>
+        <dependencySet>
+            <outputDirectory>/openidm/bin/workflow</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>
+                <include>org.forgerock.openidm:openidm-workflow-remote</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
 </assembly>

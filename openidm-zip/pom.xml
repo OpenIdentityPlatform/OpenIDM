@@ -148,6 +148,18 @@
             <artifactId>openidm-workflow-activiti</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-workflow-remote</artifactId>
+            <version>${openidm.version}</version>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-workflow-activiti</artifactId>
+            <version>${openidm.version}</version>
+            <classifier>jar-with-dependencies</classifier>
+        </dependency>
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.apache.felix</groupId>
