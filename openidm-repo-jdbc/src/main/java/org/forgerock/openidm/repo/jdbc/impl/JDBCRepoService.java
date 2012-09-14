@@ -778,6 +778,14 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         maxBatchSize,
                         new MySQLExceptionHandler());
                 break;
+            case SQLSERVER:
+                handler = new MSSQLTableHandler(
+                        tableConfig,
+                        dbSchemaName,
+                        queries,
+                        maxBatchSize,
+                        new DefaultSQLExceptionHandler());
+                break;
             default:
                 handler = new GenericTableHandler(
                         tableConfig,
@@ -827,6 +835,14 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         dbSchemaName,
                         explicitQueries,
                         new MySQLExceptionHandler());
+                break;
+            case SQLSERVER:
+                handler = new MappedTableHandler(
+                        table,
+                        objectToColumn,
+                        dbSchemaName,
+                        explicitQueries,
+                        new DefaultSQLExceptionHandler());
                 break;
             default:
                 handler = new MappedTableHandler(
