@@ -837,7 +837,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         new MySQLExceptionHandler());
                 break;
             case SQLSERVER:
-                handler = new MappedTableHandler(
+                handler = new MSSQLMappedTableHandler(
                         table,
                         objectToColumn,
                         dbSchemaName,
