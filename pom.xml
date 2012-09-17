@@ -67,6 +67,9 @@
             <url>${siteDistributionURL}</url>
         </site>
     </distributionManagement>
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
 
     <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
     <repositories>
@@ -243,7 +246,7 @@
         <log4j.version>1.2.16</log4j.version>
         <orientdb.version>1.1.0</orientdb.version>
         <jackson.version>1.9.9</jackson.version>
-        <restlet.version>2.0.14</restlet.version>
+        <restlet.version>2.0.15</restlet.version>
 		<javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
 		
         <!-- Commons JSON versions -->
@@ -327,31 +330,6 @@
 
     <profiles>
         <profile>
-            <!-- This profile only active if the build server exports the SVN_REVISION variable -->
-            <id>ci-build</id>
-            <activation>
-                <property>
-                    <name>env.SVN_REVISION</name>
-                </property>
-            </activation>
-            <properties>
-                <ci.build.number>${env.BUILD_NUMBER}</ci.build.number>
-                <ci.svn.revision>${env.SVN_REVISION}</ci.svn.revision>
-            </properties>
-        </profile>
-        <profile>
-            <id>non-ci-build</id>
-            <activation>
-                <property>
-                    <name>!env.SVN_REVISION</name>
-                </property>
-            </activation>
-            <properties>
-                <ci.build.number>0</ci.build.number>
-                <ci.svn.revision>0</ci.svn.revision>
-            </properties>
-        </profile>
-        <profile>
             <id>functional-test</id>
             <activation>
                 <property>
@@ -429,7 +407,7 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.6</version>
+                <version>1.7</version>
             </dependency>
 
             <!-- SLF4J -->
@@ -466,6 +444,42 @@
                 <groupId>org.restlet.jee</groupId>
                 <artifactId>org.restlet.ext.httpclient</artifactId>
                 <version>${restlet.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpclient</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpcore</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.httpcomponents</groupId>
+                        <artifactId>httpmime</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>net.jcip</groupId>
+                        <artifactId>jcip-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.james</groupId>
+                        <artifactId>apache-mime4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient-osgi</artifactId>
+                <version>4.2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore-osgi</artifactId>
+                <version>4.2.1</version>
             </dependency>
 
             <!-- Core OSGi -->
@@ -758,8 +772,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <inherited>true</inherited>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
                     <compilerArgument>-Xlint:all</compilerArgument>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
