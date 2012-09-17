@@ -165,9 +165,12 @@ define("config/process/UserConfig", [
                 "org/forgerock/openidm/ui/common/main/Configuration",
                 "org/forgerock/openidm/ui/common/main/Router"
         ],
-            processDescription: function(loggedUser, userDelegate, conf, loginCtrl, appConfiguration, router) {
-                if(loggedUser.roles && loggedUser.roles.indexOf("openidm-admin") !== -1) {
-                    conf.setProperty('loggedUser', loggedUser);
+            processDescription: function(userData, userDelegate, conf, loginCtrl, appConfiguration, router) {
+                var loggedUser = userData.user;                
+                
+                //if(loggedUser.roles && loggedUser.roles.indexOf("openidm-admin") !== -1) {
+                if(userData.userName === "openidm-admin") {
+                    conf.setProperty('loggedUser', {roles: "openidm-admin,openidm-authorized", userName: userData.userName});
                     eventManager.sendEvent(constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                     
                     if(conf.gotoURL) {

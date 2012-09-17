@@ -40,8 +40,28 @@ define("org/forgerock/openidm/ui/user/delegates/ApplicationDelegate", [
     obj.applications = {};
     obj.numberOfApplications = 0;
     
-    obj.getAllApplications = function(successCallback, errorCallback) {
+    obj.normalizeBooleanField = function(item, fieldName) {
+        if (item[fieldName] === "0") {
+            item[fieldName] = false;
+        } else if (item[fieldName] === "1") {
+            item[fieldName] = true;
+        }
+    };
+    
+    obj.rebuildApp = function(app) {
+        obj.normalizeBooleanField(app, 'isDefault');
+        obj.normalizeBooleanField(app, 'needsApproval');
+    };
+    
+    obj.rebuildApps = function(apps) {
         var i;
+        for(i = 0; i < apps.length; i++ ) {
+            obj.rebuildApp(apps[i]);
+        } 
+    };
+    
+    obj.getAllApplications = function(successCallback, errorCallback) {
+        var i, rebuildedApp;
         console.info("Getting all applications");
 
         obj.applicationsCallback = successCallback;
@@ -50,6 +70,7 @@ define("org/forgerock/openidm/ui/user/delegates/ApplicationDelegate", [
         obj.serviceCall({url: "/?_query-id=query-all-applications", success: function(data) {
             if(successCallback) {
                 for (i = 0; i < data.result.length; i++) {
+                    rebuildedApp = obj.rebuildApp(data.result[i]);
                     obj.applications[data.result[i]._id] = data.result[i];
                 }
                 successCallback(data.result);
@@ -89,7 +110,7 @@ define("org/forgerock/openidm/ui/user/delegates/ApplicationDelegate", [
 
 
     obj.getListOfApplications = function(applicationIds, successCallback, errorCallback) {
-        var par,i;
+        var par,i, result;
         for (i = 0; i < applicationIds.length; i++) {
             applicationIds[i] = "'"+applicationIds[i]+"'";
         }
@@ -98,7 +119,11 @@ define("org/forgerock/openidm/ui/user/delegates/ApplicationDelegate", [
             url: "/?_query-id=application-for-ids&" + $.param({applicationIds: par}), 
             success: function (data) {
                 if(successCallback) {
-                    successCallback(data.result);
+                    
+                    
+                    result = data.result;
+                    obj.rebuildApps(result);
+                    successCallback(result);
                 }
             },
             error: errorCallback
@@ -111,10 +136,16 @@ define("org/forgerock/openidm/ui/user/delegates/ApplicationDelegate", [
         applicationIdsToGet = obj.getApplicationIdsNotInCache(applicationIdsToPrepare);
         if (applicationIdsToGet.length > 0) {
             obj.getListOfApplications(applicationIdsToGet, function(applications) {
-                for (i = 0; i < applications.length; i++) {
-                    obj.applications[applications[i]._id] = applications[i];
+                if (applications && applications.length > 0) {
+                    for (i = 0; i < applications.length; i++) {
+                        obj.applications[applications[i]._id] = applications[i];
+                    }
+                    successCallback();
+                } else {
+                    obj.getAllApplications(function(applications) {
+                        successCallback();
+                    });
                 }
-                successCallback();
             });
         } else {
             console.log("All applications in cache");
