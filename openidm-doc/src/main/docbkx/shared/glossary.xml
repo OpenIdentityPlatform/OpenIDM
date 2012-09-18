@@ -79,7 +79,7 @@
  <glossdef>
   <para>During reconciliation, comparisons are made between managed objects 
   and objects on source or target systems. Reconciliation can result in one 
-  or more specified actions, including, but not limited to, sychronization.
+  or more specified actions, including, but not limited to, synchronization.
   </para>
  </glossdef>
 </glossentry>

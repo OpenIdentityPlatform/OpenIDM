@@ -1058,7 +1058,7 @@ $ curl
   <title>Sample 5 - Synchronization of Two Resources</title>
   <indexterm>
    <primary>Samples</primary>
-   <secondary>Sample 5 - Sychronization of two resources</secondary>
+   <secondary>Sample 5 - Synchronization of two resources</secondary>
   </indexterm>
 
   <para>Sample 5 demonstrates the flow of data from one external resource to
