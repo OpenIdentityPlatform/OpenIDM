@@ -103,7 +103,7 @@ public class RepoJobStore implements JobStore {
     /**
      * The misfire threshold
      */
-    private long misfireThreshold = 5000;
+    private long misfireThreshold = 10000;
     
     /**
      * A list of all "blocked" jobs.
@@ -137,30 +137,32 @@ public class RepoJobStore implements JobStore {
         logger.info("Initializing RepoJobStore");
         this.schedulerSignaler = schedSignaler;
         this.loadHelper = loadHelper;
-        
-        try {
-            // Make sure all available triggers are "waiting"
-            WaitingTriggers wt = getWaitingTriggers();
-            List<String> waitingTriggers = wt.getTriggerNamesList();
-            String [] groupNames = getTriggerGroupNames(null);
-            for (String groupName : groupNames) {
-                String [] triggerNames = getTriggerNames(null, groupName);
-                for (String triggerName : triggerNames) {
-                    // Check if the trigger is not "waiting"
-                    // This would happen if the trigger was acquired or if the system shutdown 
-                    //  (or an error occurred) during the acquireNextTrigger()
-                    if (!waitingTriggers.contains(triggerName)) {
-                        // Check if trigger should be "waiting"
-                        TriggerWrapper tw = getTriggerWrapper(groupName, triggerName);
-                        if (!tw.isAcquired()) {
-                            // Add the trigger to waitingTriggers
-                            addWaitingTrigger(tw.getTrigger(), wt);
+        synchronized (lock) {
+            try {
+                // Make sure all available triggers are "waiting"
+                WaitingTriggers wt = getWaitingTriggers();
+                logger.trace("Getting Acquired Triggers");
+                AcquiredTriggers at = getAcquiredTriggers(instanceId);
+                List<Trigger> acquiredTriggers = at.getTriggers();
+                //for (Trigger t : acquiredTriggers) {
+                for (Iterator<Trigger> it = acquiredTriggers.iterator(); it.hasNext();) {
+                    Trigger t = it.next();
+                    if (hasTriggerMisfired(t)) {
+                        logger.trace("Trigger {} has misfired", t.getName());
+                        processTriggerMisfired(getTriggerWrapper(t.getGroup(), t.getName()), wt);
+                        if (t.getNextFireTime() != null) {
+                            // Add the trigger to the "waiting" triggers tree
+                            addWaitingTrigger(t, wt);
+                            // Remove the trigger from the "acquired" triggers list
+                            removeAcquiredTrigger(t, at, instanceId);
                         }
                     }
+                    it = acquiredTriggers.iterator();
                 }
+
+            } catch (JobPersistenceException e) {
+                logger.warn("Error initializing RepoJobStore", e);
             }
-        } catch (JobPersistenceException e) {
-            logger.warn("Error initializing RepoJobStore", e);
         }
     }
 
@@ -331,6 +333,11 @@ public class RepoJobStore implements JobStore {
     private String getWaitingTriggersRepoId() {
         StringBuilder sb = new StringBuilder();
         return sb.append(getIdPrefix()).append("waitingTriggers").toString();
+    }
+    
+    private String getAcquiredTriggersRepoId() {
+        StringBuilder sb = new StringBuilder();
+        return sb.append(getIdPrefix()).append("acquiredTriggers").toString();
     }
 
     /**
@@ -560,7 +567,7 @@ public class RepoJobStore implements JobStore {
             while (trigger == null) {
                 try {
                     waitingTriggers = getWaitingTriggers();
-                    trigger = waitingTriggers.getTriggerNames().first();
+                    trigger = waitingTriggers.getTriggers().first();
                 } catch (NoSuchElementException e1) {
                     logger.info("No waiting triggers to acquire");
                     return null;
@@ -610,6 +617,8 @@ public class RepoJobStore implements JobStore {
                 }
 
                 updateTriggerInRepo(trigger.getGroup(), trigger.getName(), tw, tw.getRevision());
+                
+                addAcquiredTrigger(trigger, instanceId);
 
                 logger.info("Acquiring next trigger {} to be fired at {}", new Object[]{trigger.getName(), trigger.getNextFireTime()});
                 return (Trigger)trigger.clone();
@@ -627,7 +636,7 @@ public class RepoJobStore implements JobStore {
         synchronized (lock) {
             TriggerWrapper tw = getTriggerWrapper(trigger.getGroup(), trigger.getName());
             if (tw == null) {
-                logger.warn("Cannot release acquired trigger {} in group {}, trigger does not exist", 
+                logger.debug("Cannot release acquired trigger {} in group {}, trigger does not exist", 
                         new Object[] {trigger.getName(),trigger.getGroup()});
                 return;
             }
@@ -635,6 +644,7 @@ public class RepoJobStore implements JobStore {
                 tw.setAcquired(false);
                 updateTriggerInRepo(trigger.getGroup(), trigger.getName(), tw, tw.getRevision());
                 addWaitingTrigger(trigger);
+                removeAcquiredTrigger(trigger, instanceId);
             } else {
                 logger.warn("Cannot release acquired trigger {} in group {}, trigger has not been acquired", 
                         new Object[] {trigger.getName(),trigger.getGroup()});
@@ -1061,6 +1071,7 @@ public class RepoJobStore implements JobStore {
                 TriggerWrapper tw = getTriggerWrapper(groupName, triggerName);
                 if (tw != null)  {
                     removeWaitingTrigger(tw.getTrigger());
+                    removeAcquiredTrigger(tw.getTrigger(), instanceId);
                 
                     // Delete trigger
                     rev = tw.getRevision();
@@ -1452,6 +1463,9 @@ public class RepoJobStore implements JobStore {
             JobWrapper jw = getJobWrapper(jobDetail.getGroup(), jobDetail.getName());
             TriggerWrapper tw = new TriggerWrapper(getTriggerFromRepo(trigger.getGroup(), trigger.getName()).asMap());
             
+            // Remove the acquired trigger (if acquired)
+            removeAcquiredTrigger(trigger, instanceId);
+            
             if (jw != null) {
                 JobDetail jd;
                 try {
@@ -1649,7 +1663,7 @@ public class RepoJobStore implements JobStore {
         synchronized (lock) {
             try {
                 addRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()), 
-                        getWaitingTriggersRepoId());
+                        getWaitingTriggersRepoId(), "names");
             } catch (JsonResourceException e) {
                 throw new JobPersistenceException("Error adding waiting trigger", e);
             }
@@ -1667,7 +1681,45 @@ public class RepoJobStore implements JobStore {
         synchronized (lock) {
             try {
                 return removeRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()), 
-                        getWaitingTriggersRepoId());
+                        getWaitingTriggersRepoId(), "names");
+            } catch (JsonResourceException e) {
+                throw new JobPersistenceException("Error removing waiting trigger", e);
+            }
+        }
+    }
+    
+    /**
+     * Adds a Trigger to the list of acquired triggers.
+     * 
+     * @param trigger    the Trigger to add
+     * @param instanceId the instance ID
+     * @throws JobPersistenceException
+     * @throws ObjectSetException
+     */
+    private void addAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
+        synchronized (lock) {
+            try {
+                addRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()), 
+                        getAcquiredTriggersRepoId(), instanceId);
+            } catch (JsonResourceException e) {
+                throw new JobPersistenceException("Error adding waiting trigger", e);
+            }
+        }
+    }
+    
+    /**
+     * Removes a Trigger from the list of acquired triggers.
+     * 
+     * @param trigger    the Trigger to remove
+     * @param instanceId the instance ID
+     * @throws JobPersistenceException
+     * @throws ObjectSetException
+     */
+    private boolean removeAcquiredTrigger(Trigger trigger, String instanceId) throws JobPersistenceException {
+        synchronized (lock) {
+            try {
+                return removeRepoListName(getTriggerId(trigger.getGroup(), trigger.getName()), 
+                        getAcquiredTriggersRepoId(), instanceId);
             } catch (JsonResourceException e) {
                 throw new JobPersistenceException("Error removing waiting trigger", e);
             }
@@ -1677,13 +1729,13 @@ public class RepoJobStore implements JobStore {
     /**
      * Adds a Trigger to the list of waiting triggers.
      * 
-     * @param trigger   the Trigger to add
-     * @param waitingTriggers  the WaitingTriggers object
+     * @param trigger           the Trigger to add
+     * @param waitingTriggers   the WaitingTriggers object
      * @throws JobPersistenceException
      */
     private boolean addWaitingTrigger(Trigger trigger, WaitingTriggers waitingTriggers) throws JobPersistenceException {
         synchronized (lock) {
-            waitingTriggers.getTriggerNames().add(trigger);
+            waitingTriggers.getTriggers().add(trigger);
             return updateWaitingTriggers(waitingTriggers);
         }
     }
@@ -1691,17 +1743,39 @@ public class RepoJobStore implements JobStore {
     /**
      * Removes a Trigger from the list of waiting triggers.
      * 
-     * @param trigger   the Trigger to remove
-     * @param waitingTriggers  the WaitingTriggers object
+     * @param trigger           the Trigger to remove
+     * @param waitingTriggers   the WaitingTriggers object
      * @throws JobPersistenceException
      */
     private boolean removeWaitingTrigger(Trigger trigger, WaitingTriggers waitingTriggers) throws JobPersistenceException {
         synchronized (lock) {
-            waitingTriggers.getTriggerNames().remove(trigger);
+            waitingTriggers.getTriggers().remove(trigger);
             return updateWaitingTriggers(waitingTriggers);
         }
     }
     
+    /**
+     * Removes a Trigger from the list of acquired triggers (using version control).
+     * 
+     * @param trigger           the Trigger to remove
+     * @param instanceId        the instance ID
+     * @param acquiredTriggers  the AcquiredTriggers object
+     * @throws JobPersistenceException
+     */
+    private boolean removeAcquiredTrigger(Trigger trigger, AcquiredTriggers acquiredTriggers, String instanceId) throws JobPersistenceException {
+        synchronized (lock) {
+            acquiredTriggers.getTriggers().remove(trigger);
+            return updateAcquiredTriggers(acquiredTriggers, instanceId);
+        }
+    }
+    
+    /**
+     * Updates the waiting triggers in the repository.
+     * 
+     * @param waitingTriggers the updated WaitingTriggers object
+     * @return  true if the update succeeded, false otherwise
+     * @throws JobPersistenceException
+     */
     private boolean updateWaitingTriggers(WaitingTriggers waitingTriggers) throws JobPersistenceException {
         synchronized (lock) {
             String id = getWaitingTriggersRepoId();
@@ -1722,7 +1796,96 @@ public class RepoJobStore implements JobStore {
         }
     }
     
+    /**
+     * Updates the acquired triggers in the repository.
+     * 
+     * @param acquiredTriggers  the updated AcquiredTriggers object
+     * @param instanceId        the ID of the instance that acquired the triggers
+     * @return  true if the update succeeded, false otherwise
+     * @throws JobPersistenceException
+     */
+    private boolean updateAcquiredTriggers(AcquiredTriggers acquiredTriggers, String instanceId) throws JobPersistenceException {
+        synchronized (lock) {
+            String id = getAcquiredTriggersRepoId();
+            if (!setAccessor()) {
+                throw new JobPersistenceException("Repo router is null");
+            }
+            Map<String, Object> map = new HashMap<String, Object>();
+            List<Trigger> triggers = acquiredTriggers.getTriggers();
+            map.put(instanceId, triggers);
+            // update repo
+            try {
+                JsonValue newValue = accessor.update(id, acquiredTriggers.getRevision(), new JsonValue(map));
+                acquiredTriggers.setRevision((String)newValue.asMap().get("_rev"));
+                return true;
+            } catch (JsonResourceException e) {
+                throw new JobPersistenceException("Error updating waiting triggers", e);
+            }
+        }
+    }
     
+    /**
+     * Returns the an AcquiredTriggers object which wraps the List of all triggers in the "acquired" state
+     * 
+     * @param instanceId    the ID of the instance that acquired the triggers
+     * @return  the WaitingTriggers object
+     * @throws JobPersistenceException
+     */
+    private AcquiredTriggers getAcquiredTriggers(String instanceId) throws JobPersistenceException {
+        List<Trigger> acquiredTriggers = new ArrayList<Trigger>();
+        List<String> acquiredTriggerIds = new ArrayList<String>();
+        String repoId = getAcquiredTriggersRepoId();
+        String revision = null;
+        Map<String, Object> map;
+        if (!setAccessor()) {
+            throw new JobPersistenceException("Repo router is null");
+        }
+        try {
+            try {
+                map = accessor.read(repoId).asMap();
+            } catch (NotFoundException e) {
+                logger.debug("repo list {} not found, lets create it", "names");
+                map = null;
+            }
+            if (map == null) {
+                map = new HashMap<String, Object>();
+                map.put(instanceId, acquiredTriggerIds);
+                // create in repo
+                map = accessor.create(repoId, new JsonValue(map)).asMap();
+                revision = (String)map.get("_rev");
+            } else {
+                // else check if list exists in map
+                acquiredTriggerIds = (List<String>) map.get(instanceId);
+                revision = (String)map.get("_rev");
+                if (acquiredTriggerIds == null) {
+                    acquiredTriggerIds = new ArrayList<String>();
+                    map.put("names", acquiredTriggerIds);
+                    JsonValue updatedValue = accessor.update(repoId, revision, new JsonValue(map));
+                    revision = (String) updatedValue.asMap().get("_rev");
+                }
+            }
+            for (String id : acquiredTriggerIds) {
+                TriggerWrapper tw = getTriggerWrapper(getGroupFromId(id), getNameFromId(id));
+                if (tw == null) {
+                    logger.warn("Could not add {} to list of waiting Triggers. Trigger not found in repo", id);
+                } else {
+                    logger.debug("Found waiting trigger {} in group {}", new Object[]{tw.getName(),tw.getGroup()});
+                    acquiredTriggers.add(tw.getTrigger());
+                }
+            }
+            return new AcquiredTriggers(acquiredTriggers, revision);
+        } catch (JsonResourceException e) {
+            logger.warn("Error intializing waiting triggers", e);
+            throw new JobPersistenceException("Error intializing waiting triggers", e);
+        }
+    }
+    
+    /**
+     * Returns the a WaitingTriggers object which wraps the Tree of all triggers in the "waiting" state
+     * 
+     * @return  the WaitingTriggers object
+     * @throws JobPersistenceException
+     */
     private WaitingTriggers getWaitingTriggers() throws JobPersistenceException {
         TreeSet<Trigger> waitingTriggers = new TreeSet(new TriggerComparator());
         List<String> waitingTriggersRepoList = null;
@@ -1782,7 +1945,7 @@ public class RepoJobStore implements JobStore {
      */
     private void addTriggerGroupName(String groupName) 
             throws JobPersistenceException, JsonResourceException {
-        addRepoListName(groupName, getTriggerGroupNamesRepoId());
+        addRepoListName(groupName, getTriggerGroupNamesRepoId(), "names");
     }
     
     /**
@@ -1794,7 +1957,7 @@ public class RepoJobStore implements JobStore {
      */
     private void addJobGroupName(String groupName) 
             throws JobPersistenceException, JsonResourceException {
-        addRepoListName(groupName, getJobGroupNamesRepoId());
+        addRepoListName(groupName, getJobGroupNamesRepoId(), "names");
     }
 
     /**
@@ -1805,7 +1968,7 @@ public class RepoJobStore implements JobStore {
      * @throws JobPersistenceException
      * @throws ObjectSetException
      */
-    private boolean addRepoListName(String name, String id) 
+    private boolean addRepoListName(String name, String id, String list) 
             throws JobPersistenceException, JsonResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
@@ -1815,10 +1978,10 @@ public class RepoJobStore implements JobStore {
             Map<String, Object> map = getOrCreateRepo(id);
             String rev = (String)map.get("_rev");
             
-            List<String> names = (List<String>) map.get("names");
+            List<String> names = (List<String>) map.get(list);
             if (names == null) {
                 names = new ArrayList<String>();
-                map.put("names", names);
+                map.put(list, names);
             }
             boolean result = names.add(name);
             // update repo
@@ -1837,7 +2000,7 @@ public class RepoJobStore implements JobStore {
      * @throws JobPersistenceException
      * @throws ObjectSetException
      */
-     private boolean removeRepoListName(String name, String id) 
+     private boolean removeRepoListName(String name, String id, String list) 
             throws JobPersistenceException, JsonResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
@@ -1847,10 +2010,10 @@ public class RepoJobStore implements JobStore {
             Map<String, Object> map = getOrCreateRepo(id);
             String rev = (String)map.get("_rev");
             
-            List<String> names = (List<String>) map.get("names");
+            List<String> names = (List<String>) map.get(list);
             if (names == null) {
                 names = new ArrayList<String>();
-                map.put("names", names);
+                map.put(list, names);
             }
             boolean result = names.remove(name);
             // update repo
@@ -2020,6 +2183,7 @@ public class RepoJobStore implements JobStore {
     private void processTriggerMisfired(TriggerWrapper triggerWrapper, WaitingTriggers waitingtriggers) 
             throws JobPersistenceException {
         Trigger trigger = triggerWrapper.getTrigger();
+        logger.trace("Signaling Trigger Listener Misfired");
         schedulerSignaler.notifyTriggerListenersMisfired(trigger);
         Calendar calendar = retrieveCalendar(null, trigger.getCalendarName());
         trigger.updateAfterMisfire(calendar);
@@ -2029,8 +2193,7 @@ public class RepoJobStore implements JobStore {
             schedulerSignaler.notifySchedulerListenersFinalized(trigger);
             triggerWrapper.setState(Trigger.STATE_COMPLETE);
             // update trigger in repo
-            updateTriggerInRepo(trigger.getGroup(), trigger.getName(), triggerWrapper, 
-                    triggerWrapper.getRevision());
+            updateTriggerInRepo(trigger.getGroup(), trigger.getName(), triggerWrapper, triggerWrapper.getRevision());
             removeWaitingTrigger(trigger, waitingtriggers);
         }
     }
@@ -2068,18 +2231,21 @@ public class RepoJobStore implements JobStore {
         }
     }
 
+    /**
+     * A wrapper for the tree of waiting triggers
+     */
     protected class WaitingTriggers {
         
-        private TreeSet<Trigger> triggerNames;
+        private TreeSet<Trigger> triggers;
         private String revision;
         
         public WaitingTriggers(TreeSet<Trigger> triggers, String rev) {
-            triggerNames = triggers;
+            this.triggers = triggers;
             revision = rev;
         }
 
-        public TreeSet<Trigger> getTriggerNames() {
-            return triggerNames;
+        public TreeSet<Trigger> getTriggers() {
+            return triggers;
         }
 
         public String getRevision() {
@@ -2092,12 +2258,39 @@ public class RepoJobStore implements JobStore {
         
         public List<String> getTriggerNamesList() {
             List<String> names = new ArrayList<String>();
-            Iterator<Trigger> iterator = triggerNames.iterator();
+            Iterator<Trigger> iterator = triggers.iterator();
             while (iterator.hasNext()) {
                 Trigger t = iterator.next();
                 names.add(getTriggerId(t.getGroup(), t.getName()));
             }
             return names;
+        }
+        
+    }
+    
+    /**
+     * A wrapper for the list of acquired triggers
+     */
+    protected class AcquiredTriggers {
+        
+        private List<Trigger> triggers;
+        private String revision;
+        
+        public AcquiredTriggers(List<Trigger> triggers, String revision) {
+            this.triggers = triggers;
+            this.revision = revision;
+        }
+
+        public String getRevision() {
+            return revision;
+        }
+        
+        public List<Trigger> getTriggers() {
+            return triggers;
+        }
+        
+        public void setRevision(String rev) {
+            revision = rev;
         }
         
     }
