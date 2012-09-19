@@ -1,0 +1,127 @@
+{
+    "connection" : {
+        "dbType" : "SQLSERVER",
+        "jndiName" : "",
+        "driverClass" : "com.microsoft.sqlserver.jdbc.SQLServerDriver",
+        "jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;databaseName=openidm;applicationName=OpenIDM",
+        "username" : "openidm",
+        "password" : "Passw0rd",
+        "defaultCatalog" : "openidm",
+        "maxBatchSize" : 100,
+        "maxTxRetry" : 5,
+        "enableConnectionPool" : true
+    },
+    "queries" : {
+        "genericTables" : {
+            "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "check-userName-availability" : "SELECT prop.propvalue FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "links-for-targetId-db2" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND prop.partpropvalue = ${targetId} AND objtype.objecttype = ${_resource}",
+            "for-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "links-for-sourceId-db2" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND prop.partpropvalue = ${sourceId} AND objtype.objecttype = ${_resource}",
+            "get-security-question" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue, credprop.proptype FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/securityQuestion' AND conditionprop.propkey='/email' AND conditionprop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "set-newPassword-for-userName-and-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND prop.partpropvalue = ${sourceId} AND objtype.objecttype = ${_resource}",
+            "get-profile" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND prop.partpropvalue = ${targetId} AND objtype.objecttype = ${_resource}",
+            "query-all-ids" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-count-matching-username" : "SELECT '/count' as propkey, count(distinct credprop.propkey, credprop.propvalue) as propvalue FROM openidm.managedobjectproperties credprop  INNER JOIN openidm.managedobjects obj ON obj.id = credprop.managedobjects_id  INNER JOIN openidm.managedobjectproperties conditionprop ON obj.id = conditionprop.managedobjects_id INNER JOIN openidm.objecttypes objtype ON objtype.id = obj.objecttypes_id  WHERE  credprop.propkey = '/_id' AND (conditionprop.propkey='/userName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%')  OR conditionprop.propkey='/givenName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/familyName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%')) AND objtype.objecttype = ${_resource} order by 1",
+            "query-matching-username" : "select fullobject from openidm.managedobjects where objectid in (SELECT distinct credprop.propvalue FROM openidm.managedobjectproperties credprop  INNER JOIN openidm.managedobjects obj ON obj.id = credprop.managedobjects_id  INNER JOIN openidm.managedobjectproperties conditionprop ON obj.id = conditionprop.managedobjects_id INNER JOIN openidm.objecttypes objtype ON objtype.id = obj.objecttypes_id  WHERE credprop.propkey = '/_id' AND  (conditionprop.propkey='/userName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/givenName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/familyName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%')) AND objtype.objecttype = 'managed/user' order by 1) limit 30",
+            "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "for-credentials" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}"
+        },
+        "explicitTables" : {
+            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
+            "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}"
+        }
+    },
+    "resourceMapping" : {
+        "default" : {
+            "mainTable" : "genericobjects",
+            "propertiesTable" : "genericobjectproperties",
+            "searchableDefault" : true
+        },
+        "genericMapping" : {
+            "managed/*" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : true
+            }
+        },
+        "explicitMapping" : {
+            "link" : {
+                "table" : "links",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "linkType" : "linktype",
+                    "firstId" : "firstid",
+                    "secondId" : "secondid"
+                }
+            },
+            "internal/user" : {
+                "table" : "internaluser",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "password" : "pwd",
+                    "roles" : "roles"
+                }
+            },
+            "audit/activity" : {
+                "table" : "auditactivity",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "activityId" : "activityid",
+                    "timestamp" : "activitydate",
+                    "action" : "activity",
+                    "message" : "message",
+                    "objectId" : "subjectid",
+                    "rev" : "subjectrev",
+                    "rootActionId" : "rootactionid",
+                    "parentActionId" : "parentactionid",
+                    "requester" : "requester",
+                    "approver" : "approver",
+                    "before" : "subjectbefore",
+                    "after" : "subjectafter",
+                    "status" : "status",
+                    "changedFields" : "changedfields",
+                    "passwordChanged" : "passwordchanged"
+                }
+            },
+            "audit/recon" : {
+                "table" : "auditrecon",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "entryType" : "entrytype",
+                    "rootActionId" : "rootactionid",
+                    "action" : "activity",
+                    "message" : "message",
+                    "reconciling" : "reconciling",
+                    "reconId" : "reconid",
+                    "situation" : "situation",
+                    "sourceObjectId" : "sourceobjectid",
+                    "status" : "status",
+                    "targetObjectId" : "targetobjectid",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
+                    "timestamp" : "activitydate"
+                }
+            },
+            "audit/access" : {
+                "table" : "auditaccess",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",
+                    "ip" : "ip",
+                    "principal" : "principal",
+                    "roles" : "roles",
+                    "status" : "status",
+                    "timestamp" : "activitydate"
+                }
+            }
+        }
+    }
+}
