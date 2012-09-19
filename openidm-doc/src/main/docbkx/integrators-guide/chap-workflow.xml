@@ -216,7 +216,7 @@
     <para>Set up the default Activiti demo.</para>
     <screen>
     $ cd /<replaceable>path/to/activiti</replaceable>/setup/
-    $ ant start.demo
+    $ ant demo.start
     </screen>
    </listitem>
    <listitem>
@@ -391,8 +391,8 @@
      </listitem>
      <listitem>
       <para>Navigate to the sample workflow (<filename>/<replaceable>build-path
-      </replaceable>/trunk/openidm-workflow-activiti/openidm-workflow-activiti/
-      src/main/resources/OSGI-INF/activiti/example.bpmn20.xml)</filename></para>
+      </replaceable>/trunk/openidm-workflow-activiti/src/main/resources/
+      OSGI-INF/activiti/example.bpmn20.xml)</filename></para>
      </listitem>
     </orderedlist>
    </listitem>
