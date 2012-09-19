@@ -81,7 +81,7 @@
    <screen>$ cd /path/to/openidm
 $ rm conf/provisioner.openicf-xml.json
  conf/sync.json
- conf/scheduler-reconcile_systemXmlAccounts_managedUser.json</screen>
+ conf/schedule-reconcile_systemXmlAccounts_managedUser.json</screen>
 
    <para>After removing the <literal>sample1</literal> files, copy the
    relevant files from the sample you want to try. For example, if you want to
@@ -1390,11 +1390,11 @@ mail: jdoe@example.com
    <section xml:id="run-sample6-live-sync">
     <title>Using LiveSync</title>
 
-    <para>You can start reconciliation by using a scheduler configuration or 
-    by using the REST interface directly. However, you must
-    start LiveSync using a scheduler. The sample comes with the following
-    scheduler configuration file for LiveSync in
-    <filename>conf/scheduler-activeSynchroniser_systemLdapAccount.json</filename>.</para>
+    <para>You can start reconciliation by using a schedule configuration or 
+    by using the REST interface directly. However, you must start LiveSync 
+    by using a schedule. The sample comes with the following schedule 
+    configuration file for LiveSync in
+    <filename>conf/schedule-activeSynchroniser_systemLdapAccount.json</filename>.</para>
 
     <programlisting language="javascript">
 {
@@ -1409,7 +1409,7 @@ mail: jdoe@example.com
 }</programlisting>
 
     <para>LiveSync is disabled by default. Activate LiveSync by editing the file,
-    <filename>conf/scheduler-activeSynchroniser_systemLdapAccount.json</filename>,
+    <filename>conf/schedule-activeSynchroniser_systemLdapAccount.json</filename>,
     to change the "enabled" property value to <literal>true</literal>. With
     LiveSync enabled, you can add and change LDAP users, and see the changes in AD
     as OpenIDM flows the data between resources dynamically.</para>
