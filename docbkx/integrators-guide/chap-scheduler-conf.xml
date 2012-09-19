@@ -30,150 +30,280 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Scheduling Synchronization</title>
+ <title>Scheduling Tasks and Events</title>
  <indexterm>
   <primary>Scheduler</primary>
  </indexterm>
- <indexterm>
-  <primary>Reconciliation</primary>
-  <secondary>Scheduling</secondary>
+  <indexterm>
+  <primary>Scheduling tasks</primary>
  </indexterm>
- <indexterm>
-  <primary>Synchronization</primary>
-  <secondary>Scheduling</secondary>
- </indexterm>
- <indexterm>
-  <primary>LiveSync</primary>
-  <secondary>Scheduling</secondary>
- </indexterm>
-
- <para>OpenIDM provides scheduling for synchronization operations such as
- LiveSync and reconciliation. You schedule the operations using
- <command>cron</command>-like syntax.</para>
  
- <para>This chapter describes scheduling for reconciliation and LiveSync, 
- however, you can also use OpenIDM's scheduler service to schedule any other 
- event by supplying a link to a script file, in which that event is defined.  
- For more information on scheduling other events, see the 
- <link xlink:href="integrators-guide#appendix-scheduling"
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler
- Reference</citetitle></link> appendix.</para>
- 
- <para>You configure the scheduler through JSON objects. The corresponding
- configuration file names take the form <filename>openidm/conf/scheduler-
- <replaceable>schedule-name</replaceable>.json</filename>, where 
- <replaceable>schedule-name</replaceable> is the logical name for the scheduled 
- operation, such as <literal>reconcile_systemXmlAccounts_managedUser</literal>.
- </para>
+  <para>OpenIDM enables you to schedule reconciliation and synchronization 
+  tasks. You can also use scheduling to trigger scripts, collect and run 
+  reports, trigger workflows, perform custom logging, and so forth.</para>
 
+ <para>OpenIDM supports <command>cron</command>-like syntax to schedule events
+ and tasks, based on expressions supported by the Quartz Scheduler (bundled 
+ with OpenIDM).</para>
+
+ <para>If you use configuration files to schedule tasks and events, you must 
+ place the schedule files in the <filename>openidm/conf</filename> directory.
+ By convention, OpenIDM uses file names of the form
+ <filename>schedule-<replaceable>schedule-name</replaceable>.json</filename>, 
+ where <replaceable>schedule-name</replaceable> is a logical name for the 
+ scheduled operation, for example, 
+ <filename>schedule-reconcile_systemXmlAccounts_managedUser.json</filename>. 
+ There are several example schedule configuration files in the 
+ <filename>openidm/samples/schedules</filename> directory.</para>
+ 
+ <para>You can configure OpenIDM to pick up changes to scheduled tasks and 
+ events dynamically, during initialization and also at runtime. For more 
+ information, see <link xlink:href="integrators-guide#when-configuring-notes" 
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Changing the 
+ Configuration</citetitle></link>.</para>
+ 
  <section xml:id="scheduler-configuration-file">
   <title>Scheduler Configuration</title>
   <indexterm>
    <primary>Scheduler</primary>
    <secondary>Configuration</secondary>
   </indexterm>
-
-  <para>The scheduler configuration file, <filename>openidm/conf/scheduler-
-  <replaceable>schedule-name</replaceable>.json</filename> has the following 
-  format.</para>
-
-  <programlisting language="javascript">{
-  "enabled"       : true,
-  "persisted"     : false,
-  "type"          : "<replaceable>cron</replaceable>",
-  "startTime"     : "<replaceable>(optional) time</replaceable>",
-  "endTime"       : "<replaceable>(optional) time</replaceable>",
-  "schedule"      : "<replaceable>cron expression</replaceable>",
-  "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
-  "invokeService" : "<replaceable>service identifier</replaceable>",
-  "invokeContext" : "<replaceable>service specific context info</replaceable>"
-}</programlisting>
-
-  <itemizedlist>
-   <listitem>
-    <para>The optional properties <literal>"startTime"</literal>,
-    <literal>"endTime"</literal>, and <literal>"timeZone"</literal> 
-    can be absent, or empty.</para>
-    <para>When specifying times and dates, use ISO 8601 format,
-    <literal><replaceable>YYYY</replaceable>-<replaceable>MM</replaceable
-    >-<replaceable>DD</replaceable>T<replaceable>hh</replaceable>:<replaceable
-    >mm</replaceable>:<replaceable>ss</replaceable></literal>.</para>
-   </listitem>
-   <listitem>
-    <para>OpenIDM relies on the Quartz Scheduler. The <replaceable>cron
-    expression</replaceable> to use is described in the <link xlink:show="new"
-    xlink:href="http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html"
-    ><citetitle>CronTrigger Tutorial</citetitle></link> and in <link
-    xlink:href="http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html"
-    xlink:show="new"><citetitle>Lesson 6: CronTrigger</citetitle></link>.</para>
-   </listitem>
-   <listitem>
-     <itemizedlist>
-      <para>The <literal>"invokeService"</literal> property takes one of the 
-      following values:</para>
-      <listitem><para><literal>"sync"</literal> for reconciliation</para>
-      </listitem>
-      <listitem><para><literal>"provisioner"</literal> for LiveSync.</para>
-      </listitem>
-      <listitem><para><literal>"script"</literal> to call some other scheduled 
-       operation defined in a script. This is discussed in more detail in the 
-       <link xlink:href="integrators-guide#appendix-scheduling" 
-       xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduler 
-       Reference</citetitle></link> appendix
-       </para></listitem>
-     </itemizedlist>
-   </listitem>
-   <listitem>
-    <para>The <literal>"invokeContext"</literal> property depends on the
-    setting for <literal>"invokeService"</literal>.</para>
-
-    <para>For LiveSync, <literal>"source"</literal> takes an external resource
-    name and object type.</para>
-    <programlisting language="javascript">
-{
-    "invokeService": "provisioner",
-    "invokeContext": {
-        "action": "liveSync",
-        "source": "system/ldap/account"
+ 
+ <itemizedlist>
+  <para>Schedules are configured through JSON objects. The schedule 
+  configuration involves two types of files:</para>
+  <listitem><para>The <filename>openidm/conf/scheduler.json</filename> file, 
+  that configures the overall scheduler service</para></listitem>
+  <listitem><para>One <filename>openidm/conf/schedule-
+ <replaceable>schedule-name</replaceable>.json</filename> file for each 
+ configured schedule.</para></listitem>
+ </itemizedlist>
+ 
+  <para>The scheduler service configuration file 
+  (<filename>openidm/conf/scheduler.json</filename>) has the following format:</para>
+  
+  <programlisting language='javascript'>
+  {
+    "threadPool" : {
+        "threadCount" : "10"
+    },
+    "scheduler" : {
+        "instanceId" : "scheduler-example"
+    },
+    "advancedProperties" : {
+        "org.quartz.scheduler.instanceName" : "OpenIDMScheduler"
     }
+  }
+  </programlisting>
+  
+  <itemizedlist>
+   <para>The properties in the <filename>scheduler.json</filename> file relate 
+   to the configuration of the Quartz Scheduler.</para>
+   <listitem><para><literal>threadCount</literal> specifies the maximum number 
+   of threads that are available for the concurrent execution of scheduled 
+   tasks.</para>
+   </listitem>
+   <listitem><para><literal>instanceID</literal> can be any string, but must be 
+   unique for all schedulers working as if they are the same 'logical' Scheduler 
+   within a cluster.</para></listitem>
+   <listitem><para><literal>advancedProperties</literal> (optional) enables you 
+   to configure additional properties for the Quartz Scheduler.</para></listitem>
+  </itemizedlist>
+  
+  <para>For details of all the configurable properties for the Quartz Scheduler, 
+  see the <link xlink:show="new" 
+  xlink:href="http://www.quartz-scheduler.org/documentation/quartz-2.1.x/configuration/ConfigMain"
+  ><citetitle>Quartz Scheduler Configuration Reference</citetitle></link>.</para>
+ 
+  <para>Each schedule configuration file, <filename>openidm/conf/schedule-
+  <replaceable>schedule-name</replaceable>.json</filename> has the following 
+  format:</para>
+
+  <programlisting language="javascript">
+{
+ "enabled"       : true,
+ "persisted"     : false,
+ "type"          : "cron",
+ "startTime"     : "<replaceable>(optional) time</replaceable>",
+ "endTime"       : "<replaceable>(optional) time</replaceable>",
+ "schedule"      : "<replaceable>cron expression</replaceable>",
+ "misfirePolicy" : "<replaceable>optional, string</replaceable>",
+ "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
+ "invokeService" : "<replaceable>service identifier</replaceable>",
+ "invokeContext" : "<replaceable>service specific context info</replaceable>"
 }</programlisting>
 
-    <para>For reconciliation, <literal>"mapping"</literal> takes the name of
-    the mapping configured in <filename>openidm/conf/sync.json</filename>.
+ <variablelist>
+  <para>The schedule configuration properties are defined as follows:</para>
+  <varlistentry>
+   <term>enabled</term>
+   <listitem>
+    <para>Set to <literal>true</literal> to enable the schedule. When this 
+    property is set to <literal>false</literal>, OpenIDM considers the 
+    schedule configuration dormant, and does not allow it to be triggered or
+    executed.</para>
+    <para>If you want to retain a schedule configuration, but do not want it 
+    used, set <literal>enabled</literal> to <literal>false</literal> for task 
+    and event schedulers, instead of changing the configuration or 
+    <command>cron</command> expressions.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>persisted (optional)</term>
+   <listitem>
+    <para>Specifies whether the schedule state should be persisted or stored 
+    in RAM. Boolean (<literal>true</literal> or <literal>false</literal>), 
+    <literal>false</literal> by default. For more information, see 
+    <xref linkend="persistent-schedules"/>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>type</term>
+   <listitem>
+    <para>Currently OpenIDM supports only <literal>cron</literal>.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>startTime (optional)</term>
+   <listitem>
+    <para>Used to start the schedule at some time in the future. If this 
+    parameter is omitted, empty, or set to a time in the past, the task or 
+    event is scheduled to start immediately.</para>
+    <para>Use ISO 8601 format to specify times and dates (<literal><replaceable>
+    YYYY</replaceable>-<replaceable>MM</replaceable>-<replaceable>DD
+    </replaceable>T<replaceable>hh</replaceable>:<replaceable>mm
+    </replaceable>:<replaceable>ss</replaceable></literal>).</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>endTime (optional)</term>
+   <listitem>
+    <para>Used to plan the end of scheduling.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>schedule</term>
+   <listitem>
+    <para>Takes <command>cron</command> expression syntax. For more information, 
+    see the <link xlink:show="new"
+    xlink:href="http://www.quartz-scheduler.org/docs/tutorials/crontrigger.html"
+    ><citetitle>CronTrigger Tutorial</citetitle></link> and <link
+    xlink:href="http://www.quartz-scheduler.org/docs/tutorial/TutorialLesson06.html"
+    xlink:show="new"><citetitle>Lesson 6: CronTrigger</citetitle></link>.</para>  
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>misfirePolicy (optional)</term>
+   <listitem>
+    <para>For persistent schedules, specifies the behavior if the scheduled 
+    task is missed, for some reason. Possible values are as follows:
     </para>
+    <itemizedlist>
+     <listitem><para><literal>fireAndProceed</literal>. The first execution 
+     of a missed schedule is immediately executed when the server is back 
+     online. Subsequent executions are discarded. After this, the normal 
+     schedule is resumed.</para></listitem>
+     <listitem><para><literal>doNothing</literal>, all missed schedules are 
+     discarded and the normal schedule is resumed when the server is back 
+     online.</para></listitem>
+    </itemizedlist>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>timeZone (optional)</term>
+   <listitem>
+    <para>If not set, OpenIDM uses the system time zone.</para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>invokeService</term>
+   <listitem>
+    <para>Defines the type of scheduled event or action. The value of this 
+    parameter can be one of the following:</para>
+    <itemizedlist>
+     <listitem><para><literal>"sync"</literal> for reconciliation</para></listitem>
+     <listitem><para><literal>"provisioner"</literal> for LiveSync</para></listitem>
+     <listitem><para><literal>"script"</literal> to call some other scheduled 
+       operation defined in a script</para></listitem>
+    </itemizedlist>
+   </listitem>   
+  </varlistentry>
+  <varlistentry>
+   <term>invokeContext</term>
+   <listitem>
+    <para>Specifies contextual information, depending on the type of scheduled 
+    event (the value of the <literal>invokeService</literal> parameter).
+    </para>
+    <para>The following example invokes reconciliation.</para>
     <programlisting language="javascript">
 {
     "invokeService": "sync",
     "invokeContext": {
         "action": "reconcile",
-        "mapping": "systemLdapAccounts_managedUser"
+        "mapping": "systemLdapAccount_managedUser"
     }
 }</programlisting>
-   </listitem>
-  </itemizedlist>
   
-  <para>For reconciliation, you can define the mapping in two ways.</para>
   <itemizedlist>
+   <para>For a scheduled reconciliation task, you can define the mapping 
+   in one of two ways:</para>
    <listitem>
-    <para>Referencing the mapping by its name in <filename>sync.json</filename>
+    <para>Reference a mapping by its name in <filename>sync.json</filename>,
     as shown in the previous example. The mapping must exist in the
-    <filename>sync.json</filename> file.</para></listitem>
+    <filename>openidm/conf/sync.json</filename> file.</para></listitem>
    <listitem>
-    <para>Configuring the mapping in the scheduler configuration by using the
-    <literal>"mapping"</literal> property as shown in the example in
+    <para>Add the mapping definition inline by using the
+    <literal>"mapping"</literal> property, as shown in the example in
     <link xlink:href="integrators-guide#alternative-mapping"
     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Alternative
-    Mappings Location</citetitle></link>.</para>
+    Mappings</citetitle></link>.</para>
    </listitem>
   </itemizedlist>
+    
+    <para>The following example invokes a LiveSync action.</para>
+    <programlisting language="javascript">
+{
+    "invokeService": "provisioner",
+    "invokeContext": {
+        "action": "liveSync",
+        "source": "system/OpenDJ/__ACCOUNT__"
+    }
+}</programlisting>
+
+  <para>For scheduled LiveSync tasks, the <literal>"source"</literal> property 
+  follows OpenIDM's convention for a pointer to an external resource object 
+  and takes the form <literal>system/<replaceable>resource-name</replaceable>
+  /<replaceable>object-type</replaceable></literal>.</para>
+
+  <para>The following example invokes a script, which prints the string 
+  <literal>Hello World</literal> to the OpenIDM log 
+  (<filename>/openidm/logs/openidm0.log.X</filename>) each minute.</para>
+
+  <programlisting language="javascript">
+{
+    "invokeService": "script",
+    "invokeContext": {
+        "script": {
+            "type": "text/javascript",
+            "source": "java.lang.System.out.println('Hello World’);"
+        },
+    }
+}</programlisting>
+
+    <para>Note that these are sample configurations only. Your own schedule 
+    configuration will differ according to your specific requirements.</para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+
  </section>
 
  <section xml:id="persistent-schedules">
   <title>Configuring Persistent Schedules</title>
   <para>By default, scheduling information, such as schedule state and details 
   of the schedule execution, is stored in RAM. This means that such 
-  information is lost when OpenIDM is rebooted. The scheduler configuration 
-  itself (defined in the <filename>openidm/conf/scheduler-
+  information is lost when OpenIDM is rebooted. The schedule configuration 
+  itself (defined in the <filename>openidm/conf/schedule-
   <replaceable>schedule-name</replaceable>.json</filename> file) is not lost 
   when OpenIDM is shut down, and normal scheduling continues when the server is 
   restarted. However, there are no details of missed schedule executions that 
@@ -197,7 +327,7 @@
   </para>
   <para>To configure persistent schedules, set the <literal>"persisted"</literal> 
   property to <literal>true</literal> in the schedule configuration file 
-  (<filename>scheduler-<replaceable>schedule-name</replaceable>.json)</filename>.
+  (<filename>schedule-<replaceable>schedule-name</replaceable>.json)</filename>.
   </para>
   <para>If OpenIDM is down when a scheduled task was set to occur, one or more 
   executions of that schedule might be missed. To specify what action should be 
@@ -218,9 +348,9 @@
   </section>
 
  <section xml:id="scheduler-examples">
-  <title>Scheduler Examples</title>
+  <title>Schedule Examples</title>
   <indexterm>
-   <primary>Scheduler</primary>
+   <primary>Schedule</primary>
    <secondary>Examples</secondary>
   </indexterm>
 
@@ -264,4 +394,25 @@
 }</programlisting>
 
  </section>
+ 
+ <section xml:id="check-quartz-updates">
+  <title>Checking For Quartz Updates</title>
+
+  <para>The Quartz Scheduler can check for updates over the Internet on the
+  Quartz project website, and report available updates in the OpenIDM log.
+  The option is set in <filename>openidm/conf/system.properties</filename>
+  By default, this option is turned off, and should remain off in
+  production.</para>
+
+  <literallayout class="monospaced">system.properties:org.quartz.scheduler.skipUpdateCheck = true</literallayout>
+ </section>
+ 
+ <section xml:id="scheduler-service-implementations">
+  <title>Service Implementer Notes</title>
+
+  <para>Services that can be scheduled implement
+  <literal>ScheduledService</literal>. The service PID is used as a basis for
+  the service identifier in schedule definitions.</para>
+ </section>
+ 
 </chapter>
