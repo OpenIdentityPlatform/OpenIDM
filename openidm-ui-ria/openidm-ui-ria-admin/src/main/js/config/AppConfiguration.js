@@ -77,24 +77,24 @@ define("config/AppConfiguration", [
                                excludedRole: "openidm-admin"
                            },
                            "adminUsers": {
-                               view: "org/forgerock/openidm/ui/admin/UsersView",
+                               view: "org/forgerock/openidm/ui/admin/users/UsersView",
                                url: "users/",
                                role: "admin"
                            },
                            "adminUsersAdd" : {
-                               view: "org/forgerock/openidm/ui/admin/AdminUserRegistrationView",
+                               view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
                                role: "admin",
                                url: "users/add/"
                            },
                            "adminUserProfile" : {
-                               view: "org/forgerock/openidm/ui/admin/AdminUserProfileView",
+                               view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
                                role: "admin",
                                url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/$/,
                                pattern: "users/?/"
                            },
                            "adminUserChangePassword" : {
                                base: "adminUserProfile",
-                               dialog: "org/forgerock/openidm/ui/admin/ChangeUserPasswordDialog",
+                               dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
                                url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/change_password\/$/,
                                pattern: "users/?/change_password/",
                                role: "admin"
@@ -145,6 +145,16 @@ define("config/AppConfiguration", [
                                view: "org/forgerock/openidm/ui/user/apps/AppsView",
                                role: "openidm-authorized",                               
                                url: "applications/"
+                           },
+                           "tasks": {
+                               view: "org/forgerock/openidm/ui/admin/tasks/TasksView",
+                               role: "openidm-admin",
+                               url: "tasks/"
+                           },
+                           "taskDetails": {
+                               view: "org/forgerock/openidm/ui/admin/tasks/TaskDetailsView",
+                               role: "openidm-admin",
+                               url: "tasks/:id"
                            }
                        }
                    } 
@@ -190,11 +200,15 @@ define("config/AppConfiguration", [
                                "urls": {
                                    "users": {
                                        "url": "#users/",
-                                       "name": "User Management"
+                                       "name": "Users"
                                    },
                                    "groups": {
                                        "url": "#groups/",
-                                       "name": "Groups Management"
+                                       "name": "Groups"
+                                   },
+                                   "tasks": {
+                                       "url": "#tasks/",
+                                       "name": "Tasks"
                                    }
                                }
                            },
@@ -232,6 +246,14 @@ define("config/AppConfiguration", [
                            "2": "images/notifications/group_added.png",
                            "3": "images/notifications/approved.png",
                            "4": "images/notifications/removed.png"
+                       }
+                   } 
+               },
+               {
+                   moduleClass: "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
+                   configuration: {
+                       forms: {
+                           "applicationAcceptance": "org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask"
                        }
                    } 
                },
@@ -313,6 +335,10 @@ define("config/AppConfiguration", [
                            },
                            "userApplicationsUpdate": {
                                msg: "Application settings have been changed.",
+                               type: "info"
+                           },
+                           "completedTask": {
+                               msg: "Task has been completed.",
                                type: "info"
                            }
                        }

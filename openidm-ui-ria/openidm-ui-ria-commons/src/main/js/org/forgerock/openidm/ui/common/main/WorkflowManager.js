@@ -34,8 +34,8 @@ define("org/forgerock/openidm/ui/common/main/WorkflowManager", [
     
     var obj = {}, taskManagementUrl, processManagementUrl;
     
-    taskManagementUrl       =   "openidm/workflow/task";
-    processManagementUrl    =   "openidm/workflow/processinstance";
+    taskManagementUrl       =   "/openidm/workflow/task";
+    processManagementUrl    =   "/openidm/workflow/processinstance";
     
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {

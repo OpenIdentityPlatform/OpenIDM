@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/ChangeUserPasswordDialog", [
+define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
     "org/forgerock/openidm/ui/common/components/Dialog",
     "org/forgerock/openidm/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/main/Configuration",

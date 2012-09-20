@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/AdminUserProfileView", [
+define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
     "org/forgerock/openidm/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/common/util/UIUtils",

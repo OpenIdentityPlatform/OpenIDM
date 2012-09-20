@@ -1,7 +1,7 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * @license DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,16 +22,20 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global require, define, _, $ */
 
-define("org/forgerock/openidm/ui/admin/main", [
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
-	"./tasks/TasksView",
-	"./tasks/TaskDetailsView",
-	"./tasks/AbstractTaskForm",
-	"./tasks/ApplicationAcceptanceTask",
-	"./tasks/TasksFormManager"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/admin/tasks/TasksFormManager", [
+    "org/forgerock/openidm/ui/common/main/AbstractConfigurationAware"
+], function(AbstractConfigurationAware, eventManager) {
+    var obj = new AbstractConfigurationAware();
+    
+    obj.getViewForForm = function(name) {
+        return obj.configuration.forms[name];
+    };
+
+    return obj;
+});    
+
