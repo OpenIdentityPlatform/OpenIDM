@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _, $ */
+/*global define, _, $, window */
 
 /**
  * @author jdabrowski
@@ -36,6 +36,10 @@ define("org/forgerock/openidm/ui/user/BaseApplicationsView", [
 ], function(GridTableView, applicationDelegate, userDelegate, conf, universalCachedDelegate) {
     
     var BaseApplicationsView = GridTableView.extend({
+        
+        events: {
+            "click .ui-state-item": "onClick"
+        },
         
         generateItemView: function(itemObject) {
             var privilagesClass = '', item, closableTag, stateClass = '', lnkIdTag = '', stateTag = '';
@@ -89,6 +93,9 @@ define("org/forgerock/openidm/ui/user/BaseApplicationsView", [
         
         onClick: function(event) {
             event.preventDefault();
+            if($(event.target).text() === 'Salesforce') {
+                window.location = 'https://login.salesforce.com/';
+            }
         }, 
         
         closable: function() {
