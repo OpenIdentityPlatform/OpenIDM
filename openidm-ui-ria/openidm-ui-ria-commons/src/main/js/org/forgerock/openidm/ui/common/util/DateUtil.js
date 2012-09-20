@@ -43,6 +43,10 @@ define("org/forgerock/openidm/ui/common/util/DateUtil", [
     obj.currentDate = function() {
         return new XDate().toDate();
     };
+    
+    obj.parseDateString = function(dateString) {
+        return new XDate(dateString).toDate();
+    };
 
     return obj;
 });

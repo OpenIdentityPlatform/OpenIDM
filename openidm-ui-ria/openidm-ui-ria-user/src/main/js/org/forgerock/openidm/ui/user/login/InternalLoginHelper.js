@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/user/login/InternalLoginHelper", [
 
     obj.loginRequest = function(userName, password, successCallback, errorCallback) {
         userDelegate.logAndGetUserDataByCredentials(userName, password, function(user) {
-            eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, user);
+            eventManager.sendEvent(constants.EVENT_SUCCESFULY_LOGGGED_IN, {user: user, userName: userName});
         }, function() {
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "invalidCredentials");
         }, {"unauthorized": { status: "401"}});

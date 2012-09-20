@@ -204,6 +204,7 @@ public class ActivitiServiceImpl implements JsonResource {
                         }
 
                         configuration.setTransactionManager(transactionManager);
+                        configuration.setTransactionsExternallyManaged(true);
                         configuration.setDatabaseSchemaUpdate("true");
 
                         List<SessionFactory> customSessionFactories = configuration.getCustomSessionFactories();
@@ -260,7 +261,7 @@ public class ActivitiServiceImpl implements JsonResource {
                                 props.put("felix.fileinstall.noInitialDelay", "true");
                                 //TODO java.net.URLDecoder.decode(IdentityServer.getFileForPath("workflow").getAbsolutePath(),"UTF-8")
                                 props.put("felix.fileinstall.dir", IdentityServer.getFileForPath("workflow").getAbsolutePath());
-                                props.put("felix.fileinstall.filter", ".*\\.bar");
+                                props.put("felix.fileinstall.filter", ".*\\.bar|.*\\.xml");
                                 props.put("felix.fileinstall.bundles.new.start", "true");
                                 props.put("config.factory-pid", "activiti");
                                 barInstallerConfiguration.update(props);

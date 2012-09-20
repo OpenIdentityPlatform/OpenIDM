@@ -495,12 +495,12 @@
 
    <para>OpenIDM supports reversible encryption of attribute values for
    managed objects. Attribute values to encrypt include passwords (if passwords
-   are not already encrypted on the external resource, which would usually exclude them from the synchronization process, see the chapter about <link
+   are not already encrypted on the external resource, which would usually 
+   exclude them from the synchronization process, see the chapter about <link
   xlink:href="integrators-guide#chap-passwords"
   xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Passwords</citetitle>
-</link>), and also authentication
-   questions, credit card numbers, and social security numbers.</para>
+  <citetitle>Passwords</citetitle></link>), and also authentication questions, 
+  credit card numbers, and social security numbers.</para>
 
    <para>You configure encryption in the managed object configuration. The file
    to edit is <filename>openidm/conf/managed.json</filename>. The following
@@ -800,17 +800,20 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>"UNQUALIFIED" (qualifies=0, link=1, source=1, but source does not qualify)</term>
+     <term>"UNQUALIFIED" (qualifies=0, link=1, source=1, but source does not 
+     qualify)</term>
      <listitem>
-      <para>The mapping is not qualified (by validTarget) for a target object, and there is a
-      link from an existing source object where the source exists. Detected during change events and
-      reconciliation. Default action: "DELETE".</para>
+      <para>The mapping is not qualified (by validTarget) for a target object, 
+      and there is a link from an existing source object where the source 
+      exists. Detected during change events and reconciliation. Default 
+      action: "DELETE".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
      <listitem>
-      <para>The target qualifies and a link is found. But the source object is missing. Only detected during reconciliation. Default action: "EXCEPTION".</para>
+      <para>The target qualifies and a link is found. But the source object is 
+      missing. Only detected during reconciliation. Default action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -1439,9 +1442,8 @@ map;</programlisting>
 }</programlisting>
 
   <variablelist>
-   <para>Here is the complete list of properties you can use as hooks in
-    mapping configurations to call scripts.
-   </para>
+   <para>The following list shows all the properties that you can use as hooks 
+   in mapping configurations to call scripts.</para>
    <varlistentry>
     <term>Triggered by Situation</term>
     <listitem>
@@ -1491,7 +1493,104 @@ repoUser = openidm.read("managed/user/ddoe);</programlisting>
 externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
  </section>
  
- <section xml:id="alternative-mapping">
+ <section xml:id="scheduling-synchronization">
+ <title>Scheduling Synchronization</title>
+ <indexterm>
+  <primary>Scheduler</primary>
+ </indexterm>
+ <indexterm>
+  <primary>Reconciliation</primary>
+  <secondary>Scheduling</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>Synchronization</primary>
+  <secondary>Scheduling</secondary>
+ </indexterm>
+ <indexterm>
+  <primary>LiveSync</primary>
+  <secondary>Scheduling</secondary>
+ </indexterm>
+ 
+  <para>You can schedule synchronization operations, such as LiveSync and 
+  reconciliation, using <command>cron</command>-like syntax.</para>
+ 
+  <para>This section describes scheduling for reconciliation and LiveSync, 
+  however, you can also use OpenIDM's scheduler service to schedule any other 
+  event by supplying a link to a script file, in which that event is defined. 
+  For information about scheduling other events, and for a deeper understanding 
+  of the OpenIDM scheduler service, see 
+  <link xlink:href="integrators-guide#chap-scheduler-conf" 
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling Tasks 
+  and Events</citetitle></link>.</para>
+ 
+  <para>Each scheduled reconciliation and LiveSync task requires a schedule 
+  configuration file in <filename>opendidm/conf</filename>. By convention, 
+  files are named <filename>openidm/conf/schedule-<replaceable>schedule-name
+  </replaceable>.json</filename>, where <replaceable>schedule-name</replaceable> 
+  is a logical name for the scheduled synchronization operation, such as 
+  <literal>reconcile_systemXmlAccounts_managedUser</literal>.</para>
+  
+  <para>Schedule configuration files have the following format:</para>
+
+  <programlisting language="javascript">
+{
+ "enabled"       : true,
+ "persisted"     : false,
+ "type"          : "cron",
+ "startTime"     : "<replaceable>(optional) time</replaceable>",
+ "endTime"       : "<replaceable>(optional) time</replaceable>",
+ "schedule"      : "<replaceable>cron expression</replaceable>",
+ "misfirePolicy" : "<replaceable>optional, string</replaceable>",
+ "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
+ "invokeService" : "<replaceable>service identifier</replaceable>",
+ "invokeContext" : "<replaceable>service specific context info</replaceable>"
+}</programlisting>
+
+  <para>For an explanation of each of these properties, see 
+  <link xlink:href="integrators-guide#chap-scheduler-conf" 
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling Tasks 
+  and Events</citetitle></link>.</para>
+  
+  <para>To schedule a reconciliation or LiveSync task, set the 
+  <literal>invokeService</literal> property to either <literal>"sync"</literal> 
+  (for reconciliation) or <literal>"provisioner"</literal> for LiveSync.</para>
+  
+  <para>The value of the <literal>invokeContext</literal> property depends on 
+  the type of scheduled event. For reconciliation, the properties are set as 
+  follows:</para>
+  <programlisting language="javascript">
+{
+    "invokeService": "sync",
+    "invokeContext": {
+        "action": "reconcile",
+        "mapping": "systemLdapAccount_managedUser"
+    }
+}</programlisting>
+
+  <para>The <literal>"mapping"</literal> is either referenced by its name in 
+  the <filename>openidm/conf/sync.json</filename> file, or defined inline by 
+  using the <literal>"mapping"</literal> property, as shown in the example in 
+  <link xlink:href="integrators-guide#alternative-mapping" 
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Alternative 
+  Mappings</citetitle></link>.</para>
+  
+  <para>For LiveSync, the properties are set as follows:</para>
+  <programlisting language="javascript">
+{
+    "invokeService": "provisioner",
+    "invokeContext": {
+        "action": "liveSync",
+        "source": "system/OpenDJ/__ACCOUNT__"
+    }
+}</programlisting>
+ 
+  <para>The <literal>"source"</literal> property follows OpenIDM's convention 
+  for a pointer to an external resource object and takes the form 
+  <literal>system/<replaceable>resource-name</replaceable>/<replaceable>
+  object-type</replaceable></literal>.
+    </para>
+  
+  <section xml:id="alternative-mapping">
   <title>Alternative Mappings</title>
   <indexterm>
    <primary>Mappings</primary>
@@ -1502,8 +1601,8 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
   <filename>openidm/conf/sync.json</filename> for reconciliation, LiveSync,
   and for pushing changes made to managed objects to external resources.
   You can, however, provide alternative mappings for scheduled reconciliation
-  by adding the mapping to the scheduler configuration instead of referencing
-  the <filename>sync.json</filename> mapping.</para>
+  by adding the mapping to the scheduler configuration instead of referencing 
+  a mapping in <filename>sync.json</filename>.</para>
 
   <programlisting language="javascript">
 {
@@ -1530,4 +1629,5 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
 }</programlisting>
  </section>
  
+ </section>
 </chapter>

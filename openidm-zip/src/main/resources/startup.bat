@@ -18,7 +18,7 @@ goto end
 
 rem Only set OPENIDM_OPTS if not already set
 if not "%OPENIDM_OPTS%" == "" goto noOpenIDMOpts
-set OPENIDM_OPTS=-Xmx1024m -Dfile.encoding=UTF-8
+set OPENIDM_OPTS=${openidm.options} -Dfile.encoding=UTF-8
 :noOpenIDMOpts
 
 rem Set JDK Logger config file if it is present and an override has not been issued

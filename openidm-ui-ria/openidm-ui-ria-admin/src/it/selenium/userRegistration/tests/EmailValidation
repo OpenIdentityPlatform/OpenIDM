@@ -12,9 +12,9 @@
 <tr><td rowspan="1" colspan="3">EmailValidation</td></tr>
 </thead><tbody>
 <tr>
-    <td>deleteAllVisibleCookies</td>
-    <td></td>
-    <td></td>
+	<td>deleteAllVisibleCookies</td>
+	<td></td>
+	<td></td>
 </tr>
 <tr>
 	<td>open</td>
@@ -39,7 +39,7 @@
 <tr>
 	<td>waitForCondition</td>
 	<td>selenium.browserbot.getUserWindow().$.active == 0</td>
-	<td>1000</td>
+	<td>3000</td>
 </tr>
 <tr>
 	<td>deleteAllVisibleCookies</td>
