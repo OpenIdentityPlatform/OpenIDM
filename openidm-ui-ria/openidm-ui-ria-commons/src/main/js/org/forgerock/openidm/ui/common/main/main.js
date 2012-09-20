@@ -34,5 +34,6 @@ define("org/forgerock/openidm/ui/common/main/main", [
 	"./Router",
 	"./ViewManager",
 	"./SpinnerManager",
-	"./ErrorsHandler"
+	"./ErrorsHandler",
+	"./WorkflowManager"
 ]);

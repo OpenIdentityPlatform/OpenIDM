@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/UsersView", [
+define("org/forgerock/openidm/ui/admin/users/UsersView", [
     "org/forgerock/openidm/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/user/delegates/UserDelegate",
     "org/forgerock/openidm/ui/common/main/EventManager",
