@@ -27,6 +27,8 @@
             <outputDirectory>/openidm</outputDirectory>
             <excludes>
                 <exclude>**/*.sh</exclude>
+                <exclude>**/*.command</exclude>
+                <exclude>**/*.bat</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -35,7 +37,19 @@
             <fileMode>754</fileMode>
             <includes>
                 <include>**/*.sh</include>
+                <include>**/*.command</include>
             </includes>
+            <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <outputDirectory>/openidm</outputDirectory>
+            <fileMode>754</fileMode>
+            <includes>
+                <include>**/*.bat</include>
+            </includes>
+            <lineEnding>windows</lineEnding>
+            <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/orientstudio/orientdb-${orientdb.version}/www</directory>
@@ -74,7 +88,7 @@
                 <exclude>org.forgerock.openidm:openidm-security-jetty</exclude>
                 <exclude>org.forgerock.openidm:openidm-quartz-fragment</exclude>
                 <exclude>org.forgerock.openidm:openidm-scheduler</exclude>
-                <exclude>org.forgerock.openidm:openidm-ui-ria:zip</exclude>
+                <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
                 <exclude>*:*:js</exclude>
@@ -118,7 +132,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.connectors.*:openicf-*</include>
+                <include>org.forgerock.openicf.connectors.*:*-connector</include>
             </includes>
         </dependencySet>
         <dependencySet>

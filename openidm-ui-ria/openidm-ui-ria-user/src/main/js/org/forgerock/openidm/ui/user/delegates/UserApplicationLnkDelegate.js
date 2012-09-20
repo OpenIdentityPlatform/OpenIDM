@@ -31,14 +31,32 @@ define("org/forgerock/openidm/ui/user/delegates/UserApplicationLnkDelegate", [
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/openidm/ui/common/main/AbstractDelegate",
     "org/forgerock/openidm/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, configuration, eventManager) {
+    "org/forgerock/openidm/ui/common/main/EventManager",
+    "org/forgerock/openidm/ui/common/util/DateUtil"
+], function(constants, AbstractDelegate, configuration, eventManager, dateUtil) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/managed/user_application_lnk");
 
     obj.userApplicationLnksCallback = null;
     obj.userApplicationLnks = null;
     obj.numberOfUserApplicationLnks = 0;
+    
+    obj.normalizeDateField = function(item, fieldName) {
+        if (item[fieldName]) {
+            item[fieldName] = dateUtil.parseDateString(item[fieldName]);
+        }
+    };
+    
+    obj.rebuildLnk = function(link) {
+        obj.normalizeDateField(link, 'lastTimeUsed');
+    };
+    
+    obj.rebuildLnks = function(links) {
+        var i;
+        for(i = 0; i < links.length; i++ ) {
+            obj.rebuildLnk(links[i]);
+        } 
+    };
     
     obj.getAllUserApplicationLnks = function(successCallback, errorCallback) {
         console.info("getting all user application links");
@@ -48,7 +66,7 @@ define("org/forgerock/openidm/ui/user/delegates/UserApplicationLnkDelegate", [
 
         obj.serviceCall({url: "/?_query-id=query-all-user_application_lnk", success: function(data) {
             if(successCallback) {
-                obj.userApplicationLnks = data.result;
+                obj.userApplicationLnks = obj.rebuildLnks(data.result);
                 successCallback(data.result);
             }
         }, error: errorCallback} );
@@ -86,11 +104,14 @@ define("org/forgerock/openidm/ui/user/delegates/UserApplicationLnkDelegate", [
 
 
     obj.getUserApplicationLnksForUserName = function(uid, successCallback, errorCallback) {
+        var result;
         obj.serviceCall({
             url: "/?_query-id=user_application_lnk-for-userName&" + $.param({uid: uid.toLowerCase()}), 
             success: function (data) {
                 if(successCallback) {
-                    successCallback(data.result);
+                    result = data.result;
+                    obj.rebuildLnks(result);
+                    successCallback(result);
                 }
             },
             error: errorCallback

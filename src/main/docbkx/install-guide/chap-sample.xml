@@ -359,9 +359,12 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  <section xml:id="sample-viewing-users-logs">
   <title>Viewing Users &amp; Logs</title>
   <para>After reconciliation runs, you can use the REST interface to display
-  all users in the local repository, by performing an HTTP GET on the following
-  URL:
-  <literal>http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</literal>.</para>
+  all users in the local repository. Use a REST client to perform an HTTP 
+  GET on the following URL:
+  <literal>http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</literal> 
+  with the headers <literal>"X-OpenIDM-Username: openidm-admin"</literal> and 
+  <literal>"X-OpenIDM-Password: openidm-admin"</literal>.
+  </para>
 
   <para>OpenIDM returns a JSON file. Depending on your browser, it can display
   the JSON or download it as a file. Alternatively, you can use the following

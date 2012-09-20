@@ -37,7 +37,7 @@ cd $PRGDIR
 [ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE=$OPENIDM_HOME/.openidm.pid
 
 # Only set OPENIDM_OPTS if not already set
-[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS=-Xmx1024m
+[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS=${openidm.options}
 
 # Set JDK Logger config file if it is present and an override has not been issued
 if [ -z "$LOGGING_CONFIG" ]; then
@@ -77,7 +77,7 @@ echo $$ > $OPENIDM_PID_FILE
 # start in normal mode
 exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
-        -Djava.security.auth.login.config=security/jaas-repo.conf \
+    -Djava.security.auth.login.config=security/jaas-repo.conf \
 	-classpath "$CLASSPATH" \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
 	-Dignore.openidm.system.server.environment="dev|test|qa|prod" \
