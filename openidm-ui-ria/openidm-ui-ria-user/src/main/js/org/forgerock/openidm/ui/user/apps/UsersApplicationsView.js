@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, _, $ */
+/*global define, _, $, window */
 
 /**
  * @author jdabrowski
@@ -53,6 +53,7 @@ define("org/forgerock/openidm/ui/user/apps/UsersApplicationsView", [
         
         events: {
             "click .ui-state-close" : "onClick",
+            "click .ui-state-item": "onAllClick",
             "click li" : "preventDefault",
             "sortupdate" : "orderChanged"
         },
@@ -96,6 +97,13 @@ define("org/forgerock/openidm/ui/user/apps/UsersApplicationsView", [
                 
                 appDetails = applicationDelegate.getApplicationDetails(applicationId);
             });
+        },
+        
+        onAllClick: function(event) {
+            event.preventDefault();
+            if($(event.target).text() === 'Salesforce') {
+                window.location = 'https://login.salesforce.com/';
+            }
         },
         
         addApplication: function(appId, appName) {
