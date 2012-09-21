@@ -100,9 +100,10 @@ define("org/forgerock/openidm/ui/user/apps/UsersApplicationsView", [
         },
         
         onAllClick: function(event) {
+            var url = $(event.target).parent().find('input[name=url]').val();
             event.preventDefault();
-            if($(event.target).text() === 'Salesforce') {
-                window.location = 'https://login.salesforce.com/';
+            if (url && url !== 'undefined') {
+                window.location = url;
             }
         },
         

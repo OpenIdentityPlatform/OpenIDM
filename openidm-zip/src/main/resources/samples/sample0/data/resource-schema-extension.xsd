@@ -33,6 +33,7 @@
                 </xsd:element>
                 <xsd:element name="needsApproval" type="xsd:boolean" minOccurs="0">
                 </xsd:element>
+		<xsd:element name="url" type="xsd:string" minOccurs="0"/>
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>

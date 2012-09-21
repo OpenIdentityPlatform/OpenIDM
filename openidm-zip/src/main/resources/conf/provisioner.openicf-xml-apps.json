@@ -69,6 +69,11 @@
                     "type" : "boolean",
                     "nativeName" : "needsApproval",
                     "nativeType" : "boolean"
+                },
+                "url" : {
+                    "type" : "string",
+                    "nativeName" : "url",
+                    "nativeType" : "string"
                 }
             }
         }

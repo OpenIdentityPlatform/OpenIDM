@@ -20,6 +20,7 @@
 		<ri:description>Salesforce</ri:description>
 		<ri:isDefault>false</ri:isDefault>
 		<ri:needsApproval>true</ri:needsApproval>
+		<ri:url>https://login.salesforce.com/</ri:url>
 	</ri:__APPLICATION__>
 
 	<ri:__APPLICATION__>
