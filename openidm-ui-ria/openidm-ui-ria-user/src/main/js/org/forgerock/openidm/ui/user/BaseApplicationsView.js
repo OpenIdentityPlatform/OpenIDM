@@ -42,7 +42,7 @@ define("org/forgerock/openidm/ui/user/BaseApplicationsView", [
         },
         
         generateItemView: function(itemObject) {
-            var privilagesClass = '', item, closableTag, stateClass = '', lnkIdTag = '', stateTag = '';
+            var privilagesClass = '', item, closableTag, stateClass = '', lnkIdTag = '', stateTag = '', urlTag = '';
             
             if (itemObject.applicationId) {
                 item = applicationDelegate.getApplicationDetails(itemObject.applicationId);
@@ -55,6 +55,7 @@ define("org/forgerock/openidm/ui/user/BaseApplicationsView", [
             if (this.shouldApplicationBeVisible(item) && (!itemObject.applicationId || this.isLinkValidToShow(itemObject)) ) {
                 closableTag = this.closable() ? '<div class="ui-state-close">x</div>' : '';
                 privilagesClass = !this.hideApprovalInfo() && item.needsApproval ? 'ui-state-needsApproval' : '';
+		urlTag = '<input type="hidden" name="url" value='+item.url+' />';
                 return '<li class="ui-state-default ' + privilagesClass + ' ' +  stateClass + '">'
                           + '<a href="#" class="ui-item-href">'
                               + closableTag
@@ -63,6 +64,7 @@ define("org/forgerock/openidm/ui/user/BaseApplicationsView", [
                                   + '<span class="link">'+item.description+'</span>'
                                   + '<input type="hidden" name="id" value='+item._id+' />'
                                   + stateTag
+				  + urlTag
                                   + lnkIdTag
                               + '</div>'
                           + '</a>'
@@ -92,9 +94,10 @@ define("org/forgerock/openidm/ui/user/BaseApplicationsView", [
         },
         
         onClick: function(event) {
+	    var url = $(event.target).parent().find('input[name=url]').val();
             event.preventDefault();
-            if($(event.target).text() === 'Salesforce') {
-                window.location = 'https://login.salesforce.com/';
+            if (url && url !== 'undefined') {
+                window.location = url;
             }
         }, 
         
