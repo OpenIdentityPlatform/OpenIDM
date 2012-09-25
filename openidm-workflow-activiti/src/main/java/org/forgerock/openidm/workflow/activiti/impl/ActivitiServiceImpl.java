@@ -41,6 +41,8 @@ import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.engine.impl.scripting.ResolverFactory;
+import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
+import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.fluent.JsonPointer;
@@ -241,6 +243,7 @@ public class ActivitiServiceImpl implements JsonResource {
                         List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
                         resolverFactories.add(new OpenIDMResolverFactory());
                         configuration.setResolverFactories(resolverFactories);
+                        configuration.setScriptingEngines(new OsgiScriptingEngines(new ScriptBindingsFactory(resolverFactories)));
 
                         //We are done!!
                         processEngine = processEngineFactory.getObject();
