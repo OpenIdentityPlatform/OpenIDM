@@ -1,7 +1,7 @@
-/* @license 
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,8 +28,8 @@
  * @author mbilski
  */
 define("config/ValidatorsConfiguration", [
-    "org/forgerock/openidm/ui/common/util/Constants", 
-    "org/forgerock/openidm/ui/common/main/EventManager"
+    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
         "required": {
@@ -50,8 +50,8 @@ define("config/ValidatorsConfiguration", [
         "registrationEmail": {
             "name": "Correct and unique email",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils",
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate"
             ],
             "validator": function(el, input, callback, utils, userDelegate) {
                 var v = $(input).val();
@@ -78,8 +78,8 @@ define("config/ValidatorsConfiguration", [
         "adminRegistrationEmail": {
             "name": "Correct and unique email",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils",
-               "org/forgerock/openidm/ui/user/delegates/UserDelegate"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+               "org/forgerock/commons/ui/user/delegates/UserDelegate"
             ],
             "validator": function(el, input, callback, utils, userDelegate) {
                 var v = $(input).val();
@@ -106,7 +106,7 @@ define("config/ValidatorsConfiguration", [
         "name": {
             "name": "Only alphabetic characters",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
             ],
             "validator": function(el, input, callback, utils) {
                 var v = $(input).val();
@@ -127,7 +127,7 @@ define("config/ValidatorsConfiguration", [
         "phone": {
             "name": "Only numbers etc",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
             ],
             "validator": function(el, input, callback, utils) {
                 var v = $(input).val();
@@ -148,7 +148,7 @@ define("config/ValidatorsConfiguration", [
         "password": {
             "name": "Password validator",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
             ],
             "validator": function(el, input, callback, utils) {
                 var v = $(input).val(), reg, errors = [];
@@ -198,7 +198,7 @@ define("config/ValidatorsConfiguration", [
         "passwordConfirm": {
             "name": "Password confirmation",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
             ],
             "validator": function(el, input, callback, utils) {
                 var v = $(input).val();
@@ -275,9 +275,9 @@ define("config/ValidatorsConfiguration", [
         "profileEmail": {
             "name": "Correct and unique email",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils",
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-                "org/forgerock/openidm/ui/common/main/Configuration"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration"
             ],
             "validator": function(el, input, callback, utils, userDelegate, conf) {
                 var v = $(input).val();
@@ -309,9 +309,9 @@ define("config/ValidatorsConfiguration", [
 	 "adminUserProfileEmail": {
             "name": "Correct and unique email but can be same as was",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils",
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-                "org/forgerock/openidm/ui/common/main/Configuration"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration"
             ],
             "validator": function(el, input, callback, utils, userDelegate, conf) {
                 var v = $(input).val();
@@ -343,8 +343,8 @@ define("config/ValidatorsConfiguration", [
         "oldPassword": {
             "name": "Required field",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/main/Configuration",
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate"
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate"
             ],
             "validator": function(el, input, callback, conf, userDelegate) {
                 var v = $(input).val();
@@ -368,8 +368,8 @@ define("config/ValidatorsConfiguration", [
         "resetPasswordCorrectEmail": {
             "name": "Reset Password Correct Email",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils",
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate"
             ],
             "validator": function(el, input, callback, utils, userDelegate) {
                 var v = $(input).val();
@@ -408,8 +408,8 @@ define("config/ValidatorsConfiguration", [
         "securityAnswer": {
             "name": "Check if security answer is correct",
             "dependencies": [
-                "org/forgerock/openidm/ui/common/util/ValidatorsUtils",
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate"
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate"
             ],
             "validator": function(el, input, callback, utils, userDelegate) {
                 var v = $(input).val(), userName;

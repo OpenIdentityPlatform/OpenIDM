@@ -1,7 +1,7 @@
-/*! @license 
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,17 +28,17 @@
  * @author yaromin
  */
 define("config/process/AdminConfig", [
-    "org/forgerock/openidm/ui/common/util/Constants", 
-    "org/forgerock/openidm/ui/common/main/EventManager"
+    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = [
         {
             startEvent: constants.EVENT_PROFILE_DELETE_USER_REQUEST,
             description: "",
             dependencies: [
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-                "org/forgerock/openidm/ui/common/main/Configuration",
-                "org/forgerock/openidm/ui/common/main/Router"
+                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/main/Router"
             ],
             processDescription: function(event, userDelegate, globalConfiguration, router) {
                 if(event.userId === globalConfiguration.loggedUser._id) {
@@ -60,8 +60,8 @@ define("config/process/AdminConfig", [
             startEvent: constants.EVENT_USER_LIST_DELETE_USER_REQUEST,
             description: "",
             dependencies: [
-                "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-                "org/forgerock/openidm/ui/common/main/Configuration"
+                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration"
             ],
             processDescription: function(event, userDelegate, globalConfiguration) {
                 if(event.userId === globalConfiguration.loggedUser._id) {

@@ -1,0 +1,123 @@
+{
+    "availableApps" : [
+        {
+            "iconPath" : "images/dashboard/gmail.png",
+            "needsApproval" : false,
+            "_id" : "B65FA6A2-D23D-49CD-BEA0-CE98E275A8CD",
+            "_rev" : "0",
+            "isDefault" : true,
+            "description" : "Gmail",
+            "name" : "Gmail",
+            "link" : "http://gmail.com"
+        },
+        {
+            "iconPath" : "images/dashboard/salesforce.png",
+            "needsApproval" : true,
+            "_id" : "F3535924-EF9C-48D0-BFC6-59DE7B190A1B",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Salesforce",
+            "name" : "Salesforce",
+            "link" : "http://salesforce.com"
+        },
+        {
+            "iconPath" : "images/dashboard/googleplus.png",
+            "needsApproval" : false,
+            "_id" : "2156ACE6-1FFF-46B3-B680-EA16520F55A0",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Google+",
+            "name" : "GooglePlus",
+            "link" : "http://google.com"
+        },
+        {
+            "iconPath" : "images/dashboard/liveplan.png",
+            "needsApproval" : false,
+            "_id" : "2F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Liveplan",
+            "name" : "Liveplan"
+        },
+        {
+            "iconPath" : "images/dashboard/calendar.png",
+            "needsApproval" : false,
+            "_id" : "0F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : true,
+            "description" : "Calendar",
+            "name" : "Calendar"
+        },
+        {
+            "iconPath" : "images/dashboard/concur.png",
+            "needsApproval" : false,
+            "_id" : "1F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : true,
+            "description" : "Concur",
+            "name" : "Concur"
+        },
+        {
+            "iconPath" : "images/dashboard/docs.png",
+            "needsApproval" : false,
+            "_id" : "3F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Docs",
+            "name" : "Docs"
+        },
+        {
+            "iconPath" : "images/dashboard/drive.png",
+            "needsApproval" : false,
+            "_id" : "4F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Drive",
+            "name" : "Drive"
+        },
+        {
+            "iconPath" : "images/dashboard/fusion_tables.png",
+            "needsApproval" : false,
+            "_id" : "5F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Fusion Tables",
+            "name" : "FusionTables"
+        },
+        {
+            "iconPath" : "images/dashboard/vault.png",
+            "needsApproval" : false,
+            "_id" : "6F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : false,
+            "description" : "Vault",
+            "name" : "Vault"
+        },
+        {
+            "iconPath" : "images/dashboard/webex.png",
+            "needsApproval" : false,
+            "_id" : "7F3B1623-2738-47C5-8050-9523BC0525A6",
+            "_rev" : "0",
+            "isDefault" : true,
+            "description" : "Webex",
+            "name" : "Webex"
+        }
+    ],
+    "states" : [
+        {
+            "_id" : "B65FA6A2-D43D-49CD-BEA0-CE98E275A8CD",
+            "name" : "pending",
+            "description" : "Request is pending for approval"
+        },
+        {
+            "_id" : "B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD",
+            "name" : "approved",
+            "description" : "Request has been approved"
+        },
+        {
+            "_id" : "B65FA6A2-D43D-49CD-BEA0-CE9CE275A8CD",
+            "name" : "rejected",
+            "description" : "Request has been rejected"
+        }
+    ]
+}

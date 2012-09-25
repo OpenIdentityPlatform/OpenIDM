@@ -218,6 +218,37 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
 ENGINE = InnoDB;
 
 
+-- -----------------------------------------------------
+-- Table `openidm`.`manageduserapplicationlnk`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`manageduserapplicationlnk` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `state` VARCHAR(38) NOT NULL ,
+  `applicationId` VARCHAR(38) NOT NULL ,
+  `userId` VARCHAR(38) NOT NULL ,
+  `lastTimeUsed` VARCHAR(80) NULL ,
+  `requester` VARCHAR(255) NULL ,
+  `link` VARCHAR(255) NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`uinotification`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `notificationType` VARCHAR(255) NOT NULL ,
+  `requestDate` VARCHAR(255) NOT NULL ,
+  `message` TEXT NOT NULL ,
+  `requester` VARCHAR(255) NULL ,
+  `userId` VARCHAR(38) NOT NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

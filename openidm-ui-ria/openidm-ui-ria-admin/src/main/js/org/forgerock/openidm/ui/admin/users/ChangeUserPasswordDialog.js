@@ -1,7 +1,7 @@
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,13 +28,13 @@
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
-    "org/forgerock/openidm/ui/common/components/Dialog",
-    "org/forgerock/openidm/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/util/Constants"
+    "org/forgerock/commons/ui/common/components/Dialog",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants"
 ], function(Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants) {
     var ChangeUserPasswordDialog = Dialog.extend({    
         contentTemplate: "templates/admin/ChangeUserPasswordDialogTemplate.html",

@@ -1,7 +1,7 @@
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,12 +28,12 @@
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
-    "org/forgerock/openidm/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/util/Constants"
+    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants"
 ], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants) {
     var AdminUserRegistrationView = AbstractView.extend({
         template: "templates/admin/AdminUserRegistrationTemplate.html",
@@ -45,7 +45,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         formSubmit: function(event) {
             event.preventDefault();
             
-            if(validatorsManager.formValidated(this.$el)) {
+            if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
+                this.lock();
+                
                 var data = form2js(this.$el.attr("id")), element;
                 
                 delete data.terms;
@@ -64,6 +66,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                     } else {
                         eventManager.sendEvent(constants.EVENT_USER_REGISTRATION_ERROR, { causeDescription: 'Unknown error' });
                     }
+                    this.unlock();
                 });
             }
         },
@@ -71,6 +74,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         render: function() {
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
+                this.unlock();
             });            
         }   
     }); 

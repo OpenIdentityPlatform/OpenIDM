@@ -1,7 +1,7 @@
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,10 +28,10 @@
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/admin/users/UsersView", [
-    "org/forgerock/openidm/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
     "dataTable"
 ], function(AbstractView, userDelegate, eventManager, constants, dataTable) {
     var UsersView = AbstractView.extend({

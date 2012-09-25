@@ -23,7 +23,7 @@
 </tr>
 <tr>
 	<td>runScript</td>
-	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td>require([&quot;org/forgerock/commons/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
 	<td></td>
 </tr>
 <tr>
@@ -33,7 +33,7 @@
 </tr>
 <tr>
 	<td>runScript</td>
-	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, givenName : &quot;givenName&quot;, familyName :&quot;familyName&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;Test Address Line 1&quot;, address2 : &quot;Test Address Line 2&quot;, city : &quot;TestCity&quot;, postalCode : &quot;Any postal code&quot;, phoneNumber : &quot;+48666666666&quot;, country : &quot;poland&quot;, stateProvince : &quot;dolnoslaskie&quot;, securityQuestion : &quot;1&quot;, securityAnswer : &quot;qwe&quot; }); });</td>
+	<td>require([&quot;org/forgerock/commons/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.createEntity({ userName : &quot;test@test.test&quot;, givenName : &quot;givenName&quot;, familyName :&quot;familyName&quot;, email : &quot;test@test.test&quot;, password : &quot;tesT#1#Test&quot;, address1 : &quot;Test Address Line 1&quot;, address2 : &quot;Test Address Line 2&quot;, city : &quot;TestCity&quot;, postalCode : &quot;Any postal code&quot;, phoneNumber : &quot;+48666666666&quot;, country : &quot;poland&quot;, stateProvince : &quot;dolnoslaskie&quot;, securityQuestion : &quot;1&quot;, securityAnswer : &quot;qwe&quot; }); });</td>
 	<td></td>
 </tr>
 <tr>

@@ -1,7 +1,7 @@
-/*
- * @license DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -31,15 +31,15 @@
 
 require.config({
     paths: {
-        mustache: "libs/mustache",
+        mustache: "libs/mustache-0.7.0",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.3.3-min",
-        js2form: "libs/js2form",
-        form2js: "libs/form2js",
+        js2form: "libs/js2form-1.0",
+        form2js: "libs/form2js-1.0",
         contentflow: "libs/contentflow",
         spin: "libs/spin-1.2.5-min",
-        dataTable: "libs/dataTables-1.9.3-min",
-        jqueryui: "libs/jquery-ui-1.8.23.custom.min",
+        dataTable: "libs/datatables-1.9.3-min",
+        jqueryui: "libs/jquery-ui-1.8.23.custom-min",
         xdate: "libs/xdate-0.7-min"
     },
 
@@ -93,12 +93,13 @@ require([
     "dataTable",
     "jqueryui",
     "xdate",
-    "org/forgerock/openidm/ui/common/util/Constants", 
-    "org/forgerock/openidm/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/EventManager",
     "config/main",
-    "org/forgerock/openidm/ui/user/main", 
-    "org/forgerock/openidm/ui/admin/main", 
-    "org/forgerock/openidm/ui/common/main" 
+    "org/forgerock/commons/ui/user/main",
+    "org/forgerock/commons/ui/common/main",
+    "org/forgerock/openidm/ui/apps/main",
+    "org/forgerock/openidm/ui/admin/main" 
 ], function(a, b, c, d, e, f, g, h, i, j, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
