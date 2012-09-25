@@ -1,7 +1,7 @@
-/* @license 
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,22 +28,22 @@
  * @author yaromin
  */
 define("config/AppConfiguration", [
-    "org/forgerock/openidm/ui/common/util/Constants", 
-    "org/forgerock/openidm/ui/common/main/EventManager"
+    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
             moduleDefinition: [
                 {
-                    moduleClass: "org/forgerock/openidm/ui/user/login/LoginCtrl",
+                    moduleClass: "org/forgerock/commons/ui/user/login/LoginCtrl",
                     configuration: {
-                        loginHelperClass: "org/forgerock/openidm/ui/user/login/InternalLoginHelper",
+                        loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper",
                         showCredentialFields: true,
                         hideLoginButton: false,
                         loginButtonDisabledByDefault: true
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/user/login/OpenAMLoginHelper",
+                   moduleClass: "org/forgerock/commons/ui/user/login/OpenAMLoginHelper",
                    configuration: {
                        loginURL: "http://openaminstallationdomain.com:8090/openam/UI/Login",
                        logoutURL: "http://openaminstallationdomain.com:8090/openam/UI/Logout",
@@ -55,23 +55,23 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/common/main/Router",
+                   moduleClass: "org/forgerock/commons/ui/common/main/Router",
                    configuration: {
                        routes: {
                            "": {
-                               view: "org/forgerock/openidm/ui/user/dashboard/DashboardView",
+                               view: "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
                                role: "openidm-authorized",
                                url: ""                                   
                            },
                            "profile": {
-                               view: "org/forgerock/openidm/ui/user/profile/UserProfileView",
+                               view: "org/forgerock/commons/ui/user/profile/UserProfileView",
                                role: "openidm-authorized",
                                excludedRole: "openidm-admin",
                                url: "profile/" 
                            },
                            "siteIdentification": {
                                base: "profile",
-                               dialog: "org/forgerock/openidm/ui/user/profile/ChangeSiteIdentificationDialog",
+                               dialog: "org/forgerock/commons/ui/user/profile/ChangeSiteIdentificationDialog",
                                url: "profile/site_identification/",
                                role: "openidm-authorized",
                                excludedRole: "openidm-admin"
@@ -100,49 +100,49 @@ define("config/AppConfiguration", [
                                role: "admin"
                            },
                            "register": {
-                               view: "org/forgerock/openidm/ui/user/UserRegistrationView",
+                               view: "org/forgerock/commons/ui/user/UserRegistrationView",
                                url: "register/"
                            },
                            "termsOfUse": {
                                base: "register",
-                               dialog: "org/forgerock/openidm/ui/user/TermsOfUseDialog",
+                               dialog: "org/forgerock/commons/ui/user/TermsOfUseDialog",
                                url: "register/terms_of_use/"
                            },
                            "login" : {
-                               view: "org/forgerock/openidm/ui/user/LoginView",
+                               view: "org/forgerock/commons/ui/user/LoginView",
                                url: "login/"
                            },                           
                            "forgottenPassword" : {
                                base: "login",
-                               dialog: "org/forgerock/openidm/ui/user/ForgottenPasswordDialog",
+                               dialog: "org/forgerock/commons/ui/user/ForgottenPasswordDialog",
                                url: "profile/forgotten_password/"
                            },
                            "enterOldPassword": {
                                base: "profile",
-                               dialog: "org/forgerock/openidm/ui/user/profile/EnterOldPasswordDialog",
+                               dialog: "org/forgerock/commons/ui/user/profile/EnterOldPasswordDialog",
                                role: "openidm-authorized",
                                url: "profile/old_password/",
                                excludedRoles: "openidm-admin"
                            },
                            "changeSecurityData": {
                                base: "profile",
-                               dialog: "org/forgerock/openidm/ui/user/profile/ChangeSecurityDataDialog",
+                               dialog: "org/forgerock/commons/ui/user/profile/ChangeSecurityDataDialog",
                                role: "openidm-authorized",
                                url: "profile/change_security_data/",
                                excludedRole: "openidm-admin"
                            },
                            "addMoreAppsView": {
-                               view: "org/forgerock/openidm/ui/user/apps/AddMoreAppsView",
+                               view: "org/forgerock/openidm/ui/apps/AddMoreAppsView",
                                role: "openidm-authorized",                               
                                url: "applications/addmore/"
                            },
                            "allApps": {
-                               view: "org/forgerock/openidm/ui/user/apps/AllAppsView",
+                               view: "org/forgerock/openidm/ui/apps/AllAppsView",
                                role: "openidm-authorized",                               
                                url: "applications/all/"
                            },
                            "apps": {
-                               view: "org/forgerock/openidm/ui/user/apps/AppsView",
+                               view: "org/forgerock/openidm/ui/apps/AppsView",
                                role: "openidm-authorized",                               
                                url: "applications/"
                            },
@@ -155,12 +155,17 @@ define("config/AppConfiguration", [
                                view: "org/forgerock/openidm/ui/admin/tasks/TaskDetailsView",
                                role: "openidm-admin",
                                url: "tasks/:id"
+                           },
+                           "tasksWithMenu": {
+                               view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
+                               role: "openidm-admin",
+                               url: "tasksmenu/"
                            }
                        }
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/common/main/ProcessConfiguration",
+                   moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                    configuration: {
                        processConfigurationFiles: [
                            "config/process/AdminConfig",
@@ -170,14 +175,14 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/common/main/ServiceInvoker",
+                   moduleClass: "org/forgerock/commons/ui/common/main/ServiceInvoker",
                    configuration: {
                        defaultHeaders: {
                        }                                         
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/common/main/ErrorsHandler",
+                   moduleClass: "org/forgerock/commons/ui/common/main/ErrorsHandler",
                    configuration: {
                        defaultHandlers: {
                            "unauthorized": {
@@ -192,7 +197,7 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/common/components/Navigation",
+                   moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                    configuration: {
                        links: {
                            "admin" : {
@@ -210,6 +215,25 @@ define("config/AppConfiguration", [
                                        "url": "#tasks/",
                                        "name": "Tasks"
                                    }
+                                   /*"tasksMenu": {
+                                       "baseUrl": "#tasksmenu/",
+                                       "url": "#tasksmenu/",
+                                       "name": "Tasks with menu",
+                                       "urls": {
+                                           "myTasks": {
+                                               "url": "#tasksmenu/",
+                                               "name": "My tasks (4)"
+                                           },
+                                           "groupsTasks": {
+                                               "url": "#tasksmenu/groups",
+                                               "name": "Groups queue"
+                                           },
+                                           "usersTasks": {
+                                               "url": "#tasksmenu/users",
+                                               "name": "Users queue"
+                                           }
+                                       }
+                                   }*/
                                }
                            },
                            "user" : {
@@ -239,7 +263,7 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/user/dashboard/NotificationViewHelper",
+                   moduleClass: "org/forgerock/openidm/ui/apps/dashboard/NotificationViewHelper",
                    configuration: {
                        typeToIconMapping: {
                            "1": "images/notifications/pending.png",
@@ -258,7 +282,15 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/common/components/Messages",
+                   moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
+                   configuration: {
+                       templateUrls: [
+                           "templates/apps/application.html"
+                       ]
+                   } 
+               },
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                    configuration: {
                        messages: {
                            "invalidCredentials": {

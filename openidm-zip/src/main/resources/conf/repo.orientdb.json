@@ -20,20 +20,13 @@
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
         
-        "notifications-for-userName": "SELECT * FROM ${_resource} WHERE userName = '${uid}' ORDER BY 'requestDate' desc",
+        "notifications-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
         "query-all-notifications": "select * from ${_resource}",
         
-        "user_application_lnk-for-userName": "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
+        "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
         "query-all-user_application_lnk": "select * from ${_resource}",
         "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",
-        
-        "application-for-ids": "SELECT * FROM ${_resource} WHERE _openidm_id in [${applicationIds}]",
-        "application-for-id": "SELECT * FROM ${_resource} WHERE _openidm_id = '${applicationId}'",
-        "query-all-applications": "select * from ${_resource}",
-        "query-default-applications": "select * from ${_resource} WHERE isDefault = true",
-        
-        "user_application_state-for-id": "SELECT * FROM ${_resource} WHERE _openidm_id = '${userApplicationStateId}'",
-        "query-all-user_application_states": "select * from ${_resource}"
+        "get-user-app-link-by-user-and-app": "select * from ${_resource} WHERE userId = '${uid}' and applicationId = '${applicationId}'"
     },
     "dbStructure" : {
         "orientdbClass" : {
@@ -55,15 +48,6 @@
                     }
                 ]
             },
-            "managed_notification" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    }
-                ]
-            },
             "managed_user_application_lnk" : {
                 "index" : [
                     {
@@ -73,16 +57,7 @@
                     }
                 ]
             },
-            "managed_user_application_state" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    }
-                ]
-            },
-            "managed_application" : {
+            "ui_notification" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",

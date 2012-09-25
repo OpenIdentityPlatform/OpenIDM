@@ -3,6 +3,7 @@
 	baseUrl : ".",
 	dir : "../../../target/minified",
 	mainConfigFile : '../js/main.js',
+	preserveLicenseComments: false,
 	modules : [ {
 		name : "main",
 		excludeShallow : [ 

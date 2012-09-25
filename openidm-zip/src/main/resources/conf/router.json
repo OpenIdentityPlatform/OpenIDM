@@ -112,6 +112,16 @@
             }
         },
         {
+            "pattern" : "^managed/user_application_lnk/.*",
+            "methods" : [
+                "delete"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/user_application_lnk/onResponse-user_application_lnk_delete.js"
+            }
+        },
+        {
             "pattern" : "^managed/user/.*",
             "methods" : [
                 "create"
@@ -119,6 +129,16 @@
             "onResponse" : {
                 "type" : "text/javascript",
                 "file" : "script/ui/onResponse-user_create.js"
+            }
+        },
+        {
+            "pattern" : "^repo/ui/notification.*",
+            "methods" : [
+                "create"
+            ],
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/notification/onCreateRequest-notification-set-default-fields.js"
             }
         }
     ]

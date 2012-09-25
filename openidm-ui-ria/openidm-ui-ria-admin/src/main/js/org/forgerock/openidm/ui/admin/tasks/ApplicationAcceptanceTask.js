@@ -1,7 +1,7 @@
-/*
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,19 +29,34 @@
  */
 define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
     "org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm",
-    "org/forgerock/openidm/ui/common/util/DateUtil"
-], function(AbstractTaskForm, DateUtil) {
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate"
+], function(AbstractTaskForm, DateUtil, userApplicationLnkDelegate, userDelegate, applicationDelegate) {
     var ApplicationAcceptanceTask = AbstractTaskForm.extend({
         template: "templates/admin/tasks/ApplicationAcceptanceTemplate.html",
         
         reloadData: function() {
+            var self = this;
             js2form(document.getElementById(this.$el.attr("id")), this.task);
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
             this.$el.find("input[name=saveButton]").val("Update");
             this.$el.find("input[name=backButton]").val("Back");
-        }
             
+            userApplicationLnkDelegate.readEntity(this.task.description, function(userAppLink) {
+                
+                userDelegate.readEntity(userAppLink.userId, function(user) {
+                    self.$el.find("input[name=userData]").val(user.givenName + " " + user.familyName);
+                });
+                
+                applicationDelegate.getApplicationDetails(userAppLink.applicationId, function(app) {
+                    self.$el.find("input[name=requestedApplicationName]").val(app.name);
+                });
+                
+            });
+        }
     }); 
     
     return new ApplicationAcceptanceTask();

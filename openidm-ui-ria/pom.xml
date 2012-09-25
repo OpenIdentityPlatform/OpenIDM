@@ -35,10 +35,12 @@
 	<name>OpenIDM RIA Web UI</name>
 	<packaging>pom</packaging>
 	<modules>
-		<module>openidm-ui-ria-libs</module>
-		<module>openidm-ui-ria-commons</module>
-		<module>openidm-ui-ria-user</module>
+	    <module>openidm-ui-ria-apps</module>
 		<module>openidm-ui-ria-admin</module>
 	</modules>
-
+    
+    <properties>
+        <forgerock-ui.version>1.0.0-SNAPSHOT</forgerock-ui.version>
+    </properties>
+    
 </project>

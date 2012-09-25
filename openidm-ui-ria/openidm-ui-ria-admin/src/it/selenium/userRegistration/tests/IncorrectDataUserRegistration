@@ -23,7 +23,7 @@
 </tr>
 <tr>
 	<td>runScript</td>
-	<td>require([&quot;org/forgerock/openidm/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
+	<td>require([&quot;org/forgerock/commons/ui/user/delegates/UserDelegate&quot;], function(userDelegate) { userDelegate.removeAllUsers(); });</td>
 	<td></td>
 </tr>
 <tr>

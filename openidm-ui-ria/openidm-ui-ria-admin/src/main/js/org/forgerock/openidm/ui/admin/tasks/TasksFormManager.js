@@ -1,7 +1,7 @@
-/*
- * @license DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,7 +28,7 @@
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/admin/tasks/TasksFormManager", [
-    "org/forgerock/openidm/ui/common/main/AbstractConfigurationAware"
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function(AbstractConfigurationAware, eventManager) {
     var obj = new AbstractConfigurationAware();
     
