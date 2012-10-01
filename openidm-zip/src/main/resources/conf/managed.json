@@ -10,6 +10,10 @@
                 "type" : "text/javascript",
                 "file" : "script/ui/onValidate-user-sensitive-fields.js"
             },
+            "onDelete" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onDetele-user-cleanup.js"
+            },
             "properties" : [
                 {
                     "name" : "securityAnswer",

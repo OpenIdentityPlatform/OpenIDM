@@ -133,17 +133,20 @@ define("config/AppConfiguration", [
                            },
                            "addMoreAppsView": {
                                view: "org/forgerock/openidm/ui/apps/AddMoreAppsView",
-                               role: "openidm-authorized",                               
+                               role: "openidm-authorized", 
+                               excludedRole: "openidm-admin",
                                url: "applications/addmore/"
                            },
                            "allApps": {
                                view: "org/forgerock/openidm/ui/apps/AllAppsView",
-                               role: "openidm-authorized",                               
+                               role: "openidm-authorized",  
+                               excludedRole: "openidm-admin",
                                url: "applications/all/"
                            },
                            "apps": {
                                view: "org/forgerock/openidm/ui/apps/AppsView",
-                               role: "openidm-authorized",                               
+                               role: "openidm-authorized",    
+                               excludedRole: "openidm-admin",
                                url: "applications/"
                            },
                            "tasks": {

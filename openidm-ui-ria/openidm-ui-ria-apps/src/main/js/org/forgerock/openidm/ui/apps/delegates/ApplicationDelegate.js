@@ -34,7 +34,7 @@ define("org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate", [
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/config/applications");
+    var obj = new AbstractDelegate(constants.host + "/openidm/config/ui/applications");
 
     obj.applications = {};
     obj.statesById = {};

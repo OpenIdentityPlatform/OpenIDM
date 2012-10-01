@@ -46,6 +46,20 @@
             }
         },
         {
+            "pattern" : "^repo/internal/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'for-internalcredentials'"
+            },
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onRequest-for-credentials.js"
+            }
+        },
+        {
             "pattern" : "^managed/user/.*",
             "methods" : [
                 "query"

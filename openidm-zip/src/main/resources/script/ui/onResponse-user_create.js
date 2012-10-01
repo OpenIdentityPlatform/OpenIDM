@@ -3,7 +3,7 @@ newUserApplicationLnk = {
     "state" : "B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD"
 }
 
-result = openidm.read("config/applications")
+result = openidm.read("config/ui/applications")
 defaultApps = [];
 
 if (result.availableApps) {
