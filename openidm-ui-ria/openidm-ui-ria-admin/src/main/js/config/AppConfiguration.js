@@ -220,7 +220,7 @@ define("config/AppConfiguration", [
                                    "tasksMenu": {
                                        "baseUrl": "#tasksmenu/",
                                        "url": "#tasksmenu/all",
-                                       "name": "Tasks with menu",
+                                       "name": "Tasks",
                                        "urls": {
                                            "allTasks": {
                                                "url": "#tasksmenu/all",

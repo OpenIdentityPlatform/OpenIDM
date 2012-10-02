@@ -29,7 +29,7 @@
  */
 define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/WorkflowManager",
+    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/tasks/TasksMenuView",

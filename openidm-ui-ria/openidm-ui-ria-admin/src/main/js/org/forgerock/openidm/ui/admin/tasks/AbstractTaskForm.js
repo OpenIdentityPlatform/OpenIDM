@@ -32,7 +32,7 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/WorkflowManager",
+    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractTaskForm = AbstractView.extend({

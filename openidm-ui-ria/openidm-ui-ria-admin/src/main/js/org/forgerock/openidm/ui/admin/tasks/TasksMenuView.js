@@ -28,13 +28,16 @@
  * @author mbilski
  */
 define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
-    "org/forgerock/commons/ui/common/main/WorkflowManager",
+    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "dataTable",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate"
+], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userApplicationLnkDelegate, userDelegate, applicationDelegate) {
     var TasksMenuView = Backbone.View.extend({
         
         events: {
@@ -54,9 +57,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             this.category = category;
             
             if(category === "all") {
-                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, this.displayTasks, this.errorHandler);
+                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), this.errorHandler);
             } else if(category === "assigned") {
-                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, this.displayTasks, this.errorHandler);
+                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), this.errorHandler);
             }
         },
         
@@ -65,7 +68,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         displayTasks: function(tasks) {
-            var process, data, processName, task, taskName, taskId, params;
+            var process, data, processName, task, taskName, i, j, params;
             
             for(processName in tasks) {
                 process = tasks[processName];
@@ -77,21 +80,38 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         processName: processName,
                         taskName: taskName,
                         count: task.tasks.length,
-                        headers: ["AppLink", ""],
+                        headers: ["Application", "Requester"],
                         tasks: []
                     };
                     
-                    for(taskId in task.tasks) {
-                        params = task.tasks[taskId];
+                    j = 0;
+                    for(i = 0; i < task.tasks.length; i++) {
+                        params = task.tasks[i];
                         
-                        data.tasks.push(this.prepareParams(params));
-                    }
-                    
-                    $("#tasksMenu").append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data)); 
+                        //data.tasks.push(this.prepareParams(params));
+                        this.fetchParameters(params.userApplicationLnkId, _.bind(function(userName, appName) {
+                            data.tasks.push(this.prepareParams({"app": appName, "user": userName, "_id": params._id}));
+                            j++;
+                            
+                            if(j === task.tasks.length) {
+                                $("#tasksMenu").append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
+                            }
+                        }, this));
+                    }    
                 }    
             }
             
             $("#tasksMenu").accordion();
+        },
+        
+        fetchParameters: function(userAppLinkId, callback) {
+            userApplicationLnkDelegate.readEntity(userAppLinkId, function(userAppLink) {                
+                userDelegate.readEntity(userAppLink.userId, function(user) {
+                    applicationDelegate.getApplicationDetails(userAppLink.applicationId, function(app) {
+                        callback(user.userName, app.name);
+                    });
+                });   
+            });
         },
         
         prepareParams: function(params) {
