@@ -32,32 +32,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
     "org/forgerock/commons/ui/common/main/WorkflowManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "dataTable"
-], function(AbstractView, workflowManager, eventManager, constants, dataTable) {
+    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView"
+], function(AbstractView, workflowManager, eventManager, constants, tasksMenuView) {
     var TasksWithMenuView = AbstractView.extend({
         template: "templates/admin/tasks/TasksWithMenuTemplate.html",
-        
-        events: {
-            "click tr": "showTask",
-            "click checkbox": "select"
-        },
-        
-        select: function(event) {
-            console.log("user selected");
-            event.stopPropagation();
-        },
-        
-        showTask: function(event) {
-            var id = $(event.target).parent().find("input[name=id]").val();
-            
-            if(id) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "taskDetails", args: [id]});
-            }
-        },
-        
-        render: function() {
+                
+        render: function(args) {
             this.parentRender(function() {
-                $("#tasksMenu").accordion();
+                tasksMenuView.render();
+                
+                //TODO it should check if args is passed
+                //then display tasks details
             });            
         }   
     }); 

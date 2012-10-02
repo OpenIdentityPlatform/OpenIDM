@@ -22,18 +22,33 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $, form2js, _ */
 
-define("org/forgerock/openidm/ui/admin/main", [
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
-	"./tasks/TasksView",
-	"./tasks/TaskDetailsView",
-	"./tasks/AbstractTaskForm",
-	"./tasks/ApplicationAcceptanceTask",
-	"./tasks/TasksFormManager",
-	"./tasks/TasksWithMenuView",
-	"./tasks/TasksMenuView"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
+    "org/forgerock/commons/ui/common/main/WorkflowManager",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "dataTable"
+], function(workflowManager, eventManager, constants, dataTable) {
+    var TasksMenuView = Backbone.View.extend({
+        
+        events: {
+            "click tr": "showTask",
+            "click checkbox": "select"
+        },
+                
+        render: function() {
+            //TODO getTasks from delegate
+            //TODO use ProcessUserTaskTableTempalte and mustache to display them
+            
+            $("#tasksMenu").accordion();        
+        }   
+    }); 
+    
+    return new TasksMenuView();
+});
+
+
