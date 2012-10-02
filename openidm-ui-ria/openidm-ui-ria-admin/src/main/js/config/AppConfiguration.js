@@ -217,15 +217,15 @@ define("config/AppConfiguration", [
                                    "tasks": {
                                        "url": "#tasks/",
                                        "name": "Tasks"
-                                   }
-                                   /*"tasksMenu": {
+                                   },
+                                   "tasksMenu": {
                                        "baseUrl": "#tasksmenu/",
                                        "url": "#tasksmenu/",
                                        "name": "Tasks with menu",
                                        "urls": {
                                            "myTasks": {
                                                "url": "#tasksmenu/",
-                                               "name": "My tasks (4)"
+                                               "name": "My tasks"
                                            },
                                            "groupsTasks": {
                                                "url": "#tasksmenu/groups",
@@ -236,7 +236,7 @@ define("config/AppConfiguration", [
                                                "name": "Users queue"
                                            }
                                        }
-                                   }*/
+                                   }
                                }
                            },
                            "user" : {
@@ -288,7 +288,8 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                    configuration: {
                        templateUrls: [
-                           "templates/apps/application.html"
+                           "templates/apps/application.html",
+                           "templates/tasks/ProcessUserTaskTableTemplate.html"
                        ]
                    } 
                },
