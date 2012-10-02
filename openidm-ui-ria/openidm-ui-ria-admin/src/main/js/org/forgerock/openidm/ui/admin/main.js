@@ -34,5 +34,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./tasks/ApplicationAcceptanceTask",
 	"./tasks/TasksFormManager",
 	"./tasks/TasksWithMenuView",
-	"./tasks/TasksMenuView"
+	"./tasks/TasksMenuView",
+	"./tasks/WorkflowDelegate"
 ]);
