@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _ */
+/*global define, $, form2js, _, Backbone */
 
 /**
  * @author mbilski
@@ -31,21 +31,78 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
     "org/forgerock/commons/ui/common/main/WorkflowManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "dataTable"
-], function(workflowManager, eventManager, constants, dataTable) {
+    "dataTable",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils) {
     var TasksMenuView = Backbone.View.extend({
         
         events: {
-            "click tr": "showTask",
-            "click checkbox": "select"
+            "click tr": "showTask"
+        },
+        
+        showTask: function(event) {
+            var id = $(event.target).parent().find("input[type=hidden]").val();
+            
+            if(id) {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [this.category, id]});
+            }
         },
                 
-        render: function() {
-            //TODO getTasks from delegate
-            //TODO use ProcessUserTaskTableTempalte and mustache to display them
+        render: function(category) {
+            this.setElement($("#tasksMenu"));
+            this.category = category;
             
-            $("#tasksMenu").accordion();        
-        }   
+            if(category === "all") {
+                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, this.displayTasks, this.errorHandler);
+            } else if(category === "assigned") {
+                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, this.displayTasks, this.errorHandler);
+            }
+        },
+        
+        errorHandler: function() {
+            $("#tasksMenu").append('No tasks');
+        },
+        
+        displayTasks: function(tasks) {
+            var process, data, processName, task, taskName, taskId, params;
+            
+            for(processName in tasks) {
+                process = tasks[processName];
+                
+                for(taskName in process) {
+                    task = process[taskName];
+                    
+                    data = {
+                        processName: processName,
+                        taskName: taskName,
+                        count: task.tasks.length,
+                        headers: ["AppLink", ""],
+                        tasks: []
+                    };
+                    
+                    for(taskId in task.tasks) {
+                        params = task.tasks[taskId];
+                        
+                        data.tasks.push(this.prepareParams(params));
+                    }
+                    
+                    $("#tasksMenu").append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data)); 
+                }    
+            }
+            
+            $("#tasksMenu").accordion();
+        },
+        
+        prepareParams: function(params) {
+            return $.map(params, function(v, k) {
+                if( k === "_id" ) {
+                    return '<input type="hidden" value="'+ v +'" />';
+                }
+                
+                return v;
+            });
+        }
     }); 
     
     return new TasksMenuView();

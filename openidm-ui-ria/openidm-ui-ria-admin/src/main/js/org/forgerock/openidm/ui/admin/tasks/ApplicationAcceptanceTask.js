@@ -43,7 +43,7 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
             this.$el.find("input[name=saveButton]").val("Update");
-            this.$el.find("input[name=backButton]").val("Back");
+            this.$el.find("input[name=claimButton]").val("Claim");
             
             userApplicationLnkDelegate.readEntity(this.task.description, function(userAppLink) {
                 

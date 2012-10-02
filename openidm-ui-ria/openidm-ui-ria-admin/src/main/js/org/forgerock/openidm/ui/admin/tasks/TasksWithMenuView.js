@@ -32,17 +32,25 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
     "org/forgerock/commons/ui/common/main/WorkflowManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView"
-], function(AbstractView, workflowManager, eventManager, constants, tasksMenuView) {
+    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView",
+    "org/forgerock/openidm/ui/admin/tasks/TaskDetailsView"
+], function(AbstractView, workflowManager, eventManager, constants, tasksMenuView, taskDetailsView) {
     var TasksWithMenuView = AbstractView.extend({
         template: "templates/admin/tasks/TasksWithMenuTemplate.html",
                 
         render: function(args) {
+            var category, id;
+            category = args[0];
+            id = args[1];
+            
             this.parentRender(function() {
-                tasksMenuView.render();
+                tasksMenuView.render(category);
                 
-                //TODO it should check if args is passed
-                //then display tasks details
+                if(id) {                    
+                    taskDetailsView.render(id, category);
+                } else {
+                    $("#taskDetails").html('Choose tasks');
+                }
             });            
         }   
     }); 
