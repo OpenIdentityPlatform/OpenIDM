@@ -37,8 +37,11 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager) {
     var TaskDetailsView = AbstractView.extend({
         template: "templates/admin/tasks/TaskDetailsTemplate.html",
-
-        render: function(id, callback) {   
+        
+        element: "#taskDetails",
+        
+        render: function(id, category) {  
+            
             this.parentRender(function() {      
                 validatorsManager.bindValidators(this.$el);
                 
@@ -46,12 +49,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
                     this.task = task;
                     
                     var view = require(tasksFormManager.getViewForForm("applicationAcceptance"));
-                    view.render(task);
+                    view.render(task, category);
                 }, this));
-                
-                if(callback) {
-                    callback();
-                }
             });            
         }
     }); 

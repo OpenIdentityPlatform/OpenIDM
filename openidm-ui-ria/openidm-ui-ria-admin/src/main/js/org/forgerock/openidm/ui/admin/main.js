@@ -29,7 +29,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./users/AdminUserProfileView",
 	"./users/ChangeUserPasswordDialog",
 	"./users/UsersView",
-	"./tasks/TasksView",
 	"./tasks/TaskDetailsView",
 	"./tasks/AbstractTaskForm",
 	"./tasks/ApplicationAcceptanceTask",

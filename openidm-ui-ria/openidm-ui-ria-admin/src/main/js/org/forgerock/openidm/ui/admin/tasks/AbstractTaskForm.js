@@ -32,15 +32,16 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/WorkflowManager"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager) {
+    "org/forgerock/commons/ui/common/main/WorkflowManager",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractTaskForm = AbstractView.extend({
         template: "templates/admin/tasks/DefaultTaskTemplate.html",
         element: "#taskContent",
         
         events: {
             "click input[name=saveButton]": "formSubmit",
-            "click input[name=backButton]": "back",
+            "click input[name=claimButton]": "claimTask",
             "onValidate": "onValidate"
         },
         
@@ -50,19 +51,31 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
             var params = form2js(this.$el.attr("id"), '.', false);
             console.log(params);
             
-            workflowManager.completeTask(this.task._id, params, function() {
+            workflowManager.completeTask(this.task._id, params, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasks"});
-            }, function() {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [this.category]});
+            }, this), function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
             });
         },
         
-        render: function(task, callback) { 
+        claimTask: function(event) {
+            event.preventDefault();
+            
+            workflowManager.assignTaskToUser(this.task._id, conf.loggedUser.userName, _.bind(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "claimedTask");
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: ["assigned", this.task._id]});
+            }, this), function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+            });
+        },
+        
+        render: function(task, category, callback) { 
             this.setElement(this.element);
             this.$el.unbind();
             this.delegateEvents();
             this.task = task;
+            this.category = category;
             
             this.parentRender(function() {      
                 validatorsManager.bindValidators(this.$el);                
@@ -78,10 +91,6 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
             js2form(document.getElementById(this.$el.attr("id")), this.task);
             this.$el.find("input[name=saveButton]").val("Update");
             this.$el.find("input[name=backButton]").val("Back");
-        },
-
-        back: function() {
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasks"});
         }
     }); 
     

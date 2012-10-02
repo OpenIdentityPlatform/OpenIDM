@@ -86,7 +86,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         editedUser: {},
         
         render: function(userName, callback) {
-            userName = userName.toString();
+            userName = userName[0].toString();
             
             this.parentRender(function() {
                 var editedUserRef = this.editedUserContainer, self = this;

@@ -162,7 +162,10 @@ define("config/AppConfiguration", [
                            "tasksWithMenu": {
                                view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
                                role: "openidm-admin",
-                               url: "tasksmenu/"
+                               //url: "tasksmenu/:category/:id"
+                               url: /^tasksmenu\/([A-Za-z]+)\/?([0-9]*)$/,
+                               pattern: "tasksmenu/?/?",
+                               forceUpdate: true
                            }
                        }
                    } 
@@ -214,26 +217,18 @@ define("config/AppConfiguration", [
                                        "url": "#groups/",
                                        "name": "Groups"
                                    },
-                                   "tasks": {
-                                       "url": "#tasks/",
-                                       "name": "Tasks"
-                                   },
                                    "tasksMenu": {
                                        "baseUrl": "#tasksmenu/",
-                                       "url": "#tasksmenu/",
+                                       "url": "#tasksmenu/all",
                                        "name": "Tasks with menu",
                                        "urls": {
+                                           "allTasks": {
+                                               "url": "#tasksmenu/all",
+                                               "name": "All tasks"
+                                           },
                                            "myTasks": {
-                                               "url": "#tasksmenu/",
+                                               "url": "#tasksmenu/assigned",
                                                "name": "My tasks"
-                                           },
-                                           "groupsTasks": {
-                                               "url": "#tasksmenu/groups",
-                                               "name": "Groups queue"
-                                           },
-                                           "usersTasks": {
-                                               "url": "#tasksmenu/users",
-                                               "name": "Users queue"
                                            }
                                        }
                                    }
@@ -289,7 +284,7 @@ define("config/AppConfiguration", [
                    configuration: {
                        templateUrls: [
                            "templates/apps/application.html",
-                           "templates/tasks/ProcessUserTaskTableTemplate.html"
+                           "templates/admin/tasks/ProcessUserTaskTableTemplate.html"
                        ]
                    } 
                },
@@ -375,6 +370,10 @@ define("config/AppConfiguration", [
                            },
                            "completedTask": {
                                msg: "Task has been completed.",
+                               type: "info"
+                           },
+                           "claimedTask": {
+                               msg: "Task has been claimed.",
                                type: "info"
                            }
                        }
