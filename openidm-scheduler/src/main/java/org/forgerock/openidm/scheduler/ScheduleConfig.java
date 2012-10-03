@@ -54,8 +54,18 @@ public class ScheduleConfig {
     private Object invokeContext = null;
     
     public ScheduleConfig(JsonValue config) {
-        enabled = config.get(SchedulerService.SCHEDULE_ENABLED).defaultTo(Boolean.TRUE).asBoolean();
-        persisted = config.get(SchedulerService.SCHEDULE_PERSISTED).defaultTo(Boolean.FALSE).asBoolean();
+        JsonValue enabledValue = config.get(SchedulerService.SCHEDULE_ENABLED);
+        if (enabledValue.isString()) {
+            enabled = Boolean.parseBoolean(enabledValue.defaultTo("true").asString());
+        } else {
+            enabled = enabledValue.defaultTo(Boolean.TRUE).asBoolean();
+        }
+        JsonValue persistedValue = config.get(SchedulerService.SCHEDULE_PERSISTED);
+        if (persistedValue.isString()) {
+            persisted = Boolean.parseBoolean(persistedValue.defaultTo("false").asString());
+        } else {
+            persisted = persistedValue.defaultTo(Boolean.FALSE).asBoolean();
+        }
         misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY).defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
         if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) && 
                 !misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_DO_NOTHING)) {
