@@ -27,43 +27,34 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
+define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView",
-    "org/forgerock/openidm/ui/admin/tasks/TaskDetailsView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, taskDetailsView) {
-    var TasksWithMenuView = AbstractView.extend({
-        template: "templates/admin/tasks/TasksWithMenuTemplate.html",
+    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView"
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView) {
+    var TasksDashboard = AbstractView.extend({
+        template: "templates/admin/tasks/TasksDashboardTemplate.html",
                 
         render: function(args) {
-            var category, id;
-            category = args[0];
-            id = args[1];
-            
-            this.tasksMenuView = new TasksMenuView();
+            this.myTasks = new TasksMenuView();
+            this.candidateTasks = new TasksMenuView();
             
             this.parentRender(function() {
-                this.tasksMenuView.render(category);
-                
-                if(id) {                    
-                    taskDetailsView.render(id, category);
-                } else {
-                    $("#taskDetails").html('<div class="center shadowFrame"><h1>Choose a task</h1></div>');
-                }
+                this.candidateTasks.render("all", $("#candidateTasks"));                
+                this.myTasks.render("assigned", $("#myTasks"));
             });            
         }   
-    }), obj; 
+    }), obj;
     
-    obj = new TasksWithMenuView();
+    obj = new TasksDashboard();
     
     eventManager.registerListener("showTaskDetailsRequest", function(event) {
-        taskDetailsView.render(event.id, event.category);
+        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [event.category, event.id]});
     });
-    
-    return obj;
+
+    return new TasksDashboard();
 });
 
 

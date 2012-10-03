@@ -1,17 +1,21 @@
 <h3><a href="#">{{processName}} - {{taskName}} {{#count}}({{count}}){{/count}}</a></h3>
 <div>
     <table>
-        <tr>
-            {{#headers}}
-                <th>{{.}}</th>
-            {{/headers}}
-        </tr>
-        {{#tasks}}
-        <tr>
-            {{#.}}
-                <td>{{{.}}}</td>
-            {{/.}}
-        </tr>
-        {{/tasks}}
+        <thead>
+	        <tr>
+	            {{#headers}}
+	                <th>{{.}}</th>
+	            {{/headers}}
+	        </tr>
+        </thead>
+        <tbody>
+	        {{#tasks}}
+	        <tr>
+	            {{#.}}
+	                <td>{{{.}}}</td>
+	            {{/.}}
+	        </tr>
+	        {{/tasks}}
+        </tbody>
     </table>    
 </div>

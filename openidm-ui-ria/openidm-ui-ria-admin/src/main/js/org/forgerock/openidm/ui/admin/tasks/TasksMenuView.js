@@ -48,23 +48,28 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             var id = $(event.target).parent().find("input[type=hidden]").val();
             
             if(id) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [this.category, id]});
+                eventManager.sendEvent("showTaskDetailsRequest", {"category": this.category, "id": id});
             }
         },
-                
-        render: function(category) {
-            this.setElement($("#tasksMenu"));
+        
+        render: function(category, element, callback) {
+            if(!element) {
+                this.setElement($("#tasksMenu"));
+            } else {
+                this.setElement(element);
+            }
+            
             this.category = category;
             
             if(category === "all") {
-                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), this.errorHandler);
+                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             } else if(category === "assigned") {
-                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), this.errorHandler);
+                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             }
         },
         
         errorHandler: function() {
-            $("#tasksMenu").append('No tasks');
+            this.$el.append('<b>No tasks</b>');
         },
         
         displayTasks: function(tasks) {
@@ -88,27 +93,28 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                     for(i = 0; i < task.tasks.length; i++) {
                         params = task.tasks[i];
                         
+                        if(params.userApplicationLnkId) {
                         //data.tasks.push(this.prepareParams(params));
-                        this.fetchParameters(params.userApplicationLnkId, _.bind(function(userName, appName) {
-                            data.tasks.push(this.prepareParams({"app": appName, "user": userName, "_id": params._id}));
-                            j++;
-                            
-                            if(j === task.tasks.length) {
-                                $("#tasksMenu").append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
-                            }
-                        }, this));
+                            this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, taskId) {
+                                data.tasks.push(this.prepareParams({"app": appName, "user": userName, "_id": taskId}));
+                                j++;
+                                
+                                if(j === task.tasks.length) {
+                                    this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
+                                    this.$el.accordion({collapsible: true, fillSpace: true});
+                                }
+                            }, this));
+                        } 
                     }    
                 }    
-            }
-            
-            $("#tasksMenu").accordion();
+            }          
         },
         
-        fetchParameters: function(userAppLinkId, callback) {
+        fetchParameters: function(userAppLinkId, taskId, callback) {
             userApplicationLnkDelegate.readEntity(userAppLinkId, function(userAppLink) {                
                 userDelegate.readEntity(userAppLink.userId, function(user) {
                     applicationDelegate.getApplicationDetails(userAppLink.applicationId, function(app) {
-                        callback(user.userName, app.name);
+                        callback(user.userName, app.name, taskId);
                     });
                 });   
             });
@@ -125,7 +131,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         }
     }); 
     
-    return new TasksMenuView();
+    return TasksMenuView;
 });
 
 
