@@ -91,7 +91,7 @@ import org.forgerock.openidm.objset.ObjectSetJsonResource;
 @Service
 public class SynchronizationService extends ObjectSetJsonResource
 // TODO: Deprecate these interfaces:
- implements SynchronizationListener, ScheduledService {
+ implements SynchronizationListener, ScheduledService, Mappings {
 
     /** TODO: Description. */
     private enum Action {
@@ -107,6 +107,9 @@ public class SynchronizationService extends ObjectSetJsonResource
     /** TODO: Description. */
     private ComponentContext context;
 
+    @Reference
+    Reconcile reconService;
+    
     /** Object set router service. */
     @Reference(
         name = "ref_SynchronizationService_JsonResourceRouterService",
@@ -171,13 +174,24 @@ public class SynchronizationService extends ObjectSetJsonResource
      * @return TODO.
      * @throws org.forgerock.openidm.sync.SynchronizationException
      */
-    ObjectMapping getMapping(String name) throws SynchronizationException {
+    public ObjectMapping getMapping(String name) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             if (mapping.getName().equals(name)) {
                 return mapping;
             }
         }
         throw new SynchronizationException("No such mapping: " + name);
+    }
+    
+    /**
+     * Instantiate an ObjectMapping with the given config
+     */
+    public ObjectMapping createMapping(JsonValue mappingConfig) {
+        ObjectMapping createdMapping = new ObjectMapping(this, mappingConfig);
+        List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
+        augmentedMappings.add(createdMapping);
+        createdMapping.initRelationships(this, augmentedMappings);
+        return createdMapping;
     }
 
     /**
@@ -253,38 +267,6 @@ public class SynchronizationService extends ObjectSetJsonResource
     /**
      * @deprecated Use {@code sync} resource interface.
      */
-    @Deprecated
-    private String reconcile(JsonValue mapping) throws SynchronizationException {
-        JsonValue context = ObjectSetContext.get();
-        //String reconId = context.get("uuid").asString();
-        ReconciliationContext reconContext = new ReconciliationContext(context); // TODO: track, expose, manage instances
-        if (mapping.isString()) {
-            getMapping(mapping.asString()).recon(reconContext); // throws SynchronizationException
-        } else if (mapping.isMap()) {
-// FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB 
-            ObjectMapping schedulerMapping = new ObjectMapping(this, mapping);
-            List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
-            augmentedMappings.add(schedulerMapping);
-            schedulerMapping.initRelationships(this, augmentedMappings);
-            schedulerMapping.recon(reconContext);
-        } else {
-            throw new SynchronizationException("Unknown mapping type");
-        }
-        return reconContext.getReconId();
-    }
-
-    /**
-     *
-     * @deprecated Use the discovery engine.
-     */
-    private void performAction(JsonValue params) throws SynchronizationException {
-        ObjectMapping mapping = getMapping(params.get("mapping").required().asString());
-        mapping.performAction(params);
-    }
-
-    /**
-     * @deprecated Use {@code sync} resource interface.
-     */
     @Override // ScheduledService
     @Deprecated // use resource interface
     public void execute(Map<String, Object> context) throws ExecutionException {
@@ -295,7 +277,7 @@ public class SynchronizationService extends ObjectSetJsonResource
                 JsonValue mapping = params.get("mapping");
                 ObjectSetContext.push(newFauxContext(mapping));
                 try {
-                    reconcile(mapping);
+                    reconService.reconcile(mapping, Boolean.TRUE);
                 } finally {
                     ObjectSetContext.pop();
                 }
@@ -308,6 +290,15 @@ public class SynchronizationService extends ObjectSetJsonResource
         } catch (SynchronizationException se) {
             throw new ExecutionException(se);
         }
+    }
+
+    /**
+     *
+     * @deprecated Use the discovery engine.
+     */
+    private void performAction(JsonValue params) throws SynchronizationException {
+        ObjectMapping mapping = getMapping(params.get("mapping").required().asString());
+        mapping.performAction(params);
     }
 
     @Override // ObjectSetJsonResource
@@ -339,8 +330,11 @@ public class SynchronizationService extends ObjectSetJsonResource
                     result = new HashMap<String, Object>();
                     JsonValue mapping = _params.get("mapping").required();
                     logger.debug("Synchronization _action=recon, mapping={}", mapping);
-                    result.put("reconId", reconcile(mapping));
-// TODO: Make asynchronous, and provide polling mechanism for reconciliation status.
+                    String reconId = reconService.reconcile(mapping, Boolean.TRUE);
+                    result.put("reconId", reconId);
+                    result.put("_id", reconId);
+                    result.put("comment1", "Deprecated API on sync service. Call recon action on recon service instead.");
+                    result.put("comment2", "Deprecated return property reconId, use _id instead.");
                     break;
                 case performAction:
                     logger.debug("Synchronization _action=performAction, params={}", _params);

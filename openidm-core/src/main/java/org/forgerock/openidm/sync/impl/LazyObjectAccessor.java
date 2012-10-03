@@ -86,9 +86,12 @@ public class LazyObjectAccessor {
     }
 
     /**
-     * @return the object value, which may trigger a load on demand 
+     * @return the object value, null if the object does not exist.
+     * This may trigger a load on demand 
      * if it has not been loaded already.
-     * @throws SynchronizationException if loading the object failed
+     * 
+     * @throws SynchronizationException if loading the object failed 
+     * for reasons other than just not finding the object.
      */
     public JsonValue getObject() throws SynchronizationException {
         if (!loaded) {
