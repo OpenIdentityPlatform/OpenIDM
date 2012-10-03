@@ -122,14 +122,15 @@ public class SchedulerService extends ObjectSetJsonResource {
     final static String GROUP_NAME = "scheduler-service-group";
     
     private static Scheduler inMemoryScheduler;
-    private static Scheduler persistentScheduler;
-    private SchedulerConfig schedulerConfig = null;
+    private static Scheduler persistentScheduler = null;
+    private static SchedulerConfig schedulerConfig = null;
     
     private Map<String, ScheduleConfigService> configMap = new HashMap<String, ScheduleConfigService>();
     private static Object CONFIG_SERVICE_LOCK = new Object();
     
     private static Object LOCK = new Object();
     
+    private boolean executePersistentSchedules = false;
     private boolean started = false;
     
     EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
@@ -174,8 +175,13 @@ public class SchedulerService extends ObjectSetJsonResource {
             // Start processing schedules
             logger.info("Starting Volatile Scheduler");
             inMemoryScheduler.start();
-            logger.info("Starting Persistent Scheduler");
-            persistentScheduler.start();
+            
+            if (executePersistentSchedules) {
+                logger.info("Starting Persistent Scheduler");
+                persistentScheduler.start();
+            } else {
+                logger.info("Persistent Schedules will not be executed on this node");
+            }
             
             logger.info("There are {} jobs waiting to be scheduled", configMap.size());
             Set<String> keys = configMap.keySet();
@@ -190,23 +196,6 @@ public class SchedulerService extends ObjectSetJsonResource {
             logger.info("Scheduling waiting schedules");
         }
     }
-    
-    /**
-     * Initialize the service configuration
-     * @param compContext
-     * @throws InvalidException if the configuration is invalid.
-     */
-    /*private ScheduleConfig initConfig(ComponentContext compContext) throws InvalidException {
-        
-        // Optional property SERVICE_FACTORY_PID set by JSONConfigInstaller
-        configFactoryPID = (String) compContext.getProperties().get("config.factory-pid");
-        Map<String, Object> config = enhancedConfig.getConfiguration(compContext);
-        logger.debug("Scheduler service activating with configuration {}", config);
-        if (config == null) {
-            return null;
-        }
-        return new ScheduleConfig(config);
-    }*/
     
     public void registerConfigService(ScheduleConfigService service) throws SchedulerException, ParseException {
         logger.debug("Registering new ScheduleConfigService");
@@ -389,10 +378,9 @@ public class SchedulerService extends ObjectSetJsonResource {
     private boolean jobExists(String jobName, boolean persisted) throws SchedulerException {
         if (!persisted) {
             return (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null);
-            
+        } else {
+            return (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null);
         }
-        return (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null);
-        
     }
 
     @Override
@@ -532,7 +520,8 @@ public class SchedulerService extends ObjectSetJsonResource {
             try {
                 if (queryId.equals("query-all-ids")) {
                     // Query all the Job IDs in both schedulers
-                    String[] persistentJobNames = persistentScheduler.getJobNames(GROUP_NAME);
+                    String[] persistentJobNames = null;
+                    persistentJobNames = persistentScheduler.getJobNames(GROUP_NAME);
                     String[] inMemoryJobNames = inMemoryScheduler.getJobNames(GROUP_NAME);
                     List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
                     if (persistentJobNames != null) {
@@ -612,9 +601,14 @@ public class SchedulerService extends ObjectSetJsonResource {
                 persistentScheduler.shutdown();
             }
         }
+        if (schedulerConfig.exectuePersistentSchedulesEnabled()) {
+            executePersistentSchedules = true;
+        } else {
+            executePersistentSchedules = false;
+        }
         createPersistentScheduler();
     }
-    
+
     private void createPersistentScheduler() throws SchedulerException {
         // Get the persistent scheduler using our custom JobStore implementation
         logger.info("Creating Persistent Scheduler");
