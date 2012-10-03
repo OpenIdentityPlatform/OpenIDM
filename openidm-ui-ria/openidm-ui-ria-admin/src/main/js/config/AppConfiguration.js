@@ -149,23 +149,18 @@ define("config/AppConfiguration", [
                                excludedRole: "openidm-admin",
                                url: "applications/"
                            },
-                           "tasks": {
-                               view: "org/forgerock/openidm/ui/admin/tasks/TasksView",
-                               role: "openidm-admin",
-                               url: "tasks/"
-                           },
-                           "taskDetails": {
-                               view: "org/forgerock/openidm/ui/admin/tasks/TaskDetailsView",
-                               role: "openidm-admin",
-                               url: "tasks/:id"
-                           },
                            "tasksWithMenu": {
                                view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
                                role: "openidm-admin",
                                //url: "tasksmenu/:category/:id"
-                               url: /^tasksmenu\/([A-Za-z]+)\/?([0-9]*)$/,
-                               pattern: "tasksmenu/?/?",
+                               url: /^tasks\/([A-Za-z]+)\/?([0-9]*)$/,
+                               pattern: "tasks/?/?",
                                forceUpdate: true
+                           },
+                           "tasks": {
+                               view: "org/forgerock/openidm/ui/admin/tasks/TasksDashboard",
+                               role: "openidm-admin",
+                               url: "tasks/dashboard"
                            }
                        }
                    } 
@@ -218,16 +213,20 @@ define("config/AppConfiguration", [
                                        "name": "Groups"
                                    },
                                    "tasksMenu": {
-                                       "baseUrl": "#tasksmenu/",
-                                       "url": "#tasksmenu/all",
+                                       "baseUrl": "#tasks/",
+                                       "url": "#tasks/dashboard",
                                        "name": "Tasks",
                                        "urls": {
+                                           "tasksDashboard": {
+                                               "url": "#tasks/dashboard",
+                                               "name": "Dashboard"
+                                           },
                                            "allTasks": {
-                                               "url": "#tasksmenu/all",
-                                               "name": "All tasks"
+                                               "url": "#tasks/all",
+                                               "name": "Candidate tasks"
                                            },
                                            "myTasks": {
-                                               "url": "#tasksmenu/assigned",
+                                               "url": "#tasks/assigned",
                                                "name": "My tasks"
                                            }
                                        }
@@ -374,6 +373,10 @@ define("config/AppConfiguration", [
                            },
                            "claimedTask": {
                                msg: "Task has been claimed.",
+                               type: "info"
+                           },
+                           "unclaimedTask": {
+                               msg: "Task has been unclaimed.",
                                type: "info"
                            }
                        }

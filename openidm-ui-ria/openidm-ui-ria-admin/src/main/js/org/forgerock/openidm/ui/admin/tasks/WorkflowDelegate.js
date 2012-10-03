@@ -127,26 +127,36 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     
     obj.getAllTasksViewForUser = function(userName, successCallback, errorCallback) {
         obj.getTasksAssignedToUser(userName, function(avalibleTasks) {
-            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback, errorCallback);
+            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, userName, successCallback, errorCallback);
         }, errorCallback);
     };
     
     obj.getAllAvalibleTasksViewForUser = function(userName, successCallback, errorCallback) {
         obj.getTasksAvalibleToUser(userName, function(avalibleTasks) {
-            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, successCallback, errorCallback);
+            obj.buildStandardViewFromTaskBasicDataMap(avalibleTasks, null, successCallback, errorCallback);
         }, errorCallback);
     };
     
-    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, successCallback, errorCallback) {
+    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, assignee,successCallback, errorCallback) {
         var finished = 0, taskBasicData, getTasksSuccessCallback, pointer, myTasks = {};
         
         getTasksSuccessCallback = function(taskData) {
             taskData.params = {userApplicationLnkId: taskData.description};
-            myTasks[taskData._id] = taskData;
+            if(taskData.assignee === assignee) {
+                myTasks[taskData._id] = taskData;
+            }
+            
+            if(assignee === null && taskData.assignee === "") {
+                myTasks[taskData._id] = taskData;
+            }
             
             finished++;
             if(finished === taskInstanceBasicInfoMap.length) {
-                successCallback(obj.buildStandardViewFromTaskMap(myTasks));
+                if(_.isEmpty(myTasks)) {
+                    errorCallback();
+                } else {
+                    successCallback(obj.buildStandardViewFromTaskMap(myTasks));
+                }
             }
         };
         
@@ -154,7 +164,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
             taskBasicData = taskInstanceBasicInfoMap[pointer];
             obj.getTask(taskBasicData._id, getTasksSuccessCallback);
         }
-        
+
         if(_.isEmpty(taskInstanceBasicInfoMap)) {
             errorCallback();
         }

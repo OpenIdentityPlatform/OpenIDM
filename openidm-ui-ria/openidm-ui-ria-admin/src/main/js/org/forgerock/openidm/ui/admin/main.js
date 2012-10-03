@@ -35,5 +35,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./tasks/TasksFormManager",
 	"./tasks/TasksWithMenuView",
 	"./tasks/TasksMenuView",
-	"./tasks/WorkflowDelegate"
+	"./tasks/WorkflowDelegate",
+	"./tasks/TasksDashboard"
 ]);

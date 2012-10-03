@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate"
-], function(AbstractTaskForm, DateUtil, userApplicationLnkDelegate, userDelegate, applicationDelegate) {
+    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractTaskForm, DateUtil, userApplicationLnkDelegate, userDelegate, applicationDelegate, conf) {
     var ApplicationAcceptanceTask = AbstractTaskForm.extend({
         template: "templates/admin/tasks/ApplicationAcceptanceTemplate.html",
         
@@ -43,7 +44,19 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
             this.$el.find("input[name=saveButton]").val("Update");
-            this.$el.find("input[name=claimButton]").val("Claim");
+            
+            if(this.category === "all") {
+                this.$el.find("input[name=claimButton]").val("Claim");                
+                
+                if(this.task.assignee === conf.loggedUser.userName) {
+                    this.$el.find("input[name=saveButton]").show();
+                } else {
+                    this.$el.find("input[name=saveButton]").hide();
+                }
+            } else {
+                this.$el.find("input[name=claimButton]").val("Unclaim");
+                this.$el.find("input[name=saveButton]").show();
+            }
             
             userApplicationLnkDelegate.readEntity(this.task.description, function(userAppLink) {
                 

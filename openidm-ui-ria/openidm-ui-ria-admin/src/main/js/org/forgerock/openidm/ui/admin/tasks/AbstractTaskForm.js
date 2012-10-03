@@ -62,9 +62,21 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
         claimTask: function(event) {
             event.preventDefault();
             
-            workflowManager.assignTaskToUser(this.task._id, conf.loggedUser.userName, _.bind(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "claimedTask");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: ["assigned", this.task._id]});
+            var userName, categoryToGo, message;
+            
+            if(this.category === "all") {
+                userName = conf.loggedUser.userName;
+                categoryToGo = "assigned";
+                message = "claimedTask";
+            } else {
+                userName = "";
+                categoryToGo = "all";
+                message = "unclaimedTask";
+            }
+            
+            workflowManager.assignTaskToUser(this.task._id, userName, _.bind(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, message);
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [categoryToGo, this.task._id]});
             }, this), function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
             });
