@@ -19,21 +19,23 @@
         "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
-        
+
         "notifications-for-userName": "SELECT * FROM ${_resource} WHERE userName = '${uid}' ORDER BY 'requestDate' desc",
         "query-all-notifications": "select * from ${_resource}",
-        
+
         "user_application_lnk-for-userName": "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         "query-all-user_application_lnk": "select * from ${_resource}",
         "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",
-        
+
         "application-for-ids": "SELECT * FROM ${_resource} WHERE _openidm_id in [${applicationIds}]",
         "application-for-id": "SELECT * FROM ${_resource} WHERE _openidm_id = '${applicationId}'",
         "query-all-applications": "select * from ${_resource}",
         "query-default-applications": "select * from ${_resource} WHERE isDefault = true",
-        
+
         "user_application_state-for-id": "SELECT * FROM ${_resource} WHERE _openidm_id = '${userApplicationStateId}'",
-        "query-all-user_application_states": "select * from ${_resource}"
+        "query-all-user_application_states": "select * from ${_resource}",
+
+        "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
     },
     "dbStructure" : {
         "orientdbClass" : {
