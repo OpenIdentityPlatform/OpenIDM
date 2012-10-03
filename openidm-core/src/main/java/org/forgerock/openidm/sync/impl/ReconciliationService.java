@@ -235,7 +235,7 @@ public class ReconciliationService extends ObjectSetJsonResource
 
             if ("cancel".equalsIgnoreCase(action)) {
                 foundRun.cancel();
-                result.put("reconId", foundRun.getReconId());
+                result.put("_id", foundRun.getReconId());
                 result.put("action", action);
                 result.put("status", "SUCCESS");
             } else {
