@@ -31,8 +31,131 @@
  * authentication (assigned an "openidm-cert" role).
  */
 
-// If true, then allows HTTP requests from "openidm-cert" role.
-const allowCert = false;
+/**
+ * A configuration for allowed requests.  Each entry in the config contains a pattern to match
+ * against the incoming request ID and, in the event of a match, the associated roles, methods,
+ * and actions that are allowed for requests on that particular pattern.
+ *
+ * pattern:  A pattern to match against an incoming request's resource ID
+ * roles:  A comma separated list of allowed roles
+ * methods:  A comma separated list of allowed methods
+ * actions:  A comma separated list of allowed actions
+ * customAuthz: A custom function for additional authorization logic/checks (optional)
+ *
+ * A single '*' character indicates all possible values.  With patterns ending in "/*", the "*"
+ * acts as a wild card to indicate the pattern accepts all resource IDs "below" the specified
+ * pattern (prefix).  For example the pattern "managed/*" would match "managed/user" or anything
+ * starting with "managed/".  Note: it would not match "managed", which would need to have its 
+ * own entry in the config.
+ */
+var accessConfig = { "configs" : [
+	{	"pattern" : "*", 
+		"roles" : "openidm-admin", 
+		"methods": "*", // default to all methods allowed
+		"actions" : "*" // default to all actions allowed
+	},
+	// Clients authenticated via SSL mutual authentication
+	{	"pattern" : "*", 
+		"roles" : "openidm-cert", 
+		"methods": "",	// default to no methods allowed
+		"actions" : ""  // default to no actions allowed
+	},
+	// Additional checks for anonymous and authenticated users
+	{	"pattern" : "*", 
+		"roles" : "openidm-authorized, openidm-reg", 
+		"methods": "*",
+		"actions" : "*",
+		"customAuthz" : "ownDataOnly()" // Custom auth function
+	}] };
+
+function ownDataOnly() {
+	// Additional Checks (if failed access configuration check)
+    if (requestIsAQueryOfName('for-userName') && userIsAuthorized(roles)){
+    	//authenticated user can only manage his data and cannot change a role attribute.
+    	var requestedUserNameDataIdentificator = request.params['uid'];
+        
+        if (authorizedUsernameEquals(requestedUserNameDataIdentificator)) {
+            logger.debug("User manipulation with own data");
+            
+            if (requestIsAnActionOfName('patch')) {            	
+                logger.debug("Request is a patch. Checking if trying to change own role");
+                
+                if (requestValueContainsReplaceValueWithKeyOfName('/role')) {                	
+                    logger.debug("Trying to change own role is forbidden for standard user");
+                    return false;
+                }
+            }
+        } else {
+            logger.debug("Manipulation with data of user not equal to logged-in is forbidden");
+            throw "Access denied (Manipulation with data of user not equal to logged-in is forbidden)";
+        }
+        return true;
+    } else {
+        return isPublicMethodInvocation();
+    }
+}
+
+function passesAccessConfig(id, roles, method, action) {
+	for (var i = 0; i < accessConfig.configs.length; i++) {
+		var config = accessConfig.configs[i];
+		var pattern = config.pattern;
+		// Check resource ID
+		if (matchesResourceIdPattern(id, pattern)) {
+			// Check roles
+			if (containsItems(roles, config.roles.split(','))) {
+				// Check method
+				if (method == 'undefined' || containsItem(method, config.methods)) {
+					// Check action
+					if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
+						if (typeof(config.customAuthz) != 'undefined') {
+							return eval(config.customAuthz);
+						} else {
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+function matchesResourceIdPattern(id, pattern) {
+	if (pattern == "*") {
+		// Accept all patterns
+		return true;
+	} else if (id == pattern) {
+		// pattern matches exactly
+		return true;
+	} else if (pattern.indexOf("/*", pattern.length - 2) !== -1) {
+		// Ends with "/*" or "/"
+		// See if parent pattern matches
+		var parentResource = pattern.substring(0, pattern.length - 1);
+		if (id.length >= parentResource.length && id.substring(0, parentResource.length) == parentResource) {
+			return true
+		}
+	}
+	return false;
+}
+
+function containsItems(items, configItems) {
+	if (configItems == "*") {
+		return true;
+	}
+	for (var i = 0; i < items.length; i++) {
+		if (contains(configItems, items[i])) {
+			return true;
+		}
+	}
+	return false
+}
+
+function containsItem(item, configItems) {
+	if (configItems == "*") {
+		return true;
+	}
+	return contains(configItems.split(','), item);
+}
 
 function contains(a, o) {
     if (typeof(a) != 'undefined' && a != null) {
@@ -116,35 +239,18 @@ function allow() {
     }
     
     var roles = request.parent.security['openidm-roles'];
+    var action = "";
+    if (request.params && request.params['_action']) {
+    	action = request.params['_action'];
+    }
     
-    if (contains(roles, 'openidm-admin') || contains(roles, 'admin')) {
-    	//administrator can do everything
-        return true;
-    } else if (allowCert && contains(roles, 'openidm-cert')) {
-    	//certificated user can do everything
-        return true;
-    } else if (requestIsAQueryOfName('for-userName') && userIsAuthorized(roles)){
-    	//authenticated user can only manage his data and cannot change a role attribute.
-    	var requestedUserNameDataIdentificator = request.params['uid'];
-        
-        if (authorizedUsernameEquals(requestedUserNameDataIdentificator)) {
-            logger.debug("User manipulation with own data");
-            
-            if (requestIsAnActionOfName('patch')) {            	
-                logger.debug("Request is a patch. Checking if trying to change own role");
-                
-                if (requestValueContainsReplaceValueWithKeyOfName('/role')) {                	
-                    logger.debug("Trying to change own role is forbidden for standard user");
-                    return false;
-                }
-            }
-        } else {
-            logger.debug("Manipulation with data of user not equal to logged-in is forbidden");
-            throw "Access denied (Manipulation with data of user not equal to logged-in is forbidden)";
-        }
-        return true;
-    } else {
-        return isPublicMethodInvocation();
+    // Check REST requests against the access configuration
+    if (request.parent.type == 'http') {
+    	logger.debug("Access Check for HTTP request for resource id: " + request.id);
+    	if (passesAccessConfig(request.id, roles, request.method, action)) {
+    		logger.debug("Request allowed");
+    		return true;
+    	}
     }
 }
 
