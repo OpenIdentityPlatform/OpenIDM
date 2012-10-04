@@ -40,18 +40,20 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
         render: function(args) {
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
+            this.registerListeners();
             
             this.parentRender(function() {
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
             });            
-        }   
-    }), obj;
-    
-    obj = new TasksDashboard();
-    
-    eventManager.registerListener("showTaskDetailsRequest", function(event) {
-        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [event.category, event.id]});
+        },
+        
+        registerListeners: function() {
+            eventManager.unregisterListener("showTaskDetailsRequest");
+            eventManager.registerListener("showTaskDetailsRequest", function(event) {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [event.category, event.id]});
+            });
+        }
     });
 
     return new TasksDashboard();

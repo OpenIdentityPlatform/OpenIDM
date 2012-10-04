@@ -72,7 +72,7 @@ function isPublicMethodInvocation() {
                 logger.debug("Query {} hasn't been found in a query", queryName);
                 return false;
             }            
-        } else if (request.parent.method == 'PUT') {
+        } else if (request.parent.method == 'POST') {
             logger.debug("PUT request detected");
             return true;
         } else {

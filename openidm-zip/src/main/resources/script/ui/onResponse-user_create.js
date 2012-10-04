@@ -16,5 +16,5 @@ if (result.availableApps) {
 
 for (appId in defaultApps) {
     newUserApplicationLnk.applicationId = defaultApps[appId];
-    openidm.create("managed/user_application_lnk/1", newUserApplicationLnk);
+    openidm.create("managed/user_application_lnk", newUserApplicationLnk);
 }

@@ -44,7 +44,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
             id = args[1];
             
             this.tasksMenuView = new TasksMenuView();
-            
+            this.registerListeners();
             this.parentRender(function() {
                 this.tasksMenuView.render(category);
                 
@@ -54,16 +54,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
                     $("#taskDetails").html('<div class="center shadowFrame"><h1>Choose a task</h1></div>');
                 }
             });            
-        }   
-    }), obj; 
-    
-    obj = new TasksWithMenuView();
-    
-    eventManager.registerListener("showTaskDetailsRequest", function(event) {
-        taskDetailsView.render(event.id, event.category);
-    });
-    
-    return obj;
+        },
+        
+        registerListeners: function() {
+            eventManager.unregisterListener("showTaskDetailsRequest");
+            eventManager.registerListener("showTaskDetailsRequest", _.bind(function(event) {
+                taskDetailsView.render(event.id, event.category);
+            }, this));
+        }
+    }); 
+
+    return new TasksWithMenuView();
 });
 
 

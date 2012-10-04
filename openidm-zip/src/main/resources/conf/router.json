@@ -116,7 +116,7 @@
             }
         },
         {
-            "pattern" : "^managed/user_application_lnk/.*",
+            "pattern" : "^managed/user_application_lnk.*",
             "methods" : [
                 "create"
             ],
