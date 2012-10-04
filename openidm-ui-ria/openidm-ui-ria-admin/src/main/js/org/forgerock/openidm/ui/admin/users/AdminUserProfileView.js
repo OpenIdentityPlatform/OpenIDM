@@ -105,7 +105,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 userDelegate.getForUserName(userName, function(user) {
                     self.editedUser = user;
                     self.$el.find("#passwordChangeLink").attr("href", "#users/"+self.editedUser.email+"/change_password/");
-                    self.$el.find("#userProfileHeadingLabel").text(self.editedUser.givenName+ " "+self.editedUser.familyName+ "' profile");
+                    self.$el.find("#userProfileHeadingLabel").text(self.editedUser.givenName+ " "+self.editedUser.familyName+ "'s profile");
                     self.reloadData();
                 });
                 
