@@ -36,7 +36,7 @@
 	<packaging>pom</packaging>
 	<modules>
 	    <module>openidm-ui-ria-apps</module>
-		<module>openidm-ui-ria-admin</module>
+        <module>openidm-ui-ria-admin</module>
 	</modules>
     
     <properties>
