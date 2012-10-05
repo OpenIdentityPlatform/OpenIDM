@@ -62,9 +62,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 }, function(response) {
                     console.warn(response);
                     if (response.error === 'Conflict') {
-                        eventManager.sendEvent(constants.EVENT_USER_REGISTRATION_ERROR, { causeDescription: 'User already exists' });
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists" );
                     } else {
-                        eventManager.sendEvent(constants.EVENT_USER_REGISTRATION_ERROR, { causeDescription: 'Unknown error' });
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown" );
                     }
                     this.unlock();
                 });

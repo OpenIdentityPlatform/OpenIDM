@@ -58,11 +58,14 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/Router",
                    configuration: {
                        routes: {
+                           //specific
                            "": {
                                view: "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
                                role: "openidm-authorized",
                                url: ""                                   
                            },
+                           
+                           //from commons
                            "profile": {
                                view: "org/forgerock/commons/ui/user/profile/UserProfileView",
                                role: "openidm-authorized",
@@ -75,29 +78,6 @@ define("config/AppConfiguration", [
                                url: "profile/site_identification/",
                                role: "openidm-authorized",
                                excludedRole: "openidm-admin"
-                           },
-                           "adminUsers": {
-                               view: "org/forgerock/openidm/ui/admin/users/UsersView",
-                               url: "users/",
-                               role: "admin"
-                           },
-                           "adminUsersAdd" : {
-                               view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
-                               role: "admin",
-                               url: "users/add/"
-                           },
-                           "adminUserProfile" : {
-                               view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
-                               role: "admin",
-                               url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/$/,
-                               pattern: "users/?/"
-                           },
-                           "adminUserChangePassword" : {
-                               base: "adminUserProfile",
-                               dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
-                               url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/change_password\/$/,
-                               pattern: "users/?/change_password/",
-                               role: "admin"
                            },
                            "register": {
                                view: "org/forgerock/commons/ui/user/UserRegistrationView",
@@ -131,6 +111,49 @@ define("config/AppConfiguration", [
                                url: "profile/change_security_data/",
                                excludedRole: "openidm-admin"
                            },
+                           
+                           
+                           //for admin
+                           "adminUsers": {
+                               view: "org/forgerock/openidm/ui/admin/users/UsersView",
+                               url: "users/",
+                               role: "admin"
+                           },
+                           "adminUsersAdd" : {
+                               view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
+                               role: "admin",
+                               url: "users/add/"
+                           },
+                           "adminUserProfile" : {
+                               view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
+                               role: "admin",
+                               url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/$/,
+                               pattern: "users/?/"
+                           },
+                           "adminUserChangePassword" : {
+                               base: "adminUserProfile",
+                               dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
+                               url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/change_password\/$/,
+                               pattern: "users/?/change_password/",
+                               role: "admin"
+                           },
+                           
+                           //for tasks 
+                           "tasksWithMenu": {
+                               view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
+                               role: "openidm-admin",
+                               //url: "tasksmenu/:category/:id"
+                               url: /^tasks\/([A-Za-z]+)\/?([0-9]*)$/,
+                               pattern: "tasks/?/?",
+                               forceUpdate: true
+                           },
+                           "tasks": {
+                               view: "org/forgerock/openidm/ui/admin/tasks/TasksDashboard",
+                               role: "openidm-admin",
+                               url: "tasks/dashboard"
+                           },
+                           
+                           //for apps
                            "addMoreAppsView": {
                                view: "org/forgerock/openidm/ui/apps/AddMoreAppsView",
                                role: "openidm-authorized", 
@@ -148,19 +171,6 @@ define("config/AppConfiguration", [
                                role: "openidm-authorized",    
                                excludedRole: "openidm-admin",
                                url: "applications/"
-                           },
-                           "tasksWithMenu": {
-                               view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
-                               role: "openidm-admin",
-                               //url: "tasksmenu/:category/:id"
-                               url: /^tasks\/([A-Za-z]+)\/?([0-9]*)$/,
-                               pattern: "tasks/?/?",
-                               forceUpdate: true
-                           },
-                           "tasks": {
-                               view: "org/forgerock/openidm/ui/admin/tasks/TasksDashboard",
-                               role: "openidm-admin",
-                               url: "tasks/dashboard"
                            }
                        }
                    } 
@@ -235,6 +245,10 @@ define("config/AppConfiguration", [
                            },
                            "user" : {
                                "urls": {
+                                   "dashboard": {
+                                       "url": "#/",
+                                       "name": "Dashboard"
+                                   },
                                    "apps": {
                                        "baseUrl": "#applications/",
                                        "url": "#applications/all/",
@@ -291,6 +305,7 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/components/Messages",
                    configuration: {
                        messages: {
+                           //from commons
                            "invalidCredentials": {
                                msg: "Login/password combination is invalid.",
                                type: "error"
@@ -302,10 +317,6 @@ define("config/AppConfiguration", [
                            "changedPassword": {
                                msg: "Password has been changed",
                                type: "info"
-                           },
-                           "userAlreadyExists": {
-                               msg: "User already exists",
-                               type: "error"
                            },
                            "unknown": {
                                msg: "Unknown error. Please contact with administrator",
@@ -339,18 +350,6 @@ define("config/AppConfiguration", [
                                msg: "You have been logged out.",
                                type: "info"
                            },
-                           "cannotDeleteYourself": {
-                               msg: "You can't delete yourself",
-                               type: "error"
-                           },
-                           "userDeleted": {
-                               msg: "User has been deleted",
-                               type: "info"
-                           },
-                           "userDeleteError": {
-                               msg: "Error when deleting user",
-                               type: "error"
-                           },
                            "siteIdentificationChanged": {
                                msg: "Site identification image has been changed",
                                type: "info"
@@ -363,10 +362,32 @@ define("config/AppConfiguration", [
                                msg: "Unauthorized access",
                                type: "error"
                            },
+                           "userAlreadyExists": {
+                               msg: "User already exists",
+                               type: "error"
+                           },
+                           
+                           //admin
+                           "cannotDeleteYourself": {
+                               msg: "You can't delete yourself",
+                               type: "error"
+                           },
+                           "userDeleted": {
+                               msg: "User has been deleted",
+                               type: "info"
+                           },
+                           "userDeleteError": {
+                               msg: "Error when deleting user",
+                               type: "error"
+                           },
+
+                           //applications
                            "userApplicationsUpdate": {
                                msg: "Application settings have been changed.",
                                type: "info"
                            },
+                           
+                           //tasks
                            "completedTask": {
                                msg: "Task has been completed.",
                                type: "info"
