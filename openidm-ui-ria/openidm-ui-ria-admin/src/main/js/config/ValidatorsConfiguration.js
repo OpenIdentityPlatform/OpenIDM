@@ -32,6 +32,8 @@ define("config/ValidatorsConfiguration", [
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
+            
+        //from commons
         "required": {
             "name": "Required field",
             "dependencies": [
@@ -69,34 +71,6 @@ define("config/ValidatorsConfiguration", [
                 userDelegate.checkUserNameAvailability(v, function(available) {
                     if(!available) {
                         callback("Email address already exists. <br />&nbsp;&nbsp;<a href='#profile/forgotten_password/' id='frgtPasswrdSelfReg' class='ice'>Forgot password?</a>");
-                    } else {
-                        callback();
-                    }
-                });              
-            }
-        },
-        "adminRegistrationEmail": {
-            "name": "Correct and unique email",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-               "org/forgerock/commons/ui/user/delegates/UserDelegate"
-            ],
-            "validator": function(el, input, callback, utils, userDelegate) {
-                var v = $(input).val();
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
-                }
-                
-                if(!utils.emailPattern.test(v)) {
-                    callback("Not a valid email address.");
-                    return;
-                }
-                
-                userDelegate.checkUserNameAvailability(v, function(available) {
-                    if(!available) {
-                        callback("Email address already exists.");
                     } else {
                         callback();
                     }
@@ -306,40 +280,6 @@ define("config/ValidatorsConfiguration", [
                 });              
             }
         },
-	 "adminUserProfileEmail": {
-            "name": "Correct and unique email but can be same as was",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                "org/forgerock/commons/ui/user/delegates/UserDelegate",
-                "org/forgerock/commons/ui/common/main/Configuration"
-            ],
-            "validator": function(el, input, callback, utils, userDelegate, conf) {
-                var v = $(input).val();
-                
-                if($(el).find("input[name=oldEmail]").val() === v) {
-                    callback();
-                    return;
-                }
-                
-                if(v === "") {
-                    callback("Required");
-                    return;
-                }
-                
-                if(!utils.emailPattern.test(v)) {
-                    callback("Not a valid email address.");
-                    return;
-                }
-                
-                userDelegate.checkUserNameAvailability(v, function(available) {
-                    if(!available) {
-                        callback("Email address already exists.");
-                    } else {
-                        callback();
-                    }
-                });              
-            }
-        },
         "oldPassword": {
             "name": "Required field",
             "dependencies": [
@@ -448,6 +388,71 @@ define("config/ValidatorsConfiguration", [
                 } else {
                     callback();
                 }
+            }
+        },
+        
+        
+        //admin
+        "adminRegistrationEmail": {
+            "name": "Correct and unique email",
+            "dependencies": [
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+               "org/forgerock/commons/ui/user/delegates/UserDelegate"
+            ],
+            "validator": function(el, input, callback, utils, userDelegate) {
+                var v = $(input).val();
+                
+                if(v === "") {
+                    callback("Required");
+                    return;
+                }
+                
+                if(!utils.emailPattern.test(v)) {
+                    callback("Not a valid email address.");
+                    return;
+                }
+                
+                userDelegate.checkUserNameAvailability(v, function(available) {
+                    if(!available) {
+                        callback("Email address already exists.");
+                    } else {
+                        callback();
+                    }
+                });              
+            }
+        },
+        "adminUserProfileEmail": {
+            "name": "Correct and unique email but can be same as was",
+            "dependencies": [
+                "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration"
+            ],
+            "validator": function(el, input, callback, utils, userDelegate, conf) {
+                var v = $(input).val();
+                
+                if($(el).find("input[name=oldEmail]").val() === v) {
+                    callback();
+                    return;
+                }
+                
+                if(v === "") {
+                    callback("Required");
+                    return;
+                }
+                
+                if(!utils.emailPattern.test(v)) {
+                    callback("Not a valid email address.");
+                    return;
+                }
+                
+                userDelegate.checkUserNameAvailability(v, function(available) {
+                    if(!available) {
+                        callback("Email address already exists.");
+                    } else {
+                        callback();
+                    }
+                });              
             }
         }
     };
