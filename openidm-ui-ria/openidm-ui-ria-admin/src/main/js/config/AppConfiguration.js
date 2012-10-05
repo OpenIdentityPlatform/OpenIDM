@@ -32,33 +32,32 @@ define("config/AppConfiguration", [
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, eventManager) {
     var obj = {
-            moduleDefinition: [
-                {
-                    moduleClass: "org/forgerock/commons/ui/user/login/LoginCtrl",
-                    configuration: {
-                        loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper",
-                        showCredentialFields: true,
-                        hideLoginButton: false,
-                        loginButtonDisabledByDefault: true
+           moduleDefinition: [
+               {
+                   moduleClass: "org/forgerock/commons/ui/common/main/SessionManager",
+                   configuration: {
+                       loginHelperClass: "org/forgerock/commons/ui/user/login/InternalLoginHelper"
                    } 
                },
                {
-                   moduleClass: "org/forgerock/commons/ui/user/login/OpenAMLoginHelper",
+                   moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                    configuration: {
-                       loginURL: "http://openaminstallationdomain.com:8090/openam/UI/Login",
-                       logoutURL: "http://openaminstallationdomain.com:8090/openam/UI/Logout",
-                       passwordParameterName: "IDToken2",
-                       userNameParameterName: "IDToken1",
-                       logoutTestOnly: false,
-                       loginTestOnly: false,
-                       ajaxLogout: false
+                       processConfigurationFiles: [
+                           "config/process/AdminConfig",
+                           "config/process/UserConfig",
+                           "config/process/CommonConfig"
+                       ]
                    } 
                },
                {
                    moduleClass: "org/forgerock/commons/ui/common/main/Router",
                    configuration: {
                        routes: {
-                           //specific
+                           "404":  { //this route must be the last route
+                               view: "org/forgerock/commons/ui/user/NotFoundView",
+                               url: /^([\w\W]*)$/,
+                               pattern: "?"
+                           },
                            "": {
                                view: "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
                                role: "openidm-authorized",
@@ -176,16 +175,6 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
-                   configuration: {
-                       processConfigurationFiles: [
-                           "config/process/AdminConfig",
-                           "config/process/UserConfig",
-                           "config/process/CommonConfig"
-                       ]
-                   } 
-               },
-               {
                    moduleClass: "org/forgerock/commons/ui/common/main/ServiceInvoker",
                    configuration: {
                        defaultHeaders: {
@@ -214,6 +203,10 @@ define("config/AppConfiguration", [
                            "admin" : {
                                "role": "admin",
                                "urls": {
+                                   "dashboard": {
+                                       "url": "#/",
+                                       "name": "Dashboard"
+                                   },
                                    "users": {
                                        "url": "#users/",
                                        "name": "Users"
@@ -287,7 +280,7 @@ define("config/AppConfiguration", [
                {
                    moduleClass: "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
                    configuration: {
-                       forms: {
+                       forms: { // Workflow User Task to View mapping
                            "applicationAcceptance": "org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask"
                        }
                    } 
@@ -295,7 +288,7 @@ define("config/AppConfiguration", [
                {
                    moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                    configuration: {
-                       templateUrls: [
+                       templateUrls: [ //preloaded templates
                            "templates/apps/application.html",
                            "templates/admin/tasks/ProcessUserTaskTableTemplate.html"
                        ]
