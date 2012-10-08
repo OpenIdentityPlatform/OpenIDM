@@ -51,9 +51,11 @@ public class SchedulerConfig {
     
     // Scheduler objects
     private final static String INSTANCE_ID = "instanceId";
+    private final static String EXECUTE_PERSISTENT_SCHEDULES = "executePersistentSchedules";
     
     private String threadCount = null;
     private String instanceId = null;
+    private boolean executePersistentSchedules = true;
     
     private Properties props;
     
@@ -83,6 +85,14 @@ public class SchedulerConfig {
             if (!value.isNull()) {
                 instanceId = value.asString();
             }
+            value = config.get(EXECUTE_PERSISTENT_SCHEDULES);
+            if (!value.isNull()) {
+                if (value.isString()) {
+                    executePersistentSchedules = Boolean.parseBoolean(value.asString());
+                } else {
+                    executePersistentSchedules = value.asBoolean();
+                }
+            }
         }
     }
 
@@ -98,6 +108,10 @@ public class SchedulerConfig {
         return props;
     }
 
+    public boolean exectuePersistentSchedulesEnabled() {
+        return executePersistentSchedules;
+    }
+    
     public String getInstanceName() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "DefaultQuartzScheduler");
     }

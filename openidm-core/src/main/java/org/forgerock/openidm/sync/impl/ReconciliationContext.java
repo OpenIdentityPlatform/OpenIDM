@@ -25,7 +25,9 @@
 package org.forgerock.openidm.sync.impl;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,21 +41,30 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public class ReconciliationContext {
 
-    private boolean complete = false;
+    ObjectMapping mapping;
+
+    private ReconStage stage = ReconStage.ACTIVE_INITIALIZED;
     private boolean canceled = false;
     private String reconId; 
+    private final ReconciliationStatistic reconStat;
     
     // If set, the list of all queried source Ids
     private Set<String> sourceIds; 
     // If set, the list of all queried target Ids
     private Set<String> targetIds;
+    
+    private Integer totalSourceEntries;
+    private Integer totalTargetEntries;
+    private Integer totalLinkEntries;
 
     /**
      * Creates the instance with info from the current call context
      * @param callingContext The resource call context
      */
-    public ReconciliationContext(JsonValue callingContext) {
-         reconId = callingContext.get("uuid").required().asString();
+    public ReconciliationContext(ObjectMapping mapping, JsonValue callingContext) {
+        this.mapping = mapping;
+        this.reconId = callingContext.get("uuid").required().asString();
+        this.reconStat = new ReconciliationStatistic(this);
     }
     
     /**
@@ -68,6 +79,7 @@ public class ReconciliationContext {
      * May not take immediate effect in stopping the reconciliation logic.
      */
     public void cancel() {
+        stage = ReconStage.ACTIVE_CANCELING;
         canceled = true;
     }
 
@@ -81,12 +93,81 @@ public class ReconciliationContext {
     /**
      * @return Statistics about this reconciliation run
      */
-    /* TODO
-    public ReconStats getStatistics() {
-        return null; 
+    public ReconciliationStatistic getStatistics() {
+        return reconStat; 
     }
-    */
     
+    /**
+     * @return The name of the ObjectMapping associated 
+     * with the reconciliation run
+     */
+    public String getMapping() {
+        return mapping.getName();
+    }
+    
+    /**
+     * @return The ObjectMapping associated with the reconciliation run
+     */
+    public ObjectMapping getObjectMapping() {
+        return mapping;
+    }
+    
+    public String getState() {
+        return stage.getState();
+    }
+    
+    public ReconStage getStage() {
+        return stage;
+    }
+
+    /**
+     * @return the populated run progress structure
+     */
+    public Map<String, Object> getProgress() {
+        // Unknown total entries are currently represented via question mark string.
+        String totalSourceEntriesStr = (totalSourceEntries == null ? "?" : Integer.toString(totalSourceEntries));
+        String totalTargetEntriesStr = (totalTargetEntries == null ? "?" : Integer.toString(totalTargetEntries));
+        
+        String totalLinkEntriesStr = "?";
+        if (totalLinkEntries == null) {
+            if (getStage() == ReconStage.COMPLETED_SUCCESS) {
+                totalLinkEntriesStr = Integer.toString(getStatistics().getLinkProcessed()); 
+            }
+        } else {
+            totalLinkEntriesStr = Integer.toString(totalLinkEntries);
+        }
+        
+        Map<String, Object> progress = new LinkedHashMap<String, Object>();
+        Map<String, Object> progressDetail = new LinkedHashMap<String, Object>();
+        Map<String, Object> sourceDetail = new LinkedHashMap<String, Object>();
+        Map<String, Object> sourceExisting = new LinkedHashMap<String, Object>();
+        Map<String, Object> targetDetail = new LinkedHashMap<String, Object>();
+        Map<String, Object> targetExisting = new LinkedHashMap<String, Object>();
+        Map<String, Object> linkDetail = new LinkedHashMap<String, Object>();
+        Map<String, Object> linkExisting = new LinkedHashMap<String, Object>();
+        
+        sourceExisting.put("processed", getStatistics().getSourceProcessed());
+        sourceExisting.put("total", totalSourceEntriesStr);
+        sourceDetail.put("existing", sourceExisting);
+        progressDetail.put("source", sourceDetail);
+        
+        targetExisting.put("processed", getStatistics().getTargetProcessed());
+        targetExisting.put("total", totalTargetEntriesStr);
+        targetDetail.put("existing", targetExisting);
+        targetDetail.put("created", getStatistics().getTargetCreated());
+        progressDetail.put("target", targetDetail);
+        
+        linkExisting.put("processed", getStatistics().getLinkProcessed());
+        linkExisting.put("total", totalLinkEntriesStr);
+        linkDetail.put("existing", linkExisting);
+        linkDetail.put("created", getStatistics().getLinkCreated());
+        progressDetail.put("links", linkDetail);
+
+        progress.put("progress", progressDetail);
+
+        return progress;
+    }
+
     /**
      * @param sourceIds the list of all ids in the source object set
      */
@@ -94,6 +175,7 @@ public class ReconciliationContext {
         // Choose a hash based collection as we need fast "contains" handling
         this.sourceIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
         this.sourceIds.addAll(sourceIds);
+        this.totalSourceEntries = Integer.valueOf(sourceIds.size());
     }
     
     /**
@@ -103,6 +185,19 @@ public class ReconciliationContext {
         // Choose a hash based collection as we need fast "contains" handling
         this.targetIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
         this.targetIds.addAll(targetIds);
+        this.totalTargetEntries = Integer.valueOf(targetIds.size());
+    }
+    
+    /**
+     * Set all pre-fetched links
+     * Since pre-fetching all links is optional, links may be gotten individually rather than
+     * this getting set.
+     * @param allLinks the list of all links for a given mapping
+     */
+    void setAllLinks(Map<String, Link> allLinks) {
+        if (allLinks != null) {
+            this.totalLinkEntries = Integer.valueOf(allLinks.size());
+        }
     }
 
     /**
@@ -122,19 +217,35 @@ public class ReconciliationContext {
     public Set<String> getTargetIds() {
         return targetIds;
     }
-    
+
     /**
-     * Flags the reconciliation run a complete.
-     * May clean up state information that is not needed past the run.
+     * @param stage Sets the current state and stage in the reconciliation process
      */
-    public void setComplete() {
-        complete = true;
-        cleanupState();
+    public void setStage(ReconStage newStage) {
+        // If there is already a stage in progress, end it first
+        if (this.stage != ReconStage.ACTIVE_INITIALIZED) {
+            reconStat.endStage(this.stage);
+        }
+        if (canceled) {
+            if (newStage.isComplete()) {
+                this.stage = ReconStage.COMPLETED_CANCELED;
+            } else {
+                this.stage = ReconStage.ACTIVE_CANCELING;
+            }
+        } else {
+            this.stage = newStage;
+        }
+        if (newStage.isComplete()) {
+            cleanupState();
+        } else {
+            reconStat.startStage(newStage);
+        }
     }
+    
     
     /**
      * Remove any state from memory that should not be kept 
-     * past the completion of the reconciliaiton run
+     * past the completion of the reconciliation run
      */
     private void cleanupState() {
         sourceIds = null;

@@ -88,6 +88,7 @@ public class ScheduleConfigService {
         }
         
         schedulerService.registerConfigService(this);
+        
     }
     
     @Deactivate
