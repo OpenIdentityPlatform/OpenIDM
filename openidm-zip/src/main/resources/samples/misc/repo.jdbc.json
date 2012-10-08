@@ -67,6 +67,11 @@
                 "mainTable" : "managedobjects",
                 "propertiesTable" : "managedobjectproperties",
                 "searchableDefault" : true
+            },
+            "scheduler" : {
+                "mainTable" : "schedulerobjects",
+                "propertiesTable" : "schedulerobjectproperties",
+                "searchableDefault" : true
             }
         },
         "explicitMapping" : {
