@@ -185,13 +185,33 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/ErrorsHandler",
                    configuration: {
                        defaultHandlers: {
+                           "badRequest": {
+                               status: "400",
+                               message: "badRequestError"
+                           },
                            "unauthorized": {
                                status: "401",
                                event: constants.EVENT_UNAUTHORIZED
                            },
+                           "forbidden": {
+                               status: "403",
+                               message: "forbiddenError"
+                           },
+                           "notFound": {
+                               status: "404",
+                               message: "notFoundError"
+                           },
+                           "conflict": {
+                               status: "409",
+                               message: "conflictError"
+                           },
                            "serverError": {
                                status: "503",
                                event: constants.EVENT_SERVICE_UNAVAILABLE
+                           },
+                           "internalServerError": {
+                               status: "500",
+                               message: "internalError"
                            }
                        }
                    } 
@@ -352,11 +372,31 @@ define("config/AppConfiguration", [
                                type: "info"
                            },
                            "unauthorized": {
-                               msg: "Unauthorized access",
+                               msg: "Unauthorized access or session timeout",
                                type: "error"
                            },
                            "userAlreadyExists": {
                                msg: "User already exists",
+                               type: "error"
+                           },
+                           "internalError": {
+                               msg: "Internal server error",
+                               type: "error"
+                           },
+                           "forbiddenError": {
+                               msg: "Forbidden request error.",
+                               type: "error"
+                           },
+                           "notFoundError": {
+                               msg: "Not found error.",
+                               type: "error"
+                           },
+                           "badRequestError": {
+                               msg: "Bad request error.",
+                               type: "error"
+                           },
+                           "conflictError": {
+                               msg: "Detected conflict in request.",
                                type: "error"
                            },
                            
