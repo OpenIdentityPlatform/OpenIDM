@@ -34,6 +34,6 @@ define("config/main", [
     "./ValidatorsConfiguration",
     "./process/AdminConfig",
     "./process/CommonConfig",
-    "./process/UserConfig"
-    
+    "./process/UserConfig",
+    "./errorhandlers/CommonErrorHandlers"
 ]);
