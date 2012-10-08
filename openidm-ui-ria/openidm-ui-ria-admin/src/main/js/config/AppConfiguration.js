@@ -72,35 +72,10 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/main/ErrorsHandler",
                    configuration: {
                        defaultHandlers: {
-                           "badRequest": {
-                               status: "400",
-                               message: "badRequestError"
-                           },
-                           "unauthorized": {
-                               status: "401",
-                               event: constants.EVENT_UNAUTHORIZED
-                           },
-                           "forbidden": {
-                               status: "403",
-                               message: "forbiddenError"
-                           },
-                           "notFound": {
-                               status: "404",
-                               message: "notFoundError"
-                           },
-                           "conflict": {
-                               status: "409",
-                               message: "conflictError"
-                           },
-                           "serverError": {
-                               status: "503",
-                               event: constants.EVENT_SERVICE_UNAVAILABLE
-                           },
-                           "internalServerError": {
-                               status: "500",
-                               message: "internalError"
-                           }
-                       }
+                       },
+                       loader: [
+                                {"defaultHandlers":"config/errorhandlers/CommonErrorHandlers"}, 
+                       ]
                    } 
                },
                {
