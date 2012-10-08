@@ -23,13 +23,44 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.openidm.objset.ForbiddenException;
+import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.objset.NotFoundException;
+import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.osgi.OsgiName;
 import org.forgerock.openidm.osgi.ServiceUtil;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -44,25 +75,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
-
-// Deprecated
-import org.forgerock.openidm.objset.*;
 
 /**
  * Repository service implementation using JDBC
@@ -144,6 +156,9 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             connection = getConnection();
             connection.setAutoCommit(true); // Ensure this does not get transaction isolation handling
             TableHandler handler = getTableHandler(type);
+            if (handler == null) {
+                throw new ObjectSetException("No handler configured for resource type " + type);
+            }
             result = handler.read(fullId, type, localId, connection);
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
@@ -191,13 +206,17 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         boolean retry = false;
         int tryCount = 0;
         do {
+            TableHandler handler = getTableHandler(type);
+            if (handler == null) {
+                throw new ObjectSetException("No handler configured for resource type " + type);
+            }
             retry = false;
             ++tryCount;
             try {
                 connection = getConnection();
                 connection.setAutoCommit(false);
 
-                getTableHandler(type).create(fullId, type, localId, obj, connection);
+                handler.create(fullId, type, localId, obj, connection);
 
                 connection.commit();
                 logger.debug("Commited created object for id: {}", fullId);
@@ -208,12 +227,12 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                             new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
                 }
                 rollback(connection);
-                boolean alreadyExisted = getTableHandler(type).isErrorType(ex, ErrorType.DUPLICATE_KEY);
+                boolean alreadyExisted = handler.isErrorType(ex, ErrorType.DUPLICATE_KEY);
                 if (alreadyExisted) {
                     throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
                             + "(" + ex.getErrorCode() + "-" + ex.getSQLState() + ")"+ ex.getMessage(), ex);
                 }
-                if (getTableHandler(type).isRetryable(ex, connection)) {
+                if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
                         logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
@@ -273,6 +292,10 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         boolean retry = false;
         int tryCount = 0;
         do {
+            TableHandler handler = getTableHandler(type);
+            if (handler == null) {
+                throw new ObjectSetException("No handler configured for resource type " + type);
+            }
             retry = false;
             ++tryCount;
             try {
@@ -281,7 +304,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                 connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 connection.setAutoCommit(false);
 
-                getTableHandler(type).update(fullId, type, localId, rev, obj, connection);
+                handler.update(fullId, type, localId, rev, obj, connection);
 
                 connection.commit();
                 logger.debug("Commited updated object for id: {}", fullId);
@@ -291,7 +314,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                             new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
                 }
                 rollback(connection);
-                if (getTableHandler(type).isRetryable(ex, connection)) {
+                if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
                         logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
@@ -350,13 +373,17 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         boolean retry = false;
         int tryCount = 0;
         do {
+            TableHandler handler = getTableHandler(type);
+            if (handler == null) {
+                throw new ObjectSetException("No handler configured for resource type " + type);
+            }
             retry = false;
             ++tryCount;
             try {
                 connection = getConnection();
                 connection.setAutoCommit(false);
 
-                getTableHandler(type).delete(fullId, type, localId, rev, connection);
+                handler.delete(fullId, type, localId, rev, connection);
 
                 connection.commit();
                 logger.debug("Commited deleted object for id: {}", fullId);
@@ -370,7 +397,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                             new Object[] {fullId, ex.getErrorCode(), ex.getSQLState(), ex});
                 }
                 rollback(connection);
-                if (getTableHandler(type).isRetryable(ex, connection)) {
+                if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
                         logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
@@ -436,11 +463,15 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         Map<String, Object> result = new HashMap<String, Object>();
         Connection connection = null;
         try {
+            TableHandler handler = getTableHandler(type);
+            if (handler == null) {
+                throw new ObjectSetException("No handler configured for resource type " + type);
+            }
             connection = getConnection();
             connection.setAutoCommit(true); // Ensure we do not implicitly start transaction isolation
 
             long start = System.currentTimeMillis();
-            List<Map<String, Object>> docs = getTableHandler(type).query(type, params, connection);
+            List<Map<String, Object>> docs = handler.query(type, params, connection);
             long end = System.currentTimeMillis();
             result.put(QueryConstants.QUERY_RESULT, docs);
             // TODO: split out conversion time
@@ -539,7 +570,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
     }
 
     /**
-     * Populate and return a repository service that knows how to query and maniuplate configuration.
+     * Populate and return a repository service that knows how to query and manipulate configuration.
      *
      * @param repoConfig the bootstrap configuration
      * @param context
@@ -654,6 +685,8 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
             if (!defaultMapping.isNull()) {
                 defaultTableHandler = getGenericTableHandler(databaseType, defaultMapping, dbSchemaName, genericQueries, maxBatchSize);
                 logger.debug("Using default table handler: {}", defaultTableHandler);
+            } else {
+                logger.warn("No default table handler configured");
             }
 
             // Default the configuration table for bootstrap
