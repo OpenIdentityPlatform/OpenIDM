@@ -25,9 +25,15 @@
 /*global define*/
 
 define("config/main", [
+    "./routes/CommonRoutesConfig",
+    "./routes/AdminRoutesConfig",
+    "./routes/UserRoutesConfig",
+    "./messages/AdminMessages",
+    "./messages/UserMessages",
     "./AppConfiguration",
     "./ValidatorsConfiguration",
     "./process/AdminConfig",
     "./process/CommonConfig",
     "./process/UserConfig"
+    
 ]);
