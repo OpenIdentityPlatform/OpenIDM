@@ -1,7 +1,8 @@
-package org.forgerock.commons.ui.functionaltests.helpers;
+package org.forgerock.openidm.ui.functionaltests.helpers;
 
 import javax.inject.Inject;
 
+import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;

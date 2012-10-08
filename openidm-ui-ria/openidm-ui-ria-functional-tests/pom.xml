@@ -79,7 +79,7 @@
 						<configuration>
 							<skipTests>false</skipTests>
 							<suiteXmlFiles>
-								<suiteXmlFile>src/main/resources/suites/OpenIDMUISuite.xml</suiteXmlFile>
+								<suiteXmlFile>src/test/resources/suites/OpenIDMUISuite.xml</suiteXmlFile>
 							</suiteXmlFiles>
 						</configuration>
 					</plugin>

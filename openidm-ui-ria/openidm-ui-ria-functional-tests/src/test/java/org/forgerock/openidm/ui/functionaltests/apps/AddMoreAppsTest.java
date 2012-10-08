@@ -1,11 +1,11 @@
-package org.forgerock.commons.ui.functionaltests.apps;
+package org.forgerock.openidm.ui.functionaltests.apps;
 
 import javax.inject.Inject;
 
 import org.forgerock.commons.ui.functionaltests.AbstractTest;
-import org.forgerock.commons.ui.functionaltests.helpers.*;
-import org.forgerock.commons.ui.functionaltests.helpers.ApplicationHelper.ApplicationState;
 import org.forgerock.commons.ui.functionaltests.helpers.SeleniumHelper.ElementType;
+import org.forgerock.openidm.ui.functionaltests.helpers.*;
+import org.forgerock.openidm.ui.functionaltests.helpers.ApplicationHelper.ApplicationState;
 import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 
@@ -19,7 +19,7 @@ public class AddMoreAppsTest extends AbstractTest{
 		userHelper.createDefaultUser();
 		userHelper.loginAsDefaultUser();
 		router.goToAddMoreApps(true);
-		router.assertUrl("/#applications/addmore/");
+		router.assertUrl("#applications/addmore/");
 		
 		WebElement draggedElement = applicationHelper.getApplication("appsTable", "Salesforce");
 		WebElement containerToDrop = selenium.getElement("content", "userAppsView", ElementType.ID);
