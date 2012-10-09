@@ -62,7 +62,7 @@ public class Activator implements BundleActivator {
              bootConfig.put(JDBCRepoService.CONFIG_DB_SCHEMA, repoConfig.get(JDBCRepoService.CONFIG_DB_SCHEMA.toLowerCase()));*/
 
              // Init the bootstrap repo
-             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(repoConfig.get(JDBCRepoService.CONFIG_CONNECTION), context);
+             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(repoConfig, context);
              
              // Register bootstrap repo
              Hashtable<String, String> prop = new Hashtable<String, String>();

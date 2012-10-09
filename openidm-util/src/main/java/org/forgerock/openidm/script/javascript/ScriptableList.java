@@ -88,7 +88,7 @@ class ScriptableList implements Scriptable, Wrapper {
 
     @Override
     public Object get(String name, Scriptable start) {
-        if ("length".equals(name)) {
+        if ("length".equals(name) || "size".equals(name)) {
             return Integer.valueOf(list.size());
         } else {
             return NOT_FOUND;
@@ -219,7 +219,7 @@ class ScriptableList implements Scriptable, Wrapper {
     public Object unwrap() {
         return list;
     }
-    
+
     public String toString() {
         return list == null ? "null" : list.toString();
     }
