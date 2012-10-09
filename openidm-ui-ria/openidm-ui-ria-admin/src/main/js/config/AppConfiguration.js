@@ -40,6 +40,13 @@ define("config/AppConfiguration", [
                    } 
                },
                {
+                   moduleClass: "org/forgerock/commons/ui/user/SiteConfigurator",
+                   configuration: {
+                       selfRegistration: true,
+                       enterprise: true
+                   } 
+               },
+               {
                    moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                    configuration: {
                        processConfigurationFiles: [
