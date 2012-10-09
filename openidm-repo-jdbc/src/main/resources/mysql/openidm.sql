@@ -45,7 +45,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_genericobjectproperties_genericobjects` (`genericobjects_id` ASC) ,
-  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
+  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
   CONSTRAINT `fk_genericobjectproperties_genericobjects`
     FOREIGN KEY (`genericobjects_id` )
     REFERENCES `openidm`.`genericobjects` (`id` )
@@ -83,7 +83,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_managedobjectproperties_managedobjects` (`managedobjects_id` ASC) ,
-  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
+  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
@@ -121,7 +121,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` TEXT NULL ,
   INDEX `fk_configobjectproperties_configobjects` (`configobjects_id` ASC) ,
-  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(16) ASC) ,
+  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
   CONSTRAINT `fk_configobjectproperties_configobjects`
     FOREIGN KEY (`configobjects_id` )
     REFERENCES `openidm`.`configobjects` (`id` )
@@ -217,6 +217,42 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `openidm`.`schedulerobjects`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  UNIQUE INDEX `idx-schedulerobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  INDEX `fk_schedulerobjects_objectypes` (`objecttypes_id` ASC) ,
+  CONSTRAINT `fk_schedulerobjects_objectypes`
+    FOREIGN KEY (`objecttypes_id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`schedulerobjectproperties`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
+  `schedulerobjects_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(32) NULL ,
+  `propvalue` TEXT NULL ,
+  INDEX `fk_schedulerobjectproperties_schedulerobjects` (`schedulerobjects_id` ASC) ,
+  INDEX `idx_schedulerobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
+  CONSTRAINT `fk_schedulerobjectproperties_schedulerobjects`
+    FOREIGN KEY (`schedulerobjects_id` )
+    REFERENCES `openidm`.`schedulerobjects` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `openidm`.`manageduserapplicationlnk`

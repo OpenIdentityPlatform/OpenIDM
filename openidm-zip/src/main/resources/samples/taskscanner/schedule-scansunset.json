@@ -1,0 +1,30 @@
+{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0 0 * * * ?",
+    "invokeService" : "taskscanner",
+    "invokeContext" : {
+        "scan" : {
+            "_query-id" : "scan-tasks",
+            "object" : "managed/user",
+            "property" : "/sunset/date",
+
+            "condition" : {
+                "before": "2012-10-02T00:00:00.000Z"
+            },
+            "taskState" : {
+                "started" : "/sunset/task-started",
+                "completed" : "/sunset/task-completed"
+            },
+            "recovery" : {
+                "timeout" : "10m"
+            }
+        },
+        "task" : {
+            "script" : {
+                "type" : "text/javascript",
+                "file" : "script/sunset.js"
+            }
+        }
+    }
+}

@@ -143,7 +143,7 @@ public class ConfigBootstrapHelper {
             JsonValue jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig, bundleContext, repoType);
             Map<String, Object> cfg = jsonCfg.asMap();
             for (Entry<String, Object> entry : cfg.entrySet()) {
-                result.put(entry.getKey().toLowerCase(), entry.getValue());
+                result.put(entry.getKey(), entry.getValue());
             }
         } catch (Exception ex) {
             logger.warn("Failed to load configuration file to bootstrap repository " + ex.getMessage(), ex);
