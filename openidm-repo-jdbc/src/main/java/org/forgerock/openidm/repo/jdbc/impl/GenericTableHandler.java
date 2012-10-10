@@ -45,6 +45,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,8 +96,6 @@ public class GenericTableHandler implements TableHandler {
         PROPDELETEQUERYSTR,
         QUERYALLIDS
     }
-    
-    
 
     public GenericTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
         cfg = GenericTableConfig.parse(tableConfig);
@@ -432,30 +431,48 @@ public class GenericTableHandler implements TableHandler {
     }
 
     /**
-     * @param fullId
-     * @param type
-     * @param localId
-     * @param connection
+     * Reads an object with for update locking applied
+     * 
+     * Note: statement associated with the returned resultset
+     * is not closed upon return.
+     * Aside from taking care to close the resultset it also is
+     * the responsibility of the caller to close the associated 
+     * statement. Although the specification specifies that drivers/pools
+     * should close the statement automatically, not all do this reliably.
+     * 
+     * @param fullId qualified id of component type and id
+     * @param type the component type
+     * @param localId the id of the object within the component type
+     * @param connection the connection to use
      * @return the row for the requested object, selected FOR UPDATE
      * @throws NotFoundException if the requested object was not found in the DB
-     * @throws java.sql.SQLException
+     * @throws java.sql.SQLException for general DB issues
      */
     public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException {
 
-        PreparedStatement readForUpdateStatement = null; // Statement currently implicitly closed when rs closes
-        readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
-        logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
-        readForUpdateStatement.setString(1, type);
-        readForUpdateStatement.setString(2, localId);
-
-        logger.debug("Executing: {}", readForUpdateStatement);
-        ResultSet rs = readForUpdateStatement.executeQuery();
-        if (rs.next()) {
-            logger.debug("Read for update full id: {}", fullId);
-            return rs;
-        } else {
-            throw new NotFoundException("Object " + fullId + " not found in " + type);
+        PreparedStatement readForUpdateStatement = null; 
+        ResultSet rs = null;
+        try {
+            readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
+            logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
+            readForUpdateStatement.setString(1, type);
+            readForUpdateStatement.setString(2, localId);
+    
+            logger.debug("Executing: {}", readForUpdateStatement);
+            rs = readForUpdateStatement.executeQuery();
+            if (rs.next()) {
+                logger.debug("Read for update full id: {}", fullId);
+                return rs;
+            } else {
+                CleanupHelper.loggedClose(rs);
+                CleanupHelper.loggedClose(readForUpdateStatement);
+                throw new NotFoundException("Object " + fullId + " not found in " + type);
+            }
+        } catch (SQLException ex) {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(readForUpdateStatement);
+            throw ex;
         }
     }
 
@@ -520,7 +537,12 @@ public class GenericTableHandler implements TableHandler {
             logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
             writeValueProperties(fullId, dbId, localId, jv, connection);
         } finally {
-            CleanupHelper.loggedClose(rs);
+            if (rs != null) {
+                // Ensure associated statement also is closed
+                Statement rsStatement = rs.getStatement();
+                CleanupHelper.loggedClose(rs);
+                CleanupHelper.loggedClose(rsStatement);
+            }
             CleanupHelper.loggedClose(updateStatement);
             CleanupHelper.loggedClose(deletePropStatement);
         }
@@ -567,7 +589,12 @@ public class GenericTableHandler implements TableHandler {
                 logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
             }
         } finally {
-            CleanupHelper.loggedClose(existing);
+            if (existing != null) {
+                // Ensure associated statement also is closed
+                Statement existingStatement = existing.getStatement();
+                CleanupHelper.loggedClose(existing);
+                CleanupHelper.loggedClose(existingStatement);
+            }
             CleanupHelper.loggedClose(deleteStatement);
         }
     }

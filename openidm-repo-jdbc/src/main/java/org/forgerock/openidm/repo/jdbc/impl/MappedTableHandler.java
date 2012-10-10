@@ -46,6 +46,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -140,50 +141,74 @@ public class MappedTableHandler implements TableHandler {
     public Map<String, Object> read(String fullId, String type, String localId, Connection connection) 
                     throws NotFoundException, SQLException, IOException {
         JsonValue result = null;
-        PreparedStatement readStatement = queries.getPreparedStatement(connection, readQueryStr);
+        PreparedStatement readStatement = null;
+        ResultSet rs = null;
+        try {
+            readStatement = queries.getPreparedStatement(connection, readQueryStr);
 
-        logger.debug("Populating prepared statement {} for {}", readStatement, fullId);
-        readStatement.setString(1, localId);
-        
-        logger.debug("Executing: {}", readStatement);
-        ResultSet rs = readStatement.executeQuery();
-        
-        if (rs.next()) {
-            result = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
-            Object rev = result.get("_rev");  
-            logger.debug(" full id: {}, rev: {}, obj {}", new Object[] {fullId, rev, result});  
-        } else {
-            throw new NotFoundException("Object " + fullId + " not found in " + type);
+            logger.debug("Populating prepared statement {} for {}", readStatement, fullId);
+            readStatement.setString(1, localId);
+            
+            logger.debug("Executing: {}", readStatement);
+            rs = readStatement.executeQuery();
+            
+            if (rs.next()) {
+                result = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
+                Object rev = result.get("_rev");  
+                logger.debug(" full id: {}, rev: {}, obj {}", new Object[] {fullId, rev, result});  
+            } else {
+                throw new NotFoundException("Object " + fullId + " not found in " + type);
+            }
+        } finally {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(readStatement);
         }
         
         return result.asMap();
     }
     
     /**
-     * Reads and locks a record
-     * @param fullId the object id to retrieve
-     * @param type the object set type context
-     * @param localId
-     * @param connection
+     * Reads an object with for update locking applied
+     * 
+     * Note: statement associated with the returned resultset
+     * is not closed upon return.
+     * Aside from taking care to close the resultset it also is
+     * the responsibility of the caller to close the associated 
+     * statement. Although the specification specifies that drivers/pools
+     * should close the statement automatically, not all do this reliably.
+     * 
+     * @param fullId qualified id of component type and id
+     * @param type the component type
+     * @param localId the id of the object within the component type
+     * @param connection the connection to use
      * @return the row for the requested object, selected FOR UPDATE
      * @throws NotFoundException if the requested object was not found in the DB
-     * @throws java.sql.SQLException if a database failure occurred
+     * @throws java.sql.SQLException for general DB issues
      */
     ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException {
 
-        PreparedStatement readForUpdateStatement = null; // Statement currently implicitly closed when rs closes
-        readForUpdateStatement = queries.getPreparedStatement(connection, readForUpdateQueryStr);
-        logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
-        readForUpdateStatement.setString(1, localId);
-
-        logger.debug("Executing: {}", readForUpdateStatement);
-        ResultSet rs = readForUpdateStatement.executeQuery();
-        if (rs.next()) {
-            logger.debug("Read for update full id: {}", fullId);
-            return rs;
-        } else {
-            throw new NotFoundException("Object " + fullId + " not found in " + type);
+        PreparedStatement readForUpdateStatement = null;
+        ResultSet rs = null;
+        try {
+            readForUpdateStatement = queries.getPreparedStatement(connection, readForUpdateQueryStr);
+            logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
+            readForUpdateStatement.setString(1, localId);
+    
+            logger.debug("Executing: {}", readForUpdateStatement);
+            rs = readForUpdateStatement.executeQuery();
+            if (rs.next()) {
+                logger.debug("Read for update full id: {}", fullId);
+                return rs;
+            } else {
+                CleanupHelper.loggedClose(rs);
+                CleanupHelper.loggedClose(readForUpdateStatement);
+                throw new NotFoundException("Object " + fullId + " not found in " + type);
+            }
+        } catch (SQLException ex) {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(readForUpdateStatement);
+            throw ex;
         }
     }
 
@@ -194,7 +219,23 @@ public class MappedTableHandler implements TableHandler {
     public void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection) 
                 throws SQLException, IOException {
         PreparedStatement createStatement = queries.getPreparedStatement(connection, createQueryStr);
-
+        try {
+            create(fullId, type, localId, obj, connection, createStatement, false);
+        } finally {
+            CleanupHelper.loggedClose(createStatement);
+        }
+    }
+    
+    /**
+     * Adds the option to batch more than one create statement
+     * @param batchCreate if true just adds create to batched statements, does not execute.  
+     * false the statement is executed directly
+     * @see org.forgerock.openidm.repo.jdbc.TableHandler#create(java.lang.String, java.lang.String, java.lang.String, java.util.Map, java.sql.Connection)
+     * for the other parameters
+     */
+    protected void create(String fullId, String type, String localId, Map<String, Object> obj, Connection connection,
+            PreparedStatement createStatement, boolean batchCreate) throws SQLException, IOException {
+        
         logger.debug("Create with fullid {}", fullId);
         String rev = "0";
         obj.put("_id", localId); // Save the id in the object
@@ -205,12 +246,16 @@ public class MappedTableHandler implements TableHandler {
                 new Object[]{ createStatement, type, localId, rev });
         populatePrepStatementColumns(createStatement, objVal, tokenReplacementPropPointers);
         
-        logger.debug("Executing: {}", createStatement);
-        int val = createStatement.executeUpdate();
-        
-        logger.debug("Created object for id {} with rev {}", fullId, rev);
+        if (!batchCreate) {
+            logger.debug("Executing: {}", createStatement);
+            int val = createStatement.executeUpdate();
+            logger.debug("Created object for id {} with rev {}", fullId, rev);
+        } else {
+            createStatement.addBatch();
+            logger.debug("Added create for object id {} with rev {} to batch", fullId, rev);
+        }
     }
-    
+
     /**
      * Populates the create or update statement with the token replacement values in the appropriate order.
      * For update the final objectid is not part of the declarative mapping and needs to be populated separately.
@@ -288,7 +333,12 @@ public class MappedTableHandler implements TableHandler {
                  throw new InternalServerErrorException("Update execution did not result in updating 1 row as expected. Updated rows: " + updateCount);
              }
          } finally {
-             CleanupHelper.loggedClose(rs);
+             if (rs != null) {
+                 // Ensure associated statement also is closed
+                 Statement rsStatement = rs.getStatement();
+                 CleanupHelper.loggedClose(rs);
+                 CleanupHelper.loggedClose(rsStatement);
+             }
              CleanupHelper.loggedClose(updateStatement);
          }
      }
@@ -332,7 +382,12 @@ public class MappedTableHandler implements TableHandler {
                 logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
             }
         } finally {
-            CleanupHelper.loggedClose(existing);
+            if (existing != null) {
+                // Ensure associated statement also is closed
+                Statement existingStatement = existing.getStatement();
+                CleanupHelper.loggedClose(existing);
+                CleanupHelper.loggedClose(existingStatement);
+            }
             CleanupHelper.loggedClose(deleteStatement);
         }
     }
