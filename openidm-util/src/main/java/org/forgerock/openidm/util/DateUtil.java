@@ -64,6 +64,7 @@ public class DateUtil {
      * <p>2011-09-09T14:58:17.6+02:00
      * <p>2011-09-09T14:58:17.65+02:00
      * <p>2011-09-09T14:58:17.654+02:00
+     * <p>2011-09-09T14:58:17.654Z
      *
      * @param timeZoneID the ID for a TimeZone, either an abbreviation such as "PST",
      *                   a full name such as "America/Los_Angeles", or a custom ID such as "GMT-8:00".
@@ -119,9 +120,17 @@ public class DateUtil {
     public String formatDateTime(Date date) {
         String dateStr = formatter.format(date);
 
+        int timestampPos = dateStr.length() - 4;
         int colonPos = dateStr.length() - 2;
-        return dateStr.substring(0, colonPos)
+
+        if (dateStr.substring(timestampPos).equals("0000")) {
+            // 2011-09-09T14:58:17.654Z
+            // Go one back to remove the +/-
+            return dateStr.substring(0, timestampPos-1) + 'Z';
+        } else {
+            return dateStr.substring(0, colonPos)
                 + ":" + dateStr.substring(colonPos);
+        }
     }
 
     /**

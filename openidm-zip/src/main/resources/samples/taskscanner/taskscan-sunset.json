@@ -10,7 +10,7 @@
             "property" : "/sunset/date",
 
             "condition" : {
-                "before": "2012-10-02T00:00:00.000Z"
+                "before": "${Time.now}"
             },
             "taskState" : {
                 "started" : "/sunset/task-started",
