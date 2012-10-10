@@ -110,18 +110,18 @@ public class TableQueries {
         return statement;
     }
 
-	/**
-   * Get a prepared statement for the given connection and SQL. Returns the generated Key
-   * This is a function used by OracleTableHandler. Since ORACLE does not return the auto incremented key but the ROWID on using getGeneratedKeys(),
-   * we have to pass a string array containing the column that has been auto incremented.
-   * I.E. passing 'id' as the only entry of this array to this method will return the value of the id-column instead of the ROWID
-   * @param connection db connection to get a prepared statement for
-   * @param sql the prepared statement SQL
-   * @param columns which column shall be returned as the value of PreparedStatement.getGeneratedKeys()
-   * @return the prepared statement
-   * @throws SQLException if parsing or retrieving the prepared statement failed
-   */
-	public PreparedStatement getPreparedStatement(Connection connection, String sql, String[] columns) throws SQLException {
+    /**
+     * Get a prepared statement for the given connection and SQL. Returns the generated Key
+     * This is a function used by OracleTableHandler. Since ORACLE does not return the auto incremented key but the ROWID on using getGeneratedKeys(),
+     * we have to pass a string array containing the column that has been auto incremented.
+     * I.E. passing 'id' as the only entry of this array to this method will return the value of the id-column instead of the ROWID
+     * @param connection db connection to get a prepared statement for
+     * @param sql the prepared statement SQL
+     * @param columns which column shall be returned as the value of PreparedStatement.getGeneratedKeys()
+     * @return the prepared statement
+     * @throws SQLException if parsing or retrieving the prepared statement failed
+     */
+    public PreparedStatement getPreparedStatement(Connection connection, String sql, String[] columns) throws SQLException {
         PreparedStatement statement = null;
 
         statement = connection.prepareStatement(sql, columns);
