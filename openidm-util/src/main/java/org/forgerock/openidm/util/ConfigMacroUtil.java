@@ -232,25 +232,30 @@ public class ConfigMacroUtil {
 
         int mag;
         switch (c) {
+        case 's':
+            mag = Calendar.SECOND;
+            break;
         case 'm':
+            mag = Calendar.MINUTE;
+            break;
+        case 'h':
+            mag = Calendar.HOUR;
+            break;
+        case 'd':
+            mag = Calendar.DATE;
+            break;
         case 'M':
             mag = Calendar.MONTH;
             break;
         case 'y':
-        case 'Y':
             mag = Calendar.YEAR;
             break;
-        case 'd':
-        case 'D':
-            mag = Calendar.DATE;
-            break;
         default:
-            logger.warn("Invalid date magnitude: {}. Should be 'D'/'d' (days) 'M'/'m' (months) or 'Y'/'y' (years). " +
-                        "Defaulting to days", c);
-            mag =  Calendar.DATE;
+            logger.warn("Invalid date magnitude: {}. Defaulting to seconds.", c);
+            mag =  Calendar.SECOND;
+            break;
         }
 
         return mag;
-
     }
 }
