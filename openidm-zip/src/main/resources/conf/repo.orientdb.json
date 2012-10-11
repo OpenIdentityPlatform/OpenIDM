@@ -5,35 +5,30 @@
     "poolMaxSize" : 20,
     "queries" : {
         "for-credentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        "for-internalcredentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        
         "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
         "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
         "for-security-answer" : "select securityAnswer FROM ${_resource} WHERE userName = '${uid}'",
+        
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
-        "query-count-matching-username" : "select count(*) from ${_resource} where userName like '%${usernameToMatch}%' or givenName like '%${usernameToMatch}%' or familyName like '%${usernameToMatch}%'",
-        "query-matching-username" : "select ${fields} from ${_resource} where userName like '%${usernameToMatch}%' or givenName like '%${usernameToMatch}%' or familyName like '%${usernameToMatch}%' limit ${limit}",
+        
         "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND firstId = '${firstId}'",
         "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'",
         "links-for-linkType" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}'",
+        
         "credential-query" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
         "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
+        
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
-
-        "notifications-for-userName": "SELECT * FROM ${_resource} WHERE userName = '${uid}' ORDER BY 'requestDate' desc",
-        "query-all-notifications": "select * from ${_resource}",
-
-        "user_application_lnk-for-userName": "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
+        
+        "notifications-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
+        "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
         "query-all-user_application_lnk": "select * from ${_resource}",
         "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",
-
-        "application-for-ids": "SELECT * FROM ${_resource} WHERE _openidm_id in [${applicationIds}]",
-        "application-for-id": "SELECT * FROM ${_resource} WHERE _openidm_id = '${applicationId}'",
-        "query-all-applications": "select * from ${_resource}",
-        "query-default-applications": "select * from ${_resource} WHERE isDefault = true",
-
-        "user_application_state-for-id": "SELECT * FROM ${_resource} WHERE _openidm_id = '${userApplicationStateId}'",
-        "query-all-user_application_states": "select * from ${_resource}",
+        "get-user-app-link-by-user-and-app": "select * from ${_resource} WHERE userId = '${uid}' and applicationId = '${applicationId}'",
 
         "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
     },
@@ -57,15 +52,6 @@
                     }
                 ]
             },
-            "managed_notification" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    }
-                ]
-            },
             "managed_user_application_lnk" : {
                 "index" : [
                     {
@@ -75,16 +61,7 @@
                     }
                 ]
             },
-            "managed_user_application_state" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    }
-                ]
-            },
-            "managed_application" : {
+            "ui_notification" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",

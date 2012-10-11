@@ -45,6 +45,20 @@
             }
         },
         {
+            "pattern" : "^repo/internal/user/.*",
+            "methods" : [
+                "query"
+            ],
+            "condition" : {
+                "type" : "text/javascript",
+                "source" : "request.params['_query-id'] == 'for-internalcredentials'"
+            },
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/onRequest-for-credentials.js"
+            }
+        },
+        {
             "pattern" : "^managed/user/.*",
             "methods" : [
                 "query"
@@ -101,13 +115,23 @@
             }
         },
         {
-            "pattern" : "^managed/user_application_lnk/.*",
+            "pattern" : "^managed/user_application_lnk.*",
             "methods" : [
                 "create"
             ],
             "onResponse" : {
                 "type" : "text/javascript",
                 "file" : "script/ui/user_application_lnk/onResponse-user_application_lnk_create.js"
+            }
+        },
+        {
+            "pattern" : "^managed/user_application_lnk/.*",
+            "methods" : [
+                "delete"
+            ],
+            "onResponse" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/user_application_lnk/onResponse-user_application_lnk_delete.js"
             }
         },
         {
@@ -118,6 +142,17 @@
             "onResponse" : {
                 "type" : "text/javascript",
                 "file" : "script/ui/onResponse-user_create.js"
+            }
+        },
+        {
+            "pattern" : "^repo/ui/notification.*",
+            "methods" : [
+                "create",
+                "read"
+            ],
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/ui/notification/onCreateRequest-notification-set-default-fields.js"
             }
         }
     ]

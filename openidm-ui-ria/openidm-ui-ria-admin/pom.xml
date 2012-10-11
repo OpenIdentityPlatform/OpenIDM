@@ -23,31 +23,36 @@
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<artifactId>openidm-ui-ria</artifactId>
-		<groupId>org.forgerock.openidm</groupId>
-		<version>2.1.0-SNAPSHOT</version>
-	</parent>
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>openidm-ui-ria</artifactId>
+        <groupId>org.forgerock.openidm</groupId>
+        <version>2.1.0-SNAPSHOT</version>
+    </parent>
 
-	<artifactId>openidm-ui-ria-admin</artifactId>
-	<name>OpenIDM RIA Web UI Admin</name>
-	<packaging>pom</packaging>
+    <artifactId>openidm-ui-ria-admin</artifactId>
+    <name>OpenIDM RIA Web UI Admin</name>
+    <packaging>pom</packaging>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.forgerock.openidm</groupId>
-			<artifactId>openidm-ui-ria-user</artifactId>
-			<version>${openidm.version}</version>
-			<type>zip</type>
-			<classifier>www</classifier>
-		</dependency>
-		<dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.forgerock.commons.ui</groupId>
+            <artifactId>forgerock-ui-user</artifactId>
+            <type>zip</type>
+            <classifier>www</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-ui-ria-apps</artifactId>
+            <type>zip</type>
+            <classifier>www</classifier>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -61,68 +66,69 @@
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>${basedir}/src/main/js</directory>
-			</resource>
-			<resource>
-				<directory>${basedir}/src/main/resources</directory>
-			</resource>
-		</resources>
-		<testResources>
-			<testResource>
-				<directory>${basedir}/src/test/js</directory>
-			</testResource>
-			<testResource>
-				<directory>${basedir}/src/test/resources</directory>
-			</testResource>
-		</testResources>
-	</build>
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/js</directory>
+            </resource>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>${basedir}/src/test/js</directory>
+            </testResource>
+            <testResource>
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+        </testResources>
+    </build>
 
-	<profiles>
-		<profile>
-			<id>Non optimized UI</id>
-			<activation>
-				<property>
-					<name>!openidm.ui.optimize</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>jslint-maven-plugin</artifactId>
-						<configuration>
-							<excludes>
-								<exclude>**/libs/*.js</exclude>
-								<exclude>**/*Test.js</exclude>
-							</excludes>
-						</configuration>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>jslint</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>   
-					
-					<plugin>
-						<artifactId>maven-resources-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>resources</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>   
-					
+    <profiles>
+        <profile>
+            <id>Non optimized UI</id>
+            <activation>
+                <property>
+                    <name>!openidm.ui.optimize</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>jslint-maven-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/libs/*.js</exclude>
+                                <exclude>**/*Test.js</exclude>
+                                <exclude>**/*TasksMenuView.js</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jslint</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>   
+                    
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>resources</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>   
+                    
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
@@ -136,8 +142,15 @@
                                 <configuration>
                                     <artifactItems>
                                         <artifactItem>
+                                            <groupId>org.forgerock.commons.ui</groupId>
+                                            <artifactId>forgerock-ui-user</artifactId>
+                                            <version>${forgerock-ui.version}</version>
+                                            <type>zip</type>
+                                            <classifier>www</classifier>
+                                        </artifactItem>
+                                        <artifactItem>
                                             <groupId>org.forgerock.openidm</groupId>
-                                            <artifactId>openidm-ui-ria-user</artifactId>
+                                            <artifactId>openidm-ui-ria-apps</artifactId>        
                                             <version>${openidm.version}</version>
                                             <type>zip</type>
                                             <classifier>www</classifier>
@@ -148,27 +161,27 @@
                         </executions>
                     </plugin>
                     
-					<plugin>
-						<artifactId>maven-assembly-plugin</artifactId>
-						<configuration>
-							<descriptors>
-								<descriptor>src/main/assembly/zip.xml</descriptor>
-							</descriptors>
-						</configuration>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>single</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>Optimized UI</id>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/zip.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>Optimized UI</id>
             <activation>
                 <property>
                     <name>openidm.ui.optimize</name>
@@ -183,6 +196,7 @@
                             <excludes>
                                 <exclude>**/libs/*.js</exclude>
                                 <exclude>**/*Test.js</exclude>
+                                <exclude>**/*TasksMenuView.js</exclude>
                             </excludes>
                         </configuration>
                         <executions>
@@ -222,8 +236,15 @@
                                     <includeGroupIds>org.apache.servicemix.bundles</includeGroupIds>
                                     <artifactItems>
                                         <artifactItem>
+                                            <groupId>org.forgerock.commons.ui</groupId>
+                                            <artifactId>forgerock-ui-user</artifactId>
+                                            <version>${forgerock-ui.version}</version>
+                                            <type>zip</type>
+                                            <classifier>www</classifier>
+                                        </artifactItem>
+                                        <artifactItem>
                                             <groupId>org.forgerock.openidm</groupId>
-                                            <artifactId>openidm-ui-ria-user</artifactId>
+                                            <artifactId>openidm-ui-ria-apps</artifactId>        
                                             <version>${openidm.version}</version>
                                             <type>zip</type>
                                             <classifier>www</classifier>
@@ -265,6 +286,13 @@
                                             <arg value="-o" />
                                             <arg value="${requirejs.dir}/app.build.js" />
                                         </java>
+                                        
+                                        <concat destfile="target/minified/main_with_license.js">
+                                            <fileset file="src/main/optimization/license" />
+                                            <fileset file="target/minified/main.js" />
+                                        </concat>
+                                        
+                                        <move file="target/minified/main_with_license.js" tofile="target/minified/main.js" />
                                     </target>
                                 </configuration>
                                 <goals>
@@ -291,8 +319,8 @@
                         </executions>
                     </plugin>
                 </plugins>
-            </build>	           
-		</profile>		
-	</profiles>
+            </build>               
+        </profile>        
+    </profiles>
 </project>
 

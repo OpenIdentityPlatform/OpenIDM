@@ -93,58 +93,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `openidm`.`managednotification`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`managednotification` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `notificationType` VARCHAR(255) NOT NULL ,
-  `requestDate` VARCHAR(255) NOT NULL ,
-  `message` TEXT,
-  `requester` VARCHAR(255),
-  `userName` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`objectid`) )
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `openidm`.`manageduserapplicationlnk`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`manageduserapplicationlnk` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `state` VARCHAR(255) NOT NULL ,
-  `applicationId` VARCHAR(255) NOT NULL ,
-  `userName` VARCHAR(255) NOT NULL,
-  `lastTimeUsed` VARCHAR(255),
-  PRIMARY KEY (`objectid`) )
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `openidm`.`managedapplication`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`managedapplication` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `name` VARCHAR(255) NOT NULL ,
-  `description` TEXT,
-  `iconPath` VARCHAR(255) NOT NULL,
-  `isDefault` BOOLEAN,
-  `needsApproval` BOOLEAN,
-  PRIMARY KEY (`objectid`) )
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `openidm`.`manageduserapplicationstate`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`manageduserapplicationstate` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `name` VARCHAR(255) NOT NULL ,
-  `description` TEXT,
-  PRIMARY KEY (`objectid`) )
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
 -- Table `openidm`.`configobjects`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `openidm`.`configobjects` (
@@ -306,32 +254,42 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+-- -----------------------------------------------------
+-- Table `openidm`.`manageduserapplicationlnk`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`manageduserapplicationlnk` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `state` VARCHAR(38) NOT NULL ,
+  `applicationId` VARCHAR(38) NOT NULL ,
+  `userId` VARCHAR(38) NOT NULL ,
+  `lastTimeUsed` VARCHAR(80) NULL ,
+  `requester` VARCHAR(255) NULL ,
+  `link` VARCHAR(255) NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`uinotification`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
+  `objectid` VARCHAR(38) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `notificationType` VARCHAR(255) NOT NULL ,
+  `requestDate` VARCHAR(255) NOT NULL ,
+  `message` TEXT NOT NULL ,
+  `requester` VARCHAR(255) NULL ,
+  `userId` VARCHAR(38) NOT NULL ,
+  PRIMARY KEY (`objectid`) )
+ENGINE = InnoDB;
+
+
+
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
--- -----------------------------------------------------
--- Data for table `openidm`.`managedapplication`
--- -----------------------------------------------------
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('F3535924-EF9C-48D0-BFC6-59DE7B190A1B', 0, 'Salesforce', 'Salesforce', 'images/dashboard/salesforce.png', false, true);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('B65FA6A2-D23D-49CD-BEA0-CE98E275A8CD', 0, 'Gmail', 'Gmail', 'images/dashboard/gmail.png', true, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('2156ACE6-1FFF-46B3-B680-EA16520F55A0', 0, 'GooglePlus', 'Google+', 'images/dashboard/googleplus.png', false, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('2F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Liveplan', 'Liveplan', 'images/dashboard/liveplan.png', false, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('0F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Calendar', 'Calendar', 'images/dashboard/calendar.png', true, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('1F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Concur', 'Concur', 'images/dashboard/concur.png', true, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('3F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Docs', 'Docs', 'images/dashboard/docs.png', false, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('4F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Drive', 'Drive', 'images/dashboard/drive.png', false, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('5F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'FusionTables', 'FusionTables', 'images/dashboard/fusion_tables.png', false, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('6F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Vault', 'Vault', 'images/dashboard/vault.png', false, false);
-insert into managedapplication (objectid,rev,name,description,iconPath,isDefault,needsApproval) values ('7F3B1623-2738-47C5-8050-9523BC0525A6', 0, 'Webex', 'Webex', 'images/dashboard/webex.png', true, false);
-
-
--- -----------------------------------------------------
--- Data for table `openidm`.`manageduserapplicationstate`
--- -----------------------------------------------------
-insert into manageduserapplicationstate (objectid,rev,name,description) values ('B65FA6A2-D43D-49CD-BEA0-CE98E275A8CD', 0, 'pending', 'Request is pending for approval');
-insert into manageduserapplicationstate (objectid,rev,name,description) values ('B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD', 0, 'approved', 'Request has been approved');
-insert into manageduserapplicationstate (objectid,rev,name,description) values ('B65FA6A2-D43D-49CD-BEA0-CE9CE275A8CD', 0, 'rejected', 'Request has been rejected');
 
 -- -----------------------------------------------------
 -- Data for table `openidm`.`internaluser`

@@ -22,27 +22,4 @@
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-    <xsd:element name="__APPLICATION__">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="icf:__NAME__"/>
-                <xsd:element ref="icf:__UID__" minOccurs="0"/>
-                <xsd:element name="iconPath" type="xsd:string" minOccurs="0"/>
-                <xsd:element name="description" type="xsd:string" minOccurs="0"/>
-                <xsd:element name="isDefault" type="xsd:boolean" minOccurs="0">
-                </xsd:element>
-                <xsd:element name="needsApproval" type="xsd:boolean" minOccurs="0">
-                </xsd:element>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-    <xsd:element name="__USER_APPLICATION_STATE__">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="icf:__NAME__"/>
-                <xsd:element ref="icf:__UID__" minOccurs="0"/>
-                <xsd:element name="description" type="xsd:string" minOccurs="0"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
 </xsd:schema>
