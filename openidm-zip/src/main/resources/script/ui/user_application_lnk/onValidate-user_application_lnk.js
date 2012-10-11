@@ -41,7 +41,7 @@ function requiredValidator(toValidate, fieldName) {
 function isUserApplicationLnk() {
     var userApplicationLnk = openidm.decrypt(object);
     requiredValidator(userApplicationLnk.state, "Notification State");
-    requiredValidator(userApplicationLnk.userName, "UserName");
+    requiredValidator(userApplicationLnk.userId, "User Id");
     requiredValidator(userApplicationLnk.applicationId, "Application Id");
     if(errors.length > 0) {
     	throw errors;

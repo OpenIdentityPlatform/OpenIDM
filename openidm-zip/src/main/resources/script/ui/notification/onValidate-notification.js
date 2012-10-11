@@ -44,7 +44,7 @@ function isNotificationValid() {
     requiredValidator(notification.message, "Notification Message");
     requiredValidator(notification.requestDate, "Request Date");
     requiredValidator(notification.requester, "Notification Requester");
-    requiredValidator(notification.userName, "Notification User");
+    requiredValidator(notification.userId, "Notification User");
     if(errors.length > 0) {
     	throw errors;
     }

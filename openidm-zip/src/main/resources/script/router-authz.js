@@ -49,38 +49,85 @@
  * own entry in the config.
  */
 var accessConfig = { "configs" : [
-	{	"pattern" : "*", 
-		"roles" : "openidm-admin", 
-		"methods": "*", // default to all methods allowed
-		"actions" : "*" // default to all actions allowed
-	},
-	// Clients authenticated via SSL mutual authentication
-	{	"pattern" : "*", 
-		"roles" : "openidm-cert", 
-		"methods": "",	// default to no methods allowed
-		"actions" : ""  // default to no actions allowed
-	},
-	// Additional checks for anonymous and authenticated users
-	{	"pattern" : "*", 
-		"roles" : "openidm-authorized, openidm-reg", 
-		"methods": "*",
-		"actions" : "*",
-		"customAuthz" : "ownDataOnly()" // Custom auth function
-	}] };
+        {       "pattern" : "*",
+                "roles" : "openidm-admin",
+                "methods": "*", // default to all methods allowed
+                "actions" : "*" // default to all actions allowed
+        },
+        // Clients authenticated via SSL mutual authentication
+        {       "pattern" : "*",
+                "roles" : "openidm-cert",
+                "methods": "",  // default to no methods allowed
+                "actions" : ""  // default to no actions allowed
+        },
+        // Additional checks for authenticated users
+        {       "pattern" : "*",
+                "roles" : "openidm-authorized", // openidm-authorized is anonymous
+                "methods": "*",
+                "actions" : "*",
+                "customAuthz" : "ownDataOnly()" // Custom auth function
+        },
+
+        // Anonymous user can:
+        // * create user using POST with action=create
+        // * invoke some queries which are public:
+        //     check-userName-availability,
+        //     for-security-answer,
+        //     for-credentials,
+        //     get-security-question,
+        //     set-newPassword-for-userName-and-security-answer
+	    {  "pattern" : "managed/user/*",
+	        "roles" : "openidm-reg",
+	        "methods": "read,query",
+	        //"customAuthz" : "checkIfIsPublicQuery()",
+	        "actions" : "*"
+	    },
+	    {  "pattern" : "managed/user",
+	        "roles" : "openidm-reg",
+	        "methods": "create",
+	        "actions" : "*"
+	    }
+
+        ] };
+
 
 function ownDataOnly() {
-	// Additional Checks (if failed access configuration check)
-    if (requestIsAQueryOfName('for-userName') && userIsAuthorized(roles)){
-    	//authenticated user can only manage his data and cannot change a role attribute.
-    	var requestedUserNameDataIdentificator = request.params['uid'];
-        
+	return true; // temporarily bypass authz until we have a method for comparing requested userId against secured userId value. 
+    var roles = request.parent.security['openidm-roles'];
+
+    if (
+                (
+                requestIsAQueryOfName('for-credentials') ||
+                requestIsAQueryOfName('for-internalcredentials')
+                )
+                && userIsAuthorized(roles)
+        )
+        {
+            return true;
+        }
+
+    // Additional Checks (if failed access configuration check)
+    if (
+        (
+                requestIsAQueryOfName('for-credentials') ||
+                requestIsAQueryOfName('for-internalcredentials') ||
+                requestIsAQueryOfName('notifications-for-user') ||
+                requestIsAQueryOfName('user_application_lnk-for-user') ||
+                requestIsAQueryOfName('for-userName')
+
+        ) && userIsAuthorized(roles)){
+
+        //authenticated user can only manage his data and cannot change a role attribute.
+                java.lang.System.out.println(DumpObjectIndented(request));
+        var requestedUserNameDataIdentificator = request.params['user'];
+
         if (authorizedUsernameEquals(requestedUserNameDataIdentificator)) {
             logger.debug("User manipulation with own data");
-            
-            if (requestIsAnActionOfName('patch')) {            	
+
+            if (requestIsAnActionOfName('patch')) {
                 logger.debug("Request is a patch. Checking if trying to change own role");
-                
-                if (requestValueContainsReplaceValueWithKeyOfName('/role')) {                	
+
+                if (requestValueContainsReplaceValueWithKeyOfName('/role')) {
                     logger.debug("Trying to change own role is forbidden for standard user");
                     return false;
                 }

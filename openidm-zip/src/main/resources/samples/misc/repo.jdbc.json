@@ -15,15 +15,12 @@
         "genericTables" : {
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "check-userName-availability" : "SELECT prop.propValue FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "for-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "get-security-question" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue, credprop.proptype FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/securityQuestion' AND conditionprop.propkey='/email' AND conditionprop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "for-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "set-newPassword-for-userName-and-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
-            "get-profile" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
             "query-all-ids" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
-            "query-count-matching-username" : "SELECT '/count' as propkey, count(distinct credprop.propkey, credprop.propvalue) as propvalue FROM openidm.managedobjectproperties credprop  INNER JOIN openidm.managedobjects obj ON obj.id = credprop.managedobjects_id  INNER JOIN openidm.managedobjectproperties conditionprop ON obj.id = conditionprop.managedobjects_id INNER JOIN openidm.objecttypes objtype ON objtype.id = obj.objecttypes_id  WHERE  credprop.propkey = '/_id' AND (conditionprop.propkey='/userName' AND conditionprop.propvalue like concat('%',${usernameToMatch},'%')  OR conditionprop.propkey='/givenName' AND conditionprop.propvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/familyName' AND conditionprop.propvalue like concat('%',${usernameToMatch},'%')) AND objtype.objecttype = ${_resource} order by 1",
-            "query-matching-username" : "select fullobject from openidm.managedobjects where objectid in (SELECT distinct credprop.propvalue FROM openidm.managedobjectproperties credprop  INNER JOIN openidm.managedobjects obj ON obj.id = credprop.managedobjects_id  INNER JOIN openidm.managedobjectproperties conditionprop ON obj.id = conditionprop.managedobjects_id INNER JOIN openidm.objecttypes objtype ON objtype.id = obj.objecttypes_id  WHERE credprop.propkey = '/_id' AND  (conditionprop.propkey='/userName' AND conditionprop.propvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/givenName' AND conditionprop.propvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/familyName' AND conditionprop.propvalue like concat('%',${usernameToMatch},'%')) AND objtype.objecttype = 'managed/user' order by 1) limit 30",
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
             "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "for-credentials" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
@@ -31,28 +28,21 @@
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
-
+            "for-internalcredentials" : "select * FROM openidm.internaluser WHERE objectid = ${uid}",
+            
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
-
+            
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
-
-            "query-all-notifications": "select * from ${_dbSchema}.managednotification",
-            "notifications-for-userName": "SELECT * FROM ${_dbSchema}.managednotification WHERE userName = ${uid}",
-
-            "user_application_lnk-for-userName": "SELECT * FROM ${_dbSchema}.manageduserapplicationlnk WHERE userName = ${uid}",
-            "query-all-user_application_lnk": "select * from ${_dbSchema}.manageduserapplicationlnk",
-            "user_application_lnk-for-id": "select * from ${_dbSchema}.manageduserapplicationlnk WHERE objectid = ${userApplicationLnkId}",
-
-            "application-for-ids": "SELECT * FROM ${_dbSchema}.managedapplication WHERE objectid in (${applicationIds})",
-            "application-for-id": "SELECT * FROM ${_dbSchema}.managedapplication WHERE objectid = ${applicationId}",
-            "query-all-applications": "select * from ${_dbSchema}.managedapplication",
-            "query-default-applications": "select * from ${_dbSchema}.managedapplication WHERE isDefault = true",
-
-            "user_application_state-for-id": "SELECT * FROM ${_dbSchema}.manageduserapplicationstate WHERE objectid = ${userApplicationStateId}",
-            "query-all-user_application_states": "select * from ${_dbSchema}.manageduserapplicationstate",
+            
+            "notifications-for-user" : "SELECT * FROM ${_dbSchema}.uinotification WHERE userId = ${userId}",
+            "user_application_lnk-for-user" : "SELECT * FROM ${_dbSchema}.manageduserapplicationlnk WHERE userId = ${userId}",
+            "query-all-user_application_lnk" : "select * from ${_dbSchema}.manageduserapplicationlnk",
+            "user_application_lnk-for-id" : "select * from ${_dbSchema}.manageduserapplicationlnk WHERE objectid = ${userApplicationLnkId}",
+            "get-user-app-link-by-user-and-app" : "select * from ${_dbSchema}.manageduserapplicationlnk WHERE userId = ${uid} and applicationId = ${applicationId}",
+            
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
         }
     },
@@ -85,8 +75,8 @@
                     "secondId" : "secondid"
                 }
             },
-            "managed/notification" : {
-                "table" : "managednotification",
+            "ui/notification" : {
+                "table" : "uinotification",
                 "objectToColumn" : {
                     "_id" : "objectid",
                     "_rev" : "rev",
@@ -94,7 +84,7 @@
                     "message" : "message",
                     "requestDate" : "requestDate",
                     "requester" : "requester",
-                    "userName" : "userName"
+                    "userId" : "userId"
                 }
             },
             "managed/user_application_lnk" : {
@@ -104,29 +94,10 @@
                     "_rev" : "rev",
                     "state" : "state",
                     "applicationId" : "applicationId",
-                    "userName" : "userName",
-                    "lastTimeUsed" : "lastTimeUsed"
-                }
-            },
-            "managed/application" : {
-                "table" : "managedapplication",
-                "objectToColumn" : {
-                    "_id" : "objectid",
-                    "_rev" : "rev",
-                    "name" : "name",
-                    "description" : "description",
-                    "iconPath" : "iconPath",
-                    "isDefault" : "isDefault",
-                    "needsApproval" : "needsApproval"
-                }
-            },
-            "managed/user_application_state" : {
-                "table" : "manageduserapplicationstate",
-                "objectToColumn" : {
-                    "_id" : "objectid",
-                    "_rev" : "rev",
-                    "name" : "name",
-                    "description" : "description"
+                    "userId" : "userId",
+                    "lastTimeUsed" : "lastTimeUsed",
+                    "requester" : "requester",
+                    "link" : "link"
                 }
             },
             "internal/user" : {

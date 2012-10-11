@@ -1,0 +1,24 @@
+{
+     "securityquestions": [
+        {
+            "key" : "1",
+            "value" : "What was your first pet's name?"
+        }, 
+        {
+            "key" : "2",
+            "value" : "What is the name of the street you lived on as a child?"
+        }, 
+        {
+            "key" : "3",
+            "value" : "What is the name of your favorite teacher?"
+        }, 
+        {    
+            "key" : "4",
+            "value" : "What was your first phone number?"
+        }, 
+        {
+            "key" : "5",
+            "value" : "Enter a PIN"
+        }
+    ]
+}
