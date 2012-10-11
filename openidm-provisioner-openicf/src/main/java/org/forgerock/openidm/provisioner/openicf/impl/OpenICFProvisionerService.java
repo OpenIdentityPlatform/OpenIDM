@@ -52,11 +52,13 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.SynchronizationListener;
 import org.identityconnectors.common.event.ConnectorEvent;
 import org.identityconnectors.common.event.ConnectorEventHandler;
+import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorInfo;
@@ -330,7 +332,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
 // spec—breaks during unit testing.
 //                    return query(id, params.required());
                         before = params;
-                        after = query(id, params);
+                        after = query(id, params.required());
                         ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
                         return after;
                     case action:
@@ -543,35 +545,36 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         if (helper.isOperationPermitted(SearchApiOp.class)) {
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null, null);
-            Filter filter = null;
-            Map<String, Object> query = null;
-            String queryId = null;
-            if (null != params) {
-                query = params.get("query").asMap();
-                queryId = params.get("_query-id").asString();
-            }
-            EventEntry measure = Publisher.start(getQueryEventName(id, params, query, queryId), null, id);
-            if (null != params) {
-                if (query != null) {
-                    filter = helper.build(query, params.get("params").asMap());
-                } else if (queryId != null) {
-                    if (queryId.equals("query-all-ids")) {
+            OperationOptionsBuilder operationOptionsBuilder = helper
+                    .getOperationOptionsBuilder(SearchApiOp.class, null, null);
+            JsonValue query = params.get("query");
+            JsonValue queryId = params.get(QueryConstants.QUERY_ID);
+            EventEntry measure = Publisher
+                    .start(getQueryEventName(id, params, query.asMap(), queryId.asString()), null, id);
+            try {
+                Filter filter = null;
+                if (!query.isNull()) {
+                    filter = helper.build(query.asMap(), params.get("params").asMap());
+                } else if (!queryId.isNull()) {
+                    if (QueryConstants.QUERY_ALL_IDS.equals(queryId.asString())) {
                         // TODO: optimize query for ids, for now default to query all
                         operationOptionsBuilder.setAttributesToGet(Uid.NAME);
                     } else {
                         // Unknown query id
-                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query id: " + queryId);
+                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                                "Unknown query id: " + queryId);
                     }
                 } else {
-                    // Neither a query expression or query id defined,
-                    // default to query all
+                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                            "Query request does not contain valid query");
                 }
+                getConnectorFacade().search(helper.getObjectClass(), filter, helper.getResultsHandler(),
+                        operationOptionsBuilder.build());
+                result.put("result", helper.getQueryResult());
+                measure.setResult(result);
+            } finally {
+                measure.end();
             }
-            getConnectorFacade().search(helper.getObjectClass(), filter, helper.getResultsHandler(), operationOptionsBuilder.build());
-            result.put("result", helper.getQueryResult());
-            measure.setResult(result);
-            measure.end();
         } else {
             logger.debug("Operation QUERY of {} is not permitted", id);
         }
@@ -624,13 +627,44 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                             result.put("actions", resultList);
 
                             for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
-
+                                boolean isShell = contextBuilder.getScriptLanguage().equalsIgnoreCase("Shell");
                                 for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
                                     if (entry.getKey().startsWith("_")) {
                                         continue;
                                     }
                                     Object value = entry.getValue();
                                     Object newValue = value;
+                                    if (isShell) {
+                                        if ("password".equalsIgnoreCase(entry.getKey())) {
+                                            if (value instanceof String) {
+                                                newValue = new GuardedString(((String) value).toCharArray());
+                                            } else {
+                                                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                                                        "Invalid type for password.");
+                                            }
+                                        }
+                                        if ("username".equalsIgnoreCase(entry.getKey())) {
+                                            if (value instanceof String == false) {
+                                                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                                                        "Invalid type for username.");
+                                            }
+                                        }
+                                        if ("workingdir".equalsIgnoreCase(entry.getKey())) {
+                                            if (value instanceof String == false) {
+                                                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                                                        "Invalid type for workingdir.");
+                                            }
+                                        }
+                                        if ("timeout".equalsIgnoreCase(entry.getKey())) {
+                                            if (value instanceof String == false && value instanceof Number == false ) {
+                                                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+                                                        "Invalid type for timeout.");
+                                            }
+                                        }
+                                        contextBuilder.addScriptArgument(entry.getKey(), newValue);
+                                        continue;
+                                    }
+
                                     if (null != value) {
                                         if (value instanceof Collection) {
                                             newValue = Array.newInstance(Object.class, ((Collection) value).size());
@@ -661,8 +695,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                                 OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
 
                                 //It's necessary to keep the backward compatibility with Waveset IDM
-                                if (null != variablePrefix && contextBuilder.getScriptLanguage()
-                                        .equalsIgnoreCase("Shell")) {
+                                if (null != variablePrefix && isShell) {
                                     operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
                                 }
 
