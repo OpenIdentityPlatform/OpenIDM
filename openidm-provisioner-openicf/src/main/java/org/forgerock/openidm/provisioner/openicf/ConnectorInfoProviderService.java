@@ -38,6 +38,7 @@ import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService;
+import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.event.ConnectorEvent;
@@ -51,6 +52,7 @@ import org.identityconnectors.framework.api.operations.TestApiOp;
 import org.identityconnectors.framework.common.FrameworkUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 import org.identityconnectors.framework.impl.api.AbstractConnectorInfo;
+import org.identityconnectors.framework.impl.api.ConnectorInfoManagerFactoryImpl;
 import org.identityconnectors.framework.impl.api.remote.RemoteConnectorInfoImpl;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
@@ -68,6 +70,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -120,7 +123,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     //Private
     private Map<String, Pair<RemoteFrameworkConnectionInfo,ConnectorEventHandler>> remoteFrameworkConnectionInfo = new HashMap<String, Pair<RemoteFrameworkConnectionInfo,ConnectorEventHandler>>();
     private ScheduledExecutorService scheduledExecutorService = null;
-    private URL[] connectorURLs = null;
+    private List<URL> connectorURLs = null;
+    private ClassLoader bundleParentClassLoader = null;
     private final MetaDataProviderCallback[] callback = new MetaDataProviderCallback[1];
 
     private ConcurrentMap<ConnectorReference, Set<ConnectorEventHandler>> ConnectorEventHandler = new ConcurrentHashMap<ConnectorReference, Set<ConnectorEventHandler>>();
@@ -298,9 +302,10 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             } else {
                 try {
                     logger.debug("Looking for connectors in {} directory.", dir.getAbsoluteFile().toURI().toURL());
-                    URL[] bundleUrls = getConnectorURLs(dir.getAbsoluteFile().toURI().toURL());
                     // Create a single instance of ConnectorInfoManagerFactory
-                    ConnectorInfoManagerFactory.getInstance().getLocalManager(bundleUrls);
+                    ((ConnectorInfoManagerFactoryImpl) ConnectorInfoManagerFactory.getInstance())
+                            .getLocalManager(getConnectorURLs(dir.getAbsoluteFile().toURI().toURL()),
+                                    getBundleParentClassLoader());
                 } catch (MalformedURLException e) {
                     logger.error("How can this happen?", e);
                 }
@@ -338,6 +343,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         remoteFrameworkConnectionInfo.clear();
         factory.clearRemoteCache();
         connectorURLs = null;
+        bundleParentClassLoader = null;
         factory.clearLocalCache();
         logger.info("ConnectorInfoProviderService is deactivated.");
     }
@@ -389,7 +395,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         ConnectorInfoManager connectorInfoManager = null;
         switch (connectorReference.getConnectorLocation()) {
             case LOCAL:
-                connectorInfoManager = ConnectorInfoManagerFactory.getInstance().getLocalManager(getConnectorURLs());
+                connectorInfoManager = ((ConnectorInfoManagerFactoryImpl) ConnectorInfoManagerFactory.getInstance()).getLocalManager(
+                        getConnectorURLs(), getBundleParentClassLoader());
                 break;
             case OSGI:
                 connectorInfoManager = osgiConnectorInfoManager;
@@ -441,7 +448,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      */
     public List<ConnectorInfo> getAllConnectorInfo() {
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
-        ConnectorInfoManager connectorInfoManager = factory.getLocalManager(getConnectorURLs());
+        ConnectorInfoManager connectorInfoManager = ((ConnectorInfoManagerFactoryImpl) factory).getLocalManager(
+                getConnectorURLs(), getBundleParentClassLoader());
 
         List<ConnectorInfo> result = new ArrayList<ConnectorInfo>(connectorInfoManager.getConnectorInfos());
 
@@ -462,7 +470,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
 
     private List<Map<String, Object>> listAllConnectorInfo() {
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
-        ConnectorInfoManager connectorInfoManager = factory.getLocalManager(getConnectorURLs());
+        ConnectorInfoManager connectorInfoManager = ((ConnectorInfoManagerFactoryImpl) factory)
+                .getLocalManager(getConnectorURLs(), getBundleParentClassLoader());
 
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         for (ConnectorInfo info : connectorInfoManager.getConnectorInfos()) {
@@ -616,9 +625,57 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         return result;
     }
 
-    private URL[] getConnectorURLs(URL... resourceURLs) {
+    private ClassLoader getBundleParentClassLoader() {
+        if (null == bundleParentClassLoader) {
+            List<File> urlList = null;
+            File classes = IdentityServer.getFileForPath("classes/");
+            if (classes.isDirectory()) {
+                urlList = new ArrayList<File>();
+                urlList.add(classes);
+            } else {
+                logger.trace("BundleParentClassLoader does not use classes from {}", classes.getAbsolutePath());
+            }
+
+            File lib = IdentityServer.getFileForPath("lib");
+            if (lib.isDirectory()) {
+                File[] files = lib.listFiles(new FileFilter() {
+                    public boolean accept(File f) {
+                        return (f.getName().endsWith(".jar"));
+                    }
+                });
+                for (File jarFile : files) {
+                    if (null == urlList) {
+                        urlList = new ArrayList<File>(files.length);
+                    }
+                    urlList.add(jarFile);
+                }
+            } else {
+                logger.trace("BundleParentClassLoader does not use lib from {}", lib.getAbsolutePath());
+            }
+
+            if (null != urlList) {
+                URL[] urls = new URL[urlList.size()];
+                for (int i = 0; i < urls.length; i++) {
+                    try {
+                        urls[i] = urlList.get(i).toURI().toURL();
+                        logger.trace("Add URL to bundle parent classloader: {}", urls[i]);
+                    } catch (MalformedURLException e) {
+                        if (logger.isDebugEnabled()) {
+                            logger.error("Failed toURL on File: {}", urlList.get(i).getAbsolutePath(), e);
+                        }
+                    }
+                }
+                bundleParentClassLoader = new URLClassLoader(urls, ConnectorInfoManagerFactory.class.getClassLoader());
+            } else {
+                bundleParentClassLoader = ConnectorInfoManagerFactory.class.getClassLoader();
+            }
+        }
+        return bundleParentClassLoader;
+    }
+
+    private List<URL> getConnectorURLs(URL... resourceURLs) {
         if (null == connectorURLs) {
-            Set<URL> _bundleURLs = new HashSet<URL>();
+            List<URL> _bundleURLs = new ArrayList<URL>();
             for (URL resourceURL : resourceURLs) {
                 try {
                     Vector<URL> urls = null;
@@ -664,7 +721,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     logger.debug("Connector URL: {}", u);
                 }
             }
-            connectorURLs = _bundleURLs.toArray(new URL[_bundleURLs.size()]);
+            connectorURLs = CollectionUtil.newReadOnlyList(_bundleURLs);
         }
         return connectorURLs;
     }

@@ -31,6 +31,8 @@ import org.fest.assertions.MapAssert;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.Id;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.identityconnectors.common.CollectionUtil;
 import org.osgi.service.component.ComponentConstants;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -151,7 +153,9 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
 
     @Test(dependsOnMethods = {"testCreate"})
     public void testQueryAll() throws Exception {
-        JsonValue result = getService().handle(buildRequest("query", "system/xml/account", null, null, null));
+        JsonValue result = getService().handle(buildRequest("query", "system/xml/account", null,
+                CollectionUtil.newMap(QueryConstants.QUERY_ID, (Object) QueryConstants.QUERY_ALL_IDS),
+                null));
         Assert.assertNotNull(result);
         Object resultObject = result.get("result").getObject();
         if (resultObject instanceof List) {
