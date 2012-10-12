@@ -68,7 +68,7 @@
 
      <para>In identity management, <firstterm>reconciliation</firstterm> is the
      process of bidirectional synchronization of objects between different data
-     stores. Reconciliation applies mainly to user objects, though OpenIDM
+     stores. Reconciliation applies mainly to user objects, although OpenIDM
      can reconcile any objects, including groups and roles.</para>
 
      <para>To perform reconciliation, OpenIDM analyzes both source and target
@@ -95,36 +95,295 @@
      to determine which objects have changed.</para>
 
      <para>LiveSync is intended to react quickly to changes as they happen.
-     LiveSync is however a best effort mechanism that in some cases can miss
+     LiveSync is however a best effort mechanism that, in some cases, can miss
      changes.</para>
 
      <para>Furthermore, not all resources provide the change log mechanism
-     that LiveSync requires. The change long provides OpenIDM with a list of
-     objects changed since the last request such that OpenIDM does not need to
-     scan all objects for changes. OpenDJ provides an external change log.
-     Active Directory also provides a change log.</para>
+     that LiveSync requires. The change log provides OpenIDM with a list of
+     objects that have changed since the last request, so that OpenIDM does not
+     need to scan all objects for changes. OpenDJ and Active Directory both 
+     provide the change log required for LiveSync.</para>
     </listitem>
    </varlistentry>
   </variablelist>
 
-  <para>In all cases, OpenIDM relies on mappings that you configure to
-  determine what to synchronize and how to carry out synchronization.
-  LiveSync relies on the set of mappings that you configure once per OpenIDM
-  server, whereas reconciliation also allows you to configure specific mappings
-  for a particular reconciliation job.</para>
+  <para>To determine what to synchronize, and how to carry out synchronization,
+  OpenIDM relies on mappings that you configure. LiveSync relies on the set of
+  mappings that you configure once per OpenIDM server. Reconciliation allows 
+  you to configure specific mappings for a particular reconciliation job.</para>
 
   <para>You must trigger OpenIDM to poll for changes on external resources,
-  usually by scheduling reconciliation or LiveSync as described in the chapter
-  on <link xlink:href="integrators-guide#chap-scheduler-conf"
+  usually by scheduling reconciliation or LiveSync, as described in 
+  <link xlink:href="integrators-guide#chap-scheduler-conf"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
-  Synchronization</citetitle></link>. Alternatively, you can start
-  reconciliation through the REST interface.</para>
+  Tasks and Events</citetitle></link>. Alternatively, you can manage
+  reconciliations over the REST interface, as described in the following
+  section.</para>
+  
+  <section xml:id="recon-over-rest">
+   <title>Managing Reconciliation Over REST</title>
+   <para>You can trigger, cancel, and monitor reconciliation operations over
+   REST, using the REST endpoint 
+   <literal>http://localhost:8080/openidm/recon</literal>.</para>
+   
+   <section xml:id="triggering-recons">
+    <title>Triggering a Reconciliation Run</title>
+    <para>The following example triggers a reconciliation operation based on 
+    the <literal>systemLdapAccounts_managedUser</literal> mapping. The mapping 
+    is defined in the file <filename>conf/sync.json</filename>.</para>
 
-  <screen width="91"><?dbfo pgwide="1"?>$ curl
+    <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"
+    </screen>
+        
+    <para>By default, an assigned reconciliation run ID is returned immediately 
+    when the reconciliation operation is initiated. Clients can make subsequent 
+    calls to the reconciliation service, using this reconciliation run ID to 
+    query its state and to call operations on it.</para>
+    
+    <para>For example, the reconciliation run initiated previously would return
+    something similar to the following:</para>
+    
+    <screen>{"_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e"}</screen>
+    
+    <para>To have the entire reconciliation run complete before the 
+    reconciliation run ID is returned, set the 
+    <literal>waitForCompletion</literal> property to <literal>true</literal> 
+    when the reconciliation is initiated. For example:</para>
+
+    <screen width="91"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/recon?_action=recon&amp;
+ mapping=systemLdapAccounts_managedUser&amp;waitForCompletion=true"
+    </screen>    
+
+   </section>
+   
+   <section xml:id="canceling-recons">
+    <title>Canceling a Reconciliation Run</title>
+    
+    <para>You can cancel a reconciliation run by sending a REST call with 
+    the <literal>cancel</literal> action, specifying the reconciliation run 
+    ID. For example, the following call cancels the reconciliation run 
+    initiated in the previous section:</para>
+    
+    <screen width="91"><?dbfo pgwide="1"?>$curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/recon/0890ad62-4738-4a3f-8b8e-f3c83bbf212e?_action=cancel"
+    </screen>
+    
+    <para>The output for a reconciliation cancelation request is similar to the
+    following, but on a single line:</para>
+    
+    <screen width="91">
+    {"_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e",
+     "action":"cancel",
+     "status":"SUCCESS"}
+    </screen>
+    
+    <para>If you specified that the call should wait for completion before 
+    the ID is returned, you can obtain the reconciliation run ID from the list 
+    of active reconciliations, as described in the following section.</para>
+   </section>
+   
+   <section xml:id="listing-recons">
+    <title>Listing Reconciliation Runs</title>
+    
+    <para>You can display a list of reconciliation processes that have 
+    completed, and those that are in progress, by running a RESTful GET on 
+    <literal>"http://localhost:8080/openidm/recon"</literal>. The following 
+    example displays all reconciliation runs.</para>
+    
+    <screen>$curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/recon"
+    </screen>
+    
+    <para>The output of such a request is similar to the following, with one 
+    item for each reconciliation run. The output appears on a single line, but
+    has been indented here, for legibility.</para>
+    
+    <screen width="91">{"reconciliations":[
+ {"_id":"d3040cc9-ec2e-41b8-86c4-72393087a626",
+ "mapping":"systemLdapAccounts_managedUser",
+ "state":"SUCCESS",
+ "stage":"COMPLETED_SUCCESS",
+ "stageDescription":"reconciliation completed.",
+ "progress":{
+    "progress":{
+       "source":{             
+          "existing":{
+             "processed":1001,   
+             "total":"1001"
+          }
+       },
+       "target":{
+          "existing":{
+             "processed":1001,
+             "total":"1001"
+          },
+          "created":0
+       },
+       "links":{
+          "existing":{
+             "processed":1001,
+             "total":"1001"
+          },
+          "created":0
+       }
+    }
+ },
+ "started":"2012-10-10T13:02:36.624+00:00",
+ "ended":"2012-10-10T13:02:54.960+00:00"},    
+    </screen>
+    
+    <variablelist>
+     <para>Each reconciliation run has the following properties:</para>
+     <varlistentry>
+      <term><literal>_id</literal></term>
+      <listitem>
+       <para>The ID of the reconciliation run.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>mapping</literal></term>
+      <listitem>
+       <para>The name of the mapping, defined in the <filename>conf/sync.json
+       </filename> file.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>state</literal></term>
+      <listitem>
+       <para>The high level state of the reconciliation run. Values can be as
+       follows:</para>
+       <itemizedlist>
+        <listitem>
+         <para><literal>ACTIVE</literal></para>
+         <para>The reconciliation run is in progress.</para>
+        </listitem>
+        <listitem>
+         <para><literal>CANCELED</literal></para>
+         <para>The reconciliation run was successfully canceled.</para>
+        </listitem>
+        <listitem>
+         <para><literal>FAILED</literal></para>
+         <para>The reconciliation run was terminated because of failure.</para>
+        </listitem>
+        <listitem>
+         <para><literal>SUCCESS</literal></para>
+         <para>The reconciliation run completed successfully.</para>
+        </listitem>        
+       </itemizedlist>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>stage</literal></term>
+      <listitem>
+       <para>The current stage of the reconciliation run's progress. Values can
+       be as follows:</para>
+       <itemizedlist>
+        <listitem>
+         <para><literal>ACTIVE_INITIALIZED</literal></para>
+         <para>The initial stage, when a reconciliation run is first created.
+         </para>
+        </listitem>
+        <listitem>
+         <para><literal>ACTIVE_QUERY_ENTRIES</literal></para>
+         <para>Querying the source, target and possibly link sets to reconcile.
+         </para>
+        </listitem>
+        <listitem>
+         <para><literal>ACTIVE_RECONCILING_SOURCE</literal></para>
+         <para>Reconciling the set of IDs retrieved from the mapping source.
+         </para>
+        </listitem>
+        <listitem>
+         <para><literal>ACTIVE_RECONCILING_TARGET</literal></para>
+         <para>Reconciling any remaining entries from the set of IDs retrieved
+         from the mapping target, that were not matched or processed during
+         the source phase.</para>
+        </listitem>        
+        <listitem>
+         <para><literal>ACTIVE_LINK_CLEANUP</literal></para>
+         <para>Checking whether any links are now unused and should be cleaned
+         up.</para>
+        </listitem>        
+        <listitem>
+         <para><literal>ACTIVE_PROCESSING_RESULTS</literal></para>
+         <para>Post-processing of reconciliation results.</para>
+        </listitem>        
+        <listitem>
+         <para><literal>ACTIVE_CANCELING</literal></para>
+         <para>Attempting to abort a reconciliation run in progress.</para>
+        </listitem>        
+        <listitem>
+         <para><literal>COMPLETED_SUCCESS</literal></para>
+         <para>Successfully completed processing the reconciliation run.</para>
+        </listitem>
+        <listitem>
+         <para><literal>COMPLETED_CANCELED</literal></para>
+         <para>Completed processing because the reconciliation run was aborted.
+         </para>
+        </listitem>
+        <listitem>
+         <para><literal>COMPLETED_FAILED</literal></para>
+         <para>Completed processing because of a failure.</para>
+        </listitem>                              
+       </itemizedlist>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>stageDescription</literal></term>
+      <listitem>
+       <para>A description of the stages described previously.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>progress</literal></term>
+      <listitem>
+       <para>The progress object has the following structure (anotated here
+       with comments):</para>
+       <screen width="96">
+"progress":{
+   "progress":{
+      "source":{             // Progress on the set of existing entries in the mapping source
+         "existing":{
+            "processed":1001,   
+            "total":"1001"   // Total number of entries in source set, if known, “?” otherwise
+         }
+      },
+      "target":{             // Progress on the set of existing entries in the mapping target 
+         "existing":{
+            "processed":1001,
+            "total":"1001"   // Total number of entries in target set, if known, “?” otherwise
+         },
+         "created":0         // New entries that were created
+      },
+      "links":{              // Progress on the set of existing links between source and target
+         "existing":{
+            "processed":1001,
+            "total":"1001"   // Total number of existing links, if known, “?” otherwise
+         },
+         "created":0         // Denotes new links that were created
+      }
+   }
+},       
+       </screen>
+      </listitem>
+     </varlistentry>
+    </variablelist>
+   </section>
+  </section>
  </section>
 
  <section xml:id="sync-flexible-data">
@@ -194,7 +453,8 @@
   </itemizedlist>
  <para>Typically, you only edit two of the three types of configuration files 
  - connector configuration files, with one file per external resource, and the 
- synchronization mappings file, with one file per OpenIDM instance.</para>
+ synchronization mappings file (<filename>conf/sync.json</filename>), with one 
+ file per OpenIDM instance.</para>
 
   <variablelist>
    <varlistentry>
@@ -271,16 +531,16 @@
      </indexterm>
 
      <para>The synchronization mappings file is
-     <filename>openidm/conf/sync.json</filename>. The synchronization mappings
+     <filename>openidm/conf/sync.json</filename>. Synchronization mappings
      represent the core configuration for OpenIDM synchronization.</para>
 
      <para>The <filename>sync.json</filename> file describes a set of mappings.
      Each mapping specifies how attributes from source objects correspond to
      attributes on target objects. The source and target indicate the direction
-     for the data flow, so you must define a mapping for each data flow. For
-     example, if you want data flows from an LDAP server to the repository
-     and also from the repository to the LDAP server, you must define two
-     separate mappings.</para>
+     for the data flow, so you must define a separate mapping for each data 
+     flow. For example, if you want data flows from an LDAP server to the 
+     repository and also from the repository to the LDAP server, you must 
+     define two separate mappings.</para>
      
      <para>You identify external resource sources and targets as
      <literal>system/<replaceable>name</replaceable>/<replaceable
@@ -371,29 +631,32 @@
       <primary>Synchronization</primary>
       <secondary>Transforming attributes</secondary>
      </indexterm>
-     <para>OpenIDM lets you transform attributes as well. In the example, the
-     <literal>displayName</literal> attribute is set using a combination of
-     the <literal>lastName</literal> and <literal>firstName</literal> attribute
-     values from the source. For transformations, the <literal>source</literal>
-     property is optional. However, the source object is only available
-     when you specify the <literal>source</literal> property. Therefore, in
-     order to use <literal>source.lastName</literal> and
-     <literal>source.firstName</literal> to calculate the
-     <literal>displayName</literal>, the example specifies <literal>"source" :
-     ""</literal>.</para>
+     <para>OpenIDM also enables you to transform attributes. In the example, 
+     the value of the <literal>displayName</literal> attribute is set using a 
+     combination of the <literal>lastName</literal> and 
+     <literal>firstName</literal> attribute values from the source. For 
+     transformations, the <literal>source</literal> property is optional. 
+     However, the source object is only available when you specify the 
+     <literal>source</literal> property. Therefore, in order to use 
+     <literal>source.lastName</literal> and <literal>source.firstName</literal> 
+     to calculate the <literal>displayName</literal>, the example specifies 
+     <literal>"source" : ""</literal>.</para>
 
      <para>To add a flow from the repository to <literal>MyLDAP</literal>,
      you would define a mapping with source <literal>managed/user</literal>
      and target <literal>system/MyLDAP/account</literal>, named for example
      <literal>managedUser_systemLdapAccounts</literal>.</para>
+     
+     <para>The following image shows the paths to objects in the OpenIDM 
+     namespace.</para>
 
      <mediaobject xml:id="figure-service-tree"><?dbfo pgwide="1"?>
-      <alt>OpenIDM name space and object paths</alt>
+      <alt>OpenIDM namespace and object paths</alt>
       <imageobject>
        <imagedata fileref="images/ServiceTree.png" format="PNG" />
       </imageobject>
       <textobject>
-       <para>The image shows paths to objects in the OpenIDM name space.</para>
+       <para>The image shows paths to objects in the OpenIDM namespace.</para>
       </textobject>
       <caption>
        <para>OpenIDM stores managed objects in the repository, and exposes
@@ -408,24 +671,24 @@
        <primary>Synchronization</primary>
        <secondary>Filtering</secondary>
       </indexterm>
-      <para>By default, OpenIDM synchronizes all objects matching those defined
-      in the connector configuration for the resource. Many connectors let you
-      limit the scope of objects the connector accesses. For example, the LDAP
-      connector lets you specify base DNs and LDAP filters so you need not
-      access every entry in the directory. Yet, OpenIDM also lets you filter
-      what is considered a valid source or valid target for synchronization by
-      using JavaScript code. To apply these filters, use the
-      <literal>validSource</literal>, and <literal>validTarget</literal>
-      properties in your mapping.</para>
+      <para>By default, OpenIDM synchronizes all objects that match those 
+      defined in the connector configuration for the resource. Many connectors 
+      allow you to limit the scope of objects that the connector accesses. For 
+      example, the LDAP connector allows you to specify base DNs and LDAP 
+      filters so that you do not need to access every entry in the directory. 
+      OpenIDM also allows you to filter what is considered a valid source or 
+      valid target for synchronization by using JavaScript code. To apply these 
+      filters, use the <literal>validSource</literal>, and 
+      <literal>validTarget</literal> properties in your mapping.</para>
 
       <varlistentry>
        <term>validSource</term>
        <listitem>
         <para>A script that determines if a source object is valid to be
          mapped. The script yields a boolean value: <literal>true</literal>
-         indicates the source object is valid; <literal>false</literal> can be
-         used to defer mapping until some condition is met. In the root scope,
-         the source object is provided in the <literal>"source"</literal>
+         indicates that the source object is valid; <literal>false</literal> 
+         can be used to defer mapping until some condition is met. In the root 
+         scope, the source object is provided in the <literal>"source"</literal>
          property. If the script is not specified, then all source objects are
          considered valid.</para>
 
@@ -442,14 +705,14 @@
       <varlistentry>
        <term>validTarget</term>
        <listitem>
-        <para>A script used during reconciliation's second phase, that determines if a target
-         object is valid to be mapped. The script yields a boolean value:
-         <literal>true</literal> indicates the target object is valid;
-         <literal>false</literal> indicates that the target object should not be
-         included in reconciliation. In the root scope, the source object is
-         provided in the <literal>"target"</literal> property. If the script is
-         not specified, then all target objects are considered valid for
-         mapping.</para>
+        <para>A script, used during reconciliation's second phase, that 
+        determines if a target object is valid to be mapped. The script yields 
+        a boolean value: <literal>true</literal> indicates that the target 
+        object is valid; <literal>false</literal> indicates that the target 
+        object should not be included in reconciliation. In the root scope, the 
+        source object is provided in the <literal>"target"</literal> property. 
+        If the script is not specified, then all target objects are considered 
+        valid for mapping.</para>
 
          <programlisting language="javascript">
 {
@@ -683,7 +946,7 @@
    <title>Synchronization Situations</title>
 
    <para>OpenIDM performs synchronization action in two phases. First, OpenIDM
-   performs the so called source reconciliation, where OpenIDM accounts for source 
+   performs the source reconciliation, where OpenIDM accounts for source 
    objects and associated links based on the mapping configured. Second, OpenIDM 
    runs the target reconciliation, where OpenIDM iterates over the target objects 
    not processed in the first phase.</para>
@@ -697,7 +960,7 @@
      <para>OpenIDM assigns valid source objects <literal>qualifies=1</literal>.
      Invalid objects, including those not found in the source system, and those
      filtered out by the script specified in the <literal>validSource</literal>
-     property get <literal>qualifies=0</literal>.</para>
+     property are assigned <literal>qualifies=0</literal>.</para>
     </listitem>
     <listitem>
      <para>All records from the appropriate link table</para>
@@ -721,17 +984,18 @@
     <varlistentry>
      <term>"CONFIRMED" (qualifies=1, link=1, target=1)</term>
      <listitem>
-      <para>The mapping qualifies for a target object, and a link to an existing target
-      object was found. Detected during change events and reconciliation. Default action: "UPDATE".</para>
+      <para>The mapping qualifies for a target object, and a link to an 
+      existing target object was found. Detected during change events and 
+      reconciliation. Default action: "UPDATE".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"FOUND" (qualifies=1, link=0, target=1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, there is no link to a
-      target object, and there is a single target object, correlated by the logic found in the correlationQuery.
-      Detected during change events and reconciliation. Default action:
-      "UPDATE".</para>
+      target object, and there is a single target object, correlated by the 
+      logic found in the correlationQuery. Detected during change events and 
+      reconciliation. Default action: "UPDATE".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -747,7 +1011,8 @@
      <term>"AMBIGUOUS" (qualifies=1, link=0, target&gt;1)</term>
      <listitem>
       <para>The mapping qualifies for a target object, there is no link to a
-      target object, but there is more than one correlated target object. Detected during source object changes and reconciliation. Default
+      target object, but there is more than one correlated target object. 
+      Detected during source object changes and reconciliation. Default
       action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
@@ -756,21 +1021,24 @@
      <listitem>
       <para>The mapping is qualified for a target object, and there is a
       qualified link to a target object, but the target object is missing.
-      Only detected during reconciliation and source object changes in synchronous mappings.
-      Default action: "EXCEPTION".</para>
+      Only detected during reconciliation and source object changes in 
+      synchronous mappings. Default action: "EXCEPTION".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"UNQUALIFIED" (qualifies=0, link=0 or 1, target=1 or &gt;1)</term>
      <listitem>
-      <para>The mapping is not qualified for a source object. There is one or more targets found through the correlation logic. Detected during change events and
-      reconciliation. Default action: "DELETE".</para>
+      <para>The mapping is not qualified for a source object. One or more 
+      targets are found through the correlation logic. Detected during change 
+      events and reconciliation. Default action: "DELETE".</para>
      </listitem>
     </varlistentry>
     <varlistentry>
      <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
      <listitem>
-      <para>The source object is unqualified (by validSource), no link, no target is found. Detected during source object changes and reconciliation. Default action: "IGNORE".</para>
+      <para>The source object is unqualified (by validSource), no link, no 
+      target is found. Detected during source object changes and 
+      reconciliation. Default action: "IGNORE".</para>
      </listitem>
     </varlistentry> 
    </variablelist>
@@ -781,7 +1049,9 @@
     <varlistentry>
      <term>"TARGET_IGNORED" (qualifies=0)</term>
      <listitem>
-      <para>During target reconciliation the target becomes unqualified by the "validTagrt" script. Only detected during reconciliation. Default action: "IGNORE"</para>
+      <para>During target reconciliation the target becomes unqualified by the 
+      "validTarget" script. Only detected during reconciliation. Default 
+      action: "IGNORE"</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -813,7 +1083,8 @@
      <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
      <listitem>
       <para>The target qualifies and a link is found. But the source object is 
-      missing. Only detected during reconciliation. Default action: "EXCEPTION".</para>
+      missing. Only detected during reconciliation. Default action: 
+      "EXCEPTION".</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -842,7 +1113,7 @@
    situation during source reconciliation, depending on whether a valid
    source exists (Source Qualifies), whether a link with the appropriate type
    exists in the repository (Link Exists), and how many target objects are
-   found either based on links or correlation results.</para>
+   found, either based on links or correlation results.</para>
 
    <table pgwide="1" rules="none">
     <title>Resolving Source Reconciliation Situations</title>
@@ -1254,7 +1525,7 @@
    <filename>openidm/conf/repo.orientdb.json</filename>,
    <literal>for-userName</literal>. The <literal>source.name</literal> value
    replaces <literal>${uid}</literal> in the query. OpenIDM replaces
-   <literal>${_resource}</literal> in the query with the name of table that
+   <literal>${_resource}</literal> in the query with the name of the table that
    holds managed objects.</para>
 
    <programlisting language="javascript">

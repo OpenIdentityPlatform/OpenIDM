@@ -211,9 +211,9 @@ description: Created for OpenIDM
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns a "reconId" object.</para>
+   <para>Successful reconciliation returns an "_id" object.</para>
 
    <para>With the configuration of sample 2, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -302,9 +302,9 @@ $ cp -r samples/sample2b/conf samples/sample2b/script .</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
- 
-   <para>Successful reconciliation returns a "reconId" object.</para>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+
+   <para>Successful reconciliation returns an "_id" object.</para>
 
    <para>With the configuration of sample 2b, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -447,9 +447,9 @@ objectClass: top</programlisting>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
- 
-   <para>Successful reconciliation returns a "reconId" object.</para>
+  "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+
+   <para>Successful reconciliation returns an "_id" object.</para>
 
    <para>With the configuration of sample 2c, OpenIDM creates user objects from
    LDAP in OpenIDM, assigning the new objects random unique IDs. To list user
@@ -753,9 +753,9 @@ objectClass: top
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapGroups_managedGroup"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapGroups_managedGroup"</screen>
  
-   <para>Successful reconciliation returns a "reconId" object.</para>
+   <para>Successful reconciliation returns an "_id" object.</para>
 
    <para>With the configuration of sample 2d, OpenIDM creates group objects from
    LDAP in OpenIDM. To list group objects by ID, run a query over the REST interface.</para>
@@ -917,7 +917,7 @@ jdoe</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemHrdb_managedUser"</screen>
 
    <para>Reconciliation creates the five users from the database in the
    OpenIDM repository. Check the result with the following command.</para>
@@ -1003,7 +1003,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemHrAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemHrAccounts_managedUser"</screen>
  
    <para>Check the results of reconciliation with the following command.</para>
 
@@ -1107,7 +1107,7 @@ Using boot properties at /path/to/openidm/conf/boot/boot.properties
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
    <para>This command creates a user in the repository and also in the pseudo
    AD resource, represented by the
@@ -1304,10 +1304,10 @@ objectclass: organizationalunit
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemLdapAccounts_managedUser"</screen>
 
-    <para>The result of a successful reconciliation is a
-    <literal>reconId</literal> object.</para>
+    <para>The result of a successful reconciliation is an
+    <literal>_id</literal> object.</para>
 
     <programlisting language="javascript"
     >{"reconId":"7da56fc0-54de-4c7b-bae3-de7c7a999387"}</programlisting>
@@ -1460,7 +1460,7 @@ $ cp -r samples/sample7/conf samples/sample7/data samples/sample7/script .</scre
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
    <para>Reconciliation creates a user object in the repository. Retrieve the
    user from the repository.</para>
@@ -1615,9 +1615,9 @@ $ cp -r samples/sample8/conf samples/sample8/script .</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
-"http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
-   <para>Successful reconciliation returns a "reconId" object.</para>
+   <para>Successful reconciliation returns an "_id" object.</para>
 
    <para>Notice the log messages displayed on the OpenIDM (Felix) console.
    The following example omits timestamps and so forth to show only the message
