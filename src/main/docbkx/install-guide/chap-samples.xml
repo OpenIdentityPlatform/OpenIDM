@@ -66,6 +66,13 @@
    folder under <filename>openidm/</filename>. Some, but not all samples
    require additional software, such as an external LDAP server or
    database.</para>
+   
+   <para>When you move from one sample to the next, bear in mind that you are
+   changing the OpenIDM configuration. For information on how configuration 
+   changes work, see <link xlink:href="integrators-guide#when-configuring-notes" 
+   xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Changing the Configuration</citetitle></link> in the 
+   <citetitle>Integrator's Guide</citetitle>.</para>
   </section>
 
   <section xml:id="preparing-openidm">
@@ -1611,11 +1618,11 @@ $ cp -r samples/sample8/conf samples/sample8/script .</screen>
    <para>First start OpenIDM. Then run reconciliation over the REST
    interface.</para>
 
-   <screen width="93"><?dbfo pgwide="1"?>$ curl
+   <screen width="99"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
-"http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
 
    <para>Successful reconciliation returns an "_id" object.</para>
 
