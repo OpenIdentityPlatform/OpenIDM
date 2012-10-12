@@ -76,28 +76,28 @@ var accessConfig = { "configs" : [
         //     for-credentials,
         //     get-security-question,
         //     set-newPassword-for-userName-and-security-answer
-	    {  "pattern" : "managed/user/*",
-	        "roles" : "openidm-reg",
-	        "methods": "read,query",
-	        //"customAuthz" : "checkIfIsPublicQuery()",
-	        "actions" : "*"
-	    },
-	    {  "pattern" : "managed/user",
-	        "roles" : "openidm-reg",
-	        "methods": "create",
-	        "actions" : "*"
-	    },
-	    {  "pattern" : "config/ui/secquestions",
-	        "roles" : "openidm-reg",
-	        "methods": "read",
-	        "actions" : "*"
-	    }
+        {  "pattern" : "managed/user/*",
+            "roles" : "openidm-reg",
+            "methods": "read,query",
+            //"customAuthz" : "checkIfIsPublicQuery()",
+            "actions" : "*"
+        },
+        {  "pattern" : "managed/user/*",
+            "roles" : "openidm-reg",
+            "methods": "create",
+            "actions" : "*"
+        },
+        {  "pattern" : "config/ui/*",
+            "roles" : "openidm-reg",
+            "methods": "read",
+            "actions" : "*"
+        }
 
         ] };
 
 
 function ownDataOnly() {
-	return true; // temporarily bypass authz until we have a method for comparing requested userId against secured userId value. 
+    return true; // temporarily bypass authz until we have a method for comparing requested userId against secured userId value. 
     var roles = request.parent.security['openidm-roles'];
 
     if (
@@ -148,65 +148,65 @@ function ownDataOnly() {
 }
 
 function passesAccessConfig(id, roles, method, action) {
-	for (var i = 0; i < accessConfig.configs.length; i++) {
-		var config = accessConfig.configs[i];
-		var pattern = config.pattern;
-		// Check resource ID
-		if (matchesResourceIdPattern(id, pattern)) {
-			// Check roles
-			if (containsItems(roles, config.roles.split(','))) {
-				// Check method
-				if (method == 'undefined' || containsItem(method, config.methods)) {
-					// Check action
-					if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
-						if (typeof(config.customAuthz) != 'undefined') {
-							return eval(config.customAuthz);
-						} else {
-							return true;
-						}
-					}
-				}
-			}
-		}
-	}
-	return false;
+    for (var i = 0; i < accessConfig.configs.length; i++) {
+        var config = accessConfig.configs[i];
+        var pattern = config.pattern;
+        // Check resource ID
+        if (matchesResourceIdPattern(id, pattern)) {
+            // Check roles
+            if (containsItems(roles, config.roles.split(','))) {
+                // Check method
+                if (method == 'undefined' || containsItem(method, config.methods)) {
+                    // Check action
+                    if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
+                        if (typeof(config.customAuthz) != 'undefined') {
+                            return eval(config.customAuthz);
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 function matchesResourceIdPattern(id, pattern) {
-	if (pattern == "*") {
-		// Accept all patterns
-		return true;
-	} else if (id == pattern) {
-		// pattern matches exactly
-		return true;
-	} else if (pattern.indexOf("/*", pattern.length - 2) !== -1) {
-		// Ends with "/*" or "/"
-		// See if parent pattern matches
-		var parentResource = pattern.substring(0, pattern.length - 1);
-		if (id.length >= parentResource.length && id.substring(0, parentResource.length) == parentResource) {
-			return true
-		}
-	}
-	return false;
+    if (pattern == "*") {
+        // Accept all patterns
+        return true;
+    } else if (id == pattern) {
+        // pattern matches exactly
+        return true;
+    } else if (pattern.indexOf("/*", pattern.length - 2) !== -1) {
+        // Ends with "/*" or "/"
+        // See if parent pattern matches
+        var parentResource = pattern.substring(0, pattern.length - 1);
+        if (id.length >= parentResource.length && id.substring(0, parentResource.length) == parentResource) {
+            return true
+        }
+    }
+    return false;
 }
 
 function containsItems(items, configItems) {
-	if (configItems == "*") {
-		return true;
-	}
-	for (var i = 0; i < items.length; i++) {
-		if (contains(configItems, items[i])) {
-			return true;
-		}
-	}
-	return false
+    if (configItems == "*") {
+        return true;
+    }
+    for (var i = 0; i < items.length; i++) {
+        if (contains(configItems, items[i])) {
+            return true;
+        }
+    }
+    return false
 }
 
 function containsItem(item, configItems) {
-	if (configItems == "*") {
-		return true;
-	}
-	return contains(configItems.split(','), item);
+    if (configItems == "*") {
+        return true;
+    }
+    return contains(configItems.split(','), item);
 }
 
 function contains(a, o) {
@@ -293,16 +293,16 @@ function allow() {
     var roles = request.parent.security['openidm-roles'];
     var action = "";
     if (request.params && request.params['_action']) {
-    	action = request.params['_action'];
+        action = request.params['_action'];
     }
     
     // Check REST requests against the access configuration
     if (request.parent.type == 'http') {
-    	logger.debug("Access Check for HTTP request for resource id: " + request.id);
-    	if (passesAccessConfig(request.id, roles, request.method, action)) {
-    		logger.debug("Request allowed");
-    		return true;
-    	}
+        logger.debug("Access Check for HTTP request for resource id: " + request.id);
+        if (passesAccessConfig(request.id, roles, request.method, action)) {
+            logger.debug("Request allowed");
+            return true;
+        }
     }
 }
 
