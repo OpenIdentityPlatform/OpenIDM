@@ -86,6 +86,11 @@ var accessConfig = { "configs" : [
 	        "roles" : "openidm-reg",
 	        "methods": "create",
 	        "actions" : "*"
+	    },
+	    {  "pattern" : "config/ui/secquestions",
+	        "roles" : "openidm-reg",
+	        "methods": "read",
+	        "actions" : "*"
 	    }
 
         ] };
