@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 // SLF4J
@@ -253,6 +254,14 @@ public class JsonResourceRouterService implements JsonResource {
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
+        if (request.get("method").required().asString().equals("create")) {
+            String id = request.get("id").asString();
+            // For a create with an empty ID, server generate the ID
+            // Relies on json resource representing empty local ID with ending /
+            if (id != null && id.endsWith("/")) {
+                request.put("id", id + UUID.randomUUID().toString());
+            }
+        }
         try {
             JsonValue response = chain.handle(request); // dispatch to router, via filter chain
             measure.setResult(response);
