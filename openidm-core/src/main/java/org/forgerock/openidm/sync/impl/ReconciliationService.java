@@ -212,14 +212,14 @@ public class ReconciliationService extends ObjectSetJsonResource
                 try {
                     JsonValue mapping = paramsVal.get("mapping").required();
                     logger.debug("Reconciliation action of mapping {}", mapping);
-                    Boolean synchronous = Boolean.FALSE;
-                    JsonValue syncParam = paramsVal.get("synchronous").defaultTo(Boolean.FALSE);
-                    if (syncParam.isBoolean()) {
-                        synchronous = syncParam.asBoolean();
+                    Boolean waitForCompletion = Boolean.FALSE;
+                    JsonValue waitParam = paramsVal.get("waitForCompletion").defaultTo(Boolean.FALSE);
+                    if (waitParam.isBoolean()) {
+                        waitForCompletion = waitParam.asBoolean();
                     } else {
-                        synchronous = Boolean.parseBoolean(syncParam.asString());
+                        waitForCompletion = Boolean.parseBoolean(waitParam.asString());
                     }
-                    result.put("_id", reconcile(mapping, synchronous));
+                    result.put("_id", reconcile(mapping, waitForCompletion));
                 } catch (SynchronizationException se) {
                    throw new ConflictException(se);
                 }

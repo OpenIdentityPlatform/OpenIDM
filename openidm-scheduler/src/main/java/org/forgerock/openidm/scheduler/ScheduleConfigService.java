@@ -76,10 +76,6 @@ public class ScheduleConfigService {
             logger.debug("No preconfigured schedule");
             return;
         }
-        if (!scheduleConfig.getEnabled()) {
-            logger.info("Scheduler for {} is disabled", configFactoryPID);
-            return;
-        }
         
         if (configFactoryPID != null) {
             jobName = configFactoryPID;
