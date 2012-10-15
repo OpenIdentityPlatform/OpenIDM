@@ -20,7 +20,6 @@
 * with the fields enclosed by brackets [] replaced by
 * your own identifying information:
 * "Portions Copyrighted [year] [name of copyright owner]"
-*
 */
 package org.forgerock.openidm.scheduler.impl;
 
@@ -37,13 +36,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
@@ -59,6 +52,7 @@ import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -73,16 +67,9 @@ import org.slf4j.LoggerFactory;
 @Service
 public class TaskScannerService extends ObjectSetJsonResource implements ScheduledService {
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerService.class);
-    private final static DateUtil dateUtil = DateUtil.getDateUtil();
+    private final static DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
 
-    private final static String FIND_BY_ID = "find-by-id";
-
-    private final static ObjectMapper mapper;
-    static {
-        JsonFactory jsonFactory = new JsonFactory();
-        jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
-        mapper = new ObjectMapper(jsonFactory);
-    }
+    private final static String INVOKE_CONTEXT = "invokeContext";
 
     @Reference
     private ScopeFactory scopeFactory;
@@ -137,6 +124,7 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      */
     private void performTask(String invokerName, String scriptName, JsonValue params)
             throws ExecutionException {
+        logger.debug("Perform task {} from {} with params {}", new Object[] { scriptName, invokerName, params });
         JsonValue scriptValue = params.get("task").expect(Map.class).get("script").expect(Map.class);
         JsonValue scanValue = params.get("scan").expect(Map.class);
 
@@ -146,13 +134,21 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
             JsonPointer completedField = getTaskStatePointer(scanValue, "completed");
 
             JsonValue flattenedScanValue = flattenJson(scanValue);
+            ConfigMacroUtil.expand(flattenedScanValue);
             JsonValue results = performQuery(id, flattenedScanValue);
 
             Script script = Scripts.newInstance(scriptName, scriptValue);
 
+            Integer max = params.get("maxRecords").asInteger();
+
             logger.debug("Results: {}", results.size());
+            int count = 0;
             for (JsonValue input : results) {
+                if (max != null && count >= max) {
+                    break;
+                }
                 execScript(scriptName, invokerName, script, id, startField, completedField, input);
+                count++;
             }
         } else {
             throw new ExecutionException("No valid script '" + scriptValue + "' configured in task scanner.");
@@ -170,9 +166,24 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
         try {
             queryResults = accessor().query(resourceID, params);
         } catch(JsonResourceException e) {
-            logger.warn("JsonResourceException", e);
+            logger.warn("Error performing query", e);
         }
         return queryResults.get("result");
+    }
+
+    /**
+     * Performs a read on a resource and returns the result
+     * @param resourceID the identifier of the resource to read
+     * @return the results from the performed read
+     */
+    private JsonValue performRead(String resourceID) {
+        JsonValue readResults = null;
+        try {
+            readResults = accessor().read(resourceID);
+        } catch(JsonResourceException e) {
+            logger.warn("Error performing read", e);
+        }
+        return readResults;
     }
 
     /**
@@ -213,7 +224,7 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
         try {
             accessor().update(fullID, rev, value);
         } catch (JsonResourceException e) {
-            logger.warn("Update error", e);
+            logger.warn("Error performing update", e);
         }
 
         return retrieveObject(resourceID, id);
@@ -227,7 +238,17 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      */
     private String retrieveFullID(String resourceID, JsonValue value) {
         String id = value.get("_id").required().asString();
-        return resourceID + '/' + id;
+        return retrieveFullID(resourceID, id);
+    }
+
+    /**
+     * Constructs a full object ID from the supplied resourceID and the objectID
+     * @param resourceID resource ID that the object originates from
+     * @param objectID ID of some object
+     * @return string indicating the full ID
+     */
+    private String retrieveFullID(String resourceID, String objectID) {
+        return resourceID + '/' + objectID;
     }
 
     /**
@@ -248,9 +269,7 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      */
     private JsonValue retrieveObject(String resourceID, String id) {
         JsonValue params = new JsonValue(new HashMap<String, Object>());
-        params.add("id", id);
-        params.add("_query-id", FIND_BY_ID);
-        return performQuery(resourceID, params).get(0);
+        return performRead(retrieveFullID(resourceID, id));
     }
 
     /**
@@ -277,7 +296,7 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
 
             logger.debug("Input: {}", input);
 
-            JsonValue _input = updateValueWithObject(resourceID, input, startField, dateUtil.now());
+            JsonValue _input = updateValueWithObject(resourceID, input, startField, DATE_UTIL.now());
             logger.debug("Updated StartField: {}", _input);
             scope.put("input", _input.getObject());
             scope.put("objectID", retrieveFullID(resourceID, _input));;
@@ -288,7 +307,7 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
                 logger.debug("After script execution: {}", _input);
 
                 if (returnedValue == Boolean.TRUE) {
-                   _input = updateValueWithObject(resourceID, _input, completedField, dateUtil.now());
+                   _input = updateValueWithObject(resourceID, _input, completedField, DATE_UTIL.now());
                    logger.debug("Updated CompletedField: {}", _input);
                 }
 
@@ -355,11 +374,12 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      */
     private static void ensureJsonPointerExists(JsonPointer ptr, JsonValue obj) {
         JsonValue refObj = obj;
+
         for (String p : ptr) {
             if (!refObj.isDefined(p)) {
                 refObj.put(p, new JsonValue(new HashMap<String, Object>()));
-                refObj = refObj.get(p);
             }
+            refObj = refObj.get(p);
         }
     }
 
@@ -387,11 +407,13 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
     /**
      * Performs the "execute" action, executing a supplied configuration
      *
-     * Expects a field "config" containing a JSON object in the query string.
-     * This object need only be the equivalent to the "invokeContext" field in the configuration script
+     * Expects a field "name" containing the name of some config object that can be found via
+     * a read on "config/" + name <br><br>
+     *
+     * <b><i>e.g.</b></i> "taskscan/sunset" => "config/taskscan/sunset" => "[openidm-directory]/conf/taskscan-sunset.json"<br>
      *
      * @param id the id to perform the action on
-     * @param params field contaning the
+     * @param params field contaning the parameters of execution
      * @return the set of parameters supplied
      * @throws ExecutionException
      * @throws JsonProcessingException
@@ -399,15 +421,11 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      */
     private Map<String, Object> onExecute(String id, Map<String, Object> params)
             throws ExecutionException, JsonProcessingException, IOException {
-        String paramsString = (String) params.get("config");
-        TypeReference<HashMap<String,Object>> typeRef = new TypeReference<HashMap<String,Object>>() {};
-        Map<String,Object> paramsMap = mapper.readValue(paramsString, typeRef);
+        String name = (String) params.get("name");
+        JsonValue config = performRead("config/" + name);
+        JsonValue context = config.get(INVOKE_CONTEXT);
 
-        JsonValue _params = new JsonValue(paramsMap);
-
-        String scriptName = _params.get(CONFIG_NAME).asString();
-
-        performTask("REST", scriptName, _params);
+        performTask("REST", name, context);
         // TODO Should this return something better? Some indication that it's successfully completed execution.
         // I stole this from SchedulerService and a few other ones
         return params;

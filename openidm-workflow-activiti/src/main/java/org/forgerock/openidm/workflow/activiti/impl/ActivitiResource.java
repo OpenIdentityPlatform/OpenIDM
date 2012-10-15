@@ -534,7 +534,7 @@ public class ActivitiResource implements JsonResource {
         result.add(ACTIVITI_DURATIONINMILLIS, instance.getDurationInMillis());
         result.add(ACTIVITI_STARTTIME, instance.getStartTime());
         result.add(ACTIVITI_ENDTIME, instance.getEndTime());
-        result.add("_rev", 0);
+        result.add("_rev", "0");
         return result;
     }
 }
