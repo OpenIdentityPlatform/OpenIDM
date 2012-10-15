@@ -52,7 +52,7 @@
 }</programlisting>
 
   <para>The required filters array defines a list of filters to be processed
-  on each router request. Filters are processed in the order they are
+  on each router request. Filters are processed in the order in which they are
   specified in this array.</para>
 
   <section xml:id="filter-object">
@@ -88,7 +88,7 @@
       <literal>"read"</literal>, <literal>"update"</literal>,
       <literal>"delete"</literal>, <literal>"patch"</literal>,
       <literal>"query"</literal>, <literal>"action"</literal>. If not specified,
-      then all methods are matched.</para>
+      all methods are matched.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -97,8 +97,8 @@
       <para>script object, optional</para>
       <para>Specifies a script that is called first to determine if the script
       should be triggered. If the condition yields <literal>"true"</literal>,
-      then the other script(s) are executed. If not specified, the script(s)
-      are called unconditionally.</para>
+      the other script(s) are executed. If no condition is specified, the 
+      script(s) are called unconditionally.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
@@ -106,7 +106,7 @@
      <listitem>
       <para>script object, optional</para>
       <para>Specifies a script to execute before the request is dispatched to
-      the resource. If the script throws an exception, the method is is not
+      the resource. If the script throws an exception, the method is not
       performed, and a client error response is provided.</para>
      </listitem>
     </varlistentry>
@@ -135,14 +135,17 @@
   <section xml:id="script-sequenze">
     <title>Script Execution Sequence</title>
     
-    <para>All "onRequest" and "onResponse" scripts are executed in a sorted sequence: first the "onRequest" scripts in a top down manner, then the "onResponse" in a bottom up way!</para>
+    <para>All "onRequest" and "onResponse" scripts are executed in sequence. 
+    First, the "onRequest" scripts are executed from the top down, then the 
+    "onResponse" scripts are executed from the bottom up.</para>
     
     <screen>
 client -&gt; filter 1 onRequest -&gt; filter 2 onRequest -&gt; resource
 client &lt;- filter 1 onResponse &lt;- filter 2 onResponse &lt;- resource
     </screen>
     
-    <para>Here is an example of a <filename>router.json</filename> file and how the scritps would be executed:</para>
+    <para>The following sample <filename>router.json</filename> file shows the 
+    order in which the scripts would be executed:</para>
     
     <programlisting language="javascript">
 {
@@ -239,8 +242,8 @@ responseFilter 1
       <para><link xlink:show="new"
       xlink:href="https://wikis.forgerock.org/confluence/display/json/resource-request"
       >resource-request</link> object</para>
-      <para>The resource-request context, which has one or more parent context.
-      Provided in scope of <literal>"condition"</literal>,
+      <para>The resource-request context, which has one or more parent contexts.
+      Provided in the scope of <literal>"condition"</literal>,
       <literal>"onRequest"</literal>, <literal>"onResponse"</literal> and
       <literal>"onException"</literal> scripts.</para>
      </listitem>

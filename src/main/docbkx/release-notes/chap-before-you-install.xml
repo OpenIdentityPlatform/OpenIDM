@@ -79,6 +79,10 @@
  <link xlink:show="new"
  xlink:href="http://www.oracle.com/technetwork/java/javase/downloads/index.html"
  >policy files</link>.</para>
+ 
+ <para>On Windows systems, use Java SE JDK 7 update 6 or later, to take 
+ advantage of a recent JVM fix relating to non-blocking sockets with the 
+ default Jetty configuration.</para>
 
  <para>You need 30 MB disk space for a minimal evaluation installation. For a
  production installation, disk space required depends on the size of the
