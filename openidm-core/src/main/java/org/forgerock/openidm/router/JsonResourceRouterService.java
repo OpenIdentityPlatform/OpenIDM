@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.UUID;
 
 // SLF4J
 import org.slf4j.Logger;
