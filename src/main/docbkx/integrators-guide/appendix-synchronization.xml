@@ -36,10 +36,10 @@
   <primary>Synchronization</primary>
  </indexterm>
 
- <para>The synchronization engine is one of the core services of OpenIDM. You configure the
- synchronization service through a <literal>mappings</literal> property
- that specifies mappings between objects managed by the synchronization
- engine.</para>
+ <para>The synchronization engine is one of the core services of OpenIDM. You 
+ configure the synchronization service through a <literal>mappings</literal> 
+ property that specifies mappings between objects that are managed by the 
+ synchronization engine.</para>
 
  <programlisting language="javascript">{
   "mappings": [ <replaceable>object-mapping object</replaceable>, ... ]
@@ -54,6 +54,7 @@
   "name"            : <replaceable>string</replaceable>,
   "source"          : <replaceable>string</replaceable>,
   "target"          : <replaceable>string</replaceable>,
+  "links"           : <replaceable>string</replaceable>,
   "validSource"     : <replaceable>script object</replaceable>,
   "validTarget"     : <replaceable>script object</replaceable>,
   "correlationQuery": <replaceable>script object</replaceable>,
@@ -61,7 +62,7 @@
   "policies"        : [ <replaceable>policy object</replaceable>, ... ],
   "onCreate"        : <replaceable>script object</replaceable>,
   "onUpdate"        : <replaceable>script object</replaceable>,
-  "onLink"        : <replaceable>script object</replaceable>,
+  "onLink"          : <replaceable>script object</replaceable>,
   "onUnlink"        : <replaceable>script object</replaceable>
 }</programlisting>
 
@@ -92,6 +93,16 @@
     </listitem>
    </varlistentry>
    <varlistentry>
+    <term>links</term>
+    <listitem>
+     <para>string, optional</para>
+     <para>Enables reuse of the links created in another mapping. 
+      Example: <literal>"systemLdapAccounts_managedUser"</literal> reuses the 
+      links created by a previous mapping whose <literal>name</literal> is 
+      <literal>"systemLdapAccounts_managedUser"</literal>.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
     <term>validSource</term>
     <listitem>
      <para>script object, optional</para>
@@ -108,11 +119,11 @@
     <term>validTarget</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script used during the target phase of reconciliation that determines if a target
-      object is valid to be mapped. The script yields a boolean value:
-      <literal>true</literal> indicates the target object is valid;
-      <literal>false</literal> indicates that the target object should not be
-      included in reconciliation. In the root scope, the target object is
+     <para>A script used during the target phase of reconciliation that 
+     determines if a target object is valid to be mapped. The script yields 
+     a boolean value: <literal>true</literal> indicates that the target object 
+     is valid; <literal>false</literal> indicates that the target object should 
+     not be included in reconciliation. In the root scope, the target object is
       provided in the <literal>"target"</literal> property. If the script is
       not specified, then all target objects are considered valid for
       mapping.</para>
@@ -123,13 +134,13 @@
     <listitem>
      <para>script object, optional</para>
      <para>A script that yields a query object to query the target object
-      set when a source object has no linked target. The syntax for writing the query depends on the target system of the correlation. See chapter <link
-  xlink:href="integrators-guide#correlation"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Correlation</citetitle>
-</link> for examples of some common targets. The source object is
-      provided in the <literal>"source"</literal> property in the script
-      scope.</para>
+      set when a source object has no linked target. The syntax for writing 
+      the query depends on the target system of the correlation. See the 
+      section on <link xlink:href="integrators-guide#correlation" 
+      xlink:role="http://docbook.org/xlink/role/olink"> 
+      <citetitle>Correlation Queries</citetitle></link> for examples of some 
+      common targets. The source object is provided in the 
+      <literal>"source"</literal> property in the script scope.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -192,22 +203,25 @@
     <term>onUnlink</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute when a source and a target object are to be unlinked,
-      after property mappings have been applied. In the root scope, the
-      source object is provided in the <literal>"source"</literal> property,
-      projected target object in the <literal>"target"</literal> property. If the script throws an exception,
-      then target object unlinking is aborted.</para>
+     <para>A script to execute when a source and a target object are to be 
+     unlinked, after property mappings have been applied. In the root scope, 
+     the source object is provided in the <literal>"source"</literal> property,
+      projected target object in the <literal>"target"</literal> property. If 
+      the script throws an exception, then target object unlinking is aborted.
+      </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>result</term>
     <listitem>
      <para>script object, optional</para>
-     <para>A script to execute on each mapping event, independent of the nature of the operation. In the root scope, the
-      source object is provided in the <literal>"source"</literal> property,
-      projected target object in the <literal>"target"</literal> property. If the script throws an exception,
+     <para>A script to execute on each mapping event, independent of the nature
+      of the operation. In the root scope, the source object is provided in the
+      <literal>"source"</literal> property, projected target object in the
+      <literal>"target"</literal> property. If the script throws an exception,
       then target object unlinking is aborted.</para>
-      <para>The "result" script is executed only during reconciliation operations!</para>
+      <para>The "result" script is executed only during reconciliation 
+      operations!</para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -250,17 +264,21 @@
        <para>script object, optional</para>
        <para>A script to determine the target property value. The root
         scope contains the value of the source in the
-        <literal>"source"</literal> property, if specified. If the <literal>"source"</literal> property has a value of <literal>""</literal>, then the entire source object of the mapping is contained in the root scope. The resulting
-        value yielded by the script is stored in the target property.</para>
+        <literal>"source"</literal> property, if specified. If the 
+        <literal>"source"</literal> property has a value of 
+        <literal>""</literal>, then the entire source object of the mapping is 
+        contained in the root scope. The resulting value yielded by the script 
+        is stored in the target property.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
       <term>condition</term>
       <listitem>
        <para>script object, optional</para>
-       <para>A script to determine whether the mapping should be executed or not. The root
-        scope contains the value of the source in the
-        <literal>"source"</literal> property (if specified). The script is considered to return a boolean value.</para>
+       <para>A script to determine whether the mapping should be executed or 
+       not. The root scope contains the value of the source in the
+        <literal>"source"</literal> property (if specified). The script is 
+        considered to return a boolean value.</para>
       </listitem>
      </varlistentry>
      <varlistentry>
@@ -283,8 +301,9 @@
    to take in response.</para>
 
    <programlisting language="javascript">{
-  "situation": <replaceable>string</replaceable>,
-  "action"   : <replaceable>string</replaceable> or <replaceable>script object</replaceable>
+  "situation"  : <replaceable>string</replaceable>,
+  "action"     : <replaceable>string</replaceable> or <replaceable>script object</replaceable>
+  "postAction" : optional, <replaceable>script object</replaceable>
 }</programlisting>
 
    <variablelist xml:id="sync-policy-object-properties">
@@ -304,6 +323,14 @@
       <para>Specifies the action to perform. If a script is specified, the
        script is executed and is expected to yield a string containing the
        action to perform.</para>
+     </listitem>
+    </varlistentry>
+    <varlistentry>
+     <term>postAction</term>
+     <listitem>
+      <para>script object, optional</para>
+      <para>Specifies the action to perform after the previously specified 
+      action has completed.</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -354,19 +381,21 @@
   <para>Link entries have the following structure.</para>
 
   <programlisting language="javascript">{
+   "_id":<replaceable>string</replaceable>,
    "_rev":<replaceable>string</replaceable>,
    "linkType":<replaceable>string</replaceable>,
-   "secondId":<replaceable>string</replaceable>,
-   "_id":<replaceable>string</replaceable>,
-   "reconId":<replaceable>string</replaceable>,
    "firstId":<replaceable>string</replaceable>
-}{
-  "f": <replaceable>string</replaceable>,
-  "targetId": <replaceable>string</replaceable>,
-  "reconId" : <replaceable>string</replaceable>
+   "secondId":<replaceable>string</replaceable>,
 }</programlisting>
 
   <variablelist>
+   <varlistentry>
+    <term>_id</term>
+    <listitem>
+     <para>string</para>
+     <para>The identifier of the link object.</para>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>_rev</term>
     <listitem>
@@ -378,7 +407,8 @@
     <term>linkType</term>
     <listitem>
      <para>string, required</para>
-     <para>The type of the link. Usually then name of the mapping which created the link.</para>
+     <para>The type of the link. Usually then name of the mapping which 
+     created the link.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -386,22 +416,6 @@
     <listitem>
      <para>string, required</para>
      <para>The identifier of the first of the two linked objects.</para>
-    </listitem>
-   </varlistentry>
-      <varlistentry>
-    <term>_id</term>
-    <listitem>
-     <para>string</para>
-     <para>The identifier of the link object.</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>reconId</term>
-    <listitem>
-     <para>string or null</para>
-     <para>The identifier of the last reconciliation job that processed this
-     link. OpenIDM uses this during reconciliation to detect orphan source and
-     target objects.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -421,7 +435,8 @@
    <para>OpenIDM performs the following queries on a link object set.</para>
    <listitem>
     <para>Find link(s) for a given firstId object identifier.</para>
-    <literallayout class="monospaced">SELECT * FROM links  WHERE linkType = <replaceable>value</replaceable> AND firstId = <replaceable
+    <literallayout class="monospaced">SELECT * FROM links WHERE linkType
+     = <replaceable>value</replaceable> AND firstId = <replaceable
     >value</replaceable></literallayout>
     <para>Although a single result makes sense, this query is intended to
     allow multiple results so that this scenario can be handled as an
@@ -429,7 +444,8 @@
    </listitem>
    <listitem>
     <para>Select link(s) for a given second object identifier.</para>
-    <literallayout class="monospaced">SELECT * FROM links  WHERE linkType = <replaceable>value</replaceable> AND secondId = <replaceable
+    <literallayout class="monospaced">SELECT * FROM links  WHERE linkType 
+    = <replaceable>value</replaceable> AND secondId = <replaceable
     >value</replaceable></literallayout>
     <para>Although a single result makes sense, this query is intended to
     allow multiple results so that this scenario can be handled as an
@@ -453,7 +469,8 @@
       <para>Look for a link to a target object in the link object set, and
       perform a correlation query (if defined).</para></listitem>
      <listitem>
-      <para>Determine the link condition, as well as whether a target object can be found.</para>
+      <para>Determine the link condition, as well as whether a target object 
+      can be found.</para>
      </listitem>
      <listitem>
       <para>Determine the action to perform based on the policy defined for the
@@ -463,7 +480,8 @@
       <para>Perform the action.</para>
      </listitem>
      <listitem>
-      <para>Keep track of the target objects for which a condition and action has already been determined.</para>
+      <para>Keep track of the target objects for which a condition and action 
+      has already been determined.</para>
      </listitem>
      <listitem>
       <para>Write the results.</para>
@@ -477,7 +495,7 @@
     <orderedlist>
      <listitem>
       <para>Find the target in the link object set.</para>
-      <para>Determine if target object already was handled in the first phase.</para>
+      <para>Determine if the target object was handled in the first phase.</para>
      </listitem>
      <listitem>
       <para>Determine the action to perform based on the policy defined for the
@@ -514,6 +532,15 @@
     </orderedlist>
    </listitem>
   </orderedlist>
+  <note>
+   <para>To optimize a reconciliation operation, the reconciliation process 
+   does not attempt to correlate source objects to target objects if the set 
+   of target objects is empty when the correlation is started. For information 
+   on changing this default behaviour, see 
+   <link xlink:href="integrators-guide#reconciliation-optimization" 
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Reconciliation 
+   Optimization</citetitle></link>.</para>
+  </note>
  </section>
 
  <section xml:id="sync-rest-api">

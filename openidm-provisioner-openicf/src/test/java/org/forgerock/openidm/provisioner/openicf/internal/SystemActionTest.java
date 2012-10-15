@@ -48,8 +48,8 @@ public class SystemActionTest {
     @BeforeClass
     public void BeforeClass() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        configuration = new JsonValue(mapper.readValue(SystemActionTest.class.getResource(URLDecoder.decode(
-                "/config/" + OpenICFProvisionerServiceTestConnectorTest.class.getCanonicalName() + ".json","UTF-8")),
+        configuration = new JsonValue(mapper.readValue(SystemActionTest.class.getResourceAsStream(
+                "/config/" + OpenICFProvisionerServiceTestConnectorTest.class.getCanonicalName() + ".json"),
                 Map.class));
     }
 

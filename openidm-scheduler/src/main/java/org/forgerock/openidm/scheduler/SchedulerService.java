@@ -138,11 +138,6 @@ public class SchedulerService extends ObjectSetJsonResource {
     // Optional user defined name for this instance, derived from the file install name
     String configFactoryPID;
     
-    // Scheduling
-    Boolean localSchedulePersisted = false;
-    Scheduler localScheduler = null;
-    String localJobName = null;
-    
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
     
@@ -188,7 +183,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             for (String key : keys) {
                 ScheduleConfigService service = configMap.get(key);
                 try {
-                    addSchedule(service.getScheduleConfig(), service.getJobName(), false, true);
+                    addSchedule(service.getScheduleConfig(), service.getJobName(), false);
                 } catch (ObjectAlreadyExistsException e) {
                     logger.debug("Job {} already scheduled", service.getJobName());
                 }
@@ -196,24 +191,31 @@ public class SchedulerService extends ObjectSetJsonResource {
             logger.info("Scheduling waiting schedules");
         }
     }
-    
+
     public void registerConfigService(ScheduleConfigService service) throws SchedulerException, ParseException {
-        logger.debug("Registering new ScheduleConfigService");
         synchronized (CONFIG_SERVICE_LOCK) {
+            boolean update = false;
+            if (configMap.containsKey(service.getJobName())) {
+                logger.debug("Updating Schedule");
+                configMap.put(service.getJobName(), service);
+                update = true;
+            }
+            logger.debug("Registering new ScheduleConfigService");
             configMap.put(service.getJobName(), service);
             if (!started) {
                 logger.debug("The Scheduler Service has not been started yet, storing new Schedule {}", service.getJobName());
             } else {
-                logger.debug("Adding new Schedule {}", service.getJobName());
+                logger.debug("Adding schedule {}", service.getJobName());
                 try {
-                    addSchedule(service.getScheduleConfig(), service.getJobName(), false, true);
+                    addSchedule(service.getScheduleConfig(), service.getJobName(), update);
                 } catch (ObjectAlreadyExistsException e) {
                     logger.debug("Job {} already scheduled", service.getJobName());
                 }
             }
+
         }
     }
-    
+
     public void unregisterConfigService(ScheduleConfigService service) {
         synchronized (CONFIG_SERVICE_LOCK) {
             if (!started) {
@@ -223,7 +225,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             }
         }
     }
-    
+
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Scheduler Service {}", compContext);
@@ -235,30 +237,31 @@ public class SchedulerService extends ObjectSetJsonResource {
      * @param scheduleConfig    The schedule configuration
      * @param jobName           The job name
      * @param update            Whether to delete the old job if present
-     * @param fromConfFile      Whether the job was configured in a "/conf" file
      * @return                  true if the job was scheduled, false otherwise
      * @throws SchedulerException
      * @throws ParseException
      * @throws ObjectAlreadyExistsException
      */
-    public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update, boolean fromConfFile) 
+    public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update) 
             throws SchedulerException, ParseException, ObjectAlreadyExistsException {
         Scheduler scheduler = null;
-        if (!scheduleConfig.getEnabled()) {
-            logger.info("Scheduler for {} is disabled", configFactoryPID);
-            return false;
-        }
         
         try {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
                 scheduler = getScheduler(scheduleConfig);
-                if (fromConfFile) {
-                    // Schedule is configured from a file in the "conf" directory, store local parameters
-                    localScheduler = scheduler;
-                    localJobName = jobName;
-                    localSchedulePersisted = scheduleConfig.getPersisted();
+
+                // If the schedule is disabled, remove from scheduler and return
+                if (!scheduleConfig.getEnabled()) {
+                    logger.info("Schedule {} is disabled", jobName);
+                    if (jobExists(jobName, scheduleConfig.getPersisted()) && 
+                            scheduler.deleteJob(jobName, GROUP_NAME)) {
+                        logger.debug("Schedule was deleted from scheduler");
+                    }
+                    return false;
                 }
+                
+                // Attempt to add the scheduler
                 if (scheduler != null && scheduleConfig.getCronSchedule() != null 
                         && scheduleConfig.getCronSchedule().length() > 0) {
                     JobDetail job = new JobDetail(jobName, GROUP_NAME, SchedulerServiceJob.class);
@@ -403,7 +406,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             }
 
             try {
-                addSchedule(scheduleConfig, id, false, false);
+                addSchedule(scheduleConfig, id, false);
             } catch (ParseException e) {
                 throw new ObjectSetException(ObjectSetException.BAD_REQUEST, e);
             } catch (ObjectAlreadyExistsException e) {
@@ -466,7 +469,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                     throw new NotFoundException();
                 } else {
                     // Update the Job
-                    addSchedule(scheduleConfig, id, true, false);
+                    addSchedule(scheduleConfig, id, true);
                 }
             } catch (ParseException e) {
                 throw new ObjectSetException(ObjectSetException.BAD_REQUEST, e);
