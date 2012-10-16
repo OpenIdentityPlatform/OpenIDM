@@ -98,23 +98,26 @@ You can turn off this feature to get a quicker startup with -A
 
 Database changed
 mysql&gt; show tables;
-+-------------------------+
-| Tables_in_openidm       |
-+-------------------------+
-| auditaccess             |
-| auditactivity           |
-| auditrecon              |
-| configobjectproperties  |
-| configobjects           |
-| genericobjectproperties |
-| genericobjects          |
-| internaluser            |
-| links                   |
-| managedobjectproperties |
-| managedobjects          |
-| objecttypes             |
-+-------------------------+
-12 rows in set (0.01 sec)</screen>
++---------------------------+
+| Tables_in_openidm         |
++---------------------------+
+| auditaccess               |
+| auditactivity             |
+| auditrecon                |
+| configobjectproperties    |
+| configobjects             |
+| genericobjectproperties   |
+| genericobjects            |
+| internaluser              |
+| links                     |
+| managedobjectproperties   |
+| managedobjects            |
+| objecttypes               |
+| schedulerobjectproperties |
+| schedulerobjects          |
+| uinotification            |
++---------------------------+
+17 rows in set (0.00 sec)</screen>
    <para>The table names are similar to those used with OrientDB.</para>
   </step>
   <step performance="optional">
@@ -156,24 +159,28 @@ Using LOGGING_CONFIG:
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
 -&gt; scr list
    Id   State          Name
-[  16] [active       ] org.forgerock.openidm.config.starter
-[   7] [active       ] org.forgerock.openidm.external.rest
-[  11] [active       ]
- org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  19] [active       ] org.forgerock.openidm.config.starter
+[  23] [active       ] org.forgerock.openidm.taskscanner
+[   8] [active       ] org.forgerock.openidm.external.rest
+[  12] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  15] [active       ] org.forgerock.openidm.ui.simple
 [   1] [active       ] org.forgerock.openidm.router
-[  18] [active       ] org.forgerock.openidm.scheduler
-[  13] [active       ] org.forgerock.openidm.restlet
-[   6] [unsatisfied  ] org.forgerock.openidm.external.email
-[  15] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
-[   5] [active       ] org.forgerock.openidm.sync
+[  22] [active       ] org.forgerock.openidm.scheduler
+[  14] [active       ] org.forgerock.openidm.restlet
+[   7] [unsatisfied  ] org.forgerock.openidm.external.email
+[  18] [unsatisfied  ] org.forgerock.openidm.repo.orientdb
+[   6] [active       ] org.forgerock.openidm.sync
 [   3] [active       ] org.forgerock.openidm.script
+[   5] [active       ] org.forgerock.openidm.recon
 [   2] [active       ] org.forgerock.openidm.scope
-[   9] [active       ] org.forgerock.openidm.http.contextregistrator
-[  17] [active       ] org.forgerock.openidm.config
+[  10] [active       ] org.forgerock.openidm.http.contextregistrator
+[  20] [active       ] org.forgerock.openidm.config
 [   0] [active       ] org.forgerock.openidm.audit
-[  14] [active       ] org.forgerock.openidm.repo.jdbc
+[  21] [active       ] org.forgerock.openidm.schedule
+[  17] [active       ] org.forgerock.openidm.repo.jdbc
+[  16] [active       ] org.forgerock.openidm.workflow
+[  13] [active       ] org.forgerock.openidm.provisioner.openicf
 [   4] [active       ] org.forgerock.openidm.managed
-[  12] [active       ] org.forgerock.openidm.provisioner.openicf
-[   8] [active       ] org.forgerock.openidm.authentication
-[  10] [active       ] org.forgerock.openidm.provisioner</screen>
+[   9] [active       ] org.forgerock.openidm.authentication
+[  11] [active       ] org.forgerock.openidm.provisioner</screen>
 </chapter>
