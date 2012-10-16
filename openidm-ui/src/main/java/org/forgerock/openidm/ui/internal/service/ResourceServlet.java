@@ -115,6 +115,8 @@ public final class ResourceServlet
         String contentType = getServletContext().getMimeType(resName);
         if (contentType != null) {
             res.setContentType(contentType);
+        } else {
+        	res.setContentType(getMimeType(resName));
         }
 
         long lastModified = getLastModified(url);
@@ -150,6 +152,20 @@ public final class ResourceServlet
         }
 
         return lastModified;
+    }
+    
+    private String getMimeType(String fileName) {
+    	if (fileName.endsWith(".css")) {
+    		return "text/css";
+    	} else if (fileName.endsWith(".js")) {
+    		return "application/javascript";
+    	} else if (fileName.endsWith(".png")) {
+    		return "image/png";
+    	} else if (fileName.endsWith(".html")) {
+    		return "text/html";
+    	}
+    	
+    	return null;
     }
 
     private boolean resourceModified(long resTimestamp, long modSince) {
