@@ -36,16 +36,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate"
-], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userApplicationLnkDelegate, userDelegate, applicationDelegate) {
+    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userApplicationLnkDelegate, userDelegate, applicationDelegate, dateUtil) {
     var TasksMenuView = Backbone.View.extend({
         
         events: {
             "click tr": "showTask",
             "click .claimLink": "claimTask",
-            "click .approveLink": "approveTask",
-            "click .denyLink" : "denyTask",
-            "click .requeueLink": "requeueTask"
+            "click .choosable" : "markAsChoosen",
+            "click .cancelLink": "resetChoosen",
+            "click .saveLink": "save"
         },
         
         showTask: function(event) {
@@ -95,6 +96,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         count: task.tasks.length,
                         //TODO make it generic
                         headers: ["For", "Application", "Requested", "Actions"],
+                        batchOperation: this.category === 'assigned',
                         tasks: []
                     };
                     
@@ -106,7 +108,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                             //data.tasks.push(this.prepareParams(params));
                             this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, date, taskId) {
                                 //TODO make it generic
-                                data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": date, "actions": actions, "_id": taskId}));
+                                data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": dateUtil.formatDate(date), "actions": actions, "_id": taskId}));
                                 j++;
                                 
                                 if(j === task.tasks.length) {
@@ -134,9 +136,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             if(this.category === 'all') {
                 return '<a href="#" class="buttonOrange claimLink">Claim</a>';
             } else if(this.category === 'assigned') {
-                return '<a href="#" class="buttonOrange approveLink">Approve</a>' +
-                    '<a href="#" class="buttonOrange denyLink">Deny</a>' +
-                    '<a href="#" class="buttonOrange requeueLink">Requeue</a>';
+                return '<a href="#" class="buttonOrange choosable" data-action="approveTask">Approve</a>' +
+                    '<a href="#" class="buttonOrange choosable" data-action="denyTask">Deny</a>' +
+                    '<a href="#" class="buttonOrange choosable" data-action="requeueTask">Requeue</a>';
             }
         },
         
@@ -155,49 +157,106 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             }
         },
         
-        approveTask: function(event) {
+        approveTask: function(id, callback) {
             event.preventDefault();
-            
-            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
             
             if(id) {
                 workflowManager.completeTask(id, {"decision": "accept"}, _.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                    eventManager.sendEvent("refreshTasksMenu");
+                    callback(this);
                 }, this), function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                    callback(this);
                 });
             }
         },
         
-        denyTask: function(event) {
+        denyTask: function(id, callback, denyReason) {
             event.preventDefault();
-            
-            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
             
             if(id) {
-                workflowManager.completeTask(id, {"decision": "reject"}, _.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                    eventManager.sendEvent("refreshTasksMenu");
+                workflowManager.completeTask(id, {"decision": "reject", "reason": denyReason}, _.bind(function() {
+                    callback(this);
                 }, this), function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                    callback(this);
                 });
             }
         },
         
-        requeueTask: function(event) {
-            event.preventDefault();
-            
-            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
-
+        requeueTask: function(id, callback) {
             if(id) {
                 workflowManager.assignTaskToUser(id, "", _.bind(function() {
-                   eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unclaimedTask");
-                   eventManager.sendEvent("refreshTasksMenu");
+                    callback(this);
                 }, this), function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                    callback(this);
                 });
             }
+        },
+        
+        markAsChoosen: function(event) {
+            event.preventDefault();
+            
+            if (!$(event.target).hasClass("choosen-decision")) {
+                $(event.target).parent().find("a").removeClass("choosen-decision");
+                $(event.target).addClass("choosen-decision");
+                
+                if ($(event.target).attr('data-action') === 'denyTask') {
+                    $(event.target).parent().parent().append('<input name="denyReason" value="" />');
+                } else {
+                    $(event.target).parent().parent().find("input[name=denyReason]").remove();
+                }
+                
+            } else {
+                $(event.target).parent().find("a").removeClass("choosen-decision");
+                $(event.target).parent().parent().find("input[name=denyReason]").remove();
+            }
+            this.setSaveLinkAsActiveOrInactive($(event.target));
+        },
+        
+        setSaveLinkAsActiveOrInactive: function(element) {
+            var taskContainer = element.parent().parent().parent();
+            if (taskContainer.find(".choosen-decision").size() === taskContainer.find("tr").size()) {
+                taskContainer.parent().parent().find(".saveLink").removeClass("buttonGrey").addClass("buttonOrange");
+            } else {
+                taskContainer.parent().parent().find(".saveLink").removeClass("buttonOrange").addClass("buttonGrey");
+            }
+        },
+        
+        actionNumberToExecute: 0,
+        
+        save: function(event) {
+            var actionsToRun = [], taskId, action, actionToRun, actionPointer, counter = 0, actionFinished;
+            
+            event.preventDefault();
+            
+            $(event.target).parent().find("table").find("tbody").find("tr").each(function(index) {
+                action = $(this).find(".choosen-decision").attr('data-action');
+                taskId = $(this).find("input[type=hidden]").val();
+                denyReason = $(this).find("input[name=denyReason]").val();
+                actionsToRun.push({actionType: action, taskId: taskId, denyReason: denyReason});
+            });
+            
+            this.actionNumberToExecute = actionsToRun.length;
+            
+            actionFinished = function(self) {
+                counter++;
+                if (counter === self.actionNumberToExecute) {
+                    eventManager.sendEvent("refreshTasksMenu");
+                }
+            };
+            
+            for (actionPointer in actionsToRun) {
+                actionToRun = actionsToRun[actionPointer];
+                this[actionToRun.actionType](actionToRun.taskId, actionFinished, actionToRun.denyReason);
+            }
+        },
+        
+        resetChoosen: function(event) {
+           event.preventDefault();
+           $(event.target).parent().find("a").removeClass("choosen-decision");
+           this.setSaveLinkAsActiveOrInactive($(event.target));
+           $(event.target).parent().find("[name=denyReason]").remove();
         },
         
         prepareParams: function(params) {
