@@ -45,6 +45,7 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
             this.$el.find("input[name=saveButton]").val("Update");
             
+            //TODO move this logic to TaskDetailsView
             if(this.category === "all") {
                 this.$el.find("input[name=claimButton]").val("Claim");                
                 

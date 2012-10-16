@@ -32,7 +32,7 @@ define("config/routes/AdminRoutesConfig", [
     
     var obj = {
             "": {
-              view: "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
+              view: "org/forgerock/openidm/ui/admin/Dashboard",
               role: "openidm-authorized",
               url: ""                                   
           },     

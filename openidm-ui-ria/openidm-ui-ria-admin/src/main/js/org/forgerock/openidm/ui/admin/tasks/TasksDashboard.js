@@ -53,6 +53,12 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
             eventManager.registerListener("showTaskDetailsRequest", function(event) {
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [event.category, event.id]});
             });
+            
+            eventManager.unregisterListener("refreshTasksMenu");
+            eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
+                this.candidateTasks.render("all", $("#candidateTasks"));                
+                this.myTasks.render("assigned", $("#myTasks"));
+            }, this));
         }
     });
 

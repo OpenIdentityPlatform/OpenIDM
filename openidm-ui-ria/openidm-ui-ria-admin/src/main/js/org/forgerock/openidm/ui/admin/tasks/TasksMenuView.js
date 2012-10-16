@@ -41,7 +41,11 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
     var TasksMenuView = Backbone.View.extend({
         
         events: {
-            "click tr": "showTask"
+            "click tr": "showTask",
+            "click .claimLink": "claimTask",
+            "click .approveLink": "approveTask",
+            "click .denyLink" : "denyTask",
+            "click .requeueLink": "requeueTask"
         },
         
         showTask: function(event) {
@@ -59,6 +63,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                 this.setElement(element);
             }
             
+            this.$el.html('');
+            
             this.category = category;
             
             if(category === "all") {
@@ -73,7 +79,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         displayTasks: function(tasks) {
-            var process, data, processName, task, taskName, i, j, params;
+            var process, data, processName, task, taskName, i, j, params, actions;
+            
+            actions = this.getActions();     
             
             for(processName in tasks) {
                 process = tasks[processName];
@@ -85,7 +93,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         processName: processName,
                         taskName: taskName,
                         count: task.tasks.length,
-                        headers: ["Application", "Requester"],
+                        //TODO make it generic
+                        headers: ["For", "Application", "Requested", "Actions"],
                         tasks: []
                     };
                     
@@ -94,9 +103,10 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         params = task.tasks[i];
                         
                         if(params.userApplicationLnkId) {
-                        //data.tasks.push(this.prepareParams(params));
-                            this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, taskId) {
-                                data.tasks.push(this.prepareParams({"app": appName, "user": userName, "_id": taskId}));
+                            //data.tasks.push(this.prepareParams(params));
+                            this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, date, taskId) {
+                                //TODO make it generic
+                                data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": date, "actions": actions, "_id": taskId}));
                                 j++;
                                 
                                 if(j === task.tasks.length) {
@@ -114,10 +124,80 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             userApplicationLnkDelegate.readEntity(userAppLinkId, function(userAppLink) {                
                 userDelegate.readEntity(userAppLink.userId, function(user) {
                     applicationDelegate.getApplicationDetails(userAppLink.applicationId, function(app) {
-                        callback(user.userName, app.name, taskId);
+                        callback(user.givenName + ' ' + user.familyName, app.name, userAppLink.lastTimeUsed, taskId);
                     });
                 });   
             });
+        },
+        
+        getActions: function() {
+            if(this.category === 'all') {
+                return '<a href="#" class="buttonOrange claimLink">Claim</a>';
+            } else if(this.category === 'assigned') {
+                return '<a href="#" class="buttonOrange approveLink">Approve</a>' +
+                    '<a href="#" class="buttonOrange denyLink">Deny</a>' +
+                    '<a href="#" class="buttonOrange requeueLink">Requeue</a>';
+            }
+        },
+        
+        claimTask: function(event) {
+            event.preventDefault();
+            
+            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
+
+            if(id) {
+                workflowManager.assignTaskToUser(id, conf.loggedUser.userName, _.bind(function() {
+                   eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "claimedTask");
+                   eventManager.sendEvent("refreshTasksMenu");
+                }, this), function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                });
+            }
+        },
+        
+        approveTask: function(event) {
+            event.preventDefault();
+            
+            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
+            
+            if(id) {
+                workflowManager.completeTask(id, {"decision": "accept"}, _.bind(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
+                    eventManager.sendEvent("refreshTasksMenu");
+                }, this), function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                });
+            }
+        },
+        
+        denyTask: function(event) {
+            event.preventDefault();
+            
+            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
+            
+            if(id) {
+                workflowManager.completeTask(id, {"decision": "reject"}, _.bind(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
+                    eventManager.sendEvent("refreshTasksMenu");
+                }, this), function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                });
+            }
+        },
+        
+        requeueTask: function(event) {
+            event.preventDefault();
+            
+            var id = $(event.target).parent().parent().find("input[type=hidden]").val();
+
+            if(id) {
+                workflowManager.assignTaskToUser(id, "", _.bind(function() {
+                   eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unclaimedTask");
+                   eventManager.sendEvent("refreshTasksMenu");
+                }, this), function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                });
+            }
         },
         
         prepareParams: function(params) {

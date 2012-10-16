@@ -43,6 +43,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
             category = args[0];
             id = args[1];
             
+            this.category = category;
+            
             this.tasksMenuView = new TasksMenuView();
             this.registerListeners();
             this.parentRender(function() {
@@ -60,6 +62,13 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
             eventManager.unregisterListener("showTaskDetailsRequest");
             eventManager.registerListener("showTaskDetailsRequest", _.bind(function(event) {
                 taskDetailsView.render(event.id, event.category);
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [event.category, event.id], trigger: false});
+            }, this));
+            
+            eventManager.unregisterListener("refreshTasksMenu");
+            eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
+                this.tasksMenuView.render(this.category);
+                //TODO clear task details
             }, this));
         }
     }); 
