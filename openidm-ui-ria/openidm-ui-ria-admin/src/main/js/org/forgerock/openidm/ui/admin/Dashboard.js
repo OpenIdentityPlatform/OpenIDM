@@ -22,20 +22,31 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $, Backbone */
 
-define("org/forgerock/openidm/ui/admin/main", [
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
-	"./tasks/TaskDetailsView",
-	"./tasks/AbstractTaskForm",
-	"./tasks/ApplicationAcceptanceTask",
-	"./tasks/TasksFormManager",
-	"./tasks/TasksWithMenuView",
-	"./tasks/TasksMenuView",
-	"./tasks/WorkflowDelegate",
-	"./tasks/TasksDashboard",
-	"./Dashboard"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/admin/Dashboard", [
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
+    "org/forgerock/openidm/ui/admin/tasks/TasksDashboard"
+], function(eventManager, constants, conf, userDashboard, tasksDashboard) {
+    var Dashboard = Backbone.View.extend({
+                
+        render: function() {
+            if(conf.loggedUser && conf.loggedUser.roles.indexOf('openidm-admin') !== -1) {
+                tasksDashboard.render();
+            } else {
+                userDashboard.render();
+            }
+        }
+        
+    });
+
+    return new Dashboard();
+});
+
+

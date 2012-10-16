@@ -105,13 +105,9 @@ define("config/AppConfiguration", [
                                    },
                                    "tasksMenu": {
                                        "baseUrl": "#tasks/",
-                                       "url": "#tasks/dashboard",
+                                       "url": "#tasks/all",
                                        "name": "Tasks",
                                        "urls": {
-                                           "tasksDashboard": {
-                                               "url": "#tasks/dashboard",
-                                               "name": "Dashboard"
-                                           },
                                            "allTasks": {
                                                "url": "#tasks/all",
                                                "name": "Candidate tasks"
