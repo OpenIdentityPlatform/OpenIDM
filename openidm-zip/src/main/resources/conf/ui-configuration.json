@@ -1,0 +1,6 @@
+{
+    "configuration": {
+        "selfRegistration": true,
+        "enterprise": true
+    }
+}

@@ -143,17 +143,6 @@
                 "type" : "text/javascript",
                 "file" : "script/ui/onResponse-user_create.js"
             }
-        },
-        {
-            "pattern" : "^repo/ui/notification.*",
-            "methods" : [
-                "create",
-                "read"
-            ],
-            "onRequest" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/notification/onCreateRequest-notification-set-default-fields.js"
-            }
         }
     ]
 }
