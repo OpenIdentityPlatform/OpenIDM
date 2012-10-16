@@ -15,7 +15,12 @@
 	                <td>{{{.}}}</td>
 	            {{/.}}
 	        </tr>
+	        
 	        {{/tasks}}
         </tbody>
-    </table>    
+    </table>   
+    {{#batchOperation}}
+        <a href="#" class="buttonOrange cancelLink">Cancel</a> 
+        <a href="#" class="buttonGrey saveLink">Save</a> 
+    {{/batchOperation}}
 </div>
