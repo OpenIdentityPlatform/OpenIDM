@@ -65,7 +65,7 @@ define("config/routes/AdminRoutesConfig", [
             //for tasks 
             "tasksWithMenu": {
                 view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
-                role: "openidm-admin",
+                role: "admin",
                 //url: "tasksmenu/:category/:id"
                 url: /^tasks\/([A-Za-z]+)\/?([0-9]*)$/,
                 pattern: "tasks/?/?",
@@ -73,7 +73,7 @@ define("config/routes/AdminRoutesConfig", [
             },
             "tasks": {
                 view: "org/forgerock/openidm/ui/admin/tasks/TasksDashboard",
-                role: "openidm-admin",
+                role: "admin",
                 url: "tasks/dashboard"
             },
             
