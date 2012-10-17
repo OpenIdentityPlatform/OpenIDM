@@ -136,6 +136,7 @@ define("config/AppConfiguration", [
                                }
                            },
                            "openidm-admin" : {
+                               "role": "openidm-admin",
                                "urls": {
                                    "dashboard": {
                                        "url": "#/",
