@@ -125,24 +125,24 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         numberOfProcessesToDisplay: 0,
         
         fetchTaskData: function(task, data, actions, callback) {
-            var i, j = 0, params;
+            var i, j = 0, params, fetchParametersCallback;
+            
+            fetchParametersCallback = function(userName, appName, date, taskId) {
+                //TODO make it generic
+                data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": dateUtil.formatDate(date), "actions": actions, "_id": taskId}));
+                j++;
+                
+                if(j === task.tasks.length) {
+                    this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
+                    this.counter++;
+                    callback(this);
+                }
+            };
             
             for(i = 0; i < task.tasks.length; i++) {
                 params = task.tasks[i];
-                
                 if(params.userApplicationLnkId) {
-                    //data.tasks.push(this.prepareParams(params));
-                    this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, date, taskId) {
-                        //TODO make it generic
-                        data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": dateUtil.formatDate(date), "actions": actions, "_id": taskId}));
-                        j++;
-                        
-                        if(j === task.tasks.length) {
-                            this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
-                            this.counter++;
-                            callback(this);
-                        }
-                    }, this));
+                    this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(fetchParametersCallback, this));
                 } 
             } 
         },
