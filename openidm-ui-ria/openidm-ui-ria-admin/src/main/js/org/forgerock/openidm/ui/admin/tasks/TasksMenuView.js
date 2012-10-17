@@ -80,7 +80,14 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         displayTasks: function(tasks) {
-            var process, data, processName, task, taskName, counter, params, actions;
+            var process, data, processName, task, taskName, actions, allLoadedCallback;
+            
+            allLoadedCallback = function(self) {
+                if (self.counter === self.numberOfProcessesToDisplay) {
+                    self.$el.accordion('destroy');
+                    self.$el.accordion({collapsible: true, fillSpace: true});
+                }
+            };
             
             this.counter = 0;
             this.numberOfProcessesToDisplay = 0;
@@ -108,17 +115,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         tasks: []
                     };
                     
-                    allLoadedCallback = function(self) {
-                        if (self.counter === self.numberOfProcessesToDisplay) {
-                            self.$el.accordion({collapsible: true, fillSpace: true});
-                            console.log("good");
-                        } else {
-                            console.log(self.counter + " ===> " + self.numberOfProcessesToDisplay);
-                        }
-                    };
-                    
                     this.fetchTaskData(task, data, actions, allLoadedCallback);
-     
                 }    
             }          
         },
@@ -254,7 +251,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         actionNumberToExecute: 0,
         
         save: function(event) {
-            var actionsToRun = [], taskId, action, actionToRun, actionPointer, counter = 0, actionFinished;
+            var actionsToRun = [], taskId, action, actionToRun, actionPointer, counter = 0, actionFinished, denyReason;
             
             event.preventDefault();
             
