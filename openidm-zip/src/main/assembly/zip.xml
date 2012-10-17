@@ -92,12 +92,15 @@
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
                 <exclude>*:*:js</exclude>
+                <exclude>*:*:zip</exclude>
                 <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
                 <exclude>org.apache.felix:org.apache.felix.configadmin</exclude>
                 <exclude>org.ops4j.pax.web:pax-web-jetty-bundle</exclude>
                 <exclude>org.ops4j.pax.web:pax-web-extender-whiteboard</exclude>
                 <exclude>org.apache.felix:org.apache.felix.gogo.shell</exclude>
                 <exclude>org.eclipse.osgi:org.eclipse.osgi</exclude>
+                <exclude>net.sf.kxml:kxml2</exclude>
+                <exclude>xmlpull:xmlpull</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -157,6 +160,18 @@
                 <include>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>
                 <include>org.forgerock.openidm:openidm-workflow-remote</include>
             </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <outputDirectory>/openidm/</outputDirectory>
+            <includes>
+                <include>org.forgerock.commons:launcher-zip:zip:*</include>
+            </includes>
+            <unpackOptions>
+                <includes>
+                    <include>bin/**</include>
+                </includes>
+            </unpackOptions>
         </dependencySet>
     </dependencySets>
 </assembly>

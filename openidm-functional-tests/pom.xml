@@ -22,7 +22,8 @@
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
@@ -31,42 +32,9 @@
     </parent>
     <artifactId>openidm-functional-test</artifactId>
     <name>OpenIDM automated integration tests</name>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
-    <properties>
-        <paxexamversion>2.0.0-RC4</paxexamversion>
-    </properties>
     <dependencies>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
-            <scope>provided</scope>
-        </dependency> 
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-repo-orientdb</artifactId>
-            <version>${openidm.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-scheduler</artifactId>
-            <version>${openidm.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-audit</artifactId>
-            <version>${openidm.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.21</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
@@ -76,21 +44,42 @@
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <scope>test</scope> 
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.6.6</version>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>1.7</version>
+            <scope>test</scope>
+        </dependency>
+        <!--dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>2.25.0</version>
+            <exclude>
+            httpclient 412
+        </dependency-->
+
+
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>org.forgerock.json.resource</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>launcher</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <!-- OSGi R4 frameworks -->
@@ -99,119 +88,136 @@
             <artifactId>org.apache.felix.framework</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Bundle installer to install all other bundles -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.fileinstall</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam</artifactId>
-            <version>${paxexamversion}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-container-native</artifactId>
-            <version>${paxexamversion}</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <build>
-        <testSourceDirectory>src/it</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>testCompile</goal> 
-                            </goals>
-                        </execution> 
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId> 
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <argLine>-Xmx1024M -XX:MaxPermSize=128M</argLine>
-                    <excludedGroups>jdbc-repo</excludedGroups>
+                    <excludes>
+                        <excludes>**</excludes>
+                    </excludes>
+                    <skipIfEmpty>true</skipIfEmpty>
                 </configuration>
-                <executions>
-                    <execution> 
-                        <phase>integration-test</phase> 
-                        <goals>
-                            <goal>test</goal> 
-                        </goals>
-                    </execution> 
-                </executions>
-            </plugin>            
-            <plugin>
-                <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>maven-paxexam-plugin</artifactId>
-                <version>1.2.4</version>
-                <executions>
-                    <execution>
-                        <id>generate-config</id>
-                        <goals>
-                            <goal>generate-depends-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin> 
-            <!-- TODO: nicer way to find and copy package bundles -->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>prepare</id>
-                        <phase>compile</phase>
-                        <configuration>
-                            <tasks>
-                                <echo message="prepare phase" />
-                                <unzip src="../openidm-zip/target/openidm-2.1.0-SNAPSHOT.zip" dest="target/openidm-orientdb-pkg/" />
-                                <unzip src="../openidm-zip/target/openidm-2.1.0-SNAPSHOT.zip" dest="target/openidm-jdbc-pkg/" />
-                            </tasks>
-                        </configuration>
                         <goals>
-                            <goal>run</goal>
+                            <goal>testCompile</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-     <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>copy</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-            <configuration>
-                <artifactItems>
-                  <artifactItem>
-                      <groupId>mysql</groupId>
-                      <artifactId>mysql-connector-java</artifactId>
-                      <version>5.1.21</version>
-                     <type>jar</type>
-                   </artifactItem>
-                 </artifactItems>
-               <outputDirectory>${project.build.directory}/openidm-jdbc-pkg/openidm/bundle</outputDirectory>
-               <overWriteReleases>false</overWriteReleases>
-               <overWriteSnapshots>true</overWriteSnapshots>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.3</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.12.3</version>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <testName>scenario1</testName>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.forgerock.openidm</groupId>
+                                    <artifactId>openidm-zip</artifactId>
+                                    <version>${openidm.version}</version>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <includes>openidm/bundle/**</includes>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-mysql</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>5.1.21</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/openidm/bundle
+                            </outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.12.3</version>
+                <reportSets>
+                    <reportSet>
+                        <id>integration-tests</id>
+                        <reports>
+                            <report>failsafe-report-only</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 </project>

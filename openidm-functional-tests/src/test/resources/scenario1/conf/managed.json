@@ -1,0 +1,24 @@
+{
+    "objects" : [
+        {
+            "name" : "user",
+            "properties" : [
+                {
+                    "name" : "securityAnswer",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    }
+                },
+                {
+                    "name" : "password",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "group"
+        }
+    ]
+}
