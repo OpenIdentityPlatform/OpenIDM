@@ -80,11 +80,19 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         displayTasks: function(tasks) {
-            var process, data, processName, task, taskName, i, j, params, actions;
+            var process, data, processName, task, taskName, counter, params, actions;
+            
+            this.counter = 0;
+            this.numberOfProcessesToDisplay = 0;
             
             actions = this.getActions();     
             
             for(processName in tasks) {
+                this.numberOfProcessesToDisplay++;
+            }
+            
+            for(processName in tasks) {
+                
                 process = tasks[processName];
                 
                 for(taskName in process) {
@@ -100,26 +108,46 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         tasks: []
                     };
                     
-                    j = 0;
-                    for(i = 0; i < task.tasks.length; i++) {
-                        params = task.tasks[i];
-                        
-                        if(params.userApplicationLnkId) {
-                            //data.tasks.push(this.prepareParams(params));
-                            this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, date, taskId) {
-                                //TODO make it generic
-                                data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": dateUtil.formatDate(date), "actions": actions, "_id": taskId}));
-                                j++;
-                                
-                                if(j === task.tasks.length) {
-                                    this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
-                                    this.$el.accordion({collapsible: true, fillSpace: true});
-                                }
-                            }, this));
-                        } 
-                    }    
+                    allLoadedCallback = function(self) {
+                        if (self.counter === self.numberOfProcessesToDisplay) {
+                            self.$el.accordion({collapsible: true, fillSpace: true});
+                            console.log("good");
+                        } else {
+                            console.log(self.counter + " ===> " + self.numberOfProcessesToDisplay);
+                        }
+                    };
+                    
+                    this.fetchTaskData(task, data, actions, allLoadedCallback);
+     
                 }    
             }          
+        },
+        
+        counter: 0,
+        
+        numberOfProcessesToDisplay: 0,
+        
+        fetchTaskData: function(task, data, actions, callback) {
+            var i, j = 0, params;
+            
+            for(i = 0; i < task.tasks.length; i++) {
+                params = task.tasks[i];
+                
+                if(params.userApplicationLnkId) {
+                    //data.tasks.push(this.prepareParams(params));
+                    this.fetchParameters(params.userApplicationLnkId, params._id, _.bind(function(userName, appName, date, taskId) {
+                        //TODO make it generic
+                        data.tasks.push(this.prepareParams({"user": userName, "app": appName, "date": dateUtil.formatDate(date), "actions": actions, "_id": taskId}));
+                        j++;
+                        
+                        if(j === task.tasks.length) {
+                            this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
+                            this.counter++;
+                            callback(this);
+                        }
+                    }, this));
+                } 
+            } 
         },
         
         fetchParameters: function(userAppLinkId, taskId, callback) {
