@@ -32,20 +32,52 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
     "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView) {
+    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView",
+    "org/forgerock/openidm/ui/apps/dashboard/BaseUserInfoView",
+    "org/forgerock/openidm/ui/apps/dashboard/NotificationsView",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate"
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, baseUserInfoView, NotificationsView, conf, notificationDelegate) {
     var TasksDashboard = AbstractView.extend({
         template: "templates/admin/tasks/TasksDashboardTemplate.html",
                 
-        render: function(args) {
+        render: function(mode) {
+            
+            //decide whether to display notification and profile 
+            this.data = {shouldDisplayNotificationsAndProfile: mode.adminMode !== "openidm-admin" };
+            
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
             this.registerListeners();
             
             this.parentRender(function() {
+                var notificationsView;
+                
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
-            });            
+                
+                if (mode.adminMode === "admin") {
+                    baseUserInfoView.render();
+                    //notifications
+                    notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
+                        
+                        notifications.sort(function(a, b) {
+                            if (a.requestDate < b.requestDate) {
+                                return 1;
+                            }
+                            if (a.requestDate > b.requestDate){
+                                return -1;
+                            }
+                            return 0;
+                        });
+                        
+                        notificationsView = new NotificationsView();
+                        notificationsView.render({el: $("#notifications"), items: notifications});
+                    }, function() {
+                        eventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
+                    });
+                }
+            });    
         },
         
         registerListeners: function() {
