@@ -1,0 +1,194 @@
+{
+    "DEFAULT-dbUrl" : "local:./db/openidm",
+    "user" : "admin",
+    "poolMinSize" : 5,
+    "poolMaxSize" : 20,
+    "queries" : {
+        "for-credentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        "for-internalcredentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        
+        "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
+        "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
+        "for-security-answer" : "select securityAnswer FROM ${_resource} WHERE userName = '${uid}'",
+        
+        "query-all-ids" : "select _openidm_id from ${_resource}",
+        "query-all" : "select ${fields} from ${_resource}",
+        
+        "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND firstId = '${firstId}'",
+        "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}' AND secondId = '${secondId}'",
+        "links-for-linkType" : "SELECT * FROM ${_resource} WHERE linkType = '${linkType}'",
+        
+        "credential-query" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
+        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
+        
+        "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
+        "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
+        
+        "notifications-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
+        "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
+        "query-all-user_application_lnk": "select * from ${_resource}",
+        "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",
+        "get-user-app-link-by-user-and-app": "select * from ${_resource} WHERE userId = '${uid}' and applicationId = '${applicationId}'",
+
+        "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
+    },
+    "dbStructure" : {
+        "orientdbClass" : {
+            "internal_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_user_application_lnk" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "ui_notification" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "link" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "linkType",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "firstId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "secondId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "reconId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            },
+            "synchronisation_pooledSyncStage" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "sourceId",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "targetId",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "reconId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            },
+            "config" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_triggers" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_jobs" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_calendars" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_jobGroups" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_triggerGroups" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            }
+        }
+    },
+    "embeddedServer" : {
+        "enabled" : true
+    }
+}

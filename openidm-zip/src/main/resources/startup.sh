@@ -37,7 +37,7 @@ cd $PRGDIR
 [ -z "$OPENIDM_PID_FILE" ] && OPENIDM_PID_FILE=$OPENIDM_HOME/.openidm.pid
 
 # Only set OPENIDM_OPTS if not already set
-[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS=${openidm.options}
+[ -z "$OPENIDM_OPTS" ] && OPENIDM_OPTS="${openidm.options}"
 
 # Set JDK Logger config file if it is present and an override has not been issued
 if [ -z "$LOGGING_CONFIG" ]; then
