@@ -141,6 +141,10 @@ define("config/AppConfiguration", [
                                        "url": "#/",
                                        "name": "Dashboard"
                                    },
+                                   "users": {
+                                       "url": "#users/",
+                                       "name": "Users"
+                                   },
                                    "groups": {
                                        "url": "#groups/",
                                        "name": "Groups"
