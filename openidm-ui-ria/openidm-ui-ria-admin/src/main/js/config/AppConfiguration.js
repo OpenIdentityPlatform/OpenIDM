@@ -99,6 +99,21 @@ define("config/AppConfiguration", [
                                        "url": "#users/",
                                        "name": "Users"
                                    },
+                                   "apps": {
+                                       "baseUrl": "#applications/",
+                                       "url": "#applications/all/",
+                                       "name": "Applications",
+                                       "urls": {
+                                           "allApps": {
+                                               "url": "#applications/all/",
+                                               "name": "All applications"
+                                           },
+                                           "addMore": {
+                                               "url": "#applications/addmore/",
+                                               "name": "Add more apps"
+                                           }
+                                       }    
+                                   },
                                    "groups": {
                                        "url": "#groups/",
                                        "name": "Groups"
@@ -119,6 +134,33 @@ define("config/AppConfiguration", [
                                        }
                                    }
                                }
+                           },
+                           "openidm-admin" : {
+                               "urls": {
+                                   "dashboard": {
+                                       "url": "#/",
+                                       "name": "Dashboard"
+                                   },
+                                   "groups": {
+                                       "url": "#groups/",
+                                       "name": "Groups"
+                                   },
+                                   "tasksMenu": {
+                                       "baseUrl": "#tasks/",
+                                       "url": "#tasks/all",
+                                       "name": "Tasks",
+                                       "urls": {
+                                           "allTasks": {
+                                               "url": "#tasks/all",
+                                               "name": "Candidate tasks"
+                                           },
+                                           "myTasks": {
+                                               "url": "#tasks/assigned",
+                                               "name": "My tasks"
+                                           }
+                                       }
+                                   }
+                               }    
                            },
                            "user" : {
                                "urls": {
