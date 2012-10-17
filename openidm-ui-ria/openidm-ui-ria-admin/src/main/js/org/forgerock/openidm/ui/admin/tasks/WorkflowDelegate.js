@@ -137,7 +137,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
         }, errorCallback);
     };
     
-    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, assignee,successCallback, errorCallback) {
+    obj.buildStandardViewFromTaskBasicDataMap = function(taskInstanceBasicInfoMap, assignee, successCallback, errorCallback) {
         var finished = 0, taskBasicData, getTasksSuccessCallback, pointer, myTasks = {};
         
         getTasksSuccessCallback = function(taskData) {
@@ -146,7 +146,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
                 myTasks[taskData._id] = taskData;
             }
             
-            if(assignee === null && taskData.assignee === "") {
+            if(assignee === null) {//} && taskData.assignee === "") {
                 myTasks[taskData._id] = taskData;
             }
             
@@ -171,6 +171,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     };
     
     obj.buildStandardViewFromTaskMap = function(taskInstanceMap) {
+        console.log(JSON.stringify(taskInstanceMap));
         var result = {}, pointer, taskInstance, taskInstanceProcessName, taskInstanceTaskName, taskView;
         for (pointer in taskInstanceMap) {
             taskInstance = taskInstanceMap[pointer];
@@ -179,6 +180,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
             
             taskView = taskInstance.params;
             taskView._id = taskInstance._id;
+            taskView.assignee = taskInstance.assignee;
             
             if (!result[taskInstanceProcessName]) {
                 result[taskInstanceProcessName] = {};

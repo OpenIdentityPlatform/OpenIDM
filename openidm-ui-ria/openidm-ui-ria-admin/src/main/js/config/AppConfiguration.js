@@ -125,7 +125,7 @@ define("config/AppConfiguration", [
                                        "urls": {
                                            "allTasks": {
                                                "url": "#tasks/all",
-                                               "name": "Candidate tasks"
+                                               "name": "Tasks that are in my group's queue"
                                            },
                                            "myTasks": {
                                                "url": "#tasks/assigned",
