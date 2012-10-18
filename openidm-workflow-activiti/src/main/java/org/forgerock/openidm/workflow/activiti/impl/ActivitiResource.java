@@ -35,6 +35,7 @@ import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.runtime.ProcessInstanceQuery;
+import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.fluent.JsonException;
@@ -45,6 +46,7 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.DateUtil;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -88,6 +90,12 @@ public class ActivitiResource implements JsonResource {
     private static final String ACTIVITI_STARTUSERID = "startUserId";
     private static final String ACTIVITI_SUPERPROCESSINSTANCEID = "superProcessInstanceId";
     private static final String ACTIVITI_TASKID = "taskId";
+    private static final String ACTIVITI_PRIORITY = "priority";
+    private static final String ACTIVITI_TASKDEFINITIONKEY = "taskDefinitionKey";
+    private static final String ACTIVITI_VARIABLES = "variables";
+    private static final String ACTIVITI_DELEGATE = "delegate";
+    private static final String ACTIVITI_VERSION = "version";
+    private static final String ACTIVITI_CATEGORY = "category";
 
     public ActivitiResource(ProcessEngine engine) {
         this.processEngine = engine;
@@ -114,7 +122,7 @@ public class ActivitiResource implements JsonResource {
                 case 5:     //workflow/task/{ID}
                     return taskId(method, request);
                 default:
-                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "The path in the request is not valid");
+                    throw new JsonResourceException(JsonResourceException.FORBIDDEN, "The path in the request is not valid");
             }
         } catch (JsonValueException jve) {
             throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
@@ -165,7 +173,7 @@ public class ActivitiResource implements JsonResource {
             case query:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, m + " method not implemented on workflow");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " method not implemented on workflow");
         }
     }
 
@@ -218,7 +226,7 @@ public class ActivitiResource implements JsonResource {
             case read:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, m + " not implemented on processinstance");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on processinstance");
         }
     }
 
@@ -238,7 +246,7 @@ public class ActivitiResource implements JsonResource {
                 HistoricProcessInstance instance =
                         processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(id).singleResult();
                 if (instance == null) {
-                    return result;
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
                 return convertHistoricProcessInstance(result, instance);
             case delete:    //stop process instance
@@ -247,8 +255,7 @@ public class ActivitiResource implements JsonResource {
                     result.add("Process instance deleted", id);
                     return result;
                 } else {
-                    result.add("Process not found", id);
-                    return result;
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
             case create:
             case action:
@@ -256,7 +263,7 @@ public class ActivitiResource implements JsonResource {
             case query:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, m + " not implemented on processinstance/{ID}");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on processinstance/{ID}");
         }
     }
 
@@ -296,7 +303,7 @@ public class ActivitiResource implements JsonResource {
             case read:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, m + " not implemented on task");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on task");
         }
     }
 
@@ -317,8 +324,7 @@ public class ActivitiResource implements JsonResource {
             case update:    //update task data
                 task = processEngine.getTaskService().createTaskQuery().taskId(id).singleResult();
                 if (task == null) {
-                    result.add("Task not found", id);
-                    return result;
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
                 Map value = new HashMap<String, Object>(request.get(REQUEST_BODY).expect(Map.class).asMap());
                 if (value.get(ACTIVITI_ASSIGNEE) != null) {
@@ -341,8 +347,7 @@ public class ActivitiResource implements JsonResource {
                 TaskService taskService = processEngine.getTaskService();
                 task = processEngine.getTaskService().createTaskQuery().taskId(id).singleResult();
                 if (task == null) {
-                    result.add("Task not found", id);
-                    return result;
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
                 if ("claim".equals(action)) {
                     taskService.claim(id, request.get(REQUEST_BODY).expect(Map.class).asMap().get("userId").toString());
@@ -357,17 +362,23 @@ public class ActivitiResource implements JsonResource {
                 TaskQuery query = processEngine.getTaskService().createTaskQuery();
                 query.taskId(id);
                 task = query.singleResult();
+                if (task == null) {
+                    throw new JsonResourceException(JsonResourceException.NOT_FOUND);
+                }
                 if (task != null) {
                     result.add(ID, task.getId());
                     result.add(ACTIVITI_NAME, task.getName());
                     result.add(ACTIVITI_PROCESSDEFINITIONID, task.getProcessDefinitionId());
                     result.add(ACTIVITI_PROCESSINSTANCEID, task.getProcessInstanceId());
                     result.add(ACTIVITI_OWNER, task.getOwner());
-                    result.add(ACTIVITI_ASSIGNEE, task.getAssignee());
+                    result.add(task.getDelegationState() == DelegationState.PENDING ? ACTIVITI_DELEGATE : ACTIVITI_ASSIGNEE, task.getAssignee());
                     result.add(ACTIVITI_DESCRIPTION, task.getDescription());
-                    result.add(ACTIVITI_CREATETIME, task.getCreateTime());
-                    result.add(ACTIVITI_DUEDATE, task.getDueDate());
+                    result.add(ACTIVITI_CREATETIME, DateUtil.getDateUtil().formatDateTime(task.getCreateTime()));
+                    result.add(ACTIVITI_DUEDATE, task.getDueDate() == null ? null : DateUtil.getDateUtil().formatDateTime(task.getDueDate()));
                     result.add(ACTIVITI_EXECUTIONID, task.getExecutionId());
+                    result.add(ACTIVITI_PRIORITY, task.getPriority());
+                    result.add(ACTIVITI_TASKDEFINITIONKEY, task.getTaskDefinitionKey());
+                    result.add(ACTIVITI_VARIABLES, processEngine.getTaskService().getVariables(task.getId()));
                     result.add("_rev","0");
                 }
                 return result;
@@ -376,7 +387,7 @@ public class ActivitiResource implements JsonResource {
             case patch:
             case query:
             default:
-                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, m + " not implemented on task/{ID}");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on task/{ID}");
         }
     }
 
@@ -392,10 +403,12 @@ public class ActivitiResource implements JsonResource {
         List<ProcessDefinition> definitionList = processEngine.getRepositoryService().createProcessDefinitionQuery().list();
         if (definitionList != null && definitionList.size() > 0) {
             for (ProcessDefinition processDefinition : definitionList) {
-                Map<String, String> entry = new HashMap<String, String>();
+                Map<String, Object> entry = new HashMap<String, Object>();
                 entry.put(ACTIVITI_KEY, processDefinition.getKey());
                 entry.put(ACTIVITI_NAME, processDefinition.getName());
                 entry.put(ACTIVITI_PROCESSDEFINITIONID, processDefinition.getId());
+                entry.put(ACTIVITI_VERSION, processDefinition.getVersion());
+                entry.put(ACTIVITI_CATEGORY, processDefinition.getCategory());
                 resultList.add(entry);
             }
         }
@@ -412,8 +425,8 @@ public class ActivitiResource implements JsonResource {
      */
     public JsonValue startProcessInstance(JsonValue request) throws JsonResourceException {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
-        String key = ActivitiUtil.getKeyFromRequest(request);
-        String processDefinitionId = ActivitiUtil.getProcessDefinitionIdFromRequest(request);
+        String key = ActivitiUtil.removeKeyFromRequest(request);
+        String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
         Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
 
         //TODO consider to put only the parent into the params. parent/security may contain confidential access token
@@ -532,8 +545,9 @@ public class ActivitiResource implements JsonResource {
         result.add(ACTIVITI_PROCESSDEFINITIONID, instance.getProcessDefinitionId());
         result.add(ACTIVITI_STARTUSERID, instance.getStartUserId());
         result.add(ACTIVITI_DURATIONINMILLIS, instance.getDurationInMillis());
-        result.add(ACTIVITI_STARTTIME, instance.getStartTime());
-        result.add(ACTIVITI_ENDTIME, instance.getEndTime());
+        result.add(ACTIVITI_STARTTIME, DateUtil.getDateUtil().formatDateTime(instance.getStartTime()));
+        result.add(ACTIVITI_ENDTIME, instance.getEndTime() == null ? null : DateUtil.getDateUtil().formatDateTime(instance.getEndTime()));
+        result.add(ACTIVITI_SUPERPROCESSINSTANCEID, instance.getSuperProcessInstanceId());
         result.add("_rev", "0");
         return result;
     }
