@@ -30,6 +30,7 @@ import org.osgi.framework.*;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Map;
@@ -76,6 +77,10 @@ public class BundleContextStub implements BundleContext {
 
     @Override
     public Bundle installBundle(String s, InputStream inputStream) throws BundleException {
+        return null;
+    }
+
+    public Bundle getBundle(String location) {
         return null;
     }
 
