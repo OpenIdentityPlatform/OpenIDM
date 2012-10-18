@@ -33,21 +33,21 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public class ActivitiUtil {
     /**
-     * Fetch OpenIDM action from the request
+     * Fetch and remove OpenIDM action from the request
      * @param request Request to be processed
      * @return requested action
      */
-    public static String getKeyFromRequest(JsonValue request) {
-          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().get("key"));
+    public static String removeKeyFromRequest(JsonValue request) {
+          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("key"));
     }
     
     /**
-     * Fetch Activiti workflow processDefinitionId if present
+     * Fetch and remove Activiti workflow processDefinitionId if present
      * @param request Request to be processed
      * @return processDefinitionId
      */
-    public static String getProcessDefinitionIdFromRequest(JsonValue request) {
-        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().get("processDefinitionId"));
+    public static String removeProcessDefinitionIdFromRequest(JsonValue request) {
+        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("processDefinitionId"));
     }
     
     /**

@@ -179,6 +179,8 @@ public class AuthFilter implements Filter {
         logAuth(req, username, null, Action.authenticate, Status.FAILURE);
         JsonResourceException jre = new JsonResourceException(401, "Access denied");
         res.getWriter().write(jre.toJsonValue().toString());
+        res.setContentType("application/json");
+        res.setStatus(401);
     }
 
     private static void logAuth(HttpServletRequest req, String username,
