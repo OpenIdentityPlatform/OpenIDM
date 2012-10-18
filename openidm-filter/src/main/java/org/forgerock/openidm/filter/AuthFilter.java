@@ -139,19 +139,14 @@ public class AuthFilter implements Filter {
             String logout = req.getHeader("X-OpenIDM-Logout");
             String headerLogin = req.getHeader("X-OpenIDM-Username");
             String basicAuth = req.getHeader("Authorization");
-            
             if (logout != null) {
                 if (session != null) {
                     session.invalidate();
                 }
                 res.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 return;
-            } else if (req.getRequestedSessionId() != null && !req.isRequestedSessionIdValid()) {
-                // Session expired
-                authFailed(req, res, authData.username, "UNAUTHORIZED_SESSION_EXPIRED", "Access denied as session is expired");
-                return;
+              // if we see the certficate port this request is for client auth only
             } else if (allowClientCertOnly(req)) {
-                // if we see the certficate port this request is for client auth only
                 authData = hasClientCert(req);
                 logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
             } else if (session == null && headerLogin != null) {
@@ -181,18 +176,9 @@ public class AuthFilter implements Filter {
     }
 
     private void authFailed(HttpServletRequest req, HttpServletResponse res, String username) throws IOException {
-        authFailed(req, res, username, null, "Access denied");
-    }
-    
-    private void authFailed(HttpServletRequest req, HttpServletResponse res, String username, String detailCode, String detailExplanation) throws IOException {
         logAuth(req, username, null, Action.authenticate, Status.FAILURE);
-        JsonResourceException jre = new JsonResourceException(401, detailExplanation);
-        JsonValue exAsJson = jre.toJsonValue();
-        // TODO: this needs to move into the json resource exception contract
-        if (detailCode != null) {
-            exAsJson.put("detailCode", detailCode);
-        }
-        res.getWriter().write(exAsJson.toString());
+        JsonResourceException jre = new JsonResourceException(401, "Access denied");
+        res.getWriter().write(jre.toJsonValue().toString());
         res.setContentType("application/json");
         res.setStatus(401);
     }
@@ -228,6 +214,7 @@ public class AuthFilter implements Filter {
         }
     }
 
+        //res.sendError(HttpServletResponse.SC_UNAUTHORIZED, new JsonValue(respMap).toString());
     private AuthData doBasicAuth(String data) throws AuthException {
 
         LOGGER.debug("HTTP basic authentication request");
