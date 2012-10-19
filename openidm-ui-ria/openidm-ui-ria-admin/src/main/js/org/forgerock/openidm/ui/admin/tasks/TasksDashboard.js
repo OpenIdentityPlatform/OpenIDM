@@ -91,6 +91,11 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
             }, this));
+            
+            eventManager.unregisterListener("refreshMyTasksMenu");
+            eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
+                this.myTasks.render("assigned", $("#myTasks"));
+            }, this));
         }
     });
 

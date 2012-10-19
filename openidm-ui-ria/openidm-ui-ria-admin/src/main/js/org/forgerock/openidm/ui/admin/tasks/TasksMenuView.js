@@ -42,7 +42,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
     var TasksMenuView = Backbone.View.extend({
         
         events: {
-//            "mouseleave" : "closeOpenItems",
             "click .detailsLink": "showTask",
             "change select[name=assignedUser]": "claimTask",
             "click .choosable" : "markAsChoosen",
@@ -81,9 +80,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             } else {
                 this.setElement(element);
             }
-            
-            this.$el.html('');
-            
+                        
             this.category = category;
             
             if(category === "all") {
@@ -94,85 +91,86 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         errorHandler: function() {
-            this.$el.append('<b>No tasks</b>');
+            this.$el.html('');
+            if(this.category === "assigned") {
+                this.$el.append('<b>You do not have any tasks assigned to you right now.</b>');
+            } else {
+                this.$el.append('<b>You do not have any tasks in your\'s group\'s queue now.</b>');
+            }
         },
         
         displayTasks: function(tasks) {
-            var process, data, processName, task, taskName, actions, allLoadedCallback;
+            var process, data, processName, taskType, taskName, actions, i, task;
             
-            allLoadedCallback = function(self) {
-                if (self.counter === self.numberOfProcessesToDisplay) {
-                    self.$el.accordion('destroy');
-//                    self.$el.accordion({collapsible: true, active: false, heightStyle: "content", event : "click mouseenter"});
-                    self.$el.accordion({collapsible: true, active: false, heightStyle: "content"});
-                    self.refreshAssignedSelectors();
-                }
-            };
-            
-            this.counter = 0;
-            this.numberOfProcessesToDisplay = 0;
-            
-            actions = this.getActions();     
-            
-            for(processName in tasks) {
-                this.numberOfProcessesToDisplay++;
-            }
+            this.$el.html('');
             
             for(processName in tasks) {
                 
                 process = tasks[processName];
                 
                 for(taskName in process) {
-                    task = process[taskName];
+                    taskType = process[taskName];
                     
                     data = {
                         processName: processName,
                         taskName: taskName,
-                        count: task.tasks.length,
-                        //TODO make it generic
-                        headers: ["For", "Application", "Requested", "Actions"],
+                        count: taskType.tasks.length,
+                        headers: this.getParamsForTaskType(taskType),
                         batchOperation: this.category === 'assigned',
                         tasks: []
                     };
                     
-                    this.fetchTaskData(task, data, actions, allLoadedCallback);
-                }    
-            }          
-        },
-        
-        counter: 0,
-        
-        numberOfProcessesToDisplay: 0,
-        
-        fetchTaskData: function(task, data, actions, callback) {
-            var i, j = 0, params, fetchParametersCallback;
-            
-            fetchParametersCallback = function(userName, userNameId, appName, date, taskId, assignee) {
-                //TODO make it generic
-                data.tasks.push(this.prepareParams({"user": this.getUserLink(userName, userNameId), "app": appName, 
-                    "date": dateUtil.formatDate(date), "actions": actions, "hidden": this.getHiddenParams({id: taskId, assignee: assignee})}));
-                j++;
+                    for(i = 0; i < taskType.tasks.length; i++) {
+                        task = taskType.tasks[i];
+                        
+                        data.tasks.push(this.prepareParamsFromTask(task));
+                    }
+                }  
                 
-                if(j === task.tasks.length) {
-                    this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
-                    this.counter++;
-                    callback(this);
-                }
-            };
-            
-            for(i = 0; i < task.tasks.length; i++) {
-                params = task.tasks[i];
-                if(params.lnkId) {
-                    this.fetchParameters(params.lnkId, params._id, params.assignee, _.bind(fetchParametersCallback, this));
-                } 
+                this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
             } 
+            
+            this.$el.accordion('destroy');
+            this.$el.accordion({collapsible: true, active: false, heightStyle: "content", event: "noevent"});
+            
+            this.$el.find(".ui-accordion-header").on('mouseenter', function(event) {
+                event.preventDefault();
+                
+                $.doTimeout('tasksAccordion', 150, _.bind(function() {
+                    $(".ui-accordion").not($(this).parent()).accordion({active: false});
+                    
+                    if(!$(this).hasClass('ui-state-active')) {
+                        $(this).parent().accordion({active: $(this).index() / 2});
+                    }
+                }, this));
+            });
+            
+            this.refreshAssignedSelectors();
         },
         
-        getHiddenParams: function(params) {
+        getParamsForTaskType: function(taskType) {
+            return ["For", "Application", "Requested", "Actions"];
+        },
+        
+        prepareParamsFromTask: function(task) {
+            var actions = this.getActions(task);
+            
+            if(task.variables.user) {
+            return this.prepareParams({
+                "user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id), 
+                "app": task.variables.application.name, 
+                "date": dateUtil.formatDate(task.createTime), 
+                "actions": actions, 
+                "hidden": this.getHiddenParams(task)
+            });
+            }
+        },
+        
+        getHiddenParams: function(task) {
             var ret = '';
                         
-            ret += '<input type="hidden" value="'+ params.id +'" name="taskId" />';
-            ret += '<input type="hidden" value="'+ params.assignee +'" name="assignedUser" />';
+            ret += '<input type="hidden" value="'+ task._id +'" name="taskId" />';
+            ret += '<input type="hidden" value="'+ task.assignee +'" name="assignedUser" />';
             
             return ret;
         },
@@ -204,17 +202,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             return "<a href='#' class='userLink'>"+ userName+ "</a><input type='hidden' name='userName' value='"+ userNameId +"' />";
         },
         
-        fetchParameters: function(userAppLinkId, taskId, assignee, callback) {
-            userApplicationLnkDelegate.readEntity(userAppLinkId, function(userAppLink) {                
-                userDelegate.readEntity(userAppLink.userId, function(user) {
-                    applicationDelegate.getApplicationDetails(userAppLink.applicationId, function(app) {
-                        callback(user.givenName + ' ' + user.familyName, user.userName, app.name, userAppLink.lastTimeUsed, taskId, assignee);
-                    });
-                });   
-            });
-        },
-        
-        getActions: function() {
+        getActions: function(task) {
             if(this.category === 'all') {
                 return '<select name="assignedUser"><option value="null">Unassigned</option><option value="me">Assign to me</option></select> <a href="#" class="buttonOrange detailsLink">Details</a>';
             } else if(this.category === 'assigned') {
@@ -243,8 +231,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             
             if(id && newAssignee !== assignee) {                
                 workflowManager.assignTaskToUser(id, newAssignee, _.bind(function() {
-                   eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "claimedTask");
-                   eventManager.sendEvent("refreshTasksMenu");
+                    $(event.target).parent().parent().find("input[name=assignedUser]").val(newAssignee);
+                    eventManager.sendEvent("refreshMyTasksMenu");
                 }, this), function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
                 });
@@ -326,8 +314,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                 taskContainer.parent().parent().find(".saveLink").removeClass("buttonOrange").addClass("buttonGrey");
             }
         },
-        
-        actionNumberToExecute: 0,
         
         save: function(event) {
             var actionsToRun = [], taskId, action, actionToRun, actionPointer, counter = 0, actionFinished, denyReason;

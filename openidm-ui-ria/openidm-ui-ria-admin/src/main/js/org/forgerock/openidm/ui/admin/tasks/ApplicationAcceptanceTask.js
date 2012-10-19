@@ -59,17 +59,8 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
                 this.$el.find("input[name=saveButton]").show();
             }
             
-            userApplicationLnkDelegate.readEntity(this.task.description, function(userAppLink) {
-                
-                userDelegate.readEntity(userAppLink.userId, function(user) {
-                    self.$el.find("input[name=userData]").val(user.givenName + " " + user.familyName);
-                });
-                
-                applicationDelegate.getApplicationDetails(userAppLink.applicationId, function(app) {
-                    self.$el.find("input[name=requestedApplicationName]").val(app.name);
-                });
-                
-            });
+            this.$el.find("input[name=userData]").val(this.task.variables.user.givenName + " " + this.task.variables.user.familyName);
+            this.$el.find("input[name=requestedApplicationName]").val(this.task.variables.application.name);            
         }
     }); 
     
