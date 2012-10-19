@@ -40,7 +40,8 @@ require.config({
         spin: "libs/spin-1.2.5-min",
         dataTable: "libs/datatables-1.9.3-min",
         jqueryui: "libs/jquery-ui-1.8.23.custom-min",
-        xdate: "libs/xdate-0.7-min"
+        xdate: "libs/xdate-0.7-min",
+        doTimeout: "org/forgerock/openidm/ui/admin/jquery.ba-dotimeout.min"
     },
 
     shim: {
@@ -74,6 +75,9 @@ require.config({
         }, 
         xdate: {
             exports: "xdate"
+        },
+        doTimeout: {
+            exports: "doTimeout"
         }
     }
 });
@@ -93,6 +97,7 @@ require([
     "dataTable",
     "jqueryui",
     "xdate",
+    "doTimeout",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
     "config/main",
@@ -100,7 +105,7 @@ require([
     "org/forgerock/commons/ui/common/main",
     "org/forgerock/openidm/ui/apps/main",
     "org/forgerock/openidm/ui/admin/main" 
-], function(a, b, c, d, e, f, g, h, i, j, constants, eventManager) { 
+], function(a, b, c, d, e, f, g, h, i, j, k, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 
