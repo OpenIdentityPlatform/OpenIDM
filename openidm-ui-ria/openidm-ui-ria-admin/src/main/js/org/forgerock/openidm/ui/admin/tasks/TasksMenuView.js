@@ -162,8 +162,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             
             for(i = 0; i < task.tasks.length; i++) {
                 params = task.tasks[i];
-                if(params.userApplicationLnkId) {
-                    this.fetchParameters(params.userApplicationLnkId, params._id, params.assignee, _.bind(fetchParametersCallback, this));
+                if(params.lnkId) {
+                    this.fetchParameters(params.lnkId, params._id, params.assignee, _.bind(fetchParametersCallback, this));
                 } 
             } 
         },
