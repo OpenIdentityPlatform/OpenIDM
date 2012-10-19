@@ -136,9 +136,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             this.$el.accordion('destroy');
             this.$el.accordion({collapsible: true, active: false, heightStyle: "content", event: "noevent"});
             
-            this.$el.find(".ui-accordion-header").on('mouseenter', function(event) {
-                event.preventDefault();
-                
+            this.$el.find(".ui-accordion-header").on('mouseenter', function(event) {                
                 $.doTimeout('tasksAccordion', 150, _.bind(function() {
                     $(".ui-accordion").not($(this).parent()).accordion({active: false});
                     
@@ -146,6 +144,10 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                         $(this).parent().accordion({active: $(this).index() / 2});
                     }
                 }, this));
+            });
+            
+            this.$el.find(".ui-accordion-header").click(function(event) {
+                event.preventDefault();
             });
             
             this.refreshAssignedSelectors();
