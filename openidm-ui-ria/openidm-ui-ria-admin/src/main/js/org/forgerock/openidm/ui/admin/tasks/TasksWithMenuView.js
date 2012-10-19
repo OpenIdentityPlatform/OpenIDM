@@ -53,9 +53,13 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
                 if(id) {                    
                     taskDetailsView.render(id, category);
                 } else {
-                    $("#taskDetails").html('<div class="center shadowFrame"><h1>Choose a task</h1></div>');
+                    this.clearTaskDetails();
                 }
             });            
+        },
+        
+        clearTaskDetails: function() {
+            $("#taskDetails").html('<div class="center shadowFrame"><h1>Choose a task</h1></div>');
         },
         
         registerListeners: function() {
@@ -68,7 +72,12 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
             eventManager.unregisterListener("refreshTasksMenu");
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
                 this.tasksMenuView.render(this.category);
-                //TODO clear task details
+                this.clearTaskDetails();
+            }, this));
+            
+            eventManager.unregisterListener("refreshMyTasksMenu");
+            eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
+                this.clearTaskDetails();
             }, this));
         }
     }); 

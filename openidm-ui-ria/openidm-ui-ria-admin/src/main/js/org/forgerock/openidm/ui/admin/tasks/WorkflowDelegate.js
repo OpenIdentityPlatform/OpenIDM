@@ -107,7 +107,6 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     };
     
     obj.serviceCall = function(callParams) {
-        console.log(callParams.url);
         serviceInvoker.restCall(callParams);
     };
     
