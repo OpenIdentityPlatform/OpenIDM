@@ -48,12 +48,10 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             "click .choosable" : "markAsChoosen",
             "click .cancelLink": "resetChoosen",
             "click .saveLink": "save",
-            "hover .userLink": "showUser"
+            "mouseenter .userLink": "showUser"
         },
         
-        closeOpenItems: function(){
-            this.$el.accordion( "activate", false );
-        },
+        tasks: {},
         
         showTask: function(event) {
             event.preventDefault();
@@ -68,13 +66,30 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         showUser: function(event) {
             event.preventDefault();
             
-            var userId = $(event.target).next().val(), data = {}, requesterDisplayName = $(event.target).next().next().val();
+            var userId = $(event.target).next().val(), data = {}, requesterDisplayName = $(event.target).next().next().val(), user, taskId;
             
-            userDelegate.readEntity(userId, function(user) {
-                data = {userDisplayName: user.givenName + " "+ user.familyName, userName: user.userName, requesterDisplayName: requesterDisplayName};
-                popupCtrl.showBy(uiUtils.fillTemplateWithData("templates/admin/tasks/ShowUserProfile.html", data),$(event.target));
-            });
+            taskId = $(event.target).parent().parent().find("input[name=taskId]").val();
+            user = this.getParamForTask("user", taskId);
+
+            data = {userDisplayName: user.givenName + " "+ user.familyName, userName: user.userName, requesterDisplayName: requesterDisplayName};
+            popupCtrl.showBy(uiUtils.fillTemplateWithData("templates/admin/tasks/ShowUserProfile.html", data),$(event.target));
                 
+        },
+        
+        getParamForTask: function(paramName, taskId) {
+            var processName, taskName, taskType, task, i;
+            for(processName in this.tasks) {
+                process = this.tasks[processName];
+                for(taskName in process) {
+                    taskType = process[taskName];
+                    for(i = 0; i < taskType.tasks.length; i++) {
+                        task = taskType.tasks[i];
+                        if (task._id === taskId) {
+                            return task.variables[paramName];
+                        }
+                    }
+                }
+            }
         },
         
         render: function(category, element, callback) {
@@ -104,6 +119,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         
         displayTasks: function(tasks) {
             var process, data, processName, taskType, taskName, actions, i, task;
+            
+            this.tasks = tasks;
             
             this.$el.html('');
             
