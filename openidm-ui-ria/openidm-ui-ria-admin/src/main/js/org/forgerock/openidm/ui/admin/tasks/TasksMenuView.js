@@ -42,12 +42,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
     var TasksMenuView = Backbone.View.extend({
         
         events: {
+//            "mouseleave" : "closeOpenItems",
             "click .detailsLink": "showTask",
             "change select[name=assignedUser]": "claimTask",
             "click .choosable" : "markAsChoosen",
             "click .cancelLink": "resetChoosen",
             "click .saveLink": "save",
             "click .userLink": "showUser"
+        },
+        
+        closeOpenItems: function(){
+            this.$el.accordion( "activate", false );
         },
         
         showTask: function(event) {
@@ -98,6 +103,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             allLoadedCallback = function(self) {
                 if (self.counter === self.numberOfProcessesToDisplay) {
                     self.$el.accordion('destroy');
+//                    self.$el.accordion({collapsible: true, active: false, heightStyle: "content", event : "click mouseenter"});
                     self.$el.accordion({collapsible: true, active: false, heightStyle: "content"});
                     self.refreshAssignedSelectors();
                 }
