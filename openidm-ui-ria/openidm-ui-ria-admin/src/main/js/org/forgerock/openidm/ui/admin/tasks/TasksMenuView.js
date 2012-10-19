@@ -37,8 +37,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
     "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
-    "org/forgerock/commons/ui/common/util/DateUtil"
-], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userApplicationLnkDelegate, userDelegate, applicationDelegate, dateUtil) {
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/commons/ui/common/components/popup/PopupCtrl"
+], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userApplicationLnkDelegate, userDelegate, applicationDelegate, dateUtil, popupCtrl) {
     var TasksMenuView = Backbone.View.extend({
         
         events: {
@@ -47,7 +48,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             "click .choosable" : "markAsChoosen",
             "click .cancelLink": "resetChoosen",
             "click .saveLink": "save",
-            "click .userLink": "showUser"
+            "hover .userLink": "showUser"
         },
         
         closeOpenItems: function(){
@@ -67,11 +68,13 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         showUser: function(event) {
             event.preventDefault();
             
-            var userName = $(event.target).next().val();
+            var userId = $(event.target).next().val(), data = {}, requesterDisplayName = $(event.target).next().next().val();
             
-            if(userName) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [userName]});
-            }
+            userDelegate.readEntity(userId, function(user) {
+                data = {userDisplayName: user.givenName + " "+ user.familyName, userName: user.userName, requesterDisplayName: requesterDisplayName};
+                popupCtrl.showBy(uiUtils.fillTemplateWithData("templates/admin/tasks/ShowUserProfile.html", data),$(event.target));
+            });
+                
         },
         
         render: function(category, element, callback) {
@@ -157,7 +160,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             
             if(task.variables.user) {
             return this.prepareParams({
-                "user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id), 
+                "user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id, task.variables.userApplicationLnk.requester), 
                 "app": task.variables.application.name, 
                 "date": dateUtil.formatDate(task.createTime), 
                 "actions": actions, 
@@ -198,8 +201,8 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             console.log("refresing selectors");
         },
         
-        getUserLink: function(userName, userNameId) {
-            return "<a href='#' class='userLink'>"+ userName+ "</a><input type='hidden' name='userName' value='"+ userNameId +"' />";
+        getUserLink: function(userName, userNameId, requesterDisplayName) {
+            return "<a href='#' class='userLink'>"+ userName+ "</a><input type='hidden' name='uid' value='"+ userNameId +"' /><input type='hidden' name='requesterDisplayName' value='"+ requesterDisplayName +"' />";
         },
         
         getActions: function(task) {
