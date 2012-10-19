@@ -141,7 +141,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
         var finished = 0, taskBasicData, getTasksSuccessCallback, pointer, myTasks = {};
         
         getTasksSuccessCallback = function(taskData) {
-            taskData.params = {userApplicationLnkId: taskData.description};
+            taskData.params = taskData.variables;
             if(taskData.assignee === assignee) {
                 myTasks[taskData._id] = taskData;
             }
