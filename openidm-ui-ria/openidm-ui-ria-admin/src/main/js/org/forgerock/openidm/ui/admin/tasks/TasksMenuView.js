@@ -77,7 +77,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         getParamForTask: function(paramName, taskId) {
-            var processName, taskName, taskType, task, i;
+            var processName, taskName, taskType, task, i, process;
             for(processName in this.tasks) {
                 process = this.tasks[processName];
                 for(taskName in process) {
