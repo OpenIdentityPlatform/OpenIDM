@@ -221,7 +221,8 @@ define("config/AppConfiguration", [
                    configuration: {
                        templateUrls: [ //preloaded templates
                            "templates/apps/application.html",
-                           "templates/admin/tasks/ProcessUserTaskTableTemplate.html"
+                           "templates/admin/tasks/ProcessUserTaskTableTemplate.html",
+                           "templates/admin/tasks/ShowUserProfile.html"
                        ]
                    } 
                },
