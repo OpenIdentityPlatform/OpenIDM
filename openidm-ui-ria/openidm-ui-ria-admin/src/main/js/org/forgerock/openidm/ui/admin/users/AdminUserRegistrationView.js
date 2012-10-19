@@ -44,11 +44,10 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         
         formSubmit: function(event) {
             event.preventDefault();
-            
+            var _this = this, data = form2js(this.$el.attr("id")), element;
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
-                var data = form2js(this.$el.attr("id")), element;
                 
                 delete data.terms;
                 delete data.passwordConfirm;
@@ -66,7 +65,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                     } else {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown" );
                     }
-                    this.unlock();
+                    _this.unlock();
                 });
             }
         },
