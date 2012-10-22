@@ -54,9 +54,7 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
             workflowManager.completeTask(this.task._id, params, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [this.category]});
-            }, this), function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
-            });
+            }, this));
         },
         
         claimTask: function(event) {

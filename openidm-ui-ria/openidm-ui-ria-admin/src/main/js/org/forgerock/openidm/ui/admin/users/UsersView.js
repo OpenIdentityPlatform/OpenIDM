@@ -70,8 +70,6 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             }
                             
                             fnCallback(data);
-                        }, function() {
-                            
                         });
                     },
                     "aoColumns": [

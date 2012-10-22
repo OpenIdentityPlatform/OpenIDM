@@ -68,9 +68,6 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                 userDelegate.patchSelectedUserAttributes(this.editedUsername, patchDefinitionObject, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
                     this.close();
-                }, this), _.bind(function(r) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
-                    this.close();
                 }, this));
             }
         },

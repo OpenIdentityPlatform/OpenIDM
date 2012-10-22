@@ -36,8 +36,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/components/ConfirmationDialog",
-    "org/forgerock/commons/ui/common/main/Router"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router) {
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/user/delegates/CountryStateDelegate"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate) {
     var AdminUserProfileView = AbstractView.extend({
         template: "templates/admin/AdminUserProfileTemplate.html",
         events: {
@@ -70,15 +71,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         self.reloadData();
-                    }, function() {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                        self.reloadData();
                     });
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                    self.reloadData();
-                }, function() {
-                    self.reloadData();
                 });
             }
         },
@@ -92,15 +85,6 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 var editedUserRef = this.editedUserContainer, self = this;
 
                 validatorsManager.bindValidators(this.$el);
-                
-                uiUtils.loadSelectOptions("data/countries.json", $("select[name='country']"), true, _.bind(function() {
-                    if(this.editedUser.country) {
-                        this.$el.find("select[name='country'] > option:first").text("");
-                        this.$el.find("select[name='country']").val(this.editedUser.country);
-                        
-                        this.loadStates();
-                    }
-                }, this));
                 
                 userDelegate.getForUserName(userName, function(user) {
                     self.editedUser = user;
@@ -116,16 +100,18 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         },
         
         loadStates: function() {
-            var country = $('#profile select[name="country"]').val();            
-              
+            var country = this.$el.find('select[name="country"]').val();            
+            
             if(country) {
                 this.$el.find("select[name='country'] > option:first").text("");
                 
-                uiUtils.loadSelectOptions("data/"+country+".json", $("select[name='stateProvince']"), true, _.bind(function() {
-                    if(this.editedUser.stateProvince) {
-                        this.$el.find("select[name='stateProvince'] > option:first").text("");
-                        this.$el.find("select[name='stateProvince']").val(this.editedUser.stateProvince);
-                    }
+                countryStateDelegate.getAllStatesForCountry(country, _.bind(function(states) {
+                    uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
+                        if(this.editedUser.stateProvince) {
+                            this.$el.find("select[name='stateProvince'] > option:first").text("");
+                            this.$el.find("select[name='stateProvince']").val(this.editedUser.stateProvince);
+                        }
+                    }, this));
                 }, this));
             } else {
                 this.$el.find("select[name='stateProvince']").emptySelect();
@@ -151,6 +137,17 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=backButton]").val("Back");
             this.$el.find("input[name=oldEmail]").val(this.editedUser.email);
             validatorsManager.validateAllFields(this.$el);
+            
+            countryStateDelegate.getAllCountries(_.bind(function(countries) {
+                uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
+                    if(this.editedUser.country) {
+                        this.$el.find("select[name='country'] > option:first").text("");
+                        this.$el.find("select[name='country']").val(this.editedUser.country);
+                        
+                        this.loadStates();
+                    }
+                }, this));
+            }, this));
         },
         
         deleteUser: function() {

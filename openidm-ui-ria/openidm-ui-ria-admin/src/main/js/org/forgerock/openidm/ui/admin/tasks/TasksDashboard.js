@@ -73,8 +73,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
                         
                         notificationsView = new NotificationsView();
                         notificationsView.render({el: $("#notifications"), items: notifications});
-                    }, function() {
-                        eventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
                     });
                 }
             });    
