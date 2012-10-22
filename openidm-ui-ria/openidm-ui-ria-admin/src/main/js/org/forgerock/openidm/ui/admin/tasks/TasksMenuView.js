@@ -256,7 +256,11 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                     $(event.target).parent().parent().find("input[name=assignedUser]").val(newAssignee);
                     eventManager.sendEvent("refreshMyTasksMenu");
                 }, this), function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
+                    if(assignee === conf.loggedUser.userName) {
+                        $(event.target).val("me");
+                    } else {
+                        $(event.target).val(assignee);
+                    }
                 });
             }
         },
@@ -268,7 +272,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                 workflowManager.completeTask(id, {"decision": "accept"}, _.bind(function() {
                     callback(this);
                 }, this), function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
                     callback(this);
                 });
             }
@@ -281,7 +284,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                 workflowManager.completeTask(id, {"decision": "reject", "reason": denyReason}, _.bind(function() {
                     callback(this);
                 }, this), function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
                     callback(this);
                 });
             }
@@ -292,7 +294,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                 workflowManager.assignTaskToUser(id, "", _.bind(function() {
                     callback(this);
                 }, this), function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
                     callback(this);
                 });
             }

@@ -48,23 +48,15 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
-                
                 delete data.terms;
                 delete data.passwordConfirm;
                 data.userName = data.email.toLowerCase();
                 data.securityQuestion = 1;
                 data.securityAnswer = "";
                 
-                console.log("ADDING USER: " + JSON.stringify(data));                
                 userDelegate.createEntity(data, function(user) {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULY_REGISTERED, { user: data, selfRegistration: false });
-                }, function(response) {
-                    console.warn(response);
-                    if (response.error === 'Conflict') {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists" );
-                    } else {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown" );
-                    }
+                }, function() {
                     _this.unlock();
                 });
             }
