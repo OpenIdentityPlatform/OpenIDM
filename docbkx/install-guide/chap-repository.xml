@@ -45,16 +45,19 @@
 
   <para>OpenIDM <?eval ${docTargetVersion}?> supports use of <link
   xlink:href="http://dev.mysql.com/downloads/mysql/" xlink:show="new"
-  >MySQL</link> as an internal repository. After installing MySQL on the local
-  host and <emphasis>before starting OpenIDM for the first time</emphasis>,
-  perform the following steps.</para>
+  >MySQL</link> as an internal repository. For details of the supported 
+  versions of MySQL, see <link xlink:href="release-notes#chap-before-you-install" 
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You Install 
+  OpenIDM Software</citetitle></link> in the <citetitle>Release Notes</citetitle>.
+  After you have installed MySQL on the local host and <emphasis>before starting 
+  OpenIDM for the first time</emphasis>, perform the following steps.</para>
 
   <step>
    <para>Download <link xlink:show="new"
    xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL
    Connector/J</link>, unpack the delivery, and copy the .jar into the
    <filename>openidm/bundle</filename> directory.</para>
-   <screen>$ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/</screen>
+   <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
   </step>
   <step>
    <para>Make sure that OpenIDM is stopped.</para>
