@@ -79,7 +79,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             "bSortable": false
                         },
                         {
-                        	"mData": "userName"
+                            "mData": "userName"
                         },
                         { 
                             "mData": "name" 
