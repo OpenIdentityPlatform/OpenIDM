@@ -52,7 +52,8 @@ var accessConfig = { "configs" : [
         {       "pattern" : "*",
                 "roles" : "openidm-admin",
                 "methods": "*", // default to all methods allowed
-                "actions" : "*" // default to all actions allowed
+                "actions" : "*", // default to all actions allowed
+                "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
         },
         // Clients authenticated via SSL mutual authentication
         {       "pattern" : "*",
@@ -145,6 +146,13 @@ function ownDataOnly() {
     } else {
         return isPublicMethodInvocation();
     }
+}
+
+function disallowQueryExpression() {
+    if (request.params && typeof request.params['_query-expression'] != "undefined") {
+        return false;
+    }
+    return true;
 }
 
 function passesAccessConfig(id, roles, method, action) {
