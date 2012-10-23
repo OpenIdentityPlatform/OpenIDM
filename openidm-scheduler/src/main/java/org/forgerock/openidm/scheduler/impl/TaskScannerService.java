@@ -39,6 +39,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonProcessingException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
@@ -46,6 +47,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.scope.ScopeFactory;
@@ -54,6 +56,9 @@ import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.ReadablePeriod;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,21 +138,48 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
             JsonPointer startField = getTaskStatePointer(scanValue, "started");
             JsonPointer completedField = getTaskStatePointer(scanValue, "completed");
 
-            JsonValue flattenedScanValue = flattenJson(scanValue);
-            ConfigMacroUtil.expand(flattenedScanValue);
-            JsonValue results = performQuery(id, flattenedScanValue);
-
+            JsonValue results;
+            try {
+                results = fetchAllObjects(id, scanValue);
+            } catch (JsonResourceException e1) {
+                throw new ExecutionException("Error during query", e1);
+            }
             Script script = Scripts.newInstance(scriptName, scriptValue);
 
             Integer max = params.get("maxRecords").asInteger();
 
-            logger.debug("Results: {}", results.size());
+            ReadablePeriod period = fetchRecoveryTimeout(scanValue);
+
+            logger.debug("TaskScan {} query results: {}", invokerName, results.size());
             int count = 0;
             for (JsonValue input : results) {
+                // TODO: clean up these limitation factors
+                // If we're over quota, quit early
                 if (max != null && count >= max) {
                     break;
                 }
-                execScript(scriptName, invokerName, script, id, startField, completedField, input);
+
+                // Check if this object has a STARTED time already
+                String startTimeString = input.get(startField).asString();
+                if (startTimeString != null) {
+                    DateTime startedTime = DATE_UTIL.parseTimestamp(startTimeString);
+                    // Skip if the startTime + interval has not been passed
+                    DateTime expirationDate = startedTime.plus(period);
+                    if (expirationDate.isAfterNow()) {
+                        logger.debug("Object already started and has not expired. Started at: {}. Timeout: {}. Expires at: {}",
+                                new Object[] {
+                                DATE_UTIL.formatDateTime(startedTime),
+                                period,
+                                DATE_UTIL.formatDateTime(expirationDate)});
+                        continue;
+                    }
+                }
+
+                try {
+                    claimAndExecScript(scriptName, invokerName, script, id, startField, completedField, input, startTimeString);
+                } catch (JsonResourceException e) {
+                    throw new ExecutionException("Error during claim and execution phase", e);
+                }
                 count++;
             }
         } else {
@@ -156,18 +188,45 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
     }
 
     /**
+     * Flatten a list of parameters and perform a query to fetch all objects from storage
+     * @param id the identifier of the resource to query
+     * @param params the parameters of the query
+     * @return JsonValue containing a list of all the retrieved objects
+     * @throws JsonResourceException
+     */
+    private JsonValue fetchAllObjects(String id, JsonValue params) throws JsonResourceException {
+        JsonValue flatParams = flattenJson(params);
+        ConfigMacroUtil.expand(flatParams);
+        return performQuery(id, flatParams);
+    }
+
+    /**
+     * Retrieve the timeout period from the supplied config
+     * @param value JsonValue configuration containing "recovery/timeout"
+     * @return the timeout period taken from the config
+     */
+    private ReadablePeriod fetchRecoveryTimeout(JsonValue value) {
+        String timeoutStr = value.get("recovery").get("timeout").asString();
+
+        // Default to a 0-Day period if there's nothing to add
+        if (timeoutStr == null) {
+            return Days.days(0);
+        }
+
+        return ConfigMacroUtil.getTimePeriod(timeoutStr);
+    }
+
+    /**
      * Performs a query on a resource and returns the result set
      * @param resourceID the identifier of the resource to query
      * @param params parameters to supply to the query
      * @return the set of results from the performed query
+     * @throws JsonResourceException
      */
-    private JsonValue performQuery(String resourceID, JsonValue params) {
+    private JsonValue performQuery(String resourceID, JsonValue params) throws JsonResourceException {
         JsonValue queryResults = null;
-        try {
-            queryResults = accessor().query(resourceID, params);
-        } catch(JsonResourceException e) {
-            logger.warn("Error performing query", e);
-        }
+
+        queryResults = accessor().query(resourceID, params);
         return queryResults.get("result");
     }
 
@@ -175,14 +234,12 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      * Performs a read on a resource and returns the result
      * @param resourceID the identifier of the resource to read
      * @return the results from the performed read
+     * @throws JsonResourceException
      */
-    private JsonValue performRead(String resourceID) {
+    private JsonValue performRead(String resourceID) throws JsonResourceException {
         JsonValue readResults = null;
-        try {
-            readResults = accessor().read(resourceID);
-        } catch(JsonResourceException e) {
-            logger.warn("Error performing read", e);
-        }
+
+        readResults = accessor().read(resourceID);
         return readResults;
     }
 
@@ -203,8 +260,9 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      * @param path JsonPointer to the updated/added field
      * @param obj object to add to the field
      * @return the updated JsonValue
+     * @throws JsonResourceException
      */
-    private JsonValue updateValueWithObject(String resourceID, JsonValue value, JsonPointer path, Object obj) {
+    private JsonValue updateValueWithObject(String resourceID, JsonValue value, JsonPointer path, Object obj) throws JsonResourceException {
         ensureJsonPointerExists(path, value);
         value.put(path, obj);
         return performUpdate(resourceID, value);
@@ -215,18 +273,14 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      * @param resourceID the resource identifier to perform the update on
      * @param value the object to update with
      * @return the updated object
+     * @throws JsonResourceException
      */
-    private JsonValue performUpdate(String resourceID, JsonValue value) {
+    private JsonValue performUpdate(String resourceID, JsonValue value) throws JsonResourceException {
         String id = value.get("_id").required().asString();
         String fullID = retrieveFullID(resourceID, value);
         String rev = value.get("_rev").required().asString();
 
-        try {
-            accessor().update(fullID, rev, value);
-        } catch (JsonResourceException e) {
-            logger.warn("Error performing update", e);
-        }
-
+        accessor().update(fullID, rev, value);
         return retrieveObject(resourceID, id);
     }
 
@@ -256,8 +310,9 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      * @param resourceID the resource identifier to fetch an object from
      * @param value the value to retrieve an updated copy of
      * @return the updated value
+     * @throws JsonResourceException
      */
-    private JsonValue retrieveUpdatedObject(String resourceID, JsonValue value) {
+    private JsonValue retrieveUpdatedObject(String resourceID, JsonValue value) throws JsonValueException, JsonResourceException {
         return retrieveObject(resourceID, value.get("_id").required().asString());
     }
 
@@ -266,10 +321,43 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      * @param resourceID the resource identifier to fetch the object from
      * @param id the identifier of the object to fetch
      * @return the object retrieved from the resource
+     * @throws JsonResourceException
      */
-    private JsonValue retrieveObject(String resourceID, String id) {
-        JsonValue params = new JsonValue(new HashMap<String, Object>());
+    private JsonValue retrieveObject(String resourceID, String id) throws JsonResourceException {
         return performRead(retrieveFullID(resourceID, id));
+    }
+
+    private void claimAndExecScript(String scriptName, String invokerName, Script script, String resourceID,
+            JsonPointer startField, JsonPointer completedField, JsonValue input, String expectedStartDateStr) throws ExecutionException, JsonResourceException {
+        String id = input.get("_id").required().asString();
+        boolean claimedTask = false;
+        boolean retryClaimTask = false;
+
+        JsonValue _input = input;
+        do {
+            try {
+                retryClaimTask = false;
+                _input = updateValueWithObject(resourceID, input, startField, DATE_UTIL.now());
+                logger.debug("Claimed task and updated StartField: {}", _input);
+                claimedTask = true;
+            } catch (PreconditionFailedException ex) {
+                    // If the object changed since we queried, get the latest
+                    // and check if it's still in a state we want to process the task.
+                    _input = retrieveObject(resourceID, id);
+                    String currentStartDateStr = _input.get(startField).asString();
+                    String currentCompletedDateStr = _input.get(completedField).asString();
+                    if (currentCompletedDateStr == null && (currentStartDateStr == null || currentStartDateStr.equals(expectedStartDateStr))) {
+                        retryClaimTask = true;
+                    } else {
+                        // Someone else managed to update the started field first,
+                        // claimed the task. Do not execute it here this run.
+                        logger.debug("Task for {} {} was already claimed, ignore.", resourceID, id);
+                    }
+            }
+        } while (retryClaimTask);
+        if (claimedTask) {
+            execScript(scriptName, invokerName, script, resourceID, startField, completedField, _input);
+        }
     }
 
     /**
@@ -288,22 +376,18 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      * @param completedField JsonPointer to the field that will be marked at script completion
      * @param input value to input to the script
      * @throws ExecutionException
+     * @throws JsonResourceException
      */
     private void execScript(String scriptName, String invokerName, Script script, String resourceID,
-            JsonPointer startField, JsonPointer completedField, JsonValue input) throws ExecutionException {
+            JsonPointer startField, JsonPointer completedField, JsonValue input) throws ExecutionException, JsonResourceException {
         if (script != null) {
             Map<String, Object> scope = newScope();
-
-            logger.debug("Input: {}", input);
-
-            JsonValue _input = updateValueWithObject(resourceID, input, startField, DATE_UTIL.now());
-            logger.debug("Updated StartField: {}", _input);
-            scope.put("input", _input.getObject());
-            scope.put("objectID", retrieveFullID(resourceID, _input));;
+            scope.put("input", input.getObject());
+            scope.put("objectID", retrieveFullID(resourceID, input));
 
             try {
                 Object returnedValue = script.exec(scope);
-                _input = retrieveUpdatedObject(resourceID, _input);
+                JsonValue _input = retrieveUpdatedObject(resourceID, input);
                 logger.debug("After script execution: {}", _input);
 
                 if (returnedValue == Boolean.TRUE) {
@@ -385,7 +469,7 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params)
-            throws ObjectSetException {
+            throws ObjectSetException, BadRequestException {
         String action = (String) params.get("_action");
         try {
             if (action.equals("execute")) {
@@ -397,10 +481,11 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
                     throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
                 }
             } else {
-                return null;
+                throw new BadRequestException("Unknown action: " + action);
             }
         } catch (ExecutionException e) {
-            throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+            logger.warn(e.getMessage());
+            throw new BadRequestException(e.getMessage(), e);
         }
     }
 
@@ -422,7 +507,12 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
     private Map<String, Object> onExecute(String id, Map<String, Object> params)
             throws ExecutionException, JsonProcessingException, IOException {
         String name = (String) params.get("name");
-        JsonValue config = performRead("config/" + name);
+        JsonValue config;
+        try {
+            config = performRead("config/" + name);
+        } catch (JsonResourceException e) {
+            throw new ExecutionException("Error obtaining named config: '" + name + "'", e);
+        }
         JsonValue context = config.get(INVOKE_CONTEXT);
 
         performTask("REST", name, context);

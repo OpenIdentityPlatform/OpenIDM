@@ -15,92 +15,78 @@
  */
 package org.forgerock.openidm.util;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.core.ServerConstants;
-import org.apache.commons.lang3.time.FastDateFormat;
+
+import org.joda.time.Chronology;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
+ * Manages timestamp strings in ISO8601 format
+ * <p><b>Example:</b>
+ * <br>2011-09-09T14:58:17.6+02:00
+ * <br>2011-09-09T14:58:17.65+02:00
+ * <br>2011-09-09T14:58:17.654+02:00
+ * <br>2011-09-09T14:58:17.654Z
+ *
  * @author $author$
  * @version $Revision$ $Date$
  */
 public class DateUtil {
-    private FastDateFormat formatter;
-    private static final Locale LOCALE = new Locale("EN");
+    private Chronology chrono;
 
     /**
-     * Create a new DateUtil with the default timezone that generates ISO8601 format timestamps with milliseconds
-     * <p>2011-09-09T14:58:17.6+02:00
-     * <p>2011-09-09T14:58:17.65+02:00
-     * <p>2011-09-09T14:58:17.654+02:00
-     *
-     *
-     * @return new DateUtil with default formatting
+     * Fetches a DateUtil that is set in the default timezone
+     * @return DateUtil set in the default timezone
      */
     public static DateUtil getDateUtil() {
-        return new DateUtil(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND, TimeZone.getDefault());
+        return new DateUtil();
     }
 
     /**
-     * Create a new DateUtil using a specified TimeZone that generates ISO8601 format timestamps with milliseconds
-     * <p>2011-09-09T14:58:17.6+02:00
-     * <p>2011-09-09T14:58:17.65+02:00
-     * <p>2011-09-09T14:58:17.654+02:00
-     *
-     *
-     * @param zone the given time zone
-     * @return new DateUtil with specified time zone
+     * Returns a DateUtil using a specified timezone
+     * @param zone string representation of a timezone i.e. "UTC" or "Asia/Tokyo"
+     * @return DateUtil set with the supplied timezone
      */
-    public static DateUtil getDateUtil(TimeZone zone) {
-        return new DateUtil(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND, zone);
+    public static DateUtil getDateUtil(String zone) {
+        return new DateUtil(zone);
     }
 
     /**
-     * Create a new DateUtil using a TimeZone for the specified ID that generates
-     * ISO8601 format timestamps with milliseconds
-     * <p>2011-09-09T14:58:17.6+02:00
-     * <p>2011-09-09T14:58:17.65+02:00
-     * <p>2011-09-09T14:58:17.654+02:00
-     * <p>2011-09-09T14:58:17.654Z
-     *
-     * @param timeZoneID the ID for a TimeZone, either an abbreviation such as "PST",
-     *                   a full name such as "America/Los_Angeles", or a custom ID such as "GMT-8:00".
-     *                   Note that the support of abbreviations is for JDK 1.1.x compatibility only and
-     *                   full names should be used.
-     * @return DateUtil with specified time zone
+     * Creates a DateUtil using a specified timezone
+     * @param zone DateTimeZone object
+     * @return DateUtil set with the supplied timezone
      */
-    public static DateUtil getDateUtil(String timeZoneID) {
-        return new DateUtil(ServerConstants.DATE_FORMAT_ISO8601_TIME_MILLISECOND, TimeZone.getTimeZone(timeZoneID));
+    public static DateUtil getDateUtil(DateTimeZone zone) {
+        return new DateUtil(zone);
+    }
+
+
+    /**
+     * Creates a DateUtil using the default timezone and generates ISO8601 timestamps
+     */
+    private DateUtil() {
+        this(DateTimeZone.getDefault());
     }
 
     /**
-     * Create a new DateUtil using a Json object for configuration
-     *
-     * @param config Json object defining the configuration of the object. Expects "timezone" field to be defined
-     *               otherwise uses the system default timezone
-     * @return dateUtil object using the provided configuration object
+     * Creates a DateUtil using a specified timezone and generates ISO8601 timestamps
+     * @param zone string representation of a timezone. i.e. "UTC" or "Asia/Tokyo"
      */
-    public static DateUtil getDateUtil(JsonValue config) {
-        TimeZone zone;
-        String zoneID = config.get("timezone").asString(); // Returns null if object is undefined
-        if (zoneID == null) {
-            zone = TimeZone.getDefault();
-        } else {
-            zone = TimeZone.getTimeZone(zoneID);
-        }
-        return getDateUtil(zone);
+    private DateUtil(String zone) {
+        this(DateTimeZone.forID(zone));
     }
 
     /**
-     * Private constructor
-     * @param format string that defines the timestamp format
-     * @param zone time zone to configure the formatter
+     * Creates a DateUtil using a specified timezone and generates ISO8601 timestamps
+     * @param zone timezone object
      */
-    private DateUtil(String format, TimeZone zone) {
-        formatter = FastDateFormat.getInstance(format, zone, LOCALE);
+    private DateUtil(DateTimeZone zone) {
+        chrono = ISOChronology.getInstance(zone);
     }
 
     /**
@@ -109,7 +95,20 @@ public class DateUtil {
      * @return String containing a timestamp
      */
     public String now() {
-        return formatDateTime(new Date());
+        return new DateTime(chrono).toString();
+    }
+
+    public DateTime currentDateTime() {
+        return new DateTime(chrono);
+    }
+
+    /**
+     * Formats a given DateTime into a timestamp
+     * @param date DateTime object to convert
+     * @return String containing the formatted timestamp
+     */
+    public String formatDateTime(DateTime date) {
+        return date.withChronology(chrono).toString();
     }
 
     /**
@@ -118,19 +117,18 @@ public class DateUtil {
      * @return String containing the formatted timestamp
      */
     public String formatDateTime(Date date) {
-        String dateStr = formatter.format(date);
+        DateTime dt = new DateTime(date, chrono);
+        return dt.toString();
+    }
 
-        int timestampPos = dateStr.length() - 4;
-        int colonPos = dateStr.length() - 2;
-
-        if (dateStr.substring(timestampPos).equals("0000")) {
-            // 2011-09-09T14:58:17.654Z
-            // Go one back to remove the +/-
-            return dateStr.substring(0, timestampPos-1) + 'Z';
-        } else {
-            return dateStr.substring(0, colonPos)
-                + ":" + dateStr.substring(colonPos);
-        }
+    /**
+     * Parses an ISO8601 compliant timestamp into a DateTime object
+     * @param timestamp timestamp to parse
+     * @return DateTime using the zone and chronology indicated by the timestamp
+     */
+    public DateTime parseTimestamp(String timestamp) {
+        DateTimeFormatter parser = ISODateTimeFormat.dateTime();
+        return parser.withOffsetParsed().parseDateTime(timestamp);
     }
 
     /**
@@ -152,5 +150,9 @@ public class DateUtil {
             }
         }
         return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(new DateUtil("UTC").now());
     }
 }

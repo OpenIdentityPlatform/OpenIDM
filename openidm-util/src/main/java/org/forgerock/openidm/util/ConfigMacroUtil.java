@@ -25,11 +25,18 @@ package org.forgerock.openidm.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
+import org.joda.time.Hours;
+import org.joda.time.Minutes;
+import org.joda.time.Months;
+import org.joda.time.ReadablePeriod;
+import org.joda.time.Seconds;
+import org.joda.time.Years;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,7 +201,7 @@ public class ConfigMacroUtil {
      * @return string containing the interpolated time token
      */
     private static String handleTime(List<String> tokens, Iterator<String> iter) {
-        Calendar cal = Calendar.getInstance();
+        DateTime dt = new DateTime();
 
         // Add some amount
         if (iter.hasNext()) {
@@ -202,15 +209,14 @@ public class ConfigMacroUtil {
             if (operationToken.equals("+") || operationToken.equals("-")) {
                 if (iter.hasNext()) {
                     String quantityToken = iter.next(); // Get the magnitude to add or subtract
-                    int timeMagnitude = getTimeMagnitude(quantityToken);
-                    String valueString = quantityToken.substring(0, quantityToken.length()-1);
-                    int value = Integer.parseInt(valueString);
+
+                    ReadablePeriod period = getTimePeriod(quantityToken);
 
                     if (operationToken.equals("-")) {
-                        value *= -1;
+                        dt = dt.minus(period);
+                    } else {
+                        dt = dt.plus(period);
                     }
-
-                    cal.add(timeMagnitude, value);
                 } else {
                     logger.warn("Token '{}' not followed by a quantity", operationToken);
                 }
@@ -219,7 +225,7 @@ public class ConfigMacroUtil {
             }
         }
 
-        return DATE_UTIL.formatDateTime(cal.getTime());
+        return DATE_UTIL.formatDateTime(dt);
     }
 
     /**
@@ -227,35 +233,38 @@ public class ConfigMacroUtil {
      * @param token token of form "[number][magnitude]" (ex. "1d")
      * @return integer indicating the magnitude of the date for the calendar system
      */
-    private static int getTimeMagnitude(String token) {
-        char c = token.charAt(token.length()-1);
+    public static ReadablePeriod getTimePeriod(String token) {
+        String valString = token.substring(0, token.length()-1);
+        int value = Integer.parseInt(valString);
+        char mag = token.charAt(token.length()-1);
 
-        int mag;
-        switch (c) {
+        ReadablePeriod period;
+
+        switch (mag) {
         case 's':
-            mag = Calendar.SECOND;
+            period = Seconds.seconds(value);
             break;
         case 'm':
-            mag = Calendar.MINUTE;
+            period = Minutes.minutes(value);
             break;
         case 'h':
-            mag = Calendar.HOUR;
+            period = Hours.hours(value);
             break;
         case 'd':
-            mag = Calendar.DATE;
+            period = Days.days(value);
             break;
         case 'M':
-            mag = Calendar.MONTH;
+            period = Months.months(value);
             break;
         case 'y':
-            mag = Calendar.YEAR;
+            period = Years.years(value);
             break;
         default:
-            logger.warn("Invalid date magnitude: {}. Defaulting to seconds.", c);
-            mag =  Calendar.SECOND;
+            logger.warn("Invalid date magnitude: {}. Defaulting to seconds.", mag);
+            period = Seconds.seconds(value);
             break;
         }
 
-        return mag;
+        return period;
     }
 }
