@@ -104,7 +104,6 @@
                             <excludes>
                                 <exclude>**/libs/*.js</exclude>
                                 <exclude>**/*Test.js</exclude>
-                                <exclude>**/jquery.ba-dotimeout*</exclude>
                             </excludes>
                         </configuration>
                         <executions>

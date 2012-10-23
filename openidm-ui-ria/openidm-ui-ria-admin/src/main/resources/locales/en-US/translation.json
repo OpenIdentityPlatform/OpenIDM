@@ -1,0 +1,41 @@
+{
+    "config" : {
+        "messages" : {
+            "UserMessages" : {
+                "invalidCredentials" : "Login/password combination is invalid.",
+                "serviceUnavailable" : "Service unavailable",
+                "changedPassword" : "Password has been changed",
+                "unknown" : "Unknown error. Please contact with administrator",
+                "profileUpdateFailed" : "Problem during profile update",
+                "profileUpdateSuccessful" : "Profile has been updated",
+                "userNameUpdated" : "Username has been modified succesfully.",
+                "afterRegistration" : "User has been registered successfully",
+                "loggedIn" : "You have been successfully logged in.",
+                "errorFetchingData" : "Error fetching user data",
+                "loggedOut" : "You have been logged out.",
+                "siteIdentificationChanged" : "Site identification image has been changed",
+                "securityDataChanged" : "Security data has been changed",
+                "unauthorized" : "Unauthorized access or session timeout",
+                "userAlreadyExists" : "User already exists",
+                "internalError" : "Internal server error",
+                "forbiddenError" : "Forbidden request error.",
+                "notFoundError" : "Not found error.",
+                "badRequestError" : "Bad request error.",
+                "conflictError" : "Detected conflict in request."
+            }
+        }
+    },
+    "templates" : {
+        "user" : {
+            "LoginTemplate" : {
+                "loginRemember" : "Remember my username",
+                "login" : "Login",
+                "password" : "Password",
+                "noAccountQuestion" : "Don't have an account?",
+                "registerAccount" : "Register your account",
+                "problemLoggingQuestion" : "Having trouble logging in?",
+                "resetPassword" : "Reset my password"
+            }
+        }
+    }
+}

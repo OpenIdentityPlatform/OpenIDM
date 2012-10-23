@@ -43,23 +43,23 @@ define("config/routes/AdminRoutesConfig", [
                 url: "users/",
                 role: "admin"
             },
-            "adminUsersAdd" : {
-                view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
-                role: "admin",
-                url: "users/add/"
-            },
             "adminUserProfile" : {
                 view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
                 role: "admin",
-                url: /^users\/([^\/]+)\/$/,
+                url: /^users\/(([A-Za-z0-9_\-\.@])+)\/$/,
                 pattern: "users/?/"
             },
             "adminUserChangePassword" : {
                 base: "adminUserProfile",
                 dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
-                url: /^users\/([^\/]+)\/change_password\/$/,
+                url: /^users\/(([A-Za-z0-9_\-\.@])+)\/change_password\/$/,
                 pattern: "users/?/change_password/",
                 role: "admin"
+            },
+            "adminUsersAdd" : {
+                view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
+                role: "admin",
+                url: "users/add/"
             },
             
             //for tasks 
