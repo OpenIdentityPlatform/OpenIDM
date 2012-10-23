@@ -168,7 +168,9 @@ function passesAccessConfig(id, roles, method, action) {
                     // Check action
                     if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
                         if (typeof(config.customAuthz) != 'undefined') {
-                            return eval(config.customAuthz);
+                        	if (eval(config.customAuthz)) {
+                        		return true;
+                        	}
                         } else {
                             return true;
                         }
