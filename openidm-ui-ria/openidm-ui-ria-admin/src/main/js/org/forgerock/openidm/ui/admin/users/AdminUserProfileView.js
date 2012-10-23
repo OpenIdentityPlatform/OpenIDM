@@ -57,7 +57,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 var data = form2js(this.$el.attr("id"), '.', false), self = this;
                 delete data.lastPasswordSet;
                 delete data.oldEmail;
-                data.userName = data.email.toLowerCase();
+                //data.userName = data.email.toLowerCase();
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
@@ -67,9 +67,10 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         return;
                     }
                     
-                    userDelegate.getForUserName(data.email, function(user) {
+                    userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+                        router.routeTo("adminUserProfile", {args: [data.userName]})
                         self.reloadData();
                     });
                 });

@@ -48,10 +48,10 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
         },
         
         showProfile: function(event) {
-            var email = $(event.target).parent().find("td:last").html();
+            var userName = $(event.target).parent().find(".userName").text();
             
-            if(email) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [email]});
+            if(userName) {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [userName]});
             }
         },
         
@@ -66,9 +66,10 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             
                             for(i = 0; i < data.aaData.length; i++) {
                                 data.aaData[i].selector = '<input type="checkbox" />';
-                                data.aaData[i].name = '<span class="name">' + users[i].givenName + ' ' + users[i].familyName + '</span>'; 
+                                data.aaData[i].name = '<span class="name">' + users[i].givenName + ' ' + users[i].familyName + '</span>';
+                                data.aaData[i].userName = '<span class="userName">' + users[i].userName + '</span>';
                             }
-                            
+
                             fnCallback(data);
                         });
                     },
@@ -76,6 +77,9 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         {
                             "mData": "selector",
                             "bSortable": false
+                        },
+                        {
+                        	"mData": "userName"
                         },
                         { 
                             "mData": "name" 
