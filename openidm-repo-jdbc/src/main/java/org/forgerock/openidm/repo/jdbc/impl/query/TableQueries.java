@@ -44,6 +44,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,7 +136,7 @@ public class TableQueries {
      * 
      * The keys for the input parameters as well as the return map entries are in QueryConstants.
      * 
-     * @param type the relative/local resource name, which matches the OrientDB document class name
+     * @param type the resource component name targeted by the URI
      * @param params the parameters which include the query id, or the query expression, as well as the 
      *        token key/value pairs to replace in the query
      * @param con a handle to a database connection instance for exclusive use by the query method whilst it is executing.
@@ -149,20 +150,20 @@ public class TableQueries {
         List<Map<String, Object>> result = null; 
         params.put(QueryConstants.RESOURCE_NAME, type); 
         
-        //TODO: support QUERY_EXPRESSION
-        //String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);
-        //if (queryExpression != null) {
-        //    foundQueryInfo = resolveInlineQuery(type, params, database);
-        //} else {
-        
+
+        String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);        
         String queryId = (String) params.get(QueryConstants.QUERY_ID);
-        if (queryId == null) {
+        if (queryId == null && queryExpression == null) {
             throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
                     + " to identify/define a query must be passed in the parameters. " + params);
         }
         PreparedStatement foundQuery = null;
         try {
-            foundQuery = getQuery(con, queryId, type, params); //configuredQueries.get(queryId);
+            if (queryExpression != null) {
+                foundQuery = resolveInlineQuery(con, queryExpression, params);
+            } else {
+                foundQuery = getQuery(con, queryId, type, params);
+            }
         } catch (SQLException ex) {
             throw new InternalServerErrorException("DB reported failure preparing query: " 
                     + (foundQuery == null ? "null" : foundQuery.toString()) + " with params: " + params + " error code: " + ex.getErrorCode() 
@@ -173,7 +174,7 @@ public class TableQueries {
                     + " does not match any configured queries on the OrientDB repository service.");
         }
         
-        Name eventName = getEventName(/*queryExpression,*/ queryId);
+        Name eventName = getEventName(queryId);
         EventEntry measure = Publisher.start(eventName, foundQuery, null);
         ResultSet rs = null;
         try {
@@ -195,6 +196,13 @@ public class TableQueries {
         return result;
     }
     
+    /**
+     * Whether a result set contains a given column
+     * @param rsMetaData result set meta data
+     * @param columnName name of the column to look for
+     * @return true if it is present
+     * @throws SQLException if meta data inspection failed
+     */
     public boolean hasColumn (ResultSetMetaData rsMetaData, String columnName) throws SQLException {
         for (int colPos = 1 ; colPos <= rsMetaData.getColumnCount(); colPos++) {
             if (columnName.equalsIgnoreCase(rsMetaData.getColumnName(colPos))) {
@@ -204,14 +212,54 @@ public class TableQueries {
         return false;
     }
     
-    PreparedStatement getQuery(Connection con, String queryId, String type, Map<String, Object> params) 
+    /**
+     * Resolves a full query expression
+     * Currently does not support token replacement 
+     * @param con The db connection
+     * @param queryExpression the native query string
+     * @param params parameters passed to the resource query
+     * @return A resolved statement
+     */
+    PreparedStatement resolveInlineQuery(Connection con, String queryExpression, Map<String, Object> params)
+            throws SQLException {
+        // No token replacement on expressions for now
+        List<String> tokenNames = new ArrayList<String>();
+        QueryInfo info = new QueryInfo(queryExpression, tokenNames);
+        PreparedStatement stmt = resolveQuery(info, con, params);
+        return stmt;
+    }
+    
+    /**
+     * Gets and resolves a query by id, using token substitution
+     * @param con The db connection
+     * @param queryId the unique identifier of the paramterized, pre-defined query
+     * @param type the resource component name targeted by the URI
+     * @param params the paramteris passed into the query call
+     * @return The statement
+     * @throws SQLException if resolving the statement failed
+     * @throws BadRequestException if no query is defined for the given identifier
+     */
+    PreparedStatement getQuery(Connection con, String queryId, String type, Map<String, Object> params)
                 throws SQLException, BadRequestException{
         
         QueryInfo info = queries.get(queryId);
         if (info == null) {
             throw new BadRequestException("No query defined/configured for requested queryId " + queryId);
         }
-        
+        PreparedStatement stmt = resolveQuery(info, con, params);
+        return stmt;
+    }
+
+    /**
+     * Resolves a query, given a QueryInfo
+     * @param info The info encapsulating the query information
+     * @param con the db connection 
+     * @param params the paramters passed to query
+     * @return the resolved query
+     * @throws SQLException if resolving the query failed
+     */
+    PreparedStatement resolveQuery(QueryInfo info, Connection con, Map<String, Object> params) 
+            throws SQLException {
         String queryStr = info.getQueryString();
         List<String> tokenNames = info.getTokenNames();
         PreparedStatement statement = getPreparedStatement(con, queryStr); 

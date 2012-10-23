@@ -32,9 +32,9 @@ import java.util.List;
  */
 final class QueryInfo {
     private String queryString;
-    private List tokenNames;
+    private List<String> tokenNames;
 
-    public QueryInfo(String queryString, List tokenNames) {
+    public QueryInfo(String queryString, List<String> tokenNames) {
         this.queryString = queryString;
         this.tokenNames = tokenNames;
     }
@@ -51,7 +51,7 @@ final class QueryInfo {
      * @return the token names in the order they need to replaced
      * in the queryString
      */
-    public List getTokenNames() {
+    public List<String> getTokenNames() {
         return tokenNames;
     }
 }
