@@ -2,6 +2,7 @@
     "configuration": {
         "selfRegistration": false,
         "forgottenPassword": false,
-        "securityQuestions": false
+        "securityQuestions": false,
+        "siteIdentification" : false
     }
 }
