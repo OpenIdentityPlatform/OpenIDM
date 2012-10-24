@@ -40,7 +40,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {
         console.debug("start proccess");
-        params.key = proccessNameKey;
+        params._key = proccessNameKey;
         this.serviceCall({url: processManagementUrl + "/?_action=createProcessInstance", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
     };
 

@@ -3,7 +3,7 @@ var workflow = {
 };
   
 var params = {
-    "key" : "UserApplicationAcceptance",
+    "_key" : "UserApplicationAcceptance",
     "lnkId" : response._id
 };
  

@@ -87,6 +87,7 @@
     "common" : {
          "form" : {
             "update" : "Update",
+            "save" : "Save",
             "cancel" : "Cancel",
             "back" : "Back",
             "delete" : "Delele",
