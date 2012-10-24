@@ -76,6 +76,8 @@ define("config/validators/AdminValidators", [
                         callback("Not a valid email address.");
                         return;
                     }
+                    
+                    callback();
                 }
             }
     };
