@@ -62,6 +62,11 @@
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Changing the 
  Configuration</citetitle></link>.</para>
  
+ <para>In addition to the fine-grained scheduling facility, you can perform a 
+ scheduled batch scan for a specified date in OpenIDM data, and then 
+ automatically execute a task when this date is reached. For more information, 
+ see <xref linkend="task-scanner"/>.</para>
+ 
  <section xml:id="scheduler-configuration-file">
   <title>Scheduler Configuration</title>
   <indexterm>
@@ -413,6 +418,210 @@
   <para>Services that can be scheduled implement
   <literal>ScheduledService</literal>. The service PID is used as a basis for
   the service identifier in schedule definitions.</para>
+ </section>
+ 
+ <section xml:id="task-scanner">
+  <title>Scanning Data to Trigger Tasks</title>
+  <para>In addition to the fine-grained scheduling facility described 
+  previously, OpenIDM provides a task scanning mechanism. The task scanner 
+  enables you to perform a batch scan for a specified date in OpenIDM data, 
+  on a scheduled interval, and then to execute a task when this date is 
+  reached. When the task scanner identifies a condition that should trigger the
+  task, it can invoke a script created specifically to handle the task.</para>
+ 
+  <para>For example, the task scanner can scan all <literal>managed/user</literal> 
+  objects for a  "sunset date" and can invoke a script that executes a sunset 
+  task on the user object when this date is reached.</para>
+ 
+  <para>The task scanner is essentially a scheduled task that queries a span of 
+  managed users. The task scanner is configured in the same way as a regular 
+  scheduled task, in a schedule configuration file named 
+  (<filename>schedule-<replaceable>task-name</replaceable>.json)</filename>, 
+  with the <literal>"invokeService"</literal> parameter set to 
+  <literal>"taskscanner</literal>. The <literal>"invokeContext"</literal> 
+  parameter defines the details of the scan, and the task that should be 
+  executed when the specified condition is triggered.</para>
+  
+  <para>The following example defines a scheduled scanning task that triggers 
+  a sunset script. This sample configuration file is provided in the OpenIDM 
+  delivery as 
+  <filename>openidm/samples/taskscanner/schedule-taskscan_sunset.json</filename>. 
+  To use this sample file, you must copy it to the <filename>openidm/conf</filename> 
+  directory.
+  </para>
+  
+  <programlisting language="javascript">
+{
+    "enabled" : true,
+    "type" : "cron",
+    "schedule" : "0 0 * * * ?",
+    "invokeService" : "taskscanner",
+    "invokeContext" : {
+        "scan" : {
+            "object" : "managed/user",
+            "_query-id" : "scan-tasks",
+            "property" : "sunset/date",
+            "condition" : {
+                "before" : "${Time.now}"
+            },
+            "taskState" : {
+                "started" : "sunset/task-started",
+                "completed" : "sunset/task-completed"
+            },
+            "recovery" : {
+                "timeout" : "10m"
+            }
+        },
+        "task" : {
+            "script" : {
+                "type" : "text/javascript",
+                "file" : "script/sunset.js"
+            }
+        }
+    }
+}</programlisting>
+
+ <variablelist>
+  <para>The <literal>"invokeContext"</literal> parameter takes two properties:
+  </para>
+  <varlistentry>
+   <term><literal>"scan"</literal></term>
+   <listitem>
+    <para>Defines the details of the scan. The following properties are 
+    defined:</para>
+    <variablelist>
+     <varlistentry>
+      <term><literal>"object"</literal></term>
+      <listitem>
+       <para>Defines the object type against which the query should be 
+       performed.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>"_query-id"</literal></term>
+      <listitem>
+       <para>Specifies the query that is performed. The queries that can be 
+       set here are defined in the database configuration file (either 
+       <filename>conf/repo.orientdb.json</filename> or 
+       <filename>conf/repo.jdbc.json</filename>).</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>"property"</literal></term>
+      <listitem>
+       <para>Defines the object property against which the range query is 
+       performed. In the preceding example, the query is run against all 
+       <literal>managed/user</literal> objects.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>"condition"</literal> (optional)</term>
+      <listitem>
+       <para>Indicates the conditions that must be matched for the defined 
+       property.</para>
+       <para>In the previous example, the scanner scans for users for whom the 
+       property <literal>sunset/date</literal> is set to a value prior to the 
+       current timestamp at the time the script is executed.</para>
+       <para>You can use these fields to define any condition. For example, if 
+       you wanted to limit the scanned objects to a specified location, say, 
+       London, you could formulate a query to compare against object locations 
+       and then set the condition to be:</para>
+       <programlisting language="javascript">
+            "condition" : {
+                "location" : "London"
+            },</programlisting>
+            
+        <para>For time-based conditions, the <literal>"condition"</literal> 
+        property supports macro syntax, based on the <literal>Time.now</literal> 
+        object (which fetches the current time). You can specify any date/time 
+        in relation to the current time, using the <literal>+</literal> or 
+        <literal>-</literal> operator, and a duration modifier. For example: 
+        <literal>"before": "${Time.now + 1d}"</literal> would return all user 
+        objects whose <literal>sunset/date</literal> is before tomorrow 
+        (current time plus one day). You must include space characters around the 
+        operator (<literal>+</literal> or <literal>-</literal>). The duration 
+        modifier supports the following unit specifiers:</para>
+        <simplelist>
+         <member><literal>s</literal> - second</member>
+         <member><literal>m</literal> - minute</member>
+         <member><literal>h</literal> - hour</member>
+         <member><literal>d</literal> - day</member>
+         <member><literal>M</literal> - month</member>
+         <member><literal>y</literal> - year</member>
+        </simplelist>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>"taskState"</literal></term>
+      <listitem>
+       <para>Indicates the fields that are used to track the status of the 
+       task.</para>
+       <simplelist>
+        <member><literal>"started"</literal> specifies the field that stores 
+        the timestamp for when the task begins.</member>
+        <member><literal>"completed”</literal> specifies the field that stores 
+        the timestamp for when the task completes its operation.</member>
+       </simplelist>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term><literal>"recovery"</literal> (optional)</term>
+       <listitem>
+        <para>Specifies a configurable timeout, after which the task scanner 
+        process ends.</para>
+       </listitem>
+      </varlistentry>
+     </variablelist> 
+    </listitem>
+    </varlistentry> 
+  <varlistentry>
+   <term><literal>"task"</literal></term>
+   <listitem><para>Provides details of the task that is performed. Usually, 
+   the task is invoked by a script, whose details are defined in the 
+   <literal>"script"</literal> property:</para>
+    <simplelist>
+     <member><literal>"type"</literal> - the type of script. Currently, only 
+     JavaScript is supported.</member>
+     <member><literal>"file"</literal> - the path to the script file. The script 
+     file takes at least two objects (in addition to the default objects that 
+     are provided to all OpenIDM scripts): <literal>"input"</literal> which is 
+     the individual object that is retrieved from the query (in the example, 
+     this is the individual user object) and <literal>"objectID"</literal> 
+     which is a string that contains the full identifier of the object. The 
+     objectID is useful for performing updates with the script as it allows you 
+     to target the object directly, for example: 
+     <literal>openidm.update(objectID, input['_rev'], input);</literal>. A sample 
+     script file is provided in <filename>openidm/samples/taskscanner/sunset.js</filename>. 
+     To use this sample file, you must copy it to the <filename>openidm/script</filename> 
+     directory. The sample script marks all user objects that match the 
+     specified conditions as "inactive". You can use this sample script to 
+     trigger a specific workflow, or any other task associated with the sunset 
+     process. For more information about using scripts in OpenIDM, see the 
+     <link xlink:href="integrators-guide#appendix-scripting" 
+     xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Scripting Reference</citetitle></link>.</member>
+    </simplelist>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+ 
+ <section xml:id="task-scanner-rest">
+  <title>Managing Scanning Tasks Over REST</title>
+  <para>You can interact with the task scanner over the REST interface by 
+  using the REST endpoint <literal>openidm/taskscanner</literal>. For example, 
+  the following REST command executes a task named "taskscan_sunrise". The 
+  task itself is defined in a file named 
+  <filename>openidm/conf/schedule-taskscan_sunrise.json</filename>.</para>
+ 
+  <screen width="91"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunrise"
+ </screen> 
+ 
+ </section>
+
  </section>
  
 </chapter>
