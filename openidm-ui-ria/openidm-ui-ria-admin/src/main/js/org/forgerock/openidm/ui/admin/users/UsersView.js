@@ -93,12 +93,12 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         } 
                     ],
                     "oLanguage": {
-                        "sLengthMenu": "Display _MENU_ per page"
+                        "sLengthMenu": $.t("openidm.ui.admin.users.UsersView.display")+' _MENU_ ' + $.t("openidm.ui.admin.users.UsersView.perPage")
                     },
                     "sDom": 'l<"addButton">f<"clear">rt<"clear">ip<"clear">',
                     "sPaginationType": "full_numbers",
                     "fnInitComplete": function(oSettings, json) {
-                        $(".addButton").html('<a href="#adduser/" class="buttonOrange" style="margin-left: 15px; float: left;">Add user</a>');
+                        $(".addButton").html('<a href="#adduser/" class="buttonOrange" style="margin-left: 15px; float: left;">' + $.t("common.form.addUser") + '</a>');
                     }
                 });
             });

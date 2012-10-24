@@ -50,7 +50,6 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 
                 delete data.terms;
                 delete data.passwordConfirm;
-                data.userName = data.email.toLowerCase();
                 data.securityQuestion = 1;
                 data.securityAnswer = "";
                 

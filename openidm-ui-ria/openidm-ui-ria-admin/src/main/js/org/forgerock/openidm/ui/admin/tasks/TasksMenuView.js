@@ -111,9 +111,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         errorHandler: function() {
             this.$el.html('');
             if(this.category === "assigned") {
-                this.$el.append('<b>You do not have any tasks assigned to you right now.</b>');
+                this.$el.append('<b>' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksAssigned") + '</b>');
             } else {
-                this.$el.append('<b>You do not have any tasks in your\'s group\'s queue now.</b>');
+                this.$el.append('<b>' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksInGroupQueue") + '</b>');
             }
         },
         
@@ -171,7 +171,12 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         getParamsForTaskType: function(taskType) {
-            return ["For", "Application", "Requested", "Actions"];
+            return [
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.for"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.application"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.requested"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.actions")
+                ];
         },
         
         prepareParamsFromTask: function(task) {
@@ -226,12 +231,15 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         
         getActions: function(task) {
             if(this.category === 'all') {
-                return '<select name="assignedUser"><option value="null">Unassigned</option><option value="me">Assign to me</option></select> <a href="#" class="buttonOrange detailsLink">Details</a>';
+                return '<select name="assignedUser"><option value="null">' + $.t("common.task.unassigned") 
+                    + '</option><option value="me">' + $.t("common.task.unassignToMe")
+                    + '</option></select> <a href="#" class="buttonOrange detailsLink">' + $.t("common.form.details")
+                    + '</a>';
             } else if(this.category === 'assigned') {
-                return '<a href="#" class="buttonOrange choosable" data-action="approveTask">Approve</a>' +
-                    '<a href="#" class="buttonOrange choosable" data-action="denyTask">Deny</a>' +
-                    '<a href="#" class="buttonOrange choosable" data-action="requeueTask">Requeue</a>' +
-                    '<a href="#" class="buttonOrange detailsLink">Details</a>';
+                return '<a href="#" class="buttonOrange choosable" data-action="approveTask">' + $.t("common.task.approve") + '</a>' +
+                    '<a href="#" class="buttonOrange choosable" data-action="denyTask">' + $.t("common.task.deny") + '</a>' +
+                    '<a href="#" class="buttonOrange choosable" data-action="requeueTask">' + $.t("common.task.requeue") + '</a>' +
+                    '<a href="#" class="buttonOrange detailsLink">' + $.t("common.form.details") + '</a>';
             }
         },
        
@@ -326,7 +334,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         getReasonInputRow: function() {
-            return '<tr><td colspan="4"><input name="denyReason" value="Enter a reason for denying this request" /></td></tr>';
+            return '<tr><td colspan="4"><input name="denyReason" value="' + $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason") + '" /></td></tr>';
         },
         
         setSaveLinkAsActiveOrInactive: function(element) {

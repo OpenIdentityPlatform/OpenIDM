@@ -28,7 +28,8 @@
  * @author mbilski
  */
 define("config/validators/AdminValidators", [
-], function(constants, eventManager) {
+    "org/forgerock/commons/ui/user/delegates/UserDelegate"                                                 
+], function(userDelegate) {
     var obj = {
             "adminRegistrationUserName": {
                 "name": "Correct and unique userName",
@@ -45,13 +46,13 @@ define("config/validators/AdminValidators", [
                     }
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("config.validators.required"));
                         return;
                     }
                     
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback("Username already exists.");
+                            callback($.t("config.validators.emailExists"));
                         } else {
                             callback();
                         }
@@ -68,16 +69,22 @@ define("config/validators/AdminValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback("Required");
+                        callback($.t("config.validators.required"));
                         return;
                     }
                     
                     if(!utils.emailPattern.test(v)) {
-                        callback("Not a valid email address.");
+                        callback($.t("config.validators.emailNotValid"));
                         return;
                     }
                     
-                    callback();
+                    userDelegate.checkUserNameAvailability(v, function(available) {
+                        if(!available) {
+                            callback($.t("config.validators.emailExists"));
+                        } else {
+                            callback();
+                        }
+                    });              
                 }
             }
     };
