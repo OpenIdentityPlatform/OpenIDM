@@ -59,7 +59,7 @@ define("config/routes/AdminRoutesConfig", [
             "adminUsersAdd" : {
                 view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
                 role: "admin",
-                url: "users/add/"
+                url: "adduser/"
             },
             
             //for tasks 

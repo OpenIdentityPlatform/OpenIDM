@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             
             this.parentRender(function() {
                 var editedUserRef = this.editedUserContainer, self = this;
-
+                this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
                 validatorsManager.bindValidators(this.$el);
                 
                 userDelegate.getForUserName(userName, function(user) {
@@ -136,7 +136,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=saveButton]").val("Update");
             this.$el.find("input[name=deleteButton]").val("Delete");
             this.$el.find("input[name=backButton]").val("Back");
-            this.$el.find("input[name=oldEmail]").val(this.editedUser.email);
+            this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
             validatorsManager.validateAllFields(this.$el);
             
             countryStateDelegate.getAllCountries(_.bind(function(countries) {

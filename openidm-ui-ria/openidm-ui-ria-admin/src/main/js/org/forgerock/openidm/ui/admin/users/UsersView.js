@@ -98,7 +98,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                     "sDom": 'l<"addButton">f<"clear">rt<"clear">ip<"clear">',
                     "sPaginationType": "full_numbers",
                     "fnInitComplete": function(oSettings, json) {
-                        $(".addButton").html('<a href="#users/add/" class="buttonOrange" style="margin-left: 15px; float: left;">Add user</a>');
+                        $(".addButton").html('<a href="#adduser/" class="buttonOrange" style="margin-left: 15px; float: left;">Add user</a>');
                     }
                 });
             });
