@@ -78,6 +78,7 @@ public class ActivitiConstants {
     public static final String ACTIVITI_VERSION = "version";
     public static final String ACTIVITI_CATEGORY = "category";
     public static final String LIKE = "Like";
+    public static final String FORMPROPERTIES = "formProperties";
     public static final String FORMPROPERTY_ID = "id";
     public static final String FORMPROPERTY_TYPE = "type";
     public static final String FORMPROPERTY_VALUE = "value";
