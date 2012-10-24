@@ -30,8 +30,8 @@
 define("config/validators/AdminValidators", [
 ], function(constants, eventManager) {
     var obj = {
-            "adminRegistrationEmail": {
-                "name": "Correct and unique email",
+            "adminRegistrationUserName": {
+                "name": "Correct and unique userName",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
                    "org/forgerock/commons/ui/user/delegates/UserDelegate"
@@ -39,19 +39,19 @@ define("config/validators/AdminValidators", [
                 "validator": function(el, input, callback, utils, userDelegate) {
                     var v = $(input).val();
                     
+                    if($(el).find("input[name=oldUserName]").val() === v) {
+                        callback();
+                        return;
+                    }
+                    
                     if(v === "") {
                         callback("Required");
                         return;
                     }
                     
-                    if(!utils.emailPattern.test(v)) {
-                        callback("Not a valid email address.");
-                        return;
-                    }
-                    
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback("Email address already exists.");
+                            callback("Username already exists.");
                         } else {
                             callback();
                         }
@@ -62,16 +62,10 @@ define("config/validators/AdminValidators", [
                 "name": "Correct and unique email but can be same as was",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/user/delegates/UserDelegate",
                     "org/forgerock/commons/ui/common/main/Configuration"
                 ],
-                "validator": function(el, input, callback, utils, userDelegate, conf) {
+                "validator": function(el, input, callback, utils, conf) {
                     var v = $(input).val();
-                    
-                    if($(el).find("input[name=oldEmail]").val() === v) {
-                        callback();
-                        return;
-                    }
                     
                     if(v === "") {
                         callback("Required");
@@ -82,14 +76,6 @@ define("config/validators/AdminValidators", [
                         callback("Not a valid email address.");
                         return;
                     }
-                    
-                    userDelegate.checkUserNameAvailability(v, function(available) {
-                        if(!available) {
-                            callback("Email address already exists.");
-                        } else {
-                            callback();
-                        }
-                    });              
                 }
             }
     };

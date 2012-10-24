@@ -1,6 +1,7 @@
 {
     "configuration": {
-        "selfRegistration": true,
-        "enterprise": true
+        "selfRegistration": false,
+        "forgottenPassword": false,
+        "securityQuestions": false
     }
 }
