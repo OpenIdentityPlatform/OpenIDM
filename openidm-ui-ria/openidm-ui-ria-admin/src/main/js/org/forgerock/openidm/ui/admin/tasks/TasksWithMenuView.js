@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
         },
         
         clearTaskDetails: function() {
-            $("#taskDetails").html('<div class="center shadowFrame"><h1>Choose a task</h1></div>');
+            $("#taskDetails").html('<div class="center shadowFrame"><h1>' + $.t("openidm.ui.admin.tasks.TasksWithMenuView.chooseTask") + '</h1></div>');
         },
         
         registerListeners: function() {

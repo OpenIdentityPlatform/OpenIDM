@@ -99,8 +99,8 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
         
         reloadData: function() {
             js2form(document.getElementById(this.$el.attr("id")), this.task);
-            this.$el.find("input[name=saveButton]").val("Update");
-            this.$el.find("input[name=backButton]").val("Back");
+            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
+            this.$el.find("input[name=backButton]").val($.t("common.form.back"));
         }
     }); 
     

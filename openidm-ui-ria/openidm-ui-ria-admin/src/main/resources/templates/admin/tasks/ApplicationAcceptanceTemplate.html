@@ -1,31 +1,31 @@
 <div class="field">
-    <label class="light">Task Name</label> 
+    <label class="light">{{t "common.task.taskName"}}</label> 
     <input type="text" name="taskName" /> 
 </div>
 <div class="field">
-    <label class="light">Application Name</label> 
+    <label class="light">{{t "common.application.applicationName"}}</label> 
     <input type="text" name="requestedApplicationName" /> 
 </div>
 <div class="field">
-    <label class="light">Assignee</label> 
+    <label class="light">{{t "common.task.assignee"}}</label> 
     <input type="text" name="assignee" /> 
 </div>
 <div class="field">
-    <label class="light">User</label> 
+    <label class="light">{{t "common.user.user"}}</label> 
     <input type="text" name="userData" /> 
 </div>
 <div class="field">
-    <label class="light">Created at</label> 
+    <label class="light">{{t "common.form.createdAt"}}</label> 
     <input type="text" name="createTime" /> 
 </div>
 <div class="field">
-    <label class="light">Decision</label> 
+    <label class="light">{{t "common.form.decision"}}</label> 
     <select name="decision">
-        <option value="accept">Accept</option>
-        <option value="reject">Reject</option>
+        <option value="accept">{{t "common.form.accept"}}</option>
+        <option value="reject">{{t "common.form.reject"}}</option>
     </select>
 </div>
 <div id="actions">
-    <input type="button" name="claimButton" value="Claim" class="button gray floatLeft"/>  
-    <input type="submit" name="saveButton" value="Update" class="button orange floatLeft"/>
+    <input type="button" name="claimButton" value="{{t "common.task.claim"}}" class="button gray floatLeft"/>  
+    <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button orange floatLeft"/>
 </div>

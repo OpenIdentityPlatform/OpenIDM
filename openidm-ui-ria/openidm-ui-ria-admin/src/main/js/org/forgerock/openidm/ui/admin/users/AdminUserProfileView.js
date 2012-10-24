@@ -117,8 +117,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 }, this));
             } else {
                 this.$el.find("select[name='stateProvince']").emptySelect();
-                this.$el.find("select[name='country'] > option:first").text("Please Select");
-                this.$el.find("select[name='stateProvince'] > option:first").text("Please Select");
+                this.$el.find("select[name='country'] > option:first").text($.t("common.form.pleaseSelect"));
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
             }
         },
         
@@ -128,15 +128,15 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             if(state) {
                 this.$el.find("select[name='stateProvince'] > option:first").text("");
             } else {
-                this.$el.find("select[name='stateProvince'] > option:first").text("Please Select"); 
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
             }
         },
         
         reloadData: function() {
             js2form(document.getElementById(this.$el.attr("id")), this.editedUser);
-            this.$el.find("input[name=saveButton]").val("Update");
-            this.$el.find("input[name=deleteButton]").val("Delete");
-            this.$el.find("input[name=backButton]").val("Back");
+            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
+            this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
+            this.$el.find("input[name=backButton]").val($.t("common.form.back"));
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
             validatorsManager.validateAllFields(this.$el);
             
@@ -153,7 +153,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         },
         
         deleteUser: function() {
-            confirmationDialog.render("Delete user", this.editedUser.email + " account will be deleted.", "Delete", _.bind(function() {
+            confirmationDialog.render("Delete user", this.editedUser.email + " account will be deleted.", $.t("common.form.delete"), _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});
             }, this));
         },

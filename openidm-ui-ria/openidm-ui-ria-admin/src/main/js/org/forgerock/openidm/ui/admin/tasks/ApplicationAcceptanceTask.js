@@ -43,7 +43,7 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
             js2form(document.getElementById(this.$el.attr("id")), this.task);
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
-            this.$el.find("input[name=saveButton]").val("Update");
+            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             
             if(this.$el.find("input[name=assignee]").val() === "null") {
                 this.$el.find("input[name=assignee]").val("");
@@ -51,7 +51,7 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
             
             //TODO move this logic to TaskDetailsView
             if(this.category === "all") {
-                this.$el.find("input[name=claimButton]").val("Claim");                
+                this.$el.find("input[name=claimButton]").val($.t("common.task.claim"));                
                 
                 if(this.task.assignee === conf.loggedUser.userName) {
                     this.$el.find("input[name=saveButton]").show();
@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
                     this.$el.find("input[name=saveButton]").hide();
                 }
             } else {
-                this.$el.find("input[name=claimButton]").val("Unclaim");
+                this.$el.find("input[name=claimButton]").val($.t("common.task.unclaim"));
                 this.$el.find("input[name=saveButton]").show();
             }
             

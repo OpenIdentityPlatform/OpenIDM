@@ -1,5 +1,5 @@
 <div id='registration'>
-	<h2 class='floatLeft'>Create new account</h2>
+	<h2 class='floatLeft'>{{t "common.user.registerNewAccount"}}</h2>
 
 	<div class='clear'></div>
 
@@ -8,30 +8,30 @@
 			<fieldset>
 				<div class='fields'>
                     <div class='field'>
-                        <label>Username</label> <input type='text' name='userName'
+                        <label>{{t "common.user.username"}}</label> <input type='text' name='userName'
                             data-validator="userName" /> <span class='error'>x</span>
                         <div class='validationMessage'></div>
                     </div>
 					<div class='field'>
-						<label>Email address</label> <input type='text' name='email'
+						<label>{{t "common.user.emailAddress"}}</label> <input type='text' name='email'
 							data-validator="registrationEmail" /> <span class='error'>x</span>
 						<div class='validationMessage'></div>
 					</div>
 
 					<div class='field'>
-						<label>First name</label> <input type='text' name='givenName'
+						<label>{{t "common.user.givenName"}}</label> <input type='text' name='givenName'
 							data-validator="name" /> <span class='error'>x</span>
 						<div class='validationMessage'></div>
 					</div>
 
 					<div class='field'>
-						<label>Last name</label> <input type='text' name='familyName'
+						<label>{{t "common.user.familyName"}}</label> <input type='text' name='familyName'
 							data-validator="name" /> <span class='error'>x</span>
 						<div class='validationMessage'></div>
 					</div>
 
 					<div class='field'>
-						<label>Mobile phone number</label> <input type='text'
+						<label>{{t "common.user.phoneNumber"}}</label> <input type='text'
 							name='phoneNumber' data-validator="phone" /> <span class='error'>x</span>
 						<div class='validationMessage'></div>
 					</div>
@@ -39,13 +39,13 @@
 					<div class="groupField">
 						<div class="groupFieldInputs floatLeft">
 							<div class='field'>
-								<label>Password</label> <input type='password' name='password'
+								<label>{{t "common.user.password"}}</label> <input type='password' name='password'
 									value='' data-validator="password" data-validator-event="keyup" />
 								<span class='error'>x</span>
 							</div>
 
 							<div class='field'>
-								<label>Confirm Password</label> <input type='password'
+								<label>{{t "common.user.confirmPassword"}}</label> <input type='password'
 									name='passwordConfirm' value=''
 									data-validator="passwordConfirm" data-validator-event="keyup" />
 								<span class='error'>x</span>
@@ -54,23 +54,23 @@
 						<div class="groupFieldErrors floatRight radious">
 							<div class="groupFieldErrorsRule">
 								<span class='error'>x</span> <label
-									data-for-validator="password">At least one capital letter</label>
+									data-for-validator="password">{{t "common.form.validation.atLeastOneCapitalLetter"}}</label>
 							</div>
 							<div class="groupFieldErrorsRule">
 								<span class='error'>x</span> <label
-									data-for-validator="password">At least one number</label>
+									data-for-validator="password">{{t "common.form.validation.atLeastOneNumber"}}</label>
 							</div>
 							<div class="groupFieldErrorsRule">
 								<span class='error'>x</span> <label
-									data-for-validator="password">At least 8 characters</label>
+									data-for-validator="password">{{t "common.form.validation.atLeast8Characters"}}</label>
 							</div>
 							<div class="groupFieldErrorsRule">
 								<span class='error'>x</span> <label
-									data-for-validator="password">Cannot match login</label>
+									data-for-validator="password">{{t "common.form.validation.cannotMatchLogin"}}</label>
 							</div>
 							<div class="groupFieldErrorsRule">
 								<span class='error'>x</span> <label
-									data-for-validator="passwordConfirm">Confirmation matches password</label>
+									data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</label>
 							</div>
 						</div>
 						<div class="clear"></div>
@@ -78,8 +78,7 @@
 				</div>
 				<input type='submit' name='register' class='button gray'
 					value='Register' />
-				<div class='inputValidationMessage'>Form contains validation
-					errors</div>
+				<div class='inputValidationMessage'>{{t "common.form.validation.formContainsErrors"}}</div>
 			</fieldset>
 		</form>
 	</div>

@@ -22,6 +22,35 @@
                 "notFoundError" : "Not found error.",
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request."
+            },
+            "AdminMessages" : {
+                "cannotDeleteYourself" : "You can't delete yourself",
+                "userDeleted" : "User has been deleted",
+                "userDeleteError" : "Error when deleting user",
+                "userApplicationsUpdate" : "Application settings have been changed.",
+                "completedTask" : "Task has been completed.",
+                "claimedTask" : "Task has been claimed.",
+                "unclaimedTask" : "Task has been unclaimed."
+            }
+        },
+        "validators" : {
+            "required" : "Require",
+            "emailNotValid" : "Not a valid email address.",
+            "emailExists" : "Email address already exists."
+        },
+        "AppConfiguration" : {
+            "Navigation" : {
+                "links" : {
+                    "dashboard" : "Dashboard",
+                    "users" : "Users",
+                    "apps" : "Applications",
+                    "allApps" : "All applications",
+                    "addMore" : "Add more apps",
+                    "groups" : "Groups",
+                    "tasksMenu" : "Tasks",
+                    "allTasks" : "Tasks that are in my group's queue",
+                    "myTasks" : "My tasks"
+                }
             }
         }
     },
@@ -35,6 +64,128 @@
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset my password"
+            }
+        },
+        "admin" : {
+            "tasks" : {
+                "ShowUserProfile" : {
+                    "requestInitiator" : "Request initiated by"
+                },
+                "TasksDashboardTemplate" : {
+                    "tasksFromGroupsQueue" : "Tasks that are in my group's queue"
+                }
+            },
+            "ChangeUserPasswordDialogTemplate" : {
+                "securityDataChange" : "Security data change",
+                "enterNewPasswordToChange" : "Please enter new password in the fields below to change user's password."
+            },
+            "UsersTemplate" : {
+                "remainingUsers" : "remaining users"
+            }
+        }
+    },
+    "common" : {
+         "form" : {
+            "update" : "Update",
+            "cancel" : "Cancel",
+            "back" : "Back",
+            "delete" : "Delele",
+            "details" : "Details",
+            "pleaseSelect" : "Please Select",
+            "addUser" : "Add user",
+            "decision" : "Decision",
+            "accept" : "Accept",
+            "reject" : "Reject",
+            "createdAt" : "Created at",
+            "search" : "Search",
+            "actions" : "Actions",
+            "validation" : {
+                "formContainsErrors" : "Form contains validation errors",
+                "atLeastOneCapitalLetter" : "At least one capital letter",
+                "atLeastOneNumber" : "At least one number",
+                "atLeast8Characters" : "At least 8 characters",
+                "cannotMatchLogin" : "Cannot match login",
+                "confirmationMatchesPassword" : "Confirmation matches password"
+            }
+         },
+         "user" : {
+            "user" : "User",
+            "profile" : "Profile",
+            "userProfile" : "User profile",
+            "username" : "Username",
+            "emailAddress" : "Email address",
+            "givenName" : "First Name",
+            "familyName" : "Last Name",
+            "changePassword" : "Change password",
+            "accountStatus" : "Account status",
+            "active" : "Active",
+            "inactive" : "Inactive",
+            "address" : "Address",
+            "address1" : "Address 1",
+            "address2" : "Address 2",
+            "country" : "Country",
+            "city" : "City",
+            "stateProvince" : "State/Province",
+            "phoneNumber" : "Mobile Phone",
+            "postalCode" : "Postal Code",
+            "lastPasswordSet" : "Last password set",
+            "registerNewAccount" : "Create new account",
+            "password" : "Password",
+            "confirmPassword" : "Confirm Password",
+            "newPassword" : "New password",
+            "confirmNewPassword" : "Confirm new password",
+            "usersList" : "Users list",
+            "addUsers" : "Add users",
+            "name" : "Name",
+            "status" : "Status",
+            "email" : "Email"
+         }, 
+         "task" : {
+            "unassigned" : "Unassigned",
+            "assignToMe" : "Assign to me",
+            "claim" : "Claim",
+            "unclaim" : "Unclaim",
+            "approve" : "Approve",
+            "deny" : "Deny",
+            "requeue" : "Requeue",
+            "taskName" : "Task Name",
+            "assignee" : "Assignee",
+            "taskDetails" : "Task Details",
+            "myTasks" : "My tasks",
+            "tasksList" : "Tasks list"
+         },
+         "application" : {
+            "applicationName" : "Application Name"
+         },
+         "notifications" : {
+            "notifications" : "Notifications"
+         }
+    },
+    "openidm" : {
+        "ui" : {
+            "admin" : {
+                "tasks" : {
+                    "TasksMenuView" : {
+                        "noTasksAssigned" : "You do not have any tasks assigned to you right now.",
+                        "noTasksInGroupQueue" : "You do not have any tasks in your's group's queue now.",
+                        "denyDefaultReason" : "Enter a reason for denying this request",
+                        "acceptanceForm" : {
+                            "for" : "For",
+                            "application" : "Application",
+                            "requested" : "Requested",
+                            "actions" : "Actions"                            
+                        }       
+                    },
+                    "TasksWithMenuView" : {
+                        "chooseTask" : "Choose a task"
+                    }
+                },
+                "users" : {
+                    "UsersView" : {
+                        "display" : "Display",
+                        "perPage" : "per page"
+                    }
+                }
             }
         }
     }
