@@ -232,7 +232,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         getActions: function(task) {
             if(this.category === 'all') {
                 return '<select name="assignedUser"><option value="null">' + $.t("common.task.unassigned") 
-                    + '</option><option value="me">' + $.t("common.task.unassignToMe")
+                    + '</option><option value="me">' + $.t("common.task.assignToMe")
                     + '</option></select> <a href="#" class="buttonOrange detailsLink">' + $.t("common.form.details")
                     + '</a>';
             } else if(this.category === 'assigned') {
