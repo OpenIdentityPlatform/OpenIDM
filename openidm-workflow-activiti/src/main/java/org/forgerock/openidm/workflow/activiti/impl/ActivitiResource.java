@@ -622,6 +622,7 @@ public class ActivitiResource implements JsonResource {
                 entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, formProperty.isRequired());
                 entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, formProperty.isWritable());
             }
+            result.add(ActivitiConstants.FORMPROPERTIES, entry);
         }
         result.add("_rev", "0");
         return result;
