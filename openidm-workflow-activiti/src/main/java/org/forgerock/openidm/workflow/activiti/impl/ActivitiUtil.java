@@ -38,7 +38,7 @@ public class ActivitiUtil {
      * @return requested action
      */
     public static String removeKeyFromRequest(JsonValue request) {
-          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("key"));
+          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("_key"));
     }
     
     /**
@@ -47,7 +47,7 @@ public class ActivitiUtil {
      * @return processDefinitionId
      */
     public static String removeProcessDefinitionIdFromRequest(JsonValue request) {
-        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("processDefinitionId"));
+        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("_processDefinitionId"));
     }
     
     /**
