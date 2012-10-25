@@ -357,10 +357,13 @@ $ cli.sh encrypt newpwd
   <para>By default, direct HTTP access to native queries is disallowed, and 
   should remain so in production systems. To enable native queries on the JDBC 
   repository over HTTP, specifically for testing or development purposes, 
-  remove the following line from the router authorization script 
+  remove the custom authorization call from the router authorization script 
   (<filename>openidm/script/router-authz.js</filename>).</para>
   
   <screen>"customAuthz" : "disallowQueryExpression()"</screen>
+  
+  <para>Remember to remove the comma at the end of the preceding line as 
+  well.</para>
 
   <para>See the chapter on <link xlink:href="integrators-guide#chap-auth"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
