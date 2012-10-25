@@ -46,13 +46,13 @@ define("config/validators/AdminValidators", [
                     }
                     
                     if(v === "") {
-                        callback($.t("config.validators.required"));
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback($.t("config.validators.emailExists"));
+                            callback($.t("common.form.validation.emailExists"));
                         } else {
                             callback();
                         }
@@ -69,18 +69,18 @@ define("config/validators/AdminValidators", [
                     var v = $(input).val();
                     
                     if(v === "") {
-                        callback($.t("config.validators.required"));
+                        callback($.t("common.form.validation.required"));
                         return;
                     }
                     
                     if(!utils.emailPattern.test(v)) {
-                        callback($.t("config.validators.emailNotValid"));
+                        callback($.t("common.form.validation.emailNotValid"));
                         return;
                     }
                     
                     userDelegate.checkUserNameAvailability(v, function(available) {
                         if(!available) {
-                            callback($.t("config.validators.emailExists"));
+                            callback($.t("common.form.validation.emailExists"));
                         } else {
                             callback();
                         }

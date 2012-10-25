@@ -33,11 +33,6 @@
                 "unclaimedTask" : "Task has been unclaimed."
             }
         },
-        "validators" : {
-            "required" : "Require",
-            "emailNotValid" : "Not a valid email address.",
-            "emailExists" : "Email address already exists."
-        },
         "AppConfiguration" : {
             "Navigation" : {
                 "links" : {
@@ -58,12 +53,43 @@
         "user" : {
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
-                "login" : "Login",
-                "password" : "Password",
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset my password"
+            },
+            "404" : {
+                "pageNotFound" : "Page not found",
+                "requestedPageCouldNotBeFound" : "The requested page could not be found."
+            },
+            "ChangeSecurityDataDialogTemplate" : {
+                "securityDataChange" : "Security data change",
+                "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
+                "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
+                "securityQuestionAndAnserExplanation" : "The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password."
+            },
+            "ChangeSiteIdentificationDialogTemplate" : {
+                "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
+            },
+            "EnterOldPasswordDialog" : {
+                "enterYourOldPassword" : "Please enter your old password"
+            },
+            "ForgottenPasswordTemplate" : {
+                "forgottenPasswordQuestion" : "Forgotten password?",
+                "enterLogin" : "Please enter your login in the field below to continue."
+            },
+            "TermsOfUseTemplate" : {
+                "termsOfUse" : "Terms of use",
+                "termsOfUseContent" : "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p>"
+            },
+            "UserProfileTemplate" : {
+                "changeSecurityData" : "Change Security Data",
+                "changeSiteIdentification" : "Change Site Identification"
+            },
+            "UserRegistrationTemplate" : {
+                "registerYourAccount" : "Register your account",
+                "logIn" : "Log in",
+                "haveAccoutQuestion" : "Already have an account?"
             }
         },
         "admin" : {
@@ -89,6 +115,11 @@
             "update" : "Update",
             "save" : "Save",
             "cancel" : "Cancel",
+            "close" : "Close",
+            "logout" : "Log out",
+            "register" : "Register",
+            "home" : "Home",
+            "continue" : "Continue",
             "back" : "Back",
             "delete" : "Delele",
             "details" : "Details",
@@ -100,18 +131,33 @@
             "createdAt" : "Created at",
             "search" : "Search",
             "actions" : "Actions",
+            "copyright" : "Copyright (c) 2010-11 ForgeRock, all rights reserved.",
+            "sessionExpired" : "Session Expired",
             "validation" : {
                 "formContainsErrors" : "Form contains validation errors",
                 "atLeastOneCapitalLetter" : "At least one capital letter",
                 "atLeastOneNumber" : "At least one number",
                 "atLeast8Characters" : "At least 8 characters",
                 "cannotMatchLogin" : "Cannot match login",
-                "confirmationMatchesPassword" : "Confirmation matches password"
+                "confirmationMatchesPassword" : "Confirmation matches password",
+                "usernameExists" : "Username already exists",
+                "emailAddressAlreadyExists" : "Email address already exists",
+                "onlyAlphabeticCharacters" : "Only alphabetic characters",
+                "onlyNumbersAndSpecialCharacters" : "Only numbers and special characters",
+                "cannotMatchOldPassword" : "Cannot match old password",
+                "minimum4Characters" : "Minimum 4 characters",
+                "acceptanceRequiredForRegistration" : "Acceptance required for registration",
+                "incorrectPassword" : "Incorrect password",
+                "required" : "Required",
+                "emailNotValid" : "Not a valid email address.",
+                "emailExists" : "Email address already exists."
             }
          },
          "user" : {
             "user" : "User",
+            "login" : "Login",
             "profile" : "Profile",
+            "myProfile" : "My Profile",
             "userProfile" : "User profile",
             "username" : "Username",
             "emailAddress" : "Email address",
@@ -130,10 +176,18 @@
             "phoneNumber" : "Mobile Phone",
             "postalCode" : "Postal Code",
             "lastPasswordSet" : "Last password set",
+            "siteImage" : "Site Image",
+            "sitePhrase" : "Site Phrase",
+            "securityQuestion" : "Security question",
+            "securityAnswer" : "Security answer",
+            "adaptiveAuthMethod" : "Adaptive auth method",
+            "SMS" : "SMS",
+            "OAuth" : "OAuth",
             "registerNewAccount" : "Create new account",
             "password" : "Password",
             "confirmPassword" : "Confirm Password",
             "newPassword" : "New password",
+            "oldPassword" : "Old password",
             "confirmNewPassword" : "Confirm new password",
             "usersList" : "Users list",
             "addUsers" : "Add users",
@@ -176,6 +230,14 @@
     },
     "openidm" : {
         "ui" : {
+            "common" : {
+                "components" : {
+                    "LineTableView" : {
+                        "seeMoreItems" : "see more",
+                        "noItems" : "No items"
+                    }
+                }
+            },
             "admin" : {
                 "tasks" : {
                     "TasksMenuView" : {
