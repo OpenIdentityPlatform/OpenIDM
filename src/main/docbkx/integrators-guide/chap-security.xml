@@ -394,6 +394,7 @@ $ cli.sh encrypt newpwd
   information, see the <link xlink:href="integrators-guide#cli-encrypt" 
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>encrypt
   </citetitle></link> documentation.</para>
+  </section>
  
  <section xml:id="security-remove-dev-tools">
   <title>Remove or Protect Development &amp; Debug Tools</title>
