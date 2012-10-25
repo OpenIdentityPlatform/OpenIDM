@@ -139,7 +139,11 @@
             "addUsers" : "Add users",
             "name" : "Name",
             "status" : "Status",
-            "email" : "Email"
+            "email" : "Email",
+            "system" : "System",
+            "changePhoto" : "Change photo",
+            "SKYPE" : "SKYPE",
+            "googlePlus" : "Google+"
          }, 
          "task" : {
             "unassigned" : "Unassigned",
@@ -156,10 +160,18 @@
             "tasksList" : "Tasks list"
          },
          "application" : {
-            "applicationName" : "Application Name"
+            "applicationName" : "Application Name",
+            "requestedBy" : "Requested by",
+            "yourFrequentlyUsedApplications" : "Your frequently used apps",
+            "applicationsYouHaveAdded" : "Apps you've added",
+            "defaultApplications" : "Default apps",
+            "addMoreApplications" : "Add more apps",
+            "allAvailableApps" : "All available apps",
+            "dropApplicationsHere" : "drop apps here"
          },
-         "notifications" : {
-            "notifications" : "Notifications"
+         "notification" : {
+            "notifications" : "Notifications",
+            "deleteThisMessage" : "Delete this message"
          }
     },
     "openidm" : {
@@ -185,6 +197,22 @@
                     "UsersView" : {
                         "display" : "Display",
                         "perPage" : "per page"
+                    }
+                },
+                "apps" : {
+                    "dashboard" : {
+                        "NotificationsView" : {
+                            "noNotifications" : "You have no notifications right now.",
+                            "seeMoreNotifications" : "see more notifications"
+                        }
+                    }, 
+                    "BaseApplicationsView" : {
+                        "noApplicationsHere" : "Your have no apps here",
+                        "noDefaultApplications" : "Your have no default apps",
+                        "noFrequentlyUsedApplications" : "Your have no frequently used apps"
+                    },
+                    "UsersApplicationsView" : {
+                        "noApplications" : "You have no applications"
                     }
                 }
             }

@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
             requester = item.requester;
             requestDate = dateUtil.formatDate(item.requestDate);
             
-            deleteLink = '<a name="deleteLink" href="#">Delete this message</a>';
+            deleteLink = '<a name="deleteLink" href="#">' + $.t("common.notification.deleteThisMessage") + '</a>';
             id = item._id;
             
             return '<h3>' 
@@ -62,18 +62,21 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
                      + '<a name="title" href="#">' + message + '</a>'
                   + '</h3>'
                   + '<div class="itemLeftIdent">'
-                      + '<div class="details"> Requested by: ' + (requester ? requester : 'System') + '</br>' + requestDate + '</div>'
+                      + '<div class="details"> '
+                      + $.t("common.application.requestedBy") +': ' 
+                      + (requester ? requester : $.t("common.user.system")) + '</br>' 
+                      + requestDate + '</div>'
                       + deleteLink
                       + '<input type="hidden" name="id" value=' + id + ' />'
                   + '</div>';
         },
         
         noItemsMessage: function(item) {
-            return "You have no notifications right now.";
+            return $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications");
         },
 
         seeMoreItemsMessage: function(item) {
-            return "see more notifications";
+            return $.t("openidm.ui.apps.dashboard.NotificationsView.seeMoreNotifications");
         },
         
         maxToShow: 6,

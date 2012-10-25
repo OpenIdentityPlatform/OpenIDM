@@ -91,7 +91,7 @@ define("org/forgerock/openidm/ui/apps/BaseApplicationsView", [
         },
         
         noItemsMessage: function(item) {
-            return "Your have no apps here";
+            return $.t("openidm.ui.apps.BaseApplicationsView.noApplicationsHere");
         },
         
         appExists : function(appId) {

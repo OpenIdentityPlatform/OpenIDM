@@ -43,7 +43,8 @@ define("org/forgerock/openidm/ui/apps/FrequentlyUsedApplicationsView", [
         },
         
         noItemsMessage: function(item) {
-            return "Your have no frequently used apps. Click <a href='#applications/addmore/'> here<a/> to add.";
+            return $.t("openidm.ui.apps.BaseApplicationsView.noFrequentlyUsedApplications") + ". "
+            + "Click <a href='#applications/addmore/'> here<a/> to add.";
         },
         
         isLinkValidToShow: function(itemLink) {
