@@ -432,6 +432,9 @@
   <para>For example, the task scanner can scan all <literal>managed/user</literal> 
   objects for a  "sunset date" and can invoke a script that executes a sunset 
   task on the user object when this date is reached.</para>
+  
+  <section xml:id="task-scanner-config">
+  <title>Configuring the Task Scanner</title>
  
   <para>The task scanner is essentially a scheduled task that queries a span of 
   managed users. The task scanner is configured in the same way as a regular 
@@ -604,7 +607,8 @@
    </listitem>
   </varlistentry>
  </variablelist>
- 
+ </section>
+
  <section xml:id="task-scanner-rest">
   <title>Managing Scanning Tasks Over REST</title>
   <para>You can interact with the task scanner over the REST interface by 
