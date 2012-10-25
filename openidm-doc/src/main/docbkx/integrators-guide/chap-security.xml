@@ -65,7 +65,7 @@
   applications' trust and key stores provides some confidence for trusting
   application access.</para>
 
-  <para>Augment this protect with message level security where
+  <para>Augment this protection with message level security where
   appropriate.</para>
  </section>
 
@@ -84,7 +84,7 @@
   wire. This can be important if the TLS/SSL termination happens prior to
   the final end point.</para>
 
-  <para>OpenIDM also supports encryption of data it puts into the repository,
+  <para>OpenIDM also supports encryption of data stored in the repository,
   using a symmetric key. This protects against some attacks on the data
   store.</para>
 
@@ -103,10 +103,10 @@
 
   <para>OpenIDM supports message level security, forcing authentication before
   granting access. Authentication works by means of a filter-based mechanism
-  that lets you use either a HTTP Basic like mechanism or OpenIDM-specific headers, setting a
-  cookie in the response that you can use for subsequent authentication. If you
-  attempt to access OpenIDM URLs without the appropriate headers or session
-  cookie, OpenIDM returns HTTP 401 Unauthorized.</para>
+  that lets you use either an HTTP Basic like mechanism or OpenIDM-specific 
+  headers, setting a cookie in the response that you can use for subsequent 
+  authentication. If you attempt to access OpenIDM URLs without the appropriate 
+  headers or session cookie, OpenIDM returns HTTP 401 Unauthorized.</para>
 
   <para>The following examples show successful authentications.</para>
 
@@ -273,29 +273,24 @@ $ </screen>
    <para>After changing the default encryption key, change at least the default
    user password.</para>
    <step>
-    <para>Get the encrypted version of the new password.</para>
-    <para>TODO: Replace these commands, as json-crypto-cli-* is no longer in bundle/.</para>
+    <para>Use the <command>encrypt</command> command to obtain the encrypted 
+    version of the new password.</para>
     <screen>$ cd /path/to/openidm/
-$ echo \"newpwd\" &gt; /tmp/newpwd.json
-$ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
- -encrypt
- -keystore security/keystore.jceks
- -storetype jceks
- -storepass changeit
- -alias "new-sym-key"
- -srcjson /tmp/newpwd.json
-
+$ cli.sh encrypt newpwd
+...
+-----BEGIN ENCRYPTED VALUE-----
 {
-    "$crypto": {
-        "value": {
-            "iv": "sL0KM93PmvvvaQQ8rP+QAQ==",
-            "data": "eSH8YgeezoWsDDIvX1WQ2A==",
-            "cipher": "AES/CBC/PKCS5Padding",
-            "key": "new-sym-key"
-        },
-        "type": "x-simple-encryption"
-    }
-}</screen>
+  "$crypto" : {
+    "value" : {
+      "iv" : "TCoC/YrmiRmINw6jCPB5LQ==",
+      "data" : "nCFvBIApIQ7C6k+UPzosaA==",
+      "cipher" : "AES/CBC/PKCS5Padding",
+      "key" : "openidm-sym-default"
+    },
+    "type" : "x-simple-encryption"
+  }
+}
+------END ENCRYPTED VALUE------</screen>
    </step>
    <step>
     <para>Replace the user object in the
@@ -315,7 +310,7 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
 
   <para>Before running OpenIDM in production, edit the
   <filename>openidm/conf/jetty.xml</filename> configuration to avoid
-  clear text HTTP. Opt instead for HTTPS either with or without mutual
+  clear text HTTP. Opt instead for HTTPS, either with or without mutual
   authentication. To disable plain HTTP access, comment out the section in
   <filename>openidm/conf/jetty.xml</filename> that enables HTTP on port
   8080.</para>
@@ -346,10 +341,26 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
   deny it in the authorization policy to reduce the attack surface.</para>
 
   <para>Similarly deny direct HTTP access to system objects in production,
-  particularly access to action. As a rule of thumb, do not expose anything
-  not used in production. The main public interfaces over HTTP are
-  <literal>/openidm/managed/</literal> and <literal>/openidm/config/</literal>.
+  particularly access to <literal>action</literal>. As a rule of thumb, do not 
+  expose anything that is not used in production. The main public interfaces 
+  over HTTP are <literal>/openidm/managed/</literal> and <literal>/openidm/config/</literal>.
   Other URIs are triggered indirectly, or are for internal consumption.</para>
+  
+  <para>OpenIDM supports native query expressions on the JDBC repository and it 
+  is possible to enable these over HTTP, for example:</para>
+  
+  <screen width="91">$curl 
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user?_query-expression=select+*+from+managedobjects"</screen>
+  
+  <para>By default, direct HTTP access to native queries is disallowed, and 
+  should remain so in production systems. To enable native queries on the JDBC 
+  repository over HTTP, specifically for testing or development purposes, 
+  remove the following line from the router authorization script 
+  (<filename>openidm/script/router-authz.js</filename>).</para>
+  
+  <screen>"customAuthz" : "disallowQueryExpression()"</screen>
 
   <para>See the chapter on <link xlink:href="integrators-guide#chap-auth"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managing
@@ -375,19 +386,12 @@ $ java -jar bundle/json-crypto-cli-<?eval ${commonsJsonCryptoVersion}?>.jar
   password to start up. You can set an obfuscated version in the file, or
   prompt for the password at start up time.</para>
 
-  <para>To generate obfuscated versions of a password, invoke
-  <filename>openidm-crypto-<?eval ${docTargetVersion}?>.jar</filename> from
-  the <filename>openidm/</filename> directory.</para>
+  <para>To generate obfuscated versions of a password, use the 
+  <command>encrypt</command> command-line utility. For more 
+  information, see the <link xlink:href="integrators-guide#cli-encrypt" 
+  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>encrypt
+  </citetitle></link> documentation.</para>
  
-  <screen>$ cd /path/to/openidm
-$ java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar
-  This utility helps obfuscate passwords to prevent casual observation.
-  It is not securely encrypted and needs further measures to prevent disclosure.
-  Please enter the password:
-  OBF:1v2j1uum1xtv1zej1zer1xtn1uvk1v1v
-  CRYPT:1206319abab995251d745b151b73131c</screen>
- </section>
-
  <section xml:id="security-remove-dev-tools">
   <title>Remove or Protect Development &amp; Debug Tools</title>
 
