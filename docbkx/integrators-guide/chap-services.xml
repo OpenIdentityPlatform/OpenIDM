@@ -30,12 +30,11 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Starting &amp; Stopping OpenIDM</title>
+ <title>Starting and Stopping OpenIDM</title>
 
- <para>This chapter covers scripts provided for managing OpenIDM.</para>
+ <para>This chapter covers the scripts provided for starting and stopping 
+ OpenIDM.</para>
 
- <section xml:id="startup-shutdown">
-  <title>Startup &amp; Shutdown</title>
   <indexterm>
    <primary>Starting OpenIDM</primary>
   </indexterm>
@@ -127,160 +126,5 @@ $</screen>
   <screen>$ ./shutdown.sh
 ./shutdown.sh
 Stopping OpenIDM (454)</screen>
- </section>
 
- <section xml:id="command-line-tools">
-  <title>Command-Line Tools</title>
-
-  <variablelist>
-   <para>OpenIDM includes these command line tools in the
-   <filename>openidm</filename> directory.</para>
-   <varlistentry>
-    <term><command>cli.bat</command></term>
-    <term><command>cli.sh</command></term>
-    <listitem>
-     <para>This script supports the following subcommands.</para>
-     <variablelist> 
-      <varlistentry>
-       <term><command>configexport</command></term>
-       <listitem>
-        <para>Export all configuration objects to a specified location. This 
-        subcommand enables you to reuse a system configuration in another 
-        environment. For example, you can test a configuration in a development 
-        environment, then export it and import it into a production environment.
-        </para>
-        <para>Usage is as follows:</para>
-        <screen>
-        $ ./cli.sh configexport /<replaceable>export-location</replaceable>
-        </screen>
-        <para>For example:</para>
-        <screen>
-        $ ./cli.sh configexport /tmp/conf
-        </screen>
-        <para>Configuration objects are exported, as <filename>.json</filename> 
-        files, to the specified directory. The following objects are exported:</para>
-        <itemizedlist>
-         <listitem>
-          <para>The internal repository configuration (<filename>
-          repo.orientdb.json</filename> or <filename>repo.jdbc.json</filename>)
-          </para>
-         </listitem>
-         <listitem>
-          <para>The log configuration (<filename>audit.json</filename>)</para>
-         </listitem>
-         <listitem>
-          <para>The authentication configuration (<filename>authentication.json
-          </filename>)</para>
-         </listitem>
-         <listitem>
-          <para>The managed object configuration (<filename>managed.json
-          </filename>)</para>
-         </listitem>                  
-         <listitem>
-          <para>The connector configuration (<filename>provisioner.openicf-*.json
-          </filename>)</para>
-         </listitem>
-         <listitem>
-          <para>The router service configuration (<filename>router.json</filename>)
-          </para>
-         </listitem>
-         <listitem>
-          <para>Any scheduler configurations (<filename>scheduler-*.json
-          </filename>)</para>
-         </listitem>
-         <listitem>
-          <para>The synchronization mapping configuration (<filename>sync.json
-          </filename>)</para>
-         </listitem>         
-          <listitem>
-          <para>If workflows are defined, the configuration of the workflow 
-          engine (<filename>workflow.json</filename>)</para>
-         </listitem>        
-        </itemizedlist>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term><command>configimport</command></term>
-       <listitem>
-        <para>Imports configuration objects from the specified directory. This 
-        subcommand enables you to reuse a system configuration from another 
-        environment. For example, you can test a configuration in a development 
-        environment, then export it and import it into a production environment.
-        </para>
-       
-        <para>The command updates the existing configuration from the 
-        <replaceable>import-location</replaceable> over the OpenIDM REST 
-        interface. By default, if configuration objects are present in the 
-        <replaceable>import-location</replaceable> and not in the existing 
-        configuration, these objects are added. If configuration objects are 
-        present in the existing location but not in the 
-        <replaceable>import-location</replaceable>, these objects are left 
-        untouched in the existing configuration.</para>
-        
-        <para>If you include the <literal>--replaceAll</literal> parameter, 
-        the command wipes out the existing configuration and replaces it with 
-        the configuration in the <replaceable>import-location</replaceable>. 
-        Objects in the existing configuration that are not present in the 
-        <replaceable>import-location</replaceable> are deleted.</para>
-                
-        <para>Usage is as follows:</para>
-        <screen>
-        $ ./cli.sh configimport [--replaceAll] /<replaceable>import-location</replaceable>
-        </screen>
-        <para>For example:</para>
-        <screen>
-        $ ./cli.sh configimport --replaceAll /tmp/conf
-        </screen>
-        <para>Configuration objects are imported, as <literal>.json</literal> 
-        files, from the specified directory to the <filename>conf</filename> 
-        directory. The configuration objects that are imported are outlined in 
-        the corresponding export command, described in the previous section.</para>
-       </listitem>
-      </varlistentry>
-      
-<!--      
-      <varlistentry>
-       <term><command>keytool</command></term>
-       <listitem>
-        <para>Export or import SecretKeyEntry values</para>
-       </listitem>
-      </varlistentry>
- -->
-      <varlistentry>
-       <term><command>validate</command></term>
-       <listitem>
-        <indexterm>
-         <primary>Configuration</primary>
-         <secondary>Validating</secondary>
-        </indexterm>
-        <para>Validate all .json configuration files in the
-        <filename>conf/</filename> directory</para>
-       </listitem>
-      </varlistentry>
-     </variablelist>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><command>java -jar bundle/init/openidm-crypto-<?eval ${docTargetVersion}?>.jar</command></term>
-    <listitem>
-     <para>Utility to obfuscate passwords such as the bootstrap password stored
-     in <filename>openidm/conf/boot/boot.properties</filename></para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><command>startup.bat</command></term>
-    <term><command>startup.sh</command></term>
-    <listitem>
-     <para>Script to start OpenIDM and the OSGi console</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term><command>shutdown.sh</command></term>
-    <listitem>
-     <para>Script to stop OpenIDM, especially when you run OpenIDM as a
-     background process</para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
- </section>
 </chapter>
