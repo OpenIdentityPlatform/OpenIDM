@@ -21,7 +21,9 @@
                 "forbiddenError" : "Forbidden request error.",
                 "notFoundError" : "Not found error.",
                 "badRequestError" : "Bad request error.",
-                "conflictError" : "Detected conflict in request."
+                "conflictError" : "Detected conflict in request.",
+                "errorDeletingNotification" : "Error deleting notification.",
+                "errorFetchingNotifications" : "Error Fetching notifications."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You can't delete yourself",
@@ -62,6 +64,9 @@
                 "pageNotFound" : "Page not found",
                 "requestedPageCouldNotBeFound" : "The requested page could not be found."
             },
+            "DefaultBaseTemplate" : {
+                "orPhone" : ", or phone %s."
+            },
             "ChangeSecurityDataDialogTemplate" : {
                 "securityDataChange" : "Security data change",
                 "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
@@ -89,7 +94,8 @@
             "UserRegistrationTemplate" : {
                 "registerYourAccount" : "Register your account",
                 "logIn" : "Log in",
-                "haveAccoutQuestion" : "Already have an account?"
+                "haveAccoutQuestion" : "Already have an account?",
+                "agreeToTerms" : "I agree to the %sterms of use%s"
             }
         },
         "admin" : {
@@ -259,6 +265,13 @@
                     "UsersView" : {
                         "display" : "Display",
                         "perPage" : "per page"
+                    },
+                    "AdminUserProfileView" : {
+                        "profileOwnership" : "%s' profile",
+                        "profileWillBeDeleted" : "%s account will be deleted."
+                    },
+                    "ChangeUserPasswordDialog" : {
+                        "securityDataChangeForWhom" : "Security data change for %s" 
                     }
                 },
                 "apps" : {
@@ -275,6 +288,9 @@
                     },
                     "UsersApplicationsView" : {
                         "noApplications" : "You have no applications"
+                    },
+                    "FrequentlyUsedApplicationsView" : {
+                        "clickHereToAdd" : "Click %shere%s to add."
                     }
                 }
             }

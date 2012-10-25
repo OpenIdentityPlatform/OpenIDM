@@ -80,7 +80,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             this.show(_.bind(function() {
                 validatorsManager.bindValidators(this.$el);
                 
-                this.$el.find("#changeUserPasswordHeadingLabel").text("Security data change for " + this.editedUsername);
+                this.$el.find("#changeUserPasswordHeadingLabel").text($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
                 
                 this.reloadData();
             }, this));            

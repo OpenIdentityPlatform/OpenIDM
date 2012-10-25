@@ -91,7 +91,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 userDelegate.getForUserName(userName, function(user) {
                     self.editedUser = user;
                     self.$el.find("#passwordChangeLink").attr("href", "#users/"+self.editedUser.userName+"/change_password/");
-                    self.$el.find("#userProfileHeadingLabel").text(self.editedUser.givenName+ " "+self.editedUser.familyName+ "'s profile");
+                    self.$el.find("#userProfileHeadingLabel").text( $.t("openidm.ui.admin.users.AdminUserProfileView.profileOwnership", { postProcess: 'sprintf', sprintf: [self.editedUser.givenName+ " "+self.editedUser.familyName] }));
                     self.reloadData();
                 });
                 
@@ -153,7 +153,10 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         },
         
         deleteUser: function() {
-            confirmationDialog.render("Delete user", this.editedUser.email + " account will be deleted.", $.t("common.form.delete"), _.bind(function() {
+            confirmationDialog.render("Delete user", 
+                    $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.email] }),
+                    $.t("common.form.delete"), 
+                    _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});
             }, this));
         },
