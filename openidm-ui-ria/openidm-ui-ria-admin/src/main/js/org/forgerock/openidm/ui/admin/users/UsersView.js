@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "dataTable"
-], function(AbstractView, userDelegate, eventManager, constants, dataTable) {
+    "dataTable",
+    "org/forgerock/commons/ui/common/main/i18nManager"
+], function(AbstractView, userDelegate, eventManager, constants, dataTable, i18nManager) {
     var UsersView = AbstractView.extend({
         template: "templates/admin/NewUsersTemplate.html",
         
@@ -93,7 +94,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         } 
                     ],
                     "oLanguage": {
-                        "sLengthMenu": $.t("openidm.ui.admin.users.UsersView.display")+' _MENU_ ' + $.t("openidm.ui.admin.users.UsersView.perPage")
+                        "sUrl": "locales/" + i18nManager.language + "/datatable_translation.json"
                     },
                     "sDom": 'l<"addButton">f<"clear">rt<"clear">ip<"clear">',
                     "sPaginationType": "full_numbers",

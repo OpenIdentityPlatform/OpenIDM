@@ -1,7 +1,9 @@
 <h3>
     <a href="#">{{taskName}}</a>
     <div style="float: right;">
-        {{#count}}{{.}} requests{{/count}}
+        {{#count}}
+            {{p this key="templates.admin.tasks.ProcessUserTaskTableTemplate.requestCount"}}
+        {{/count}}
     </div>
 </h3>
 <div>

@@ -3,6 +3,7 @@
         "selfRegistration": false,
         "forgottenPassword": false,
         "securityQuestions": false,
-        "siteIdentification" : false
+        "siteIdentification" : false,
+        "language" : "pl_pl"
     }
 }
