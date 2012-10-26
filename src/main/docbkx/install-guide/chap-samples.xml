@@ -285,7 +285,7 @@ $ curl
    <screen>$ cd /path/to/openidm
 $ cp -r samples/sample2b/conf samples/sample2b/script .</screen>
 
-   <para>If you already installed sample 2, then simply add the second mapping
+   <para>If you have already installed sample 2, simply add the second mapping
    from sample 2b's <filename>sync.json</filename> file to the current
    <filename>sync.json</filename> file, and copy the sample script to the
    <filename>script</filename> folder. The script is referenced in the second
@@ -302,7 +302,7 @@ $ cp -r samples/sample2b/conf samples/sample2b/script .</screen>
   <section xml:id="run-sample2b">
    <title>Running the Sample</title>
 
-   <para>First start OpenIDM. Then run reconciliation over the REST
+   <para>First start OpenIDM, then run reconciliation over the REST
    interface.</para>
 
    <screen width="91"><?dbfo pgwide="1"?>$ curl
@@ -348,15 +348,24 @@ $ curl
  "http://localhost:8080/openidm/managed/user/56f0fb7e-3837-464d-b9ec-9d3b6af665c3"</screen>
 
    <para>Test the second mapping by creating a user in the OpenIDM
-   repository.</para>
+   repository. On UNIX:</para>
  
-   <screen>
-$ curl
+   <screen width="100">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --data '{"email":"fdoe@example.com","familyName":"Doe","userName":"fdoe",
  "givenName":"Felicitas","displayName":"Felicitas Doe"}'
  --request PUT
+ "http://localhost:8080/openidm/managed/user/repoUser1"</screen>
+ 
+ <para>On Windows:</para>
+ 
+ <screen width="100">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request PUT
+ --data "{\"email\":\"fdoe@example.com\",\"familyName\":\"Doe\", \"userName\":\"fdoe\",
+ \"givenName\":\"Felicitas\",\"displayName\":\"Felicitas Doe\"}" 
  "http://localhost:8080/openidm/managed/user/repoUser1"</screen>
 
    <para>Run reconciliation again to create the new user in the LDAP server
@@ -372,7 +381,8 @@ $ curl
   </indexterm>
 
   <para>Like sample 2b, sample 2c also connects to an external LDAP
-  server. The difference is just that in sample 2c LDAP Group Memberships are synchronized.</para>
+  server. The only difference is that in sample 2c, LDAP Group Memberships 
+  are synchronized.</para>
   
   <section xml:id="install-sample2c">
    <title>Install the Sample</title>
@@ -384,14 +394,18 @@ $ curl
    <screen>$ cd /path/to/openidm
 $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
 
-   <para>If you already installed sample 2b, then simply two properties need to be added to both mappings, "systemLdapAccounts_managedUser" and "managedUser_systemLdapAccounts" (it is the same property since source and target use the same property name!): </para>
+   <para>If you already installed sample 2b, you simply need to add two 
+   properties to both mappings, "systemLdapAccounts_managedUser" and 
+   "managedUser_systemLdapAccounts" (it is the same property because the source 
+   and the target use the same property name!): </para>
    <programlisting language="javascript">
                 {
                     "source" : "ldapGroups",
                     "target" : "ldapGroups"
                 }</programlisting>
    
-   <para>In addition the following property needs to be added to the "objectTypes"/"accounts" part of the provisioner configuration: </para>
+   <para>In addition the following property must be added to the 
+   "objectTypes"/"accounts" part of the provisioner configuration:</para>
    
    <programlisting language="javascript">
                 "ldapGroups" : {
@@ -404,7 +418,8 @@ $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
                     "nativeType" : "string"
                 }</programlisting>
    
-   <warning><para>If you change from a previous provisioner configuration then also make sure that the LDAP groups to sync are within the search scope: </para>
+   <warning><para>If you change from a previous provisioner configuration, 
+   make sure that the LDAP groups to sync are within the search scope: </para>
    <programlisting language="javascript">
         "baseContexts" : [
             "dc=example,dc=com"
@@ -422,7 +437,8 @@ $ cp -r samples/sample2c/conf samples/sample2c/script .</screen>
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
    
-   <para>In addition, two LDAP Groups should be created, which can be found in the LDIF file: <filename>openidm/samples/sample2c/data/Example.ldif</filename>:</para>
+   <para>In addition, two LDAP Groups should be created, which can be found in 
+   the LDIF file: <filename>openidm/samples/sample2c/data/Example.ldif</filename>:</para>
    
    <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
@@ -441,7 +457,9 @@ cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top</programlisting>
    
-   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you import these groups.</para> 
+   <para>Make sure that the user with the dn 
+   <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you 
+   import these groups.</para> 
   </section>
   
   <section xml:id="run-sample2c">
@@ -496,16 +514,33 @@ $ curl
    
    <screen>"ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"]</screen>
    
-   <para>Now change the user on the OpdenIDM side with the following patch query: </para>
+   <para>Now change the user on the OpdenIDM side with the following REST
+   call (on UNIX):</para>
    
-   <screen>
-$ curl -u openidm-admin:openidm-admin 
+   <screen width="100"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST   
  -d '[{"replace":"/ldapGroups","value": ["cn=openidm2,ou=Groups,dc=example,dc=com"]}]' 
- -X POST
  "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=jdoe"   
    </screen>
    
-   <para>This will change the user's ldapGroups property in OpenIDM from <filename>"cn=openidm,ou=Groups,dc=example,dc=com"</filename> to <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and as a consequence the user will be removed from the one LDAP group and added to the other LDAP group on OpenDJ!</para>
+   <para>On Windows, you might need to escape certain characters, so your REST 
+   call will look like this:</para>
+
+   <screen width="100"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ -d "[{\"replace\":\"/ldapGroups\",\"value\": [\"cn=openidm2,ou=Groups,dc=example,dc=com\"]}]"
+ "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=jdoe"
+  </screen>
+   
+   <para>This will change the user's ldapGroups property in OpenIDM from 
+   <filename>"cn=openidm,ou=Groups,dc=example,dc=com"</filename> to 
+   <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and, as a 
+   result, the user will be removed from the one LDAP group and added to 
+   the other LDAP group on OpenDJ.</para>
  
   </section>
  </section>
@@ -530,18 +565,24 @@ $ curl -u openidm-admin:openidm-admin
    <screen>$ cd /path/to/openidm
 $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
 
-   <para>If you already installed sample 2c, then only the following is needed to upgrade to sample 2d:</para>
+   <para>If you have already installed sample 2c, you need only do 
+   the following to upgrade to sample 2d:</para>
    <itemizedlist>
-    <listitem><para>Add a mapping for the groups to <filename>openidm/conf/sync.json</filename>.</para></listitem>
-    <listitem><para>Add a property for the new managed objects to <filename>openidm/conf/managed.json</filename>.</para></listitem>
-    <listitem><para>Add a new property to the <literal>objectTypes</literal> of <filename>openidm/conf/provisioner.openicf-ldap.json</filename> for the LDAP Group objects.</para></listitem>
+    <listitem><para>Add a mapping for the groups to 
+    <filename>openidm/conf/sync.json</filename>.</para></listitem>
+    <listitem><para>Add a property for the new managed objects to 
+    <filename>openidm/conf/managed.json</filename>.</para></listitem>
+    <listitem><para>Add a new property to the <literal>objectTypes</literal> 
+    of <filename>openidm/conf/provisioner.openicf-ldap.json</filename> for the 
+    LDAP Group objects.</para></listitem>
    </itemizedlist>
    
    <variablelist>
     <varlistentry>
      <term>Changes in <filename>sync.json</filename></term>
      <listitem>
-      <para>The following shows a possible mapping which needs to be added to the <filename>sync.json</filename>:</para>
+      <para>The following shows a possible mapping which must be added to the 
+      <filename>sync.json</filename> file:</para>
       <programlisting language="javascript">
         {
             "name" : "systemLdapGroups_managedGroup",
@@ -606,7 +647,8 @@ $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
     <varlistentry>
      <term>Changes in <filename>managed.json</filename></term>
      <listitem>
-      <para>The <filename>managed.json</filename> looks like this after the change:</para>
+      <para>The <filename>managed.json</filename> file looks like this after 
+      the change:</para>
       <programlisting language="javascript">
 {
     "objects" : [
@@ -624,7 +666,8 @@ $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
     <varlistentry>
      <term>Changes in <filename>provisioner.openicf-ldap.json</filename></term>
      <listitem>
-      <para>Add a new <literal>objectTypes</literal>-entry to <filename>provisioner.openicf-ldap.json</filename>:</para>
+      <para>Add a new <literal>objectTypes</literal>-entry to 
+      <filename>provisioner.openicf-ldap.json</filename>:</para>
       <programlisting language="javascript">
         "group" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
@@ -726,7 +769,9 @@ $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
    <xref linkend="external-ldap-config-2" />. The LDAP user must have write
    access to create users from OpenIDM on the LDAP server.</para>
    
-   <para>In addition two LDAP Groups should be created, which can be found in the LDIF file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> (if not already added through sample 2c):</para>
+   <para>In addition, two LDAP Groups should be created, which can be found in 
+   the LDIF file: <filename>openidm/samples/sample2d/data/Example.ldif</filename> 
+   (if they have not already been added through sample 2c):</para>
    
    <programlisting language="ldif">
 dn: ou=Groups,dc=example,dc=com
@@ -747,14 +792,16 @@ objectClass: groupOfUniqueNames
 objectClass: top
 </programlisting>
    
-   <para>Make sure that the user with the dn <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you import these groups.</para> 
+   <para>Make sure that the user with the dn 
+   <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you 
+   import these groups.</para> 
   </section>
   
   <section xml:id="run-sample2d">
    <title>Running the Sample</title>
 
-   <para>First start OpenIDM. Then run reconciliation <emphasis>for the groups mapping</emphasis> over the REST
-   interface.</para>
+   <para>First start OpenIDM, then run reconciliation 
+   <emphasis>for the groups mapping</emphasis> over the REST interface.</para>
 
    <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
