@@ -83,22 +83,23 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         render: function(userName, callback) {
             userName = userName[0].toString();
             
-            this.parentRender(function() {
-                var editedUserRef = this.editedUserContainer, self = this;
-                this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-                validatorsManager.bindValidators(this.$el);
+            userDelegate.getForUserName(userName, _.bind(function(user) {
+                this.editedUser = user;
+                this.data = user;
                 
-                userDelegate.getForUserName(userName, function(user) {
-                    self.editedUser = user;
-                    self.$el.find("#passwordChangeLink").attr("href", "#users/"+self.editedUser.userName+"/change_password/");
-                    self.$el.find("#userProfileHeadingLabel").text( $.t("openidm.ui.admin.users.AdminUserProfileView.profileOwnership", { postProcess: 'sprintf', sprintf: [self.editedUser.givenName+ " "+self.editedUser.familyName] }));
-                    self.reloadData();
-                });
+                this.data.profileName = user.givenName + ' ' + user.familyName;
                 
-                if(callback) {
-                    callback();
-                }
-            });            
+                this.parentRender(_.bind(function() {
+                    this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
+                    validatorsManager.bindValidators(this.$el);
+                    
+                    this.reloadData();
+                    
+                    if(callback) {
+                        callback();
+                    }
+                }, this));
+            }, this));
         },
         
         loadStates: function() {
@@ -154,9 +155,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         
         deleteUser: function() {
             confirmationDialog.render("Delete user", 
-                    $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.email] }),
-                    $.t("common.form.delete"), 
-                    _.bind(function() {
+                $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.email] }),
+                $.t("common.form.delete"), _.bind(function() {
+                
                 eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});
             }, this));
         },

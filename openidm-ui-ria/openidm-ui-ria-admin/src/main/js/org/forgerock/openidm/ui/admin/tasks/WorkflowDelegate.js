@@ -32,10 +32,12 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(constants, serviceInvoker) {
     
-    var obj = {}, taskManagementUrl, processManagementUrl;
+    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl;
     
-    taskManagementUrl       =   "/openidm/workflow/task";
+    taskManagementUrl       =   "/openidm/workflow/taskinstance";
+    taskDefinitionUrl = "/openidm/workflow/taskdefinition";
     processManagementUrl    =   "/openidm/workflow/processinstance";
+    processDefinitionUrl = "/openidm/workflow/processdefinition";
     
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {
@@ -65,6 +67,14 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     obj.completeTask = function(id, params, successCallback, errorCallback) {
         console.debug("complete task");
         this.serviceCall({url: taskManagementUrl + "/" + id + "?_action=complete", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
+    };
+    
+    obj.getTaskDefinition = function(id, successCallback, errorCallback) {
+        this.serviceCall({url: taskDefinitionUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
+    };
+    
+    obj.getProcessDefinition = function(id, successCallback, errorCallback) {
+        this.serviceCall({url: processDefinitionUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
     
     obj.getAllTasks = function(successCallback, errorCallback) {
