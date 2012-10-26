@@ -35,8 +35,10 @@ public class ActivitiConstants {
     public static final String PROCESSDEFINITION_ID_PATTERN = "/?processdefinition/.+$";
     public static final String PROCESSINSTANCE_PATTERN = "/?processinstance.*";
     public static final String PROCESSINSTANCE_ID_PATTERN = "/?processinstance/.+$";
-    public static final String TASK_PATTERN = "/?task.*";
-    public static final String TASK_ID_PATTERN = "/?task/.+$";
+    public static final String TASKINSTANCE_PATTERN = "/?taskinstance.*";
+    public static final String TASKINSTANCE_ID_PATTERN = "/?taskinstance/.+$";
+    public static final String TASKDEFINITION_PATTERN = "/?taskdefinition.*";
+    public static final String TASKDEFINITION_ID_PATTERN = "/?taskdefinition/.+$";
     public static final String ID = ServerConstants.OBJECT_PROPERTY_ID;
     public static final String REQUEST_PARAMS = "params";
     public static final String REQUEST_BODY = "value";
@@ -85,10 +87,12 @@ public class ActivitiConstants {
     public static final String FORMPROPERTY_READABLE = "readable";
     public static final String FORMPROPERTY_REQUIRED = "required";
     public static final String FORMPROPERTY_WRITABLE = "writable";
+    public static final String FORMPROPERTY_VARIABLENAME = "variableName";
+    public static final String FORMPROPERTY_DEFAULTEXPRESSION = "defaultExpression";
     
     public enum WorkflowPath {
 
         processdefinition, processdefinitionid, processinstance, processinstanceid,
-        task, taskid, unknown
+        taskdefinition, taskdefinitionid, taskinstance, taskinstanceid, unknown
     }
 }
