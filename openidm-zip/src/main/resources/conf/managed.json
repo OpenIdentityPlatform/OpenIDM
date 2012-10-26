@@ -19,13 +19,15 @@
                     "name" : "securityAnswer",
                     "encryption" : {
                         "key" : "openidm-sym-default"
-                    }
+                    },
+                    "scope" : "private"
                 },
                 {
                     "name" : "password",
                     "encryption" : {
                         "key" : "openidm-sym-default"
-                    }
+                    },
+                    "scope" : "private"
                 }
             ]
         },
