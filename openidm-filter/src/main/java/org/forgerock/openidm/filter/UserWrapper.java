@@ -42,6 +42,9 @@ class UserWrapper extends HttpServletRequestWrapper {
 
     /** The user principal name, as provided by the authentication filter. */
     private final String username;
+    
+    /** The internal user id, as provided by the authentication filter. */
+    private final String userId;
 
     /** A (case-sensitive) list of roles, as provided by the authentication filter. */
     private final List<String> roles;
@@ -53,9 +56,11 @@ class UserWrapper extends HttpServletRequestWrapper {
      * @param username the name of the authenticated user.
      * @param roles the roles assigned to the authenticated user.
      */
-    public UserWrapper(HttpServletRequest request, String username, List<String> roles) {
+    public UserWrapper(HttpServletRequest request, String username, 
+            String userId, List<String> roles) {
         super(request);
         this.username = username;
+        this.userId = userId;
         this.roles = roles;
     }
 

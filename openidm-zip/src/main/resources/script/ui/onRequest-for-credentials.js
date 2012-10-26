@@ -26,5 +26,5 @@
  * This scripts forces running query with correct parameters.
  */
 
-request.params['uid'] = request.parent.security['user']
+request.params['uid'] = request.parent.security['username']
 request.params['resource'] = request.parent.security['openidm-resource']

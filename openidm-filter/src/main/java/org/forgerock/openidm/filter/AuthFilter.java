@@ -83,6 +83,9 @@ public class AuthFilter implements Filter {
 
     /** Attribute in session containing authenticated username. */
     public static final String USERNAME_ATTRIBUTE = "openidm.username";
+    
+    /** Attribute in session containing authenticated userid. */
+    public static final String USERID_ATTRIBUTE = "openidm.userid";
 
     /** Attribute in session and request containing assigned roles. */
     public static final String ROLES_ATTRIBUTE = "openidm.roles";
@@ -100,8 +103,9 @@ public class AuthFilter implements Filter {
         authenticate, logout
     }
 
-    private class AuthData {
+    static class AuthData {
        String username;
+       String userId;
        List<String> roles = new ArrayList<String>();
        boolean status = false;
        String resource = "default";
@@ -148,18 +152,19 @@ public class AuthFilter implements Filter {
               // if we see the certficate port this request is for client auth only
             } else if (allowClientCertOnly(req)) {
                 authData = hasClientCert(req);
-                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
+                logAuth(req, authData.username, authData.userId, authData.roles, Action.authenticate, Status.SUCCESS);
             } else if (session == null && headerLogin != null) {
                 authData = authenticateUser(req);
-                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
+                logAuth(req, authData.username, authData.userId, authData.roles, Action.authenticate, Status.SUCCESS);
                 createSession(req, session, authData);
             } else if (session == null && basicAuth != null) {
                 authData = doBasicAuth(basicAuth);
-                logAuth(req, authData.username, authData.roles, Action.authenticate, Status.SUCCESS);
+                logAuth(req, authData.username, authData.userId, authData.roles, Action.authenticate, Status.SUCCESS);
                 createSession(req, session, authData);
             } else if (session != null) {
                 authData.username = (String)session.getAttribute(USERNAME_ATTRIBUTE);
-                authData.roles = (List)session.getAttribute(ROLES_ATTRIBUTE);
+                authData.userId = (String)session.getAttribute(USERID_ATTRIBUTE);
+                authData.roles = (List<String>) session.getAttribute(ROLES_ATTRIBUTE);
                 authData.resource = (String)session.getAttribute(RESOURCE_ATTRIBUTE);
             } else {
                 authFailed(req, res, authData.username);
@@ -169,21 +174,22 @@ public class AuthFilter implements Filter {
             authFailed(req, res, s.getMessage());
             return;
         }
-        LOGGER.debug("Found valid session for {} with roles {}", authData.username, authData.roles);
+        LOGGER.debug("Found valid session for {} id {} with roles {}", new Object[] {authData.username, authData.userId, authData.roles});
+        req.setAttribute(USERID_ATTRIBUTE, authData.userId);
         req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
         req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
-        chain.doFilter(new UserWrapper(req, authData.username, authData.roles), res);
+        chain.doFilter(new UserWrapper(req, authData.username, authData.userId, authData.roles), res);
     }
 
     private void authFailed(HttpServletRequest req, HttpServletResponse res, String username) throws IOException {
-        logAuth(req, username, null, Action.authenticate, Status.FAILURE);
+        logAuth(req, username, null, null, Action.authenticate, Status.FAILURE);
         JsonResourceException jre = new JsonResourceException(401, "Access denied");
         res.getWriter().write(jre.toJsonValue().toString());
         res.setContentType("application/json");
         res.setStatus(401);
     }
 
-    private static void logAuth(HttpServletRequest req, String username,
+    private static void logAuth(HttpServletRequest req, String username, String userId,
                             List<String> roles, Action action, Status status) {
         try {
             Map<String,Object> entry = new HashMap<String,Object>();
@@ -191,6 +197,7 @@ public class AuthFilter implements Filter {
             entry.put("action", action.toString());
             entry.put("status", status.toString());
             entry.put("principal", username);
+            entry.put("userid", userId);
             entry.put("roles", roles);
             // check for header sent by load balancer for IPAddr of the client
             String ipAddress;
@@ -234,9 +241,7 @@ public class AuthFilter implements Filter {
             throw new AuthException("");
         }
         ad.username = t[0];
-        StringBuilder resource = new StringBuilder();
-        ad.status = AuthModule.authenticate(ad.username, t[1], ad.roles, resource);
-        ad.resource = resource.toString();
+        AuthModule.authenticate(ad, t[1]);
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }
@@ -247,12 +252,13 @@ public class AuthFilter implements Filter {
         if (req.getHeader("X-OpenIDM-NoSession") == null) {
             sess = req.getSession();
             sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
+            sess.setAttribute(USERID_ATTRIBUTE, ad.userId);
             sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
             sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Created session for: {} with roles {} and resource: {}",
-                    new Object[] {ad.username, ad.roles, ad.resource});
+                LOGGER.debug("Created session for: {} with id {}, roles {} and resource: {}",
+                    new Object[] {ad.username, ad.userId, ad.roles, ad.resource});
             }
         }
     }
@@ -268,8 +274,7 @@ public class AuthFilter implements Filter {
             throw new AuthException();
         }
         StringBuilder resource = new StringBuilder();
-        ad.status = AuthModule.authenticate(ad.username, password, ad.roles, resource);
-        ad.resource = resource.toString();
+        ad = AuthModule.authenticate(ad, password);
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }
