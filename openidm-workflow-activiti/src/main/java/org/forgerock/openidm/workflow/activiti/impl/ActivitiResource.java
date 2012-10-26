@@ -31,6 +31,7 @@ import java.util.Iterator;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
@@ -615,28 +616,36 @@ public class ActivitiResource implements JsonResource {
         result.add(ActivitiConstants.ID, def.getId());
         result.add(ActivitiConstants.ACTIVITI_KEY, def.getKey());
         result.add(ActivitiConstants.ACTIVITI_NAME, def.getName());
+        FormService formService = processEngine.getFormService();
+        StartFormData startFormData = formService.getStartFormData(def.getId());
         if (def.hasStartFormKey()) {
-            FormService formService = processEngine.getFormService();
-            StartFormData startFormData = formService.getStartFormData(def.getId());
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
         }
         DefaultStartFormHandler handler = (DefaultStartFormHandler) def.getStartFormHandler();
         List<FormPropertyHandler> formPropertyHandlers = handler.getFormPropertyHandlers();
-        List propList = new LinkedList();
+        Map<String, Map> propertyMap = new HashMap<String, Map>();
         for (FormPropertyHandler h : formPropertyHandlers) {
             Map<String, Object> entry = new HashMap<String, Object>();
             entry.put(ActivitiConstants.FORMPROPERTY_DEFAULTEXPRESSION, h.getDefaultExpression());
-            entry.put(ActivitiConstants.FORMPROPERTY_ID, h.getId());
-            entry.put(ActivitiConstants.ACTIVITI_NAME, h.getName());
-            entry.put(ActivitiConstants.FORMPROPERTY_TYPE, h.getType());
-            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.getVariableExpression());
+            entry.put(ActivitiConstants.FORMPROPERTY_VARIABLEEXPRESSION, h.getVariableExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
-            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.isReadable());
-            entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, h.isRequired());
-            entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
-            propList.add(entry);
+            propertyMap.put(h.getId(), entry);
         }
-        result.add(ActivitiConstants.FORMPROPERTIES, propList);
+        List<FormProperty> formProperties = startFormData.getFormProperties();
+        for (FormProperty p : formProperties) {
+            Map<String, Object> entry = new HashMap<String, Object>();
+            entry.put(ActivitiConstants.ACTIVITI_NAME, p.getName());
+            entry.put(ActivitiConstants.FORMPROPERTY_VALUE, p.getValue());
+            Map type = new HashMap(2);
+            type.put(ActivitiConstants.ACTIVITI_NAME, p.getType().getName());
+            type.put(ActivitiConstants.ENUM_VALUES, p.getType().getInformation("values"));
+            entry.put(ActivitiConstants.FORMPROPERTY_TYPE, type);
+            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, p.isReadable());
+            entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, p.isRequired());
+            entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, p.isWritable());
+            propertyMap.get(p.getId()).putAll(entry);
+        }
+        result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
         result.add("_rev", "0");
         return result;
     }
