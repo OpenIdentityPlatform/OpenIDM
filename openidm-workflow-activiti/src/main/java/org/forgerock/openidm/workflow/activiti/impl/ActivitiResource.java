@@ -31,10 +31,13 @@ import java.util.Iterator;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
+import org.activiti.engine.impl.RepositoryServiceImpl;
+import org.activiti.engine.impl.form.DefaultStartFormHandler;
+import org.activiti.engine.impl.form.FormPropertyHandler;
+import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -82,10 +85,10 @@ public class ActivitiResource implements JsonResource {
                     return processInstance(method, request);
                 case processinstanceid:     //workflow/processinstance/{ID}
                     return processInstanceId(method, request);
-                case task:     //workflow/task
-                    return task(method, request);
-                case taskid:     //workflow/task/{ID}
-                    return taskId(method, request);
+                case taskinstance:     //workflow/taskinstance
+                    return taskInstance(method, request);
+                case taskinstanceid:     //workflow/taskinstance/{ID}
+                    return taskInstanceId(method, request);
                 default:
                     throw new JsonResourceException(JsonResourceException.FORBIDDEN, "The path in the request is not valid");
             }
@@ -114,11 +117,17 @@ public class ActivitiResource implements JsonResource {
             } else {
                 return ActivitiConstants.WorkflowPath.processinstance;
             }
-        } else if (id.matches(ActivitiConstants.TASK_PATTERN)) {
-            if (id.matches(ActivitiConstants.TASK_ID_PATTERN)) {
-                return ActivitiConstants.WorkflowPath.taskid;
+        } else if (id.matches(ActivitiConstants.TASKINSTANCE_PATTERN)) {
+            if (id.matches(ActivitiConstants.TASKINSTANCE_ID_PATTERN)) {
+                return ActivitiConstants.WorkflowPath.taskinstanceid;
             } else {
-                return ActivitiConstants.WorkflowPath.task;
+                return ActivitiConstants.WorkflowPath.taskinstance;
+            }
+        } else if (id.matches(ActivitiConstants.TASKDEFINITION_PATTERN)) {
+            if (id.matches(ActivitiConstants.TASKDEFINITION_ID_PATTERN)) {
+                return ActivitiConstants.WorkflowPath.taskdefinitionid;
+            } else {
+                return ActivitiConstants.WorkflowPath.taskdefinition;
             }
         }
         return ActivitiConstants.WorkflowPath.unknown;
@@ -169,8 +178,7 @@ public class ActivitiResource implements JsonResource {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         switch (m) {
             case read:  //detailed information of a process definition
-                ProcessDefinition def =
-                        processEngine.getRepositoryService().createProcessDefinitionQuery().processDefinitionId(id).singleResult();
+                ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl)processEngine.getRepositoryService()).getDeployedProcessDefinition(id);
                 if (def == null) {
                     throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
@@ -277,14 +285,14 @@ public class ActivitiResource implements JsonResource {
     }
 
     /**
-     * Handle the request sent to '/workflow/task'
+     * Handle the request sent to '/workflow/taskinstance'
      *
      * @param m method to execute
      * @param request incoming request
      * @return result
      * @throws JsonResourceException requested method not implemented
      */
-    private JsonValue task(Method m, JsonValue request) throws JsonResourceException {
+    private JsonValue taskInstance(Method m, JsonValue request) throws JsonResourceException {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         List resultList = new LinkedList();
         switch (m) {
@@ -317,7 +325,7 @@ public class ActivitiResource implements JsonResource {
     }
 
     /**
-     * Handle the request sent to '/workflow/task/{ID}'
+     * Handle the request sent to '/workflow/taskinstance/{ID}'
      *
      * @param m method to execute
      * @param request incoming request
@@ -325,7 +333,7 @@ public class ActivitiResource implements JsonResource {
      * @throws JsonResourceException requested method not implemented or unknown
      * action parameter
      */
-    private JsonValue taskId(Method m, JsonValue request) throws JsonResourceException {
+    private JsonValue taskInstanceId(Method m, JsonValue request) throws JsonResourceException {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         String id = ActivitiUtil.getIdFromRequest(request);
         Task task = null;
@@ -599,7 +607,7 @@ public class ActivitiResource implements JsonResource {
      * @param def source of the data
      * @return
      */
-    private JsonValue convertProcessDefinition(JsonValue result, ProcessDefinition def) {
+    private JsonValue convertProcessDefinition(JsonValue result, ProcessDefinitionEntity def) {
         result.add(ActivitiConstants.ACTIVITI_CATEGORY, def.getCategory());
         result.add(ActivitiConstants.ACTIVITI_DEPLOYMENTID, def.getDeploymentId());
         result.add(ActivitiConstants.ACTIVITI_DESCRIPTION, def.getDescription());
@@ -611,19 +619,24 @@ public class ActivitiResource implements JsonResource {
             FormService formService = processEngine.getFormService();
             StartFormData startFormData = formService.getStartFormData(def.getId());
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
-            List<FormProperty> properties = startFormData.getFormProperties();
-            Map<String, Object> entry = new HashMap<String, Object>();
-            for (FormProperty formProperty : properties) {
-                entry.put(ActivitiConstants.FORMPROPERTY_ID, formProperty.getId());
-                entry.put(ActivitiConstants.ACTIVITI_NAME, formProperty.getName());
-                entry.put(ActivitiConstants.FORMPROPERTY_TYPE, formProperty.getType());
-                entry.put(ActivitiConstants.FORMPROPERTY_VALUE, formProperty.getValue());
-                entry.put(ActivitiConstants.FORMPROPERTY_READABLE, formProperty.isReadable());
-                entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, formProperty.isRequired());
-                entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, formProperty.isWritable());
-            }
-            result.add(ActivitiConstants.FORMPROPERTIES, entry);
         }
+        DefaultStartFormHandler handler = (DefaultStartFormHandler) def.getStartFormHandler();
+        List<FormPropertyHandler> formPropertyHandlers = handler.getFormPropertyHandlers();
+        List propList = new LinkedList();
+        for (FormPropertyHandler h : formPropertyHandlers) {
+            Map<String, Object> entry = new HashMap<String, Object>();
+            entry.put(ActivitiConstants.FORMPROPERTY_DEFAULTEXPRESSION, h.getDefaultExpression());
+            entry.put(ActivitiConstants.FORMPROPERTY_ID, h.getId());
+            entry.put(ActivitiConstants.ACTIVITI_NAME, h.getName());
+            entry.put(ActivitiConstants.FORMPROPERTY_TYPE, h.getType());
+            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.getVariableExpression());
+            entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
+            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.isReadable());
+            entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, h.isRequired());
+            entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
+            propList.add(entry);
+        }
+        result.add(ActivitiConstants.FORMPROPERTIES, propList);
         result.add("_rev", "0");
         return result;
     }
