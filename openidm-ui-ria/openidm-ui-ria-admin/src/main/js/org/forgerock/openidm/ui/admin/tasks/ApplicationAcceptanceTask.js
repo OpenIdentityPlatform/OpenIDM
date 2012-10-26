@@ -49,20 +49,6 @@ define("org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask", [
                 this.$el.find("input[name=assignee]").val("");
             }
             
-            //TODO move this logic to TaskDetailsView
-            if(this.category === "all") {
-                this.$el.find("input[name=claimButton]").val($.t("common.task.claim"));                
-                
-                if(this.task.assignee === conf.loggedUser.userName) {
-                    this.$el.find("input[name=saveButton]").show();
-                } else {
-                    this.$el.find("input[name=saveButton]").hide();
-                }
-            } else {
-                this.$el.find("input[name=claimButton]").val($.t("common.task.unclaim"));
-                this.$el.find("input[name=saveButton]").show();
-            }
-            
             this.$el.find("input[name=userData]").val(this.task.variables.user.givenName + " " + this.task.variables.user.familyName);
             this.$el.find("input[name=requestedApplicationName]").val(this.task.variables.application.name);            
         }

@@ -41,7 +41,6 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
         
         events: {
             "click input[name=saveButton]": "formSubmit",
-            "click input[name=claimButton]": "claimTask",
             "onValidate": "onValidate"
         },
         
@@ -57,38 +56,22 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
             }, this));
         },
         
-        claimTask: function(event) {
-            event.preventDefault();
+        postRender: function() {
             
-            var userName, categoryToGo, message;
-            
-            if(this.category === "all") {
-                userName = conf.loggedUser.userName;
-                categoryToGo = "assigned";
-                message = "claimedTask";
-            } else {
-                userName = "";
-                categoryToGo = "all";
-                message = "unclaimedTask";
-            }
-            
-            workflowManager.assignTaskToUser(this.task._id, userName, _.bind(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, message);
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [categoryToGo, this.task._id]});
-            }, this), function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
-            });
         },
         
-        render: function(task, category, callback) { 
+        render: function(task, category, args, callback) { 
             this.setElement(this.element);
             this.$el.unbind();
             this.delegateEvents();
             this.task = task;
             this.category = category;
+            this.args = args;
             
             this.parentRender(function() {      
                 validatorsManager.bindValidators(this.$el);                
+                
+                this.postRender();
                 this.reloadData();
                 
                 if(callback) {
@@ -98,9 +81,6 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
         },
         
         reloadData: function() {
-            js2form(document.getElementById(this.$el.attr("id")), this.task);
-            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
-            this.$el.find("input[name=backButton]").val($.t("common.form.back"));
         }
     }); 
     

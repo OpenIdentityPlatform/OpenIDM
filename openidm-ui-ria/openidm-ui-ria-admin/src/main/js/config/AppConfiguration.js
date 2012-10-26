@@ -212,7 +212,7 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
                    configuration: {
                        forms: { // Workflow User Task to View mapping
-                           "applicationAcceptance": "org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask"
+                           "org.forgerock.applicationAcceptanceInit": "org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask"
                        }
                    } 
                },

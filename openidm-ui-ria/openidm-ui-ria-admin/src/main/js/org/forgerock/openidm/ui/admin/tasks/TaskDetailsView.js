@@ -33,25 +33,47 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
-    "org/forgerock/openidm/ui/admin/tasks/TasksFormManager"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager) {
+    "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
+    "org/forgerock/openidm/ui/admin/tasks/TemplateTaskForm"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm) {
     var TaskDetailsView = AbstractView.extend({
         template: "templates/admin/tasks/TaskDetailsTemplate.html",
-        
+
         element: "#taskDetails",
         
         render: function(id, category) {  
-            
             this.parentRender(function() {      
                 validatorsManager.bindValidators(this.$el);
                 
                 workflowManager.getTask(id, _.bind(function(task) {
                     this.task = task;
                     
-                    var view = require(tasksFormManager.getViewForForm("applicationAcceptance"));
-                    view.render(task, category);
+                    workflowManager.getProcessDefinition(task.processDefinitionId, _.bind(function(definition) {
+                        var template = this.getGenerationTemplate(definition);
+                        
+                        if(definition.formResourceKey) {
+                            var view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
+                            view.render(task, category);
+                        } else if(template !== false) {
+                            templateTaskForm.render(task, category, template);
+                        } else {
+                            //TODO
+                        }
+                    }, this));                  
                 }, this));
             });            
+        },
+        
+        getGenerationTemplate: function(definition) {
+            var i;
+            
+            for(i = 0; i < definition.formProperties.length; i++) {
+                if(definition.formProperties[i].id === "_formGenerationTemplate") {
+                    return definition.formProperties[i].defaultExpression.expressionText;
+                }
+            }
+            
+            return false
         }
     }); 
     

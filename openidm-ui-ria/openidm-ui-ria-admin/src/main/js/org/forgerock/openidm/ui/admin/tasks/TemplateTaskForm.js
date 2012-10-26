@@ -22,21 +22,26 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global define, $, form2js, _, js2form, Handlebars */
 
-define("org/forgerock/openidm/ui/admin/main", [
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
-	"./tasks/TaskDetailsView",
-	"./tasks/AbstractTaskForm",
-	"./tasks/ApplicationAcceptanceTask",
-	"./tasks/TasksFormManager",
-	"./tasks/TasksWithMenuView",
-	"./tasks/TasksMenuView",
-	"./tasks/WorkflowDelegate",
-	"./tasks/TasksDashboard",
-	"./Dashboard",
-	"./tasks/TemplateTaskForm"
-]);
+/**
+ * @author mbilski
+ */
+define("org/forgerock/openidm/ui/admin/tasks/TemplateTaskForm", [
+    "org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm",
+    "org/forgerock/commons/ui/common/util/DateUtil",
+    "org/forgerock/commons/ui/common/main/Configuration",
+], function(AbstractTaskForm, DateUtil, conf, uiUtils) {
+    var ApplicationAcceptanceTask = AbstractTaskForm.extend({
+        
+        postRender: function() {            
+            var t = Handlebars.compile(this.args)(this.task);
+            
+            this.$el.html(t);
+        }
+    }); 
+    
+    return new ApplicationAcceptanceTask();
+});
+
+
