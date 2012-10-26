@@ -35,6 +35,7 @@ import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.resource.JsonResourceContext;
 
 // OpenIDM
 import org.forgerock.openidm.audit.util.Action;
@@ -385,6 +386,12 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         onRetrieve(jv);
         execScript("onRead", onRead, jv);
         logActivity(id, null, jv, null);
+
+        if (isPublicContext()) {
+            // if it came over a public interface we have to cull private properties
+            cullPrivateProperties(jv);
+        }
+
         return jv.asMap();
     }
 
@@ -443,6 +450,20 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         noSubObjects(id);
         Map<String, Object> result = service.getRouter().query(repoId(id), params);
         logActivity(id, "Query parameters " + params, new JsonValue(result), null);
+
+        if (isPublicContext()) {
+            // If it came over a public interface we have to cull each resulting object
+            JsonValue jv = new JsonValue(result);
+            JsonValue resultList = jv.get(QueryConstants.QUERY_RESULT);
+
+            // List will be empty if there are no results
+            for (JsonValue val : resultList) {
+                cullPrivateProperties(val);
+            }
+
+            result = jv.asMap();
+        }
+
         return result;
     }
 
@@ -475,5 +496,29 @@ class ManagedObjectSet extends ObjectSetJsonResource {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Culls properties that are marked private
+     * @param jv JsonValue to cull private properties from
+     * @return the supplied JsonValue with private properties culled
+     */
+    private JsonValue cullPrivateProperties(JsonValue jv) {
+        for (ManagedObjectProperty property : properties) {
+            if (property.isPrivate()) {
+                jv.remove(property.getName());
+            }
+        }
+        return jv;
+    }
+
+    /**
+     * Checks to see if the current request's context came from a public interface (i.e. http)
+     * @return true if it came over http, false otherwise
+     */
+    private boolean isPublicContext() {
+        JsonValue context = ObjectSetContext.get();
+        JsonValue parent = JsonResourceContext.getParentContext(context);
+        return "http".equals(parent.get("type").asString());
     }
 }
