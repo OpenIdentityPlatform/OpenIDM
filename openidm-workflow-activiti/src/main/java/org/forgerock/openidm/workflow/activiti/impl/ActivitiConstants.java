@@ -89,6 +89,8 @@ public class ActivitiConstants {
     public static final String FORMPROPERTY_WRITABLE = "writable";
     public static final String FORMPROPERTY_VARIABLENAME = "variableName";
     public static final String FORMPROPERTY_DEFAULTEXPRESSION = "defaultExpression";
+    public static final String FORMPROPERTY_VARIABLEEXPRESSION = "variableExpression";
+    public static final String ENUM_VALUES = "values";
     
     public enum WorkflowPath {
 
