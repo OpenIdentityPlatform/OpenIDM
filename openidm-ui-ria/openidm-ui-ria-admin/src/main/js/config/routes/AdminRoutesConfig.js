@@ -46,8 +46,8 @@ define("config/routes/AdminRoutesConfig", [
             "adminUserProfile" : {
                 view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
                 role: "admin",
-                url: /^users\/(([A-Za-z0-9_\-\.@])+)\/$/,
-                pattern: "users/?/"
+                url: /^users\/show\/(([A-Za-z0-9_\-\.@])+)\/$/,
+                pattern: "users/show/?/"
             },
             "adminUserChangePassword" : {
                 base: "adminUserProfile",
@@ -59,7 +59,7 @@ define("config/routes/AdminRoutesConfig", [
             "adminUsersAdd" : {
                 view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
                 role: "admin",
-                url: "adduser/"
+                url: "users/add/"
             },
             
             //for tasks 
