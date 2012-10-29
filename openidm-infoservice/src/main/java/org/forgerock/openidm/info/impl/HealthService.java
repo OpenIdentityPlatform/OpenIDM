@@ -85,6 +85,8 @@ public class HealthService implements HealthInfo {
 
     // Whether we consider the underlying framework as started
     private volatile boolean frameworkStarted = false;
+    // Flag to help in processing state during start-up. 
+    // For clients to query application state, use the state detail instead
     private volatile boolean appStarting = true; 
 
     private volatile StateDetail stateDetail = 
@@ -159,7 +161,7 @@ public class HealthService implements HealthInfo {
             "org.forgerock.openidm.script",
             "org.forgerock.openidm.crypto",
             "org.forgerock.openidm.recon",
-            "org.forgerock.openidm.info",
+//TODO: add once committed "org.forgerock.openidm.info",
             "org.forgerock.openidm.router",
             "org.forgerock.openidm.scheduler",
             "org.forgerock.openidm.scope",
