@@ -49,6 +49,10 @@ import org.forgerock.openidm.script.ScriptThrownException;
  */
 class ManagedObjectProperty {
 
+    private static enum Scope {
+        PUBLIC, PRIVATE
+    }
+
     /** TODO: Description. */
     private final static Logger LOGGER = LoggerFactory.getLogger(ManagedObjectProperty.class);
 
@@ -69,6 +73,9 @@ class ManagedObjectProperty {
 
     /** TODO: Description. */
     private JsonEncryptor encryptor;
+
+    /** String that indicates the privacy level of the property. */
+    private Scope scope;
 
     /**
      * Constructs a new managed object property.
@@ -92,6 +99,11 @@ class ManagedObjectProperty {
             } catch (JsonCryptoException jce) {
                 throw new JsonValueException(encryptionValue, jce);
             }
+        }
+
+        scope = config.get("scope").asEnum(Scope.class);
+        if (scope == null) {
+            scope = Scope.PUBLIC;
         }
     }
 
@@ -190,5 +202,13 @@ class ManagedObjectProperty {
      */
     String getName() {
         return name;
+    }
+
+    public boolean isPrivate() {
+        return Scope.PRIVATE.equals(scope);
+    }
+
+    public boolean isPublic() {
+        return Scope.PUBLIC.equals(scope);
     }
 }

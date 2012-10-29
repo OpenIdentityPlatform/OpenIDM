@@ -77,7 +77,7 @@ public class ActivityLog {
     public static String getRequester(JsonValue request) {
         String result = null;
         while (request != null && !request.isNull()) {
-            JsonValue user = request.get("security").get("user");
+            JsonValue user = request.get("security").get("username");
             if (user.isString()) {
                 result = user.asString();
                 break;

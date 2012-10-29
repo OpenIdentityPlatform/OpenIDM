@@ -325,6 +325,7 @@
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-workflow-remote</module>
+	<module>openidm-policy</module>
         <module>openidm-zip</module>
     </modules>
 

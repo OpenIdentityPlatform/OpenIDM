@@ -27,6 +27,7 @@ import org.eclipse.jetty.http.security.Credential;
 import org.eclipse.jetty.http.security.Password;
 
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.filter.AuthFilter.AuthData;
 import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -87,25 +88,36 @@ public class AuthModule {
             new Object[] {userIdProperty, userCredentialProperty, userRolesProperty} );
     }
 
-    public static boolean authenticate(String login, String password, List<String> roles, StringBuilder resource) {
+    /**
+     * Authenticate the given username and password
+     * @param authData The current authentication data to validate and augment, with the username supplied
+     * @param password The supplied password to validate
+     * @param resource
+     * @return the authentication data augmented with role, id, status info. Whether authentication was successful is 
+     * carried by the status property 
+     */
+    public static AuthData authenticate(AuthData authData, String password) {
 
-        boolean authenticated = authPass(queryId, queryOnResource, login, password, roles);
+        boolean authenticated = authPass(queryId, queryOnResource, authData.username, password, authData);
         if (!authenticated) {
             // Authenticate against the internal user table if authentication against managed users failed
-            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, login, password, roles);
-            resource.append("internal_user");
+            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authData.username, password, authData);
+            authData.resource = queryOnInternalUserResource;
         } else {
-            resource.append("managed_user");
+            authData.resource = queryOnResource;
         }
-        return authenticated;
+        authData.status = authenticated;
+        
+        return authData;
     }
 
     private static boolean authPass(String passQueryId, String passQueryOnResource,
-            String login, String password, List roles) {
+            String login, String password, AuthData authData) {
         UserInfo userInfo = null;
         try {
-            userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login);
+            userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login, authData);
             if (userInfo != null && userInfo.checkCredential(password)) {
+                List<String> roles = authData.roles;
                 roles.clear();
                 roles.addAll(userInfo.getRoleNames());
                 return true;
@@ -119,8 +131,8 @@ public class AuthModule {
         return false;
     }
 
-    private static UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username)
-            throws Exception {
+    private static UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
+            AuthData authData) throws Exception {
         UserInfo user = null;
         Credential credential = null;
         List roleNames = new ArrayList();
@@ -165,7 +177,7 @@ public class AuthModule {
                 for (Map.Entry<String, Object> ordered : entry.asMap().entrySet()) {
                     String key = ordered.getKey();
                     if (key.equals("_id")) {
-                        retrId = entry.get(key).asString(); // It is optional to include the record identifier
+                        retrId = entry.get(key).asString();
                     } else if (!key.startsWith("_")) {
                         ++nonInternalCount;
                         if (nonInternalCount == 1) {
@@ -182,7 +194,10 @@ public class AuthModule {
                 }
             }
 
-            if (retrCred == null && retrCredPropName == null) {
+            authData.userId = retrId; // The internal user id can be different than the login user name
+            if (retrId == null) {
+                logger.warn("Query for credentials did not contain expected result property defining the user id");
+            } else if (retrCred == null && retrCredPropName == null) {
                 logger.warn("Query for credentials did not contain expected result properties.");
             } else {
                 credential = getCredential(retrCred, retrId, username, retrCredPropName, true);

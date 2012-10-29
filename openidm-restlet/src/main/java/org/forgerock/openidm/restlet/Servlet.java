@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -202,8 +203,24 @@ public class Servlet extends RestletRouterServlet {
         @Override public JsonValue newContext(Request request) {
             JsonValue result = super.newContext(request);
             JsonValue security = result.get("security");
+            Map<String, Object> qualifiedId = new LinkedHashMap<String, Object>();
+            qualifiedId.put("component", request.getAttributes().get("openidm.resource"));
+            qualifiedId.put("id", request.getAttributes().get("openidm.userid"));
+            security.put("userid", qualifiedId);
             security.put("openidm-roles", request.getAttributes().get("openidm.roles"));
-            security.put("openidm-resource", request.getAttributes().get("openidm.resource"));
+            
+            // TODO: Remove this temporary compatibility code
+            // TODO: Temporarily left in for compatibility until UI migrates to new capabilities
+            String resource = (String) request.getAttributes().get("openidm.resource");
+            resource = resource.replace('/', '_'); // Current use is with OrientDB class names
+            security.put("openidm-resource", resource);
+            String oldnamedEntry = security.get("user").asString(); // temporary compatibilty with previous commons
+            if (oldnamedEntry != null) {
+                security.put("username", oldnamedEntry);
+                security.remove("user");
+            }
+            
+            
             return result;
         }
     }

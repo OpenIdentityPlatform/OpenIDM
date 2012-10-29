@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -32,9 +32,9 @@ import java.util.List;
  */
 final class QueryInfo {
     private String queryString;
-    private List tokenNames;
+    private List<String> tokenNames;
 
-    public QueryInfo(String queryString, List tokenNames) {
+    public QueryInfo(String queryString, List<String> tokenNames) {
         this.queryString = queryString;
         this.tokenNames = tokenNames;
     }
@@ -51,7 +51,7 @@ final class QueryInfo {
      * @return the token names in the order they need to replaced
      * in the queryString
      */
-    public List getTokenNames() {
+    public List<String> getTokenNames() {
         return tokenNames;
     }
 }

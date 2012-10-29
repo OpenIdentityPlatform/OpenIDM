@@ -134,7 +134,7 @@ public class RepoJobStore implements JobStore {
      */
     @Override
     public void initialize(ClassLoadHelper loadHelper, SchedulerSignaler schedSignaler) {
-        logger.info("Initializing RepoJobStore");
+        logger.debug("Initializing RepoJobStore");
         this.schedulerSignaler = schedSignaler;
         this.loadHelper = loadHelper;
         synchronized (lock) {
@@ -204,7 +204,7 @@ public class RepoJobStore implements JobStore {
     
     @Override
     public void schedulerStarted() throws SchedulerException {
-        logger.info("Job Scheduler Started");
+        logger.debug("Job Scheduler Started");
     }
     
     /**
@@ -381,7 +381,7 @@ public class RepoJobStore implements JobStore {
      */
     @Override
     public void shutdown() {
-        logger.info("Job Scheduler Stopped");
+        logger.debug("Job Scheduler Stopped");
     }
     
     @Override
@@ -569,12 +569,12 @@ public class RepoJobStore implements JobStore {
                     waitingTriggers = getWaitingTriggers();
                     trigger = waitingTriggers.getTriggers().first();
                 } catch (NoSuchElementException e1) {
-                    logger.info("No waiting triggers to acquire");
+                    logger.debug("No waiting triggers to acquire");
                     return null;
                 }
                 
                 if (trigger == null) {
-                    logger.info("No waiting triggers to acquire");
+                    logger.debug("No waiting triggers to acquire");
                     return null;
                 }
                 
@@ -591,7 +591,7 @@ public class RepoJobStore implements JobStore {
                 TriggerWrapper tw = getTriggerWrapper(trigger.getGroup(), trigger.getName());
                 
                 if (hasTriggerMisfired(trigger)) {
-                    logger.info("Attempting to process misfired trigger");
+                    logger.debug("Attempting to process misfired trigger");
                     processTriggerMisfired(tw, waitingTriggers);
                     if (trigger.getNextFireTime() != null) {
                         addWaitingTrigger(trigger, waitingTriggers);
@@ -620,10 +620,10 @@ public class RepoJobStore implements JobStore {
                 
                 addAcquiredTrigger(trigger, instanceId);
 
-                logger.info("Acquiring next trigger {} to be fired at {}", new Object[]{trigger.getName(), trigger.getNextFireTime()});
+                logger.debug("Acquiring next trigger {} to be fired at {}", new Object[]{trigger.getName(), trigger.getNextFireTime()});
                 return (Trigger)trigger.clone();
             }
-            logger.info("No waiting triggers to acquire");
+            logger.debug("No waiting triggers to acquire");
             return null;
         }
     }
@@ -1516,11 +1516,11 @@ public class RepoJobStore implements JobStore {
                     removeWaitingTrigger(tw.getTrigger(), waitingTriggers);
                     schedulerSignaler.signalSchedulingChange(0L);
                 } else if (triggerInstCode == Trigger.INSTRUCTION_SET_TRIGGER_ERROR) {
-                    logger.info("Trigger {} set to ERROR state.", trigger.getFullName());
+                    logger.debug("Trigger {} set to ERROR state.", trigger.getFullName());
                     tw.setState(Trigger.STATE_ERROR);
                     schedulerSignaler.signalSchedulingChange(0L);
                 } else if (triggerInstCode == Trigger.INSTRUCTION_SET_ALL_JOB_TRIGGERS_ERROR) {
-                    logger.info("All triggers of Job {} set to ERROR state.", trigger.getFullJobName());
+                    logger.debug("All triggers of Job {} set to ERROR state.", trigger.getFullJobName());
                     setAllTriggersOfJobToState(trigger.getJobName(), trigger.getJobGroup(), Trigger.STATE_ERROR);
                     schedulerSignaler.signalSchedulingChange(0L);
                 } else if (triggerInstCode == Trigger.INSTRUCTION_SET_ALL_JOB_TRIGGERS_COMPLETE) {

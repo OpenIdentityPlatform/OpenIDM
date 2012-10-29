@@ -245,7 +245,18 @@ Listening for transport dt_socket at address: 5005
      <primary>Getting started</primary>
     </indexterm>
     <para>OpenIDM provides RESTful access to users in the OpenIDM
-    repository.</para>
+    repository. To access the OpenIDM repository over REST, you can use a 
+    browser-based REST client, such as the 
+    <link xlink:href="https://chrome.google.com/webstore/detail/simple-rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb">
+    Simple REST Client</link> for Chrome, or <link xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
+    RESTClient</link> for Firefox. Alternatively you can use the 
+    <command>curl</command> command-line tool that is included with most
+     operating systems. For more information on <command>curl</command>, see 
+     <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>. If 
+     you cannot locate the <command>curl</command> command on your system, you 
+     can download it from 
+     <link xlink:href="http://curl.haxx.se/download.html">http://curl.haxx.se/download.html</link>.
+    </para>
     <step>
      <para>Access the following URL to get a JSON file including all users in
      the OpenIDM repository.</para>
@@ -257,11 +268,7 @@ Listening for transport dt_socket at address: 5005
 
      <para>When you first install OpenIDM with an empty repository, no users
      exist.</para>
-     <para>The <command>curl</command> command line tool is included with most
-     operating systems.<footnote><para>For more
-     information on <command>curl</command>, see <link
-     xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>.</para>
-     </footnote></para>
+
     </step>
     <step>
      <para>Create a user <literal>joe</literal> by sending a RESTful PUT.</para>
