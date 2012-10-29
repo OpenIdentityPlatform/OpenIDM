@@ -339,7 +339,7 @@
                 </property>
             </activation>
             <modules>
-                <module>openidm-functional-tests</module>
+                <module>openidm-integration-tests</module>
             </modules>
         </profile>
         <profile>
@@ -804,6 +804,7 @@
                     </execution>
                 </executions>
             </plugin>
+			
         </plugins>
     </build>
     <reporting>
@@ -859,6 +860,8 @@
                     </reportSet>
                 </reportSets>
             </plugin>
+
+			
         </plugins>
     </reporting>
 </project>

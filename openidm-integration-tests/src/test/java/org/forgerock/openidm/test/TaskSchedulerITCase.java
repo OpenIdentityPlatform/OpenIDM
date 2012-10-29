@@ -24,9 +24,8 @@
 
 package org.forgerock.openidm.test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+
+import java.util.*;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceAccessor;
@@ -41,6 +40,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.path.json.JsonPath;
 import org.forgerock.openidm.test.module.ModuleFactory;
 import org.forgerock.openidm.test.module.OpenIDMTestModule;
 import org.testng.internal.Nullable;
@@ -69,16 +69,16 @@ public class TaskSchedulerITCase {
 
     @BeforeClass
     public void setupClass(ITestContext context) {
-        RestAssured.baseURI = "http://127.0.0.1";
+        /*RestAssured.baseURI = "http://127.0.0.1";
         RestAssured.port = 8080;
         RestAssured.basePath = "/openidm";
         RestAssured.authentication = basic("openidm-admin", "openidm-admin");
         RestAssured.requestContentType(ContentType.JSON);
-        RestAssured.urlEncodingEnabled = true;
+        RestAssured.urlEncodingEnabled = true;*/
     }
 
     @Test
-    public void creatUser(ITestContext context) throws Exception {
+    public void getUserWithJavaAPI(ITestContext context) throws Exception {
         Assert.assertNotNull(accessor);
         JsonValue response = accessor.create("managed/user", getUser());
         Assert.assertNotNull(response.get("_id").getObject());
@@ -86,13 +86,31 @@ public class TaskSchedulerITCase {
 
     @Test
     public void restTest() {
-        given().auth().basic("openidm-admin", "openidm-admin");
-        given().headers("X-OpenIDM-Password", "openidm-admin", "X-OpenIDM-Username", "openidm-admin");
-        get("/config").getBody().prettyPrint();
-       /* given().contentType(ContentType.JSON);
-        given().body(getUser().getObject());
-        given().pathParameter("_action","create");
-        post("managed/user");*/
+        List<String> ids = null;
+        String json =
+        given().
+                headers("X-OpenIDM-Username", "openidm-admin", "X-OpenIDM-Password", "openidm-admin").
+        expect().
+                statusCode(200).
+        when().
+                get("/openidm/managed/user/?_query-id=query-all-ids").asString();
+        JsonPath jp = new JsonPath(json);
+        jp.setRoot("result");
+        ids = jp.getList("_id");
+        if(null == ids ) return;
+        ListIterator<String> idList = ids.listIterator();
+        while ( idList.hasNext()) {
+            String id = idList.next();
+            System.out.println("Got id " + id);
+            given().headers("X-OpenIDM-Username", "openidm-admin","X-OpenIDM-Password", "openidm-admin", "If-Match", "*").pathParam("id", id).expect().statusCode(204).when().delete("/openidm/managed/user/{id}");
+        }
+        idList = null;
+        ids = null;
+
+
+
+
+        //given().headers("X-OpenIDM-Username", "openidm-admin","X-OpenIDM-Password", "openidm-admin","Content-Type", "application/json").request().body("{\"username\":\"nicolas\" }").expect().statusCode(201).when().put("/openidm/managed/user/nicolas").asString();
     }
 
     @Test
