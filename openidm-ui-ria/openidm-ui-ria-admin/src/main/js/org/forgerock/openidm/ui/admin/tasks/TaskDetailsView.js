@@ -49,15 +49,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
                     this.task = task;
                     
                     workflowManager.getProcessDefinition(task.processDefinitionId, _.bind(function(definition) {
-                        var template = this.getGenerationTemplate(definition);
+                        
+                        var template = this.getGenerationTemplate(definition), view, passJSLint;
                         
                         if(definition.formResourceKey) {
-                            var view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
+                            view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
                             view.render(task, category);
                         } else if(template !== false) {
                             templateTaskForm.render(task, category, template);
                         } else {
                             //TODO
+                            passJSLint = true;
                         }
                     }, this));                  
                 }, this));
@@ -65,15 +67,13 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
         },
         
         getGenerationTemplate: function(definition) {
-            var i;
-            
-            for(i = 0; i < definition.formProperties.length; i++) {
-                if(definition.formProperties[i].id === "_formGenerationTemplate") {
-                    return definition.formProperties[i].defaultExpression.expressionText;
+            var property;
+            for(property in definition.formProperties) {
+                if(property === "_formGenerationTemplate") {
+                    return definition.formProperties[property].defaultExpression.expressionText;
                 }
             }
-            
-            return false
+            return false;
         }
     }); 
     
