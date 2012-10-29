@@ -99,7 +99,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         callback();
                     }
                 }, this));
-            }, this));
+            }, this), function() {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, { routeName: "404", trigger: false, args: [window.location.hash]} );
+            });
         },
         
         loadStates: function() {
