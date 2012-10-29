@@ -43,8 +43,8 @@ define("org/forgerock/openidm/ui/apps/FrequentlyUsedApplicationsView", [
         },
         
         noItemsMessage: function(item) {
-            return $.t("openidm.ui.admin.apps.BaseApplicationsView.noFrequentlyUsedApplications") + ". "
-            + $.t("openidm.ui.admin.apps.FrequentlyUsedApplicationsView.clickHereToAdd", { postProcess: 'sprintf', sprintf: ["<a href='#applications/addmore/'>","</a>" ]});
+            return $.t("openidm.ui.apps.BaseApplicationsView.noFrequentlyUsedApplications") + ". "
+            + $.t("openidm.ui.apps.FrequentlyUsedApplicationsView.clickHereToAdd", { postProcess: 'sprintf', sprintf: ["<a href='#applications/addmore/'>","</a>" ]});
         },
         
         isLinkValidToShow: function(itemLink) {

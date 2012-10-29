@@ -52,7 +52,7 @@ define("org/forgerock/openidm/ui/apps/DefaultApplicationsView", [
         },
         
         noItemsMessage: function(item) {
-            return $.t("openidm.ui.admin.apps.BaseApplicationsView.noDefaultApplications");
+            return $.t("openidm.ui.apps.BaseApplicationsView.noDefaultApplications");
         }
         
     });
