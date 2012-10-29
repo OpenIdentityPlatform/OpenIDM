@@ -269,8 +269,10 @@ public class SchedulerService extends ObjectSetJsonResource {
                     job.setJobDataMap(createJobDataMap(scheduleConfig));
                     Trigger trigger = createTrigger(scheduleConfig, jobName);
                     if (update) {
-                        // Update the job by first deleting it, then scheduling the new version
-                        scheduler.deleteJob(jobName, GROUP_NAME);
+                        if (jobExists(jobName, scheduleConfig.getPersisted())) {
+                            // Update the job by first deleting it, then scheduling the new version
+                            scheduler.deleteJob(jobName, GROUP_NAME);
+                        }
                     }
                     // Schedule the Job
                     scheduler.scheduleJob(job, trigger);
