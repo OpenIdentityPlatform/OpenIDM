@@ -36,7 +36,7 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractTaskForm = AbstractView.extend({
-        template: "templates/admin/tasks/DefaultTaskTemplate.html",
+        template: "templates/common/EmptyTemplate.html",
         element: "#taskContent",
         
         events: {
