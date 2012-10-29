@@ -27,8 +27,8 @@ import javax.security.auth.callback.CallbackHandler;
 
 import org.eclipse.jetty.plus.jaas.spi.AbstractLoginModule;
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
-import org.eclipse.jetty.http.security.Credential;
-import org.eclipse.jetty.http.security.Password;
+import org.eclipse.jetty.util.security.Credential;
+import org.eclipse.jetty.util.security.Password;
 
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.http.ContextRegistrator;

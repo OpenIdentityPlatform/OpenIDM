@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jetty.http.security.Credential;
-import org.eclipse.jetty.http.security.Password;
+import org.eclipse.jetty.util.security.Credential;
+import org.eclipse.jetty.util.security.Password;
 
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.filter.AuthFilter.AuthData;

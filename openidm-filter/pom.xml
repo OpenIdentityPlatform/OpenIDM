@@ -44,9 +44,17 @@
             <artifactId>openidm-httpcontext</artifactId>
             <version>${openidm.version}</version>
         </dependency>
+        <!-- Workaround http://team.ops4j.org/browse/PAXWEB-443
         <dependency>
             <groupId>org.ops4j.pax.web</groupId>
             <artifactId>pax-web-jetty-bundle</artifactId>
+        </dependency>
+         -->
+        <dependency>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all-server</artifactId>
+            <scope>provided</scope>
+            <version>7.6.2.v20120308</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
