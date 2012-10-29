@@ -283,25 +283,25 @@
                     "ChangeUserPasswordDialog" : {
                         "securityDataChangeForWhom" : "Security data change for %s" 
                     }
-                },
-                "apps" : {
-                    "dashboard" : {
-                        "NotificationsView" : {
-                            "noNotifications" : "You have no notifications right now.",
-                            "seeMoreNotifications" : "see more notifications"
-                        }
-                    }, 
-                    "BaseApplicationsView" : {
-                        "noApplicationsHere" : "Your have no apps here",
-                        "noDefaultApplications" : "Your have no default apps",
-                        "noFrequentlyUsedApplications" : "Your have no frequently used apps"
-                    },
-                    "UsersApplicationsView" : {
-                        "noApplications" : "You have no applications"
-                    },
-                    "FrequentlyUsedApplicationsView" : {
-                        "clickHereToAdd" : "Click %shere%s to add."
+                }
+            },
+            "apps" : {
+                "dashboard" : {
+                    "NotificationsView" : {
+                        "noNotifications" : "You have no notifications right now.",
+                        "seeMoreNotifications" : "see more notifications"
                     }
+                }, 
+                "BaseApplicationsView" : {
+                    "noApplicationsHere" : "Your have no apps here",
+                    "noDefaultApplications" : "Your have no default apps",
+                    "noFrequentlyUsedApplications" : "Your have no frequently used apps"
+                },
+                "UsersApplicationsView" : {
+                    "noApplications" : "You have no applications"
+                },
+                "FrequentlyUsedApplicationsView" : {
+                    "clickHereToAdd" : "Click %shere%s to add."
                 }
             }
         }
