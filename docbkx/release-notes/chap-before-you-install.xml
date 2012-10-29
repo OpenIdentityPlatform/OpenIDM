@@ -84,8 +84,8 @@
  advantage of a recent JVM fix relating to non-blocking sockets with the 
  default Jetty configuration.</para>
 
- <para>You need 30 MB disk space for a minimal evaluation installation. For a
- production installation, disk space required depends on the size of the
- repository, and on size of the audit and service log files that OpenIDM
- writes.</para>
+ <para>You need 30 MB disk space and 256 MB memory for a minimal evaluation 
+ installation. For a production installation, disk space and memory 
+ requirements will depend on the size of the repository, and on size of the 
+ audit and service log files that OpenIDM writes.</para>
 </chapter>
