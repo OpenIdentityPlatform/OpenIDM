@@ -1,6 +1,6 @@
 {
+    "userName": "test", 
     "email": "test@test.test", 
-    "userName": "test@test.test", 
     "givenName": "TestName",
     "familyName": "TestSurname",
     "phoneNumber": "0044123456789",
