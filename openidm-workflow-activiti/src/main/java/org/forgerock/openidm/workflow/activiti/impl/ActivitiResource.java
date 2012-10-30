@@ -504,6 +504,7 @@ public class ActivitiResource implements JsonResource {
     public JsonValue startProcessInstance(JsonValue request) throws JsonResourceException {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         String key = ActivitiUtil.removeKeyFromRequest(request);
+        String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
         String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
         Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
 
@@ -511,9 +512,9 @@ public class ActivitiResource implements JsonResource {
         //variables.put("openidm-context", new HashMap(params.get("parent").asMap()));
         ProcessInstance instance;
         if (processDefinitionId == null) {
-            instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, variables);
+            instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, businessKey, variables);
         } else {
-            instance = processEngine.getRuntimeService().startProcessInstanceById(processDefinitionId, variables);
+            instance = processEngine.getRuntimeService().startProcessInstanceById(processDefinitionId, businessKey, variables);
         }
         if (instance != null) {
             result.put(ActivitiConstants.ACTIVITI_STATUS, instance.isEnded() ? "ended" : "suspended");
