@@ -28,17 +28,17 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Iterator;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
-import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
-import org.activiti.engine.impl.form.DefaultStartFormHandler;
-import org.activiti.engine.impl.form.FormPropertyHandler;
+import org.activiti.engine.impl.form.*;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
+import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.repository.ProcessDefinitionQuery;
 import org.activiti.engine.runtime.ProcessInstance;
@@ -86,6 +86,8 @@ public class ActivitiResource implements JsonResource {
                     return processInstance(method, request);
                 case processinstanceid:     //workflow/processinstance/{ID}
                     return processInstanceId(method, request);
+                case taskdefinition:    //workflow/taskdefinition
+                    return taskDefinition(method, request);
                 case taskinstance:     //workflow/taskinstance
                     return taskInstance(method, request);
                 case taskinstanceid:     //workflow/taskinstance/{ID}
@@ -174,16 +176,24 @@ public class ActivitiResource implements JsonResource {
         }
     }
 
+    /**
+     * Handle the request sent to '/workflow/processdefinition/{ID}'
+     * @param m method to execute
+     * @param request incoming request
+     * @return result
+     * @throws JsonResourceException requested method not implemented
+     */
     private JsonValue processDefinitionId(Method m, JsonValue request) throws JsonResourceException {
         String id = ActivitiUtil.getIdFromRequest(request);
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         switch (m) {
             case read:  //detailed information of a process definition
-                ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl)processEngine.getRepositoryService()).getDeployedProcessDefinition(id);
-                if (def == null) {
+                try {
+                    ProcessDefinitionEntity def = (ProcessDefinitionEntity) ((RepositoryServiceImpl)processEngine.getRepositoryService()).getDeployedProcessDefinition(id);
+                    return convertProcessDefinition(result, def);
+                } catch (ActivitiException e) {
                     throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
-                return convertProcessDefinition(result, def);
             case delete:
             case create:
             case action:
@@ -284,6 +294,37 @@ public class ActivitiResource implements JsonResource {
                 throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on processinstance/{ID}");
         }
     }
+    
+    /**
+     * Handle the request sent to '/workflow/processdefinition'
+     *
+     * @param m method to execute
+     * @param request incoming request
+     * @return result
+     * @throws JsonResourceException requested method not implemented or unknown
+     * query-id parameter
+     */
+    private JsonValue taskDefinition(Method m, JsonValue request) throws JsonResourceException {
+        switch (m) {
+            case query:     //query based on query-id
+                String queryId = ActivitiUtil.getQueryIdFromRequest(request);
+                if (ActivitiConstants.QUERY_TASKDEF.equals(queryId)) {
+                    String procDefId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID).asString();
+                    String taskDefKey = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_TASKDEFINITIONKEY).asString();
+                    return queryTaskDefinition(procDefId, taskDefKey);
+                }
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query-id");
+            case action:
+            case create:
+            case delete:
+            case patch:
+            case read:
+            case update:
+            default:
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on task");
+        }
+    }
+
 
     /**
      * Handle the request sent to '/workflow/taskinstance'
@@ -300,20 +341,22 @@ public class ActivitiResource implements JsonResource {
             case query:     //query based on query-id
                 String queryId = ActivitiUtil.getQueryIdFromRequest(request);
                 TaskQuery query = processEngine.getTaskService().createTaskQuery();
-                if (ActivitiConstants.QUERY_FILTERED.equals(queryId)) {
-                    setTaskParams(query, request);
-                } else if (!ActivitiConstants.QUERY_ALL_IDS.equals(queryId)) {
-                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query-id");
+                if (ActivitiConstants.QUERY_FILTERED.equals(queryId) ||
+                        ActivitiConstants.QUERY_ALL_IDS.equals(queryId)){
+                    if (ActivitiConstants.QUERY_FILTERED.equals(queryId)) {
+                        setTaskParams(query, request);
+                    }
+                    List<Task> list = query.list();
+                    for (Task t : list) {
+                        Map entry = new HashMap();
+                        entry.put(ActivitiConstants.ID, t.getId());
+                        entry.put(ActivitiConstants.ACTIVITI_NAME, t.getName());
+                        resultList.add(entry);
+                    }
+                    result.add("result", resultList);
+                    return result;
                 }
-                List<Task> list = query.list();
-                for (Task t : list) {
-                    Map entry = new HashMap();
-                    entry.put(ActivitiConstants.ID, t.getId());
-                    entry.put(ActivitiConstants.ACTIVITI_NAME, t.getName());
-                    resultList.add(entry);
-                }
-                result.add("result", resultList);
-                return result;
+                throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query-id");
             case action:
             case create:
             case delete:
@@ -431,7 +474,26 @@ public class ActivitiResource implements JsonResource {
         result.add("result", resultList);
         return result;
     }
-
+    
+    /**
+     * Query the taskdefinition based on processDefinitionId and taskdefinitionKey
+     *
+     * @return taskdefinition description
+     * @throws JsonResourceException
+     */
+    public JsonValue queryTaskDefinition(String procDefId, String taskDefinitionKey) throws JsonResourceException {
+        JsonValue result = new JsonValue(new HashMap<String, Object>());
+        List resultList = new LinkedList();
+        try {
+            ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl)processEngine.getRepositoryService()).getDeployedProcessDefinition(procDefId);
+            convertTaskDefinition(result, procdef, taskDefinitionKey);
+            result.add("result", resultList);
+            return result;
+        } catch (ActivitiException e) {
+            throw new JsonResourceException(JsonResourceException.NOT_FOUND);
+        }
+    }
+    
     /**
      * Start a workflow process instance
      *
@@ -622,31 +684,63 @@ public class ActivitiResource implements JsonResource {
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
         }
         DefaultStartFormHandler handler = (DefaultStartFormHandler) def.getStartFormHandler();
-        List<FormPropertyHandler> formPropertyHandlers = handler.getFormPropertyHandlers();
         Map<String, Map> propertyMap = new HashMap<String, Map>();
-        for (FormPropertyHandler h : formPropertyHandlers) {
+        addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
+        result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
+        result.add("_rev", "0");
+        return result;
+    }
+    
+    /**
+     * Create a JsonValue from a TaskEntity representing the TaskDefinition
+     *
+     * @param result result object containing the data of the
+     * Task
+     * @param t source of the data
+     * @return
+     */
+    private JsonValue convertTaskDefinition(JsonValue result, ProcessDefinitionEntity procdef, String taskDefinitionKey) throws JsonResourceException {
+        TaskDefinition def = procdef.getTaskDefinitions().get(taskDefinitionKey);
+        if (def != null) {
+            DefaultTaskFormHandler handler = (DefaultTaskFormHandler) def.getTaskFormHandler();
+            result.add(ActivitiConstants.ID, def.getKey());
+            result.add(ActivitiConstants.ACTIVITI_NAME, def.getNameExpression());
+            result.add(ActivitiConstants.ACTIVITI_ASSIGNEE, def.getAssigneeExpression());
+            result.add(ActivitiConstants.ACTIVITI_CANDIDATEUSER, def.getCandidateUserIdExpressions());
+            result.add(ActivitiConstants.ACTIVITI_CANDIDATEGROUP, def.getCandidateGroupIdExpressions());
+            result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, handler.getFormKey());
+            result.add(ActivitiConstants.ACTIVITI_DUEDATE, def.getDueDateExpression());
+            result.add(ActivitiConstants.ACTIVITI_PRIORITY, def.getPriorityExpression());
+            Map<String, Map> propertyMap = new HashMap<String, Map>();
+            addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
+            result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
+            return result;
+        }
+        throw new JsonResourceException(JsonResourceException.NOT_FOUND);
+    }
+    
+    /**
+     * Add FormProperty related data to the map of task properties
+     * @param propertyMap map containing the result
+     * @param handlers list of handlers to process
+     */
+    private void addFormHandlerData(Map<String, Map> propertyMap, List<FormPropertyHandler> handlers) {
+        for (FormPropertyHandler h : handlers) {
             Map<String, Object> entry = new HashMap<String, Object>();
             entry.put(ActivitiConstants.FORMPROPERTY_DEFAULTEXPRESSION, h.getDefaultExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLEEXPRESSION, h.getVariableExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
+            entry.put(ActivitiConstants.ACTIVITI_NAME, h.getName());
+            Map type = new HashMap(2);
+            if (h.getType() != null) {
+                type.put(ActivitiConstants.ACTIVITI_NAME, h.getType().getName());
+                type.put(ActivitiConstants.ENUM_VALUES, h.getType().getInformation("values"));
+            }
+            entry.put(ActivitiConstants.FORMPROPERTY_TYPE, type);
+            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.isReadable());
+            entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, h.isRequired());
+            entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
             propertyMap.put(h.getId(), entry);
         }
-        List<FormProperty> formProperties = startFormData.getFormProperties();
-        for (FormProperty p : formProperties) {
-            Map<String, Object> entry = new HashMap<String, Object>();
-            entry.put(ActivitiConstants.ACTIVITI_NAME, p.getName());
-            entry.put(ActivitiConstants.FORMPROPERTY_VALUE, p.getValue());
-            Map type = new HashMap(2);
-            type.put(ActivitiConstants.ACTIVITI_NAME, p.getType().getName());
-            type.put(ActivitiConstants.ENUM_VALUES, p.getType().getInformation("values"));
-            entry.put(ActivitiConstants.FORMPROPERTY_TYPE, type);
-            entry.put(ActivitiConstants.FORMPROPERTY_READABLE, p.isReadable());
-            entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, p.isRequired());
-            entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, p.isWritable());
-            propertyMap.get(p.getId()).putAll(entry);
-        }
-        result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
-        result.add("_rev", "0");
-        return result;
     }
 }
