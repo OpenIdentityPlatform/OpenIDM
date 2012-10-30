@@ -57,8 +57,6 @@ import static org.hamcrest.Matchers.*;
 @Guice(moduleFactory = ModuleFactory.class)
 public class TaskSchedulerITCase {
 
-
-
     @Inject
     @Named(OpenIDMTestModule.ROUTER)
     private JsonResourceAccessor accessor;
@@ -66,25 +64,7 @@ public class TaskSchedulerITCase {
     @Inject
     private BundleContext context;
 
-
-    @BeforeClass
-    public void setupClass(ITestContext context) {
-        /*RestAssured.baseURI = "http://127.0.0.1";
-        RestAssured.port = 8080;
-        RestAssured.basePath = "/openidm";
-        RestAssured.authentication = basic("openidm-admin", "openidm-admin");
-        RestAssured.requestContentType(ContentType.JSON);
-        RestAssured.urlEncodingEnabled = true;*/
-    }
-
-    @Test
-    public void getUserWithJavaAPI(ITestContext context) throws Exception {
-        Assert.assertNotNull(accessor);
-        JsonValue response = accessor.create("managed/user", getUser());
-        Assert.assertNotNull(response.get("_id").getObject());
-    }
-
-    @Test
+    @Test()
     public void restTest() {
         List<String> ids = null;
         String json =
@@ -106,22 +86,8 @@ public class TaskSchedulerITCase {
         }
         idList = null;
         ids = null;
-
-
-
-
         //given().headers("X-OpenIDM-Username", "openidm-admin","X-OpenIDM-Password", "openidm-admin","Content-Type", "application/json").request().body("{\"username\":\"nicolas\" }").expect().statusCode(201).when().put("/openidm/managed/user/nicolas").asString();
     }
 
-    @Test
-    public void keepOpenIDMRunning() throws Exception {
-        //Thread.sleep(TimeUnit.MINUTES.toMillis(5));
-    }
-
-    protected JsonValue getUser() {
-        JsonValue user = new JsonValue(new HashMap<String, Object>());
-        user.put("userName","DDOE");
-        return user;
-    }
 
 }
