@@ -5,12 +5,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
 	<ri:__ACCOUNT__>
-		<icf:__UID__>E079F50D-6002-4217-BCB2-65C688D7EF07</icf:__UID__>
-		<icf:__NAME__>openidmtestuser@forgerock.org</icf:__NAME__>
+		<icf:__UID__>bjensen</icf:__UID__>
+		<icf:__NAME__>bjensen@example.com</icf:__NAME__>
 		<ri:password>TestPassw0rd#</ri:password>
-		<ri:firstname>Darthx</ri:firstname>
-		<ri:lastname>Ddoex</ri:lastname>
-		<ri:email>openidmtestuser@forgerock.org</ri:email>
+		<ri:firstname>Barbara</ri:firstname>
+		<ri:lastname>Jensen</ri:lastname>
+		<ri:email>bjensen@example.com</ri:email>
 		<ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
 		<ri:securityQuestion>1</ri:securityQuestion>
 		<ri:securityAnswer>Some security answer</ri:securityAnswer>
@@ -19,12 +19,12 @@
 	</ri:__ACCOUNT__>
 
 	<ri:__ACCOUNT__>
-		<icf:__UID__>B152DD3E-D5CF-4095-BF15-A1201F8D81F7</icf:__UID__>
-		<icf:__NAME__>openidmtestadmin@forgerock.org</icf:__NAME__>
+		<icf:__UID__>scarter</icf:__UID__>
+		<icf:__NAME__>scarter@example.com</icf:__NAME__>
 		<ri:password>TestPassw0rd#</ri:password>
-		<ri:firstname>Darthxadmin</ri:firstname>
-		<ri:lastname>Ddoexadmin</ri:lastname>
-		<ri:email>openidmtestadmin@forgerock.org</ri:email>
+		<ri:firstname>Steven</ri:firstname>
+		<ri:lastname>Carter</ri:lastname>
+		<ri:email>scarter@example.com</ri:email>
 		<ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
 		<ri:securityQuestion>1</ri:securityQuestion>
 		<ri:securityAnswer>Some security answer</ri:securityAnswer>
