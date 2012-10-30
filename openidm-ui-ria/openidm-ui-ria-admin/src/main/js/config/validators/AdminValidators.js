@@ -31,36 +31,8 @@ define("config/validators/AdminValidators", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate"                                                 
 ], function(userDelegate) {
     var obj = {
-            "adminRegistrationUserName": {
-                "name": "Correct and unique userName",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                   "org/forgerock/commons/ui/user/delegates/UserDelegate"
-                ],
-                "validator": function(el, input, callback, utils, userDelegate) {
-                    var v = $(input).val();
-                    
-                    if($(el).find("input[name=oldUserName]").val() === v) {
-                        callback();
-                        return;
-                    }
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    userDelegate.checkUserNameAvailability(v, function(available) {
-                        if(!available) {
-                            callback($.t("common.form.validation.emailExists"));
-                        } else {
-                            callback();
-                        }
-                    });              
-                }
-            },
-            "adminUserProfileEmail": {
-                "name": "Correct and unique email but can be same as was",
+            "adminUserProfileUserName": {
+                "name": "Correct and unique username but can be same as was",
                 "dependencies": [
                     "org/forgerock/commons/ui/common/util/ValidatorsUtils",
                     "org/forgerock/commons/ui/common/main/Configuration"
@@ -73,8 +45,8 @@ define("config/validators/AdminValidators", [
                         return;
                     }
                     
-                    if(!utils.emailPattern.test(v)) {
-                        callback($.t("common.form.validation.emailNotValid"));
+                    if($(el).find("input[name=oldUserName]").val() === v) {
+                        callback();
                         return;
                     }
                     

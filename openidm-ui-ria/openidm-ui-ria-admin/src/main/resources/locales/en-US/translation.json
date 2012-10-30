@@ -59,6 +59,9 @@
     },
     "templates" : {
         "user" : {
+            "LoginDialog" : {
+                "refreshOnLogin" : "Should refresh on login" 
+            },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
                 "noAccountQuestion" : "Don't have an account?",
