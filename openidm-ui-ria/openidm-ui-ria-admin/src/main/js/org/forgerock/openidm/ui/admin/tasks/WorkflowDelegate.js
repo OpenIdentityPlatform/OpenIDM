@@ -56,6 +56,12 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
         this.serviceCall({url: taskManagementUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
     
+    obj.getTaskDefinition = function(processDefinitionId, taskDefinitionKey, successCallback, errorCallback) {
+        console.debug("get task definition");
+        obj.serviceCall({url: taskManagementUrl + "?_query-id=query-taskdefinition&" 
+            + $.param({processDefinitionId: processDefinitionId, taskDefinitionKey: taskDefinitionKey}), success: successCallback, error: errorCallback} );
+    };
+    
     obj.updateTask = function(id, params, successCallback, errorCallback) {
         console.debug("update task");
         var callParams =  {url: taskManagementUrl + "/" + id, type: "PUT", success: successCallback, error: errorCallback, data: JSON.stringify(params)};
@@ -67,10 +73,6 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     obj.completeTask = function(id, params, successCallback, errorCallback) {
         console.debug("complete task");
         this.serviceCall({url: taskManagementUrl + "/" + id + "?_action=complete", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
-    };
-    
-    obj.getTaskDefinition = function(id, successCallback, errorCallback) {
-        this.serviceCall({url: taskDefinitionUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
     
     obj.getProcessDefinition = function(id, successCallback, errorCallback) {
