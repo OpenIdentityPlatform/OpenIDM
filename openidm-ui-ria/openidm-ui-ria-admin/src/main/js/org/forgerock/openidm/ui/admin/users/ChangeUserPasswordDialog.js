@@ -49,7 +49,6 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             "onValidate": "onValidate",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop"
         },
         
