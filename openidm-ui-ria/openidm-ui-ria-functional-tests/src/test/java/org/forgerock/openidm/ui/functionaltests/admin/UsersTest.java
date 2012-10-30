@@ -14,7 +14,7 @@ public class UsersTest extends AbstractTest {
 	@AssertNoErrors
 	public void shouldAddUser() {
 		userHelper.loginAsOpenIDMAdmin();
-		router.routeTo("#adduser/", true);
+		router.routeTo("#users/add/", true);
 		
 		selenium.waitForElement("content", "userName", ElementType.NAME);
 		
@@ -37,7 +37,7 @@ public class UsersTest extends AbstractTest {
 		userHelper.createDefaultUser();
 		userHelper.loginAsOpenIDMAdmin();
 		
-		router.routeTo("#users/test@test.test/", true);
+		router.routeTo("#users/show/test@test.test/", true);
 		WebElement deleteButton = selenium.getElement("content", "deleteButton", ElementType.NAME);
 		deleteButton.click();
 		
@@ -56,7 +56,7 @@ public class UsersTest extends AbstractTest {
 		userHelper.createDefaultUser();
 		userHelper.loginAsOpenIDMAdmin();
 		
-		router.routeTo("#users/test@test.test/", true);
+		router.routeTo("#users/show/test@test.test/", true);
 		
 		forms.setField("content", "givenName", "John");
 		forms.validateForm("content");
@@ -81,7 +81,7 @@ public class UsersTest extends AbstractTest {
 		WebElement tr = selenium.getElement("usersTable", "odd", ElementType.CLASS);
 		tr.click();
 		
-		router.assertUrl("#users/test@test.test/");
+		router.assertUrl("#users/show/test@test.test/");
 	}
 	
 }

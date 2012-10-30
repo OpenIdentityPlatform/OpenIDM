@@ -22,6 +22,8 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 */
 
-if (request.params['password'] && response.result && (!response.result.length || !response.result[0].password || openidm.decrypt(response.result[0].password) !== request.params['password'])) {
+user = openidm.read("managed/user/" + response.result[0]._id);
+
+if (request.params['password'] && user && (!user.password || openidm.decrypt(user.password) !== request.params['password'])) {
     delete response.result;
 }

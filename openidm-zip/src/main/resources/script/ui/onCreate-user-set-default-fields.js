@@ -1,5 +1,5 @@
 /** 
- * This script generates user UUID and sets default fields. 
+ * This script sets default fields. 
  * It forces that user role is openidm-authorized and account status
  * is active.
  * 

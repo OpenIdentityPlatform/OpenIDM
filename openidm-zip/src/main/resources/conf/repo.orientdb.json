@@ -9,7 +9,7 @@
         
         "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
         "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
-        "for-security-answer" : "select securityAnswer FROM ${_resource} WHERE userName = '${uid}'",
+        "for-security-answer" : "select _openidm_id FROM ${_resource} WHERE userName = '${uid}'",
         
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
