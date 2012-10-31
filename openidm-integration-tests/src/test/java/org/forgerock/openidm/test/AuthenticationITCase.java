@@ -25,18 +25,11 @@
 package org.forgerock.openidm.test;
 
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import com.jayway.restassured.path.json.JsonPath;
 import static com.jayway.restassured.RestAssured.*;
 import com.jayway.restassured.response.*;
 
-import org.forgerock.json.resource.JsonResourceAccessor;
-import org.forgerock.openidm.test.module.ModuleFactory;
-import org.forgerock.openidm.test.module.OpenIDMTestModule;
-import org.osgi.framework.BundleContext;
 
-import org.testng.annotations.Guice;
 import org.testng.annotations.Test;
 import static org.hamcrest.Matchers.*;
 
@@ -50,7 +43,7 @@ import static com.jayway.restassured.RestAssured.given;
  */
 public class AuthenticationITCase {
 
-    @Test
+    @Test(groups="authentication")
     public void anonymousGet() throws Exception {
         // Anonymous credential can not be used to GET
         given().
@@ -62,49 +55,55 @@ public class AuthenticationITCase {
 
     }
 
-    @Test
+    @Test(groups="authentication")
     public void anonymousPost() throws Exception {
-        // Anonymous credential can be used to POST
+        // Anonymous credential can be used to POST in the repo
         String json =
                 given().
-                        headers("X-OpenIDM-Username", "anonymous","X-OpenIDM-Password", "anonymous","Content-Type", "application/json").request().body("{\"userName\":\"djoe\", \"givenName\":\"Joe\",\"familyName\":\"Doe\", \"email\":\"joe@forgerock.com\",\"password\":\"ldap12345\"}").
+                        headers("X-OpenIDM-Username", "anonymous","X-OpenIDM-Password", "anonymous","Content-Type", "application/json").
+                request().
+                        body("{\"userName\":\"djoe\", \"givenName\":\"Joe\",\"familyName\":\"Doe\", \"email\":\"joe@forgerock.com\",\"password\":\"ldap12345\"}").
                 expect().
                         statusCode(201).
                 when().
                         post("/openidm/managed/user?_action=create").asString();
         JsonPath jp = new JsonPath(json);
-        String firstId = jp.get("_id[0]");
-        if(firstId == null) {
+        String userID = jp.get("_id");
+        if(userID == null) {
             throw new IllegalArgumentException("Test Failed(AnonyPost): No result was returned");
         }
+        // we clean the repo after the test
+        given().
+                headers("X-OpenIDM-Username", "openidm-admin", "X-OpenIDM-Password", "openidm-admin", "If-Match", "*").
+        pathParam("id", userID).
+        expect().
+                statusCode(204).
+        when().
+                delete("/openidm/managed/user/{id}");
     }
 
-    @Test
+    @Test(groups="authentication")
     public void noCredential() throws Exception {
         // W/o authentication, query should fail.
-        expect().body("error", equalTo(401)).get("/openidm/managed/user?_query-id=query-all-ids");
+        expect().
+                body("error", equalTo(401)).
+        get("/openidm/managed/user?_query-id=query-all-ids");
     }
 
-    @Test
+    @Test(groups="authentication")
     public void basicAuthentication() throws Exception {
         // basic authentication should return an empty list of users
-        String json =
             expect().
                     statusCode(200).
             when().
-                    with().headers("X-OpenIDM-Username", "openidm-admin", "X-OpenIDM-Password","openidm-admin").
-                    get("/openidm/managed/user?_query-id=query-all-ids").asString();
-        JsonPath jp = new JsonPath(json);
-        jp.setRoot("result");
-        String firstId = jp.get("_id[0]");
-        if(firstId == null) {
-            throw new IllegalArgumentException("Test Failed(basicAuth): No result was returned");
-        }
+            with().
+                    headers("X-OpenIDM-Username", "openidm-admin", "X-OpenIDM-Password","openidm-admin").
+            get("/openidm/managed/user?_query-id=query-all-ids").asString();
     }
 
-    @Test
+    @Test(groups="authentication")
     public void useCookie() throws Exception {
-
+        // authentication with cookie
         Response response =
                 given().
                         headers("X-OpenIDM-Username", "openidm-admin","X-OpenIDM-Password", "openidm-admin").
@@ -113,23 +112,15 @@ public class AuthenticationITCase {
 
         // Get a single cookie value:
         String cookieValue = response.cookie("JSESSIONID");
-        // Get status code
-        int statusCode = response.getStatusCode();
 
-        String json =
-                given().
-                        cookie("JSESSIONID",cookieValue).
-                expect().
-                        statusCode(200).
-                when().
-                        get("/openidm/managed/user?_query-id=query-all-ids").asString();
+        given().
+                cookie("JSESSIONID",cookieValue).
+        expect().
+                statusCode(200).
+        when().
+                get("/openidm/managed/user?_query-id=query-all-ids").asString();
 
-        JsonPath jp = new JsonPath(json);
-        jp.setRoot("result");
-        String firstId = jp.get("_id[0]");
-        if(firstId == null) {
-            throw new IllegalArgumentException("Test Failed(useCookie): No result was returned");
-        }
+
     }
 
 }
