@@ -34,13 +34,11 @@ import org.forgerock.commons.launcher.Daemon;
 import org.forgerock.commons.launcher.OSGiDaemonBean;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
-import org.testng.Assert;
 import org.testng.IObjectFactory;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.ObjectFactory;
-import org.testng.annotations.Test;
 import org.testng.internal.ObjectFactoryImpl;
 
 /**
@@ -117,10 +115,5 @@ public class ITTestSetup {
         }
     }
 
-    @Test
-    public void firstTest(ITestContext context) {
-        Object service = context.getAttribute(Daemon.class.getName());
-        Assert.assertNotNull(service);
-    }
 
 }
