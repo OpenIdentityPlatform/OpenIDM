@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
@@ -309,8 +310,8 @@ public class ActivitiResource implements JsonResource {
             case query:     //query based on query-id
                 String queryId = ActivitiUtil.getQueryIdFromRequest(request);
                 if (ActivitiConstants.QUERY_TASKDEF.equals(queryId)) {
-                    String procDefId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID).asString();
-                    String taskDefKey = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_TASKDEFINITIONKEY).asString();
+                    String procDefId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID);
+                    String taskDefKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_TASKDEFINITIONKEY);
                     return queryTaskDefinition(procDefId, taskDefKey);
                 }
                 throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query-id");
@@ -534,15 +535,15 @@ public class ActivitiResource implements JsonResource {
      * @param request incoming request
      */
     private void setProcessInstanceParams(ProcessInstanceQuery query, JsonValue request) {
-        String processDefinitionId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID).asString();
+        String processDefinitionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID);
         query = processDefinitionId == null ? query : query.processDefinitionId(processDefinitionId);
-        String processDefinitionKey = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY).asString();
+        String processDefinitionKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY);
         query = processDefinitionKey == null ? query : query.processDefinitionKey(processDefinitionKey);
-        String processInstanceBusinessKey = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSINSTANCEBUSINESSKEY).asString();
+        String processInstanceBusinessKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSINSTANCEBUSINESSKEY);
         query = processInstanceBusinessKey == null ? query : query.processInstanceBusinessKey(processInstanceBusinessKey);
-        String processInstanceId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSINSTANCEID).asString();
+        String processInstanceId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSINSTANCEID);
         query = processInstanceId == null ? query : query.processInstanceId(processInstanceId);
-        String superProcessInstanceId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_SUPERPROCESSINSTANCEID).asString();
+        String superProcessInstanceId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_SUPERPROCESSINSTANCEID);
         query = superProcessInstanceId == null ? query : query.superProcessInstanceId(superProcessInstanceId);
 
         Map wfParams = fetchVarParams(request);
@@ -561,27 +562,27 @@ public class ActivitiResource implements JsonResource {
      * @param request incoming request
      */
     private void setProcessDefinitionParams(ProcessDefinitionQuery query, JsonValue request) {
-        String deploymentId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_DEPLOYMENTID).asString();
+        String deploymentId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_DEPLOYMENTID);
         query = deploymentId == null ? query : query.deploymentId(deploymentId);
-        String category = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_CATEGORY).asString();
+        String category = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_CATEGORY);
         query = category == null ? query : query.processDefinitionCategory(category);
-        String categoryLike = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_CATEGORY + ActivitiConstants.LIKE).asString();
+        String categoryLike = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_CATEGORY + ActivitiConstants.LIKE);
         query = categoryLike == null ? query : query.processDefinitionCategoryLike(categoryLike);
-        String processDefinitionId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ID).asString();
+        String processDefinitionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ID);
         query = processDefinitionId == null ? query : query.processDefinitionId(processDefinitionId);
-        String processDefinitionKey = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_KEY).asString();
+        String processDefinitionKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_KEY);
         query = processDefinitionKey == null ? query : query.processDefinitionKey(processDefinitionKey);
-        String processDefinitionKeyLike = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_KEY + ActivitiConstants.LIKE).asString();
+        String processDefinitionKeyLike = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_KEY + ActivitiConstants.LIKE);
         query = processDefinitionKeyLike == null ? query : query.processDefinitionKeyLike(processDefinitionKeyLike);
-        String processDefinitionName = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_NAME).asString();
+        String processDefinitionName = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_NAME);
         query = processDefinitionName == null ? query : query.processDefinitionName(processDefinitionName);
-        String processDefinitionNameLike = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_NAME + ActivitiConstants.LIKE).asString();
+        String processDefinitionNameLike = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_NAME + ActivitiConstants.LIKE);
         query = processDefinitionNameLike == null ? query : query.processDefinitionNameLike(processDefinitionNameLike);
-        String processDefinitionResourceName = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME).asString();
+        String processDefinitionResourceName = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME);
         query = processDefinitionResourceName == null? query : query.processDefinitionResourceName(processDefinitionResourceName);
-        String processDefinitionResourceNameLike = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME + ActivitiConstants.LIKE).asString();
+        String processDefinitionResourceNameLike = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME + ActivitiConstants.LIKE);
         query = processDefinitionResourceNameLike == null ? query : query.processDefinitionResourceNameLike(processDefinitionResourceNameLike);
-        String processDefinitionVersion = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_VERSION).asString();
+        String processDefinitionVersion = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_VERSION);
         query = processDefinitionVersion == null ? query : query.processDefinitionVersion(Integer.getInteger(processDefinitionVersion));
     }
 
@@ -612,25 +613,32 @@ public class ActivitiResource implements JsonResource {
      * @param request incoming request
      */
     private void setTaskParams(TaskQuery query, JsonValue request) {
-        String executionId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_EXECUTIONID).asString();
+        String executionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_EXECUTIONID);
         query = executionId == null ? query : query.executionId(executionId);
-        String processDefinitionId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID).asString();
+        String processDefinitionId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID);
         query = processDefinitionId == null ? query : query.processDefinitionId(processDefinitionId);
-        String processDefinitionKey = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY).asString();
+        String processDefinitionKey = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSDEFINITIONKEY);
         query = processDefinitionKey == null ? query : query.processDefinitionKey(processDefinitionKey);
-        String processInstanceId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_PROCESSINSTANCEID).asString();
+        String processInstanceId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_PROCESSINSTANCEID);
         query = processInstanceId == null ? query : query.processInstanceId(processInstanceId);
-        String taskAssignee = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_ASSIGNEE).asString();
+        String taskAssignee = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_ASSIGNEE);
         query = taskAssignee == null ? query : query.taskAssignee(taskAssignee);
-        String taskCandidateGroup = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_CANDIDATEGROUP).asString();
-        query = taskCandidateGroup == null ? query : query.taskCandidateGroup(taskCandidateGroup);
-        String taskCandidateUser = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_CANDIDATEUSER).asString();
+        String taskCandidateGroup = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_CANDIDATEGROUP);
+        if (taskCandidateGroup != null) {
+            String[] taskCandidateGroups = taskCandidateGroup.split(",");
+            if (taskCandidateGroups.length > 1) {
+                query.taskCandidateGroupIn(Arrays.asList(taskCandidateGroups));
+            } else {
+                query.taskCandidateGroup(taskCandidateGroup);
+            }
+        }
+        String taskCandidateUser = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_CANDIDATEUSER);
         query = taskCandidateUser == null ? query : query.taskCandidateUser(taskCandidateUser);
-        String taskId = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_TASKID).asString();
+        String taskId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_TASKID);
         query = taskId == null ? query : query.taskId(taskId);
-        String taskName = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_TASKNAME).asString();
+        String taskName = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_TASKNAME);
         query = taskName == null ? query : query.taskName(taskName);
-        String taskOwner = request.get(ActivitiConstants.REQUEST_PARAMS).get(ActivitiConstants.ACTIVITI_OWNER).asString();
+        String taskOwner = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_OWNER);
         query = taskOwner == null ? query : query.taskOwner(taskOwner);
 
         Map wfParams = fetchVarParams(request);
