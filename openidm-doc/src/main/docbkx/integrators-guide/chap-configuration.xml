@@ -99,12 +99,13 @@
    <para><emphasis>Configuration objects</emphasis> are named
    <literal><replaceable>objectname</replaceable>/<replaceable
    >instancename</replaceable></literal>. For example, <filename>provisioner.openicf/xml</filename>.</para>
-   <para><emphasis>JSON file</emphasis> views of these configuration objects are named
-   <filename><replaceable>objectname</replaceable>-<replaceable
-   >instancename</replaceable>.json</filename>. For example, <filename>provisioner.openicf-xml.json.</filename></para>
+   <para><emphasis>JSON file</emphasis> views of these configuration objects 
+   are named <filename><replaceable>objectname</replaceable>-<replaceable
+   >instancename</replaceable>.json</filename>. For example, 
+   <filename>provisioner.openicf-xml.json.</filename></para>
    <listitem>
-    <para>Multiple <literal>scheduler</literal> configurations can run
-    reconciliations on different schedules.</para>
+    <para>Multiple <literal>schedule</literal> configurations can run
+    reconciliations and other tasks on different schedules.</para>
    </listitem>
    <listitem>
     <para>Multiple <literal>provisioner.openicf</literal> configurations
@@ -129,8 +130,31 @@
    </listitem>
    <listitem>
     <para>OpenIDM recognizes changes to JSON files when it is running. OpenIDM
-    must be running when you delete configuration objects, even if you do so
+    must be running when you delete configuration objects, even if you do so <!-- Why is this the case. Surely if you delete a conf object while 
+                                                                                  OpenIDM is off, it will restart with the new conf? -->
     by editing the JSON files.</para>
+   </listitem>
+   <listitem>
+    <para>OpenIDM polls the JSON files in the <literal>conf</literal> directory
+    periodically for any changes to the configuration. To disable this 
+    automatic polling for changes, edit the <filename>conf/system.properties</filename> 
+    file by uncommenting the following line:</para>
+    <programlisting>
+    # openidm.fileinstall.enabled=false
+    </programlisting>
+   </listitem>
+   <listitem>
+    <para>OpenIDM stores its configuration in the internal database by default. 
+    This means that even if you remove an OpenIDM instance, the configuration 
+    remains in the repository. You can disable this <emphasis>persistent 
+    configuration</emphasis> in the <filename>conf/system.properties</filename> 
+    file by uncommenting the following line:</para>
+    <programlisting>
+      # openidm.config.repo.enabled=false
+    </programlisting>
+    <para>Disabling persistent configuration means that OpenIDM will store its 
+    configuration in memory only. You should not disable persistent 
+    configuration in a production environment.</para>
    </listitem>
    <listitem>
     <para>Avoid directly editing configuration objects in the internal

@@ -305,6 +305,7 @@
         <module>openidm-external-email</module>
         <module>openidm-external-rest</module>
         <module>openidm-httpcontext</module>
+        <module>openidm-infoservice</module>
         <module>openidm-jaas-loginmodule-repo</module>
         <module>openidm-jetty-fragment</module>
         <module>openidm-provisioner-openicf</module>
@@ -582,17 +583,17 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>1.1.1</version>
+                <version>1.1.5</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>1.1.1</version>
+                <version>1.1.5</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>1.1.1</version>
+                <version>1.1.5</version>
             </dependency>
 
             <!-- Test Dependencies -->

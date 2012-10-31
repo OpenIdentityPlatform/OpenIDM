@@ -4,8 +4,7 @@
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
     "queries" : {
-        "for-credentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
-        "for-internalcredentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
         "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
         "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
