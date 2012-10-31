@@ -63,6 +63,10 @@ define("config/messages/AdminMessages", [
             "unclaimedTask": {
                 msg: "config.messages.AdminMessages.unclaimedTask",
                 type: "info"
+            },
+            "startedProcess": {
+                msg: "config.messages.AdminMessages.startedProcess",
+                type: "info"
             }
     };
     

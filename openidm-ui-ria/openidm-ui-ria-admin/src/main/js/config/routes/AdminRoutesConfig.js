@@ -76,6 +76,11 @@ define("config/routes/AdminRoutesConfig", [
                 role: "admin",
                 url: "tasks/dashboard"
             },
+            "startTask": {
+                view: "org/forgerock/openidm/ui/admin/tasks/StartProcessDashboardView",
+                role: "admin",
+                url: "tasks/start"
+            },
             
             //for apps
             "addMoreAppsView": {

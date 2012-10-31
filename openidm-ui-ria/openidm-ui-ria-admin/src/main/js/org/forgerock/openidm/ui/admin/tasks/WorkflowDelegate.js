@@ -45,6 +45,12 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
         params._key = proccessNameKey;
         this.serviceCall({url: processManagementUrl + "/?_action=createProcessInstance", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
     };
+    
+    obj.startProcessById = function(processDefinitionId, params, successCallback, errorCallback) {
+        console.debug("start proccess");
+        params._processDefinitionId = processDefinitionId;
+        this.serviceCall({url: processManagementUrl + "/?_action=createProcessInstance", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
+    };
 
     obj.deleteProcess = function(id, successCallback, errorCallback) {
         console.debug("delete process");
@@ -58,7 +64,7 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
     
     obj.getTaskDefinition = function(processDefinitionId, taskDefinitionKey, successCallback, errorCallback) {
         console.debug("get task definition");
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=query-taskdefinition&" 
+        this.serviceCall({url: taskDefinitionUrl + "?_query-id=query-taskdefinition&" 
             + $.param({processDefinitionId: processDefinitionId, taskDefinitionKey: taskDefinitionKey}), success: successCallback, error: errorCallback} );
     };
     
@@ -97,6 +103,41 @@ define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
                 successCallback(data.result);
             }
         }, error: errorCallback} );
+    };
+    
+    obj.getAllProcessDefinitions = function(successCallback, errorCallback) {
+        console.info("getting all process definitions");
+        
+        obj.serviceCall({url: processDefinitionUrl + "?_query-id=query-all-ids", success: function(data) {
+            if(successCallback) {
+                successCallback(data.result);
+            }
+        }, error: errorCallback} );
+    };
+    
+    obj.getAllUniqueProcessDefinitions = function(successCallback, errorCallback) {
+        obj.getAllProcessDefinitions( function(processDefinitions) {
+            
+            var result = {}, ret = [], i, processDefinition, splittedProcessDefinition, processName, currentProcessVersion, newProcesVersion, r;
+            for (i=0; i < processDefinitions.length; i++) {
+                processDefinition = processDefinitions[i];
+                splittedProcessDefinition = processDefinition._id.split(':');
+                processName = splittedProcessDefinition[0];
+                if (result[processName]) {
+                    currentProcessVersion = result[processName]._id.split(':')[1];
+                    newProcesVersion = splittedProcessDefinition[1];
+                    if (newProcesVersion > currentProcessVersion) {
+                        result[processName] = processDefinition;
+                    }
+                } else {
+                    result[processName] = processDefinition;
+                }
+            }
+            for (r in result) {
+                ret.push(result[r]);
+            }
+            successCallback(ret);
+        }, errorCallback);
     };
     
     obj.getAllTasksForProccess = function(proccessNameKey, successCallback, errorCallback) {

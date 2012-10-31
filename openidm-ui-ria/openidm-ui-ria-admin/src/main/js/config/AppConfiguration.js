@@ -93,43 +93,47 @@ define("config/AppConfiguration", [
                                "urls": {
                                    "dashboard": {
                                        "url": "#/",
-                                       "name": "Dashboard"
+                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
                                    },
                                    "users": {
                                        "url": "#users/",
-                                       "name": "Users"
+                                       "name": "config.AppConfiguration.Navigation.links.users"
                                    },
                                    "apps": {
                                        "baseUrl": "#applications/",
                                        "url": "#applications/all/",
-                                       "name": "Applications",
+                                       "name": "config.AppConfiguration.Navigation.links.apps",
                                        "urls": {
                                            "allApps": {
                                                "url": "#applications/all/",
-                                               "name": "All applications"
+                                               "name": "config.AppConfiguration.Navigation.links.allApps"
                                            },
                                            "addMore": {
                                                "url": "#applications/addmore/",
-                                               "name": "Add more apps"
+                                               "name": "config.AppConfiguration.Navigation.links.addMore"
                                            }
                                        }    
                                    },
                                    "groups": {
                                        "url": "#groups/",
-                                       "name": "Groups"
+                                       "name": "config.AppConfiguration.Navigation.links.groups"
                                    },
                                    "tasksMenu": {
                                        "baseUrl": "#tasks/",
                                        "url": "#tasks/all",
-                                       "name": "Tasks",
+                                       "name": "config.AppConfiguration.Navigation.links.tasksMenu",
                                        "urls": {
                                            "allTasks": {
                                                "url": "#tasks/all",
-                                               "name": "Tasks that are in my group's queue"
+                                               "name": "config.AppConfiguration.Navigation.links.allTasks"
                                            },
                                            "myTasks": {
                                                "url": "#tasks/assigned",
-                                               "name": "My tasks"
+                                               "name": "config.AppConfiguration.Navigation.links.myTasks"
+                                           },
+                                           "startProcess": {
+                                               "url": "#tasks/start",
+                                               "name": "config.AppConfiguration.Navigation.links.startProcess"
                                            }
                                        }
                                    }
@@ -162,6 +166,10 @@ define("config/AppConfiguration", [
                                            "myTasks": {
                                                "url": "#tasks/assigned",
                                                "name": "config.AppConfiguration.Navigation.links.myTasks"
+                                           },
+                                           "startProcess": {
+                                               "url": "#tasks/start",
+                                               "name": "config.AppConfiguration.Navigation.links.startProcess"
                                            }
                                        }
                                    }

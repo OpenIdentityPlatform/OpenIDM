@@ -25,9 +25,9 @@
 /*global define, $, form2js, _, js2form, document */
 
 /**
- * @author mbilski
+ * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
+define("org/forgerock/openidm/ui/admin/tasks/AbstractProcessForm", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -35,12 +35,12 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
     "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
-    var AbstractTaskForm = AbstractView.extend({
+    var AbstractProcessForm = AbstractView.extend({
+        
         template: "templates/common/EmptyTemplate.html",
-        element: "#taskContent",
         
         events: {
-            "click input[name=saveButton]": "formSubmit",
+            "click input[name=startProcessButton]": "formSubmit",
             "onValidate": "onValidate"
         },
         
@@ -48,10 +48,11 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
             event.preventDefault();
             
             var params = form2js(this.$el.attr("id"), '.', false);
+            delete params.startProcessButton;
             
-            workflowManager.completeTask(this.task._id, params, _.bind(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [this.category]});
+            workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
+                eventManager.sendEvent("clearStartProcessTemplateView");
             }, this));
         },
         
@@ -59,11 +60,11 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
             
         },
         
-        render: function(task, category, args, callback) { 
+        render: function(processDefinition, category, args, callback) { 
             this.setElement(this.element);
             this.$el.unbind();
             this.delegateEvents();
-            this.task = task;
+            this.processDefinition = processDefinition;
             this.category = category;
             this.args = args;
             
@@ -81,9 +82,10 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
         
         reloadData: function() {
         }
+        
     }); 
     
-    return AbstractTaskForm;
+    return AbstractProcessForm;
 });
 
 

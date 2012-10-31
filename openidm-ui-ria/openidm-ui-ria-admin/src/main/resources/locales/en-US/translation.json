@@ -38,7 +38,8 @@
                 "userApplicationsUpdate" : "Application settings have been changed.",
                 "completedTask" : "Task has been completed.",
                 "claimedTask" : "Task has been claimed.",
-                "unclaimedTask" : "Task has been unclaimed."
+                "unclaimedTask" : "Task has been unclaimed.",
+                "startedProcess" : "Process has been started"
             }
         },
         "AppConfiguration" : {
@@ -52,7 +53,8 @@
                     "groups" : "Groups",
                     "tasksMenu" : "Tasks",
                     "allTasks" : "Tasks that are in my group's queue",
-                    "myTasks" : "My tasks"
+                    "myTasks" : "My tasks",
+                    "startProcess" : "Start process"
                 }
             }
         }
@@ -138,6 +140,7 @@
             "logout" : "Log out",
             "register" : "Register",
             "home" : "Home",
+            "start" : "Start",
             "continue" : "Continue",
             "back" : "Back",
             "delete" : "Delete",
@@ -227,10 +230,13 @@
             "deny" : "Deny",
             "requeue" : "Requeue",
             "taskName" : "Task Name",
+            "processName" : "Process Name",
+            "startProcess" : "Start Process",
             "assignee" : "Assignee",
             "taskDetails" : "Task Details",
             "myTasks" : "My tasks",
-            "tasksList" : "Tasks list"
+            "tasksList" : "Tasks list",
+            "processes" : "Processes"
          },
          "application" : {
             "applicationName" : "Application Name",
@@ -272,6 +278,9 @@
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"
+                    },
+                    "StartProcessDashboardView" : {
+                        "chooseProcess" : "Please choose a process to start"
                     }
                 },
                 "users" : {

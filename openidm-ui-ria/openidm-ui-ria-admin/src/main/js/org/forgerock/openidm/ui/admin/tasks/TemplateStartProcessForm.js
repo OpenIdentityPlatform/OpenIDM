@@ -27,24 +27,26 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TemplateTaskForm", [
-    "org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm",
+define("org/forgerock/openidm/ui/admin/tasks/TemplateStartProcessForm", [
+    "org/forgerock/openidm/ui/admin/tasks/AbstractProcessForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractTaskForm, DateUtil, conf, uiUtils) {
+], function(AbstractProcessForm, DateUtil, conf, uiUtils) {
     
-    var TemplateTaskForm = AbstractTaskForm.extend({
+    var TemplateStartProcessForm = AbstractProcessForm.extend({
         
-        template: "templates/common/EmptyTemplate.html",
+        template: "templates/admin/tasks/StartProcessUsingTemplateTemplate.html",
         
-        postRender: function() {            
-            var t = Handlebars.compile(this.args)(this.task);
-            
-            this.$el.html(t);
+        element: "#startProcessForm",
+        
+        postRender: function() {
+            var t = Handlebars.compile(this.args)(this.processDefinition);
+            this.$el.find('#startProcessTemplateContent').html(t);
         }
+        
     }); 
     
-    return new TemplateTaskForm();
+    return new TemplateStartProcessForm();
 });
 
 
