@@ -31,6 +31,7 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./users/UsersView",
 	"./tasks/TaskDetailsView",
 	"./tasks/AbstractTaskForm",
+	"./tasks/AbstractProcessForm",
 	"./tasks/ApplicationAcceptanceTask",
 	"./tasks/TasksFormManager",
 	"./tasks/TasksWithMenuView",
@@ -38,5 +39,6 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./tasks/WorkflowDelegate",
 	"./tasks/TasksDashboard",
 	"./Dashboard",
-	"./tasks/TemplateTaskForm"
+	"./tasks/TemplateTaskForm",
+	"./tasks/StartProcessDashboardView"
 ]);

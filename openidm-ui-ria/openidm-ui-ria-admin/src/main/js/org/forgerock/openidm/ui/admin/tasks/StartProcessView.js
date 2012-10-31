@@ -27,42 +27,39 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
+define("org/forgerock/openidm/ui/admin/tasks/StartProcessView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
     "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
-    "org/forgerock/openidm/ui/admin/tasks/TemplateTaskForm"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm) {
-    var TaskDetailsView = AbstractView.extend({
-        template: "templates/admin/tasks/TaskDetailsTemplate.html",
+    "org/forgerock/openidm/ui/admin/tasks/TemplateStartProcessForm"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateStartProcessForm) {
+    var StartProcessView = AbstractView.extend({
+        template: "templates/admin/tasks/StartProcessTemplate.html",
 
-        element: "#taskDetails",
+        element: "#startProcessForm",
         
-        render: function(id, category) {  
-            this.parentRender(function() {      
+        render: function(id, category) { 
+            this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                 
-                workflowManager.getTask(id, _.bind(function(task) {
-                    this.task = task;
-                    
-                    workflowManager.getTaskDefinition(task.processDefinitionId, task.taskDefinitionKey, _.bind(function(definition) {
+                    workflowManager.getProcessDefinition(id, _.bind(function(definition) {
                         
                         var template = this.getGenerationTemplate(definition), view, passJSLint;
                         
                         if(definition.formResourceKey) {
                             view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
                             if (view.render) {
-                                view.render(task, category);
+                                view.render(definition, {});
                                 return;
                             } else {
                                 console.log("There is no view defined for " + definition.formResourceKey);
                             }
                         } 
                         if(template !== false) {
-                            templateTaskForm.render(task, category, template);
+                            templateStartProcessForm.render(definition, {}, template);
                             return;
                         } else {
                             //TODO
@@ -70,7 +67,6 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
                             return;
                         }
                     }, this));                  
-                }, this));
             });            
         },
         
@@ -85,7 +81,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TaskDetailsView", [
         }
     }); 
     
-    return new TaskDetailsView();
+    return new StartProcessView();
 });
 
 
