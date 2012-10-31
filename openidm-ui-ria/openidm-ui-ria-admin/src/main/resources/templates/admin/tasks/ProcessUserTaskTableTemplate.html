@@ -1,5 +1,5 @@
 <h3>
-    <a href="#">{{taskName}}</a>
+    {{taskName}}
     <div style="float: right;">
         {{#count}}
             {{p this key="templates.admin.tasks.ProcessUserTaskTableTemplate.requestCount"}}
@@ -27,7 +27,10 @@
         </tbody>
     </table>   
     {{#batchOperation}}
-        <a href="#" class="buttonOrange cancelLink">{{t "common.form.cancel"}}</a> 
-        <a href="#" class="buttonGrey saveLink">{{t "common.form.save"}}</a> 
+    <div class="action-buttons">
+        <a href="#" class="link cancelLink">{{t "common.form.cancel"}}</a> 
+        <a href="#" class="button active saveLink">{{t "common.form.save"}}</a>
+    </div> 
     {{/batchOperation}}
+    <div class="clear"></div>
 </div>

@@ -48,11 +48,18 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             "click .choosable" : "markAsChoosen",
             "click .cancelLink": "resetChoosen",
             "click .saveLink": "save",
-            "mouseenter .userLink": "showUser"
+            "mouseenter .userLink": "showUser",
+            "click input[name=denyReason]": "clearInput"
         },
         
         tasks: {},
         
+        clearInput: function(event) {
+            if($(event.target).val() === $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason")) {
+                $(event.target).val('');       
+            }            
+        },
+
         showTask: function(event) {
             event.preventDefault();
             
@@ -187,8 +194,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                 "user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id, task.variables.userApplicationLnk.requester), 
                 "app": task.variables.application.name, 
                 "date": dateUtil.formatDate(task.createTime), 
-                "actions": actions, 
-                "hidden": this.getHiddenParams(task)
+                "actions": actions + this.getHiddenParams(task)
+                // TODO fix
+                // "hidden": this.getHiddenParams(task)
             });
             }
         },
@@ -231,15 +239,15 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         
         getActions: function(task) {
             if(this.category === 'all') {
-                return '<select name="assignedUser"><option value="null">' + $.t("common.task.unassigned") 
+                return '<select name="assignedUser" style="width: 180px"><option value="null">' + $.t("common.task.unassigned") 
                     + '</option><option value="me">' + $.t("common.task.assignToMe")
-                    + '</option></select> <a href="#" class="buttonOrange detailsLink">' + $.t("common.form.details")
+                    + '</option></select> <a href="#" class="button choosable choosable-static detailsLink">' + $.t("common.form.details")
                     + '</a>';
             } else if(this.category === 'assigned') {
-                return '<a href="#" class="buttonOrange choosable" data-action="approveTask">' + $.t("common.task.approve") + '</a>' +
-                    '<a href="#" class="buttonOrange choosable" data-action="denyTask">' + $.t("common.task.deny") + '</a>' +
-                    '<a href="#" class="buttonOrange choosable" data-action="requeueTask">' + $.t("common.task.requeue") + '</a>' +
-                    '<a href="#" class="buttonOrange detailsLink">' + $.t("common.form.details") + '</a>';
+                return '<a href="#" class="button choosable" data-action="approveTask">' + $.t("common.task.approve") + '</a>' +
+                    '<a href="#" class="button choosable" data-action="denyTask">' + $.t("common.task.deny") + '</a>' +
+                    '<a href="#" class="button choosable" data-action="requeueTask">' + $.t("common.task.requeue") + '</a>' +
+                    '<a href="#" class="button choosable choosable-static detailsLink">' + $.t("common.form.details") + '</a>';
             }
         },
        
@@ -310,12 +318,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         markAsChoosen: function(event) {
             event.preventDefault();
             
+            var height;
+
             if (!$(event.target).hasClass("choosen-decision")) {
                 $(event.target).parent().find("a").removeClass("choosen-decision");
                 $(event.target).addClass("choosen-decision");
                 
                 if ($(event.target).attr('data-action') === 'denyTask') {
                     $(event.target).parent().parent().after(this.getReasonInputRow());
+                    // TODO change table height +31
+                    height = $(event.target).parent().parent().parent().parent().parent().height();
+                    $(event.target).parent().parent().parent().parent().parent().css("height", (height + 31) + "px");
                 } else {
                     if($(event.target).parent().parent().next().find("input[name=denyReason]").length !== 0) {
                         $(event.target).parent().parent().next().remove();
@@ -325,7 +338,9 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             } else {
                 $(event.target).parent().find("a").removeClass("choosen-decision");
                 if($(event.target).parent().parent().next().find("input[name=denyReason]").length !== 0) {
+                    height = $(event.target).parent().parent().parent().parent().parent().height();
                     $(event.target).parent().parent().next().remove();
+                    $(event.target).parent().parent().parent().parent().parent().css("height", (height - 31) + "px");
                 }
             }
             
@@ -334,15 +349,15 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
         },
         
         getReasonInputRow: function() {
-            return '<tr><td colspan="4"><input name="denyReason" value="' + $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason") + '" /></td></tr>';
+            return '<tr class="input-full"><td colspan="4"><input name="denyReason" type="text" value="' + $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason") + '" /></td></tr>';
         },
         
         setSaveLinkAsActiveOrInactive: function(element) {
             var taskContainer = element.parent().parent().parent();
             if (taskContainer.find(".choosen-decision").size() > 0) {
-                taskContainer.parent().parent().find(".saveLink").removeClass("buttonGrey").addClass("buttonOrange");
+                taskContainer.parent().parent().find(".saveLink").removeClass("button inactive").addClass("button");
             } else {
-                taskContainer.parent().parent().find(".saveLink").removeClass("buttonOrange").addClass("buttonGrey");
+                taskContainer.parent().parent().find(".saveLink").removeClass("button").addClass("button inactive");
             }
         },
         
@@ -351,7 +366,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             
             event.preventDefault();
             
-            $(event.target).parent().find("table").find("tbody").find("tr").each(function(index) {
+            $(event.target).parent().parent().find("table").find("tbody").find("tr").each(function(index) {
                 action = $(this).find(".choosen-decision").attr('data-action');
                 taskId = $(this).find("input[name=taskId]").val();
                 denyReason = $(this).find("input[name=denyReason]").val();

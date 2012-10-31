@@ -57,11 +57,11 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
             deleteLink = '<a name="deleteLink" href="#">' + $.t("common.notification.deleteThisMessage") + '</a>';
             id = item._id;
             
-            return '<h3>' 
+            return '<div class="notification-title">' 
                      + '<img src="' + iconLink + '"/>'
                      + '<a name="title" href="#">' + message + '</a>'
-                  + '</h3>'
-                  + '<div class="itemLeftIdent">'
+                  + '</div>'
+                  + '<div class="notification-details">'
                       + '<div class="details"> '
                       + $.t("common.application.requestedBy") +': ' 
                       + (requester ? requester : $.t("common.user.system")) + '</br>' 

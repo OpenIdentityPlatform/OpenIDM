@@ -202,7 +202,7 @@
             "adaptiveAuthMethod" : "Adaptive auth method",
             "SMS" : "SMS",
             "OAuth" : "OAuth",
-            "registerNewAccount" : "Create new account",
+            "createNewAccount" : "Create new account",
             "password" : "Password",
             "confirmPassword" : "Confirm Password",
             "newPassword" : "New password",
