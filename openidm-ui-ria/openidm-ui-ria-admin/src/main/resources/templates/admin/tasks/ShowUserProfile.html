@@ -1,23 +1,14 @@
-<div style="height:100px">
+<div style="height: 100px">
 
-	<div class="floatLeft" style="width: 110px;">
-	    <img src="images/default_profile_image.gif" alt="default" />
-	</div>
-	
-	<div class="floatRight">
-	
-	    <div class="line">
-	        <label name="userName" class="head">{{userDisplayName}}</label>
-	    </div>
-	    
-	    <div class="line">
-	        <label name="position">{{userName}}</label>
-	    </div>
-	    
-	    <div class="line">
-	        <label name="requestedBy">{{t "templates.admin.tasks.ShowUserProfile.requestInitiator"}}: {{requesterDisplayName}}</label>
-	    </div>
-	    
-	</div>
+    <div class="column-layout">
+        <div class="float-left" style="width: 110px;">
+            <img src="images/default_profile_image.gif" alt="default" /> 
+        </div>
+        <div class="float-right">
+            <label name="userName" class="header">{{userDisplayName}}</label>
+            <label name="position">{{userName}}</label>
+            <label name="requestedBy">{{t "templates.admin.tasks.ShowUserProfile.requestInitiator"}}: {{requesterDisplayName}}</label>
+         </div>
+    </div>
 	
 </div>
