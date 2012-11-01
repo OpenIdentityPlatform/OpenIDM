@@ -125,38 +125,37 @@ public class PolicyService implements JsonResource {
         logger.info("OpenIDM Policy Service component is deactivated.");
     }
 
-    public void registerComponent(JsonValue componentConfig) {
-        List<Object> components = parameters.get("components").asList();
-        String componentName = componentConfig.get("component").asString();
-        for (Object obj : components) {
+    public void registerResource(JsonValue resourceConfig) {
+        List<Object> resources = parameters.get("resources").asList();
+        String resourceName = resourceConfig.get("resource").asString();
+        for (Object obj : resources) {
             JsonValue value = (JsonValue)obj;
-            if (value.get("component").asString().equals(componentName)) {
-                logger.debug("Removing old component configuration for {}", componentName);
-                components.remove(obj);
+            if (value.get("resource").asString().equals(resourceName)) {
+                logger.debug("Removing old resource configuration for {}", resourceName);
+                resources.remove(obj);
             }
         }
-        logger.debug("Registering component configuration for {}", componentName);
-        components.add(componentConfig);
+        logger.debug("Registering resource configuration for {}", resourceName);
+        resources.add(resourceConfig);
     }
     
-    public void unregisterComponent(String componentName) {
-        List<Object> components = parameters.get("components").asList();
-        for (Object obj : components) {
+    public void unregisterResource(String resourceName) {
+        List<Object> resources = parameters.get("resources").asList();
+        for (Object obj : resources) {
             JsonValue value = (JsonValue)obj;
-            if (value.get("component").asString().equals(componentName)) {
-                logger.debug("Unregistering component configuration for {}", componentName);
-                components.remove(obj);
+            if (value.get("resource").asString().equals(resourceName)) {
+                logger.debug("Unregistering resource configuration for {}", resourceName);
+                resources.remove(obj);
                 return;
             }
         }
-        logger.debug("Cannot unregister component configuration for {}. Component configuration does not exist", componentName);
+        logger.debug("Cannot unregister resource configuration for {}. Resource configuration does not exist", resourceName);
     }
     
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         Map<String, Object> scope = Utils.deepCopy(parameters.asMap());
         scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));
         scope.put("request", request.getObject());
-        scope.put("openidm", router);
         
         try {
             return new JsonValue(script.exec(scope));

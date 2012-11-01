@@ -7,6 +7,16 @@
             }
         },
         {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/policyFilter.js"
+            },
+            "methods" : [
+                "create",
+                "update"
+            ]
+        },
+        {
             "pattern" : "^managed/user/.*",
             "methods" : [
                 "query"
