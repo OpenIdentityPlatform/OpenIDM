@@ -175,9 +175,9 @@ public class HealthService implements HealthInfo {
     @Activate
     protected void activate(final ComponentContext context) {
         this.context = context;        
-        requiredBundles = new ArrayList();
+        requiredBundles = new ArrayList<String>();
         requiredBundles.addAll(Arrays.asList(defaultRequiredBundles));
-        requiredServices = new ArrayList();
+        requiredServices = new ArrayList<String>();
         requiredServices.addAll(Arrays.asList(defaultRequiredServices));
         applyPropertyConfig();
 
