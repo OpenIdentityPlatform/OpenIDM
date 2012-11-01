@@ -4,6 +4,8 @@
     "schedule" : "0 0 * * * ?",
     "invokeService" : "taskscanner",
     "invokeContext" : {
+        "waitForCompletion" : false,
+        "numberOfThreads" : 5,
         "scan" : {
             "_query-id" : "scan-tasks",
             "object" : "managed/user",
