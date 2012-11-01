@@ -816,6 +816,65 @@
    &amp; Hardening OpenIDM</citetitle></link> for instructions on adding your
    own symmetric key.</para>
   </section>
+  
+  <section xml:id="restricting-http-access">
+   <title>Restricting HTTP Access to Sensitive Data</title>
+   <para>You can protect specific sensitive data stored in the repository by 
+   marking the corresponding properties as "private". Private data, whether it 
+   is encrypted or not, is not accessible over the REST interface. Properties 
+   that are marked as private are removed from an object when that object is 
+   retrieved over REST.</para>
+   
+   <para>To mark a property as private, set its <literal>"scope"</literal> to 
+   <literal>"private"</literal> in the <filename>conf/managed.json</filename> 
+   file.</para>
+   
+   <para>The following extract of the <filename>managed.json</filename> file 
+   shows how HTTP access is prevented on the <literal>password</literal> and 
+   <literal>securityAnswer</literal> properties.</para>
+   
+   <programlisting language="javascript">
+       "properties" : [
+           {
+               "name" : "securityAnswer",
+               "encryption" : {
+                   "key" : "openidm-sym-default"
+               },
+               "scope" : "private"
+           },
+           {
+               "name" : "password",
+               "encryption" : {
+                   "key" : "openidm-sym-default"
+               },
+               "scope" : "private"
+   </programlisting>
+   
+   <para>A potential caveat with using private properties is that such 
+   properties are <emphasis>removed</emphasis> if an object is updated by 
+   using an HTTP <literal>PUT</literal> request. A <literal>PUT</literal> 
+   request replaces the entire object in the repository. Because properties 
+   that are marked as private are ignored in HTTP requests, these properties 
+   are effectively removed from the object when the update is done. To work 
+   around this limitation, do not use <literal>PUT</literal> requests if you 
+   have configured private properties. Instead, use a <literal>PATCH</literal> 
+   request to update only those properties that need to be changed.
+   </para>
+   
+   <para>For example, to update the familyName of user joe, replace only the 
+   familyName and not the entire user object, as follows:</para>
+   
+   <screen width="100">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --header "Content-Type: application/json"
+ --request POST
+ --data '{
+          "replace":"familyName","value": "Brown"
+         }'
+ "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=joe"
+   </screen>
+  </section>
 
   <section xml:id="constructing-attributes">
    <title>Constructing &amp; Manipulating Attributes</title>
