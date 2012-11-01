@@ -157,7 +157,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         
         deleteUser: function() {
             confirmationDialog.render("Delete user", 
-                $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.email] }),
+                $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.userName] }),
                 $.t("common.form.delete"), _.bind(function() {
                 
                 eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});

@@ -68,6 +68,11 @@ var accessConfig = { "configs" : [
                 "actions" : "*",
                 "customAuthz" : "ownDataOnly()" // Custom auth function
         },
+        {  "pattern" : "policy/*",
+            "roles" : "*",
+            "methods": "read,action",
+            "actions" : "*"
+        },
 
         // Anonymous user can:
         // * create user using POST with action=create
@@ -296,7 +301,7 @@ function requestValueContainsReplaceValueWithKeyOfName(valueKeyName) {
 }
 
 function allow() {
-    if (typeof(request.parent) === 'undefined' || request.parent.type != 'http') {
+    if (request.parent == null || request.parent == undefined || request.parent.type != 'http') {
         return true;
     }
     

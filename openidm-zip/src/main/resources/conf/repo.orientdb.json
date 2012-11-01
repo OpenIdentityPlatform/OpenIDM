@@ -6,6 +6,7 @@
     "queries" : {
         "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
+        "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = '${value}'",
         "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
         "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
         "for-security-answer" : "select _openidm_id FROM ${_resource} WHERE userName = '${uid}'",

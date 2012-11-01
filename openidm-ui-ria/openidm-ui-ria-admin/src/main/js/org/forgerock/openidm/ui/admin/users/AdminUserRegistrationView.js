@@ -37,6 +37,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
 ], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants) {
     var AdminUserRegistrationView = AbstractView.extend({
         template: "templates/admin/AdminUserRegistrationTemplate.html",
+        delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate"
@@ -53,7 +54,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 data.securityQuestion = 1;
                 data.securityAnswer = "";
                 
-                userDelegate.createEntity(data, function(user) {
+                this.delegate.createEntity(data, function(user) {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULY_REGISTERED, { user: data, selfRegistration: false });
                 }, function() {
                     _this.unlock();
@@ -63,8 +64,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         
         render: function() {
             this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el);
-                this.unlock();
+                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
+                    this.unlock();
+                }, this));
             });            
         }   
     }); 
