@@ -88,6 +88,10 @@ var policyConfig = {
                 "policyRequirements" : ["REQUIRED"]
                 
             }
+            {   "policyId" : "re-auth-required",
+                "policyExec" : "reauthRequired", 
+                "policyRequirements" : ["REAUTH_REQUIRED"]
+            }
         ] 
     };
 
@@ -200,6 +204,18 @@ function getPolicy(policyId) {
         }
     }
     return null;
+}
+
+function reauthRequired(fullObject, value, params, propName) {
+    var req = request.parent.parent;
+    if (typeof req.type !== 'undefined' && req.type == "http") {
+        try {
+            authFilter.reauthenticate(req);
+        } catch (error) {
+            return [ { "policyRequirement" : "REAUTH_REQUIRED" } ];
+        }
+    }
+    return [];
 }
 
 function getPropertyValue(requestObject, propName) {
