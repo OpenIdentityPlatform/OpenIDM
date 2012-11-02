@@ -24,8 +24,10 @@
 
 package org.forgerock.openidm.policy;
 
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,10 +54,11 @@ import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
 import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.script.Utils;
+import org.forgerock.openidm.util.FileUtil;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,9 +114,38 @@ public class PolicyService implements JsonResource {
         configuration.remove("type");
         configuration.remove("source");
         configuration.remove("file");
+        JsonValue additionalPolicies = configuration.get("additionalFiles");
+        if (!additionalPolicies.isNull()) {
+            configuration.remove("additionalFiles");
+            List<String> list = new ArrayList<String>();
+            for (JsonValue policy : additionalPolicies) {
+                String fileName = policy.asString();
+                try {
+                    list.add(FileUtil.readFile(new File(fileName)));
+                } catch (Exception e) {
+                    logger.error("Error loading additional policy script " + fileName, e);
+                }
+            }
+            configuration.add("additionalPolicies", list);
+        }
         parameters = configuration;
 
         logger.info("OpenIDM Policy Service component is activated.");
+    }
+    
+    private static String readFileAsString(String filePath) throws java.io.IOException{
+        StringBuffer fileData = new StringBuffer(1000);
+        BufferedReader reader = new BufferedReader(
+                new FileReader(filePath));
+        char[] buf = new char[1024];
+        int numRead=0;
+        while((numRead=reader.read(buf)) != -1){
+            String readData = String.valueOf(buf, 0, numRead);
+            fileData.append(readData);
+            buf = new char[1024];
+        }
+        reader.close();
+        return fileData.toString();
     }
 
     @Deactivate
@@ -151,18 +183,21 @@ public class PolicyService implements JsonResource {
         }
         logger.debug("Cannot unregister resource configuration for {}. Resource configuration does not exist", resourceName);
     }
-    
+
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         Map<String, Object> scope = Utils.deepCopy(parameters.asMap());
-        scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));
-        scope.put("request", request.getObject());
-        
+        ObjectSetContext.push(request);
         try {
+            scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));
+            scope.put("request", request.getObject());
+            
             return new JsonValue(script.exec(scope));
         } catch (ScriptThrownException ste) {
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, ste.getValue().toString(), ste);
         } catch (ScriptException se) {
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, se);
+        } finally {
+            ObjectSetContext.pop();
         }
     }
 }
