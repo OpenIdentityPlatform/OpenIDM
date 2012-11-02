@@ -1,0 +1,77 @@
+.tasks-table {
+    margin-bottom: 20px;
+    table {
+        width: 100%;
+        border: 1px solid #E6E6E6;
+        border-bottom: 0;
+        
+        
+        background-color: #ffffff;
+        
+        thead th {
+            font-weight: bold;
+            padding: 9px;
+            text-align: left;
+        }
+        thead {
+            /* .linear-gradient; */
+            background-color: #EDEDED;
+            border: 1px solid #E6E6E6;
+        }
+        
+        tbody tr {
+            border: 1px solid #ffffff;
+            &:hover {
+                background-color: #DCEBFF;
+                border: 1px solid #E6E6E6;
+            }
+            &.input-full {
+                input {
+                    width: 94%;
+                    margin-right: 7px;
+                    color: #A9A9A9;
+                }
+                &:hover {
+                    background-color: none !important;
+                }
+            }
+        }
+        
+        tbody td {
+            padding: 9px;
+            /*
+            &:first-child {
+                width: 25%;
+            }*/
+            &:last-child {
+                padding: 0 5px;
+                text-align: right;
+            } 
+        }
+        
+       
+        
+    }
+    h3 {
+        &.ui-accordion-header {
+        font-size: 14px;
+        outline: 0;
+        line-height: 18px;
+        font-weight: normal;
+        padding: 10px;
+      }
+      &.ui-state-active {
+        background-color: #ffffff;
+        border: 1px solid #E6E6E6;
+        font-weight: bold;
+      }
+    }
+    div.action-buttons {
+        background-color: #ffffff;
+        text-align: right;
+        border: 1px solid #E6E6E6;
+        border-top: 0;
+        padding: 10px;
+    }
+    
+}
