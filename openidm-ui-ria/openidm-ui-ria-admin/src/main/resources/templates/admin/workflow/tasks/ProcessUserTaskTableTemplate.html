@@ -1,0 +1,36 @@
+<h3>
+    {{taskName}}
+    <div style="float: right;">
+        {{#count}}
+            {{p this key="templates.admin.tasks.ProcessUserTaskTableTemplate.requestCount"}}
+        {{/count}}
+    </div>
+</h3>
+<div>
+    <table>
+        <thead>
+	        <tr>
+	            {{#headers}}
+	                <th>{{.}}</th>
+	            {{/headers}}
+	        </tr>
+        </thead>
+        <tbody>
+	        {{#tasks}}
+	        <tr>
+	            {{#.}}
+	                <td>{{{.}}}</td>
+	            {{/.}}
+	        </tr>
+	        
+	        {{/tasks}}
+        </tbody>
+    </table>   
+    {{#batchOperation}}
+    <div class="action-buttons">
+        <a href="#" class="link cancelLink">{{t "common.form.cancel"}}</a> 
+        <a href="#" class="button active saveLink">{{t "common.form.save"}}</a>
+    </div> 
+    {{/batchOperation}}
+    <div class="clear"></div>
+</div>
