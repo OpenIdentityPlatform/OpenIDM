@@ -1,7 +1,7 @@
 /*! @license 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright ¬¨¬®¬¨¬Æ¬¨¬®¬¨¬© 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
