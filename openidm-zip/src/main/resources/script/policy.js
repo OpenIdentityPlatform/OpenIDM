@@ -32,6 +32,7 @@ var policyConfig = {
         "policies" : [
             {   "policyId" : "required",
                 "policyExec" : "required",
+                "clientValidation": true,
                 "policyRequirements" : ["REQUIRED"]
             },
             {   "policyId" : "not-empty",
