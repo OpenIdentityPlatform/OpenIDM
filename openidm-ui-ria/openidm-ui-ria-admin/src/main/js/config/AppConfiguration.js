@@ -118,24 +118,9 @@ define("config/AppConfiguration", [
                                        "url": "#groups/",
                                        "name": "config.AppConfiguration.Navigation.links.groups"
                                    },
-                                   "tasksMenu": {
-                                       "baseUrl": "#tasks/",
-                                       "url": "#tasks/all",
-                                       "name": "config.AppConfiguration.Navigation.links.tasksMenu",
-                                       "urls": {
-                                           "allTasks": {
-                                               "url": "#tasks/all",
-                                               "name": "config.AppConfiguration.Navigation.links.allTasks"
-                                           },
-                                           "myTasks": {
-                                               "url": "#tasks/assigned",
-                                               "name": "config.AppConfiguration.Navigation.links.myTasks"
-                                           },
-                                           "startProcess": {
-                                               "url": "#tasks/start",
-                                               "name": "config.AppConfiguration.Navigation.links.startProcess"
-                                           }
-                                       }
+                                   "processDashboard": {
+                                       "url": "#processes/",
+                                       "name": "config.AppConfiguration.Navigation.links.startProcess"
                                    }
                                }
                            },
@@ -154,24 +139,9 @@ define("config/AppConfiguration", [
                                        "url": "#groups/",
                                        "name": "config.AppConfiguration.Navigation.links.groups"
                                    },
-                                   "tasksMenu": {
-                                       "baseUrl": "#tasks/",
-                                       "url": "#tasks/all",
-                                       "name": "config.AppConfiguration.Navigation.links.tasksMenu",
-                                       "urls": {
-                                           "allTasks": {
-                                               "url": "#tasks/all",
-                                               "name": "config.AppConfiguration.Navigation.links.allTasks"
-                                           },
-                                           "myTasks": {
-                                               "url": "#tasks/assigned",
-                                               "name": "config.AppConfiguration.Navigation.links.myTasks"
-                                           },
-                                           "startProcess": {
-                                               "url": "#tasks/start",
-                                               "name": "config.AppConfiguration.Navigation.links.startProcess"
-                                           }
-                                       }
+                                   "processDashboard": {
+                                       "url": "#processes/",
+                                       "name": "config.AppConfiguration.Navigation.links.startProcess"
                                    }
                                }    
                            },
@@ -217,10 +187,10 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
+                   moduleClass: "org/forgerock/openidm/ui/admin/workflow/FormManager",
                    configuration: {
                        forms: { // Workflow User Task to View mapping
-                           "org.forgerock.applicationAcceptanceInit": "org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask"
+                           "org.forgerock.applicationAcceptanceInit": "org/forgerock/openidm/ui/admin/workflow/tasks/ApplicationAcceptanceTask"
                        }
                    } 
                },
@@ -229,8 +199,8 @@ define("config/AppConfiguration", [
                    configuration: {
                        templateUrls: [ //preloaded templates
                            "templates/apps/application.html",
-                           "templates/admin/tasks/ProcessUserTaskTableTemplate.html",
-                           "templates/admin/tasks/ShowUserProfile.html"
+                           "templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html",
+                           "templates/admin/workflow/tasks/ShowUserProfile.html"
                        ]
                    } 
                },

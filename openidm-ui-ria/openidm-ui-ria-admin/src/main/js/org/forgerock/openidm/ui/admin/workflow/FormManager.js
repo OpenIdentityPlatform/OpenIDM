@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,29 +22,20 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, Handlebars */
+/*global require, define, _, $ */
 
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TemplateTaskForm", [
-    "org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm",
-    "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractTaskForm, DateUtil, conf, uiUtils) {
+define("org/forgerock/openidm/ui/admin/workflow/FormManager", [
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function(AbstractConfigurationAware, eventManager) {
+    var obj = new AbstractConfigurationAware();
     
-    var TemplateTaskForm = AbstractTaskForm.extend({
-        
-        template: "templates/common/EmptyTemplate.html",
-        
-        postRender: function() {            
-            var t = Handlebars.compile(this.args)(this.task);
-            
-            this.$el.html(t);
-        }
-    }); 
-    
-    return new TemplateTaskForm();
-});
+    obj.getViewForForm = function(name) {
+        return obj.configuration.forms[name];
+    };
 
+    return obj;
+});    
 

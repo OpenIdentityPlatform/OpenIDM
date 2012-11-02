@@ -27,7 +27,7 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate", [
+define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(constants, serviceInvoker) {

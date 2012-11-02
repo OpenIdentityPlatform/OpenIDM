@@ -27,15 +27,15 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TemplateStartProcessForm", [
-    "org/forgerock/openidm/ui/admin/tasks/AbstractProcessForm",
+define("org/forgerock/openidm/ui/admin/workflow/processes/TemplateStartProcessForm", [
+    "org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractProcessForm, DateUtil, conf, uiUtils) {
     
     var TemplateStartProcessForm = AbstractProcessForm.extend({
         
-        template: "templates/admin/tasks/StartProcessUsingTemplateTemplate.html",
+        template: "templates/admin/workflow/processes/StartProcessUsingTemplateTemplate.html",
         
         element: "#startProcessForm",
         

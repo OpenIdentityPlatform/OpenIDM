@@ -25,27 +25,30 @@
 /*global define, $, form2js, _ */
 
 /**
- * @author mbilski
+ * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/admin/tasks/StartProcessDashboardView", [
+define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/StartProcessView"
+    "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView"
 ], function(AbstractView, workflowManager, eventManager, constants, startProcessView) {
     var StartProcessDashboardView = AbstractView.extend({
         
-        template: "templates/admin/tasks/StartProcessDashboardTemplate.html",
+        template: "templates/admin/workflow/processes/StartProcessDashboardTemplate.html",
         
         events: {
             "click .processName": "showStartProcessView"
         },
         
-        render: function() {
-            var i;
+        render: function(args) {
+            console.log("ACASASFVAES");
+            var i, processId;
+            if (args && args[0] && args[0] !== '') {
+                processId = args[0];
+            }
             this.parentRender(function() {
-                this.registerListeners();
                 this.clearStartProcessView();
                 workflowManager.getAllUniqueProcessDefinitions( function(processDefinitions) {
                     for (i = 0; i < processDefinitions.length; i++) {
@@ -54,34 +57,25 @@ define("org/forgerock/openidm/ui/admin/tasks/StartProcessDashboardView", [
                                 + "<div>");
                     }
                 });
-            });            
+                if (processId) {
+                    startProcessView.render(processId);
+                }
+            });
         },
         
         showStartProcessView: function(event) {
             event.preventDefault();
             var id = $(event.target).parent().find('[name="id"]').val();
-            
-            if(id) {                    
-                startProcessView.render(id);
-            } else {
-                this.clearStartProcessView();
-            }
+            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "startProcesses", args: [id], trigger: false});
+            startProcessView.render(id);
         },
         
         clearStartProcessView: function() {
             $("#startProcessForm").html('');
-        },
-        
-        registerListeners: function() {
-            eventManager.unregisterListener("clearStartProcessTemplateView");
-            eventManager.registerListener("clearStartProcessTemplateView", _.bind(function(event) {
-                this.clearStartProcessView();
-            }, this));
         }
         
     }); 
     
-
     return new StartProcessDashboardView();
 });
 

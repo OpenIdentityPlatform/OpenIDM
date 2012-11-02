@@ -27,16 +27,16 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView", [
+define("org/forgerock/openidm/ui/admin/workflow/tasks/_TasksWithMenuView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView",
-    "org/forgerock/openidm/ui/admin/tasks/TaskDetailsView"
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView",
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView"
 ], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, taskDetailsView) {
     var TasksWithMenuView = AbstractView.extend({
-        template: "templates/admin/tasks/TasksWithMenuTemplate.html",
+        template: "templates/admin/workflow/tasks/TasksWithMenuTemplate.html",
                 
         render: function(args) {
             var category, id;

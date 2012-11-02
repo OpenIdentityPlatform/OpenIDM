@@ -27,8 +27,8 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
+define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "dataTable",
@@ -79,7 +79,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
             user = this.getParamForTask("user", taskId);
 
             data = {userDisplayName: user.givenName + " "+ user.familyName, userName: user.userName, requesterDisplayName: requesterDisplayName};
-            popupCtrl.showBy(uiUtils.fillTemplateWithData("templates/admin/tasks/ShowUserProfile.html", data),$(event.target));
+            popupCtrl.showBy(uiUtils.fillTemplateWithData("templates/admin/workflow/tasks/ShowUserProfile.html", data),$(event.target));
                 
         },
         
@@ -154,7 +154,7 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksMenuView", [
                     }
                 }  
                 
-                this.$el.append(uiUtils.fillTemplateWithData("templates/admin/tasks/ProcessUserTaskTableTemplate.html", data));
+                this.$el.append(uiUtils.fillTemplateWithData("templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html", data));
             } 
             
             this.$el.accordion('destroy');
