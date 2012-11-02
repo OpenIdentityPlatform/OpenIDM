@@ -1,0 +1,12 @@
+{
+    "classPathURLs" : [
+        "file:/jetty_v61_agent/lib/agent.jar",
+        "file:/jetty_v61_agent/lib/openssoclientsdk.jar",
+        "file:/jetty_v61_agent/lib/",
+        "file:/jetty_v61_agent/lib/locale/"
+    ],
+    "systemProperties" : {
+        "openam.agents.bootstrap.dir" : "/jetty_v61_agent/lib"
+    },
+    "filterClass" : "com.sun.identity.agents.filter.AmAgentFilter"
+}
