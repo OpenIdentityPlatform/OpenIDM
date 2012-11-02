@@ -1,9 +1,9 @@
 {
     "type" : "text/javascript",
     "file" : "script/policy.js",
-    "components" : [
+    "resources" : [
         {
-            "component" : "test/object",
+            "resource" : "test/object",
             "properties" : [
                 {
                     "name" : "test/prop/one",
@@ -24,14 +24,6 @@
                             "params" : {
                                 "minLength" : 8
                             }
-                        }
-                    ]
-                },
-                {
-                    "name" : "test/name",
-                    "policies" : [
-                        {
-                            "policyId" : "at-least-one-capital"
                         }
                     ]
                 }

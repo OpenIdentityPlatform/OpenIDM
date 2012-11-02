@@ -440,6 +440,15 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         JsonValue decrypted = decrypt(oldValue); // decrypt any incoming encrypted properties
         JsonValue newValue = decrypted.copy();
         patch.apply(newValue.asMap());
+        JsonValue params = new JsonValue(new HashMap<String, Object>());
+        // Validate policies on the patched object
+        // TODO: Move to the patch.apply() method?
+        params.add("_action", "validateObject");
+        params.add("value", newValue);
+        JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
+        if (!result.get("result").asBoolean()) {
+            throw new ObjectSetException("Failed policy validation");
+        }
         update(id, rev, decrypted, newValue);
         logActivity(id, "Patch " + patch, oldValue, newValue);
     }
