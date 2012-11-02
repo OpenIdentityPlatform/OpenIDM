@@ -93,61 +93,82 @@ define("config/AppConfiguration", [
                                "urls": {
                                    "dashboard": {
                                        "url": "#/",
-                                       "name": "Dashboard"
+                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
                                    },
                                    "users": {
                                        "url": "#users/",
-                                       "name": "Users"
-                                   },
-                                   "groups": {
-                                       "url": "#groups/",
-                                       "name": "Groups"
-                                   },
-                                   "tasksMenu": {
-                                       "baseUrl": "#tasks/",
-                                       "url": "#tasks/dashboard",
-                                       "name": "Tasks",
-                                       "urls": {
-                                           "tasksDashboard": {
-                                               "url": "#tasks/dashboard",
-                                               "name": "Dashboard"
-                                           },
-                                           "allTasks": {
-                                               "url": "#tasks/all",
-                                               "name": "Candidate tasks"
-                                           },
-                                           "myTasks": {
-                                               "url": "#tasks/assigned",
-                                               "name": "My tasks"
-                                           }
-                                       }
-                                   }
-                               }
-                           },
-                           "user" : {
-                               "urls": {
-                                   "dashboard": {
-                                       "url": "#/",
-                                       "name": "Dashboard"
+                                       "name": "config.AppConfiguration.Navigation.links.users"
                                    },
                                    "apps": {
                                        "baseUrl": "#applications/",
                                        "url": "#applications/all/",
-                                       "name": "Applications",
+                                       "name": "config.AppConfiguration.Navigation.links.apps",
                                        "urls": {
                                            "allApps": {
                                                "url": "#applications/all/",
-                                               "name": "All applications"
+                                               "name": "config.AppConfiguration.Navigation.links.allApps"
                                            },
                                            "addMore": {
                                                "url": "#applications/addmore/",
-                                               "name": "Add more apps"
+                                               "name": "config.AppConfiguration.Navigation.links.addMore"
                                            }
                                        }    
                                    },
                                    "groups": {
                                        "url": "#groups/",
-                                       "name": "Groups"
+                                       "name": "config.AppConfiguration.Navigation.links.groups"
+                                   },
+                                   "processDashboard": {
+                                       "url": "#processes/",
+                                       "name": "config.AppConfiguration.Navigation.links.startProcess"
+                                   }
+                               }
+                           },
+                           "openidm-admin" : {
+                               "role": "openidm-admin",
+                               "urls": {
+                                   "dashboard": {
+                                       "url": "#/",
+                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
+                                   },
+                                   "users": {
+                                       "url": "#users/",
+                                       "name": "config.AppConfiguration.Navigation.links.users"
+                                   },
+                                   "groups": {
+                                       "url": "#groups/",
+                                       "name": "config.AppConfiguration.Navigation.links.groups"
+                                   },
+                                   "processDashboard": {
+                                       "url": "#processes/",
+                                       "name": "config.AppConfiguration.Navigation.links.startProcess"
+                                   }
+                               }    
+                           },
+                           "user" : {
+                               "urls": {
+                                   "dashboard": {
+                                       "url": "#/",
+                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
+                                   },
+                                   "apps": {
+                                       "baseUrl": "#applications/",
+                                       "url": "#applications/all/",
+                                       "name": "config.AppConfiguration.Navigation.links.apps",
+                                       "urls": {
+                                           "allApps": {
+                                               "url": "#applications/all/",
+                                               "name": "config.AppConfiguration.Navigation.links.allApps"
+                                           },
+                                           "addMore": {
+                                               "url": "#applications/addmore/",
+                                               "name": "config.AppConfiguration.Navigation.links.addMore"
+                                           }
+                                       }    
+                                   },
+                                   "groups": {
+                                       "url": "#groups/",
+                                       "name": "config.AppConfiguration.Navigation.links.groups"
                                    }
                                }    
                            }
@@ -166,10 +187,10 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
+                   moduleClass: "org/forgerock/openidm/ui/admin/workflow/FormManager",
                    configuration: {
                        forms: { // Workflow User Task to View mapping
-                           "applicationAcceptance": "org/forgerock/openidm/ui/admin/tasks/ApplicationAcceptanceTask"
+                           "org.forgerock.applicationAcceptanceInit": "org/forgerock/openidm/ui/admin/workflow/tasks/ApplicationAcceptanceTask"
                        }
                    } 
                },
@@ -178,7 +199,8 @@ define("config/AppConfiguration", [
                    configuration: {
                        templateUrls: [ //preloaded templates
                            "templates/apps/application.html",
-                           "templates/admin/tasks/ProcessUserTaskTableTemplate.html"
+                           "templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html",
+                           "templates/admin/workflow/tasks/ShowUserProfile.html"
                        ]
                    } 
                },

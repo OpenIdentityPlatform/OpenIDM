@@ -1,22 +1,16 @@
-<div id="users">
-    <div class="shadowFrame">
-    
-        <h2 class="head floatLeft">Users list</h2>
-        <br />
-        <br />
+<div id="users" class="content-bg">
+    <h2>{{t "common.user.usersList"}}</h2>
         
-        <table id="usersTable" width="100%">
-            <thead>
-                <tr>
-                    <th width="40"><input type="checkbox" /></th>
-                    <th width="350">Name & username</th>
-                    <th width="220">Status</th>
-                    <th>Email</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
+    <table id="usersTable" width="100%">
+        <thead>
+            <tr>
+                <th width="40"><input type="checkbox" /></th>
+                <th width="150">{{t "common.user.username"}}</th>
+                <th width="200">{{t "common.user.name"}}</th>
+                <th width="220">{{t "common.user.status"}}</th>
+                <th>{{t "common.user.email"}}</th>
+            </tr>
+        </thead>
+    </table>
        
-    </div>
 </div>

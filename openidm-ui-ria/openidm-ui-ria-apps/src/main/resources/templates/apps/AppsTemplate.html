@@ -1,22 +1,28 @@
-    <div id="apps" class="center">
-        <div class="appsBoxMarginBottom">
-            <h2 class="underline sortableWidth">All available apps</h2>
-            <div id='appsTable' />
-            <div class="clear"></div>
-        </div>
-        <div id="userAppsView" class="appsBoxMarginBottom">
-            <h2 class="underline sortableWidth">Apps you've added</h2>
-            <div id='userApps'>
-                <div class="itemize">
-                    <div class="appItem gradientLinearGray">+ drop apps here</div>
-                </div>
-            </div>
-            <div class="clear"></div>
-        </div>
-        <div class="appsBoxMarginBottom">
-            <h2 class="underline sortableWidth">Default apps</h2>
-            <div id='defaultAppsTable' />
-            <div class="clear"></div>
+<div id="apps">
+
+    <div class="column-layout">
+        <div class="column">
+            <h2 class="header">{{t "common.application.allAvailableApps" }}</h2>
+            <div id="appsTable"></div>
         </div>
     </div>
     
+    <div class="column-layout">    
+        <div class="column" id="userAppsView">
+            <h2 class="header">{{t "common.application.applicationsYouHaveAdded" }}</h2>
+            <div id="userApps">
+                <div class="itemize">
+                    <div class="appItem gradientLinearGray">+ {{t "common.application.dropApplicationsHere" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="column-layout">
+        <div class="column">
+            <h2 class="header">{{t "common.application.defaultApplications" }}</h2>
+            <div id="defaultAppsTable"></div>
+        </div>
+    </div>
+
+</div>

@@ -31,7 +31,9 @@
  * It is run on response to for-securityAnswer query.
  */
 
-if(response.result && (!response.result.length || !response.result[0].securityAnswer || openidm.decrypt(response.result[0].securityAnswer)!=request.params['securityAnswer'])) {
+user = openidm.read("managed/user/" + response.result[0]._id);
+
+if(!user.securityAnswer || openidm.decrypt(user.securityAnswer).toLowerCase() != request.params['securityAnswer'].toLowerCase()) {
     delete response.result;
 } else {
     response.result = "correct";

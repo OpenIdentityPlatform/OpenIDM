@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, js2form, document */
+/*global define, $, form2js, _, js2form, document, window */
 
 /**
  * @author mbilski
@@ -36,8 +36,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/components/ConfirmationDialog",
-    "org/forgerock/commons/ui/common/main/Router"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router) {
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/user/delegates/CountryStateDelegate"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf, confirmationDialog, router, countryStateDelegate) {
     var AdminUserProfileView = AbstractView.extend({
         template: "templates/admin/AdminUserProfileTemplate.html",
         events: {
@@ -56,7 +57,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 var data = form2js(this.$el.attr("id"), '.', false), self = this;
                 delete data.lastPasswordSet;
                 delete data.oldEmail;
-                data.userName = data.email.toLowerCase();
+                delete data.oldUserName;
+                //data.userName = data.email.toLowerCase();
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
@@ -66,19 +68,12 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                         return;
                     }
                     
-                    userDelegate.getForUserName(data.email, function(user) {
+                    userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        self.reloadData();
-                    }, function() {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
+                        router.routeTo("adminUserProfile", {args: [data.userName]});
                         self.reloadData();
                     });
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                    self.reloadData();
-                }, function() {
-                    self.reloadData();
                 });
             }
         },
@@ -88,49 +83,45 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
         render: function(userName, callback) {
             userName = userName[0].toString();
             
-            this.parentRender(function() {
-                var editedUserRef = this.editedUserContainer, self = this;
-
-                validatorsManager.bindValidators(this.$el);
+            userDelegate.getForUserName(userName, _.bind(function(user) {
+                this.editedUser = user;
+                this.data = user;
                 
-                uiUtils.loadSelectOptions("data/countries.json", $("select[name='country']"), true, _.bind(function() {
-                    if(this.editedUser.country) {
-                        this.$el.find("select[name='country'] > option:first").text("");
-                        this.$el.find("select[name='country']").val(this.editedUser.country);
-                        
-                        this.loadStates();
+                this.data.profileName = user.givenName + ' ' + user.familyName;
+                
+                this.parentRender(_.bind(function() {
+                    this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
+                    validatorsManager.bindValidators(this.$el);
+                    
+                    this.reloadData();
+                    
+                    if(callback) {
+                        callback();
                     }
                 }, this));
-                
-                userDelegate.getForUserName(userName, function(user) {
-                    self.editedUser = user;
-                    self.$el.find("#passwordChangeLink").attr("href", "#users/"+self.editedUser.email+"/change_password/");
-                    self.$el.find("#userProfileHeadingLabel").text(self.editedUser.givenName+ " "+self.editedUser.familyName+ "'s profile");
-                    self.reloadData();
-                });
-                
-                if(callback) {
-                    callback();
-                }
-            });            
+            }, this), function() {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, { routeName: "404", trigger: false, args: [window.location.hash]} );
+            });
         },
         
         loadStates: function() {
-            var country = $('#profile select[name="country"]').val();            
-              
+            var country = this.$el.find('select[name="country"]').val();            
+            
             if(country) {
                 this.$el.find("select[name='country'] > option:first").text("");
                 
-                uiUtils.loadSelectOptions("data/"+country+".json", $("select[name='stateProvince']"), true, _.bind(function() {
-                    if(this.editedUser.stateProvince) {
-                        this.$el.find("select[name='stateProvince'] > option:first").text("");
-                        this.$el.find("select[name='stateProvince']").val(this.editedUser.stateProvince);
-                    }
+                countryStateDelegate.getAllStatesForCountry(country, _.bind(function(states) {
+                    uiUtils.loadSelectOptions(states, $("select[name='stateProvince']"), true, _.bind(function() {
+                        if(this.editedUser.stateProvince) {
+                            this.$el.find("select[name='stateProvince'] > option:first").text("");
+                            this.$el.find("select[name='stateProvince']").val(this.editedUser.stateProvince);
+                        }
+                    }, this));
                 }, this));
             } else {
                 this.$el.find("select[name='stateProvince']").emptySelect();
-                this.$el.find("select[name='country'] > option:first").text("Please Select");
-                this.$el.find("select[name='stateProvince'] > option:first").text("Please Select");
+                this.$el.find("select[name='country'] > option:first").text($.t("common.form.pleaseSelect"));
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect"));
             }
         },
         
@@ -140,21 +131,35 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             if(state) {
                 this.$el.find("select[name='stateProvince'] > option:first").text("");
             } else {
-                this.$el.find("select[name='stateProvince'] > option:first").text("Please Select"); 
+                this.$el.find("select[name='stateProvince'] > option:first").text($.t("common.form.pleaseSelect")); 
             }
         },
         
         reloadData: function() {
             js2form(document.getElementById(this.$el.attr("id")), this.editedUser);
-            this.$el.find("input[name=saveButton]").val("Update");
-            this.$el.find("input[name=deleteButton]").val("Delete");
-            this.$el.find("input[name=backButton]").val("Back");
-            this.$el.find("input[name=oldEmail]").val(this.editedUser.email);
+            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
+            this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
+            this.$el.find("input[name=backButton]").val($.t("common.form.back"));
+            this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
             validatorsManager.validateAllFields(this.$el);
+            
+            countryStateDelegate.getAllCountries(_.bind(function(countries) {
+                uiUtils.loadSelectOptions(countries, $("select[name='country']"), true, _.bind(function() {
+                    if(this.editedUser.country) {
+                        this.$el.find("select[name='country'] > option:first").text("");
+                        this.$el.find("select[name='country']").val(this.editedUser.country);
+                        
+                        this.loadStates();
+                    }
+                }, this));
+            }, this));
         },
         
         deleteUser: function() {
-            confirmationDialog.render("Delete user", this.editedUser.email + " account will be deleted.", "Delete", _.bind(function() {
+            confirmationDialog.render("Delete user", 
+                $.t("openidm.ui.admin.users.AdminUserProfileView.profileWillBeDeleted", { postProcess: 'sprintf', sprintf: [this.editedUser.userName] }),
+                $.t("common.form.delete"), _.bind(function() {
+                
                 eventManager.sendEvent(constants.EVENT_PROFILE_DELETE_USER_REQUEST, {userId: this.editedUser._id});
             }, this));
         },

@@ -1,7 +1,7 @@
-/*! @license 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +21,18 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-if (!request.params['usernameToMatch']) {
-	request.params['usernameToMatch'] = '';
-}
+
+/* css basic configuration */
+@import "user/config.less";
+
+/* helpers, functions, columns */
+@import "user/helpers.less"; 
+
+/* header, footer, menu, dialogs, messages, popups, basic buttons & links */
+@import "user/layout.less";
+
+/* specific css used in specific modules */
+@import "user/forms.less";
+@import "apps/apps.less";
+@import "admin/task-table.less";
+@import "admin/notifications.less";

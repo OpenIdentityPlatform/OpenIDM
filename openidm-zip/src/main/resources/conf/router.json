@@ -25,55 +25,9 @@
                 "type" : "text/javascript",
                 "source" : "request.params['_query-id'] == 'for-credentials'"
             },
-            "onRequest" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onRequest-for-credentials.js"
-            },
             "onResponse" : {
                 "type" : "text/javascript",
                 "file" : "script/ui/onResponse-for-credentials.js"
-            }
-        },
-        {
-            "pattern" : "^repo/internal/user/.*",
-            "methods" : [
-                "query"
-            ],
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "request.params['_query-id'] == 'for-internalcredentials'"
-            },
-            "onRequest" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onRequest-for-credentials.js"
-            }
-        },
-        {
-            "pattern" : "^managed/user/.*",
-            "methods" : [
-                "query"
-            ],
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "request.params['_query-id'] == 'query-matching-username'"
-            },
-            "onRequest" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onRequest-for-query-matching-username.js"
-            }
-        },
-        {
-            "pattern" : "^managed/user/.*",
-            "methods" : [
-                "query"
-            ],
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "request.params['_query-id'] == 'query-count-matching-username'"
-            },
-            "onRequest" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onRequest-for-query-matching-username.js"
             }
         },
         {

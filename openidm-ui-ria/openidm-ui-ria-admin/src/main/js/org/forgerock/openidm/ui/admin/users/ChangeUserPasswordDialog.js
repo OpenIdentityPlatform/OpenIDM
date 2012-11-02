@@ -38,10 +38,10 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
 ], function(Dialog, validatorsManager, conf, userDelegate, uiUtils, eventManager, constants) {
     var ChangeUserPasswordDialog = Dialog.extend({    
         contentTemplate: "templates/admin/ChangeUserPasswordDialogTemplate.html",
-        
+        delegate: userDelegate,
         data: {         
             width: 800,
-            height: 220
+            height: 300
         },
         
         events: {
@@ -49,7 +49,6 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             "onValidate": "onValidate",
             "click .dialogCloseCross img": "close",
             "click input[name='close']": "close",
-            "click": "close",
             "click .dialogContainer": "stop"
         },
         
@@ -65,11 +64,8 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                     patchDefinitionObject.push({replace: "password", value: this.$el.find("input[name=password]").val()});
                 }
                 
-                userDelegate.patchSelectedUserAttributes(this.editedUsername, patchDefinitionObject, _.bind(function(r) {
+                this.delegate.patchSelectedUserAttributes(this.editedUsername, patchDefinitionObject, _.bind(function(r) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
-                    this.close();
-                }, this), _.bind(function(r) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
                     this.close();
                 }, this));
             }
@@ -81,11 +77,13 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             this.addAction("Update", "submit");
             
             this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el);
+                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
                 
-                this.$el.find("#changeUserPasswordHeadingLabel").text("Security data change for " + this.editedUsername);
+                    this.$el.find("#changeUserPasswordHeadingLabel").text($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
+                    
+                    this.reloadData();
                 
-                this.reloadData();
+                }, this));
             }, this));            
         },
         

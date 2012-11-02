@@ -1,40 +1,23 @@
-<div id="users">
-	<h2>Users list</h2>
+<div id="users" class="content-bg">
+	<h2>{{t "common.form.usersList"}}</h2>
 
 	<div class="shadowFrame">
 	
-		<span class="floatLeft labelSearch">Search:</span><input type="text" name="filter" class="floatLeft" />
-		<input type="button" id="addUserButton" class="button orange floatRight" value="Add users" />
+		<span class="floatLeft labelSearch">{{t "common.form.search"}}:</span><input type="text" name="filter" class="floatLeft" />
+		<input type="button" id="addUserButton" class="button orange floatRight" value="{{t "common.user.addUsers"}}" />
 		
 		<div class="clear"></div>
 		
-		<!-- 
-		<table class="usersTableHead">
-			<th width="145">User Principle</th>
-			<th width="110">Last Name</th>
-			<th width="110">First Name</th>
-			<th width="110">Email</th>
-			<th width="110">Actions</th>
-		</table>
-		
-		<div id="usersTableScrool"> 
-		<table id="usersTable" class="usersTableContent">
-
-		</table>
-		</div>
-		
-		-->
-		
 		<table id="usersTable" class="radious">
 			<tr>
-				<th width="245">Email</th>
-				<th width="210">Last Name</th>
-				<th width="110">First Name</th>
-				<th width="110" style="text-align: center;">Actions</th>
+				<th width="245">{{t "common.user.email"}}</th>
+				<th width="210">{{t "common.user.familyName"}}</th>
+				<th width="110">{{t "common.user.givenName"}}</th>
+				<th width="110" style="text-align: center;">{{t "common.form.actions"}}</th>
 			</tr>
 		</table>
 		
-		<span id="remainingUsers"></span> remaining users.
+		<span id="remainingUsers"></span> {{t "templates.admin.UsersTemplate.remainingUsers"}}.
 		
 				
 	</div><!-- .shadowFrame -->

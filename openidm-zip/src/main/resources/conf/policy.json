@@ -3,26 +3,151 @@
     "file" : "script/policy.js",
     "resources" : [
         {
-            "resource" : "test/object",
+            "resource" : "managed/user",
             "properties" : [
                 {
-                    "name" : "test/prop/one",
+                    "name" : "userName",
                     "policies" : [
                         {
-                            "policyId" : "at-least-one-capital"
+                            "policyId" : "required"
                         },
                         {
-                            "policyId" : "at-least-one-number"
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "unique"
                         }
                     ]
                 },
                 {
-                    "name" : "test/prop/two",
+                    "name" : "password",
                     "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "at-least-X-capitals",
+                            "params" : {
+                                "numCaps" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "at-least-X-numbers",
+                            "params" : {
+                                "numNums" : 1
+                            }
+                        },
                         {
                             "policyId" : "minimum-length",
                             "params" : {
                                 "minLength" : 8
+                            }
+                        },
+                        {
+                            "policyId" : "cannot-contain-others",
+                            "params" : {
+                                "disallowedFields" : "userName,givenName,familyName"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "email",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-email-address-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "givenName",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-name-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "familyName",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-name-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "phoneNumber",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "valid-phone-format"
+                        }
+                    ]
+                },
+                {
+                    "name" : "securityQuestion",
+                    "policies" : [
+                        {
+                            "policyId" : "required-if-configured",
+                            "params" : {
+                                "configBase" : "ui/configuration",
+                                "baseKey" : "configuration.securityQuestions"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "securityAnswer",
+                    "policies" : [
+                        {
+                            "policyId" : "required-if-configured",
+                            "params" : {
+                                "configBase" : "ui/configuration",
+                                "baseKey" : "configuration.securityQuestions"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "passPhrase",
+                    "policies" : [
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 4
+                            }
+                        },
+                        {
+                            "policyId" : "required-if-configured",
+                            "params" : {
+                                "configBase" : "ui/configuration",
+                                "baseKey" : "configuration.siteIdentification"
                             }
                         }
                     ]

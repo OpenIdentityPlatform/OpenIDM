@@ -1,17 +1,25 @@
-    <div id="apps" class="center">
-        <div id="userAppsView" class="appsBoxMarginBottom">
-            <div class="underline sortableWidth">
-                <h2 class="floatLeft head bold">Apps you've added</h2>
-                <a href="#applications/addmore/" class="orange bold floatRight" style="margin-top: 5px;">Add more apps</a>
-                <div class="clear"></div>
+<div class="column-layout" id="apps">
+    <div class="column">
+        <div id="userAppsView">
+            <div class="title sortableWidth">
+            
+                <div class="column-layout column-header">
+                    <div class="float-left">
+                        <h2 class="header">{{t "common.application.applicationsYouHaveAdded" }}</h2>
+                    </div>
+                    <div class="float-right">
+                        <a href="#applications/addmore/" class="active bold inline" style="margin-top: 5px;">Add more apps</a>    
+                    </div>
+                </div>
+                
             </div>
-            <div id='userApps'></div>
+            <div id="userApps"></div>
             <div class="clear"></div>
         </div>
-        <div class="appsBoxMarginBottom">
-            <h2 class="underline sortableWidth">Default apps</h2>
-            <div id='defaultAppsTable'></div>
+        <div>
+            <h2 class="header">{{t "common.application.addMoreApplications" }}</h2>
+            <div id="defaultAppsTable"></div>
             <div class="clear"></div>
-        </div>
+        </div>    
     </div>
-    
+</div>

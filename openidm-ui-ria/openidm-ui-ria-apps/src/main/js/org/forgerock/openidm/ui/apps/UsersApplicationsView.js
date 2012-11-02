@@ -152,7 +152,7 @@ define("org/forgerock/openidm/ui/apps/UsersApplicationsView", [
         },
         
         noItemsMessage: function(item) {
-            return "You have no applications";
+            return $.t("openidm.ui.apps.UsersApplicationsView.noApplications");
         },
         
         shouldApplicationBeVisible: function(item) {

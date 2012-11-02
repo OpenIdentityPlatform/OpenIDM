@@ -29,14 +29,14 @@
  * set-newPassword-for-userName query.
  */
 
-securityAnswer = response.result[0].securityAnswer;
+user = openidm.read("managed/user/" + response.result[0]._id);
+securityAnswer = user.securityAnswer;
 requestedUserNameMatchesReturnedUserName = (response.result[0].userName == request.params['username']);
 
 if (securityAnswer && requestedUserNameMatchesReturnedUserName) {
-    isRequestedSecurityEqualToReturned = (openidm.decrypt(response.result[0].securityAnswer) == request.params['securityAnswer']);
+    isRequestedSecurityEqualToReturned = (openidm.decrypt(user.securityAnswer) == request.params['securityAnswer']);
     if (isRequestedSecurityEqualToReturned) {
         logger.info("Setting new password for {}", request.params['username']);
-        user = openidm.read("managed/user/" + response.result[0]._id);
         user.password = request.params['newpassword'];
         user.securityAnswer = request.params['securityAnswer'];
         openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
