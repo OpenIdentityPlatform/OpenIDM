@@ -4,12 +4,12 @@
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
     "queries" : {
-        "for-credentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
-        "for-internalcredentials" : "select * FROM ${resource} WHERE userName = '${uid}'",
+        "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
+        "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = '${value}'",
         "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
         "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
-        "for-security-answer" : "select securityAnswer FROM ${_resource} WHERE userName = '${uid}'",
+        "for-security-answer" : "select _openidm_id FROM ${_resource} WHERE userName = '${uid}'",
         
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",

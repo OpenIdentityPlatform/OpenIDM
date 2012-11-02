@@ -32,9 +32,10 @@ define("config/routes/AdminRoutesConfig", [
     
     var obj = {
             "": {
-              view: "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
+              view: "org/forgerock/openidm/ui/admin/Dashboard",
               role: "openidm-authorized",
-              url: ""                                   
+              url: "",
+              forceUpdate: true
           },     
             
           //for admin
@@ -43,39 +44,43 @@ define("config/routes/AdminRoutesConfig", [
                 url: "users/",
                 role: "admin"
             },
+            "adminUserProfile" : {
+                view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
+                role: "admin",
+                url: /^users\/show\/(([A-Za-z0-9_\-\.@])+)\/$/,
+                pattern: "users/show/?/"
+            },
+            "adminUserChangePassword" : {
+                base: "adminUserProfile",
+                dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
+                url: /^users\/(([A-Za-z0-9_\-\.@])+)\/change_password\/$/,
+                pattern: "users/?/change_password/",
+                role: "admin"
+            },
             "adminUsersAdd" : {
                 view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
                 role: "admin",
                 url: "users/add/"
             },
-            "adminUserProfile" : {
-                view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
-                role: "admin",
-                url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/$/,
-                pattern: "users/?/"
-            },
-            "adminUserChangePassword" : {
-                base: "adminUserProfile",
-                dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
-                url: /^users\/(([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4}))\/change_password\/$/,
-                pattern: "users/?/change_password/",
-                role: "admin"
-            },
             
-            //for tasks 
-            "tasksWithMenu": {
-                view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
-                role: "openidm-admin",
-                //url: "tasksmenu/:category/:id"
-                url: /^tasks\/([A-Za-z]+)\/?([0-9]*)$/,
-                pattern: "tasks/?/?",
+            "processesDashboard": {
+                view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
+                role: "admin",
+                url: "processes/",
                 forceUpdate: true
             },
-            "tasks": {
-                view: "org/forgerock/openidm/ui/admin/tasks/TasksDashboard",
-                role: "openidm-admin",
-                url: "tasks/dashboard"
+            "startProcesses": {
+                view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
+                role: "admin",
+                url: /^processes\/([A-Za-z0-9:]+)/,
+                pattern: "processes/?/"
             },
+            "completeTask": {
+                view: "org/forgerock/openidm/ui/admin/Dashboard",
+                role: "admin",
+                url: /^tasks\/([0-9]+)/,
+                pattern: "tasks/?/"
+            },  
             
             //for apps
             "addMoreAppsView": {

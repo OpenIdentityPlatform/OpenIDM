@@ -1,116 +1,116 @@
-<div id="profile" class="center">
-    <div class="shadowFrame">
-        <form class="form">
-            <h1 id="userProfileHeadingLabel">User profile</h1>
-            <div id="profileData">                
-                        <div class="floatLeft">
-                            <div class="field">
-                                <label class="light">Email address</label> 
-                                <input type="text" name="email" data-validator="adminUserProfileEmail" /> 
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                            <div class="field">
-                                <label class="light">First Name</label>
-                                <input type="text" name="givenName" data-validator="name" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="floatRight">
-                            <div class="floatRight">
-	                            <div class="field">
-	                                <label class="light"></label> 
-	                                <a href="#" id="passwordChangeLink" class="ice hrefInput">Change password</a>
-	                            </div>
-                            </div>
-                            <div class="field">
-                                <label class="light">Last Name</label>
-                                <input type="text" name="familyName" data-validator="name" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                        </div>                        
-                        <div class="clear"></div>
-                    
-                        <div class="floatLeft">
-                            <div class="field">
-                                <label class="light">Account status</label> 
-                                <select name="accountStatus" >
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>                               
-                                <div class="validationMessage"></div>
-                            </div>
-                            <div class="field">
-                                <label class="light">Address 1</label>
-                                <input type="text" name="address1" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                            <div class="field">
-                                <label class="light">Country</label>
-                                <select name="country" ></select>
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                            <div class="field">
-                                <label class="light">State/Province</label>
-                                <select name="stateProvince" ></select>
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                        
-                        </div>
-                        
-                        <div class="floatRight">
-                            <div class="field">
-                                <label class="light">Mobile Phone</label>
-                                <input type="text" name="phoneNumber" data-validator="phone" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                            <div class="field">
-                                <label class="light">Address 2</label>
-                                <input type="text" name="address2" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                            
-                            <div class="field">
-                                <label class="light">City</label>
-                                <input type="text" name="city" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                            
-                            <div class="field">
-                                <label class="light">Postal Code</label>
-                                <input type="text" name="postalCode" />
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>
-                        </div>  
-                         <div class="floatLeft">
-                            <div class="field">
-                                <label class="light">Last password set</label> 
-                                <input type="text" name="lastPasswordSet" class="readOnly" disabled="disabled" value="01/10/11"/> 
-                                <span></span>
-                                <div class="validationMessage"></div>
-                            </div>          
-                        </div>                      
-                        <div class="clear"></div>
+<div id="profile" class="content-bg">
 
-                    
-                        <div id="actions">
-                            <input type="submit" name="saveButton" value="Update" class="button floatRight"/>
-                            <input type="button" name="deleteButton" value="Delete" class="button orange floatRight"/>
-                            <input type="button" name="backButton" value="Back" class="button gray floatRight"/>                            
+    <h1 id="userProfileHeadingLabel">{{t 'openidm.ui.admin.users.AdminUserProfileView.profileOwnership' profileName}}</h1>
+    
+        <form class="form two-columns">
+            
+
+            <div class="column-layout">
+                <div class="column2">
+                    <div class="field">
+                        <label class="light">{{t "common.user.username"}}</label> 
+                        <input type="text" name="userName" data-validator="adminUserProfileUserName" /> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.emailAddress"}}</label> 
+                        <input type="text" name="email" data-validator="email" /> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.givenName"}}</label>
+                        <input type="text" name="givenName" data-validator="name" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.accountStatus"}}</label> 
+                        <select name="accountStatus" >
+                            <option value="active">{{t "common.user.active"}}</option>
+                            <option value="inactive">{{t "common.user.inactive"}}</option>
+                        </select>                               
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.address1"}}</label>
+                        <input type="text" name="address1" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.country"}}</label>
+                        <select name="country" ></select>
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.stateProvince"}}</label>
+                        <select name="stateProvince" ></select>
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.lastPasswordSet"}}</label> 
+                        <input type="text" name="lastPasswordSet" class="read-only" disabled="disabled" value="01/10/11"/> 
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>   
+                </div>
+                <div class="column2">
+                    <div class="floatRight">
+                        <div class="field">
+                            <label class="light"></label> 
+                            <a href="{{url 'adminUserChangePassword' userName}}" id="passwordChangeLink" class="ice hrefInput">{{t "common.user.changePassword"}}</a>
                         </div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.familyName"}}</label>
+                        <input type="text" name="familyName" data-validator="name" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field"></div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.phoneNumber"}}</label>
+                        <input type="text" name="phoneNumber" data-validator="phone" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "common.user.address2"}}</label>
+                        <input type="text" name="address2" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="light">{{t "common.user.city"}}</label>
+                        <input type="text" name="city" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                    
+                    <div class="field">
+                        <label class="light">{{t "common.user.postalCode"}}</label>
+                        <input type="text" name="postalCode" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>
+                </div>
             </div>
-            <div class="clear"></div>
-			<input type="text" name="oldEmail" style="display: none" />
+            <div class="column-layout">
+                <div class="float-right" style="margin-right: 30px;">
+                    <div class="field submit-field">
+                        <input type="submit" name="saveButton" value="{{t "common.form.update"}}" class="button"/>
+                        <input type="button" name="deleteButton" value="{{t "common.form.delete"}}" class="button active"/>
+                        <input type="button" name="backButton" value="{{t "common.form.back"}}" class="button gray"/>
+                        <input type="text" name="oldUserName" style="display: none" />
+                    </div>
+                </div>
+            </div>
+			
 		</form>
-    </div>
 </div>
+

@@ -104,7 +104,6 @@
                             <excludes>
                                 <exclude>**/libs/*.js</exclude>
                                 <exclude>**/*Test.js</exclude>
-                                <exclude>**/*TasksMenuView.js</exclude>
                             </excludes>
                         </configuration>
                         <executions>

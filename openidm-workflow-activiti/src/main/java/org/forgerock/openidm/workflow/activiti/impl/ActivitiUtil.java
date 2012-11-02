@@ -33,12 +33,21 @@ import org.forgerock.json.fluent.JsonValue;
  */
 public class ActivitiUtil {
     /**
-     * Fetch and remove OpenIDM action from the request
+     * Fetch and remove process key from the request
      * @param request Request to be processed
-     * @return requested action
+     * @return process key
      */
     public static String removeKeyFromRequest(JsonValue request) {
-          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("key"));
+          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("_key"));
+    }
+    
+    /**
+     * Fetch and remove process business key from the request
+     * @param request Request to be processed
+     * @return process business key
+     */
+    public static String removeBusinessKeyFromRequest(JsonValue request) {
+          return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("_businessKey"));
     }
     
     /**
@@ -47,7 +56,7 @@ public class ActivitiUtil {
      * @return processDefinitionId
      */
     public static String removeProcessDefinitionIdFromRequest(JsonValue request) {
-        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("processDefinitionId"));
+        return (String) (request.get("value").isNull() ? null : request.get("value").expect(Map.class).asMap().remove("_processDefinitionId"));
     }
     
     /**
@@ -72,5 +81,9 @@ public class ActivitiUtil {
     
     public static String getQueryIdFromRequest(JsonValue request) {
         return request.get("params").get("_query-id").asString();
+    }
+    
+    public static String getParamFromRequest(JsonValue request, String paramName) {
+        return request.get(ActivitiConstants.REQUEST_PARAMS).get(paramName).asString();
     }
 }

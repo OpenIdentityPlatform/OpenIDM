@@ -146,16 +146,16 @@
             <name>SpringSource Enterprise Bundle Repository - External Bundle Releases</name>
             <url>http://repository.springsource.com/maven/bundles/external</url>
         </repository>
-		<repository>
-			<id>codehaus-snapshots-repo</id>
-			<name>Codehaus snapshots Repo</name>
-			<url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
-		</repository>
-		<repository>
-			<id>codehaus-release-repo</id>
-			<name>Codehaus Release Repo</name>
-			<url>http://repository.codehaus.org/</url>
-		</repository>
+        <repository>
+            <id>codehaus-snapshots-repo</id>
+            <name>Codehaus snapshots Repo</name>
+            <url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
+        </repository>
+        <repository>
+            <id>codehaus-release-repo</id>
+            <name>Codehaus Release Repo</name>
+            <url>http://repository.codehaus.org/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -173,15 +173,15 @@
             </snapshots>
         </pluginRepository>
         <pluginRepository>
-			<id>codehaus-snapshots-repo</id>
-			<name>Codehaus snapshots Repo</name>
-			<url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
-		</pluginRepository>
-		<pluginRepository>
-			<id>codehaus-release-repo</id>
-			<name>Codehaus Release Repo</name>
-			<url>http://repository.codehaus.org/</url>
-		</pluginRepository>
+            <id>codehaus-snapshots-repo</id>
+            <name>Codehaus snapshots Repo</name>
+            <url>https://nexus.codehaus.org/content/groups/snapshots-group/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>codehaus-release-repo</id>
+            <name>Codehaus Release Repo</name>
+            <url>http://repository.codehaus.org/</url>
+        </pluginRepository>
     </pluginRepositories>
 
     <mailingLists>
@@ -247,8 +247,8 @@
         <orientdb.version>1.2.0</orientdb.version>
         <jackson.version>1.9.9</jackson.version>
         <restlet.version>2.0.15</restlet.version>
-		<javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
-		
+        <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
+        
         <!-- Commons JSON versions -->
         <commons.json-fluent.version>1.1.0</commons.json-fluent.version>
         <commons.json-patch.version>1.0.0</commons.json-patch.version>
@@ -308,6 +308,7 @@
         <module>openidm-infoservice</module>
         <module>openidm-jaas-loginmodule-repo</module>
         <module>openidm-jetty-fragment</module>
+        <module>openidm-policy</module>
         <module>openidm-provisioner-openicf</module>
         <module>openidm-provisioner</module>
         <module>openidm-repo-jdbc</module>
@@ -327,7 +328,6 @@
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
         <module>openidm-workflow-remote</module>
-	<module>openidm-policy</module>
         <module>openidm-zip</module>
     </modules>
 
@@ -617,25 +617,25 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.10</version>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.10</version>
                 <scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.codehaus.jstestrunner</groupId>
-				<artifactId>jstestrunner-junit</artifactId>
-				<version>1.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jstestrunner</groupId>
+                <artifactId>jstestrunner-junit</artifactId>
+                <version>1.0.2</version>
                 <scope>test</scope>
-			</dependency>
+            </dependency>
             
             <!-- UI -->
             <dependency>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>jquery-amd</artifactId>
-				<version>1.7.1-alpha-1</version>
-				<type>js</type>
-			</dependency>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jquery-amd</artifactId>
+                <version>1.7.1-alpha-1</version>
+                <type>js</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -684,89 +684,89 @@
                 </plugin>
                 
                 <!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											js-import-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0.0,)
-										</versionRange>
-										<goals>
-											<goal>import-js</goal>
-											<goal>generate-html</goal>
-											<goal>
-												test-generate-html
-											</goal>
-											<goal>test-import-js</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.codehaus.mojo
-										</groupId>
-										<artifactId>
-											jslint-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0.1,)
-										</versionRange>
-										<goals>
-											<goal>test-jslint</goal>
-											<goal>jslint</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>jslint-maven-plugin</artifactId>
-					<version>1.0.1</version>
-					<configuration>
-						<assumeConsoleAlertEtc>true</assumeConsoleAlertEtc>
-						<strictWhiteSpace>false</strictWhiteSpace>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>webminifier-maven-plugin</artifactId>
-					<version>1.0.1</version>
-					<executions>
-						<execution>
-							<id>default-minify-js</id>
-							<phase>none</phase>
-							<goals>
-								<goal>minify-js</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
+                    only. It has no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.codehaus.mojo
+                                        </groupId>
+                                        <artifactId>
+                                            js-import-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.0.0,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>import-js</goal>
+                                            <goal>generate-html</goal>
+                                            <goal>
+                                                test-generate-html
+                                            </goal>
+                                            <goal>test-import-js</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute>
+                                            <runOnIncremental>true</runOnIncremental>
+                                        </execute>
+                                    </action>
+                                </pluginExecution>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.codehaus.mojo
+                                        </groupId>
+                                        <artifactId>
+                                            jslint-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [1.0.1,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>test-jslint</goal>
+                                            <goal>jslint</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute>
+                                            <runOnIncremental>true</runOnIncremental>
+                                        </execute>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>jslint-maven-plugin</artifactId>
+                    <version>1.0.1</version>
+                    <configuration>
+                        <assumeConsoleAlertEtc>true</assumeConsoleAlertEtc>
+                        <strictWhiteSpace>false</strictWhiteSpace>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>webminifier-maven-plugin</artifactId>
+                    <version>1.0.1</version>
+                    <executions>
+                        <execution>
+                            <id>default-minify-js</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>minify-js</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>

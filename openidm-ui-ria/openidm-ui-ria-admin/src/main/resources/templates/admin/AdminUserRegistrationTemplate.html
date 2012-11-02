@@ -1,82 +1,72 @@
-<div id='registration'>
-	<h2 class='floatLeft'>Register new account</h2>
+<div class="content-bg">
+    <h2>{{t "common.user.createNewAccount"}}</h2>
+    
+    <form action="" method="post" class="form large center">
+        <fieldset>
+            <div class="fields">
+                <div class="field">
+                    <label>{{t "common.user.username"}}</label> 
+                    <input type='text' name='userName' data-validation-dependents="password" /> <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
+                <div class="field">
+                    <label>{{t "common.user.emailAddress"}}</label> 
+                    <input type='text' name='email' /> 
+                    <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
 
-	<div class='clear'></div>
+                <div class="field">
+                    <label>{{t "common.user.givenName"}}</label> 
+                    <input type='text' name='givenName' data-validation-dependents="password" /> 
+                    <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
 
-	<div class='shadowFrame'>
-		<form action='' method='post'>
-			<fieldset>
-				<div class='fields'>
-					<div class='field'>
-						<label>Email address</label> <input type='text' name='email'
-							data-validator="adminRegistrationEmail" /> <span class='error'>x</span>
-						<div class='validationMessage'></div>
-					</div>
+                <div class="field">
+                    <label>{{t "common.user.familyName"}}</label> 
+                    <input type='text' name='familyName' 
+                        data-validation-dependents="password" /> <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
 
-					<div class='field'>
-						<label>First name</label> <input type='text' name='givenName'
-							data-validator="name" /> <span class='error'>x</span>
-						<div class='validationMessage'></div>
-					</div>
+                <div class="field">
+                    <label>{{t "common.user.phoneNumber"}}</label> 
+                    <input type="text" name="phoneNumber" /> 
 
-					<div class='field'>
-						<label>Last name</label> <input type='text' name='familyName'
-							data-validator="name" /> <span class='error'>x</span>
-						<div class='validationMessage'></div>
-					</div>
+                    <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
 
-					<div class='field'>
-						<label>Mobile phone number</label> <input type='text'
-							name='phoneNumber' data-validator="phone" /> <span class='error'>x</span>
-						<div class='validationMessage'></div>
-					</div>
+                <div class="group-field">
+                    <div class="group-field-inputs">
+                        <div class="field">
+                            <label>{{t "common.user.password"}}</label> 
+                            <input type='password' name='password' value='' data-validation-dependents="passwordConfirm"/>
+                            <span class="error">x</span>
+                        </div>
 
-					<div class="groupField">
-						<div class="groupFieldInputs floatLeft">
-							<div class='field'>
-								<label>Password</label> <input type='password' name='password'
-									value='' data-validator="password" data-validator-event="keyup" />
-								<span class='error'>x</span>
-							</div>
+                        <div class="field">
+                            <label>{{t "common.user.confirmPassword"}}</label> 
+                            <input type='password' name='passwordConfirm' value=''  data-validator="passwordConfirm" data-validator-event="keyup change" />
+                            <span class="error">x</span>
+                        </div>
+                    </div>
+                    <div class="group-field-errors validationRules" data-for-validator="password passwordConfirm">
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="field field-submit">
+                    <input type="submit" name="createButton" class="button" value="Create" />
+                    <div class="input-validation-message">{{t "common.form.validation.formContainsErrors"}}</div>    
+                </div>
+            </div>
+ 
+        </fieldset>
+    </form>
 
-							<div class='field'>
-								<label>Confirm Password</label> <input type='password'
-									name='passwordConfirm' value=''
-									data-validator="passwordConfirm" data-validator-event="keyup" />
-								<span class='error'>x</span>
-							</div>
-						</div>
-						<div class="groupFieldErrors floatRight radious">
-							<div class="groupFieldErrorsRule">
-								<span class='error'>x</span> <label
-									data-for-validator="password">At least one capital letter</label>
-							</div>
-							<div class="groupFieldErrorsRule">
-								<span class='error'>x</span> <label
-									data-for-validator="password">At least one number</label>
-							</div>
-							<div class="groupFieldErrorsRule">
-								<span class='error'>x</span> <label
-									data-for-validator="password">At least 8 characters</label>
-							</div>
-							<div class="groupFieldErrorsRule">
-								<span class='error'>x</span> <label
-									data-for-validator="password">Cannot match login</label>
-							</div>
-							<div class="groupFieldErrorsRule">
-								<span class='error'>x</span> <label
-									data-for-validator="passwordConfirm">Confirmation matches password</label>
-							</div>
-						</div>
-						<div class="clear"></div>
-					</div>
-				</div>
-				<input type='submit' name='register' class='button gray'
-					value='Register' />
-				<div class='inputValidationMessage'>Form contains validation
-					errors</div>
-			</fieldset>
-		</form>
-	</div>
 </div>
-&nbsp;

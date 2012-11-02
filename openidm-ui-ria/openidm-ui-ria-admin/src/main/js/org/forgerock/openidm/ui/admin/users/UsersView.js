@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "dataTable"
-], function(AbstractView, userDelegate, eventManager, constants, dataTable) {
+    "dataTable",
+    "org/forgerock/commons/ui/common/main/i18nManager"
+], function(AbstractView, userDelegate, eventManager, constants, dataTable, i18nManager) {
     var UsersView = AbstractView.extend({
         template: "templates/admin/NewUsersTemplate.html",
         
@@ -48,10 +49,10 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
         },
         
         showProfile: function(event) {
-            var email = $(event.target).parent().find("td:last").html();
+            var userName = $(event.target).parent().find(".userName").text();
             
-            if(email) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [email]});
+            if(userName) {
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [userName]});
             }
         },
         
@@ -66,18 +67,20 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             
                             for(i = 0; i < data.aaData.length; i++) {
                                 data.aaData[i].selector = '<input type="checkbox" />';
-                                data.aaData[i].name = '<span class="name">' + users[i].givenName + ' ' + users[i].familyName + '</span>'; 
+                                data.aaData[i].name = '<span class="name">' + users[i].givenName + ' ' + users[i].familyName + '</span>';
+                                data.aaData[i].userName = '<span class="userName">' + users[i].userName + '</span>';
                             }
-                            
+
                             fnCallback(data);
-                        }, function() {
-                            
                         });
                     },
                     "aoColumns": [
                         {
                             "mData": "selector",
                             "bSortable": false
+                        },
+                        {
+                            "mData": "userName"
                         },
                         { 
                             "mData": "name" 
@@ -91,12 +94,12 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                         } 
                     ],
                     "oLanguage": {
-                        "sLengthMenu": "Display _MENU_ per page"
+                        "sUrl": "locales/" + i18nManager.language + "/datatable_translation.json"
                     },
                     "sDom": 'l<"addButton">f<"clear">rt<"clear">ip<"clear">',
                     "sPaginationType": "full_numbers",
                     "fnInitComplete": function(oSettings, json) {
-                        $(".addButton").html('<a href="#users/add/" class="buttonOrange" style="margin-left: 15px; float: left;">Add user</a>');
+                        $(".addButton").html('<a href="#users/add/" class="button active" style="margin-left: 15px; float: left;">' + $.t("common.form.addUser") + '</a>');
                     }
                 });
             });

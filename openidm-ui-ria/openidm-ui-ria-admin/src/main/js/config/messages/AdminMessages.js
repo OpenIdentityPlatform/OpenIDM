@@ -33,35 +33,39 @@ define("config/messages/AdminMessages", [
     var obj = {
             //admin
             "cannotDeleteYourself": {
-                msg: "You can't delete yourself",
+                msg: "config.messages.AdminMessages.cannotDeleteYourself",
                 type: "error"
             },
             "userDeleted": {
-                msg: "User has been deleted",
+                msg: "config.messages.AdminMessages.userDeleted",
                 type: "info"
             },
             "userDeleteError": {
-                msg: "Error when deleting user",
+                msg: "config.messages.AdminMessages.userDeleteError",
                 type: "error"
             },
 
             //applications
             "userApplicationsUpdate": {
-                msg: "Application settings have been changed.",
+                msg: "config.messages.AdminMessages.userApplicationsUpdate",
                 type: "info"
             },
             
             //tasks
             "completedTask": {
-                msg: "Task has been completed.",
+                msg: "config.messages.AdminMessages.completedTask",
                 type: "info"
             },
             "claimedTask": {
-                msg: "Task has been claimed.",
+                msg: "config.messages.AdminMessages.claimedTask",
                 type: "info"
             },
             "unclaimedTask": {
-                msg: "Task has been unclaimed.",
+                msg: "config.messages.AdminMessages.unclaimedTask",
+                type: "info"
+            },
+            "startedProcess": {
+                msg: "config.messages.AdminMessages.startedProcess",
                 type: "info"
             }
     };

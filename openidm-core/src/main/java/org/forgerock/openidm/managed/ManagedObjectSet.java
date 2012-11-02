@@ -442,7 +442,6 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         patch.apply(newValue.asMap());
         JsonValue params = new JsonValue(new HashMap<String, Object>());
         // Validate policies on the patched object
-        // TODO: Move to the patch.apply() method?
         params.add("_action", "validateObject");
         params.add("value", newValue);
         JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));

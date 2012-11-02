@@ -37,6 +37,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
 ], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants) {
     var AdminUserRegistrationView = AbstractView.extend({
         template: "templates/admin/AdminUserRegistrationTemplate.html",
+        delegate: userDelegate,
         events: {
             "click input[type=submit]": "formSubmit",
             "onValidate": "onValidate"
@@ -44,37 +45,28 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         
         formSubmit: function(event) {
             event.preventDefault();
-            
+            var _this = this, data = form2js(this.$el.attr("id")), element;
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
-                var data = form2js(this.$el.attr("id")), element;
-                
                 delete data.terms;
                 delete data.passwordConfirm;
-                data.userName = data.email.toLowerCase();
                 data.securityQuestion = 1;
                 data.securityAnswer = "";
                 
-                console.log("ADDING USER: " + JSON.stringify(data));                
-                userDelegate.createEntity(data, function(user) {
+                this.delegate.createEntity(data, function(user) {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULY_REGISTERED, { user: data, selfRegistration: false });
-                }, function(response) {
-                    console.warn(response);
-                    if (response.error === 'Conflict') {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userAlreadyExists" );
-                    } else {
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown" );
-                    }
-                    this.unlock();
+                }, function() {
+                    _this.unlock();
                 });
             }
         },
         
         render: function() {
             this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el);
-                this.unlock();
+                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
+                    this.unlock();
+                }, this));
             });            
         }   
     }); 

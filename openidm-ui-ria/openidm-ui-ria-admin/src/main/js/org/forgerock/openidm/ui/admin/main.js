@@ -29,12 +29,21 @@ define("org/forgerock/openidm/ui/admin/main", [
 	"./users/AdminUserProfileView",
 	"./users/ChangeUserPasswordDialog",
 	"./users/UsersView",
-	"./tasks/TaskDetailsView",
-	"./tasks/AbstractTaskForm",
-	"./tasks/ApplicationAcceptanceTask",
-	"./tasks/TasksFormManager",
-	"./tasks/TasksWithMenuView",
-	"./tasks/TasksMenuView",
-	"./tasks/WorkflowDelegate",
-	"./tasks/TasksDashboard"
+	
+	"./workflow/FormManager",
+	
+	"./workflow/tasks/TaskDetailsView",
+    "./workflow/tasks/AbstractTaskForm",
+	"./workflow/tasks/customview/ApplicationAcceptanceTask",
+//	"./workflow/tasks/TasksWithMenuView",
+	"./workflow/tasks/TasksMenuView",
+	"./workflow/tasks/TasksDashboard",
+	"./workflow/tasks/TemplateTaskForm",
+	
+	"./workflow/processes/AbstractProcessForm",
+    "./workflow/processes/StartProcessDashboardView",
+	
+	"./workflow/WorkflowDelegate",
+	"./Dashboard"
+	
 ]);

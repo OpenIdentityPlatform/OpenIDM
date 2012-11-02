@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TasksFormManager", [
+define("org/forgerock/openidm/ui/admin/workflow/FormManager", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function(AbstractConfigurationAware, eventManager) {
     var obj = new AbstractConfigurationAware();

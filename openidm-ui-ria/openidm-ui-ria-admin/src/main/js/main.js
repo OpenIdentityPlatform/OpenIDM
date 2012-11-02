@@ -32,6 +32,7 @@
 require.config({
     paths: {
         mustache: "libs/mustache-0.7.0",
+        i18next: "libs/i18next-1.5.7-min",
         backbone: "libs/backbone-0.9.2-min",
         underscore: "libs/underscore-1.3.3-min",
         js2form: "libs/js2form-1.0",
@@ -40,7 +41,9 @@ require.config({
         spin: "libs/spin-1.2.5-min",
         dataTable: "libs/datatables-1.9.3-min",
         jqueryui: "libs/jquery-ui-1.8.23.custom-min",
-        xdate: "libs/xdate-0.7-min"
+        xdate: "libs/xdate-0.7-min",
+        doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
+        handlebars: "libs/handlebars-1.0.rc.1"        
     },
 
     shim: {
@@ -74,6 +77,16 @@ require.config({
         }, 
         xdate: {
             exports: "xdate"
+        },
+        doTimeout: {
+            exports: "doTimeout"
+        },
+        handlebars: {
+            exports: "handlebars"
+        },
+        i18next: {
+            deps: ["handlebars"],
+            exports: "i18next"
         }
     }
 });
@@ -93,6 +106,10 @@ require([
     "dataTable",
     "jqueryui",
     "xdate",
+    "doTimeout",
+    "handlebars",
+    "i18next",
+    "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/Constants", 
     "org/forgerock/commons/ui/common/main/EventManager",
     "config/main",
@@ -100,7 +117,7 @@ require([
     "org/forgerock/commons/ui/common/main",
     "org/forgerock/openidm/ui/apps/main",
     "org/forgerock/openidm/ui/admin/main" 
-], function(a, b, c, d, e, f, g, h, i, j, constants, eventManager) { 
+], function(a, b, c, d, e, f, g, h, i, j, k, l, m, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 
