@@ -475,6 +475,17 @@ function processRequest() {
     }
 }
 
+//Load additional policy scripts if configured
+if (typeof additionalPolicies != 'undefined') {
+  for (var i = 0; i < additionalPolicies.length; i++) {
+      try {
+          eval(additionalPolicies[i]);
+      } catch (error) {
+          java.lang.System.out.println("Error executing addtional policy script: " + error);
+      }
+  }
+}
+
 processRequest();
 
 returnObject;
