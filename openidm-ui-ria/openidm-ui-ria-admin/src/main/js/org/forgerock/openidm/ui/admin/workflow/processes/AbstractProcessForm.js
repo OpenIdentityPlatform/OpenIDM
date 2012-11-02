@@ -27,12 +27,12 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/admin/tasks/AbstractProcessForm", [
+define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractProcessForm = AbstractView.extend({
@@ -52,7 +52,7 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractProcessForm", [
             
             workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
-                eventManager.sendEvent("clearStartProcessTemplateView");
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
             }, this));
         },
         

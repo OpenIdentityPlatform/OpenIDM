@@ -32,20 +32,20 @@ define("org/forgerock/openidm/ui/admin/Dashboard", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/apps/dashboard/DashboardView",
-    "org/forgerock/openidm/ui/admin/tasks/TasksDashboard"
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard"
 ], function(eventManager, constants, conf, userDashboard, tasksDashboard) {
     var Dashboard = Backbone.View.extend({
         
-        render: function() {
+        render: function(args) {
             if (conf.loggedUser) {
                 var roles = conf.loggedUser.roles, data = {};
                 
                 if(roles.indexOf('openidm-admin') !== -1) {
                     data.adminMode = "openidm-admin";
-                    tasksDashboard.render(data);
+                    tasksDashboard.render(data, args);
                 } else if(roles.indexOf('admin') !== -1) {
                     data.adminMode = "admin";
-                    tasksDashboard.render(data);
+                    tasksDashboard.render(data, args);
                 } else {
                     userDashboard.render();
                 }

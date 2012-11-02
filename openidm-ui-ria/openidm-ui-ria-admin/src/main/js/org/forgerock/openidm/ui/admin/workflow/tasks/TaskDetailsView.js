@@ -27,39 +27,56 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/StartProcessView", [
+define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
-    "org/forgerock/openidm/ui/admin/tasks/TasksFormManager",
-    "org/forgerock/openidm/ui/admin/tasks/TemplateStartProcessForm"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateStartProcessForm) {
-    var StartProcessView = AbstractView.extend({
-        template: "templates/admin/tasks/StartProcessTemplate.html",
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/FormManager",
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TemplateTaskForm"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm) {
+    var TaskDetailsView = AbstractView.extend({
+        template: "templates/admin/workflow/tasks/TaskDetailsTemplate.html",
 
-        element: "#startProcessForm",
+        element: "#taskDetails",
         
-        render: function(id, category) { 
-            this.parentRender(function() {
+        events: {
+            "click input[name=saveButton]": "formSubmit"
+        },
+        
+        formSubmit: function(event) {
+            event.preventDefault();
+            var params = form2js(this.$el.attr("id"), '.', false);
+            
+            workflowManager.completeTask(this.task._id, params, _.bind(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
+            }, this));
+        },
+        
+        render: function(id, category) {  
+            this.parentRender(function() {      
                 validatorsManager.bindValidators(this.$el);
                 
-                    workflowManager.getProcessDefinition(id, _.bind(function(definition) {
+                workflowManager.getTask(id, _.bind(function(task) {
+                    this.task = task;
+                    
+                    workflowManager.getTaskDefinition(task.processDefinitionId, task.taskDefinitionKey, _.bind(function(definition) {
                         
                         var template = this.getGenerationTemplate(definition), view, passJSLint;
                         
                         if(definition.formResourceKey) {
                             view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
                             if (view.render) {
-                                view.render(definition, {});
+                                view.render(task, category);
                                 return;
                             } else {
                                 console.log("There is no view defined for " + definition.formResourceKey);
                             }
                         } 
                         if(template !== false) {
-                            templateStartProcessForm.render(definition, {}, template);
+                            templateTaskForm.render(task, category, template);
                             return;
                         } else {
                             //TODO
@@ -67,6 +84,7 @@ define("org/forgerock/openidm/ui/admin/tasks/StartProcessView", [
                             return;
                         }
                     }, this));                  
+                }, this));
             });            
         },
         
@@ -81,7 +99,7 @@ define("org/forgerock/openidm/ui/admin/tasks/StartProcessView", [
         }
     }); 
     
-    return new StartProcessView();
+    return new TaskDetailsView();
 });
 
 

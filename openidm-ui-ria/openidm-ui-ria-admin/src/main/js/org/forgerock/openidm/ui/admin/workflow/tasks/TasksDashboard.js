@@ -27,22 +27,23 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
+define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/TasksMenuView",
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView",
     "org/forgerock/openidm/ui/apps/dashboard/BaseUserInfoView",
     "org/forgerock/openidm/ui/apps/dashboard/NotificationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, baseUserInfoView, NotificationsView, conf, notificationDelegate) {
+    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView"
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, baseUserInfoView, NotificationsView, conf, notificationDelegate, taskDetailsView) {
     var TasksDashboard = AbstractView.extend({
-        template: "templates/admin/tasks/TasksDashboardTemplate.html",
+        template: "templates/admin/workflow/tasks/TasksDashboardTemplate.html",
                 
-        render: function(mode) {
-            
+        
+        render: function(mode, args) {
             //decide whether to display notification and profile 
             this.data = {shouldDisplayNotificationsAndProfile: mode.adminMode !== "openidm-admin" };
             
@@ -75,13 +76,17 @@ define("org/forgerock/openidm/ui/admin/tasks/TasksDashboard", [
                         notificationsView.render({el: $("#notifications"), items: notifications});
                     });
                 }
+                if (args && args[0] && args[0] !== '') {
+                    taskDetailsView.render(args[0]);
+                }
             });    
         },
         
         registerListeners: function() {
             eventManager.unregisterListener("showTaskDetailsRequest");
             eventManager.registerListener("showTaskDetailsRequest", function(event) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [event.category, event.id]});
+                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "completeTask", args: [event.id], trigger: false});
+                taskDetailsView.render(event.id);
             });
             
             eventManager.unregisterListener("refreshTasksMenu");

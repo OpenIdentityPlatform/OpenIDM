@@ -27,12 +27,12 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
+define("org/forgerock/openidm/ui/admin/workflow/tasks/AbstractTaskForm", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/tasks/WorkflowDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractTaskForm = AbstractView.extend({
@@ -40,19 +40,7 @@ define("org/forgerock/openidm/ui/admin/tasks/AbstractTaskForm", [
         element: "#taskContent",
         
         events: {
-            "click input[name=saveButton]": "formSubmit",
             "onValidate": "onValidate"
-        },
-        
-        formSubmit: function(event) {
-            event.preventDefault();
-            
-            var params = form2js(this.$el.attr("id"), '.', false);
-            
-            workflowManager.completeTask(this.task._id, params, _.bind(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "tasksWithMenu", args: [this.category]});
-            }, this));
         },
         
         postRender: function() {

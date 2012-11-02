@@ -34,7 +34,8 @@ define("config/routes/AdminRoutesConfig", [
             "": {
               view: "org/forgerock/openidm/ui/admin/Dashboard",
               role: "openidm-authorized",
-              url: ""                                   
+              url: "",
+              forceUpdate: true
           },     
             
           //for admin
@@ -62,25 +63,24 @@ define("config/routes/AdminRoutesConfig", [
                 url: "users/add/"
             },
             
-            //for tasks 
-            "tasksWithMenu": {
-                view: "org/forgerock/openidm/ui/admin/tasks/TasksWithMenuView",
+            "processesDashboard": {
+                view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
                 role: "admin",
-                //url: "tasksmenu/:category/:id"
-                url: /^tasks\/([A-Za-z]+)\/?([0-9]*)$/,
-                pattern: "tasks/?/?",
+                url: "processes/",
                 forceUpdate: true
             },
-            "tasks": {
-                view: "org/forgerock/openidm/ui/admin/tasks/TasksDashboard",
+            "startProcesses": {
+                view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
                 role: "admin",
-                url: "tasks/dashboard"
+                url: /^processes\/([A-Za-z0-9:]+)/,
+                pattern: "processes/?/"
             },
-            "startTask": {
-                view: "org/forgerock/openidm/ui/admin/tasks/StartProcessDashboardView",
+            "completeTask": {
+                view: "org/forgerock/openidm/ui/admin/Dashboard",
                 role: "admin",
-                url: "tasks/start"
-            },
+                url: /^tasks\/([0-9]+)/,
+                pattern: "tasks/?/"
+            },  
             
             //for apps
             "addMoreAppsView": {
