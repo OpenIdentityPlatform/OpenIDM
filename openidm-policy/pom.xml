@@ -64,6 +64,11 @@
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        	<groupId>org.forgerock.openidm</groupId>
+        	<artifactId>openidm-util</artifactId>
+        	<version>${openidm.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
