@@ -109,7 +109,7 @@ public class SynchronizationService extends ObjectSetJsonResource
 
     @Reference
     Reconcile reconService;
-    
+
     /** Object set router service. */
     @Reference(
         name = "ref_SynchronizationService_JsonResourceRouterService",
@@ -182,7 +182,7 @@ public class SynchronizationService extends ObjectSetJsonResource
         }
         throw new SynchronizationException("No such mapping: " + name);
     }
-    
+
     /**
      * Instantiate an ObjectMapping with the given config
      */
@@ -224,7 +224,9 @@ public class SynchronizationService extends ObjectSetJsonResource
     public void onCreate(String id, JsonValue object) throws SynchronizationException {
         PendingLink.handlePendingLinks(mappings, id, object);
         for (ObjectMapping mapping : mappings) {
-            mapping.onCreate(id, object);
+            if (mapping.isSyncEnabled()) {
+                mapping.onCreate(id, object);
+            }
         }
     }
 
@@ -235,7 +237,9 @@ public class SynchronizationService extends ObjectSetJsonResource
     @Deprecated // use resource interface
     public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
-            mapping.onUpdate(id, oldValue, newValue);
+            if (mapping.isSyncEnabled()) {
+                mapping.onUpdate(id, oldValue, newValue);
+            }
         }
     }
 
@@ -246,7 +250,9 @@ public class SynchronizationService extends ObjectSetJsonResource
     @Deprecated // use resource interface
     public void onDelete(String id) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
-            mapping.onDelete(id);
+            if (mapping.isSyncEnabled()) {
+                mapping.onDelete(id);
+            }
         }
     }
 
