@@ -87,7 +87,7 @@ var policyConfig = {
                 "policyExec": "requiredIfConfigured",
                 "policyRequirements" : ["REQUIRED"]
                 
-            }
+            },
             {   "policyId" : "re-auth-required",
                 "policyExec" : "reauthRequired", 
                 "policyRequirements" : ["REAUTH_REQUIRED"]
