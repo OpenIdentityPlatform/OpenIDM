@@ -38,7 +38,6 @@ objectClass: groupOfUniqueNames
 objectClass: top
 
 dn: cn=openidm2,ou=Groups,dc=example,dc=com
-uniqueMember: uid=jdoe,ou=People,dc=example,dc=com
 cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top
