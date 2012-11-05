@@ -58,6 +58,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 delete data.lastPasswordSet;
                 delete data.oldEmail;
                 delete data.oldUserName;
+                
+                data.roles = data.roles.join(",");
                 //data.userName = data.email.toLowerCase();
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
@@ -85,8 +87,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             
             userDelegate.getForUserName(userName, _.bind(function(user) {
                 this.editedUser = user;
-                this.data = user;
-                
+                this.data.user = user;
+                this.data.roles = conf.globalData.userRoles;
                 this.data.profileName = user.givenName + ' ' + user.familyName;
                 
                 this.parentRender(_.bind(function() {
@@ -141,6 +143,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
             this.$el.find("input[name=backButton]").val($.t("common.form.back"));
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
+            this.$el.find("select[name=roles]").val(this.editedUser.roles.split(","));
             validatorsManager.validateAllFields(this.$el);
             
             countryStateDelegate.getAllCountries(_.bind(function(countries) {

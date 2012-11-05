@@ -8,12 +8,12 @@
                <h2 class="header">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h2>
                <div id="candidateTasks" class="tasks-table"></div>
            </div>
-           <div class="column4">
+           <div class="column3">
                {{#shouldDisplayNotificationsAndProfile}}
                <h2 class="header">{{t "common.notification.notifications"}}</h2>
-               <div id="notifications"></div>
+               <div id="notifications" style="margin-bottom: 15px;" ></div>
                
-               <h2>{{t "common.user.profile"}}</h2>
+               <h2 class="header">{{t "common.user.profile"}}</h2>
                <div id="profileInfo"></div>
                {{/shouldDisplayNotificationsAndProfile}}
            </div>
