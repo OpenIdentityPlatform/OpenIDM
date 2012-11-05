@@ -306,6 +306,7 @@
         <module>openidm-external-rest</module>
         <module>openidm-httpcontext</module>
         <module>openidm-infoservice</module>
+        <module>openidm-customendpoint</module>
         <module>openidm-jaas-loginmodule-repo</module>
         <module>openidm-jetty-fragment</module>
         <module>openidm-policy</module>
