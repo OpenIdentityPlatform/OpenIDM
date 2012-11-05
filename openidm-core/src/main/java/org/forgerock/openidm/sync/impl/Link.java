@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 // SLF4J
 import org.slf4j.Logger;
@@ -260,9 +261,9 @@ class Link {
      * @return the mapping from source identifier to the link object for it
      */
     public static Map<String, Link> getLinksForMapping(ObjectMapping mapping) throws SynchronizationException {
-        Map<String, Link> sourceIdToLink = new HashMap<String, Link>();
+        Map<String, Link> sourceIdToLink = new ConcurrentHashMap<String, Link>();
         if (mapping != null) {
-            JsonValue query = new JsonValue(new HashMap<String, Object>());            
+            JsonValue query = new JsonValue(new HashMap<String, Object>());
             query.put(QueryConstants.QUERY_ID, "links-for-linkType");
             query.put("linkType", mapping.getLinkType().getName());
             JsonValue queryResults = linkQuery(mapping.getService().getRouter(), query);

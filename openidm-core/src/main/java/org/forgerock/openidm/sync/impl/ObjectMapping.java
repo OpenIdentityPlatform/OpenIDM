@@ -19,11 +19,18 @@ package org.forgerock.openidm.sync.impl;
 // Java SE
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Future;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -148,6 +155,12 @@ class ObjectMapping implements SynchronizationListener {
      * Default to {@code FALSE}
      */
     private Boolean correlateEmptyTargetSet;
+    
+    /**
+     * The number of processing threads to use in reconciliation
+     */
+// TODO: make configurable
+    int taskThreads = 10;
 
     /** TODO: Description. */
     private SynchronizationService service;
@@ -184,6 +197,10 @@ class ObjectMapping implements SynchronizationListener {
         onUnlinkScript = Scripts.newInstance("ObjectMapping", config.get("onUnlink"));
         resultScript = Scripts.newInstance("ObjectMapping", config.get("result"));
         prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
+        Integer confTaskThreads = config.get("taskThreads").asInteger();
+        if (confTaskThreads != null) {
+            taskThreads = confTaskThreads.intValue();
+        }
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
 
@@ -294,7 +311,7 @@ class ObjectMapping implements SynchronizationListener {
      */
     private List<String> queryAllIds(final String objectSet, ReconciliationContext reconContext)
             throws SynchronizationException {
-        List<String> ids = new ArrayList<String>();
+        List<String> ids = Collections.synchronizedList(new ArrayList<String>());
         HashMap<String, Object> query = new HashMap<String, Object>();
         query.put(QueryConstants.QUERY_ID, "query-all-ids");
         try {
@@ -647,7 +664,8 @@ class ObjectMapping implements SynchronizationListener {
             }
 
             reconContext.getStatistics().targetQueryStart();
-            List<String> remainingTargetIds = queryAllIds(targetObjectSet, reconContext);
+            List<String> remainingTargetIds = 
+                    Collections.synchronizedList(queryAllIds(targetObjectSet, reconContext));
             reconContext.setTargetIds(new ArrayList(remainingTargetIds)); // TODO: cleanup
             reconContext.getStatistics().targetQueryEnd();
 
@@ -664,50 +682,10 @@ class ObjectMapping implements SynchronizationListener {
 
             EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_SOURCE);
-            while (sourceIdsIter.hasNext()) {
-                checkCanceled(reconContext);
-                String sourceId = sourceIdsIter.next();
-                SourceSyncOperation op = new SourceSyncOperation();
-                op.reconContext = reconContext;
-                ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
-                op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceId);
-                if (allLinks != null) {
-                    op.initializeLink(allLinks.get(sourceId));
-                }
-                entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sourceId);
-                op.reconId = reconId;
-                try {
-                    op.sync();
-                } catch (SynchronizationException se) {
-                    if (op.action != Action.EXCEPTION) {
-                        entry.status = Status.FAILURE; // exception was not intentional
-                        LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
-                    }
-                    Throwable throwable = se;
-                    while (throwable.getCause() != null) { // want message associated with original cause
-                        throwable = throwable.getCause();
-                    }
-                    if (se != throwable) {
-                        entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
-                    } else {
-                        entry.message = throwable.getMessage();
-                    }
-                }
-                String[] targetIds = op.getTargetIds();
-                for (String handledId : targetIds) {
-                    remainingTargetIds.remove(handledId);
-                }
-
-                if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
-                    entry.timestamp = new Date();
-                    entry.reconciling = "source";
-                    if (op.hasTargetObject()) {
-                        entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
-                    }
-                    entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
-                    logReconEntry(entry);
-                }
-            }
+            
+            SourceReconPhase sourcePhase = new SourceReconPhase(sourceIdsIter, reconContext, context, 
+                    rootContext, allLinks, remainingTargetIds);
+            sourcePhase.execute();
             measureSource.end();
 
             EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
@@ -750,12 +728,147 @@ class ObjectMapping implements SynchronizationListener {
             logReconEnd(reconContext, rootContext, context);
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext);
+        } catch (InterruptedException ex) {
+            checkCanceled(reconContext);
+            throw new SynchronizationException("Interrupted execution of reconciliation", ex);
         } finally {
             context.remove("trigger");
             reconContext.getStatistics().reconEnd();
         }
 
 // TODO: cleanup orphan link objects (no matching source or target) here
+    }
+
+    /**
+     * Reconcile a given source ID
+     * @param sourceId the id to reconcile
+     * @param reconContext reconciliation context
+     * @param rootContext json resource root ctx
+     * @param allLinks all links if pre-queried, or null for on-demand link querying
+     * @param remainingTargetIds The list to update/remove any targets that were matched
+     * @throws SynchronizationException if there is a failure reported in reconciling this id
+     */
+    void reconSourceById(String sourceId, ReconciliationContext reconContext, JsonValue rootContext, 
+            Map<String, Link> allLinks, List<String> remainingTargetIds) throws SynchronizationException {
+        SourceSyncOperation op = new SourceSyncOperation();
+        op.reconContext = reconContext;
+        ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
+        op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceId);
+        if (allLinks != null) {
+            op.initializeLink(allLinks.get(sourceId));
+        }
+        entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sourceId);
+        op.reconId = reconContext.getReconId();
+        try {
+            op.sync();
+        } catch (SynchronizationException se) {
+            if (op.action != Action.EXCEPTION) {
+                entry.status = Status.FAILURE; // exception was not intentional
+                LOGGER.warn("Unexpected failure during source reconciliation {}", op.reconId, se);
+            }
+            Throwable throwable = se;
+            while (throwable.getCause() != null) { // want message associated with original cause
+                throwable = throwable.getCause();
+            }
+            if (se != throwable) {
+                entry.message = se.getMessage() + ". Root cause: " + throwable.getMessage();
+            } else {
+                entry.message = throwable.getMessage();
+            }
+        }
+        String[] targetIds = op.getTargetIds();
+        for (String handledId : targetIds) {
+            remainingTargetIds.remove(handledId);
+        }
+
+        if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
+            entry.timestamp = new Date();
+            entry.reconciling = "source";
+            try {
+                if (op.hasTargetObject()) {
+                    entry.targetId = LazyObjectAccessor.qualifiedId(targetObjectSet, op.getTargetObjectId());
+                }
+            } catch (SynchronizationException ex) {
+                entry.message = "Failure in preparing recon entry " + ex.getMessage() 
+                        + " for target: " + op.getTargetObjectId() + " original status: " + entry.status 
+                        + " message: "  + entry.message;
+                entry.status = Status.FAILURE;
+            }
+            entry.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
+            logReconEntry(entry);
+        }
+    }
+
+    /**
+     * Wrapper to submit source recon for a given id for concurrent processing
+     * @author aegloff
+     */
+    class SourceReconTask implements Callable<Void> {
+        String sourceId;
+        ReconciliationContext reconContext;
+        JsonValue parentContext;
+        JsonValue rootContext; 
+        Map<String, Link> allLinks;
+        List<String> remainingTargetIds; 
+        
+        public SourceReconTask(String sourceId, ReconciliationContext reconContext,
+                JsonValue parentContext, JsonValue rootContext,
+                Map<String, Link> allLinks, List<String> remainingTargetIds) {
+            this.sourceId = sourceId;
+            this.reconContext = reconContext;
+            this.parentContext = parentContext;
+            this.rootContext = rootContext;
+            this.allLinks = allLinks;
+            this.remainingTargetIds = remainingTargetIds;
+        }
+
+        public Void call() throws SynchronizationException {
+            ObjectSetContext.push(JsonResourceContext.newContext("resource", parentContext));
+            try {
+                reconSourceById(sourceId, reconContext, rootContext, allLinks, remainingTargetIds);
+            } finally {
+                ObjectSetContext.pop();
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Reconcile the source phase, multi threaded or single threaded.
+     * @author aegloff
+     */
+    class SourceReconPhase extends ReconFeeder {
+        JsonValue parentContext;
+        JsonValue rootContext; 
+        Map<String, Link> allLinks;
+        List<String> remainingTargetIds; 
+        
+        public SourceReconPhase(Iterator<String> sourceIdsIter, ReconciliationContext reconContext,
+                JsonValue parentContext, JsonValue rootContext,
+                Map<String, Link> allLinks, List<String> remainingTargetIds) {
+            super(sourceIdsIter, reconContext);
+            this.parentContext = parentContext;
+            this.rootContext = rootContext;
+            this.allLinks = allLinks;
+            this.remainingTargetIds = remainingTargetIds;
+        }
+        @Override
+        Callable createTask(String sourceId) throws SynchronizationException {
+            return new SourceReconTask(sourceId, reconContext, parentContext, rootContext, 
+                    allLinks, remainingTargetIds);
+        }
+        @Override
+        void checkCanceled() throws SynchronizationException {
+            ObjectMapping.this.checkCanceled(reconContext);
+        }
+    }
+
+    /**
+     * @return the configured number of threads to use for processing tasks. 
+     * 0 to process in a single thread.
+     */
+    int getTaskThreads() {
+        return taskThreads;
     }
 
     /**
@@ -1293,6 +1406,52 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+    public static class SyncRunnable implements Callable<Void> {
+        
+        SyncOperation syncOp;
+        JsonValue parentContext;
+        public SyncRunnable(SyncOperation syncOp, JsonValue parentContext) {
+            this.syncOp = syncOp;
+            this.parentContext = parentContext;
+        }
+        public Void call() throws SynchronizationException {
+            ObjectSetContext.push(JsonResourceContext.newContext("resource", parentContext));
+            try {
+                syncOp.sync();
+            } finally {
+                ObjectSetContext.pop();
+            }
+            return null;
+        }
+    }
+/*
+    public void feedSync(int feedSize) {
+        
+        
+        
+        // Each time one completes, feed another.
+        
+        //Collection<Callable<Result>> workItems = ...
+        //        ExecutorService executor = Executors.newSingleThreadExecutor();
+        CompletionService<Void> completionService = new ExecutorCompletionService<Void>(executor);
+
+        // Pre-load configured number of items
+        for (int i = 0; i < feedSize; ++i) {
+          completionService.submit(new SyncRunnable(...));
+        }
+
+        // Each time one completes, feed another.
+        for (int i = 0; i < totalTasks; ++i) {
+            Future<Void> future = completionService.take(); 
+            // Get any exceptions
+            Void result = future.get();
+            completionService.submit(new SyncRunnable(...));
+            // TODO: exception handling
+        }
+    }
+*/
+    
+    
     /**
      * TODO: Description.
      */
