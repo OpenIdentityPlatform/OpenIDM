@@ -26,12 +26,14 @@ package org.forgerock.openidm.sync.impl;
 
 //import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Holds the (source/target) Phase specific statistics
@@ -45,24 +47,24 @@ public class PhaseStatistic {
     
     private ReconciliationStatistic parentStat;
     Phase phase;
-    private Map<Situation, List<String>> ids = new EnumMap<Situation, List<String>>(Situation.class);
-    private volatile long processedEntries;
-    private  List<String> notValid;
+    private Map<Situation, List<String>> ids = Collections.synchronizedMap(new EnumMap<Situation, List<String>>(Situation.class));
+    private AtomicLong processedEntries = new AtomicLong();
+    private List<String> notValid;
 
     public PhaseStatistic(ReconciliationStatistic parentStat, Phase phase) {
         this.parentStat = parentStat;
         this.phase = phase;
-        ids.put(Situation.CONFIRMED, new ArrayList<String>());
-        ids.put(Situation.FOUND, new ArrayList<String>());
-        ids.put(Situation.ABSENT, new ArrayList<String>());
-        ids.put(Situation.AMBIGUOUS, new ArrayList<String>());
-        ids.put(Situation.MISSING, new ArrayList<String>());
-        ids.put(Situation.UNQUALIFIED, new ArrayList<String>());
-        ids.put(Situation.UNASSIGNED, new ArrayList<String>());
-        ids.put(Situation.SOURCE_MISSING, new ArrayList<String>());
-        ids.put(Situation.SOURCE_IGNORED, new ArrayList<String>());
-        ids.put(Situation.TARGET_IGNORED, new ArrayList<String>());
-        notValid = new ArrayList<String>();
+        ids.put(Situation.CONFIRMED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.FOUND, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.ABSENT, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.AMBIGUOUS, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.MISSING, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.UNQUALIFIED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.UNASSIGNED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.SOURCE_MISSING, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.SOURCE_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.TARGET_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
+        notValid = Collections.synchronizedList(new ArrayList<String>());
     }
 
     public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, Situation situation, Action action) {
@@ -75,7 +77,7 @@ public class PhaseStatistic {
         }
         parentStat.processed(sourceId, targetId, linkExisted, linkId, situation, action);
         if (id != null) {
-            ++processedEntries;
+            processedEntries.incrementAndGet();
             if (situation != null) {
                 List<String> situationIds = ids.get(situation);
                 if (situationIds != null) {
@@ -92,7 +94,7 @@ public class PhaseStatistic {
     }
 
     public long getProcessed() {
-        return processedEntries;
+        return processedEntries.get();
     }
     
     public Map<String, Object> asMap() {
