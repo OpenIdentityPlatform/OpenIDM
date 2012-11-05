@@ -22,23 +22,27 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.test.module;
-
-import org.forgerock.commons.launcher.OSGiFramework;
-import org.testng.Assert;
-import org.testng.IModuleFactory;
-import org.testng.ITestContext;
-import com.google.inject.Module;
+package org.forgerock.openidm.core;
 
 /**
- * A ModuleFactory does ...
- *
+ * A NAME does ...
+ * 
  * @author Laszlo Hordos
  */
-public class ModuleFactory implements IModuleFactory {
-    public Module createModule(ITestContext context, Class<?> testClass) {
-        OSGiFramework service = (OSGiFramework) context.getAttribute(OSGiFramework.class.getName());
-        Assert.assertNotNull(service);
-        return new OpenIDMTestModule(service.getSystemBundle().getBundleContext());
-    }
+public interface PropertyAccessor {
+    /**
+     * Returns the value of the specified property. If the key is not found in
+     * the Framework properties, the system properties are then searched. The
+     * method returns {@code null} if the property is not found.
+     * 
+     * @param key
+     *            The name of the requested property.
+     * @return The value of the requested property, or {@code null} if the
+     *         property is undefined.
+     * @throws SecurityException
+     *             If the caller does not have the appropriate
+     *             {@code PropertyPermission} to read the property, and the Java
+     *             Runtime Environment supports permissions.
+     */
+    <T> T getProperty(String key, T defaultValue, Class<T> expected);
 }

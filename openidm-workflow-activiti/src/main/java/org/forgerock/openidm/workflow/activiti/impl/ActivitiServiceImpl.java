@@ -195,7 +195,7 @@ public class ActivitiServiceImpl implements JsonResource {
                         if (null == dataSource) {
                             //initialise the default h2 DataSource
                             JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
-                            File root = IdentityServer.getFileForPath("db/activiti/database");
+                            File root = IdentityServer.getFileForWorkingPath("db/activiti/database");
                             jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_DELAY=1000");
                             jdbcDataSource.setUser("sa");
                             configuration.setDatabaseType("h2");
@@ -263,7 +263,7 @@ public class ActivitiServiceImpl implements JsonResource {
                                 props.put("felix.fileinstall.poll", "2000");
                                 props.put("felix.fileinstall.noInitialDelay", "true");
                                 //TODO java.net.URLDecoder.decode(IdentityServer.getFileForPath("workflow").getAbsolutePath(),"UTF-8")
-                                props.put("felix.fileinstall.dir", IdentityServer.getFileForPath("workflow").getAbsolutePath());
+                                props.put("felix.fileinstall.dir", IdentityServer.getFileForInstallPath("workflow").getAbsolutePath());
                                 props.put("felix.fileinstall.filter", ".*\\.bar|.*\\.xml");
                                 props.put("felix.fileinstall.bundles.new.start", "true");
                                 props.put("config.factory-pid", "activiti");

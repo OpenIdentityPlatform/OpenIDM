@@ -65,7 +65,7 @@ if [ "$1" = "jpda" ] ; then
   shift
 fi
 
-CLASSPATH="$OPENIDM_HOME"/bin/felix.jar
+CLASSPATH="$OPENIDM_HOME/bin/*:$OPENIDM_HOME/framework/*"
 
 echo "Using OPENIDM_HOME:   $OPENIDM_HOME"
 echo "Using OPENIDM_OPTS:   $OPENIDM_OPTS"
@@ -77,8 +77,8 @@ echo $$ > $OPENIDM_PID_FILE
 # start in normal mode
 exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
 	-Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
-    -Djava.security.auth.login.config=security/jaas-repo.conf \
 	-classpath "$CLASSPATH" \
 	-Dopenidm.system.server.root="$OPENIDM_HOME" \
-	-Dignore.openidm.system.server.environment="dev|test|qa|prod" \
-	org.apache.felix.main.Main "$@"
+	org.forgerock.commons.launcher.Main -c bin/launcher.json "$@"
+
+# org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
