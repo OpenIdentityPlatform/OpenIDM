@@ -52,6 +52,9 @@
                 "location":"bundle",
                 "includes":["*.jar"],
                 "excludes":[
+                    "**/org.forgerock.json.resource-*.jar",
+                    "**/json-fluent-*.jar",
+                    "**/org.forgerock.util-*.jar",
                     "**/openidm-system-*.jar",
                     "**/openidm-security-jetty*.jar",
                     "**/openidm-jaas-loginmodule-repo*.jar",

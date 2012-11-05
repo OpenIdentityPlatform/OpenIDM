@@ -221,6 +221,11 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <systemPropertyVariables>
+                        <org.osgi.framework.system.packages.extra>
+                            sun.misc,org.forgerock.util;version="1.0.0",org.forgerock.json.fluent;version="1.1.0",org.forgerock.json.resource;version="1.2.3"
+                        </org.osgi.framework.system.packages.extra>
+                    </systemPropertyVariables>
                     <workingDirectory>${project.build.directory}/openidm</workingDirectory>
                 </configuration>
             </plugin>
