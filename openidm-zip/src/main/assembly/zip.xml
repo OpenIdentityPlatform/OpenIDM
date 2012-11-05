@@ -29,6 +29,7 @@
                 <exclude>**/*.sh</exclude>
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
+                <exclude>**/internal-common/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -63,6 +64,41 @@
   			</excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
+        <!-- Setup Sample1  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample1</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample1</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample2  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
@@ -70,58 +106,24 @@
             <outputDirectory>/openidm/bundle</outputDirectory>
             <scope>runtime</scope>
             <excludes>
-                <exclude>org.apache.felix:org.apache.felix.main</exclude>
                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
-                <exclude>org.apache.felix:org.osgi.foundation</exclude>
-                <exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
-                <exclude>org.osgi:**</exclude>
-                <exclude>javax.persistence:persistence-api</exclude>
-                <exclude>javax.transaction:jta</exclude>
+                <exclude>org.osgi:*</exclude>
                 <exclude>org.forgerock.openicf.connectors.*:openicf-*</exclude>
-                <exclude>org.forgerock.openidm:openidm-config</exclude>
-                <exclude>org.forgerock.openidm:openidm-crypto</exclude>
-                <exclude>org.forgerock.openidm:openidm-jaas-loginmodule-repo</exclude>
-                <exclude>org.forgerock.openidm:openidm-jetty-fragment</exclude>
-                <exclude>org.forgerock.openidm:openidm-repo-jdbc</exclude>
-                <exclude>org.forgerock.openidm:openidm-repo-orientdb</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
-                <exclude>org.forgerock.openidm:openidm-security-jetty</exclude>
-                <exclude>org.forgerock.openidm:openidm-quartz-fragment</exclude>
-                <exclude>org.forgerock.openidm:openidm-scheduler</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
+                <exclude>org.apache.felix:*gogo*</exclude>
                 <exclude>*:*:js</exclude>
                 <exclude>*:*:zip</exclude>
-                <exclude>org.apache.felix:org.apache.felix.fileinstall</exclude>
-                <exclude>org.apache.felix:org.apache.felix.configadmin</exclude>
-                <exclude>org.ops4j.pax.web:pax-web-jetty-bundle</exclude>
-                <exclude>org.ops4j.pax.web:pax-web-extender-whiteboard</exclude>
-                <exclude>org.apache.felix:org.apache.felix.gogo.shell</exclude>
-                <exclude>org.eclipse.osgi:org.eclipse.osgi</exclude>
+                <!--exclude>org.apache.felix:org.apache.felix.scr.annotations</exclude>
+                <exclude>javax.persistence:persistence-api</exclude>
+                <exclude>javax.transaction:jta</exclude>
+                <exclude>org.apache.felix:org.apache.felix.main</exclude>
+                <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>net.sf.kxml:kxml2</exclude>
-                <exclude>xmlpull:xmlpull</exclude>
+                <exclude>xmlpull:xmlpull</exclude-->
             </excludes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/bundle/init</outputDirectory>
-            <includes>
-                <include>org.forgerock.openidm:openidm-config</include>
-                <include>org.forgerock.openidm:openidm-crypto</include>
-                <include>org.forgerock.openidm:openidm-jaas-loginmodule-repo</include>
-                <include>org.forgerock.openidm:openidm-jetty-fragment</include>
-                <include>org.forgerock.openidm:openidm-repo-jdbc</include>
-                <include>org.forgerock.openidm:openidm-repo-orientdb</include>
-                <include>org.forgerock.openidm:openidm-scheduler</include>
-                <include>org.forgerock.openidm:openidm-security-jetty</include>
-                <include>org.forgerock.openidm:openidm-quartz-fragment</include>
-                <include>org.apache.felix:org.apache.felix.fileinstall</include>
-                <include>org.apache.felix:org.apache.felix.configadmin</include>
-                <include>org.ops4j.pax.web:pax-web-jetty-bundle</include>
-                <include>org.ops4j.pax.web:pax-web-extender-whiteboard</include>
-                <include>org.apache.felix:org.apache.felix.gogo.shell</include>
-            </includes>
         </dependencySet>
         <!-- Include UI in distribution for use in various web servers -->
         <dependencySet>
@@ -142,7 +144,7 @@
             <unpack>false</unpack>
             <outputFileNameMapping>felix.jar</outputFileNameMapping>
             <includes>
-                <include>org.apache.felix:org.apache.felix.main</include>
+                <include>org.apache.felix:org.apache.felix.framework</include>
             </includes>
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>

@@ -104,7 +104,7 @@ public class CryptoServiceImpl implements CryptoService {
     private InputStream openStream(String location) throws IOException {
         InputStream result = null;
         if (location != null) {
-            File configFile = IdentityServer.getFileForPath(location);
+            File configFile = IdentityServer.getFileForPath(location, IdentityServer.getInstance().getInstallLocation());
             if (configFile.exists()) {
                 result = new FileInputStream(configFile);
             } else {

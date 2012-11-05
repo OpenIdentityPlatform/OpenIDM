@@ -139,6 +139,10 @@ public class BundleContextStub implements BundleContext {
         return null;
     }
 
+    public <S> ServiceRegistration<S> registerService(Class<S> clazz, S service, Dictionary<String, ?> properties) {
+        return null;
+    }
+
     @Override
     public ServiceReference[] getServiceReferences(String s, String s1) throws InvalidSyntaxException {
         return new ServiceReference[0];
@@ -147,6 +151,15 @@ public class BundleContextStub implements BundleContext {
     @Override
     public ServiceReference[] getAllServiceReferences(String s, String s1) throws InvalidSyntaxException {
         return new ServiceReference[0];
+    }
+
+    public <S> ServiceReference<S> getServiceReference(Class<S> clazz) {
+        return null;
+    }
+
+    public <S> Collection<ServiceReference<S>> getServiceReferences(Class<S> clazz, String filter)
+            throws InvalidSyntaxException {
+        return null;
     }
 
     @Override

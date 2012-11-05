@@ -34,6 +34,10 @@
     <name>OpenIDM automated integration tests</name>
     <packaging>jar</packaging>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.easytesting</groupId>
@@ -122,7 +126,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.3</version>
+                <version>2.12.4</version>
                 <configuration>
                     <skipTests>true</skipTests>
                 </configuration>
@@ -130,17 +134,76 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.12.3</version>
+                <version>2.12.4</version>
                 <executions>
                     <execution>
-                        <id>integration-test</id>
+                        <id>integration-test-default</id>
                         <goals>
                             <goal>integration-test</goal>
                         </goals>
                         <configuration>
+                            <reportNameSuffix>default</reportNameSuffix>
+                            <groups>common,default</groups>
+                            <skipITs>false</skipITs>
                             <systemPropertyVariables>
-                                <testName>scenario1</testName>
+                                <launcher.install.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.install.location>
+                                <launcher.project.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.project.location>
+                                <launcher.working.location>
+                                    ${project.build.directory}/storage/default
+                                </launcher.working.location>
                             </systemPropertyVariables>
+                            <summaryFile>target/failsafe-reports/failsafe-summary-default.xml</summaryFile>
+                            <!--debugForkedProcess>true</debugForkedProcess-->
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-test-sample1</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <reportNameSuffix>sample1</reportNameSuffix>
+                            <groups>common,sample1</groups>
+                            <skipITs>false</skipITs>
+                            <systemPropertyVariables>
+                                <launcher.install.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.install.location>
+                                <launcher.project.location>
+                                    ${project.build.directory}/openidm/samples/sample1
+                                </launcher.project.location>
+                                <launcher.working.location>
+                                    ${project.build.directory}/storage/sample1
+                                </launcher.working.location>
+                            </systemPropertyVariables>
+                            <summaryFile>target/failsafe-reports/failsafe-summary-sample1.xml</summaryFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-test-sample2</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <reportNameSuffix>sample2</reportNameSuffix>
+                            <groups>common,sample2</groups>
+                            <skipITs>false</skipITs>
+                            <systemPropertyVariables>
+                                <launcher.install.location>
+                                    ${project.build.directory}/openidm
+                                </launcher.install.location>
+                                <launcher.project.location>
+                                    ${project.build.directory}/openidm/samples/sample2
+                                </launcher.project.location>
+                                <launcher.working.location>
+                                    ${project.build.directory}/storage/sample2
+                                </launcher.working.location>
+                            </systemPropertyVariables>
+                            <summaryFile>target/failsafe-reports/failsafe-summary-sample2.xml</summaryFile>
                         </configuration>
                     </execution>
                     <execution>
@@ -148,8 +211,18 @@
                         <goals>
                             <goal>verify</goal>
                         </goals>
+                        <configuration>
+                            <summaryFiles>
+                                <summaryFile>target/failsafe-reports/failsafe-summary-default.xml</summaryFile>
+                                <!--summaryFile>target/failsafe-reports/failsafe-summary-sample1.xml</summaryFile>
+                                <summaryFile>target/failsafe-reports/failsafe-summary-sample2.xml</summaryFile-->
+                            </summaryFiles>
+                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <workingDirectory>${project.build.directory}/openidm</workingDirectory>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -171,7 +244,16 @@
                                     <type>zip</type>
                                 </artifactItem>
                             </artifactItems>
-                            <includes>openidm/bundle/**</includes>
+                            <includes>
+                                openidm/bin/**,
+                                openidm/bundle/**,
+                                openidm/conf/**,
+                                openidm/connectors/**,
+                                openidm/samples/**,
+                                openidm/script/**,
+                                openidm/security/**,
+                                openidm/workflow/**
+                            </includes>
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>true</overWriteSnapshots>

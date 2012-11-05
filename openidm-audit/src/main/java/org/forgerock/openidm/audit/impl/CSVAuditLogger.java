@@ -81,7 +81,7 @@ public class CSVAuditLogger implements AuditLogger {
         String location = null;
         try {
             location = (String) config.get(CONFIG_LOG_LOCATION);
-            auditLogDir = IdentityServer.getFileForPath(location);
+            auditLogDir = IdentityServer.getFileForWorkingPath(location);
             logger.info("Audit logging to: {}", auditLogDir.getAbsolutePath());
             auditLogDir.mkdirs();
             recordDelim = (String) config.get(CONFIG_LOG_RECORD_DELIM);

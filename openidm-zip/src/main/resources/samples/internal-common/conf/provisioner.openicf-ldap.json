@@ -44,7 +44,7 @@
          "changeLogBlockSize" : 100,
          "baseContextsToSynchronize" :
             [
-               "ou=People,dc=example,dc=com"
+               "dc=example,dc=com"
             ],
          "attributesToSynchronize" :
             [
@@ -74,7 +74,7 @@
          "principal" : "cn=Directory Manager",
          "baseContexts" :
             [
-               "ou=People,dc=example,dc=com"
+               "dc=example,dc=com"
             ],
          "readSchema" : true,
          "accountObjectClasses" :
@@ -99,8 +99,10 @@
          "maintainLdapGroupMembership" : false,
          "respectResourcePasswordPolicyChangeAfterReset" : false
       },
-    "objectTypes" : {
-        "account" : {
+   "objectTypes" :
+      {
+         "account" :
+            {
                "$schema" : "http://json-schema.org/draft-03/schema",
                "id" : "__ACCOUNT__",
                "type" : "object",
@@ -148,11 +150,122 @@
                     "nativeName" : "__NAME__",
                     "nativeType" : "string",
                     "required" : true
+                },
+                "ldapGroups" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "ldapGroups",
+                    "nativeType" : "string"
                         }
                   }
+        },
+        "group" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__GROUP__",
+            "type" : "object",
+            "nativeType" : "__GROUP__",
+            "properties" : {
+                "seeAlso" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "seeAlso",
+                    "nativeType" : "string"
+                },
+                "description" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "description",
+                    "nativeType" : "string"
+                },
+                "uniqueMember" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "uniqueMember",
+                    "nativeType" : "string"
+                },
+                "dn" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "o" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "o",
+                    "nativeType" : "string"
+                },
+                "ou" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "ou",
+                    "nativeType" : "string"
+                },
+                "businessCategory" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "businessCategory",
+                    "nativeType" : "string"
+                },
+                "owner" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "nativeName" : "owner",
+                    "nativeType" : "string"
+                },
+                "cn" : {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "string",
+                        "nativeType" : "string"
+                    },
+                    "required" : true,
+                    "nativeName" : "cn",
+                    "nativeType" : "string"
+                }
+            }
             }
       },
    "operationOptions" :
       {
+         "DELETE" :
+            {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        },
+         "UPDATE" :
+            {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        },
+         "CREATE" :
+            {
+            "denied" : false,
+            "onDeny" : "DO_NOTHING"
+        }
       }
 }

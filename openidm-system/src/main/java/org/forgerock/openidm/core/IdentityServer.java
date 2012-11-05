@@ -1,17 +1,25 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 package org.forgerock.openidm.core;
 
@@ -21,147 +29,194 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Enumeration;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
 /**
  * This class defines the core of the Identity Server.
- *
+ * 
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class IdentityServer {
+public class IdentityServer implements PropertyAccessor {
 
-//    final static Logger logger = LoggerFactory.getLogger(IdentityServer.class);
-    
+    // final static Logger logger =
+    // LoggerFactory.getLogger(IdentityServer.class);
+
     /**
      * The singleton Identity Server instance.
      */
-    private static final IdentityServer identityServer = new IdentityServer();
-
-    // The set of properties for the environment config. 
+    private static final AtomicReference<IdentityServer> identityServer =
+            new AtomicReference<IdentityServer>(new IdentityServer(null));
+    private static final AtomicBoolean initialised = new AtomicBoolean(Boolean.FALSE);
+    // The set of properties for the environment config.
     // Keys are lower case for easier case insensitive searching
-    // Precedences is 1. Explicit config properties, 2. Boot file properties, 3. System properties
-    private final Map<String, String> configProperties;
+    // Precedences is 1. Boot file properties, 2. Explicit config properties, 3.
+    // System properties
+    private final PropertyAccessor configProperties;
     private final Map<String, String> bootFileProperties;
 
     /**
-     * Creates a new identity environment configuration initialized
-     * from the system properties defined in the JVM.
+     * Creates a new identity environment configuration initialized with a copy
+     * of the provided set of properties.
+     * 
+     * @param properties
+     *            The properties to use when initializing this environment
+     *            configuration, or {@code null} to use an empty set of
+     *            properties.
      */
-    private IdentityServer() {
-        this(null);
+    private IdentityServer(PropertyAccessor properties) {
+        PropertyAccessor propertyAccessor = properties;
+        if (null == propertyAccessor) {
+            propertyAccessor = new SystemPropertyAccessor(null);
+        }
+        configProperties = propertyAccessor;
+        String bootFileName =
+                getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
+                        ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
+        bootFileProperties = loadProps(bootFileName);
+    }
+
+    public static IdentityServer getInstance() {
+        IdentityServer server = identityServer.get();
+        if (null == server) {
+            throw new IllegalStateException("IdentityServer has not been initialised");
+        }
+        return server;
     }
 
     /**
-     * Creates a new identity environment configuration initialized
-     * with a copy of the provided set of properties.
-     *
-     * @param properties The properties to use when initializing this
-     *                   environment configuration, or {@code null}
-     *                   to use an empty set of properties.
+     * Initialise the singleton {@link IdentityServer} instance with the
+     * provided {@link PropertyAccessor} instance.
+     * <p/>
+     * This or the {@link #initInstance(IdentityServer)} method can be called
+     * only once and then it throws {@link IllegalStateException} if it's called
+     * more then once.
+     * 
+     * @param properties
+     * @return new instance of {@link IdentityServer}
+     * @throws IllegalStateException
+     *             when this method called more then once.
      */
-    private IdentityServer(Map<String, String> properties) {
-        configProperties = new HashMap<String, String>();
-        if (properties != null) {
-            // Populate with lower case keys for easier case insensitive comparisons
-            for (Map.Entry<String, String> entry : properties.entrySet()) {
-                configProperties.put(entry.getKey().toLowerCase(), entry.getValue());
+    public static IdentityServer initInstance(PropertyAccessor properties) {
+        if (initialised.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
+            return identityServer.getAndSet(new IdentityServer(properties));
+        } else {
+            throw new IllegalStateException("IdentityServer has been initialised already");
+        }
+    }
+
+    /**
+     * Initialise the singleton {@link IdentityServer} instance with the
+     * provided {@link IdentityServer} instance.
+     * <p/>
+     * This or the {@link #initInstance(PropertyAccessor)} method can be called
+     * only once and then it throws {@link IllegalStateException} if it's called
+     * more then once.
+     * 
+     * @param server
+     *            new instance of {@link IdentityServer}
+     * @return same instance as the {@code server} parameter if not {@code null}
+     *         or the current {@link IdentityServer instance}
+     * @throws IllegalStateException
+     *             when this method called more then once.
+     */
+    public static IdentityServer initInstance(IdentityServer server) {
+        if (null != server) {
+            if (initialised.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
+                return identityServer.getAndSet(server);
+            } else {
+                throw new IllegalStateException("IdentityServer has been initialised already");
             }
         }
-        String bootFileName = getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION, 
-                ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
-        bootFileProperties = loadProps(bootFileName);
+        return identityServer.get();
     }
-    
-    public static IdentityServer getInstance() {
-        return identityServer;
+
+    public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
+        T value = null;
+        if (null != bootFileProperties && null != key && ((null != expected && expected
+                .isAssignableFrom(String.class)) || defaultValue instanceof String)) {
+            value = (T) bootFileProperties.get(key);
+        }
+        return null != value ? value : (null != configProperties) ? configProperties.getProperty(
+                key, defaultValue, expected) : null;
+
     }
-    
-    public static IdentityServer getInstance(Map<String, String> properties) {
-        return new IdentityServer(properties);
-    }
-    
+
     /**
-     * Retrieves the property with the specified name (case insensitvie).  
-     * The check will first be made in the local config properties, 
-     * the boot properties file, but if no value is
-     * found then the JVM system properties will be checked.
-     *
-     * @param name The name of the property to retrieve.
-     * @param defaultValue the default value to return if the property is not set
+     * Retrieves the property with the specified name (case insensitvie). The
+     * check will first be made in the boot properties file, the local config
+     * properties, but if no value is found then the JVM system properties will
+     * be checked.
+     * 
+     * @param name
+     *            The name of the property to retrieve.
+     * @param defaultValue
+     *            the default value to return if the property is not set
      * @return The property with the specified name, or {@code defaultValue} if
      *         no such property is defined.
      */
     public String getProperty(String name, String defaultValue) {
-        String lowerCaseName = name.toLowerCase();
-        if (configProperties != null && configProperties.containsKey(lowerCaseName)) {
-            //logger.trace("Property " + name + " resolved from programmatic config properties: " + configProperties.get(lowerCaseName));
-            return configProperties.get(lowerCaseName);
-        } else if (bootFileProperties != null && bootFileProperties.containsKey(lowerCaseName)) {
-            //logger.trace("Property " + name + " resolved from boot properties file: " + bootFileProperties.get(lowerCaseName));
-            return bootFileProperties.get(lowerCaseName);
-        } else {
-            String value = getSystemPropertyIgnoreCase(lowerCaseName);
-            if (value == null) {
-                //logger.trace("Property " + name + " no setting found, defaulting to: " + defaultValue);
-                return defaultValue;
-            } else {
-                //logger.trace("Property " + name + " resolved from system properties: " + value);
-                return value;
-            }
-        }
+        return getProperty(name, defaultValue, String.class);
     }
-    
+
     /**
-     * Retrieves the property with the specified name (case insensitvie).  
-     * The check will first be made in the local config properties, 
-     * the boot properties file, but if no value is
-     * found then the JVM system properties will be checked.
-     *
-     * @param name The name of the property to retrieve.
-     * @param defaultValue the default value to return if the property is not set
-     * @return The property with the specified name, or {@code null} if
-     *         no such property is defined.
+     * Retrieves the property with the specified name (case insensitvie). The
+     * check will first be made in the local config properties, the boot
+     * properties file, but if no value is found then the JVM system properties
+     * will be checked.
+     * 
+     * @param name
+     *            The name of the property to retrieve.
+     * @return The property with the specified name, or {@code null} if no such
+     *         property is defined.
      */
     public String getProperty(String name) {
-        return getProperty(name, null);
+        return getProperty(name, null, String.class);
     }
 
     // Case insensitive retrieval of system properties
     private String getSystemPropertyIgnoreCase(String name) {
         Properties allProps = System.getProperties();
         for (Object key : allProps.keySet()) {
-            if (((String)key).equalsIgnoreCase(name)) {
+            if (((String) key).equalsIgnoreCase(name)) {
                 return (String) allProps.get(key);
             }
         }
         return null;
     }
-    
+
     /**
-     * Retrieves the path to the root directory for this instance of the Identity
-     * Server.
-     *
+     * Retrieves the path to the root directory for this instance of the
+     * Identity Server.
+     * 
      * @return The path to the root directory for this instance of the Identity
      *         Server.
      */
     public String getServerRoot() {
-        String root = getProperty(ServerConstants.PROPERTY_SERVER_ROOT);
+        String root = getProperty(ServerConstants.LAUNCHER_PROJECT_LOCATION, null, String.class);
+        // Keep the backward compatibility
+        if (null == root) {
+            root = getProperty(ServerConstants.PROPERTY_SERVER_ROOT, null, String.class);
+        }
 
         if (null != root) {
-                File r = new File(root);
-                if (r.isAbsolute()) {
-                    return root;
-                } else {
-                    return r.getAbsolutePath();
-                }
+            File r = new File(root);
+            if (r.isAbsolute()) {
+                return root;
+            } else {
+                return r.getAbsolutePath();
+            }
         }
         // We don't know where the server root is, so we'll have to assume it's
         // the current working directory.
@@ -170,9 +225,9 @@ public class IdentityServer {
     }
 
     /**
-     * Retrieves the path to the root directory for this instance of the Identity
-     * Server.
-     *
+     * Retrieves the path to the root directory for this instance of the
+     * Identity Server.
+     * 
      * @return The path to the root directory for this instance of the Identity
      *         Server.
      */
@@ -182,89 +237,251 @@ public class IdentityServer {
 
     /**
      * Retrieves a <CODE>File</CODE> object corresponding to the specified path.
-     * If the given path is an absolute path, then it will be used.  If the path
+     * If the given path is an absolute path, then it will be used. If the path
      * is relative, then it will be interpreted as if it were relative to the
      * Identity Server root.
-     *
-     * @param path The path string to be retrieved as a <CODE>File</CODE>
-     * @return A <CODE>File</CODE> object that corresponds to the specified path.
+     * 
+     * @param path
+     *            The path string to be retrieved as a <CODE>File</CODE>
+     * @return A <CODE>File</CODE> object that corresponds to the specified
+     *         path.
      */
     public static File getFileForPath(String path) {
-        return getFileForPath(path, identityServer.getServerRoot());
+        return getFileForPath(path, identityServer.get().getServerRoot());
     }
-    
+
+    /**
+     * Retrieves a {@code File} object corresponding to the <b>Install</b> path.
+     * If the given path is an absolute path, then it will be used. If the path
+     * is relative, then it will be interpreted as if it were relative to the
+     * Install location.
+     *
+     * @param path
+     *            The path string to be retrieved as a {@code File}
+     * @return A {@code File} object that corresponds to the specified
+     *         path.
+     */
+    public static File getFileForInstallPath(String path) {
+        return getFileForPath(path, identityServer.get().getInstallLocation());
+    }
+
+    /**
+     * Retrieves a {@code File} object corresponding to the <b>Project</b> path.
+     * If the given path is an absolute path, then it will be used. If the path
+     * is relative, then it will be interpreted as if it were relative to the
+     * Project location.
+     *
+     * @param path
+     *            The path string to be retrieved as a {@code File}
+     * @return A {@code File} object that corresponds to the specified
+     *         path.
+     */
+    public static File getFileForProjectPath(String path) {
+        return getFileForPath(path, identityServer.get().getProjectLocation());
+    }
+
+    /**
+     * Retrieves a {@code File} object corresponding to the <b>Working</b> path.
+     * If the given path is an absolute path, then it will be used. If the path
+     * is relative, then it will be interpreted as if it were relative to the
+     * Working location.
+     *
+     * @param path
+     *            The path string to be retrieved as a {@code File}
+     * @return A {@code File} object that corresponds to the specified
+     *         path.
+     */
+    public static File getFileForWorkingPath(String path) {
+        return getFileForPath(path, identityServer.get().getWorkingLocation());
+    }
     /**
      * Retrieves a <CODE>File</CODE> object corresponding to the specified path.
-     * If the given path is an absolute path, then it will be used.  If the path
+     * If the given path is an absolute path, then it will be used. If the path
      * is relative, then it will be interpreted as if it were relative to the
      * Identity Server root.
-     *
-     * @param path The path string to be retrieved as a <CODE>File</CODE>
-     * @param serverRoot the server root to resolve against
-     * @return A <CODE>File</CODE> object that corresponds to the specified path.
+     * 
+     * @param path
+     *            The path string to be retrieved as a <CODE>File</CODE>
+     * @param serverRoot
+     *            the server root to resolve against
+     * @return A <CODE>File</CODE> object that corresponds to the specified
+     *         path.
      */
     public static File getFileForPath(String path, String serverRoot) {
         File f = new File(path);
 
         if (f.isAbsolute()) {
-            //logger.trace("getFileForPath is absolute: {}", path);
+            // logger.trace("getFileForPath is absolute: {}", path);
             return f;
         } else {
-            //logger.trace("getFileForPath is relative: {} resolving against {}", path, serverRoot);
+            // logger.trace("getFileForPath is relative: {} resolving against {}",
+            // path, serverRoot);
             return new File(serverRoot, path).getAbsoluteFile();
         }
     }
 
     /**
+     * Retrieves a <CODE>File</CODE> object corresponding to the specified path.
+     * If the given path is an absolute path, then it will be used. If the path
+     * is relative, then it will be interpreted as if it were relative to the
+     * {@code rootLocation} parameter.
+     * 
+     * @param path
+     *            The path string to be retrieved as a {@code File}
+     * @param rootLocation
+     *            the server root to resolve against
+     * @return A {@code File} object that corresponds to the specified path.
+     */
+    public static File getFileForPath(String path, File rootLocation) {
+        File f = new File(path);
+
+        if (f.isAbsolute()) {
+            // logger.trace("getFileForPath is absolute: {}", path);
+            return f;
+        } else {
+            // logger.trace("getFileForPath is relative: {} resolving against {}",
+            // path, serverRoot);
+            return new File(rootLocation, path).getAbsoluteFile();
+        }
+    }
+
+    public File getInstallLocation() {
+        return getLocation(ServerConstants.LAUNCHER_INSTALL_LOCATION);
+    }
+
+    public File getProjectLocation() {
+        return getLocation(ServerConstants.LAUNCHER_PROJECT_LOCATION);
+    }
+
+    public File getWorkingLocation() {
+        return getLocation(ServerConstants.LAUNCHER_WORKING_LOCATION);
+    }
+
+    protected File getLocation(String propertyName) {
+        String location = getProperty(propertyName, null, String.class);
+        if (null == location) {
+            location = getProperty(ServerConstants.PROPERTY_SERVER_ROOT, null, String.class);
+        }
+        if (null == location) {
+            location = getProperty(ServerConstants.PROPERTY_SERVER_ROOT, null, String.class);
+        }
+        return new File(null != location ? location : "");
+    }
+
+    public URL getInstallLocationURL() {
+        URL location = getLocationURL(ServerConstants.LAUNCHER_INSTALL_URL);
+        if (null == location) {
+            try {
+                location =
+                        getLocation(ServerConstants.LAUNCHER_INSTALL_LOCATION).getAbsoluteFile()
+                                .toURI().toURL();
+            } catch (MalformedURLException e) {
+                /* ignore because the file is absolute */
+            }
+        }
+        return location;
+    }
+
+    public URL getProjectLocationURL() {
+        URL location = getLocationURL(ServerConstants.LAUNCHER_PROJECT_URL);
+        if (null == location) {
+            try {
+                location =
+                        getLocation(ServerConstants.LAUNCHER_PROJECT_LOCATION).getAbsoluteFile()
+                                .toURI().toURL();
+            } catch (MalformedURLException e) {
+                /* ignore because the file is absolute */
+            }
+        }
+        return location;
+    }
+
+    public URL getWorkingLocationURL() {
+        URL location = getLocationURL(ServerConstants.LAUNCHER_WORKING_URL);
+        if (null == location) {
+            try {
+                location =
+                        getLocation(ServerConstants.LAUNCHER_WORKING_LOCATION).getAbsoluteFile()
+                                .toURI().toURL();
+            } catch (MalformedURLException e) {
+                /* ignore because the file is absolute */
+            }
+        }
+        return location;
+    }
+
+    protected URL getLocationURL(String propertyName) {
+        String location = getProperty(ServerConstants.LAUNCHER_PROJECT_URL, null, String.class);
+        if (null != location) {
+            try {
+                return new URL(location);
+            } catch (MalformedURLException e) {
+                throw new IllegalArgumentException("The " + propertyName + " has no valid value!",
+                        e);
+            }
+        }
+        return null;
+    }
+
+    /**
      * Retrieves the current running mode of Identity Server.
      * <p/>
-     * Default running mode is the {@code Production}, that prohibit access to some
-     * insecure method.
-     * Development mode allow access to all method. To enable development mode set the
-     * {@link ServerConstants#PROPERTY_DEBUG_ENABLE} system property {@code true}.
-     *
+     * Default running mode is the {@code Production}, that prohibit access to
+     * some insecure method. Development mode allow access to all method. To
+     * enable development mode set the
+     * {@link ServerConstants#PROPERTY_DEBUG_ENABLE} system property
+     * {@code true}.
+     * 
      * @return true if {@code Development} mode is on.
      */
     public static boolean isDevelopmentProfileEnabled() {
-        String debug = identityServer.getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE);
+        String debug =
+                identityServer.get().getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE, null,
+                        String.class);
         return (null != debug) && Boolean.valueOf(debug);
     }
-    
+
     /**
      * Loads boot properties file
+     * 
      * @return properties in boot properties file, keys in lower case
      */
-    private Map<String, String> loadProps(String bootFileLocation) { 
+    private Map<String, String> loadProps(String bootFileLocation) {
         File bootFile = IdentityServer.getFileForPath(bootFileLocation, getServerRoot());
         Map<String, String> entries = new HashMap<String, String>();
-        
+
         if (!bootFile.exists()) {
-// TODO: move this class out of system bundle so we can use logging
-            //logger.info("No boot properties file detected at {}.", bootFile.getAbsolutePath());
+            // TODO: move this class out of system bundle so we can use logging
+            // logger.info("No boot properties file detected at {}.",
+            // bootFile.getAbsolutePath());
             System.out.println("No boot properties file detected at " + bootFile.getAbsolutePath());
         } else {
-            //logger.info("Using boot properties at {}.", bootFile.getAbsolutePath());
+            // logger.info("Using boot properties at {}.",
+            // bootFile.getAbsolutePath());
             System.out.println("Using boot properties at " + bootFile.getAbsolutePath());
             InputStream in = null;
             try {
                 Properties prop = new Properties();
                 in = new BufferedInputStream(new FileInputStream(bootFile));
                 prop.load(in);
-                for (Map.Entry<Object, Object> entry :  prop.entrySet()) {
-                    entries.put(((String) entry.getKey()).toLowerCase(), (String) entry.getValue());
+                for (Map.Entry<Object, Object> entry : prop.entrySet()) {
+                    entries.put((String) entry.getKey(), (String) entry.getValue());
                 }
             } catch (FileNotFoundException ex) {
-            //    logger.info("Boot properties file {} not found", bootFile.getAbsolutePath(), ex);
+                // logger.info("Boot properties file {} not found",
+                // bootFile.getAbsolutePath(), ex);
             } catch (IOException ex) {
-            //    logger.warn("Failed to load boot properties file {}", bootFile.getAbsolutePath(), ex);
-                throw new RuntimeException("Failed to load boot properties file " 
+                // logger.warn("Failed to load boot properties file {}",
+                // bootFile.getAbsolutePath(), ex);
+                throw new RuntimeException("Failed to load boot properties file "
                         + bootFile.getAbsolutePath() + " " + ex.getMessage(), ex);
             } finally {
                 if (in != null) {
                     try {
                         in.close();
                     } catch (IOException ex) {
-            //            logger.warn("Failure in closing boot properties file", ex);
+                        // logger.warn("Failure in closing boot properties file",
+                        // ex);
                     }
                 }
             }

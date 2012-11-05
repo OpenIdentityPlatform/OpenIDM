@@ -96,7 +96,7 @@ public class LocalCommandScope implements CustomCommandScope {
                         (provider == null || provider.trim().length() == 0 ? KeyStore
                                 .getInstance(type) : KeyStore.getInstance(type, provider));
                 if (location != null) {
-                    File configFile = IdentityServer.getFileForPath(location);
+                    File configFile = IdentityServer.getFileForInstallPath(location);
                     if (configFile.exists()) {
                         FileInputStream in = null;
                         try {
@@ -188,7 +188,7 @@ public class LocalCommandScope implements CustomCommandScope {
     }
 
     public void validate(CommandSession session) {
-        File file = IdentityServer.getFileForPath("conf");
+        File file = IdentityServer.getFileForProjectPath("conf");
         session.getConsole().println(
                 "...................................................................");
         if (file.isDirectory()) {

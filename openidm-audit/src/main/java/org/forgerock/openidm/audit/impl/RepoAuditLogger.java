@@ -26,6 +26,7 @@ package org.forgerock.openidm.audit.impl;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 import org.slf4j.Logger;
@@ -141,16 +142,30 @@ public class RepoAuditLogger implements AuditLogger {
         if (repo == null) {
             if (ctx != null) {
                 try {
-                    ServiceTracker serviceTracker = new ServiceTracker(ctx, RepositoryService.class.getName(), null);
+                    ServiceTracker<RepositoryService, RepositoryService> serviceTracker
+                            = new ServiceTracker<RepositoryService, RepositoryService>(ctx, RepositoryService.class,
+                            null);
                     serviceTracker.open();
                     int timeout = 10000;
                     logger.debug("Look for repository service for {} ms", Integer.valueOf(timeout));
-                    repo = new JsonResourceObjectSet((RepositoryService)serviceTracker.waitForService(timeout));
-                    logger.debug("Repository service found: {}", repo);
+                    RepositoryService repositoryService = serviceTracker.waitForService(timeout);
                     serviceTracker.close();
+                    if (null == repositoryService) {
+                        ServiceReference<RepositoryService> ref = ctx.getServiceReference(RepositoryService.class);
+                        if (null != ref) {
+                            repositoryService = ctx.getService(ref);
+                        }
+                    }
+                    if (null != repositoryService) {
+                        repo = new JsonResourceObjectSet(repositoryService);
+                        logger.debug("Repository service found: {}", repo);
+                    }
                 } catch (Exception ex) {
-                    throw new InternalServerErrorException("Repository audit logger failure to obtain the repo service." 
+                    throw new InternalServerErrorException("Repository audit logger failure to obtain the repo service."
                             + ex.getMessage(), ex);
+                }
+                if (null == repo){
+                    throw new InternalServerErrorException("Repository audit logger failure to obtain the repo service.");
                 }
             }
         }
