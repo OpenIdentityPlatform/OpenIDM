@@ -4,7 +4,9 @@
 
 	<test name="OpenIDMUITest">
 		<classes>
-			<class name="org.forgerock.openidm.ui.functionaltests.admin.UsersTest" />
+			<class name="org.forgerock.openidm.ui.functionaltests.admin.AdminAddUserTest" />
+			<class name="org.forgerock.openidm.ui.functionaltests.admin.AdminModifyUserTest" />
+			<class name="org.forgerock.openidm.ui.functionaltests.admin.AdminUsersViewTest" />
 			<class name="org.forgerock.openidm.ui.functionaltests.apps.AddMoreAppsTest" />
 		</classes>
 	</test>
