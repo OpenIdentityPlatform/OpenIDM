@@ -93,13 +93,15 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 
                 this.parentRender(_.bind(function() {
                     this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-                    validatorsManager.bindValidators(this.$el);
+                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
                     
-                    this.reloadData();
-                    
-                    if(callback) {
-                        callback();
-                    }
+                        this.reloadData();
+                        
+                        if(callback) {
+                            callback();
+                        }
+
+                    }, this));
                 }, this));
             }, this), function() {
                 eventManager.sendEvent(constants.ROUTE_REQUEST, { routeName: "404", trigger: false, args: [window.location.hash]} );
