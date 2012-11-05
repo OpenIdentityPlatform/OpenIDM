@@ -58,6 +58,7 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.audit.util.ActivityLog;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -80,8 +81,6 @@ public class ActivitiResource implements JsonResource {
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         try {
             ActivitiConstants.WorkflowPath path = getPath(request);
-            String user = JsonResourceContext.getParentContext(request).get(new JsonPointer("security/user")).asString();
-            Authentication.setAuthenticatedUserId(user);
             Method method = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
             switch (path) {
                 case processdefinition:     //workflow/processdefinition
