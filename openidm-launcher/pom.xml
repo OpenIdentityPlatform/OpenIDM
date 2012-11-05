@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock</groupId>
+        <artifactId>forgerock-parent</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+    </parent>
+    <groupId>org.forgerock.commons</groupId>
+    <artifactId>forgerock-launcher</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>ForgeRock OSGi Launcher Parent</name>
+    <description>ForgeRock OSGi Container Launcher Parent</description>
+    <inceptionYear>2012</inceptionYear>
+
+    <url>http://openidm.forgerock.org</url>
+    <licenses>
+        <license>
+            <name>CDDL-1.0</name>
+            <url>http://www.opensource.org/licenses/cddl1.php</url>
+            <comments>Common Development and Distribution License (CDDL) 1.0.
+                This license applies to OpenIDM source code as indicated in the
+                source code.
+            </comments>
+            <distribution>repo</distribution>
+        </license>
+        <license>
+            <name>CC BY-NC-ND 3.0</name>
+            <url>http://creativecommons.org/licenses/by-nc-nd/3.0/</url>
+            <comments>Creative Commons Attribution-NonCommercial-NoDerivs 3.0
+                Unported. This license applies to the site content, and to the
+                documentation as indicated in the documentation source code.
+            </comments>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-launcher/trunk</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-launcher/trunk</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-launcher/trunk</url>
+    </scm>
+    <distributionManagement>
+        <site>
+            <id>forgerock.org</id>
+            <name>ForgeRock Community Server</name>
+            <url>${siteDistributionURL}</url>
+        </site>
+    </distributionManagement>
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
+
+    <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
+    <repositories>
+        <repository>
+            <id>forgerock-staging-repository</id>
+            <name>ForgeRock Release Repository</name>
+            <url>http://maven.forgerock.org/repo/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>forgerock-snapshots-repository</id>
+            <name>ForgeRock Snapshot Repository</name>
+            <url>http://maven.forgerock.org/repo/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>https://bugster.forgerock.org/jira/browse/CLAUNCHER</url>
+    </issueManagement>
+
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>http://builds.forgerock.org/job/Commons - ForgeRock Launcher/</url>
+    </ciManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
+
+        <!-- Documentation and site properties -->
+        <siteDistributionURL>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-launcher</siteDistributionURL>
+        <docTargetVersion>1.0.0</docTargetVersion>
+        <gaId>UA-23412190-9</gaId>
+        <!--
+            Release date is specified only when building the documentation
+            for publication. For example:
+                -D"releaseDate=Software release date: January 1, 1970"
+            Otherwise release date should remain empty.
+        -->
+        <releaseDate />
+        <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
+    </properties>
+
+    <modules>
+        <module>launcher</module>
+        <module>launcher-zip</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>4.3.0</version>
+            </dependency>
+            <!--dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.compendium</artifactId>
+                <version>4.3.0</version>
+            </dependency-->
+
+            <!-- Test Dependencies -->
+            <dependency>
+                <groupId>org.easytesting</groupId>
+                <artifactId>fest-assert</artifactId>
+                <version>1.4</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>6.7</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.framework</artifactId>
+                <version>4.0.2</version>
+				<scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
