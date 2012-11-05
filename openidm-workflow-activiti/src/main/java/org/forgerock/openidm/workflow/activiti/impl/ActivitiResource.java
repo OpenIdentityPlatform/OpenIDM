@@ -38,6 +38,7 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.form.*;
+import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.repository.ProcessDefinition;
@@ -48,9 +49,11 @@ import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceContext;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
@@ -77,6 +80,8 @@ public class ActivitiResource implements JsonResource {
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         try {
             ActivitiConstants.WorkflowPath path = getPath(request);
+            String user = JsonResourceContext.getParentContext(request).get(new JsonPointer("security/user")).asString();
+            Authentication.setAuthenticatedUserId(user);
             Method method = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
             switch (path) {
                 case processdefinition:     //workflow/processdefinition
@@ -744,6 +749,7 @@ public class ActivitiResource implements JsonResource {
             if (h.getType() != null) {
                 type.put(ActivitiConstants.ACTIVITI_NAME, h.getType().getName());
                 type.put(ActivitiConstants.ENUM_VALUES, h.getType().getInformation("values"));
+                type.put(ActivitiConstants.DATE_PATTERN, h.getType().getInformation("datePattern"));
             }
             entry.put(ActivitiConstants.FORMPROPERTY_TYPE, type);
             entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.isReadable());
