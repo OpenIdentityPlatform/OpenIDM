@@ -153,6 +153,46 @@
                     ]
                 }
             ]
+        },
+        {
+            "resource" : "repo/internal/user",
+            "properties" : [
+                {
+                    "name" : "password",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "at-least-X-capitals",
+                            "params" : {
+                                "numCaps" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "at-least-X-numbers",
+                            "params" : {
+                                "numNums" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 8
+                            }
+                        },
+                        {
+                            "policyId" : "cannot-contain-others",
+                            "params" : {
+                                "disallowedFields" : "userName,givenName,familyName"
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

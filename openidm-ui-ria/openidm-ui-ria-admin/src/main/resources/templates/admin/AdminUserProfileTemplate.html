@@ -62,7 +62,7 @@
                     <div class="floatRight">
                         <div class="field">
                             <label class="light"></label> 
-                            <a href="{{url 'adminUserChangePassword' userName}}" id="passwordChangeLink" class="ice hrefInput">{{t "common.user.changePassword"}}</a>
+                            <a href="{{url 'adminUserChangePassword' user.userName}}" id="passwordChangeLink" class="ice hrefInput">{{t "common.user.changePassword"}}</a>
                         </div>
                     </div>
                     <div class="field">
@@ -71,7 +71,13 @@
                         <span></span>
                         <div class="validation-message"></div>
                     </div>
-                    <div class="field"></div>
+                    <div class="field">
+	                    <label class="light">{{t "common.user.role"}}</label> 
+	                    {{select roles "roles" null null true 50}}
+	
+	                    <span class="error"></span>
+	                    <div class='validation-message'></div>
+	                </div>
                     <div class="field">
                         <label class="light">{{t "common.user.phoneNumber"}}</label>
                         <input type="text" name="phoneNumber" data-validator="phone" />
