@@ -711,7 +711,7 @@
    
    <varlistentry>
     <term>In <filename>openidm/conf/router.json</filename></term>
-    <listitem><para>onRequest, onResponse</para></listitem>
+    <listitem><para>onRequest, onResponse, onFailure</para></listitem>
    </varlistentry>
   
   </variablelist>
