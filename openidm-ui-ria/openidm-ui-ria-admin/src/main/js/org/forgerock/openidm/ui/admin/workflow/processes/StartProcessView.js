@@ -34,8 +34,9 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/openidm/ui/admin/workflow/FormManager",
-    "org/forgerock/openidm/ui/admin/workflow/processes/TemplateStartProcessForm"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm) {
+    "org/forgerock/openidm/ui/admin/workflow/processes/TemplateStartProcessForm",
+    "org/forgerock/commons/ui/common/util/FormGenerationUtils"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils) {
     var StartProcessView = AbstractView.extend({
         template: "templates/admin/workflow/processes/StartProcessTemplate.html",
 
@@ -59,11 +60,16 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                             }
                         } 
                         if(template !== false) {
-                            templateStartProcessForm.render(definition, {}, template);
+                            templateStartProcessForm.render(definition, {}, template, _.bind(function() {
+                                validatorsManager.bindValidators(this.$el);
+                                validatorsManager.validateAllFields(this.$el);
+                            }, this));
                             return;
                         } else {
-                            //TODO
-                            passJSLint = true;
+                            templateStartProcessForm.render(definition, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
+                                validatorsManager.bindValidators(this.$el);
+                                validatorsManager.validateAllFields(this.$el);
+                            }, this));
                             return;
                         }
                     }, this));                  

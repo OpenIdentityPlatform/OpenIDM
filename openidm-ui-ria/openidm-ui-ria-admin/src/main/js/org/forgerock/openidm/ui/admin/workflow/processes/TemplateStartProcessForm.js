@@ -39,9 +39,12 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/TemplateStartProcessFo
         
         element: "#startProcessForm",
         
-        postRender: function() {
+        postRender: function(callback) {
             var t = Handlebars.compile(this.args)(this.processDefinition);
             this.$el.find('#startProcessTemplateContent').html(t);
+            if (callback) {
+                callback();
+            }
         }
         
     }); 

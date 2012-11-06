@@ -47,13 +47,21 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
         formSubmit: function(event) {
             event.preventDefault();
             
-            var params = form2js(this.$el.attr("id"), '.', false);
-            delete params.startProcessButton;
-            
-            workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
-            }, this));
+            if(validatorsManager.formValidated(this.$el)) {
+                var params = form2js(this.$el.attr("id"), '.', false);
+                delete params.startProcessButton;
+                for (param in params) {
+                    if (_.isNull(params[param])) {
+                        delete params[param];
+                    }
+                }
+                
+                workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
+                }, this));
+                
+            }
         },
         
         postRender: function() {
@@ -69,14 +77,8 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
             this.args = args;
             
             this.parentRender(function() {      
-                validatorsManager.bindValidators(this.$el);                
-                
-                this.postRender();
+                this.postRender(callback);
                 this.reloadData();
-                
-                if(callback) {
-                    callback();
-                }
             });            
         },
         

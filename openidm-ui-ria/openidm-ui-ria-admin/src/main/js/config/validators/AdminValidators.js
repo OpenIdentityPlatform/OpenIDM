@@ -28,9 +28,8 @@
  * @author mbilski
  */
 define("config/validators/AdminValidators", [
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
-    "org/forgerock/commons/ui/common/util/DateUtil"
-], function(userDelegate, dateUtil) {
+    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+], function(userDelegate) {
     var obj = {
             "adminUserProfileUserName": {
                 "name": "Correct and unique username but can be same as was",
@@ -93,30 +92,52 @@ define("config/validators/AdminValidators", [
             "required_formattedDate": {
                 "name": "Not empty, formatted date",
                 "dependencies": [
+                    "org/forgerock/commons/ui/common/util/DateUtil"
                 ],
-                "validator": function(el, input, callback) {
-                    var v = $(input).val(), dateFormat = $(input).parent().find('[name=dateFormat]').val();
+                "validator": function(el, input, callback, dateUtil) {
+                    var valueToReplace, date, v = $(input).val(), dateFormat = $(input).parent().find('[name=dateFormat]').val();
                     if(v === "") {
                         callback($.t("common.form.validation.required"));
                         return;
                     }
-                    //TODO: Validation needed !!!
-                    //  if(v does not date-parse against 'dateFormat' format) {
-                    //      callback($.t("common.form.validation.wrongDateFormat"));
-                    //  }
+                    if(!dateUtil.isDateStringValid(v, dateFormat)) {
+                        callback($.t("common.form.validation.wrongDateFormat") + " (" + dateFormat + ")");
+                        return;
+                    } else {
+                        date = dateUtil.parseDateString(v, dateFormat);
+                        valueToReplace = dateUtil.formatDate(date,dateFormat);
+                        if (dateUtil.isDateStringValid(valueToReplace, dateFormat)) {
+                            $(input).val(valueToReplace);
+                        } else {
+                            callback($.t("common.form.validation.wrongDateFormat") + " (" + dateFormat + ")");
+                            return;
+                        }
+                    }
                     callback();
                 }
             },
             "formattedDate": {
                 "name": "Not empty, formatted date",
                 "dependencies": [
+                    "org/forgerock/commons/ui/common/util/DateUtil"
                 ],
-                "validator": function(el, input, callback) {
-                    var v = $(input).val(), dateFormat = $(input).parent().find('[name=dateFormat]').val();
-                    //TODO: Validation needed !!!
-                    //  if(v not empty && v does not date-parse against 'dateFormat' format) {
-                    //      callback($.t("common.form.validation.wrongDateFormat"));
-                    //  }
+                "validator": function(el, input, callback, dateUtil) {
+                    var valueToReplace, date, v = $(input).val(), dateFormat = $(input).parent().find('[name=dateFormat]').val();
+                    if(v !== ""){
+                        if (!dateUtil.isDateStringValid(v, dateFormat)) {
+                        callback($.t("common.form.validation.wrongDateFormat") + " (" + dateFormat + ")");
+                        return;
+                        } else {
+                            date = dateUtil.parseDateString(v, dateFormat);
+                            valueToReplace = dateUtil.formatDate(date,dateFormat);
+                            if (dateUtil.isDateStringValid(valueToReplace, dateFormat)) {
+                                $(input).val(valueToReplace);
+                            } else {
+                                callback($.t("common.form.validation.wrongDateFormat") + " (" + dateFormat + ")");
+                                return;
+                            }
+                        }
+                    }
                     callback();
                 }
             }
