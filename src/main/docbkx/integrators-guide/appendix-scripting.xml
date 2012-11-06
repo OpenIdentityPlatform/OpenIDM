@@ -706,7 +706,7 @@
    
    <varlistentry>
     <term>In <filename>openidm/conf/managed.json</filename></term>
-    <listitem><para>onRetreive, onValidate</para></listitem>
+    <listitem><para>onRetrieve, onValidate</para></listitem>
    </varlistentry>
    
    <varlistentry>
