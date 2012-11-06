@@ -28,8 +28,9 @@
  * @author mbilski
  */
 define("config/validators/AdminValidators", [
-    "org/forgerock/commons/ui/user/delegates/UserDelegate"                                                 
-], function(userDelegate) {
+    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function(userDelegate, dateUtil) {
     var obj = {
             "adminUserProfileUserName": {
                 "name": "Correct and unique username but can be same as was",
@@ -57,6 +58,66 @@ define("config/validators/AdminValidators", [
                             callback();
                         }
                     });              
+                }
+            },
+            "required_long": {
+                "name": "Not empty number",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    if(v === "") {
+                        callback($.t("common.form.validation.required"));
+                        return;
+                    }
+                    if(!v.match(/^([0-9]+)$/)) {
+                        callback($.t("common.form.validation.shouldBeLong"));
+                        return;
+                    }
+                    callback();
+                }
+            },
+            "long": {
+                "name": "Number",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    if(v !== "" && !v.match(/^([0-9]+)$/)) {
+                        callback($.t("common.form.validation.shouldBeLong"));
+                        return;
+                    }
+                    callback();
+                }
+            },
+            "required_formattedDate": {
+                "name": "Not empty, formatted date",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val(), dateFormat = $(input).parent().find('[name=dateFormat]').val();
+                    if(v === "") {
+                        callback($.t("common.form.validation.required"));
+                        return;
+                    }
+                    //TODO: Validation needed !!!
+                    //  if(v does not date-parse against 'dateFormat' format) {
+                    //      callback($.t("common.form.validation.wrongDateFormat"));
+                    //  }
+                    callback();
+                }
+            },
+            "formattedDate": {
+                "name": "Not empty, formatted date",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val(), dateFormat = $(input).parent().find('[name=dateFormat]').val();
+                    //TODO: Validation needed !!!
+                    //  if(v not empty && v does not date-parse against 'dateFormat' format) {
+                    //      callback($.t("common.form.validation.wrongDateFormat"));
+                    //  }
+                    callback();
                 }
             }
     };
