@@ -93,3 +93,7 @@ if (!object.password) {
 if (!object.securityAnswer) {
     object.securityAnswer = java.util.UUID.randomUUID().toString();
 }
+
+if (!object.securityQuestion) {
+    object.securityQuestion = "";
+}
