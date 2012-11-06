@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
         
         formSubmit: function(event) {
             event.preventDefault();
-            if(validatorsManager.formValidated(this.$el)) {
+            if(validatorsManager.formNotInvalid(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false), param;
                 delete params.saveButton;
                 for (param in params) {
@@ -58,7 +58,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                         delete params[param];
                     }
                 }
-                
                 workflowManager.completeTask(this.task._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});

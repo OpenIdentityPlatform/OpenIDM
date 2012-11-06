@@ -47,7 +47,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
         formSubmit: function(event) {
             event.preventDefault();
             
-            if(validatorsManager.formValidated(this.$el)) {
+            if(validatorsManager.formNotInvalid(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false);
                 delete params.startProcessButton;
                 for (param in params) {
@@ -60,7 +60,6 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
                 }, this));
-                
             }
         },
         
