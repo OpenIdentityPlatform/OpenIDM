@@ -133,6 +133,8 @@
     },
     "common" : {
          "form" : {
+            "true" : "True",
+            "false" : "False",
             "update" : "Update",
             "save" : "Save",
             "cancel" : "Cancel",
@@ -181,7 +183,8 @@
                 "incorrectPassword" : "Incorrect password",
                 "required" : "Required",
                 "emailNotValid" : "Not a valid email address.",
-                "emailExists" : "Email address already exists."
+                "emailExists" : "Email address already exists.",
+                "shouldBeLong" : "Should be long value"
             }
          },
          "user" : {
