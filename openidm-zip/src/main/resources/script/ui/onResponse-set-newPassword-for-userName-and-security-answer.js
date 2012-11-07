@@ -34,7 +34,7 @@ securityAnswer = user.securityAnswer;
 requestedUserNameMatchesReturnedUserName = (response.result[0].userName == request.params['username']);
 
 if (securityAnswer && requestedUserNameMatchesReturnedUserName) {
-    isRequestedSecurityEqualToReturned = (openidm.decrypt(user.securityAnswer) == request.params['securityAnswer']);
+    isRequestedSecurityEqualToReturned = (openidm.decrypt(user.securityAnswer) === request.params['securityAnswer']);
     if (isRequestedSecurityEqualToReturned) {
         logger.info("Setting new password for {}", request.params['username']);
         user.password = request.params['newpassword'];

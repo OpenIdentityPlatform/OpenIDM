@@ -48,7 +48,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
             event.preventDefault();
             
             if(validatorsManager.formNotInvalid(this.$el)) {
-                var params = form2js(this.$el.attr("id"), '.', false);
+                var params = form2js(this.$el.attr("id"), '.', false), param;
                 delete params.startProcessButton;
                 for (param in params) {
                     if (_.isNull(params[param])) {
