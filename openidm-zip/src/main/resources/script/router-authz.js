@@ -64,7 +64,7 @@ var accessConfig = { "configs" : [
   
       // These options should only be available anonymously if selfReg is enabled
       {  "pattern" : "config/ui/*",
-          "roles" : "openidm-reg,openidm-authorized",
+          "roles" : "openidm-reg",
           "methods": "read",
           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
           "actions" : "*"
@@ -102,6 +102,11 @@ var accessConfig = { "configs" : [
         {  "pattern" : "policy/*",
             "roles" : "openidm-authorized",
             "methods": "read,action",
+            "actions" : "*"
+        },
+        {  "pattern" : "config/ui/*",
+            "roles" : "openidm-authorized",
+            "methods": "read",
             "actions" : "*"
         },
         {   "pattern" : "*",
