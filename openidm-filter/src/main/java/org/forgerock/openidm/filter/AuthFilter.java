@@ -43,14 +43,18 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
@@ -58,6 +62,7 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.util.DateUtil;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
+import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -69,14 +74,18 @@ import org.slf4j.LoggerFactory;
  * Auth Filter
  * @author Jamie Nelson
  * @author aegloff
+ * @author ckienle
  */
 
 @Component(
     name = "org.forgerock.openidm.authentication", immediate = true,
     policy = ConfigurationPolicy.REQUIRE
 )
-
-public class AuthFilter implements Filter {
+@Service(value = {AuthFilterService.class})
+@Properties({
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Filter Service")})
+public class AuthFilter implements Filter, AuthFilterService {
 
 
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthFilter.class);
@@ -263,6 +272,23 @@ public class AuthFilter implements Filter {
         }
     }
 
+    public AuthData reauthenticate(Map<String, Object> request) throws AuthException {
+        
+        JsonValue req = new JsonValue(request);
+        String reauthPassword = req.get("headers").get("X-OpenIDM-Reauth-Password").asString();
+        AuthData ad = new AuthData();
+        ad.username = req.get("security").get("username").asString();
+        if (ad.username == null || reauthPassword == null || ad.username.equals("") || reauthPassword.equals("")) {
+            LOGGER.debug("Failed authentication, missing or empty headers");
+            throw new AuthException();
+        }
+        ad = AuthModule.authenticate(ad, reauthPassword);
+        if (ad.status == false) {
+            throw new AuthException(ad.username);
+        }
+        return ad;
+    }
+    
     private AuthData authenticateUser(HttpServletRequest req) throws AuthException {
 
         LOGGER.debug("No session, authenticating user");
@@ -273,7 +299,6 @@ public class AuthFilter implements Filter {
             LOGGER.debug("Failed authentication, missing or empty headers");
             throw new AuthException();
         }
-        StringBuilder resource = new StringBuilder();
         ad = AuthModule.authenticate(ad, password);
         if (ad.status == false) {
             throw new AuthException(ad.username);

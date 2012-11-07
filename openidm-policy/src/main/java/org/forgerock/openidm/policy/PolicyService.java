@@ -24,9 +24,7 @@
 
 package org.forgerock.openidm.policy;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +44,7 @@ import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.filter.AuthFilterService;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetContext;
@@ -83,6 +82,9 @@ public class PolicyService implements JsonResource {
     @Reference(referenceInterface = ScopeFactory.class)
     private ScopeFactory scopeFactory;
 
+    @Reference
+    private AuthFilterService authFilterService;
+    
     /** Internal object set router service. */
     @Reference(
         name = "ref_PolicyService_JsonResourceRouterService",
@@ -132,21 +134,6 @@ public class PolicyService implements JsonResource {
 
         logger.info("OpenIDM Policy Service component is activated.");
     }
-    
-    private static String readFileAsString(String filePath) throws java.io.IOException{
-        StringBuffer fileData = new StringBuffer(1000);
-        BufferedReader reader = new BufferedReader(
-                new FileReader(filePath));
-        char[] buf = new char[1024];
-        int numRead=0;
-        while((numRead=reader.read(buf)) != -1){
-            String readData = String.valueOf(buf, 0, numRead);
-            fileData.append(readData);
-            buf = new char[1024];
-        }
-        reader.close();
-        return fileData.toString();
-    }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
@@ -190,6 +177,7 @@ public class PolicyService implements JsonResource {
         try {
             scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));
             scope.put("request", request.getObject());
+            scope.put("authFilter", authFilterService);
             
             return new JsonValue(script.exec(scope));
         } catch (ScriptThrownException ste) {

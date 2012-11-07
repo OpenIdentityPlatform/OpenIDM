@@ -874,6 +874,13 @@
          }'
  "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=joe"
    </screen>
+   
+   <note>
+    <para>The filtering of private data applies only to direct HTTP read 
+    and query calls on managed objects. No automatic filtering is done for 
+    internal callers, and the data that these callers choose to expose.</para>
+   </note>
+   
   </section>
 
   <section xml:id="constructing-attributes">

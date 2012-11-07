@@ -58,7 +58,7 @@ public class JettyPropertyUtil {
     public static String getPathProperty(String propName) {
         String loc = getProperty(propName);
         if (loc != null) {
-            loc = IdentityServer.getFileForPath(loc).getAbsolutePath();
+            loc = IdentityServer.getFileForInstallPath(loc).getAbsolutePath();
         }
         return loc;
     }

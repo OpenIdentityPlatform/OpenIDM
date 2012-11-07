@@ -37,6 +37,7 @@ import static com.jayway.restassured.RestAssured.*;
  *
  * @author Laszlo Hordos
  */
+@Test(groups = { "sample0" })
 public class SampleZeroITCase {
 
     @Test(dependsOnGroups = "readUser", groups="sampleZero")

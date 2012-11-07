@@ -70,7 +70,8 @@ class UserWrapper extends HttpServletRequestWrapper {
     private static boolean suppress(String header) {
         // optimiziation: avoid lowercasing every header string
         return (header.length() >= 10 && header.charAt(1) == '-' &&
-         header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-"));
+                header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-") && 
+                !header.equals("X-OpenIDM-Reauth-Password"));
     }
 
     private static Enumeration<String> emptyEnumeration() {

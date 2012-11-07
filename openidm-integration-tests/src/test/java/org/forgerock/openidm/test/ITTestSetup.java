@@ -24,14 +24,18 @@
 
 package org.forgerock.openidm.test;
 
-import java.io.File;
+import static org.testng.Assert.assertNotNull;
+
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import org.forgerock.commons.launcher.Daemon;
-import org.forgerock.commons.launcher.OSGiDaemonBean;
+import org.forgerock.commons.launcher.OSGiFramework;
+import org.forgerock.commons.launcher.OSGiFrameworkService;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.testng.IObjectFactory;
@@ -39,14 +43,18 @@ import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.ObjectFactory;
+import org.testng.annotations.Test;
 import org.testng.internal.ObjectFactoryImpl;
 
 /**
- * A ITTestSetup does ...
- *
+ * A ITTestSetup start the OpenIDM.
+ * 
  * @author Laszlo Hordos
  */
+@Test(groups = { "common" })
 public class ITTestSetup {
+
+    private final Semaphore available = new Semaphore(1, true);
 
     @ObjectFactory
     public IObjectFactory createFactory(ITestContext context) throws Exception {
@@ -57,21 +65,35 @@ public class ITTestSetup {
     @BeforeSuite
     public void startOpenIDM(ITestContext context) throws Exception {
 
-        OSGiDaemonBean service = (OSGiDaemonBean) context.getAttribute(Daemon.class.getName());
+        OSGiFrameworkService service =
+                (OSGiFrameworkService) context.getAttribute(OSGiFramework.class.getName());
         if (null == service) {
-            service = new OSGiDaemonBean();
+            String test =  System.getProperty("testName");
+            String test1 =   context.getCurrentXmlTest().getParameter("testName");
 
-            String testName = context.getCurrentXmlTest().getParameter("testName");
-            if (null == testName) {
-                testName = System.getProperty("testName", "scenario1");
-            }
+            Properties p = System.getProperties();
 
-            String rootDir = URLDecoder.decode(new File(ITTestSetup.class.getResource("/" + testName).toURI())
-                    .toString(), "utf-8");
-            String configFile = "bin/launcher.json";
-            String storageDir = "../../osgi/" + testName + "/cache";
+            Set<String> para = context.getAttributeNames();
 
-            final Semaphore available = new Semaphore(1, true);
+            Map<String,String> pp = context.getCurrentXmlTest().getParameters();
+
+            String installLocation =System.getProperty(
+                            OSGiFramework.LAUNCHER_INSTALL_LOCATION);
+            assertNotNull(installLocation, "The " + OSGiFramework.LAUNCHER_INSTALL_LOCATION
+                    + " System Property  is not set!");
+            String projectLocation =System.getProperty(
+                            OSGiFramework.LAUNCHER_PROJECT_LOCATION);
+            assertNotNull(projectLocation, "The " + OSGiFramework.LAUNCHER_PROJECT_LOCATION
+                    + " System Property is not set!");
+            String workingLocation = System.getProperty(
+                            OSGiFramework.LAUNCHER_WORKING_LOCATION);
+            assertNotNull(workingLocation, "The " + OSGiFramework.LAUNCHER_WORKING_LOCATION
+                    + " System Property is not set!");
+
+            URL configFile = ITTestSetup.class.getResource("/bin/launcher.json");
+            assertNotNull(configFile, "The /bin/launcher.json is missing!");
+            service = new OSGiFrameworkService();
+
             available.drainPermits();
             service.setFrameworkListener(new FrameworkListener() {
                 public void frameworkEvent(FrameworkEvent event) {
@@ -81,14 +103,15 @@ public class ITTestSetup {
                 }
             });
 
-            service.setRootDir(rootDir);
-            service.setConfigFile(configFile);
-            service.setStorageDir(storageDir);
-
+            service.setConfigFile(URLDecoder.decode(configFile.getFile(), "utf-8"));
+            service.setInstallDir(installLocation);
+            service.setProjectDir(projectLocation);
+            service.setWorkingDir(workingLocation);
+            service.setVerbose(true);
 
             Map bootParameters = null;
             for (String attributeName : context.getAttributeNames()) {
-                if (Daemon.class.getName().equals(attributeName)) {
+                if (OSGiFramework.class.getName().equals(attributeName)) {
                     continue;
                 }
                 if (bootParameters == null) {
@@ -97,23 +120,22 @@ public class ITTestSetup {
                 bootParameters.put(attributeName, context.getAttribute(attributeName));
             }
             service.setBootParameters(bootParameters);
-            service.setDaemon(true);
+            service.setNewThread(true);
             service.init();
             service.start();
             available.acquire();
             System.out.println("Framework Started - OK");
-            context.setAttribute(Daemon.class.getName(), service);
+            context.setAttribute(OSGiFramework.class.getName(), service);
         }
     }
 
     @AfterSuite
     public void stopOpenIDM(ITestContext context) throws Exception {
-        Object service = context.getAttribute(Daemon.class.getName());
-        if (service instanceof Daemon) {
-            ((Daemon) service).stop();
-            ((Daemon) service).destroy();
+        Object service = context.getAttribute(OSGiFramework.class.getName());
+        if (service instanceof OSGiFramework) {
+            ((OSGiFramework) service).stop();
+            ((OSGiFramework) service).destroy();
         }
     }
-
 
 }

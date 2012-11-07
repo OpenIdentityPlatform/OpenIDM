@@ -24,7 +24,7 @@
                 {
                     "transform" : {
                         "type" : "text/javascript",
-                        "file" : "script/nosource.js"
+                        "file" : "script/noSource.js"
                     },
                     "target" : "sourceTest1Nosource"
                 },

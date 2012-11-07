@@ -87,7 +87,7 @@ public class SystemAction {
             this.actionType = systemTypeAction.get("actionType").required().asString();
             if (systemTypeAction.isDefined("actionFile")) {
                 File scriptFile = IdentityServer
-                        .getFileForPath(systemTypeAction.get("actionFile").required().asString());
+                        .getFileForProjectPath(systemTypeAction.get("actionFile").required().asString());
                 try {
                     actionSource = FileUtil.readFile(scriptFile);
                 } catch (IOException e) {

@@ -41,6 +41,7 @@ import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
@@ -129,12 +130,17 @@ public class TaskScannerJob {
             throw new ExecutionException("Error during query", e1);
         }
         context.endQuery();
-        context.setNumberOfTasksToProcess(Math.min(results.size(), context.getMaxRecords()));
+        Integer maxRecords = context.getMaxRecords();
+        if (maxRecords == null) {
+            context.setNumberOfTasksToProcess(results.size());
+        } else {
+            context.setNumberOfTasksToProcess(Math.min(results.size(), maxRecords));
+        }
         logger.debug("TaskScan {} query results: {}", context.getInvokerName(), results.size());
         // TODO jump out early if it's empty?
 
         // Split and prune the result set according to our max and if we're synchronous or not
-        List<JsonValue> resultSets = splitResultsOverThreads(results, numberOfThreads, context.getMaxRecords());
+        List<JsonValue> resultSets = splitResultsOverThreads(results, numberOfThreads, maxRecords);
         logger.debug("Split result set into {} units", resultSets.size());
 
         final JsonValue threadContext = ObjectSetContext.get();
@@ -254,7 +260,7 @@ public class TaskScannerJob {
     private JsonValue performQuery(String resourceID, JsonValue params) throws JsonResourceException {
         JsonValue queryResults = null;
         queryResults = accessor().query(resourceID, params);
-        return queryResults.get("result");
+        return queryResults.get(QueryConstants.QUERY_RESULT);
     }
 
     /**

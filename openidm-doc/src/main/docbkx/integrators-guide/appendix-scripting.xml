@@ -706,12 +706,12 @@
    
    <varlistentry>
     <term>In <filename>openidm/conf/managed.json</filename></term>
-    <listitem><para>onRetreive, onValidate</para></listitem>
+    <listitem><para>onRetrieve, onValidate</para></listitem>
    </varlistentry>
    
    <varlistentry>
     <term>In <filename>openidm/conf/router.json</filename></term>
-    <listitem><para>onRequest, onResponse</para></listitem>
+    <listitem><para>onRequest, onResponse, onFailure</para></listitem>
    </varlistentry>
   
   </variablelist>

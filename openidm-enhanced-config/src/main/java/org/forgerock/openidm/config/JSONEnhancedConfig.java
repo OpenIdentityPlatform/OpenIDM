@@ -202,16 +202,15 @@ public class JSONEnhancedConfig implements EnhancedConfig {
             // placeholder.
             // Try to configuration properties first.
             substValue =
-                    (identityServer != null) ? (T) identityServer.getProperty(variable, null)
+                    (identityServer != null) ? (T) identityServer.getProperty(variable, null, String.class)
                             : null;
             if (substValue == null) {
                 // Ignore unknown property values.
                 substValue = (T) System.getProperty(variable);
             }
         } else {
-            // TODO Support this in the future releases
             substValue =
-                    (identityServer != null) ? (T) identityServer.getProperty(variable, null)
+                    (identityServer != null) ? identityServer.getProperty(variable, null, type)
                             : null;
             if (substValue == null) {
                 // Ignore unknown property values.
