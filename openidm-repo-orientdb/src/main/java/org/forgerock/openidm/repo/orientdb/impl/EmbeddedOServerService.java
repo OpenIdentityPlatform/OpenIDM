@@ -184,7 +184,7 @@ public class EmbeddedOServerService {
         storage1.userName = "admin";
         storage1.userPassword = "admin";
         storage1.loadOnStartup = false;
-        File dbFolder = IdentityServer.getFileForPath("db/openidm");
+        File dbFolder = IdentityServer.getFileForWorkingPath("db/openidm");
         String dbURL = config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + dbFolder.getAbsolutePath()).asString();
         String user = config.get(OrientDBRepoService.CONFIG_USER).defaultTo("admin").asString();
         String pwd = config.get(OrientDBRepoService.CONFIG_PASSWORD).defaultTo("admin").asString();

@@ -287,7 +287,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         try {
             String connectorsDir = URLDecoder.decode(connectorsArea, "UTF-8");
             logger.debug("Using connectors from [{}]", connectorsDir);
-            File dir = IdentityServer.getFileForPath(connectorsDir);
+            File dir = IdentityServer.getFileForInstallPath(connectorsDir);
             //This is a fix to support absolute path on OSX
             if (!dir.exists()) {
                 String absolutePath = dir.getAbsolutePath();
@@ -628,7 +628,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     private ClassLoader getBundleParentClassLoader() {
         if (null == bundleParentClassLoader) {
             List<File> urlList = null;
-            File classes = IdentityServer.getFileForPath("classes/");
+            File classes = IdentityServer.getFileForInstallPath("classes/");
             if (classes.isDirectory()) {
                 urlList = new ArrayList<File>();
                 urlList.add(classes);
@@ -636,7 +636,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 logger.trace("BundleParentClassLoader does not use classes from {}", classes.getAbsolutePath());
             }
 
-            File lib = IdentityServer.getFileForPath("lib");
+            File lib = IdentityServer.getFileForInstallPath("lib");
             if (lib.isDirectory()) {
                 File[] files = lib.listFiles(new FileFilter() {
                     public boolean accept(File f) {

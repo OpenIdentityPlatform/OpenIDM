@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.forgerock.openidm.util.DateUtil;
 
@@ -52,16 +54,16 @@ public class ReconciliationStatistic {
     private long linkQueryStartTime;
     private long linkQueryEndTime;
     
-    private volatile int sourceProcessed;
-    private volatile int linkProcessed;
-    private volatile int linkCreated;
-    private volatile int targetProcessed;
-    private volatile int targetCreated;
+    private AtomicInteger sourceProcessed = new AtomicInteger();
+    private AtomicInteger linkProcessed = new AtomicInteger();
+    private AtomicInteger linkCreated = new AtomicInteger();
+    private AtomicInteger targetProcessed = new AtomicInteger();
+    private AtomicInteger targetCreated = new AtomicInteger();
     
     private PhaseStatistic sourceStat;
     private PhaseStatistic targetStat;
     
-    private Map<ReconStage, Map> stageStat = new HashMap<ReconStage, Map>();
+    private Map<ReconStage, Map> stageStat = new ConcurrentHashMap<ReconStage, Map>();
     
     public ReconciliationStatistic(ReconciliationContext reconContext) {
         this.reconContext = reconContext;
@@ -86,7 +88,7 @@ public class ReconciliationStatistic {
     }
     
     public void startStage(ReconStage stage) {
-        Map stageEntry = new HashMap();
+        Map stageEntry = new ConcurrentHashMap();
         stageEntry.put("startTime", Long.valueOf(System.currentTimeMillis()));
         stageStat.put(stage, stageEntry);
     }
@@ -125,21 +127,21 @@ public class ReconciliationStatistic {
     
     public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, Situation situation, Action action) {
         if (sourceId != null) {
-            ++sourceProcessed;
+            sourceProcessed.incrementAndGet();
         }
         
         if (targetId != null) {
             if (Action.CREATE.equals(action)) {
-                ++targetCreated;
+                targetCreated.incrementAndGet();
             } else {
-                ++targetProcessed;
+                targetProcessed.incrementAndGet();
             }
         }
         if (linkId != null) {
             if (linkExisted) {
-                ++linkProcessed;
+                linkProcessed.incrementAndGet();
             } else {
-                ++linkCreated;
+                linkCreated.incrementAndGet();
             }
         }
     }
@@ -148,35 +150,35 @@ public class ReconciliationStatistic {
      * @return The number of existing source objects processed
      */
     public int getSourceProcessed() {
-        return sourceProcessed;
+        return sourceProcessed.get();
     }
     
     /**
      * @return The number of existing target objects processed
      */
     public int getTargetProcessed() {
-        return targetProcessed;
+        return targetProcessed.get();
     }
     
     /**
      * @return The number of new target objects created/processed
      */
     public int getTargetCreated() {
-        return targetCreated;
+        return targetCreated.get();
     }
     
     /**
      * @return The number of existing links processed
      */
     public int getLinkProcessed() {
-        return linkProcessed;
+        return linkProcessed.get();
     }
     
     /**
      * @return The number of new links created/processed
      */
     public int getLinkCreated() {
-        return linkCreated;
+        return linkCreated.get();
     }
     
     /**
@@ -216,7 +218,7 @@ public class ReconciliationStatistic {
     }
     
     public String simpleSummary() {
-        Map<String, Integer> simpleSummary = new HashMap<String, Integer>();
+        Map<String, Integer> simpleSummary = new ConcurrentHashMap<String, Integer>();
         getSourceStat().updateSummary(simpleSummary);
         getTargetStat().updateSummary(simpleSummary);
         

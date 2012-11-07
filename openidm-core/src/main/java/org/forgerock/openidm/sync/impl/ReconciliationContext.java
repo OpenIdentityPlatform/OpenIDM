@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import org.forgerock.json.fluent.JsonValue;
 
@@ -166,6 +168,14 @@ public class ReconciliationContext {
         progress.put("progress", progressDetail);
 
         return progress;
+    }
+    
+    /**
+     * @return the executor for this recon, or null if no executor should be used
+     */
+    Executor getExcecutor() {
+        int noOfThreads = mapping.getTaskThreads();
+        return Executors.newFixedThreadPool(noOfThreads);
     }
 
     /**

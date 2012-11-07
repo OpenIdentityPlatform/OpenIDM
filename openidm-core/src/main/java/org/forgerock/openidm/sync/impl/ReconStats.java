@@ -25,6 +25,7 @@ package org.forgerock.openidm.sync.impl;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -54,16 +55,16 @@ public class ReconStats {
     public ReconStats(String reconId, String reconName) {
         this.reconId = reconId;
         this.reconName = reconName;
-        ids.put(Situation.CONFIRMED, new ArrayList<String>());
-        ids.put(Situation.FOUND, new ArrayList<String>());
-        ids.put(Situation.ABSENT, new ArrayList<String>());
-        ids.put(Situation.AMBIGUOUS, new ArrayList<String>());
-        ids.put(Situation.MISSING, new ArrayList<String>());
-        ids.put(Situation.UNQUALIFIED, new ArrayList<String>());
-        ids.put(Situation.UNASSIGNED, new ArrayList<String>());
-        ids.put(Situation.SOURCE_MISSING, new ArrayList<String>());
-        ids.put(Situation.SOURCE_IGNORED, new ArrayList<String>());
-        ids.put(Situation.TARGET_IGNORED, new ArrayList<String>());
+        ids.put(Situation.CONFIRMED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.FOUND, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.ABSENT, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.AMBIGUOUS, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.MISSING, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.UNQUALIFIED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.UNASSIGNED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.SOURCE_MISSING, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.SOURCE_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
+        ids.put(Situation.TARGET_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
         notValid = new ArrayList<String>();
     }
 

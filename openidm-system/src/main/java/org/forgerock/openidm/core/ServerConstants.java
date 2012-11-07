@@ -36,7 +36,8 @@ package org.forgerock.openidm.core;
 public class ServerConstants {
 
     static {
-        System.out.append("OpenIDM version \"").append(getVersion()).append("\" (revision: ").append(getRevision()).println(")");
+        System.out.append("OpenIDM version \"").append(getVersion()).append("\" (revision: ")
+                .append(getRevision()).println(")");
     }
 
     public static String getVersion() {
@@ -62,64 +63,51 @@ public class ServerConstants {
      */
     public static final String EOL = System.getProperty("line.separator");
 
-
     /**
      * The date format string that will be used to construct and parse dates
      * represented in a form like UTC time, but using the local time zone.
      */
-    public static final String DATE_FORMAT_COMPACT_LOCAL_TIME =
-            "yyyyMMddHHmmss";
-
+    public static final String DATE_FORMAT_COMPACT_LOCAL_TIME = "yyyyMMddHHmmss";
 
     /**
      * The date format string that will be used to construct and parse dates
-     * represented using generalized time.  It is assumed that the provided date
+     * represented using generalized time. It is assumed that the provided date
      * formatter will be set to UTC.
      */
-    public static final String DATE_FORMAT_GENERALIZED_TIME =
-            "yyyyMMddHHmmss.SSS'Z'";
-
+    public static final String DATE_FORMAT_GENERALIZED_TIME = "yyyyMMddHHmmss.SSS'Z'";
 
     /**
      * The date format string that will be used to construct and parse dates
-     * represented using generalized time.  It is assumed that the provided date
+     * represented using generalized time. It is assumed that the provided date
      * formatter will be set to UTC.
      */
-    public static final String DATE_FORMAT_LOCAL_TIME =
-            "dd/MMM/yyyy:HH:mm:ss Z";
-
+    public static final String DATE_FORMAT_LOCAL_TIME = "dd/MMM/yyyy:HH:mm:ss Z";
 
     /**
      * The date format string that will be used to construct and parse dates
      * represented using iso8601 time.
      */
-    public static final String DATE_FORMAT_ISO8601_TIME =
-            "yyyy-MM-dd'T'HH:mm:ssZ";
+    public static final String DATE_FORMAT_ISO8601_TIME = "yyyy-MM-dd'T'HH:mm:ssZ";
 
     /**
      * The date format string that will be used to construct and parse dates
      * represented using iso8601 time.
      */
-    public static final String DATE_FORMAT_ISO8601_TIME_MILLISECOND =
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String DATE_FORMAT_ISO8601_TIME_MILLISECOND = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     /**
      * The date format string that will be used to construct and parse dates
-     * represented using generalized time with a four-digit year.  It is assumed
+     * represented using generalized time with a four-digit year. It is assumed
      * that the provided date formatter will be set to UTC.
      */
-    public static final String DATE_FORMAT_GMT_TIME =
-            "yyyyMMddHHmmss'Z'";
-
+    public static final String DATE_FORMAT_GMT_TIME = "yyyyMMddHHmmss'Z'";
 
     /**
      * The date format string that will be used to construct and parse dates
-     * represented using generalized time with a two-digit year.  It is assumed
+     * represented using generalized time with a two-digit year. It is assumed
      * that the provided date formatter will be set to UTC.
      */
-    public static final String DATE_FORMAT_UTC_TIME =
-            "yyMMddHHmmss'Z'";
-
+    public static final String DATE_FORMAT_UTC_TIME = "yyMMddHHmmss'Z'";
 
     /**
      * The name of the time zone for universal coordinated time (UTC).
@@ -136,25 +124,26 @@ public class ServerConstants {
      */
     public static final String SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER = "AES/CBC/PKCS5Padding";
 
-
     /**
-     * The default location relative to the openidm root of the boot properties file.
-     * Override by setting system property {@code CONFIG_BOOT_FILE_LOCATION}
+     * The default location relative to the openidm root of the boot properties
+     * file. Override by setting system property
+     * {@code CONFIG_BOOT_FILE_LOCATION}
      */
     public static final String DEFAULT_BOOT_FILE_LOCATION = "conf/boot/boot.properties";
 
     /**
-     * The default location relative to the openidm root of the boot properties file.
-     * Override by setting system property {@code CONFIG_BOOT_FILE_LOCATION}
+     * The default location relative to the openidm root of the boot properties
+     * file. Override by setting system property
+     * {@code CONFIG_BOOT_FILE_LOCATION}
      */
-    public static final String DEFAULT_GLOBAL_BOOT_FILE_LOCATION = "conf/boot/global.boot.properties";
+    public static final String DEFAULT_GLOBAL_BOOT_FILE_LOCATION =
+            "conf/boot/global.boot.properties";
 
     /**
-     * The name of the system property that can be used to specify the path to the
-     * server root.
+     * The name of the system property that can be used to specify the path to
+     * the server root.
      */
-    public static final String PROPERTY_SERVER_ROOT =
-            "openidm.system.server.root";
+    public static final String PROPERTY_SERVER_ROOT = "openidm.system.server.root";
 
     /**
      * The name of the system property that can be used to specify the location
@@ -162,23 +151,21 @@ public class ServerConstants {
      */
     public static final String PROPERTY_BOOT_FILE_LOCATION = "openidm.boot.file";
 
-
     /**
-     * The name of the system property that can be used to specify the environment where
-     * the server is deployed to.
+     * The name of the system property that can be used to specify the
+     * environment where the server is deployed to.
      */
-    public static final String PROPERTY_SERVER_ENVIRONMENT =
-            "openidm.system.server.environment";
+    public static final String PROPERTY_SERVER_ENVIRONMENT = "openidm.system.server.environment";
 
     /**
-     * The name of the system property that can be used to enable
-     * for the debug on startup.
+     * The name of the system property that can be used to enable for the debug
+     * on startup.
      */
-    public static final String PROPERTY_DEBUG_ENABLE =
-            "openidm.system.debug.enable";
+    public static final String PROPERTY_DEBUG_ENABLE = "openidm.system.debug.enable";
 
     /**
-     * The column at which to wrap long lines of output in the command-line tools.
+     * The column at which to wrap long lines of output in the command-line
+     * tools.
      */
     public static final int MAX_LINE_WIDTH;
 
@@ -194,7 +181,6 @@ public class ServerConstants {
         }
         MAX_LINE_WIDTH = columns - 1;
     }
-
 
     public static final String ROUTER_PREFIX = "openidm.router.prefix";
 
@@ -234,5 +220,10 @@ public class ServerConstants {
      */
     public static final String ACTION_ENTITY = "_entity";
 
-
+    public static final String LAUNCHER_INSTALL_LOCATION = "launcher.install.location";
+    public static final String LAUNCHER_INSTALL_URL = "launcher.install.url";
+    public static final String LAUNCHER_WORKING_LOCATION = "launcher.working.location";
+    public static final String LAUNCHER_WORKING_URL = "launcher.working.url";
+    public static final String LAUNCHER_PROJECT_LOCATION = "launcher.project.location";
+    public static final String LAUNCHER_PROJECT_URL = "launcher.project.url";
 }

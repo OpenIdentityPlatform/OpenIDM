@@ -28,40 +28,40 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  * 
  * @author aegloff
  */
-public class ServiceTrackerNotifier extends ServiceTracker {
+public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
     
     ServiceTrackerListener listener;
     
-    public ServiceTrackerNotifier(BundleContext context, Filter filter, ServiceTrackerCustomizer customizer, ServiceTrackerListener listener) {
+    public ServiceTrackerNotifier(BundleContext context, Filter filter, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
         super(context, filter, customizer);
         this.listener = listener;
     }
     
-    public ServiceTrackerNotifier(BundleContext context, ServiceReference reference, ServiceTrackerCustomizer customizer, ServiceTrackerListener listener) {
+    public ServiceTrackerNotifier(BundleContext context, ServiceReference<S> reference, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
         super(context, reference, customizer);
         this.listener = listener;
     }
 
-    public ServiceTrackerNotifier(BundleContext context, java.lang.String clazz, ServiceTrackerCustomizer customizer, ServiceTrackerListener listener) {
+    public ServiceTrackerNotifier(BundleContext context, java.lang.String clazz, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
         super(context, clazz, customizer);
         this.listener = listener;
     }
     
-    public Object addingService(ServiceReference reference) {
-        Object service =  super.addingService(reference);
+    public T addingService(ServiceReference<S> reference) {
+        T service =  super.addingService(reference);
         if (listener != null) {
             listener.addedService(reference, service);
         }
         return service;
     }
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<S> reference, T service) {
         if (listener != null) {
             listener.removedService(reference, service);
         }
         super.removedService(reference, service);
     }
     
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(ServiceReference<S> reference, T service) {
         if (listener != null) {
             listener.modifiedService(reference, service);
         }

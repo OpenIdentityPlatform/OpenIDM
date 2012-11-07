@@ -164,7 +164,7 @@ public class ConfigBootstrapHelper {
             }
         };
 
-        return IdentityServer.getFileForPath(confDir).list(repoConfFilter);
+        return IdentityServer.getFileForProjectPath(confDir).list(repoConfFilter);
     }
     
     /**
@@ -175,7 +175,7 @@ public class ConfigBootstrapHelper {
     public static String getConfigFileInstallDir() {
         // Default the configuration directory if not declared
         String dir = System.getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
-        dir =  IdentityServer.getFileForPath(dir).getAbsolutePath();
+        dir =  IdentityServer.getFileForProjectPath(dir).getAbsolutePath();
         logger.debug("Configuration file directory {}", dir);
         return dir;
     }

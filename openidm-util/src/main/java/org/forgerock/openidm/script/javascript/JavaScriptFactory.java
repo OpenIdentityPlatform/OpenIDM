@@ -74,9 +74,10 @@ public class JavaScriptFactory implements ScriptFactory {
     private synchronized void initDebugListener() throws ScriptException {
         if (null == debugInitialised) {
             // Get here only once when the first factory initialised.
-            String configString = IdentityServer.getInstance().getProperty(CONFIG_DEBUG_PROPERTY);
+            String configString = IdentityServer.getInstance().getProperty(CONFIG_DEBUG_PROPERTY, null, String.class);
             if (null != configString) {
-                String externalSources = IdentityServer.getInstance().getProperty(CONFIG_SOURCE_PROPERTY);
+                String externalSources = IdentityServer.getInstance().getProperty(CONFIG_SOURCE_PROPERTY, null,
+                        String.class);
                 if (null != externalSources && externalSources.endsWith(EXTERNAL_JS_SOURCE) && new File(externalSources).isDirectory()) {
                     try {
                         if (null == debugListener) {
@@ -133,7 +134,11 @@ public class JavaScriptFactory implements ScriptFactory {
                 }
             } else if (config.isDefined("file")) { // TEMPORARY
                 try {
-                    return initializeScript(name, IdentityServer.getFileForPath(config.get("file").asString()), sharedScope);
+                    File source =  IdentityServer.getFileForProjectPath(config.get("file").asString());
+                    if (!source.isFile()) {
+                        source =  IdentityServer.getFileForInstallPath(config.get("file").asString());
+                    }
+                    return initializeScript(name, source, sharedScope);
                 } catch (ScriptException se) { // re-cast to show exact value of failure 
                     throw new JsonValueException(config.get("file"), se);
                 }

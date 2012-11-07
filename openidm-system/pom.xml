@@ -30,8 +30,32 @@
         <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-system</artifactId>
-    <name>OpenIDM System Fragment</name>
+    <name>OpenIDM Boot Module</name>
     <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <resources>
@@ -92,9 +116,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>!*</Import-Package>
-                        <Fragment-Host>system.bundle;extension:=framework</Fragment-Host>
-                        <IFragment-Host>system.bundle;extension:=framework</IFragment-Host>
+                        <Bundle-Activator>org.forgerock.openidm.core.internal.Activator</Bundle-Activator>
+                        <Private-Package>org.forgerock.openidm.core.internal</Private-Package>
                         <Export-Package>
                             org.forgerock.openidm.core;version=${openidm.version}
                         </Export-Package>

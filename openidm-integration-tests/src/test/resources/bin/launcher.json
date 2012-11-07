@@ -2,46 +2,46 @@
     "bundle":{
         "containers":[
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
                 "includes":[
-                    "**/openidm-security-jetty*.jar",
-                    "**/openidm-jaas-loginmodule-repo*.jar",
-                    "**/openidm-jetty-fragment*.jar",
-                    "**/openidm-quartz-fragment*.jar"
-                ],
-                "start-level":1,
-                "action":"install"
-            },
-            {
-                "location":"../../openidm/bundle",
-                "includes":[
-                    "**/openidm-config*.jar",
-                    "**/openidm-crypto*.jar"
+                    "**/openidm-system-*.jar"
                 ],
                 "start-level":1,
                 "action":"install.start"
             },
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
                 "includes":[
-                    "**/openidm-repo-jdbc*.jar",
-                    "**/openidm-repo-orientdb*.jar",
-                    "**/org.apache.felix.scr-*.jar"
+                    "**/openidm-security-jetty*.jar",
+                    "**/openidm-jetty-fragment*.jar",
+                    "**/openidm-quartz-fragment*.jar",
+                    "**/openidm-config*.jar",
+                    "**/openidm-crypto*.jar"
                 ],
                 "start-level":2,
                 "action":"install.start"
             },
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
                 "includes":[
-                    "**/org.apache.felix.configadmin*.jar",
-                    "**/org.apache.felix.fileinstall*.jar"
+                    "**/openidm-repo-jdbc*.jar",
+                    "**/openidm-repo-orientdb*.jar",
+                    "**/org.apache.felix.scr-*.jar"
                 ],
                 "start-level":3,
                 "action":"install.start"
             },
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
+                "includes":[
+                    "**/org.apache.felix.configadmin*.jar",
+                    "**/org.apache.felix.fileinstall*.jar"
+                ],
+                "start-level":4,
+                "action":"install.start"
+            },
+            {
+                "location":"bundle",
                 "includes":[
                     "**/openidm-httpcontext-*.jar"
                 ],
@@ -49,18 +49,32 @@
                 "action":"install.start"
             },
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
                 "includes":["*.jar"],
                 "excludes":[
                     "**/org.forgerock.json.resource-*.jar",
                     "**/json-fluent-*.jar",
                     "**/org.forgerock.util-*.jar",
+                    "**/openidm-system-*.jar",
+                    "**/openidm-security-jetty*.jar",
+                    "**/openidm-jaas-loginmodule-repo*.jar",
+                    "**/openidm-jetty-fragment*.jar",
+                    "**/openidm-quartz-fragment*.jar",
+                    "**/openidm-config*.jar",
+                    "**/openidm-crypto*.jar",
+                    "**/openidm-repo-jdbc*.jar",
+                    "**/openidm-repo-orientdb*.jar",
                     "**/org.apache.felix.scr-*.jar",
-                    "**/openidm-httpcontext-*.jar"
+                    "**/org.apache.felix.configadmin*.jar",
+                    "**/org.apache.felix.fileinstall*.jar",
+                    "**/openidm-httpcontext-*.jar",
+                    "**/pax-web-jetty-bundle*.jar",
+                    "**/pax-web-extender-whiteboard*.jar",
+                    "**/openidm-scheduler*.jar"
                 ]
             },
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
                 "includes":[
                     "**/pax-web-jetty-bundle*.jar"
                 ],
@@ -68,7 +82,7 @@
                 "action":"install.start"
             },
             {
-                "location":"../../openidm/bundle",
+                "location":"bundle",
                 "includes":[
                     "**/pax-web-extender-whiteboard*.jar",
                     "**/openidm-scheduler*.jar"
@@ -82,6 +96,9 @@
             "action":"install.start"
         }
     },
-    "config.properties":"&{root}/conf/config.properties",
-    "system.properties":"&{root}/conf/system.properties"
+    "config.properties":"conf/config.properties",
+    "system.properties":"conf/system.properties",
+    "boot.properties":{
+        "openidm.workflow.enabled":true
+    }
 }
