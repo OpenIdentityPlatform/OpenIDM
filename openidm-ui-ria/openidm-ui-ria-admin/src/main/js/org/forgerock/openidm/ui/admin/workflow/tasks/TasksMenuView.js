@@ -133,8 +133,13 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         fetchProcessInstancesAndThenDisplayTasks: function(tasks) {        
             this.tasks = tasks;
             
-            var display = _.after(this.getTasksSize(this.tasks), _.bind(this.displayTasks, this, this.tasks));
+            var display = _.after(this.getTasksSize(this.tasks), _.bind(this.displayTasks, this, this.tasks)), getProcess;
             
+            getProcess = _.bind(function(processInstance) {
+                this.processes[processInstance._id] = processInstance;
+                display();
+            }, this);
+                      
             _.each(tasks, _.bind(function(process, processName) {
                 var taskName, task, i;
                 
@@ -143,12 +148,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                         task = process[taskName].tasks[i];
                         
                         if(this.processes[task.processInstanceId] === undefined) {
-                            workflowManager.getProcess(task.processInstanceId, _.bind(function(processInstance) {
-                                this.processes[processInstance._id] = processInstance;
-                                display();
-                            }, this), function() {
-                                display();
-                            });
+                            workflowManager.getProcess(task.processInstanceId, getProcess, display);
                         } else {
                             display();
                         }
@@ -231,8 +231,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             
             return this.prepareParams({
                 /*"user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id, task.variables.userApplicationLnk.requester)*/
-                "initiator": this.processes[task.processInstanceId].startUserId + "",
-                "key" : this.processes[task.processInstanceId].businessKey + "",
+                "initiator": this.processes[task.processInstanceId].startUserId + " ",
+                "key" : this.processes[task.processInstanceId].businessKey + " ",
                 "requested" : dateUtil.formatDate(this.processes[task.processInstanceId].startTime),
                 "inQueue" : moment(task.createTime).fromNow(true),
                 "actions": actions + this.getHiddenParams(task)
