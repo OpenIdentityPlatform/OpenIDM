@@ -33,8 +33,8 @@
 
 user = openidm.read("managed/user/" + response.result[0]._id);
 
-if(!user.securityAnswer || openidm.decrypt(user.securityAnswer).toLowerCase() != request.params['securityAnswer'].toLowerCase()) {
+if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.params['securityAnswer']) {
     delete response.result;
 } else {
-    response.result = "correct";
+    response.result = user['_id'];
 }
