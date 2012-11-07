@@ -29,7 +29,8 @@
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications."
+                "errorFetchingNotifications" : "Error Fetching notifications.",
+                "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You can't delete yourself",
@@ -288,7 +289,14 @@
                             "application" : "Application",
                             "requested" : "Requested",
                             "actions" : "Actions"                            
-                        }       
+                        },
+                        "headers" : {
+                            "initiator" : "Initiator",
+                            "key" : "Key",
+                            "requested" : "Requested",
+                            "inQueue" : "In queue",
+                            "actions" : "Actions"    
+                        }   
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"
