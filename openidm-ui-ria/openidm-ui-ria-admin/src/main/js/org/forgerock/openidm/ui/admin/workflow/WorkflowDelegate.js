@@ -62,6 +62,11 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
         this.serviceCall({url: taskManagementUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
     
+    obj.getProcess = function(id, successCallback, errorCallback) {
+        console.debug("get process instance");
+        this.serviceCall({url: processManagementUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
+    };
+    
     obj.getTaskDefinition = function(processDefinitionId, taskDefinitionKey, successCallback, errorCallback) {
         console.debug("get task definition");
         this.serviceCall({url: taskDefinitionUrl + "?_query-id=query-taskdefinition&" 
@@ -233,6 +238,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
             taskView.assignee = taskInstance.assignee;
             taskView.variables = taskInstance.variables;
             taskView.createTime = taskInstance.createTime;
+            taskView.processInstanceId = taskInstance.processInstanceId;
             
             if (!result[taskInstanceProcessName]) {
                 result[taskInstanceProcessName] = {};

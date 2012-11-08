@@ -43,7 +43,8 @@ require.config({
         jqueryui: "libs/jquery-ui-1.8.23.custom-min",
         xdate: "libs/xdate-0.7-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-1.0.rc.1"        
+        handlebars: "libs/handlebars-1.0.rc.1",
+        moment: "libs/moment-1.7.2-min"
     },
 
     shim: {
@@ -87,6 +88,9 @@ require.config({
         i18next: {
             deps: ["handlebars"],
             exports: "i18next"
+        },
+        moment: {
+            exports: "moment"
         }
     }
 });
@@ -106,6 +110,7 @@ require([
     "dataTable",
     "jqueryui",
     "xdate",
+    "moment",
     "doTimeout",
     "handlebars",
     "i18next",
@@ -117,7 +122,7 @@ require([
     "org/forgerock/commons/ui/common/main",
     "org/forgerock/openidm/ui/apps/main",
     "org/forgerock/openidm/ui/admin/main" 
-], function(a, b, c, d, e, f, g, h, i, j, k, l, m, i18n, constants, eventManager) { 
+], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);
 });
 

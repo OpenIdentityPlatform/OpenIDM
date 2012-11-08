@@ -49,108 +49,120 @@
  * own entry in the config.
  */
 var accessConfig = { "configs" : [
-        {       "pattern" : "*",
-                "roles" : "openidm-admin",
-                "methods": "*", // default to all methods allowed
-                "actions" : "*", // default to all actions allowed
-                "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+
+      // Anyone can read from these endpoints
+      {  "pattern" : "info/*",
+          "roles" : "openidm-reg,openidm-authorized",
+          "methods": "read",
+          "actions" : "*"
+      },
+      {  "pattern" : "config/ui/configuration",
+          "roles" : "openidm-reg,openidm-authorized",
+          "methods": "read",
+          "actions" : "*"
+      },
+  
+      // These options should only be available anonymously if selfReg is enabled
+      {  "pattern" : "config/ui/*",
+          "roles" : "openidm-reg",
+          "methods": "read",
+          "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
+          "actions" : "*"
+      },
+      {  "pattern" : "managed/user/*",
+          "roles" : "openidm-reg",
+          "methods": "create",
+          "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
+          "actions" : "*"
+      },
+      // Anonymous user can invoke some queries which are public as part of the forgot password process:
+      {  "pattern" : "managed/user/",
+          "roles" : "openidm-reg",
+          "methods": "query",
+          "customAuthz" : "checkIfUIIsEnabled('forgottenPassword') && isQueryOneOf({ 'managed/user/': ['check-userName-availability', 'get-security-question', 'for-security-answer', 'set-newPassword-for-userName-and-security-answer'] })",
+          "actions" : "*"
+      },
+      // This is needed by both self reg and forgot password
+      {  "pattern" : "policy/managed/user",
+          "roles" : "openidm-reg",
+          "methods": "read,action",
+          "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('forgottenPassword')",
+          "actions" : "*"
+      },
+
+      // admin can request anything
+        {  "pattern" : "*",
+            "roles" : "openidm-admin",
+            "methods": "*", // default to all methods allowed
+            "actions" : "*", // default to all actions allowed
+            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
         },
+        
+        // Additional checks for authenticated users
+        {  "pattern" : "policy/*",
+            "roles" : "openidm-authorized",
+            "methods": "read,action",
+            "actions" : "*"
+        },
+        {  "pattern" : "config/ui/*",
+            "roles" : "openidm-authorized",
+            "methods": "read",
+            "actions" : "*"
+        },
+        {   "pattern" : "*",
+            "roles" : "openidm-authorized", // openidm-authorized is logged-in users
+            "methods": "*",
+            "actions" : "*",
+            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['for-credentials']})"
+        },
+
         // Clients authenticated via SSL mutual authentication
         {       "pattern" : "*",
                 "roles" : "openidm-cert",
                 "methods": "",  // default to no methods allowed
                 "actions" : ""  // default to no actions allowed
         },
-        // Additional checks for authenticated users
-        {       "pattern" : "*",
-                "roles" : "openidm-authorized", // openidm-authorized is anonymous
-                "methods": "*",
-                "actions" : "*",
-                "customAuthz" : "ownDataOnly()" // Custom auth function
-        },
-        {  "pattern" : "policy/*",
-            "roles" : "*",
-            "methods": "read,action",
-            "actions" : "*"
-        },
-
-        // Anonymous user can:
-        // * create user using POST with action=create
-        // * invoke some queries which are public:
-        //     check-userName-availability,
-        //     for-security-answer,
-        //     for-credentials,
-        //     get-security-question,
-        //     set-newPassword-for-userName-and-security-answer
-        {  "pattern" : "managed/user/*",
-            "roles" : "openidm-reg",
-            "methods": "read,query",
-            //"customAuthz" : "checkIfIsPublicQuery()",
-            "actions" : "*"
-        },
-        {  "pattern" : "managed/user/*",
-            "roles" : "openidm-reg",
-            "methods": "create",
-            "actions" : "*"
-        },
-        {  "pattern" : "config/ui/*",
-            "roles" : "openidm-reg",
-            "methods": "read",
-            "actions" : "*"
-        }
 
         ] };
 
+function isQueryOneOf(allowedQueries) {
+    if (
+            request.method === "query" &&
+            allowedQueries[request.id] &&
+            contains(allowedQueries[request.id], request.params["_query-id"])
+       )
+    {
+        return true
+    }
+    
+    return false;
+}
+
+function checkIfUIIsEnabled(param) {
+    var ui_config = openidm.read("config/ui/configuration");
+    var returnVal = false;
+    return (ui_config && ui_config.configuration && ui_config.configuration[param]);
+}
 
 function ownDataOnly() {
-    return true; // temporarily bypass authz until we have a method for comparing requested userId against secured userId value. 
-    var roles = request.parent.security['openidm-roles'];
-
-    if (
-                (
-                requestIsAQueryOfName('for-credentials') ||
-                requestIsAQueryOfName('for-internalcredentials')
-                )
-                && userIsAuthorized(roles)
-        )
-        {
-            return true;
-        }
-
-    // Additional Checks (if failed access configuration check)
-    if (
-        (
-                requestIsAQueryOfName('for-credentials') ||
-                requestIsAQueryOfName('for-internalcredentials') ||
-                requestIsAQueryOfName('notifications-for-user') ||
-                requestIsAQueryOfName('user_application_lnk-for-user') ||
-                requestIsAQueryOfName('for-userName')
-
-        ) && userIsAuthorized(roles)){
-
-        //authenticated user can only manage his data and cannot change a role attribute.
-                java.lang.System.out.println(DumpObjectIndented(request));
-        var requestedUserNameDataIdentificator = request.params['user'];
-
-        if (authorizedUsernameEquals(requestedUserNameDataIdentificator)) {
-            logger.debug("User manipulation with own data");
-
-            if (requestIsAnActionOfName('patch')) {
-                logger.debug("Request is a patch. Checking if trying to change own role");
-
-                if (requestValueContainsReplaceValueWithKeyOfName('/role')) {
-                    logger.debug("Trying to change own role is forbidden for standard user");
-                    return false;
-                }
-            }
-        } else {
-            logger.debug("Manipulation with data of user not equal to logged-in is forbidden");
-            throw "Access denied (Manipulation with data of user not equal to logged-in is forbidden)";
-        }
-        return true;
-    } else {
-        return isPublicMethodInvocation();
+    var userId = "";
+    
+    userId = request.id.match(/managed\/user\/(.*)/i);
+    if (userId && userId.length == 2)
+    {
+        userId = userId[1];
     }
+    else if (request.params && request.params.userId)
+    {
+        userId = request.params.userId;
+    }
+    else if (request.value && request.value.userId)
+    {
+        userId = request.value.userId;
+    }
+    
+    return userId === request.parent.security.userid.id;
+
 }
 
 function disallowQueryExpression() {
@@ -159,6 +171,13 @@ function disallowQueryExpression() {
     }
     return true;
 }
+
+
+
+
+//////// Do not alter functions below here as part of your authz configuration
+
+
 
 function passesAccessConfig(id, roles, method, action) {
     for (var i = 0; i < accessConfig.configs.length; i++) {
@@ -233,71 +252,6 @@ function contains(a, o) {
         }
     }
     return false;
-}
-
-/**
- * Public methods are accessible by anonymous user. They are used
- * during registration and forgotten password process.
- */
-function isPublicMethodInvocation() {
-    logger.debug("request.parent.path = {}", request.parent.path);
-    logger.debug("request.parent.method = {}", request.parent.method);
-    
-    if (request.parent.path.match('^/openidm/managed/user') == '/openidm/managed/user') {
-        logger.debug("Resource == user");
-        
-        if (request.parent.method == 'GET') {            
-            logger.debug("This is GET request. Selected allowed only. Checking queries.");
-           
-            var publicQueries = ['check-userName-availability','for-security-answer','for-credentials', 'get-security-question', 'set-newPassword-for-userName-and-security-answer'];
-            
-            if (request.params) {
-                var queryName = request.params['_query-id'];
-            }
-            
-            if (queryName && (publicQueries.indexOf(queryName) > -1)) {
-                logger.debug("Query {} found in the list", queryName);
-                return true;
-            } else {
-                logger.debug("Query {} hasn't been found in a query", queryName);
-                return false;
-            }            
-        } else if (request.parent.method == 'PUT') {
-            logger.debug("PUT request detected");
-            return true;
-        } else {
-            logger.debug("Anonymous POST and DELETE methods are not allowed");
-        }
-    } else {
-        logger.debug("Anonymous access not allowed for resources other than user");
-        return false;
-    }
-}
-
-function userIsAuthorized(roles) {
-    return contains(roles, 'openidm-authorized');
-}
-
-function requestIsAQueryOfName(queryName) {
-    return request.params && request.params['_query-id'] && request.params['_query-id'] == queryName;
-}
-
-function authorizedUsernameEquals(userName) {
-    return request.parent.security['user'] == userName;
-}
-
-function requestIsAnActionOfName(actionName) {
-    return request.value && request.params && request.params['_action'] && request.params['_action'] == actionName;
-}
-
-function requestValueContainsReplaceValueWithKeyOfName(valueKeyName) {
-    var key = "replace";
-    
-    for (var i = 0; i < request.value.length; i++) {
-        if (request.value[i][key] == valueKeyName) {
-            return true;
-        }
-    }
 }
 
 function allow() {

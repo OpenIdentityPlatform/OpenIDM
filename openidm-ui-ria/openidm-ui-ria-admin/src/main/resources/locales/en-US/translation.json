@@ -29,7 +29,8 @@
                 "badRequestError" : "Bad request error.",
                 "conflictError" : "Detected conflict in request.",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications."
+                "errorFetchingNotifications" : "Error Fetching notifications.",
+                "incorrectRevisionError" : "Cannot update the record because the version is not the latest."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You can't delete yourself",
@@ -133,6 +134,8 @@
     },
     "common" : {
          "form" : {
+            "true" : "True",
+            "false" : "False",
             "update" : "Update",
             "save" : "Save",
             "cancel" : "Cancel",
@@ -181,7 +184,9 @@
                 "incorrectPassword" : "Incorrect password",
                 "required" : "Required",
                 "emailNotValid" : "Not a valid email address.",
-                "emailExists" : "Email address already exists."
+                "emailExists" : "Email address already exists.",
+                "shouldBeLong" : "Should be long value",
+                "wrongDateFormat" : "Wrong format"
             }
          },
          "user" : {
@@ -203,6 +208,7 @@
             "address2" : "Address 2",
             "country" : "Country",
             "city" : "City",
+            "role" : "Role",
             "stateProvince" : "State/Province",
             "phoneNumber" : "Mobile Phone",
             "postalCode" : "Postal Code",
@@ -283,7 +289,14 @@
                             "application" : "Application",
                             "requested" : "Requested",
                             "actions" : "Actions"                            
-                        }       
+                        },
+                        "headers" : {
+                            "initiator" : "Initiator",
+                            "key" : "Key",
+                            "requested" : "Requested",
+                            "inQueue" : "In queue",
+                            "actions" : "Actions"    
+                        }   
                     },
                     "TasksWithMenuView" : {
                         "chooseTask" : "Choose a task"

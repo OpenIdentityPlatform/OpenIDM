@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _, ContentFlow */
+/*global define, $, _, ContentFlow, require */
 
 /**
  * @author mbilski
@@ -64,9 +64,15 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
                     patchDefinitionObject.push({replace: "password", value: this.$el.find("input[name=password]").val()});
                 }
                 
-                this.delegate.patchSelectedUserAttributes(this.editedUsername, patchDefinitionObject, _.bind(function(r) {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
-                    this.close();
+                this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {
+                    this.delegate.patchSelectedUserAttributes(user._id, user._rev, patchDefinitionObject, _.bind(function(r) {
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "securityDataChanged");
+                        this.close();
+                        
+                        userDelegate.getForUserName(conf.loggedUser.userName, function(user) {
+                            require("org/forgerock/openidm/ui/admin/users/AdminUserProfileView").editedUser = user;
+                        });
+                    }, this));
                 }, this));
             }
         },

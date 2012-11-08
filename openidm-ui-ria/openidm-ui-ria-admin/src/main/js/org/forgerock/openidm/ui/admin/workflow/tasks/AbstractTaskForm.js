@@ -56,14 +56,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/AbstractTaskForm", [
             this.args = args;
             
             this.parentRender(function() {      
-                validatorsManager.bindValidators(this.$el);                
-                
-                this.postRender();
+                this.postRender(callback);
                 this.reloadData();
-                
-                if(callback) {
-                    callback();
-                }
             });            
         },
         

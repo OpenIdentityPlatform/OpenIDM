@@ -33,8 +33,9 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants) {
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractView, validatorsManager, uiUtils, userDelegate, eventManager, constants, conf) {
     var AdminUserRegistrationView = AbstractView.extend({
         template: "templates/admin/AdminUserRegistrationTemplate.html",
         delegate: userDelegate,
@@ -49,6 +50,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
+                data.roles = data.roles.join(",");
                 delete data.terms;
                 delete data.passwordConfirm;
                 data.securityQuestion = 1;
@@ -63,6 +65,8 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
         },
         
         render: function() {
+            this.data.roles = conf.globalData.userRoles;
+            
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
                     this.unlock();

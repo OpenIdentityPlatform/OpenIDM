@@ -1,9 +1,14 @@
 {
-    "configuration": {
-        "selfRegistration": false,
-        "forgottenPassword": false,
-        "securityQuestions": false,
+    "configuration" : {
+        "selfRegistration" : false,
+        "forgottenPassword" : false,
+        "securityQuestions" : false,
         "siteIdentification" : false,
-        "language" : "en-US"
+        "language" : "en-US",
+        "roles" : {
+            "openidm-admin" : "System administrator",
+            "admin" : "Administrator",
+            "openidm-authorized" : "User"
+        }
     }
 }

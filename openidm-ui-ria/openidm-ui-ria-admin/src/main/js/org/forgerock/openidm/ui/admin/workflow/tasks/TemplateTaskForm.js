@@ -37,10 +37,12 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TemplateTaskForm", [
         
         template: "templates/common/EmptyTemplate.html",
         
-        postRender: function() {            
+        postRender: function(callback) {            
             var t = Handlebars.compile(this.args)(this.task);
             
             this.$el.html(t);
+            
+            callback();
         }
     }); 
     

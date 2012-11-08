@@ -27,7 +27,7 @@
 /**
  * @author mbilski
  */
-define("org/forgerock/openidm/ui/admin/workflow/tasks/ApplicationAcceptanceTask", [
+define("org/forgerock/openidm/ui/admin/workflow/tasks/customview/ApplicationAcceptanceTask", [
     "org/forgerock/openidm/ui/admin/workflow/tasks/AbstractTaskForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
@@ -43,7 +43,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/ApplicationAcceptanceTask"
             js2form(document.getElementById(this.$el.attr("id")), this.task);
             this.$el.find("input[name=taskName]").val(this.task.name);
             this.$el.find("input[name=createTime]").val(DateUtil.formatDate(this.task.createTime));
-            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             
             if(this.$el.find("input[name=assignee]").val() === "null") {
                 this.$el.find("input[name=assignee]").val("");
