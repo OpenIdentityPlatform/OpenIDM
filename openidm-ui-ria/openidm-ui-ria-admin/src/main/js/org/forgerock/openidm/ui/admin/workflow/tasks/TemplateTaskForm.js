@@ -42,7 +42,9 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TemplateTaskForm", [
             
             this.$el.html(t);
             
-            callback();
+            if (callback) {
+                callback();
+            }
         }
     }); 
     

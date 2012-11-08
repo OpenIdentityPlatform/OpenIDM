@@ -35,13 +35,13 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/TemplateStartProcessFo
     
     var TemplateStartProcessForm = AbstractProcessForm.extend({
         
-        template: "templates/admin/workflow/processes/StartProcessUsingTemplateTemplate.html",
-        
-        element: "#startProcessForm",
+        template: "templates/common/EmptyTemplate.html",
         
         postRender: function(callback) {
             var t = Handlebars.compile(this.args)(this.processDefinition);
-            this.$el.find('#startProcessTemplateContent').html(t);
+            
+            this.$el.html(t);
+            
             if (callback) {
                 callback();
             }
