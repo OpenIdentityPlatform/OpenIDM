@@ -698,7 +698,7 @@ public class ActivitiResource implements JsonResource {
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
         }
         DefaultStartFormHandler handler = (DefaultStartFormHandler) def.getStartFormHandler();
-        Map<String, Map> propertyMap = new HashMap<String, Map>();
+        Map<String, Map> propertyMap = new LinkedHashMap<String, Map>();
         addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
         result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
         result.add("_rev", "0");
