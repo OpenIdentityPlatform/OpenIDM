@@ -48,8 +48,7 @@ shift
 
 rem Ensure that any user defined CLASSPATH variables are not used on startup,
 rem but allow them to be specified here, in rare case when it is needed.
-set CLASSPATH="%OPENIDM_HOME%\bin\felix.jar;%OPENIDM_HOME%\bin\openidm.jar"
-set CLASSPATH="%OPENIDM_HOME%\bin\*;%OPENIDM_HOME%\framework\*"
+set CLASSPATH="bin\*;framework\*"
 
 echo "Using OPENIDM_HOME:   %OPENIDM_HOME%"
 echo "Using OPENIDM_OPTS:   %OPENIDM_OPTS%"
@@ -67,7 +66,7 @@ set _EXECJAVA=start %_RUNJAVA%
 :gotTitle
 
 rem Get remaining unshifted command line arguments and save them in the
-set CMD_LINE_ARGS="-c bin\launcher.json"
+set CMD_LINE_ARGS=-c bin/launcher.json
 :setArgs
 if ""%1""=="""" goto doneSetArgs
 set CMD_LINE_ARGS=%CMD_LINE_ARGS% %1
