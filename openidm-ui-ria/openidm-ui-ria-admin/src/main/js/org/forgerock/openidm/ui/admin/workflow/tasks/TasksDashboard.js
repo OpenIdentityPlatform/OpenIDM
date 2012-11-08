@@ -77,17 +77,40 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                     });
                 }
                 if (args && args[0] && args[0] !== '') {
-                    taskDetailsView.render(args[0]);
+                    this.showDetails({id: args[0]});
                 }
             });    
         },
         
+        getDetailsRow: function() {
+            return '<tr class="input-full"><td colspan="5"><div id="taskDetails"></div></td></tr>';
+        },
+        
+        showDetails: function(event) {
+            //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "completeTask", args: [event.id], trigger: false});
+            
+            $("#taskDetails").closest("tr").remove();
+            
+            var root, tr;
+            
+            root = event.category === "assigned" ? $("#myTasks") : $("#candidateTasks");
+            tr = root.find("[name=taskId][value="+event.id+"]").closest("tr");
+            
+            tr.after(this.getDetailsRow());
+            
+            taskDetailsView.render(event.id, event.category, function() {
+                $("#myTasks").accordion("resize");   
+                $("#candidateTasks").accordion("resize");
+                
+                if(event.category === "all") {
+                    $("#taskDetails input, #taskDetails select").attr("disabled", "true");
+                }
+            });   
+        },
+        
         registerListeners: function() {
             eventManager.unregisterListener("showTaskDetailsRequest");
-            eventManager.registerListener("showTaskDetailsRequest", function(event) {
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "completeTask", args: [event.id], trigger: false});
-                taskDetailsView.render(event.id);
-            });
+            eventManager.registerListener("showTaskDetailsRequest", _.bind(this.showDetails, this));
             
             eventManager.unregisterListener("refreshTasksMenu");
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {

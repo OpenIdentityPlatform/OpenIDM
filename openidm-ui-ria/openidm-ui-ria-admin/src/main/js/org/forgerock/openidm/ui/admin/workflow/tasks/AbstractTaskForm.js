@@ -43,8 +43,10 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/AbstractTaskForm", [
             "onValidate": "onValidate"
         },
         
-        postRender: function() {
-            
+        postRender: function(callback) {
+            if(callback) {
+                callback();
+            }
         },
         
         render: function(task, category, args, callback) { 
