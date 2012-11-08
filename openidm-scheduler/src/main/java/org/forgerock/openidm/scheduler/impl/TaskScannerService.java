@@ -158,9 +158,13 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params)
-            throws ObjectSetException, BadRequestException {
+            throws ObjectSetException {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
 
+        if (params.get("_action") == null) {
+            throw new BadRequestException("Expecting _action parameter");
+        }
+        
         String action = (String) params.get("_action");
         if (id == null) {
             try {

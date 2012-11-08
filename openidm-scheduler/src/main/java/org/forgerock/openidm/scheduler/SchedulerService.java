@@ -50,6 +50,7 @@ import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -229,6 +230,20 @@ public class SchedulerService extends ObjectSetJsonResource {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Scheduler Service {}", compContext);
+        /*try {
+            if (inMemoryScheduler != null && inMemoryScheduler.isStarted()) {
+                inMemoryScheduler.shutdown();
+            }
+        } catch (SchedulerException e) {
+            logger.error("Error shutting down in-memory scheduler", e);
+        }
+        try {
+            if (persistentScheduler != null && persistentScheduler.isStarted()) {
+                persistentScheduler.shutdown();
+            }
+        } catch (SchedulerException e) {
+            logger.error("Error shutting down persistent scheduler", e);
+        }*/
     }   
     
     /**
@@ -560,6 +575,11 @@ public class SchedulerService extends ObjectSetJsonResource {
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params)
             throws ObjectSetException {
+        
+        if (params.get("_action") == null) {
+            throw new BadRequestException("Expecting _action parameter");
+        }
+        
         String action = (String)params.get("_action");
         try {
             if (action.equals("create")) {
