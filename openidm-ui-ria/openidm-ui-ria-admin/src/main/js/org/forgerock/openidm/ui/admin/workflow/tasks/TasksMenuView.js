@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, form2js, _, Backbone */
+/*global define, $, form2js, _, Backbone, moment */
 
 /**
  * @author mbilski
@@ -53,6 +53,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         },
         
         tasks: {},
+        processes: {},
         
         clearInput: function(event) {
             if($(event.target).val() === $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason")) {
@@ -109,10 +110,51 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             this.category = category;
             
             if(category === "all") {
-                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, _.bind(this.fetchProcessInstancesAndThenDisplayTasks, this), _.bind(this.errorHandler, this));
             } else if(category === "assigned") {
-                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, _.bind(this.fetchProcessInstancesAndThenDisplayTasks, this), _.bind(this.errorHandler, this));
             }
+        },
+        
+        getTasksSize: function(tasks) {
+            var processName, taskName, taskType, task, process, size = 0;
+            
+            for(processName in tasks) {
+                process = tasks[processName];
+                for(taskName in process) {
+                    taskType = process[taskName];                    
+                    size += taskType.tasks.length;
+                }
+            }
+            
+            return size;
+        },
+        
+        fetchProcessInstancesAndThenDisplayTasks: function(tasks) {        
+            this.tasks = tasks;
+            
+            var display = _.after(this.getTasksSize(this.tasks), _.bind(this.displayTasks, this, this.tasks)), getProcess;
+            
+            getProcess = _.bind(function(processInstance) {
+                this.processes[processInstance._id] = processInstance;
+                display();
+            }, this);
+                      
+            _.each(tasks, _.bind(function(process, processName) {
+                var taskName, task, i;
+                
+                for(taskName in process) {
+                    for(i = 0; i < process[taskName].tasks.length; i++) {
+                        task = process[taskName].tasks[i];
+                        
+                        if(this.processes[task.processInstanceId] === undefined) {
+                            workflowManager.getProcess(task.processInstanceId, getProcess, display);
+                        } else {
+                            display();
+                        }
+                    }
+                }
+            }, this));
         },
         
         errorHandler: function() {
@@ -128,11 +170,9 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             var process, data, processName, taskType, taskName, actions, i, task;
             
             this.tasks = tasks;
-            
             this.$el.html('');
             
             for(processName in tasks) {
-                
                 process = tasks[processName];
                 
                 for(taskName in process) {
@@ -149,11 +189,10 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     
                     for(i = 0; i < taskType.tasks.length; i++) {
                         task = taskType.tasks[i];
-                        
                         data.tasks.push(this.prepareParamsFromTask(task));
                     }
                 }  
-                
+
                 this.$el.append(uiUtils.fillTemplateWithData("templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html", data));
             } 
             
@@ -179,26 +218,25 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         
         getParamsForTaskType: function(taskType) {
             return [
-                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.for"),
-                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.application"),
-                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.requested"),
-                    $.t("openidm.ui.admin.tasks.TasksMenuView.acceptanceForm.actions")
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.headers.initiator"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.headers.key"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.headers.requested"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.headers.inQueue"),
+                    $.t("openidm.ui.admin.tasks.TasksMenuView.headers.actions")
                 ];
         },
         
         prepareParamsFromTask: function(task) {
             var actions = this.getActions(task);
             
-            if(task.variables.user) {
             return this.prepareParams({
-                "user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id, task.variables.userApplicationLnk.requester), 
-                "app": task.variables.application.name, 
-                "date": dateUtil.formatDate(task.createTime), 
+                /*"user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id, task.variables.userApplicationLnk.requester)*/
+                "initiator": this.processes[task.processInstanceId].startUserId + " ",
+                "key" : this.processes[task.processInstanceId].businessKey + " ",
+                "requested" : dateUtil.formatDate(this.processes[task.processInstanceId].startTime),
+                "inQueue" : moment(task.createTime).fromNow(true),
                 "actions": actions + this.getHiddenParams(task)
-                // TODO fix
-                // "hidden": this.getHiddenParams(task)
             });
-            }
         },
         
         getHiddenParams: function(task) {
@@ -244,10 +282,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     + '</option></select> <a href="#" class="button choosable choosable-static detailsLink">' + $.t("common.form.details")
                     + '</a>';
             } else if(this.category === 'assigned') {
-                return '<a href="#" class="button choosable" data-action="approveTask">' + $.t("common.task.approve") + '</a>' +
-                    '<a href="#" class="button choosable" data-action="denyTask">' + $.t("common.task.deny") + '</a>' +
-                    '<a href="#" class="button choosable" data-action="requeueTask">' + $.t("common.task.requeue") + '</a>' +
-                    '<a href="#" class="button choosable choosable-static detailsLink">' + $.t("common.form.details") + '</a>';
+                return '<a href="#" class="button choosable choosable-static detailsLink">' + $.t("common.form.details") + '</a>';
             }
         },
        
@@ -326,7 +361,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                 
                 if ($(event.target).attr('data-action') === 'denyTask') {
                     $(event.target).parent().parent().after(this.getReasonInputRow());
-                    // TODO change table height +31
                     height = $(event.target).parent().parent().parent().parent().parent().height();
                     $(event.target).parent().parent().parent().parent().parent().css("height", (height + 31) + "px");
                 } else {

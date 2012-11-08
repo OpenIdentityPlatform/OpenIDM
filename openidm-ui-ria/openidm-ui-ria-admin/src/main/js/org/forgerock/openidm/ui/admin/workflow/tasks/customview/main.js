@@ -24,27 +24,8 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/main", [
-    "org/forgerock/openidm/ui/admin/workflow/tasks/customview/main",                                               
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
-	
-	"./workflow/FormManager",
-	
-	"./workflow/tasks/TaskDetailsView",
-    "./workflow/tasks/AbstractTaskForm",
-	"./workflow/tasks/customview/ApplicationAcceptanceTask",
-	"./workflow/tasks/TasksMenuView",
-	"./workflow/tasks/TasksDashboard",
-	"./workflow/tasks/TemplateTaskForm",
-	
-	"./workflow/processes/AbstractProcessForm",
-    "./workflow/processes/StartProcessDashboardView",
-	
-	"./workflow/WorkflowDelegate",
-	
-	"./Dashboard"
-	
-]);
+define("org/forgerock/openidm/ui/admin/workflow/tasks/customview/main", [
+	"./ApplicationAcceptanceTask"
+], function(a) { 
+    console.log("XXXXXXXXXXXXX");
+});

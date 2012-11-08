@@ -34,31 +34,39 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/openidm/ui/admin/workflow/FormManager",
-    "org/forgerock/openidm/ui/admin/workflow/tasks/TemplateTaskForm"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm) {
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TemplateTaskForm",
+    "org/forgerock/commons/ui/common/util/FormGenerationUtils",
+    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm, formGenerationUtils, userDelegate) {
     var TaskDetailsView = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TaskDetailsTemplate.html",
 
         element: "#taskDetails",
         
         events: {
+            "onValidate": "onValidate",
             "click input[name=saveButton]": "formSubmit"
         },
         
         formSubmit: function(event) {
             event.preventDefault();
-            var params = form2js(this.$el.attr("id"), '.', false);
-            
-            workflowManager.completeTask(this.task._id, params, _.bind(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
-            }, this));
+            if(validatorsManager.formNotInvalid(this.$el)) {
+                var params = form2js(this.$el.attr("id"), '.', false), param;
+                delete params.saveButton;
+                for (param in params) {
+                    if (_.isNull(params[param])) {
+                        delete params[param];
+                    }
+                }
+                workflowManager.completeTask(this.task._id, params, _.bind(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
+                }, this));
+            }
         },
         
         render: function(id, category) {  
-            this.parentRender(function() {      
-                validatorsManager.bindValidators(this.$el);
-                
+            this.parentRender(function() {
                 workflowManager.getTask(id, _.bind(function(task) {
                     this.task = task;
                     
@@ -76,11 +84,17 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                             }
                         } 
                         if(template !== false) {
-                            templateTaskForm.render(task, category, template);
+                            templateTaskForm.render(task, category, template, _.bind(function() {
+                                validatorsManager.bindValidators(this.$el);
+                                validatorsManager.validateAllFields(this.$el);
+                            }, this));
                             return;
                         } else {
-                            //TODO
-                            passJSLint = true;
+                            templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
+                                validatorsManager.bindValidators(this.$el);
+                                validatorsManager.validateAllFields(this.$el);
+                            }, this));
+                            
                             return;
                         }
                     }, this));                  

@@ -114,10 +114,6 @@ define("config/AppConfiguration", [
                                            }
                                        }    
                                    },
-                                   "groups": {
-                                       "url": "#groups/",
-                                       "name": "config.AppConfiguration.Navigation.links.groups"
-                                   },
                                    "processDashboard": {
                                        "url": "#processes/",
                                        "name": "config.AppConfiguration.Navigation.links.startProcess"
@@ -134,10 +130,6 @@ define("config/AppConfiguration", [
                                    "users": {
                                        "url": "#users/",
                                        "name": "config.AppConfiguration.Navigation.links.users"
-                                   },
-                                   "groups": {
-                                       "url": "#groups/",
-                                       "name": "config.AppConfiguration.Navigation.links.groups"
                                    },
                                    "processDashboard": {
                                        "url": "#processes/",
@@ -165,10 +157,6 @@ define("config/AppConfiguration", [
                                                "name": "config.AppConfiguration.Navigation.links.addMore"
                                            }
                                        }    
-                                   },
-                                   "groups": {
-                                       "url": "#groups/",
-                                       "name": "config.AppConfiguration.Navigation.links.groups"
                                    }
                                }    
                            }
@@ -190,7 +178,7 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/openidm/ui/admin/workflow/FormManager",
                    configuration: {
                        forms: { // Workflow User Task to View mapping
-                           "org.forgerock.applicationAcceptanceInit": "org/forgerock/openidm/ui/admin/workflow/tasks/ApplicationAcceptanceTask"
+                           "org.forgerock.applicationAcceptance": "org/forgerock/openidm/ui/admin/workflow/tasks/customview/ApplicationAcceptanceTask"
                        }
                    } 
                },

@@ -96,9 +96,19 @@ var policyConfig = {
     };
 
 function cannotContainOthers(fullObject, value, params, property) {
-    var fieldArray = params.disallowedFields.split(",");
+    var fieldArray = params.disallowedFields.split(","),
+        fullObject_server = {};
+    
+    if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.id && fullObject["_id"]) {
+        fullObject_server = openidm.read(request.id + "/" + fullObject["_id"])
+    }
+    
     if (value && typeof(value) === "string" && value.length) {
         for (var i = 0; i < fieldArray.length; i++) {
+            if (typeof(fullObject[fieldArray[i]]) === "undefined" && typeof(fullObject_server[fieldArray[i]]) !== "undefined") {
+                fullObject[fieldArray[i]] = fullObject_server[fieldArray[i]];
+            }
+            
             if (typeof(fullObject[fieldArray[i]]) === "string" && value.match(fullObject[fieldArray[i]]))
                 return [{"policyRequirement": "CANNOT_CONTAIN_OTHERS", params: {"disallowedFields": fieldArray[i]}}];
         }
