@@ -286,7 +286,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             System.err.println("  Example: java Main" + parser.printExample(REQUIRED));
             System.err.println("  Example: java Main" + parser.printExample(ALL));
 
-            return;
+            throw e;
         }
         init();
     }
@@ -520,7 +520,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         } else {
             Properties props =
                     loadPropertyFile(projectDirectory, systemProperties.expect(String.class)
-                            .defaultTo(SYSTEM_PROPERTIES_FILE_VALUE).asFile());
+                            .defaultTo(SYSTEM_PROPERTIES_FILE_VALUE).asString());
             if (props == null)
                 return;
             // Perform variable substitution on specified properties.
@@ -558,7 +558,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         } else {
             Properties props =
                     loadPropertyFile(projectDirectory, systemProperties.expect(String.class)
-                            .defaultTo(CONFIG_PROPERTIES_FILE_VALUE).asFile());
+                            .defaultTo(CONFIG_PROPERTIES_FILE_VALUE).asString());
             if (props == null)
                 return new HashMap<String, String>(0);
             // Perform variable substitution on specified properties.
@@ -594,7 +594,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         } else {
             Properties props =
                     loadPropertyFile(projectDirectory, bootProperties.expect(String.class)
-                            .defaultTo(BOOT_PROPERTIES_FILE_VALUE).asFile());
+                            .defaultTo(BOOT_PROPERTIES_FILE_VALUE).asString());
             if (props == null)
                 return new HashMap<String, Object>(0);
             // Perform variable substitution on specified properties.
@@ -603,17 +603,18 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         }
     }
 
-    protected Properties loadPropertyFile(URI projectDirectory, File propertyFile) {
+    protected Properties loadPropertyFile(URI projectDirectory, String propertyFile) {
         // Read the properties file.
         Properties props = new Properties();
         InputStream is = null;
         try {
-            if (!propertyFile.isAbsolute()) {
+            File pFile = new File(propertyFile);
+            if (!pFile.isAbsolute()) {
                 is =
                         projectDirectory.resolve(propertyFile.toString()).toURL().openConnection()
                                 .getInputStream();
             } else {
-                is = propertyFile.toURI().toURL().openConnection().getInputStream();
+                is =  pFile.toURI().toURL().openConnection().getInputStream();
             }
             props.load(is);
             is.close();
