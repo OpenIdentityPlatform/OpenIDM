@@ -217,6 +217,43 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `openidm`.`schedulerobjects`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  UNIQUE INDEX `idx-schedulerobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  INDEX `fk_schedulerobjects_objectypes` (`objecttypes_id` ASC) ,
+  CONSTRAINT `fk_schedulerobjects_objectypes`
+    FOREIGN KEY (`objecttypes_id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`schedulerobjectproperties`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
+  `schedulerobjects_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(32) NULL ,
+  `propvalue` TEXT NULL ,
+  INDEX `fk_schedulerobjectproperties_schedulerobjects` (`schedulerobjects_id` ASC) ,
+  INDEX `idx_schedulerobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
+  CONSTRAINT `fk_schedulerobjectproperties_schedulerobjects`
+    FOREIGN KEY (`schedulerobjects_id` )
+    REFERENCES `openidm`.`schedulerobjects` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
 
 -- -----------------------------------------------------
 -- Table `openidm`.`manageduserapplicationlnk`
@@ -251,47 +288,24 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `openidm`.`schedulerobjects`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjects` (
-  `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `objecttypes_id` BIGINT(20) UNSIGNED NOT NULL ,
-  `objectid` VARCHAR(255) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `fullobject` MEDIUMTEXT NULL DEFAULT NULL ,
-  PRIMARY KEY (`id`) ,
-  UNIQUE INDEX `idx-schedulerobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
-  INDEX `fk_schedulerobjects_objectypes` (`objecttypes_id` ASC) ,
-  CONSTRAINT `fk_schedulerobjects_objectypes`
-    FOREIGN KEY (`objecttypes_id` )
-    REFERENCES `openidm`.`objecttypes` (`id` )
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `openidm`.`schedulerobjectproperties`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
-  `schedulerobjects_id` BIGINT(20) UNSIGNED NOT NULL ,
-  `propkey` VARCHAR(255) NOT NULL ,
-  `proptype` VARCHAR(32) NULL DEFAULT NULL ,
-  `propvalue` TEXT NULL DEFAULT NULL ,
-  INDEX `fk_schedulerobjectproperties_schedulerobjects` (`schedulerobjects_id` ASC) ,
-  INDEX `idx_schedulerobjectproperties_prop` (`propkey` ASC, `propvalue`(23) ASC) ,
-  CONSTRAINT `fk_schedulerobjectproperties_schedulerobjects`
-    FOREIGN KEY (`schedulerobjects_id` )
-    REFERENCES `openidm`.`schedulerobjects` (`id` )
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
-
-
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `openidm`.`internaluser`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `openidm`;
+INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES ('openidm-admin', '0', '{\"$crypto\":{\"value\":{\"iv\":\"fIevcJYS4TMxClqcK7covg==\",\"data\":\"Tu9o/S+j+rhOIgdp9uYc5Q==\",\"cipher\":\"AES/CBC/PKCS5Padding\",\"key\":\"openidm-sym-default\"},\"type\":\"x-simple-encryption\"}}', 'openidm-admin,openidm-authorized');
+INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`) VALUES ('anonymous', '0', 'anonymous', 'openidm-reg');
+
+COMMIT;
+
+-- -------------------------------------------
+-- openidm database user
+-- ------------------------------------------
+GRANT ALL PRIVILEGES on openidm.* TO openidm IDENTIFIED BY 'openidm';
+GRANT ALL PRIVILEGES on openidm.* TO openidm@'%' IDENTIFIED BY 'openidm';
+GRANT ALL PRIVILEGES on openidm.* TO openidm@localhost IDENTIFIED BY 'openidm';
