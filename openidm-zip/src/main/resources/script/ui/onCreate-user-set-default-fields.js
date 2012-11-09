@@ -5,19 +5,6 @@
  * 
  * It is run every time new user is created.
  */  
-  
-function requiredUniqeUserName(userName) {
-    var params = {
-            "_query-id": "check-userName-availability",
-            "uid": userName
-    };
-    result = openidm.query("managed/user", params);
-    if ((result.result && result.result.length!=0) || (result.results && result.results.length!=0)) {
-        throw "Failed to create user. User with userName " + userName + " exists";
-    }
-}
-
-requiredUniqeUserName(object.userName);
 
 object.accountStatus = 'active';
 
@@ -39,6 +26,10 @@ if (!object.stateProvince) {
 
 if (!object.passwordAttempts) {
     object.passwordAttempts = "0";
+}
+
+if (!object.lastPasswordAttempt) {
+    object.lastPasswordAttempt = (new Date()).toString();
 }
 
 if (!object.address1) {
@@ -96,4 +87,12 @@ if (!object.securityAnswer) {
 
 if (!object.securityQuestion) {
     object.securityQuestion = "";
+}
+
+if (!object.securityAnswerAttempts) {
+    object.securityAnswerAttempts = "0";
+}
+
+if (!object.lastSecurityAnswerAttempt) {
+    object.lastSecurityAnswerAttempt = (new Date()).toString();
 }
