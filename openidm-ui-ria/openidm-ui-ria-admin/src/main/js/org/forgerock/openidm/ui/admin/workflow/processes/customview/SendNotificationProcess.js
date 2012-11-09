@@ -46,7 +46,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/customview/SendNotific
                 
                 userDelegate.getAllUsers(_.bind(function(users) {
                     
-                    var resultMap = {};
+                    var resultMap = {},userPointer,user;
                     for (userPointer in users) {
                         user = users[userPointer];
                         resultMap[user._id] = user.givenName + " " + user.familyName;
@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/customview/SendNotific
                     this.data.users = resultMap;
                     callback();
                     
-                }, this))
+                }, this));
                 
             }, this)();
         },

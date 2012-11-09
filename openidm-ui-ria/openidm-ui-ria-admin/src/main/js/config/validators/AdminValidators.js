@@ -153,7 +153,6 @@ define("config/validators/AdminValidators", [
                     if(v.length > 255) {
                         callback($.t("common.form.validation.shouldBeNotMoreThen256"));
                         return;
-                    } else {
                     }
                     callback();
                 }

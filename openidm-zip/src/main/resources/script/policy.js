@@ -40,9 +40,20 @@ var policyConfig = {
                 "clientValidation": true,
                 "policyRequirements" : ["REQUIRED"]
             },
+            {
+                "policyId" : "max-attempts-triggers-lock-cooldown",
+                "policyExec" : "maxAttemptsTriggersLockCooldown",
+                "policyRequirements" : ["NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES"]
+            },
             {   "policyId" : "unique",
                 "policyExec" : "unique",  
                 "policyRequirements" : ["UNIQUE"]
+            },
+            {
+                "policyId" : "valid-date",
+                "policyExec" : "validDate",
+                "clientValidation": true,
+                "policyRequirements": ["VALID_DATE"]
             },
             {
                 "policyId" : "valid-email-address-format",
@@ -95,12 +106,25 @@ var policyConfig = {
         ] 
     };
 
+
+function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
+    var failures = [],
+        lastFailedDate = new Date(fullObject[params.dateTimeField]);
+    
+    if (    value > params.max &&
+            (lastFailedDate.getTime() + (1000*60*params.numMinutes)) > (new Date()).getTime()
+    ) { 
+         failures = [{"policyRequirement": "NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES", params: {"max":params.max,"numMinutes":params.numMinutes}}];
+    }
+    return failures;
+}
+
 function cannotContainOthers(fullObject, value, params, property) {
     var fieldArray = params.disallowedFields.split(","),
         fullObject_server = {};
     
-    if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.id && fullObject["_id"]) {
-        fullObject_server = openidm.read(request.id + "/" + fullObject["_id"])
+    if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.id && !request.id.match('/$')) {
+        fullObject_server = openidm.read(request.id)
     }
     
     if (value && typeof(value) === "string" && value.length) {
@@ -114,6 +138,14 @@ function cannotContainOthers(fullObject, value, params, property) {
         }
     }
     return [];
+}
+
+function validDate(fullObject, value, params, property) {
+    if (value && value.length && isNaN(new Date(value).getTime())) {
+        return [ {"policyRequirement": "VALID_DATE"}];
+    }
+    else
+        return [];
 }
 
 function validPhoneFormat(fullObject, value, params, property) {

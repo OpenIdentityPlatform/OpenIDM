@@ -81,16 +81,18 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
             this.editedUsername = params[0];
             this.actions = {};
             this.addAction("Update", "submit");
-            
-            this.show(_.bind(function() {
-                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
-                
-                    this.$el.find("#changeUserPasswordHeadingLabel").text($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
+
+            this.delegate.getForUserName(this.editedUsername, _.bind(function(user) {
+                this.show(_.bind(function() {
+                    validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/" + user._id, _.bind(function () {
                     
-                    this.reloadData();
-                
-                }, this));
-            }, this));            
+                        this.$el.find("#changeUserPasswordHeadingLabel").text($.t("openidm.ui.admin.users.ChangeUserPasswordDialog.securityDataChangeForWhom", { postProcess: 'sprintf', sprintf: [this.editedUsername] }));
+                        
+                        this.reloadData();
+                    
+                    }, this));
+                }, this));            
+            }, this));
         },
         
         reloadData: function() {

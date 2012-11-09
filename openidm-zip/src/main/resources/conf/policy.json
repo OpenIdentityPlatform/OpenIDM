@@ -3,7 +3,7 @@
     "file" : "script/policy.js",
     "resources" : [
         {
-            "resource" : "managed/user",
+            "resource" : "managed/user/*",
             "properties" : [
                 {
                     "name" : "userName",
@@ -131,6 +131,33 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.securityQuestions"
                             }
+                        },
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 16
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "securityAnswerAttempts",
+                    "policies" : [
+                        {
+                            "policyId" : "max-attempts-triggers-lock-cooldown",
+                            "params" : {
+                                "max" : 3,
+                                "numMinutes" : 15,
+                                "dateTimeField" : "lastSecurityAnswerAttempt"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "lastSecurityAnswerAttempt",
+                    "policies" : [
+                        {
+                            "policyId" : "valid-date"
                         }
                     ]
                 },
@@ -155,7 +182,7 @@
             ]
         },
         {
-            "resource" : "repo/internal/user",
+            "resource" : "repo/internal/user/*",
             "properties" : [
                 {
                     "name" : "password",
@@ -182,12 +209,6 @@
                             "policyId" : "minimum-length",
                             "params" : {
                                 "minLength" : 8
-                            }
-                        },
-                        {
-                            "policyId" : "cannot-contain-others",
-                            "params" : {
-                                "disallowedFields" : "userName,givenName,familyName"
                             }
                         }
                     ]

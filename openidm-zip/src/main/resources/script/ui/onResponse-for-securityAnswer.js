@@ -30,11 +30,29 @@
  * 
  * It is run on response to for-securityAnswer query.
  */
-
 user = openidm.read("managed/user/" + response.result[0]._id);
+user.securityAnswerAttempts++;
 
-if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.params['securityAnswer']) {
+try {
+
+    //openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+
+    user.lastSecurityAnswerAttempt = (new Date()).toString();
+    
+    if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.params['securityAnswer']) {
+
+        user.lastSecurityAnswerAttempt =  (new Date()).toString();
+        //openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+        delete response.result;
+        
+    } else {
+        user.securityAnswerAttempts=0;
+        //openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+        response.result = user['_id'];
+    }
+    
+} 
+catch (err) {
     delete response.result;
-} else {
-    response.result = user['_id'];
+    response.detail = err;
 }
