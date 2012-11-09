@@ -43,7 +43,6 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
         },
         
         render: function(args) {
-            console.log("ACASASFVAES");
             var i, processId;
             if (args && args[0] && args[0] !== '') {
                 processId = args[0];

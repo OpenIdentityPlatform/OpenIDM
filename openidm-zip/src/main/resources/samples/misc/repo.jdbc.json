@@ -38,7 +38,7 @@
             "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
             
-            "notifications-for-user" : "SELECT * FROM ${_dbSchema}.uinotification WHERE userId = ${userId}",
+            "notifications-for-user" : "SELECT * FROM ${_dbSchema}.uinotification WHERE receiverId = ${userId}",
             "user_application_lnk-for-user" : "SELECT * FROM ${_dbSchema}.manageduserapplicationlnk WHERE userId = ${userId}",
             "query-all-user_application_lnk" : "select * from ${_dbSchema}.manageduserapplicationlnk",
             "user_application_lnk-for-id" : "select * from ${_dbSchema}.manageduserapplicationlnk WHERE objectid = ${userApplicationLnkId}",
@@ -81,11 +81,12 @@
                 "objectToColumn" : {
                     "_id" : "objectid",
                     "_rev" : "rev",
-                    "type" : "notificationType",
-                    "message" : "message",
-                    "requestDate" : "requestDate",
                     "requester" : "requester",
-                    "userId" : "userId"
+                    "requesterId" : "requesterId",
+                    "receiverId" : "receiverId",
+                    "createDate" : "createDate",
+                    "type" : "type",
+                    "message" : "message"
                 }
             },
             "managed/user_application_lnk" : {

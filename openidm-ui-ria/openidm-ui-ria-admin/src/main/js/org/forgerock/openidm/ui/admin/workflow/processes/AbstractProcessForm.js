@@ -47,6 +47,10 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
             
         },
         
+        prepareData: function(callback) {
+            callback();
+        },
+        
         render: function(processDefinition, category, args, callback) { 
             this.setElement(this.element);
             this.$el.unbind();
@@ -55,10 +59,13 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
             this.category = category;
             this.args = args;
             
-            this.parentRender(function() {      
-                this.postRender(callback);
-                this.reloadData();
-            });            
+            this.prepareData(_.bind(function() {
+                this.parentRender(function() {  
+                    this.postRender(callback);
+                    this.reloadData();
+                }); 
+            }, this));
+                       
         },
         
         reloadData: function() {

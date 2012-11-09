@@ -131,7 +131,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
                 if (result[processName]) {
                     currentProcessVersion = result[processName]._id.split(':')[1];
                     newProcesVersion = splittedProcessDefinition[1];
-                    if (newProcesVersion > currentProcessVersion) {
+                    if (parseInt(newProcesVersion) > parseInt(currentProcessVersion)) {
                         result[processName] = processDefinition;
                     }
                 } else {

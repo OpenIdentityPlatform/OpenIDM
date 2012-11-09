@@ -52,7 +52,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
             iconLink = notificationViewHelper.configuration.typeToIconMapping[item.type];
             message = item.message;
             requester = item.requester;
-            requestDate = dateUtil.formatDate(item.requestDate);
+            requestDate = dateUtil.formatDate(item.createDate);
             
             deleteLink = '<a name="deleteLink" href="#">' + $.t("common.notification.deleteThisMessage") + '</a>';
             id = item._id;
