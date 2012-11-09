@@ -44,7 +44,7 @@ CLASSPATH="\$OPENIDM_HOME"/bin/felix.jar:"\$OPENIDM_HOME"/bin/openidm.jar
 START_CMD="nohup \$JAVA_BIN \$LOGGING_CONFIG \$JAVA_OPTS \$OPENIDM_OPTS -Djava.endorsed.dirs=\$JAVA_ENDORSED_DIRS \\
 		-Djava.security.auth.login.config=security/jaas-repo.conf  -classpath \$CLASSPATH \\
 		-Dopenidm.system.server.root=\$OPENIDM_HOME -Dignore.openidm.system.server.environment=\"dev|test|qa|prod\" \\
-		-Dfelix.startup.daemon=true org.apache.felix.main.Main \$@ > logs/server.out 2>&1 &"
+		-Dfelix.startup.daemon=true org.apache.felix.main.Main > logs/server.out 2>&1 &"
 
 case "\${1}" in
 start)
