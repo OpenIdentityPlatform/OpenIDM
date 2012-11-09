@@ -427,6 +427,7 @@ public class TaskScannerJob {
                 }
 
             } catch (ScriptException se) {
+                context.getStatistics().taskFailed();
                 String msg = context.getScriptName() + " script invoked by " +
                         context.getInvokerName() + " encountered exception";
                 logger.debug(msg, se);

@@ -60,6 +60,7 @@ import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.patch.JsonPatchWrapper;
 
 /**
@@ -429,27 +430,50 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         }
     }
 
-// TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
+    // TODO: Consider dropping this Patch object abstraction and just process a patch document directly?
     @Override
     public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-// FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
-        LOGGER.debug("patch name={} id={}", name, id);
-        idRequired(id);
-        noSubObjects(id);
-        JsonValue oldValue = new JsonValue(service.getRouter().read(repoId(id))); // Get the oldest value for diffing in the log
-        JsonValue decrypted = decrypt(oldValue); // decrypt any incoming encrypted properties
-        JsonValue newValue = decrypted.copy();
-        patch.apply(newValue.asMap());
-        JsonValue params = new JsonValue(new HashMap<String, Object>());
-        // Validate policies on the patched object
-        params.add("_action", "validateObject");
-        params.add("value", newValue);
-        JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
-        if (!result.get("result").asBoolean()) {
-            throw new ObjectSetException("Failed policy validation");
-        }
-        update(id, rev, decrypted, newValue);
-        logActivity(id, "Patch " + patch, oldValue, newValue);
+        // FIXME: There's no way to decrypt a patch document. :-(  Luckily, it'll work for now with patch action.
+        boolean forceUpdate = (rev == null);
+        boolean retry = forceUpdate;
+        String _rev = rev;
+
+        do {
+            LOGGER.debug("patch name={} id={}", name, id);
+            idRequired(id);
+            noSubObjects(id);
+            JsonValue oldValue = new JsonValue(service.getRouter().read(repoId(id))); // Get the oldest value for diffing in the log
+            JsonValue decrypted = decrypt(oldValue); // decrypt any incoming encrypted properties
+
+            // If we haven't defined a rev, we need to get the current rev
+            if (rev == null) {
+                _rev = decrypted.get("_rev").asString();
+            }
+
+            JsonValue newValue = decrypted.copy();
+            patch.apply(newValue.asMap());
+            JsonValue params = new JsonValue(new HashMap<String, Object>());
+            // Validate policies on the patched object
+            params.add("_action", "validateObject");
+            params.add("value", newValue);
+            JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
+            if (!result.get("result").asBoolean()) {
+                throw new ObjectSetException("Failed policy validation");
+            }
+
+            try {
+                update(id, _rev, decrypted, newValue);
+                retry = false;
+                logActivity(id, "Patch " + patch, oldValue, newValue);
+            } catch (ConflictException e) {
+                if (forceUpdate) {
+                    LOGGER.debug("Unable to update due to revision conflict. Retrying.");
+                } else {
+                    // If it fails and we're not trying to force an update, we gave it our best shot
+                    throw e;
+                }
+            }
+        } while(retry);
     }
 
     @Override
