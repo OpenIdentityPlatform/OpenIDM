@@ -24,6 +24,6 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/workflow/tasks/customview/main", [
-	"./ApplicationAcceptanceTask"
+define("org/forgerock/openidm/ui/admin/workflow/processes/customview/main", [
+	"./SendNotificationProcess"
 ]);
