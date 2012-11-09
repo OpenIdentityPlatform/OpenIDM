@@ -120,7 +120,7 @@ public class ScopeFactoryService implements ScopeFactory {
      */
     private JsonResourceAccessor accessor(JsonValue context) {
         return new JsonResourceAccessor(router, context);
-    } 
+    }
 
     @Override
     public Map<String, Object> newInstance(final JsonValue context) {
@@ -174,6 +174,20 @@ public class ScopeFactoryService implements ScopeFactory {
                         return null; // no news is good news
                     }
                 });
+                // patch(string id, string rev, object value)
+                openidm.put("patch", new Function() {
+                    @Override
+                    public Object call(Map<String, Object> scope,
+                     Map<String, Object> _this, List<Object> params) throws Throwable {
+                        JsonValue p = paramsValue(params);
+                        accessor(context).patch(
+                         p.get(0).required().asString(),
+                         p.get(1).asString(),
+                         p.get(2).required().expect(List.class)
+                        );
+                        return null;
+                    }
+                });
                 // delete(string id, string rev)
                 openidm.put("delete", new Function() {
                     @Override
@@ -216,7 +230,7 @@ public class ScopeFactoryService implements ScopeFactory {
                         ).getWrappedObject();
                     }
                 });
-                // encrypt(any value, string cipher, string alias) 
+                // encrypt(any value, string cipher, string alias)
                 openidm.put("encrypt", new Function() {
                     @Override
                     public Object call(Map<String, Object> scope,
@@ -238,6 +252,15 @@ public class ScopeFactoryService implements ScopeFactory {
                         return cryptoService.decrypt(
                           jv.get(0).required()
                         ).getObject();
+                    }
+                });
+                // isEncrypted(any value)
+                openidm.put("isEncrypted", new Function() {
+                    @Override
+                    public Object call(Map<String, Object> scope,
+                     Map<String, Object> _this, List<Object> params) throws Throwable {
+                        JsonValue jv = paramsValue(params);
+                        return cryptoService.isEncrypted(jv.get(0).required());
                     }
                 });
                 return openidm;
