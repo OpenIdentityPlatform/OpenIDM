@@ -217,8 +217,8 @@ function getPolicy(policyId) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var req = request.parent.parent;
-    if (typeof req.type !== 'undefined' && req.type == "http") {
+    var req = getHttpRequest(request);
+    if (req) {
         try {
             authFilter.reauthenticate(req);
         } catch (error) {
@@ -226,6 +226,17 @@ function reauthRequired(fullObject, value, params, propName) {
         }
     }
     return [];
+}
+
+function getHttpRequest(req) {
+    if (typeof req.parent !== 'undefined') {
+        if (req.parent.type == "http") {
+            return req.parent;
+        } else {
+            return getHttpRequest(req.parent);
+        } 
+    }
+    return null;
 }
 
 function getPropertyValue(requestObject, propName) {
@@ -403,7 +414,7 @@ function getAdditionalPolicies(id) {
         if (objects !== undefined && objects !== null) {
             for (var i = 0; i < objects.length; i++) {
                 var obj = objects[i];
-                if (obj.name == object) {
+                if ((obj.name == object) || resourceMatches(object, obj.name + "/*")) {
                     var props = obj.properties;
                     if (props != null) {
                         for (var j = 0; j < props.length; j++) {
