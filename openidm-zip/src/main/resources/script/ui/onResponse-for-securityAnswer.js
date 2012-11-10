@@ -35,24 +35,28 @@ user.securityAnswerAttempts++;
 
 try {
 
-    //openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
-
-    user.lastSecurityAnswerAttempt = (new Date()).toString();
+    // This could throw a policy violation if there is one in place enforcing a maximum number of attempts 
+    openidm.update("managed/user/" + response.result[0]._id, user._rev, user); 
     
     if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.params['securityAnswer']) {
-
-        user.lastSecurityAnswerAttempt =  (new Date()).toString();
-        //openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
-        delete response.result;
-        
+        throw "Incorrect Answer";
     } else {
+
+        user = openidm.read("managed/user/" + response.result[0]._id);
         user.securityAnswerAttempts=0;
-        //openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+        openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
         response.result = user['_id'];
+        
     }
     
 } 
 catch (err) {
-    delete response.result;
+    
+    user = openidm.read("managed/user/" + response.result[0]._id);
+    user.lastSecurityAnswerAttempt = (new Date()).toString();
+    openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+    
     response.detail = err;
+    delete response.result;
+    
 }

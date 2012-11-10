@@ -343,18 +343,25 @@ function getResourceWithPolicyRequirements(resource) {
 }
 
 function validate(policies, fullObject, propName, propValue, retArray) {
-    var retObj = {};
-    var policyRequirements = new Array();
-    for (var i = 0; i < policies.length; i++) {
+    var retObj = {},
+        policyRequirements = new Array(),
+        i,params,policy,validationFunc,failed,y;
+    
+    for (i = 0; i < policies.length; i++) {
         params = policies[i].params;
-        var policy = getPolicy(policies[i].policyId);
+        policy = getPolicy(policies[i].policyId);
         if (policy == null) {
             throw "Unknown policy " + policies[i].policyId;
         }
-        var validationFunc = eval(policy.policyExec); 
-        var failed = validationFunc.call(this, fullObject, propValue, params, propName);
+        validationFunc = eval(policy.policyExec); 
+        
+        if (propValue && openidm.isEncrypted(propValue)) {
+            propValue = openidm.decrypt(propValue);
+        }
+            
+        failed = validationFunc.call(this, fullObject, propValue, params, propName);
         if (failed.length > 0) {
-            for ( var y = 0; y < failed.length; y++) {
+            for ( y = 0; y < failed.length; y++) {
                 policyRequirements.push(failed[y]);
             }
         }
