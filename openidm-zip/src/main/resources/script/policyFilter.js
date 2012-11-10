@@ -12,6 +12,6 @@ if (!(request.id.indexOf("policy/")==0)) {
                 message.push(result.failedPolicyRequirements[i].policyRequirements[j].policyRequirement)
             }
         }
-        throw "Policy validation failed ": " + message.join(",");
+        throw "Policy validation failed ": + message.join(",");
     }
 }
