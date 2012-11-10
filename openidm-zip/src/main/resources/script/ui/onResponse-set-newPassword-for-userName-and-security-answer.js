@@ -30,16 +30,40 @@
  */
 
 user = openidm.read("managed/user/" + response.result[0]._id);
+user.securityAnswerAttempts++;
+
 securityAnswer = user.securityAnswer;
 requestedUserNameMatchesReturnedUserName = (response.result[0].userName == request.params['username']);
 
-if (securityAnswer && requestedUserNameMatchesReturnedUserName) {
-    isRequestedSecurityEqualToReturned = (openidm.decrypt(user.securityAnswer) === request.params['securityAnswer']);
-    if (isRequestedSecurityEqualToReturned) {
-        logger.info("Setting new password for {}", request.params['username']);
-        user.password = request.params['newpassword'];
-        user.securityAnswer = request.params['securityAnswer'];
-        openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
-        response.result = "correct";
+try {
+
+    // This could throw a policy violation if there is one in place enforcing a maximum number of attempts 
+    openidm.update("managed/user/" + response.result[0]._id, user._rev, user); 
+    user = openidm.read("managed/user/" + response.result[0]._id);
+
+
+    if (securityAnswer && requestedUserNameMatchesReturnedUserName) {
+        isRequestedSecurityEqualToReturned = (openidm.decrypt(user.securityAnswer) === request.params['securityAnswer']);
+        if (isRequestedSecurityEqualToReturned) {
+            logger.info("Setting new password for {}", request.params['username']);
+            user.password = request.params['newpassword'];
+            user.securityAnswer = request.params['securityAnswer'];
+            user.securityAnswerAttempts=0;
+            openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+            response.result = "correct";
+        } else {
+            throw "Incorrect Answer";
+        }
     }
+    
+} 
+catch (err) {
+    
+    user = openidm.read("managed/user/" + response.result[0]._id);
+    user.lastSecurityAnswerAttempt = (new Date()).toString();
+    openidm.update("managed/user/" + response.result[0]._id, user._rev, user);
+    
+    response.detail = err;
+    delete response.result;
+    
 }
