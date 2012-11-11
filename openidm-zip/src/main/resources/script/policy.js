@@ -197,18 +197,24 @@ function requiredIfConfigured(fullObject, value, params, property) {
     else
         return [];
 }
+
 function unique(fullObject, value, params, property) {
     var queryParams = {
             "_query-id": "get-by-field-value",
             "field": property,
             "value": value
-            };
+            },
+        existing,requestId,requestBaseArray;
     
     if (value && value.length)
     {
-        var existing = openidm.query(request.id,  queryParams);
-        
-        if (existing.result.length != 0 && (!fullObject["_id"] || existing.result[0]["_id"] != fullObject["_id"])) {
+        requestBaseArray = request.id.split("/");
+        if (requestBaseArray.length === 3) {
+            requestId = requestBaseArray.pop();
+        }
+        existing = openidm.query(requestBaseArray.join("/"),  queryParams);
+
+        if (existing.result.length != 0 && (!requestId || (existing.result[0]["_id"] != requestId))) {
             return [{"policyRequirement": "UNIQUE"}];
         }
     }
