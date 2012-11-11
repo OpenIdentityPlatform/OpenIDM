@@ -157,6 +157,14 @@
             <outputDirectory>/openidm/bin</outputDirectory>
         </dependencySet>
         <dependencySet>
+            <unpack>false</unpack>
+            <includes>
+                <include>org.apache.felix:org.apache.felix.gogo.runtime</include>
+                <include>org.apache.felix:org.apache.felix.gogo.shell</include>
+            </includes>
+            <outputDirectory>/openidm/bin</outputDirectory>
+        </dependencySet>
+        <dependencySet>
             <outputDirectory>/openidm/bin/workflow</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</include>

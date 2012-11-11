@@ -1,1 +1,1 @@
-java -classpath "bin/openidm.jar;bundle/*;bundle/init/*" org.forgerock.openidm.shell.impl.Main %*
+java -classpath "bin/*;bundle/*" org.forgerock.openidm.shell.impl.Main %*

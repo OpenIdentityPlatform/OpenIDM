@@ -120,6 +120,8 @@
   reconciliations over the REST interface, as described in the following
   section.</para>
   
+  </section>
+  
   <section xml:id="recon-over-rest">
    <title>Managing Reconciliation Over REST</title>
    <para>You can trigger, cancel, and monitor reconciliation operations over
@@ -384,7 +386,6 @@
     </variablelist>
    </section>
   </section>
- </section>
 
  <section xml:id="sync-flexible-data">
   <title>Flexible Data Model</title>
@@ -1438,56 +1439,6 @@
     </tgroup>
    </table>
   </section>
-
-  <section xml:id="reconciliation-optimization">
-   <title>Reconciliation Optimization</title>
-   
-  <para>To optimize a reconciliation operation, the reconciliation process does 
-  not attempt to correlate source objects to target objects if the set of 
-  target objects is empty when the correlation is started. This considerably 
-  speeds up the process the first time the reconciliation is run. You can change 
-  this behavior for a specific mapping by adding the 
-  <literal>correlateEmptyTargetSet</literal> property to the mapping definition 
-  and setting it to <literal>true</literal>. For example:</para>
-   
-  <programlisting language="javascript">
-{
-    "mappings": [
-        {
-            "name"                     : "systemMyLDAPAccounts_managedUser",
-            "source"                   : "system/MyLDAP/account",
-            "target"                   : "managed/user",
-            "correlateEmptyTargetSet"  : "true"
-        },
-    ]
-}</programlisting>
-
-   <para>Be aware that this setting will have a performance impact on the 
-   reconciliation process.</para>
-  
-   <para>All links are queried at the start of a correlation and the results of 
-   that query are used. You can disable the prefetching of links, so that the 
-   correlation process looks up each link in the database as it processes each 
-   source or target object. You can disable the prefetching of links by adding 
-   the <literal>prefetchLinks</literal> property to the mapping, and setting it 
-   to <literal>false</literal>, for example:</para>
-  
-   <programlisting language="javascript">
-{
-    "mappings": [
-        {
-            "name": "systemMyLDAPAccounts_managedUser",
-            "source": "system/MyLDAP/account",
-            "target": "managed/user"
-            "prefetchLinks" : "false"
-        }
-    ]
-}</programlisting>
-   
-   <para>Be aware that this setting will have a performance impact on the 
-   reconciliation process.</para>
-   
-  </section>
   
   <section xml:id="sync-actions">
    <title>Synchronization Actions</title>
@@ -1543,6 +1494,116 @@
    </variablelist>
   </section>
  </section> 
+
+ <section xml:id="reconciliation-optimization">
+  <title>Reconciliation Optimization</title>
+  
+  <para>By default, reconciliation is configured to function in an optimized 
+  way. Some of these optimizations might, however, be unsuitable for your 
+  environment. The following sections describe the optimizations and how they 
+  can be configured.</para>
+  
+  <section xml:id="correlate-target-set">
+   <title>Correlating Empty Target Sets</title>
+   
+  <para>To optimize a reconciliation operation, the reconciliation process does 
+  not attempt to correlate source objects to target objects if the set of 
+  target objects is empty when the correlation is started. This considerably 
+  speeds up the process the first time the reconciliation is run. You can change 
+  this behavior for a specific mapping by adding the 
+  <literal>correlateEmptyTargetSet</literal> property to the mapping definition 
+  and setting it to <literal>true</literal>. For example:</para>
+   
+  <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name"                     : "systemMyLDAPAccounts_managedUser",
+            "source"                   : "system/MyLDAP/account",
+            "target"                   : "managed/user",
+            "correlateEmptyTargetSet"  : "true"
+        },
+    ]
+}</programlisting>
+
+   <para>Be aware that this setting will have a performance impact on the 
+   reconciliation process.</para>
+   </section>
+   
+   <section xml:id="prefetching-links">
+   <title>Prefetching Links</title>
+  
+   <para>All links are queried at the start of a correlation and the results of 
+   that query are used. You can disable the prefetching of links, so that the 
+   correlation process looks up each link in the database as it processes each 
+   source or target object. You can disable the prefetching of links by adding 
+   the <literal>prefetchLinks</literal> property to the mapping, and setting it 
+   to <literal>false</literal>, for example:</para>
+  
+   <programlisting language="javascript">
+{
+    "mappings": [
+        {
+            "name": "systemMyLDAPAccounts_managedUser",
+            "source": "system/MyLDAP/account",
+            "target": "managed/user"
+            "prefetchLinks" : "false"
+        }
+    ]
+}</programlisting>
+   
+   <para>Be aware that this setting will have a performance impact on the 
+   reconciliation process.</para>
+   </section>
+   
+   <section xml:id="parallel-recon-tasks">
+    <title>Parallel Reconciliation Threads</title>
+    
+    <para>By default, reconciliation is executed in a multi-threaded manner, 
+    that is, numerous threads are dedicated to the same reconciliation run. 
+    Multithreading generally improves reconciliation run performance. The 
+    default number of threads for a single reconciliation run is ten (plus the 
+    main reconciliation thread). Under normal circumstances, you should not 
+    need to change this number, however the default might not be appropriate 
+    in the following situations:</para>
+    
+    <itemizedlist>
+      <listitem>
+        <para>The hardware has many cores and supports more concurrent threads. 
+        As a rule of thumb for performance tuning, start with setting the 
+        thread number to two times the number of cores.</para>
+      </listitem>
+      <listitem>
+       <para>The source or target is an external system with high latency or 
+       slow response times. Threads may then spend considerable time waiting 
+       for a response from the external system. Increasing the available 
+       threads enables the system to prepare or continue with additional 
+       objects.</para>
+      </listitem>
+    </itemizedlist> 
+    
+    <para>To change the number of threads, set the <literal>taskThreads</literal> 
+    property in the <filename>conf/sync.json</filename> file, for example:</para>
+    
+    <programlisting language="javascript">
+    "mappings" : [
+        {
+            "name" : "systemXmlfileAccounts_managedUser",
+            "source" : "system/xmlfile/account",
+            "target" : "managed/user",
+            "taskThreads" : 20
+            ...
+         }
+    ]
+}</programlisting>
+    
+    <para>A value of <literal>0</literal> specifies that reconciliation is run 
+    on the main reconciliation thread, that is, in a serial manner.</para>
+   
+   </section>
+   
+ </section>
+
 
  <section xml:id="correlation">
   <title>Correlation Queries</title>
