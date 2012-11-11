@@ -52,6 +52,7 @@
                 "table" : "internaluser",
                 "objectToColumn" : {
                     "_id" : "objectid",
+                    "_rev" : "rev",
                     "password" : "pwd",
                     "roles" : "roles"
                 }
