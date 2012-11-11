@@ -25,7 +25,6 @@ package org.forgerock.openidm.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -40,12 +39,11 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
 
 import org.ops4j.pax.web.extender.whiteboard.ExtenderConstants;
-import org.ops4j.pax.web.service.SharedWebContainerContext;
-import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 
+import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +60,7 @@ public final class ContextRegistrator {
     final static Logger logger = LoggerFactory.getLogger(ContextRegistrator.class);
     
     @Reference
-    WebContainer httpService;
+    HttpService httpService;
 
     HttpContext httpContext;
     
@@ -86,20 +84,6 @@ public final class ContextRegistrator {
     @Activate
     protected void activate(ComponentContext context) throws Exception {
         this.context = context;
-
-        // register the http context so other bundles can add filters etc.
-        /*//http://team.ops4j.org/browse/PAXWEB-344
-        try {
-            Method getDefaultSharedHttpContext = httpService.getClass().getDeclaredMethod("getDefaultSharedHttpContext");
-            if (null != getDefaultSharedHttpContext) {
-                httpContext = (SharedWebContainerContext) getDefaultSharedHttpContext.invoke(httpService);
-                ((SharedWebContainerContext) httpContext).registerBundle(context.getBundleContext().getBundle());
-            } else {
-                httpContext = httpService.createDefaultHttpContext();
-            }
-        } catch (Exception e) {
-            httpContext = httpService.createDefaultHttpContext();
-        }*/
         httpContext = httpService.createDefaultHttpContext();
         Dictionary<String, Object> contextProps = new Hashtable<String, Object>();
         contextProps.put("openidm.contextid", "shared");
