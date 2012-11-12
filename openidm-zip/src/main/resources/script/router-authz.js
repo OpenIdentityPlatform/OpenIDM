@@ -61,7 +61,7 @@ var accessConfig = { "configs" : [
           "methods": "read",
           "actions" : "*"
       },
-  
+      
       // These options should only be available anonymously if selfReg is enabled
       {  "pattern" : "config/ui/*",
           "roles" : "openidm-reg",
@@ -75,18 +75,33 @@ var accessConfig = { "configs" : [
           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
           "actions" : "*"
       },
+
+      // Anonymous user can use the siteIdentification endpoint if it is enabled:
+      {  "pattern" : "endpoint/siteIdentification",
+          "roles" : "openidm-reg",
+          "methods": "read",
+          "customAuthz" : "checkIfUIIsEnabled('siteIdentification')",
+          "actions" : "*"
+      },
+
       // Anonymous user can invoke some queries which are public as part of the forgot password process:
+      {  "pattern" : "endpoint/securityQA",
+          "roles" : "openidm-reg",
+          "methods": "read",
+          "customAuthz" : "checkIfUIIsEnabled('securityQuestions')",
+          "actions" : "*"
+      },
       {  "pattern" : "managed/user/",
           "roles" : "openidm-reg",
           "methods": "query",
-          "customAuthz" : "checkIfUIIsEnabled('forgottenPassword') && isQueryOneOf({ 'managed/user/': ['check-userName-availability', 'get-security-question', 'for-security-answer', 'set-newPassword-for-userName-and-security-answer'] })",
+          "customAuthz" : "checkIfUIIsEnabled('securityQuestions') && isQueryOneOf({ 'managed/user/': ['check-userName-availability', 'get-security-question', 'for-security-answer', 'set-newPassword-for-userName-and-security-answer'] })",
           "actions" : "*"
       },
-      // This is needed by both self reg and forgot password
+      // This is needed by both self reg and security questions
       {  "pattern" : "policy/managed/user/*",
           "roles" : "openidm-reg",
           "methods": "read,action",
-          "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('forgottenPassword')",
+          "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')",
           "actions" : "*"
       },
 
