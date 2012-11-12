@@ -39,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     processManagementUrl    =   "/openidm/workflow/processinstance";
     processDefinitionUrl = "/openidm/workflow/processdefinition";
     endpointUrl = "/openidm/endpoint/gettasksview";
+    processDefinitiosEndpointUrl = "/openidm/endpoint/getprocessesforuser";
 
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {
@@ -111,18 +112,18 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
         }, error: errorCallback} );
     };
     
-    obj.getAllProcessDefinitions = function(successCallback, errorCallback) {
+    obj.getAllProcessDefinitions = function(userName, successCallback, errorCallback) {
         console.info("getting all process definitions");
         
-        obj.serviceCall({url: processDefinitionUrl + "?_query-id=query-all-ids", success: function(data) {
+        obj.serviceCall({url: processDefinitiosEndpointUrl + "?userName=" + userName, success: function(data) {
             if(successCallback) {
-                successCallback(data.result);
+                successCallback(data);
             }
         }, error: errorCallback} );
-    };
-    
-    obj.getAllUniqueProcessDefinitions = function(successCallback, errorCallback) {
-        obj.getAllProcessDefinitions( function(processDefinitions) {
+    }
+        
+    obj.getAllUniqueProcessDefinitions = function(userName, successCallback, errorCallback) {
+        obj.getAllProcessDefinitions(userName, function(processDefinitions) {
             
             var result = {}, ret = [], i, processDefinition, splittedProcessDefinition, processName, currentProcessVersion, newProcesVersion, r;
             for (i=0; i < processDefinitions.length; i++) {

@@ -32,8 +32,9 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
     "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView"
-], function(AbstractView, workflowManager, eventManager, constants, startProcessView) {
+    "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function(AbstractView, workflowManager, eventManager, constants, startProcessView, conf) {
     var StartProcessDashboardView = AbstractView.extend({
         
         template: "templates/admin/workflow/processes/StartProcessDashboardTemplate.html",
@@ -49,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
             }
             this.parentRender(function() {
                 this.clearStartProcessView();
-                workflowManager.getAllUniqueProcessDefinitions( function(processDefinitions) {
+                workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser.userName, function(processDefinitions) {
                     for (i = 0; i < processDefinitions.length; i++) {
                         $("#processList").append("<div><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
                                 + "<input type='hidden' name='id' value='" + processDefinitions[i]._id +"' />"
