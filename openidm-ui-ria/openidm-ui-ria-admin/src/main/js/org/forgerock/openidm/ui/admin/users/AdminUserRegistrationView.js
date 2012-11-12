@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             if(validatorsManager.formValidated(this.$el) && !this.isFormLocked()) {
                 this.lock();
                 
-                data.roles = data.roles.join(",");
+                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get().join(",");
                 delete data.terms;
                 delete data.passwordConfirm;
                 data.securityQuestion = 1;

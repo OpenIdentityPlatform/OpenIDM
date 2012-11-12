@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/siteIdentification",
+    "type" : "text/javascript",
+    "file" : "script/ui/getSiteIdentificationForLogin.js"
+}
