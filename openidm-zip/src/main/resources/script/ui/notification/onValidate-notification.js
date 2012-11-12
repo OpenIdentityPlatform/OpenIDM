@@ -33,18 +33,22 @@ var errors = [];
 function requiredValidator(toValidate, fieldName) {
     if (!toValidate || toValidate === "") {
         errors.push(fieldName + " is required");
-        return false;
     }
-    return true;
 }
 
 function isNotificationValid() {
     var notification = openidm.decrypt(object);
+    
+    if ( (!notification.requester || notification.requester === "") 
+            && (!notification.requesterId || notification.requesterId === "") ) {
+        errors.push("Notification Requester or Requester ID is required");
+    }
+    
+    requiredValidator(notification.receiverId, "Notification Receiver");
+    requiredValidator(notification.createDate, "Create Date");
     requiredValidator(notification.type, "Notification Type");
     requiredValidator(notification.message, "Notification Message");
-    requiredValidator(notification.requestDate, "Request Date");
-    requiredValidator(notification.requester, "Notification Requester");
-    requiredValidator(notification.userId, "Notification User");
+    
     if(errors.length > 0) {
     	throw errors;
     }

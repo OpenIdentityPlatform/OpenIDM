@@ -24,7 +24,7 @@
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
         
-        "notifications-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
+        "notifications-for-user": "SELECT * FROM ${_resource} WHERE receiverId = '${userId}'",
         "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
         "query-all-user_application_lnk": "select * from ${_resource}",
         "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",

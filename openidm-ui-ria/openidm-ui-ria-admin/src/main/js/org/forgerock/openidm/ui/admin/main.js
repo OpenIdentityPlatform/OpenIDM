@@ -25,7 +25,8 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/admin/main", [
-    "org/forgerock/openidm/ui/admin/workflow/tasks/customview/main",                                               
+    "org/forgerock/openidm/ui/admin/workflow/tasks/customview/main",    
+    "org/forgerock/openidm/ui/admin/workflow/processes/customview/main",    
 	"./users/AdminUserRegistrationView",
 	"./users/AdminUserProfileView",
 	"./users/ChangeUserPasswordDialog",

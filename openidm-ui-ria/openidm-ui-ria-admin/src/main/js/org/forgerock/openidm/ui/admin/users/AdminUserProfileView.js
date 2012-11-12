@@ -93,7 +93,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 
                 this.parentRender(_.bind(function() {
                     this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity, _.bind(function () {
+                    validatorsManager.bindValidators(this.$el, userDelegate.baseEntity + "/" + this.data.user._id, _.bind(function () {
                     
                         this.reloadData();
                         

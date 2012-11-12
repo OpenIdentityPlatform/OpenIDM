@@ -1,12 +1,14 @@
-<h2 class="header">{{t "common.task.taskDetails"}}</h2>
-
 <div class="column-layout">
 	<div class="column">
-		<form class="form large center">
-			<div id="taskContent"></div>
-			<div id="actions" class="field field-submit">
-                <input type="submit" name="saveButton" value='{{t "common.form.update"}}' class="button active">
-            </div>
+		<form class="form  center">
+		    <div id="taskContent"></div>
+		    {{#equals category "assigned"}}
+		    <div id="actions" class="field field-submit">
+		        <a href="#" class="closeLink">{{t "common.form.close"}}</a>
+		        <a href="#" class="requeueLink">{{t "common.task.requeue"}}</a>
+		        <input type="submit" name="saveButton" value='{{t "common.form.update"}}' class="button active">
+		    </div>
+		    {{/equals}}
 		</form>
 	</div>
 </div>

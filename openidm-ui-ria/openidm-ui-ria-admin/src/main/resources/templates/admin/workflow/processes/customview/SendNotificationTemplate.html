@@ -1,0 +1,29 @@
+<div class="field">
+    <label class="light">{{t "common.user.user"}}</label> 
+    {{select users "notificationReceiverId" "" "" ' data-validator="required" '}} 
+    <span style="" class="error">x</span>
+    <div class="validation-message"></div>
+</div>
+
+<div class="field">
+    <label class="light">{{t "common.notification.type"}}</label> 
+    {{select notificationTypes "notificationType" "y" "" ' data-validator="required" '}} 
+    <span style="" class="error">x</span>
+    <div class="validation-message"></div>
+</div>
+
+<div class="field">
+    <label class="light">{{t "common.notification.subtype"}}</label> 
+    <input type="text" name="notificationSubType" />
+</div>
+
+<div class="field">
+    <input type="text" name="notificationRequesterDiasplayable"  value="{{loggedUser.userName}}" style="display: none"/>
+</div>
+
+<div class="field">
+    <label class="light">{{t "common.notification.message"}}</label> 
+    <textarea name="notificationMessage" data-validator="required_max255" ></textarea>
+    <span style="" class="error">x</span>
+    <div class="validation-message"></div>
+</div>

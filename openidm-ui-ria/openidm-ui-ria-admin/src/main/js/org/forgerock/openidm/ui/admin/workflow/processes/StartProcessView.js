@@ -35,20 +35,50 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
     "org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate",
     "org/forgerock/openidm/ui/admin/workflow/FormManager",
     "org/forgerock/openidm/ui/admin/workflow/processes/TemplateStartProcessForm",
-    "org/forgerock/commons/ui/common/util/FormGenerationUtils"
-], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils) {
+    "org/forgerock/commons/ui/common/util/FormGenerationUtils",
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils, dateUtil) {
     var StartProcessView = AbstractView.extend({
         template: "templates/admin/workflow/processes/StartProcessTemplate.html",
 
-        element: "#startProcessForm",
+        element: "#processDetails",
+        
+        events: {
+            "click input[name=startProcessButton]": "formSubmit",
+            "onValidate": "onValidate"
+        },
+        
+        
+        formSubmit: function(event) {
+            event.preventDefault();
+            
+            if(validatorsManager.formNotInvalid(this.$el)) {
+                var params = form2js(this.$el.attr("id"), '.', false), param, typeName, paramValue, date, dateFormat;
+                delete params.startProcessButton;
+                for (param in params) {
+                    if (_.isNull(params[param])) {
+                        delete params[param];
+                    }
+                }
+                
+                if (this.definitionFormPropertyMap) {
+                    formGenerationUtils.changeParamsToMeetTheirTypes(params, this.definitionFormPropertyMap);
+                }
+                
+                workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
+                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
+                }, this));
+            }
+        },
         
         render: function(id, category) { 
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
-                
                     workflowManager.getProcessDefinition(id, _.bind(function(definition) {
-                        
                         var template = this.getGenerationTemplate(definition), view, passJSLint;
+                        this.processDefinition = definition;
+                        delete this.definitionFormPropertyMap;
                         
                         if(definition.formResourceKey) {
                             view = require(formManager.getViewForForm(definition.formResourceKey));
@@ -59,6 +89,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                                 console.log("There is no view defined for " + definition.formResourceKey);
                             }
                         } 
+                        
                         if(template !== false) {
                             templateStartProcessForm.render(definition, {}, template, _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
@@ -66,6 +97,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                             }, this));
                             return;
                         } else {
+                            this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
                             templateStartProcessForm.render(definition, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
@@ -85,6 +117,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
             }
             return false;
         }
+        
     }); 
     
     return new StartProcessView();

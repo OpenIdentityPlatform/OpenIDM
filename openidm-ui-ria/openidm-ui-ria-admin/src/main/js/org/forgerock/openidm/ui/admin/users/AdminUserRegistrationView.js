@@ -68,7 +68,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
             this.data.roles = conf.globalData.userRoles;
             
             this.parentRender(function() {
-                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity, _.bind(function () {
+                validatorsManager.bindValidators(this.$el, this.delegate.baseEntity + "/", _.bind(function () {
                     this.unlock();
                 }, this));
             });            
