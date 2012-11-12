@@ -276,13 +276,13 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   `objectid` VARCHAR(38) NOT NULL ,
   `rev` VARCHAR(38) NOT NULL ,
-  `type` VARCHAR(255) NOT NULL ,
+  `notificationType` VARCHAR(255) NOT NULL ,
   `createDate` VARCHAR(255) NOT NULL ,
   `message` TEXT NOT NULL ,
   `requester` VARCHAR(255) NULL ,
   `receiverId` VARCHAR(38) NOT NULL ,
   `requesterId` VARCHAR(38) NULL ,
-  `subtype` VARCHAR(255) NULL ,
+  `notificationSubtype` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 

@@ -85,7 +85,8 @@
                     "requesterId" : "requesterId",
                     "receiverId" : "receiverId",
                     "createDate" : "createDate",
-                    "type" : "type",
+                    "notificationType" : "notificationType",
+                    "notificationSubtype" : "notificationSubtype",
                     "message" : "message"
                 }
             },
