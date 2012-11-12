@@ -49,7 +49,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
         
         generateItemView: function(item) {
             var iconLink, message, requester, requestDate, requestDateString, deleteLink, id;
-            iconLink = notificationViewHelper.configuration.typeToIconMapping[item.type];
+            iconLink = notificationViewHelper.configuration.typeToIconMapping[item.notificationType];
             message = item.message;
             requester = item.requester;
             requestDate = dateUtil.formatDate(item.createDate);
@@ -106,6 +106,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
             var notificationId, self=this;
             event.preventDefault();
             notificationId = $(event.target).next().val();
+            
             notificationDelegate.deleteEntity(notificationId, function() {
                 self.removeItemAndRebuild(notificationId);
                 self.installAccordion(); 
