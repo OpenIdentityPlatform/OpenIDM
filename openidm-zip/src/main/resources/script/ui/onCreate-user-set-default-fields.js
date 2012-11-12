@@ -6,6 +6,8 @@
  * It is run every time new user is created.
  */  
 
+uiConfig =  openidm.read("config/ui/configuration");
+
 object.accountStatus = 'active';
 
 if(!object.roles) {
@@ -47,15 +49,6 @@ if (!object.country) {
 if (!object.city) {
     object.city = "";
 }
-
-if (!object.siteImage) {
-    object.siteImage = "1";
-}
-
-if (!object.passPhrase) {
-    object.passPhrase = "";
-}
-
 if (!object.givenName) {
     object.givenName = "";
 }
@@ -68,6 +61,7 @@ if (!object.phoneNumber) {
     object.phoneNumber = "";
 }
 
+/*
 if (!object.frequentlyUsedApplications) {
     object.frequentlyUsedApplications = "";
 }
@@ -75,24 +69,39 @@ if (!object.frequentlyUsedApplications) {
 if (!object.userApplicationsOrder) {
     object.userApplicationsOrder = "";
 }
+*/
 
 //password and security answer are generated if missing just to keep those attributes filled
 if (!object.password) {
     object.password = java.util.UUID.randomUUID().toString();
 }
 
-if (!object.securityAnswer) {
-    object.securityAnswer = java.util.UUID.randomUUID().toString();
+if (uiConfig.configuration.siteIdentification) {
+
+    if (!object.siteImage) {
+        object.siteImage = "1";
+    }
+
+    if (!object.passPhrase) {
+        object.passPhrase = "";
+    }
+
 }
 
-if (!object.securityQuestion) {
-    object.securityQuestion = "";
-}
+if (uiConfig.configuration.securityQuestions) {
+    if (!object.securityAnswer) {
+        object.securityAnswer = java.util.UUID.randomUUID().toString();
+    }
 
-if (!object.securityAnswerAttempts) {
-    object.securityAnswerAttempts = "0";
-}
+    if (!object.securityQuestion) {
+        object.securityQuestion = "";
+    }
 
-if (!object.lastSecurityAnswerAttempt) {
-    object.lastSecurityAnswerAttempt = (new Date()).toString();
+    if (!object.securityAnswerAttempts) {
+        object.securityAnswerAttempts = "0";
+    }
+
+    if (!object.lastSecurityAnswerAttempt) {
+        object.lastSecurityAnswerAttempt = (new Date()).toString();
+    }
 }
