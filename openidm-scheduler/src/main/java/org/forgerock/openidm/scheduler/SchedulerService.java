@@ -230,7 +230,7 @@ public class SchedulerService extends ObjectSetJsonResource {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Scheduler Service {}", compContext);
-        /*try {
+        try {
             if (inMemoryScheduler != null && inMemoryScheduler.isStarted()) {
                 inMemoryScheduler.shutdown();
             }
@@ -243,7 +243,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             }
         } catch (SchedulerException e) {
             logger.error("Error shutting down persistent scheduler", e);
-        }*/
+        }
     }   
     
     /**
