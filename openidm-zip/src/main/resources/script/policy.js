@@ -258,7 +258,10 @@ function reauthRequired(fullObject, value, params, propName) {
     var req = request.parent.parent;
     if (typeof req.type !== 'undefined' && req.type == "http") {
         try {
-            authFilter.reauthenticate(req);
+            var actionParams = {
+                "_action": "reauthenticate"
+            };
+            var response = openidm.action("authentication",  actionParams);
         } catch (error) {
             return [ { "policyRequirement" : "REAUTH_REQUIRED" } ];
         }
