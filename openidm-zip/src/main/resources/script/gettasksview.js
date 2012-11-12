@@ -11,17 +11,13 @@ getProcessInstance = function(processInstanceId) {
 }
 
 getTaskDefinition = function(processDefinitionId, taskDefinitionKey) {
-    java.lang.System.out.println(processDefinitionId);
-    java.lang.System.out.println(taskDefinitionKey);
     if (!taskDefinitions[processDefinitionId+"|"+taskDefinitionKey]) {
-        java.lang.System.out.println("1");
         var taskDefinitionQueryParams = {
-                "_query-id": "query-taskdefinition",
-                "processDefinitionId": processDefinitionId,
-                "taskDefinitionKey": taskDefinitionKey
-              };
+            "_query-id": "query-taskdefinition",
+            "processDefinitionId": processDefinitionId,
+            "taskDefinitionKey": taskDefinitionKey
+        };
         var taskDefinition = openidm.query("workflow/taskdefinition", taskDefinitionQueryParams);
-        java.lang.System.out.println(taskDefinition);
         taskDefinitions[processDefinitionId+"|"+taskDefinitionKey] = taskDefinition;
     }
     return taskDefinitions[processDefinitionId+"|"+taskDefinitionKey];
@@ -35,7 +31,7 @@ getUser = function(userId) {
                 "_query-id": "for-userName",
                 "uid": userId
             };
-            result = openidm.query("managed/user", params);
+            var result = openidm.query("managed/user", params);
             if (result.result && result.result.length == 1) {
                 var user = result.result[0];
             }
@@ -63,7 +59,7 @@ getDisplayableOf = function(user) {
 
 
 
-
+//code:
 if (!request.params || (!request.params.userId && !request.params.userName)) {
     throw "Required params: userId or userName";
 } else {
@@ -82,10 +78,10 @@ if (!request.params || (!request.params.userId && !request.params.userName)) {
 
 if (request.params.viewType === 'assignee') {
     var userAssignedTasksQueryParams = {
-            "_query-id": "filtered-query",
-            "assignee": userName
-         };
-    tasks = openidm.query("workflow/taskinstance", userAssignedTasksQueryParams).result;
+        "_query-id": "filtered-query",
+        "assignee": userName
+    };
+    var tasks = openidm.query("workflow/taskinstance", userAssignedTasksQueryParams).result;
 } else {
     var tasksUniqueMap = {};
     
@@ -93,7 +89,7 @@ if (request.params.viewType === 'assignee') {
       "_query-id": "filtered-query",
       "candidate": userName
     };
-    userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result;
+    var userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result;
     for (i = 0; i < userCandidateTasks.length; i++) {
         tasksUniqueMap[userCandidateTasks[i]._id] = userCandidateTasks[i];
     }
@@ -102,25 +98,22 @@ if (request.params.viewType === 'assignee') {
       "_query-id": "filtered-query",
       "candidate-group": roles
     };
-    userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
+    var userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
     for (i = 0; i < userGroupCandidateTasks.length; i++) {
         tasksUniqueMap[userGroupCandidateTasks[i]._id] = userGroupCandidateTasks[i];
     }
     
-    tasks = [];
+    var tasks = [];
     for (taskId in tasksUniqueMap) {
         tasks.push(tasksUniqueMap[taskId]);
     }
 }
 
 
-
-
-
-
+//building view
 var view = {};
 
-for (i = 0; i < tasks.length; i++) {
+for (var i = 0; i < tasks.length; i++) {
     var taskId = tasks[i]._id;
     var task = openidm.read("workflow/taskinstance/"+taskId);
     
@@ -131,19 +124,17 @@ for (i = 0; i < tasks.length; i++) {
 }
 
 for (var taskDefinition in view) {
-    var i = 0;
-    for (i = 0; i < view[taskDefinition].tasks.length; i++) {
-            var taskInstance = view[taskDefinition].tasks[i];
-            var processInstance = getProcessInstance(taskInstance.processInstanceId);
-            view[taskDefinition].tasks[i].businessKey = processInstance.businessKey;
-            view[taskDefinition].tasks[i].startTime = processInstance.startTime;
-            view[taskDefinition].tasks[i].startUserId = processInstance.startUserId;
-            view[taskDefinition].tasks[i].startUserDisplayable = getDisplayableOf(getUser(processInstance.startUserId));
-            view[taskDefinition].tasks[i].processDefinitionId = processInstance.processDefinitionId;
-            view[taskDefinition].tasks[i].taskDefinition = getTaskDefinition(taskInstance.processDefinitionId, taskInstance.taskDefinitionKey);
+    for (var i = 0; i < view[taskDefinition].tasks.length; i++) {
+        var taskInstance = view[taskDefinition].tasks[i];
+        var processInstance = getProcessInstance(taskInstance.processInstanceId);
+        view[taskDefinition].tasks[i].businessKey = processInstance.businessKey;
+        view[taskDefinition].tasks[i].startTime = processInstance.startTime;
+        view[taskDefinition].tasks[i].startUserId = processInstance.startUserId;
+        view[taskDefinition].tasks[i].startUserDisplayable = getDisplayableOf(getUser(processInstance.startUserId));
+        view[taskDefinition].tasks[i].processDefinitionId = processInstance.processDefinitionId;
+        view[taskDefinition].tasks[i].taskDefinition = getTaskDefinition(taskInstance.processDefinitionId, taskInstance.taskDefinitionKey);
     }
 }
 
-
-
+//return value
 view
