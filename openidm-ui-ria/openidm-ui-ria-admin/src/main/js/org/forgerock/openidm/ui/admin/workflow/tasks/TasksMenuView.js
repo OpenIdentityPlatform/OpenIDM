@@ -60,6 +60,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             
             this.requeueTask(id, _.bind(function() {
                 this.hideDetails();
+                eventManager.sendEvent("refreshTasksMenu");
             }, this));
         },
         
@@ -76,10 +77,33 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         showTask: function(event) {
             event.preventDefault();
             
-            var id = $(event.target).parent().parent().find("input[name=taskId]").val();
+            var id = $(event.target).parent().parent().find("input[name=taskId]").val(), task;
             
             if(id) {
-                eventManager.sendEvent("showTaskDetailsRequest", {"category": this.category, "id": id});
+                task = this.getTaskFromCacheById(id);
+                
+                if(task) {
+                    eventManager.sendEvent("showTaskDetailsRequest", {
+                        "task": task, 
+                        "definition": task.taskDefinition, 
+                        "category": this.category,
+                        "id": id
+                    });
+                }
+            }
+        },
+        
+        getTaskFromCacheById: function(id) {
+            var processName, process, i;
+            
+            for(processName in this.tasks) {
+                process = this.tasks[processName];
+                
+                for(i = 0; i < process.tasks.length; i++) {
+                    if(process.tasks[i]._id === id) {
+                        return process.tasks[i];
+                    }
+                }
             }
         },
         
@@ -122,53 +146,12 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             this.category = category;
             
             if(category === "all") {
-                workflowManager.getAllAvalibleTasksViewForUser(conf.loggedUser.userName, _.bind(this.fetchProcessInstancesAndThenDisplayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getAllTaskUsingEndpoint(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             } else if(category === "assigned") {
-                workflowManager.getAllTasksViewForUser(conf.loggedUser.userName, _.bind(this.fetchProcessInstancesAndThenDisplayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getMyTaskUsingEndpoint(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             }
         },
-        
-        getTasksSize: function(tasks) {
-            var processName, taskName, taskType, task, process, size = 0;
-            
-            for(processName in tasks) {
-                process = tasks[processName];
-                for(taskName in process) {
-                    taskType = process[taskName];                    
-                    size += taskType.tasks.length;
-                }
-            }
-            
-            return size;
-        },
-        
-        fetchProcessInstancesAndThenDisplayTasks: function(tasks) {        
-            this.tasks = tasks;
-            
-            var display = _.after(this.getTasksSize(this.tasks), _.bind(this.displayTasks, this, this.tasks)), getProcess;
-            
-            getProcess = _.bind(function(processInstance) {
-                this.processes[processInstance._id] = processInstance;
-                display();
-            }, this);
-                      
-            _.each(tasks, _.bind(function(process, processName) {
-                var taskName, task, i;
-                
-                for(taskName in process) {
-                    for(i = 0; i < process[taskName].tasks.length; i++) {
-                        task = process[taskName].tasks[i];
-                        
-                        if(this.processes[task.processInstanceId] === undefined) {
-                            workflowManager.getProcess(task.processInstanceId, getProcess, display);
-                        } else {
-                            display();
-                        }
-                    }
-                }
-            }, this));
-        },
-        
+
         errorHandler: function() {
             this.$el.html('');
             if(this.category === "assigned") {
@@ -187,23 +170,20 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             for(processName in tasks) {
                 process = tasks[processName];
                 
-                for(taskName in process) {
-                    taskType = process[taskName];
-                    
-                    data = {
-                        processName: processName,
-                        taskName: taskName,
-                        count: taskType.tasks.length,
-                        headers: this.getParamsForTaskType(taskType),
-                        batchOperation: this.category === 'assigned',
-                        tasks: []
-                    };
-                    
-                    for(i = 0; i < taskType.tasks.length; i++) {
-                        task = taskType.tasks[i];
-                        data.tasks.push(this.prepareParamsFromTask(task));
-                    }
-                }  
+                data = {
+                    processName: process.name,
+                    taskName: process.name,
+                    count: process.tasks.length,
+                    headers: this.getParamsForTaskType(taskType),
+                    batchOperation: this.category === 'assigned',
+                    tasks: []
+                };
+                
+                for(i = 0; i < process.tasks.length; i++) {
+                    task = process.tasks[i];
+                    data.tasks.push(this.prepareParamsFromTask(task));
+                }
+ 
 
                 this.$el.append(uiUtils.fillTemplateWithData("templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html", data));
             } 
@@ -243,9 +223,9 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             
             return this.prepareParams({
                 /*"user": this.getUserLink(task.variables.user.givenName + ' ' + task.variables.user.familyName, task.variables.user._id, task.variables.userApplicationLnk.requester)*/
-                "initiator": this.processes[task.processInstanceId].startUserId + " ",
-                "key" : this.processes[task.processInstanceId].businessKey + " ",
-                "requested" : dateUtil.formatDate(this.processes[task.processInstanceId].startTime),
+                "initiator": task.startUserDisplayable + " ",
+                "key" : task.businessKey + " ",
+                "requested" : dateUtil.formatDate(task.startTime),
                 "inQueue" : moment(task.createTime).fromNow(true),
                 "actions": actions + this.getHiddenParams(task)
             });

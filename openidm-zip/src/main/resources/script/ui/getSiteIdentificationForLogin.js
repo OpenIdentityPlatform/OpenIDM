@@ -12,7 +12,8 @@ if(ret && ret.result && ret.result[0] && ret.result[0].passPhrase && ret.result[
     };
 } else {
     var code = new java.lang.String(request.params.login).hashCode();
-    
+    code = java.lang.Math.abs(code);        
+
     ret = openidm.read("config/ui/configuration")
 
     var passPhrases = [

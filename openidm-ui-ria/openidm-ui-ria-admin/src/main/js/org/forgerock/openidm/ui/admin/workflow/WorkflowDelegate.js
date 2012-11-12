@@ -32,13 +32,14 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(constants, serviceInvoker) {
     
-    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl;
+    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl;
     
     taskManagementUrl       =   "/openidm/workflow/taskinstance";
     taskDefinitionUrl = "/openidm/workflow/taskdefinition";
     processManagementUrl    =   "/openidm/workflow/processinstance";
     processDefinitionUrl = "/openidm/workflow/processdefinition";
-    
+    endpointUrl = "/openidm/endpoint/gettasksview";
+
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {
         console.debug("start proccess");
@@ -253,7 +254,24 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
             }
             result[taskInstanceProcessName][taskInstanceTaskName].tasks.push(taskView);
         }
+        
         return result;
+    };
+    
+    obj.getAllTaskUsingEndpoint = function(userName, successCallback, errorCallback) {
+        obj.serviceCall({url: endpointUrl + "?userName=" + userName, success: function(data) {
+            if(successCallback) {
+                successCallback(data);
+            }
+        }, error: errorCallback} );
+    };
+    
+    obj.getMyTaskUsingEndpoint = function(userName, successCallback, errorCallback) {
+        obj.serviceCall({url: endpointUrl + "?userName=" + userName + "&viewType=assignee", success: function(data) {
+            if(successCallback) {
+                successCallback(data);
+            }
+        }, error: errorCallback} );
     };
     
     return obj;
