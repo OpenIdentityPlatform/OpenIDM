@@ -31,34 +31,6 @@ define("config/validators/AdminValidators", [
     "org/forgerock/commons/ui/user/delegates/UserDelegate"
 ], function(userDelegate) {
     var obj = {
-            "adminUserProfileUserName": {
-                "name": "Correct and unique username but can be same as was",
-                "dependencies": [
-                    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
-                    "org/forgerock/commons/ui/common/main/Configuration"
-                ],
-                "validator": function(el, input, callback, utils, conf) {
-                    var v = $(input).val();
-                    
-                    if(v === "") {
-                        callback($.t("common.form.validation.required"));
-                        return;
-                    }
-                    
-                    if($(el).find("input[name=oldUserName]").val() === v) {
-                        callback();
-                        return;
-                    }
-                    
-                    userDelegate.checkUserNameAvailability(v, function(available) {
-                        if(!available) {
-                            callback($.t("common.form.validation.emailExists"));
-                        } else {
-                            callback();
-                        }
-                    });              
-                }
-            },
             "required_long": {
                 "name": "Not empty number",
                 "dependencies": [

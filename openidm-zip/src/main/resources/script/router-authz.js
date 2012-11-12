@@ -76,25 +76,19 @@ var accessConfig = { "configs" : [
           "actions" : "*"
       },
 
-      // Anonymous user can use the siteIdentification endpoint if it is enabled:
+      // Anonymous user can call the siteIdentification endpoint if it is enabled:
       {  "pattern" : "endpoint/siteIdentification",
           "roles" : "openidm-reg",
-          "methods": "read",
+          "methods": "*",
           "customAuthz" : "checkIfUIIsEnabled('siteIdentification')",
           "actions" : "*"
       },
 
-      // Anonymous user can invoke some queries which are public as part of the forgot password process:
+      // Anonymous user can call the securityQA endpoint if it enabled:
       {  "pattern" : "endpoint/securityQA",
           "roles" : "openidm-reg",
-          "methods": "read",
+          "methods": "*",
           "customAuthz" : "checkIfUIIsEnabled('securityQuestions')",
-          "actions" : "*"
-      },
-      {  "pattern" : "managed/user/",
-          "roles" : "openidm-reg",
-          "methods": "query",
-          "customAuthz" : "checkIfUIIsEnabled('securityQuestions') && isQueryOneOf({ 'managed/user/': ['check-userName-availability', 'get-security-question', 'for-security-answer', 'set-newPassword-for-userName-and-security-answer'] })",
           "actions" : "*"
       },
       // This is needed by both self reg and security questions

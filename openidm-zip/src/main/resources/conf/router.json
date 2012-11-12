@@ -31,34 +31,6 @@
             }
         },
         {
-            "pattern" : "^managed/user/.*",
-            "methods" : [
-                "query"
-            ],
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "request.params['_query-id'] == 'for-security-answer'"
-            },
-            "onResponse" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onResponse-for-securityAnswer.js"
-            }
-        },
-        {
-            "pattern" : "^managed/user/.*",
-            "methods" : [
-                "query"
-            ],
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "request.params['_query-id'] == 'set-newPassword-for-userName-and-security-answer'"
-            },
-            "onResponse" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onResponse-set-newPassword-for-userName-and-security-answer.js"
-            }
-        },
-        {
             "pattern" : "^managed/user_application_lnk.*",
             "methods" : [
                 "create"

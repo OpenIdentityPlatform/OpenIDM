@@ -7,9 +7,6 @@
         "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
         "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = '${value}'",
-        "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
-        "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
-        "for-security-answer" : "select _openidm_id FROM ${_resource} WHERE userName = '${uid}'",
         
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
@@ -22,7 +19,6 @@
         "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
         
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
-        "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
         
         "notifications-for-user": "SELECT * FROM ${_resource} WHERE receiverId = '${userId}'",
         "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
