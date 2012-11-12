@@ -565,8 +565,26 @@ $ curl
    <screen>$ cd /path/to/openidm
 $ cp -r samples/sample2d/conf samples/sample2d/script .</screen>
 
-   <para>If you have already installed sample 2c, you need only do 
-   the following to upgrade to sample 2d:</para>
+   <para>If you are using OrientDB as an internal repository, update the 
+   <filename>conf/repo.orient.json</filename> file to add a new class for 
+   managed groups. For example, add the following:</para>
+   
+   <programlisting language="javascript">
+  ...
+  "managed_group": {
+    "index": [
+      {
+        "propertyName": "_openidm_id",
+        "propertyType": "string",
+        "indexType": "unique"
+      }
+    ]
+  },
+  ...
+   </programlisting>
+
+   <para>If you have already installed sample 2c, you need only add the managed 
+   groups class and perform the following steps to upgrade to sample 2d:</para>
    <itemizedlist>
     <listitem><para>Add a mapping for the groups to 
     <filename>openidm/conf/sync.json</filename>.</para></listitem>
