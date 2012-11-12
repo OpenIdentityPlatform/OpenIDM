@@ -33,19 +33,17 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView",
-    "org/forgerock/openidm/ui/apps/dashboard/BaseUserInfoView",
     "org/forgerock/openidm/ui/apps/dashboard/NotificationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
     "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, baseUserInfoView, NotificationsView, conf, notificationDelegate, taskDetailsView) {
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, NotificationsView, conf, notificationDelegate, taskDetailsView) {
     var TasksDashboard = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TasksDashboardTemplate.html",
-                
         
         render: function(mode, args) {
             //decide whether to display notification and profile 
-            this.data = {shouldDisplayNotificationsAndProfile: mode.adminMode !== "openidm-admin" };
+            this.data = {shouldDisplayNotifications: mode.adminMode !== "openidm-admin" };
             
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
@@ -58,7 +56,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 this.myTasks.render("assigned", $("#myTasks"));
                 
                 if (mode.adminMode === "admin") {
-                    baseUserInfoView.render();
                     //notifications
                     notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
                         

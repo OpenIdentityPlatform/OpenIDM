@@ -6,9 +6,14 @@
         "siteIdentification" : false,
         "language" : "en-US",
         "roles" : {
-            "openidm-admin" : "System administrator",
             "admin" : "Administrator",
             "openidm-authorized" : "User"
-        }
+        },
+        "siteImages" : [
+            "mail.png",
+            "user.png",
+            "report.png",
+            "twitter.png"
+        ]
     }
 }
