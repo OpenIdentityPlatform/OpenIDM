@@ -94,8 +94,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             tr = root.find("[name=taskId][value="+event.id+"]").closest("tr");
             
             tr.after(this.getDetailsRow());
-            
-            taskDetailsView.render(event.id, event.category, function() {
+
+            taskDetailsView.render(event.task, event.definition, event.category, function() {
                 $("#myTasks").accordion("resize");   
                 $("#candidateTasks").accordion("resize");
                 
