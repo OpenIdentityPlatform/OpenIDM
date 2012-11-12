@@ -23,6 +23,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,9 +57,15 @@ import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.http.ContextRegistrator;
+import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
+import org.forgerock.openidm.script.ScriptException;
+import org.forgerock.openidm.script.ScriptThrownException;
+import org.forgerock.openidm.script.Utils;
 import org.forgerock.openidm.util.DateUtil;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
@@ -81,14 +88,15 @@ import org.slf4j.LoggerFactory;
     name = "org.forgerock.openidm.authentication", immediate = true,
     policy = ConfigurationPolicy.REQUIRE
 )
-@Service(value = {AuthFilterService.class})
+@Service(value = {AuthFilterService.class, JsonResource.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Filter Service")})
-public class AuthFilter implements Filter, AuthFilterService {
-
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(AuthFilter.class);
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Filter Service"),
+        @Property(name = "openidm.router.prefix", value = "authentication")
+})
+public class AuthFilter 
+        implements Filter, AuthFilterService, JsonResource {
+    private final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
     /** Attribute in session containing authenticated username. */
     public static final String USERNAME_ATTRIBUTE = "openidm.username";
@@ -134,7 +142,7 @@ public class AuthFilter implements Filter, AuthFilterService {
                   clientAuthOnly.add(Integer.valueOf(entry));
               }
           }
-          LOGGER.info("Authentication disabled on ports: {}", clientAuthOnly);
+          logger.info("Authentication disabled on ports: {}", clientAuthOnly);
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -183,7 +191,7 @@ public class AuthFilter implements Filter, AuthFilterService {
             authFailed(req, res, s.getMessage());
             return;
         }
-        LOGGER.debug("Found valid session for {} id {} with roles {}", new Object[] {authData.username, authData.userId, authData.roles});
+        logger.debug("Found valid session for {} id {} with roles {}", new Object[] {authData.username, authData.userId, authData.roles});
         req.setAttribute(USERID_ATTRIBUTE, authData.userId);
         req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
         req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
@@ -223,17 +231,16 @@ public class AuthFilter implements Filter, AuthFilterService {
                 router.create("audit/access", entry);
             } else {
                 // Filter should have rejected request if router is not available
-                LOGGER.warn("Failed to log entry for {} as router is null.", username);
+                logger.warn("Failed to log entry for {} as router is null.", username);
             }
         } catch (ObjectSetException ose) {
-            LOGGER.warn("Failed to log entry for {}", username, ose);
+            logger.warn("Failed to log entry for {}", username, ose);
         }
     }
 
-        //res.sendError(HttpServletResponse.SC_UNAUTHORIZED, new JsonValue(respMap).toString());
     private AuthData doBasicAuth(String data) throws AuthException {
 
-        LOGGER.debug("HTTP basic authentication request");
+        logger.debug("HTTP basic authentication request");
         AuthData ad = new AuthData();
         StringTokenizer st = new StringTokenizer(data);
         String isBasic = st.nextToken();
@@ -265,22 +272,45 @@ public class AuthFilter implements Filter, AuthFilterService {
             sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
             sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
 
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Created session for: {} with id {}, roles {} and resource: {}",
+            if (logger.isDebugEnabled()) {
+                logger.debug("Created session for: {} with id {}, roles {} and resource: {}",
                     new Object[] {ad.username, ad.userId, ad.roles, ad.resource});
             }
         }
     }
 
-    public AuthData reauthenticate(Map<String, Object> request) throws AuthException {
-        
-        JsonValue req = new JsonValue(request);
-        String reauthPassword = req.get("headers").get("X-OpenIDM-Reauth-Password").asString();
+    /**
+     * @param request the full request
+     * @return the security context of the request, or null if does not exist
+     */
+    private JsonValue getSecurityContext(JsonValue request) {
+        JsonValue result = new JsonValue(null);
+        while (request != null && !request.isNull()) {
+            if ("http".equals(request.get("type").asString())) {
+                if (!request.get("security").isNull()) {
+                    result = request;
+                    break;
+                }
+            }
+            request = request.get("parent");
+        }
+        return result;
+    }
+
+    /**
+     * Re-authenticate based on the context associated with the request
+     * @param request the full request
+     * @return authenticated user if success
+     * @throws AuthException if reauthentication failed
+     */
+    public AuthData reauthenticate(JsonValue request) throws AuthException {
+        JsonValue secCtx = getSecurityContext(request);
+        String reauthPassword = secCtx.get("headers").get("X-OpenIDM-Reauth-Password").asString();
         AuthData ad = new AuthData();
-        ad.username = req.get("security").get("username").asString();
+        ad.username = secCtx.get("security").get("username").asString();
         if (ad.username == null || reauthPassword == null || ad.username.equals("") || reauthPassword.equals("")) {
-            LOGGER.debug("Failed authentication, missing or empty headers");
-            throw new AuthException();
+            logger.debug("Failed authentication, missing or empty headers");
+            throw new AuthException("Failed authentication, missing or empty headers");
         }
         ad = AuthModule.authenticate(ad, reauthPassword);
         if (ad.status == false) {
@@ -291,12 +321,12 @@ public class AuthFilter implements Filter, AuthFilterService {
     
     private AuthData authenticateUser(HttpServletRequest req) throws AuthException {
 
-        LOGGER.debug("No session, authenticating user");
+        logger.debug("No session, authenticating user");
         AuthData ad = new AuthData();
         String password = req.getHeader("X-OpenIDM-Password");
         ad.username = req.getHeader("X-OpenIDM-Username");
         if (ad.username == null || password == null || ad.username.equals("") || password.equals("")) {
-            LOGGER.debug("Failed authentication, missing or empty headers");
+            logger.debug("Failed authentication, missing or empty headers");
             throw new AuthException();
         }
         ad = AuthModule.authenticate(ad, password);
@@ -309,16 +339,15 @@ public class AuthFilter implements Filter, AuthFilterService {
     // This is currently Jetty specific
     private AuthData hasClientCert(ServletRequest request) throws AuthException {
 
-        LOGGER.debug("Client certificate authentication request");
+        logger.debug("Client certificate authentication request");
         AuthData ad = new AuthData();
         X509Certificate[] certs = getClientCerts(request);
 
-        // TODO: reduce the logging level
         if (certs != null) {
             Principal existingPrincipal = request instanceof HttpServletRequest ? ((HttpServletRequest)request).getUserPrincipal() : null;
-            LOGGER.debug("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
+            logger.debug("Request {} existing Principal {} has {} certificates", new Object[] {request, existingPrincipal, certs.length});
             for (X509Certificate cert : certs) {
-                LOGGER.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
+                logger.debug("Request {} client certificate subject DN: {}", request, cert.getSubjectDN());
             }
         }
         ad.status = (certs != null && certs.length > 0 && certs[0] != null);
@@ -327,7 +356,7 @@ public class AuthFilter implements Filter, AuthFilterService {
         }
         ad.username = certs[0].getSubjectDN().getName();
         ad.roles.add("openidm-cert");
-        LOGGER.debug("Authentication client certificate subject {}", ad.username );
+        logger.debug("Authentication client certificate subject {}", ad.username );
         return ad;
     }
 
@@ -338,7 +367,7 @@ public class AuthFilter implements Filter, AuthFilterService {
         if (checkCerts instanceof X509Certificate[]) {
             return (X509Certificate[]) checkCerts;
         } else {
-            LOGGER.warn("Unknown certificate type retrieved {}", checkCerts);
+            logger.warn("Unknown certificate type retrieved {}", checkCerts);
             return null;
         }
     }
@@ -384,7 +413,7 @@ public class AuthFilter implements Filter, AuthFilterService {
     @Activate
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
-        LOGGER.info("Activating Auth Filter with configuration {}", context.getProperties());
+        logger.info("Activating Auth Filter with configuration {}", context.getProperties());
         JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
         logClientIPHeader = (String) config.get("clientIPHeader").asString();
         AuthModule.setConfig(config);
@@ -414,12 +443,44 @@ public class AuthFilter implements Filter, AuthFilterService {
         if (serviceRegistration != null) {
             try {
                 serviceRegistration.unregister();
-                LOGGER.info("Unregistered authentication filter.");
+                logger.info("Unregistered authentication filter.");
             } catch (Exception ex) {
-                LOGGER.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
+                logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
             }
         }
     }
 
+    /**
+     * Action support, including reauthenticate action
+     * {@inheritDoc}
+     */
+    public JsonValue handle(JsonValue request) throws JsonResourceException {
+        JsonValue response = new JsonValue(new HashMap());
+        String id = request.get("id").asString();
+        
+        JsonValue params = request.get("params");
+        String action = params.get("_action").asString();
+        if (action == null) {
+            throw new BadRequestException("Action parameter is not present or value is null");                
+        }
+        
+        if (id == null) {
+            // operation on collection
+            if ("reauthenticate".equalsIgnoreCase(action)) {
+                try {
+                    AuthData reauthenticated = reauthenticate(request);
+                    response.put("reauthenticated", Boolean.TRUE);
+                    response.put("username", reauthenticated.username);
+                } catch (AuthException ex) {
+                    throw new ForbiddenException("Reauthentication failed", ex);
+                }
+            } else {
+                throw new BadRequestException("Action " + action + " on authentication service not supported " + params);
+            }
+        } else {
+            throw new BadRequestException("Actions not supported on child resource of authentication service " + params);
+        } 
+        return response;
+    }
 }
 

@@ -44,7 +44,6 @@ import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.filter.AuthFilterService;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetContext;
@@ -82,9 +81,6 @@ public class PolicyService implements JsonResource {
     @Reference(referenceInterface = ScopeFactory.class)
     private ScopeFactory scopeFactory;
 
-    @Reference
-    private AuthFilterService authFilterService;
-    
     /** Internal object set router service. */
     @Reference(
         name = "ref_PolicyService_JsonResourceRouterService",
@@ -177,8 +173,6 @@ public class PolicyService implements JsonResource {
         try {
             scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));
             scope.put("request", request.getObject());
-            scope.put("authFilter", authFilterService);
-            
             return new JsonValue(script.exec(scope));
         } catch (ScriptThrownException ste) {
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, ste.getValue().toString(), ste);
