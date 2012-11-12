@@ -83,7 +83,7 @@ var accessConfig = { "configs" : [
           "actions" : "*"
       },
       // This is needed by both self reg and forgot password
-      {  "pattern" : "policy/managed/user",
+      {  "pattern" : "policy/managed/user/*",
           "roles" : "openidm-reg",
           "methods": "read,action",
           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('forgottenPassword')",

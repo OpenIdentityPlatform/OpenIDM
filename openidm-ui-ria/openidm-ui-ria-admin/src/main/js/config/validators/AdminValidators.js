@@ -140,6 +140,22 @@ define("config/validators/AdminValidators", [
                     }
                     callback();
                 }
+            },"required_max255": {
+                "name": "Not empty and no more than 256 chars",
+                "dependencies": [
+                ],
+                "validator": function(el, input, callback) {
+                    var v = $(input).val();
+                    if(v === "") {
+                        callback($.t("common.form.validation.required"));
+                        return;
+                    }
+                    if(v.length > 255) {
+                        callback($.t("common.form.validation.shouldBeNotMoreThen256"));
+                        return;
+                    }
+                    callback();
+                }
             }
     };
     

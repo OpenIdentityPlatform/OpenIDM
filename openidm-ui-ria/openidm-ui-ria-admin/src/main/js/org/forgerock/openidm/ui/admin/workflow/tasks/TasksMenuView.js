@@ -45,22 +45,34 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         events: {
             "click .detailsLink": "showTask",
             "change select[name=assignedUser]": "claimTask",
-            "click .choosable" : "markAsChoosen",
-            "click .cancelLink": "resetChoosen",
-            "click .saveLink": "save",
             "mouseenter .userLink": "showUser",
-            "click input[name=denyReason]": "clearInput"
+            "click .closeLink" : "hideDetails",
+            "click .requeueLink" : "requeueTaskHandler"
         },
         
         tasks: {},
         processes: {},
         
-        clearInput: function(event) {
-            if($(event.target).val() === $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason")) {
-                $(event.target).val('');       
-            }            
+        requeueTaskHandler: function(event) {
+            event.preventDefault();
+            
+            var id = $(event.target).closest("tr").prev().find("[name=taskId]").val();
+            
+            this.requeueTask(id, _.bind(function() {
+                this.hideDetails();
+            }, this));
         },
-
+        
+        hideDetails: function(event) {
+            if(event) {
+                event.preventDefault();
+            }
+            
+            $("#taskDetails").closest("tr").remove();
+            $("#myTasks").accordion("resize");   
+            $("#candidateTasks").accordion("resize");
+        },
+        
         showTask: function(event) {
             event.preventDefault();
             
@@ -348,88 +360,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     callback(this);
                 });
             }
-        },
-        
-        markAsChoosen: function(event) {
-            event.preventDefault();
-            
-            var height;
-
-            if (!$(event.target).hasClass("choosen-decision")) {
-                $(event.target).parent().find("a").removeClass("choosen-decision");
-                $(event.target).addClass("choosen-decision");
-                
-                if ($(event.target).attr('data-action') === 'denyTask') {
-                    $(event.target).parent().parent().after(this.getReasonInputRow());
-                    height = $(event.target).parent().parent().parent().parent().parent().height();
-                    $(event.target).parent().parent().parent().parent().parent().css("height", (height + 31) + "px");
-                } else {
-                    if($(event.target).parent().parent().next().find("input[name=denyReason]").length !== 0) {
-                        $(event.target).parent().parent().next().remove();
-                    }
-                }
-                
-            } else {
-                $(event.target).parent().find("a").removeClass("choosen-decision");
-                if($(event.target).parent().parent().next().find("input[name=denyReason]").length !== 0) {
-                    height = $(event.target).parent().parent().parent().parent().parent().height();
-                    $(event.target).parent().parent().next().remove();
-                    $(event.target).parent().parent().parent().parent().parent().css("height", (height - 31) + "px");
-                }
-            }
-            
-            this.$el.accordion('refresh');
-            this.setSaveLinkAsActiveOrInactive($(event.target));
-        },
-        
-        getReasonInputRow: function() {
-            return '<tr class="input-full"><td colspan="4"><input name="denyReason" type="text" value="' + $.t("openidm.ui.admin.tasks.TasksMenuView.denyDefaultReason") + '" /></td></tr>';
-        },
-        
-        setSaveLinkAsActiveOrInactive: function(element) {
-            var taskContainer = element.parent().parent().parent();
-            if (taskContainer.find(".choosen-decision").size() > 0) {
-                taskContainer.parent().parent().find(".saveLink").removeClass("button inactive").addClass("button");
-            } else {
-                taskContainer.parent().parent().find(".saveLink").removeClass("button").addClass("button inactive");
-            }
-        },
-        
-        save: function(event) {
-            var actionsToRun = [], taskId, action, actionToRun, actionPointer, counter = 0, actionFinished, denyReason;
-            
-            event.preventDefault();
-            
-            $(event.target).parent().parent().find("table").find("tbody").find("tr").each(function(index) {
-                action = $(this).find(".choosen-decision").attr('data-action');
-                taskId = $(this).find("input[name=taskId]").val();
-                denyReason = $(this).find("input[name=denyReason]").val();
-                
-                if(action) {
-                    actionsToRun.push({actionType: action, taskId: taskId, denyReason: denyReason});
-                }
-            });
-            
-            this.actionNumberToExecute = actionsToRun.length;
-            
-            actionFinished = function(self) {
-                counter++;
-                if (counter === self.actionNumberToExecute) {
-                    eventManager.sendEvent("refreshTasksMenu");
-                }
-            };
-            
-            for (actionPointer in actionsToRun) {
-                actionToRun = actionsToRun[actionPointer];
-                this[actionToRun.actionType](actionToRun.taskId, actionFinished, actionToRun.denyReason);
-            }
-        },
-        
-        resetChoosen: function(event) {
-           event.preventDefault();
-           $(event.target).parent().find("a").removeClass("choosen-decision");
-           this.setSaveLinkAsActiveOrInactive($(event.target));
-           $(event.target).parent().find("[name=denyReason]").remove();
         },
         
         prepareParams: function(params) {

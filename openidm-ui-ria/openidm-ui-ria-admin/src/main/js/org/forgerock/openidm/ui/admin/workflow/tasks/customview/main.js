@@ -26,6 +26,4 @@
 
 define("org/forgerock/openidm/ui/admin/workflow/tasks/customview/main", [
 	"./ApplicationAcceptanceTask"
-], function(a) { 
-    console.log("XXXXXXXXXXXXX");
-});
+]);

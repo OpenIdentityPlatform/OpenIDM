@@ -40,9 +40,20 @@ var policyConfig = {
                 "clientValidation": true,
                 "policyRequirements" : ["REQUIRED"]
             },
+            {
+                "policyId" : "max-attempts-triggers-lock-cooldown",
+                "policyExec" : "maxAttemptsTriggersLockCooldown",
+                "policyRequirements" : ["NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES"]
+            },
             {   "policyId" : "unique",
                 "policyExec" : "unique",  
                 "policyRequirements" : ["UNIQUE"]
+            },
+            {
+                "policyId" : "valid-date",
+                "policyExec" : "validDate",
+                "clientValidation": true,
+                "policyRequirements": ["VALID_DATE"]
             },
             {
                 "policyId" : "valid-email-address-format",
@@ -95,12 +106,25 @@ var policyConfig = {
         ] 
     };
 
+
+function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
+    var failures = [],
+        lastFailedDate = new Date(fullObject[params.dateTimeField]);
+    
+    if (    value > params.max &&
+            (lastFailedDate.getTime() + (1000*60*params.numMinutes)) > (new Date()).getTime()
+    ) { 
+         failures = [{"policyRequirement": "NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES", params: {"max":params.max,"numMinutes":params.numMinutes}}];
+    }
+    return failures;
+}
+
 function cannotContainOthers(fullObject, value, params, property) {
     var fieldArray = params.disallowedFields.split(","),
         fullObject_server = {};
     
-    if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.id && fullObject["_id"]) {
-        fullObject_server = openidm.read(request.id + "/" + fullObject["_id"])
+    if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.id && !request.id.match('/$')) {
+        fullObject_server = openidm.read(request.id)
     }
     
     if (value && typeof(value) === "string" && value.length) {
@@ -114,6 +138,14 @@ function cannotContainOthers(fullObject, value, params, property) {
         }
     }
     return [];
+}
+
+function validDate(fullObject, value, params, property) {
+    if (value && value.length && isNaN(new Date(value).getTime())) {
+        return [ {"policyRequirement": "VALID_DATE"}];
+    }
+    else
+        return [];
 }
 
 function validPhoneFormat(fullObject, value, params, property) {
@@ -165,18 +197,24 @@ function requiredIfConfigured(fullObject, value, params, property) {
     else
         return [];
 }
+
 function unique(fullObject, value, params, property) {
     var queryParams = {
             "_query-id": "get-by-field-value",
             "field": property,
             "value": value
-            };
+            },
+        existing,requestId,requestBaseArray;
     
     if (value && value.length)
     {
-        var existing = openidm.query(request.id,  queryParams);
-        
-        if (existing.result.length != 0 && (!fullObject["_id"] || existing.result[0]["_id"] != fullObject["_id"])) {
+        requestBaseArray = request.id.split("/");
+        if (requestBaseArray.length === 3) {
+            requestId = requestBaseArray.pop();
+        }
+        existing = openidm.query(requestBaseArray.join("/"),  queryParams);
+
+        if (existing.result.length != 0 && (!requestId || (existing.result[0]["_id"] != requestId))) {
             return [{"policyRequirement": "UNIQUE"}];
         }
     }
@@ -217,8 +255,8 @@ function getPolicy(policyId) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var req = getHttpRequest(request);
-    if (req) {
+    var req = request.parent.parent;
+    if (typeof req.type !== 'undefined' && req.type == "http") {
         try {
             authFilter.reauthenticate(req);
         } catch (error) {
@@ -226,17 +264,6 @@ function reauthRequired(fullObject, value, params, propName) {
         }
     }
     return [];
-}
-
-function getHttpRequest(req) {
-    if (typeof req.parent !== 'undefined') {
-        if (req.parent.type == "http") {
-            return req.parent;
-        } else {
-            return getHttpRequest(req.parent);
-        } 
-    }
-    return null;
 }
 
 function getPropertyValue(requestObject, propName) {
@@ -322,18 +349,25 @@ function getResourceWithPolicyRequirements(resource) {
 }
 
 function validate(policies, fullObject, propName, propValue, retArray) {
-    var retObj = {};
-    var policyRequirements = new Array();
-    for (var i = 0; i < policies.length; i++) {
+    var retObj = {},
+        policyRequirements = new Array(),
+        i,params,policy,validationFunc,failed,y;
+    
+    for (i = 0; i < policies.length; i++) {
         params = policies[i].params;
-        var policy = getPolicy(policies[i].policyId);
+        policy = getPolicy(policies[i].policyId);
         if (policy == null) {
             throw "Unknown policy " + policies[i].policyId;
         }
-        var validationFunc = eval(policy.policyExec); 
-        var failed = validationFunc.call(this, fullObject, propValue, params, propName);
+        validationFunc = eval(policy.policyExec); 
+        
+        if (propValue && openidm.isEncrypted(propValue)) {
+            propValue = openidm.decrypt(propValue);
+        }
+            
+        failed = validationFunc.call(this, fullObject, propValue, params, propName);
         if (failed.length > 0) {
-            for ( var y = 0; y < failed.length; y++) {
+            for ( y = 0; y < failed.length; y++) {
                 policyRequirements.push(failed[y]);
             }
         }
@@ -414,7 +448,7 @@ function getAdditionalPolicies(id) {
         if (objects !== undefined && objects !== null) {
             for (var i = 0; i < objects.length; i++) {
                 var obj = objects[i];
-                if ((obj.name == object) || resourceMatches(object, obj.name + "/*")) {
+                if (obj.name == object) {
                     var props = obj.properties;
                     if (props != null) {
                         for (var j = 0; j < props.length; j++) {

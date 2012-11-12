@@ -36,35 +36,19 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, conf) {
     var AbstractProcessForm = AbstractView.extend({
-        
         template: "templates/common/EmptyTemplate.html",
+        element: "#processContent",
         
         events: {
-            "click input[name=startProcessButton]": "formSubmit",
             "onValidate": "onValidate"
-        },
-        
-        formSubmit: function(event) {
-            event.preventDefault();
-            
-            if(validatorsManager.formNotInvalid(this.$el)) {
-                var params = form2js(this.$el.attr("id"), '.', false), param;
-                delete params.startProcessButton;
-                for (param in params) {
-                    if (_.isNull(params[param])) {
-                        delete params[param];
-                    }
-                }
-                
-                workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
-                }, this));
-            }
         },
         
         postRender: function() {
             
+        },
+        
+        prepareData: function(callback) {
+            callback();
         },
         
         render: function(processDefinition, category, args, callback) { 
@@ -75,10 +59,13 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm", 
             this.category = category;
             this.args = args;
             
-            this.parentRender(function() {      
-                this.postRender(callback);
-                this.reloadData();
-            });            
+            this.prepareData(_.bind(function() {
+                this.parentRender(function() {  
+                    this.postRender(callback);
+                    this.reloadData();
+                }); 
+            }, this));
+                       
         },
         
         reloadData: function() {

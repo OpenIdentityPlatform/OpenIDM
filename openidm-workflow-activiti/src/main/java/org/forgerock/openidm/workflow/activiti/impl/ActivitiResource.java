@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
@@ -37,7 +38,9 @@ import org.activiti.engine.form.StartFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
-import org.activiti.engine.impl.form.*;
+import org.activiti.engine.impl.form.DefaultStartFormHandler;
+import org.activiti.engine.impl.form.DefaultTaskFormHandler;
+import org.activiti.engine.impl.form.FormPropertyHandler;
 import org.activiti.engine.impl.identity.Authentication;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.task.TaskDefinition;
@@ -49,11 +52,9 @@ import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceContext;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
@@ -81,6 +82,7 @@ public class ActivitiResource implements JsonResource {
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         try {
             ActivitiConstants.WorkflowPath path = getPath(request);
+            Authentication.setAuthenticatedUserId(ActivityLog.getRequester(request));
             Method method = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
             switch (path) {
                 case processdefinition:     //workflow/processdefinition
@@ -177,7 +179,7 @@ public class ActivitiResource implements JsonResource {
             case patch:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " method not implemented on workflow");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " method not implemented on processdefinition");
         }
     }
 
@@ -206,7 +208,7 @@ public class ActivitiResource implements JsonResource {
             case query:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on processinstance/{ID}");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on processdefinition/{ID}");
         }
     }
     
@@ -301,7 +303,7 @@ public class ActivitiResource implements JsonResource {
     }
     
     /**
-     * Handle the request sent to '/workflow/processdefinition'
+     * Handle the request sent to '/workflow/taskdefinition'
      *
      * @param m method to execute
      * @param request incoming request
@@ -326,10 +328,9 @@ public class ActivitiResource implements JsonResource {
             case read:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on task");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on taskdefinition");
         }
     }
-
 
     /**
      * Handle the request sent to '/workflow/taskinstance'
@@ -369,7 +370,7 @@ public class ActivitiResource implements JsonResource {
             case read:
             case update:
             default:
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on task");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on taskinstance");
         }
     }
 
@@ -454,7 +455,7 @@ public class ActivitiResource implements JsonResource {
             case patch:
             case query:
             default:
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on task/{ID}");
+                throw new JsonResourceException(JsonResourceException.FORBIDDEN, m + " not implemented on taskinstance/{ID}");
         }
     }
 
@@ -697,7 +698,7 @@ public class ActivitiResource implements JsonResource {
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
         }
         DefaultStartFormHandler handler = (DefaultStartFormHandler) def.getStartFormHandler();
-        Map<String, Map> propertyMap = new HashMap<String, Map>();
+        Map<String, Map> propertyMap = new LinkedHashMap<String, Map>();
         addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
         result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
         result.add("_rev", "0");
@@ -724,7 +725,7 @@ public class ActivitiResource implements JsonResource {
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, handler.getFormKey());
             result.add(ActivitiConstants.ACTIVITI_DUEDATE, def.getDueDateExpression());
             result.add(ActivitiConstants.ACTIVITI_PRIORITY, def.getPriorityExpression());
-            Map<String, Map> propertyMap = new HashMap<String, Map>();
+            Map<String, Map> propertyMap = new LinkedHashMap<String, Map>();
             addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
             result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
             return result;
