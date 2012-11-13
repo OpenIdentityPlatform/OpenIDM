@@ -303,6 +303,26 @@
      reason.</para>
     </listitem>
    </itemizedlist>
+   
+   <para>Note that <literal>delete</literal> is a reserved word in JavaScript 
+   and this function can therefore not be called in the usual manner. To call 
+   delete from a JavaScript, you must specify the call as shown in the 
+   following example:</para>
+   
+   <programlisting lanaguage="javascript">
+    openidm['delete']('managed/user/'+ user._id, user._rev)
+   </programlisting>
+   
+   <para>where the revision (<literal>_rev</literal>) is an optional parameter.
+   </para>
+   
+   <para>Calling <literal>openidm.delete()</literal> directly from a JavaScript 
+   results in an error similar to the following:</para>
+   
+   <screen>
+   org.forgerock.openidm.script.ScriptException: missing name after . operator
+   </screen>
+   
   </section>
 
   <section xml:id="function-query">
