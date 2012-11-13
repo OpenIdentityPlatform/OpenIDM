@@ -251,9 +251,10 @@ public class EndpointsService implements JsonResource {
                     return new JsonValue(ret);
                 }
             } catch (ScriptThrownException ste) {
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, ste.getValue().toString(), ste);
+                throw ste.toJsonResourceException(null);
             } catch (ScriptException se) {
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, se);
+                throw se.toJsonResourceException("Failure in executing script for " 
+                        + qualifiedId + ": " + se.getMessage());
             } finally {
                 ObjectSetContext.pop();
             }
