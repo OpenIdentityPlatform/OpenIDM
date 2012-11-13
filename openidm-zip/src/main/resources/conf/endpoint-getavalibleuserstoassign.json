@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/getavalibleuserstoassign",
+    "type" : "text/javascript",
+    "file" : "script/getavalibleuserstoassign.js"
+}

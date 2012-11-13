@@ -7,6 +7,7 @@
         "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
         "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = '${value}'",
+        "get-users-of-role" : "select userName FROM ${_resource} WHERE roles like '%${role}%'",
         
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
