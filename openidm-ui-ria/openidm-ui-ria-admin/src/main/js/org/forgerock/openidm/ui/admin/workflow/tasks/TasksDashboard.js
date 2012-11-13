@@ -57,7 +57,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 
                 if (params.mode === "user") {
                     //notifications
-                    notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
+                    notificationDelegate.getNotificationsForUser(function(notifications) {
                         
                         notifications.sort(function(a, b) {
                             if (a.requestDate < b.requestDate) {

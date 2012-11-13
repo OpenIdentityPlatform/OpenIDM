@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/getnotifications",
+    "type" : "text/javascript",
+    "file" : "script/ui/getnotifications.js"
+}

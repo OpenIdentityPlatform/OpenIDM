@@ -1,4 +1,4 @@
-/**
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,34 +22,27 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
-
 /**
- * @author jdabrowski
+ * @author mbilski
+ * 
+ * This script returns the notification for logged user
+ * 
  */
-define("org/forgerock/openidm/ui/admin/notifications/NotificationDelegate", [
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/getnotifications");
+var userId = request.parent.security.userid.id, res = {};
 
-    obj.getNotificationsForUser = function(successCallback, errorCallback) {
-        obj.serviceCall({
-            url: "", 
-            success: function (data) {
-                if(successCallback) {
-                    successCallback(data);
-                }
-            },
-            error: errorCallback
-        });
+if(request.parent.security.userid.component !== "internal/user") {
+    var params = {
+        "_query-id": "get-by-field-value",
+        "field": "receiverId",
+        "value": userId
     };
+      
+    var ret = openidm.query("repo/ui/notification", params);
+    
+    if(ret && ret.result) {
+        res = ret.result
+    }
+}
 
-    return obj;
-});
-
-
-
+res
