@@ -313,9 +313,10 @@ class ObjectMapping implements SynchronizationListener {
             throws SynchronizationException {
         List<String> ids = Collections.synchronizedList(new ArrayList<String>());
         HashMap<String, Object> query = new HashMap<String, Object>();
-        query.put(QueryConstants.QUERY_ID, "query-all-ids");
+        query.put(QueryConstants.QUERY_ID, QueryConstants.QUERY_ALL_IDS);
         try {
-            JsonValue objList = new JsonValue(service.getRouter().query(objectSet, query)).get(QueryConstants.QUERY_RESULT).required().expect(List.class);
+            JsonValue objList = new JsonValue(service.getRouter().query(objectSet, query))
+                    .get(QueryConstants.QUERY_RESULT).required().expect(List.class);
             for (JsonValue obj : objList) {
                 ids.add(obj.get("_id").asString());
             }
