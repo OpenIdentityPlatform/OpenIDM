@@ -144,9 +144,9 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             this.category = category;
             
             if(category === "all") {
-                workflowManager.getAllTaskUsingEndpoint(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getAllTaskUsingEndpoint(conf.loggedUser._id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             } else if(category === "assigned") {
-                workflowManager.getMyTaskUsingEndpoint(conf.loggedUser.userName, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
+                workflowManager.getMyTaskUsingEndpoint(conf.loggedUser._id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
             }
         },
 
