@@ -16,6 +16,10 @@
 
 package org.forgerock.openidm.script;
 
+import java.util.Map;
+
+import org.forgerock.json.resource.JsonResourceException;
+
 /**
  * An exception that is thrown during script operations.
  *
@@ -52,4 +56,35 @@ public class ScriptException extends Exception {
     public ScriptException(String message, Throwable cause) {
         super(message, cause);
     }
+    
+    /**
+     * Converts the script exception to an appropriate json resource exception.
+     * 
+     * The exception message is set to the defaultMsg by this exception, 
+     * subclasses may override and provide a prescedence on where the message comes from
+     *
+     * @param defaultMsg a default message to use 
+     * @return the appropriate JsonResourceException
+     */
+    public JsonResourceException toJsonResourceException(String defaultMsg) {
+        return toJsonResourceException(JsonResourceException.INTERNAL_ERROR, defaultMsg);
+//        return new JsonResourceException(JsonResourceException.INTERNAL_ERROR, defaultMsg, this);
+    }
+    
+    /**
+     * Converts the script exception to an appropriate json resource exception.
+     * 
+     * The exception message is set to the defaultMsg by this exception, 
+     * and the error code to the defaultCode
+     * subclasses may override and provide a prescedence on where the 
+     * used code and message comes from
+     *
+     * @param defaultCode a default json resource reason error code
+     * @param defaultMsg a default message to use 
+     * @return the appropriate JsonResourceException
+     */
+    public JsonResourceException toJsonResourceException(int defaultCode, String defaultMsg) {
+        return new JsonResourceException(defaultCode, defaultMsg, this);
+    }
+
 }

@@ -16,6 +16,13 @@
 
 package org.forgerock.openidm.script;
 
+import java.util.Map;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSetException;
+
 /**
  * An exception that is thrown to indicate that an executed script encountered an exception.
  *
@@ -66,5 +73,47 @@ public class ScriptThrownException extends ScriptException {
      */
     public Object getValue() {
         return value;
+    }
+    
+    /**
+     * Converts the script exception to an appropriate json resource exception.
+     * 
+     * The exception message is set to, in order of precedence
+     * 1. Specific message set in the thrown script exception
+     * 2. Default exception supplied to this method, or if null
+     * 3. value toString of this exception 
+     * @param defaultMsg a default message to use if no explicit message is set, or null if 
+     * value toString shoudl be used instead
+     * @return the appropriate JsonResourceException
+     */
+    @Override
+    public JsonResourceException toJsonResourceException(int defaultCode, String defaultMsg) {
+        if (value != null && value instanceof Map) {
+            // Convention on structuring well known exceptions with value that contains
+            // openidmCode : Integer matching JsonResourceException codes 
+            //               (required for it to be considered a known exception definition)
+            // message : String - optional exception message, set to value.toString if not present
+            // detail : Map<String, Object> - optional structure with exception detail
+            // cause : Throwable - optional cause to chain
+            JsonValue val = new JsonValue(value);
+            Integer openidmCode = val.get("openidmCode").asInteger();
+            if (openidmCode != null) {
+                String message = val.get("message").asString();
+                if (message == null) {
+                    if (defaultMsg != null) {
+                        message = defaultMsg;
+                    } else {
+                        message = (value == null ? null : value.toString());
+                    }
+                }
+                Map<String, Object> failureDetail = (Map<String, Object>) val.get("detail").asMap();
+                Throwable throwable = (Throwable) val.get("cause").getObject();
+                if (throwable == null) {
+                    throwable = this;
+                }
+                return new ObjectSetException(openidmCode.intValue(), message, failureDetail, throwable);
+            }
+        }
+        return new JsonResourceException(defaultCode, defaultMsg, this);
     }
 }

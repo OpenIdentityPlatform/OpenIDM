@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -55,5 +57,19 @@ public class NotFoundException extends ObjectSetException {
      */
     public NotFoundException(String message, Throwable cause) {
         super(JsonResourceException.NOT_FOUND, message, cause);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public NotFoundException(String message, Map<String, Object> failureDetail) {
+        super(JsonResourceException.NOT_FOUND, message, failureDetail);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public NotFoundException(String message, Map<String, Object> failureDetail, Throwable cause) {
+        super(JsonResourceException.NOT_FOUND, message, failureDetail, cause);
     }
 }

@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -57,30 +59,50 @@ public class ObjectSetException extends JsonResourceException {
     }
 
     /**
-     * TODO: Description.
+     * Constructs a new exception with the specified code
      */
     public ObjectSetException(int code) {
         super(code);
     }
 
     /**
-     * TODO: Description.
+     * Constructs a new exception with the specified code and detail message
      */
     public ObjectSetException(int code, String message) {
         super(code, message);
     }
 
     /**
-     * TODO: Description.
+     * Constructs a new exception with the specified code and cause
      */
     public ObjectSetException(int code, Throwable cause) {
         super(code, cause);
     }
 
     /**
-     * TODO: Description.
+     * Constructs a new exception with the specified code, detail message
+     * and cause
      */
     public ObjectSetException(int code, String message, Throwable cause) {
         super(code, message, cause);
     }
+
+    /**
+     * Constructs a new exception with the specified code, detail message
+     * and failure detail.
+     */
+    public ObjectSetException(int code, String message, Map<String, Object> failureDetail) {
+        this(code, message);
+        setDetail(failureDetail);
+    }
+
+    /**
+     * Constructs a new exception with the specified code, detail message, 
+     * failure detail and cause.
+     */
+    public ObjectSetException(int code, String message, Map<String, Object> failureDetail, Throwable cause) {
+        this(code, message, cause);
+        setDetail(failureDetail);
+    }
+
 }
