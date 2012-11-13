@@ -124,6 +124,12 @@ var accessConfig = { "configs" : [
             "actions" : "*",
             "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['for-credentials']})"
         },
+        {
+            "pattern" : "endpoint/getnotifications",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
 
         // Clients authenticated via SSL mutual authentication
         {       "pattern" : "*",

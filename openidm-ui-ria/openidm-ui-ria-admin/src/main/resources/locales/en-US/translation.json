@@ -171,6 +171,7 @@
                 "MIN_LENGTH" : "At least __minLength__ characters",
                 "REQUIRED" : "Cannot be blank",
                 "UNIQUE" : "Already exists",
+                "REAUTH_REQUIRED" : "",
                 "formContainsErrors" : "Form contains validation errors",
                 "atLeastOneCapitalLetter" : "At least one capital letter",
                 "atLeastOneNumber" : "At least one number",

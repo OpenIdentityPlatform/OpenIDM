@@ -51,6 +51,15 @@
                             "params" : {
                                 "disallowedFields" : "userName,givenName,familyName"
                             }
+                        },
+                        {
+                            "policyId" : "re-auth-required",
+                            "params" : {
+                                "exceptRoles" : [
+                                    "openidm-admin",
+                                    "openidm-reg"
+                                ]
+                            }
                         }
                     ]
                 },
@@ -136,6 +145,15 @@
                             "policyId" : "minimum-length",
                             "params" : {
                                 "minLength" : 16
+                            }
+                        },
+                        {
+                            "policyId" : "re-auth-required",
+                            "params" : {
+                                "exceptRoles" : [
+                                    "openidm-admin",
+                                    "openidm-reg"
+                                ]
                             }
                         }
                     ]
