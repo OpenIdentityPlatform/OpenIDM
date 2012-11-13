@@ -99,21 +99,6 @@ define("config/AppConfiguration", [
                                        "url": "#users/",
                                        "name": "config.AppConfiguration.Navigation.links.users"
                                    },
-                                   "apps": {
-                                       "baseUrl": "#applications/",
-                                       "url": "#applications/all/",
-                                       "name": "config.AppConfiguration.Navigation.links.apps",
-                                       "urls": {
-                                           "allApps": {
-                                               "url": "#applications/all/",
-                                               "name": "config.AppConfiguration.Navigation.links.allApps"
-                                           },
-                                           "addMore": {
-                                               "url": "#applications/addmore/",
-                                               "name": "config.AppConfiguration.Navigation.links.addMore"
-                                           }
-                                       }    
-                                   },
                                    "processDashboard": {
                                        "url": "#processes/",
                                        "name": "config.AppConfiguration.Navigation.links.startProcess"
@@ -142,21 +127,6 @@ define("config/AppConfiguration", [
                                    "dashboard": {
                                        "url": "#/",
                                        "name": "config.AppConfiguration.Navigation.links.dashboard"
-                                   },
-                                   "apps": {
-                                       "baseUrl": "#applications/",
-                                       "url": "#applications/all/",
-                                       "name": "config.AppConfiguration.Navigation.links.apps",
-                                       "urls": {
-                                           "allApps": {
-                                               "url": "#applications/all/",
-                                               "name": "config.AppConfiguration.Navigation.links.allApps"
-                                           },
-                                           "addMore": {
-                                               "url": "#applications/addmore/",
-                                               "name": "config.AppConfiguration.Navigation.links.addMore"
-                                           }
-                                       }    
                                    }
                                }    
                            }
@@ -164,7 +134,7 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/apps/dashboard/NotificationViewHelper",
+                   moduleClass: "org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper",
                    configuration: {
                        typeToIconMapping: {
                            "1": "images/notifications/pending.png",
@@ -187,7 +157,7 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/util/UIUtils",
                    configuration: {
                        templateUrls: [ //preloaded templates
-                           "templates/apps/application.html",
+                           //"templates/apps/application.html",
                            "templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html",
                            "templates/admin/workflow/tasks/ShowUserProfile.html"
                        ]

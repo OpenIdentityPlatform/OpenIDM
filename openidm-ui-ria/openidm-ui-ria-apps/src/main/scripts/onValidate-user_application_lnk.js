@@ -1,4 +1,4 @@
-/**
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,13 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/**
+ * @author jdabrowski
+ * 
+ * This script validates if user application link is valid.
+ */
 
-define("org/forgerock/openidm/ui/apps/dashboard/NotificationViewHelper", [
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function (AbstractConfigurationAware) {
-    
-    var obj = new AbstractConfigurationAware();
+var errors = [];
 
-    return obj;
-});
+function requiredValidator(toValidate, fieldName) {
+    if (!toValidate || toValidate === "") {
+        errors.push(fieldName + " is required");
+        return false;
+    }
+    return true;
+}
+
+function isUserApplicationLnk() {
+    var userApplicationLnk = openidm.decrypt(object);
+    requiredValidator(userApplicationLnk.state, "Approval State");
+    requiredValidator(userApplicationLnk.userId, "User Id");
+    requiredValidator(userApplicationLnk.applicationId, "Application Id");
+    if(errors.length > 0) {
+    	throw errors;
+    }
+};
+
+isUserApplicationLnk();

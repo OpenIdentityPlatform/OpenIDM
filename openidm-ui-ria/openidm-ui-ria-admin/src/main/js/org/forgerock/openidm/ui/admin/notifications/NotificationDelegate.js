@@ -27,7 +27,7 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/apps/delegates/NotificationDelegate", [
+define("org/forgerock/openidm/ui/admin/notifications/NotificationDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",

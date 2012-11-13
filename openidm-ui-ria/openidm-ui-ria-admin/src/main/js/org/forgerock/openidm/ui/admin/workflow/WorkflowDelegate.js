@@ -32,7 +32,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(constants, serviceInvoker) {
     
-    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl;
+    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl, processDefinitiosEndpointUrl;
     
     taskManagementUrl       =   "/openidm/workflow/taskinstance";
     taskDefinitionUrl = "/openidm/workflow/taskdefinition";
@@ -120,7 +120,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
                 successCallback(data);
             }
         }, error: errorCallback} );
-    }
+    };
         
     obj.getAllUniqueProcessDefinitions = function(userName, successCallback, errorCallback) {
         obj.getAllProcessDefinitions(userName, function(processDefinitions) {
@@ -261,7 +261,9 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     
     obj.getAllTaskUsingEndpoint = function(userName, successCallback, errorCallback) {
         obj.serviceCall({url: endpointUrl + "?userName=" + userName, success: function(data) {
-            if(successCallback) {
+            if(_.isEmpty(data)) {
+                errorCallback();
+            } else if(successCallback) {
                 successCallback(data);
             }
         }, error: errorCallback} );
@@ -269,7 +271,9 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     
     obj.getMyTaskUsingEndpoint = function(userName, successCallback, errorCallback) {
         obj.serviceCall({url: endpointUrl + "?userName=" + userName + "&viewType=assignee", success: function(data) {
-            if(successCallback) {
+            if(_.isEmpty(data)) {
+                errorCallback();
+            } else if(successCallback) {
                 successCallback(data);
             }
         }, error: errorCallback} );

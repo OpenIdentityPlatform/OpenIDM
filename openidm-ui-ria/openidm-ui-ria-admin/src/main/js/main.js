@@ -120,7 +120,6 @@ require([
     "config/main",
     "org/forgerock/commons/ui/user/main",
     "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/apps/main",
     "org/forgerock/openidm/ui/admin/main" 
 ], function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, i18n, constants, eventManager) { 
     eventManager.sendEvent(constants.EVENT_DEPENDECIES_LOADED);

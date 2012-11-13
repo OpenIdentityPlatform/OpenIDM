@@ -1,7 +1,7 @@
-/*! @license 
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,30 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/**
- * @author jdabrowski
+/** 
+ * This script generates user UUID and sets default fields. 
+ * It forces that user role is openidm-authorized and account status
+ * is active.
  * 
- * This script validates if user application link is valid.
- */
-
-var errors = [];
-
-function requiredValidator(toValidate, fieldName) {
-    if (!toValidate || toValidate === "") {
-        errors.push(fieldName + " is required");
-        return false;
-    }
-    return true;
-}
-
-function isUserApplicationLnk() {
-    var userApplicationLnk = openidm.decrypt(object);
-    requiredValidator(userApplicationLnk.state, "Approval State");
-    requiredValidator(userApplicationLnk.userId, "User Id");
-    requiredValidator(userApplicationLnk.applicationId, "Application Id");
-    if(errors.length > 0) {
-    	throw errors;
-    }
+ * It is run every time new user is created.
+ */  
+  
+var userApplicationLnk = openidm.decrypt(object);
+var params = {
+    "_query-id": "get-user-app-link-by-user-and-app",
+    "uid": userApplicationLnk.userId,
+    "applicationId": userApplicationLnk.applicationId
 };
-
-isUserApplicationLnk();
+      
+result = openidm.query("managed/user_application_lnk", params);
+      
+if ((result.result && result.result.length!=0) || (result.results && result.results.length!=0)) {
+    throw "Failed to create user application link. User already has this application";
+}

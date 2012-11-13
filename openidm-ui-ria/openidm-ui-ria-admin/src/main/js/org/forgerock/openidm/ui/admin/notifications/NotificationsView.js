@@ -27,10 +27,10 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
+define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
     "org/forgerock/commons/ui/common/components/LineTableView",
-    "org/forgerock/openidm/ui/apps/dashboard/NotificationViewHelper",
-    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",

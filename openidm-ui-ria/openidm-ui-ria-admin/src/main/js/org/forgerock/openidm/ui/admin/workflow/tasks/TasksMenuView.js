@@ -34,12 +34,10 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
     "dataTable",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/components/popup/PopupCtrl"
-], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userApplicationLnkDelegate, userDelegate, applicationDelegate, dateUtil, popupCtrl) {
+], function(workflowManager, eventManager, constants, dataTable, conf, uiUtils, userDelegate, dateUtil, popupCtrl) {
     var TasksMenuView = Backbone.View.extend({
         
         events: {
