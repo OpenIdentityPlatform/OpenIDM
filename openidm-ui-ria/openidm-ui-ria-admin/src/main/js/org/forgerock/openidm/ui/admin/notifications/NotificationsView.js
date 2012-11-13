@@ -112,7 +112,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
                 self.installAccordion(); 
             }, function() {
                 eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
-                notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
+                notificationDelegate.getNotificationsForUser(function(notifications) {
                     self.items = notifications;
                     self.rebuildView();
                     self.installAccordion();
