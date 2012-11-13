@@ -70,7 +70,9 @@
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset my password"
+                "resetPassword" : "Reset my password",
+                "siteIdentificationHeader": "Site Identification",
+                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -210,7 +212,7 @@
             "address2" : "Address 2",
             "country" : "Country",
             "city" : "City",
-            "role" : "Role",
+            "role" : "Admin Role",
             "stateProvince" : "State/Province",
             "phoneNumber" : "Mobile Phone",
             "postalCode" : "Postal Code",
