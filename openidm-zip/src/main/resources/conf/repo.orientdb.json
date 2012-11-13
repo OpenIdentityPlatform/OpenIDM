@@ -21,10 +21,6 @@
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
         
         "notifications-for-user": "SELECT * FROM ${_resource} WHERE receiverId = '${userId}'",
-        "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
-        "query-all-user_application_lnk": "select * from ${_resource}",
-        "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",
-        "get-user-app-link-by-user-and-app": "select * from ${_resource} WHERE userId = '${uid}' and applicationId = '${applicationId}'",
 
         "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
     },

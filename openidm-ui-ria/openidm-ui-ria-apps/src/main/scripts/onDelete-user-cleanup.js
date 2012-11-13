@@ -1,4 +1,4 @@
-/**
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,15 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+var userId = object._id;
 
-define("org/forgerock/openidm/ui/apps/main", [  
-	"./dashboard/DashboardView",
-	"./dashboard/BaseUserInfoView",
-	"./UsersApplicationsView",
-	"./AllAppsView",
-	"./FrequentlyUsedApplicationsView",
-	"./AddMoreAppsView",
-	"./AppsView",
-	"./BaseApplicationsView"
-]);
+var findUserApplicationLnksParams = {
+    "_query-id": "user_application_lnk-for-user",
+    "userId": userId
+};
+
+userApplicationLnksQueryResult = openidm.query("managed/user_application_lnk", findUserApplicationLnksParams);
+if (userApplicationLnksQueryResult.result && userApplicationLnksQueryResult.result.length!=0) {
+    
+    for (userApplicationLnksPointer in userApplicationLnksQueryResult.result) {
+        var userApplicationLnk = userApplicationLnksQueryResult.result[userApplicationLnksPointer];
+        openidm['delete']('managed/user_application_lnk/' + userApplicationLnk._id, userApplicationLnk._rev);
+    }
+    
+}

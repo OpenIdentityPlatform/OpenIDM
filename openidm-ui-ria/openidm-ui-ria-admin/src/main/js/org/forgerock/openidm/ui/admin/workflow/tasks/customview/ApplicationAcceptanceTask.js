@@ -30,11 +30,9 @@
 define("org/forgerock/openidm/ui/admin/workflow/tasks/customview/ApplicationAcceptanceTask", [
     "org/forgerock/openidm/ui/admin/workflow/tasks/AbstractTaskForm",
     "org/forgerock/commons/ui/common/util/DateUtil",
-    "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
-    "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function(AbstractTaskForm, DateUtil, userApplicationLnkDelegate, userDelegate, applicationDelegate, conf) {
+], function(AbstractTaskForm, DateUtil, userDelegate, conf) {
     var ApplicationAcceptanceTask = AbstractTaskForm.extend({
         template: "templates/admin/workflow/tasks/customview/ApplicationAcceptanceTemplate.html",
         

@@ -24,32 +24,11 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/main", [
-    "org/forgerock/openidm/ui/admin/workflow/tasks/customview/main",    
-    "org/forgerock/openidm/ui/admin/workflow/processes/customview/main",    
-	"./users/AdminUserRegistrationView",
-	"./users/AdminUserProfileView",
-	"./users/ChangeUserPasswordDialog",
-	"./users/UsersView",
-	
-	"./workflow/FormManager",
-	
-	"./workflow/tasks/TaskDetailsView",
-    "./workflow/tasks/AbstractTaskForm",
-	"./workflow/tasks/customview/ApplicationAcceptanceTask",
-	"./workflow/tasks/TasksMenuView",
-	"./workflow/tasks/TasksDashboard",
-	"./workflow/tasks/TemplateTaskForm",
-	
-	"./workflow/processes/AbstractProcessForm",
-    "./workflow/processes/StartProcessDashboardView",
-	
-	"./workflow/WorkflowDelegate",
-	
-	"./Dashboard",
-	
-	"./notifications/NotificationDelegate",
-	"./notifications/NotificationsView",
-	"./notifications/NotificationViewHelper"
-	
-]);
+define("org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper", [
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function (AbstractConfigurationAware) {
+    
+    var obj = new AbstractConfigurationAware();
+
+    return obj;
+});

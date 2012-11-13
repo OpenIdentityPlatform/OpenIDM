@@ -61,16 +61,6 @@ if (!object.phoneNumber) {
     object.phoneNumber = "";
 }
 
-/*
-if (!object.frequentlyUsedApplications) {
-    object.frequentlyUsedApplications = "";
-}
-
-if (!object.userApplicationsOrder) {
-    object.userApplicationsOrder = "";
-}
-*/
-
 //password and security answer are generated if missing just to keep those attributes filled
 if (!object.password) {
     object.password = java.util.UUID.randomUUID().toString();

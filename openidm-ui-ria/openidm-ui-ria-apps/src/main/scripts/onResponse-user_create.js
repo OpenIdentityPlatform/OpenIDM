@@ -1,4 +1,4 @@
-/**
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,15 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+newUserApplicationLnk = {
+    "userId" : response._id,
+    "state" : "B65FA6A2-D43D-49CB-BEA0-CE98E275A8CD"
+}
 
-define("org/forgerock/openidm/ui/apps/main", [  
-	"./dashboard/DashboardView",
-	"./dashboard/BaseUserInfoView",
-	"./UsersApplicationsView",
-	"./AllAppsView",
-	"./FrequentlyUsedApplicationsView",
-	"./AddMoreAppsView",
-	"./AppsView",
-	"./BaseApplicationsView"
-]);
+result = openidm.read("config/ui/applications")
+defaultApps = [];
+
+if (result.availableApps) {
+    for(app in result.availableApps) {  
+        if(result.availableApps[app].isDefault == true) {
+            defaultApps.push(result.availableApps[app]._id);
+        }
+    }
+}
+
+for (appId in defaultApps) {
+    newUserApplicationLnk.applicationId = defaultApps[appId];
+    openidm.create("managed/user_application_lnk", newUserApplicationLnk);
+}
