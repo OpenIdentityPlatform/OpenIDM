@@ -255,8 +255,33 @@ function getPolicy(policyId) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var req = request.parent.parent;
-    if (typeof req.type !== 'undefined' && req.type == "http") {
+    var exceptRoles, parent, type, roles, caller, i, j;
+    caller = request.params._caller;
+    parent = request.parent;
+    if (caller && caller == "filterEnforcer") {
+        parent = request.parent.parent;
+    }
+    type = parent.type;
+    if (parent.security) {
+        roles = parent.security["openidm-roles"];
+        if (params && params.exceptRoles) {
+            exceptRoles = params.exceptRoles;
+            if (exceptRoles) {
+                for (i = 0; i < exceptRoles.length; i++) {
+                    var role = exceptRoles[i];
+                    if (roles) {
+                        for (j = 0; j < roles.length; j++) {
+                            if (role == roles[j]) {
+                                return [];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    if (type == "http") {
         try {
             var actionParams = {
                 "_action": "reauthenticate"
@@ -451,7 +476,7 @@ function getAdditionalPolicies(id) {
         if (objects !== undefined && objects !== null) {
             for (var i = 0; i < objects.length; i++) {
                 var obj = objects[i];
-                if (obj.name == object) {
+                if ((obj.name == object) || resourceMatches(object, obj.name + "/*")) {
                     var props = obj.properties;
                     if (props != null) {
                         for (var j = 0; j < props.length; j++) {
