@@ -35,11 +35,7 @@
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
             
             "notifications-for-user" : "SELECT * FROM ${_dbSchema}.uinotification WHERE receiverId = ${userId}",
-            "user_application_lnk-for-user" : "SELECT * FROM ${_dbSchema}.manageduserapplicationlnk WHERE userId = ${userId}",
-            "query-all-user_application_lnk" : "select * from ${_dbSchema}.manageduserapplicationlnk",
-            "user_application_lnk-for-id" : "select * from ${_dbSchema}.manageduserapplicationlnk WHERE objectid = ${userApplicationLnkId}",
-            "get-user-app-link-by-user-and-app" : "select * from ${_dbSchema}.manageduserapplicationlnk WHERE userId = ${uid} and applicationId = ${applicationId}",
-            
+
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
         }
     },
@@ -84,19 +80,6 @@
                     "notificationType" : "notificationType",
                     "notificationSubtype" : "notificationSubtype",
                     "message" : "message"
-                }
-            },
-            "managed/user_application_lnk" : {
-                "table" : "manageduserapplicationlnk",
-                "objectToColumn" : {
-                    "_id" : "objectid",
-                    "_rev" : "rev",
-                    "state" : "state",
-                    "applicationId" : "applicationId",
-                    "userId" : "userId",
-                    "lastTimeUsed" : "lastTimeUsed",
-                    "requester" : "requester",
-                    "link" : "link"
                 }
             },
             "internal/user" : {
