@@ -259,8 +259,8 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
         return result;
     };
     
-    obj.getAllTaskUsingEndpoint = function(userName, successCallback, errorCallback) {
-        obj.serviceCall({url: endpointUrl + "?userName=" + userName, success: function(data) {
+    obj.getAllTaskUsingEndpoint = function(userId, successCallback, errorCallback) {
+        obj.serviceCall({url: endpointUrl + "?userId=" + userId, success: function(data) {
             if(_.isEmpty(data)) {
                 errorCallback();
             } else if(successCallback) {
@@ -269,8 +269,8 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
         }, error: errorCallback} );
     };
     
-    obj.getMyTaskUsingEndpoint = function(userName, successCallback, errorCallback) {
-        obj.serviceCall({url: endpointUrl + "?userName=" + userName + "&viewType=assignee", success: function(data) {
+    obj.getMyTaskUsingEndpoint = function(userId, successCallback, errorCallback) {
+        obj.serviceCall({url: endpointUrl + "?userId=" + userId + "&viewType=assignee", success: function(data) {
             if(_.isEmpty(data)) {
                 errorCallback();
             } else if(successCallback) {
