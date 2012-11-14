@@ -73,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
             }
         },
         
-        render: function(id, category) { 
+        render: function(id, category, callback) { 
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                     workflowManager.getProcessDefinition(id, _.bind(function(definition) {
@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                         if(definition.formResourceKey) {
                             view = require(formManager.getViewForForm(definition.formResourceKey));
                             if (view.render) {
-                                view.render(definition, {});
+                                view.render(definition, {}, {}, callback);
                                 return;
                             } else {
                                 console.log("There is no view defined for " + definition.formResourceKey);
@@ -95,6 +95,10 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                             templateStartProcessForm.render(definition, {}, template, _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
+                                
+                                if(callback) {
+                                    callback();
+                                }
                             }, this));
                             return;
                         } else {
@@ -102,6 +106,10 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                             templateStartProcessForm.render(definition, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
+                                
+                                if(callback) {
+                                    callback();
+                                }
                             }, this));
                             return;
                         }

@@ -105,6 +105,11 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 
                 if(event.category === "all") {
                     $("#taskDetails input, #taskDetails select").attr("disabled", "true");
+                    $("#taskDetails span").hide();
+                }
+                
+                if(root.find("#taskContent").html() === "") {
+                    root.find("#taskContent").html('No data required');
                 }
             });   
         },
@@ -117,11 +122,13 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
+                startProcessView.render();
             }, this));
             
             eventManager.unregisterListener("refreshMyTasksMenu");
             eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
                 this.myTasks.render("assigned", $("#myTasks"));
+                this.candidateTasks.render("all", $("#candidateTasks"));   
             }, this));
         }
     });

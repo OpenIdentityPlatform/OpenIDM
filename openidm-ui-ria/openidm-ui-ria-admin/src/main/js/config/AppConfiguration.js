@@ -98,10 +98,6 @@ define("config/AppConfiguration", [
                                    "users": {
                                        "url": "#users/",
                                        "name": "config.AppConfiguration.Navigation.links.users"
-                                   },
-                                   "processDashboard": {
-                                       "url": "#processes/",
-                                       "name": "config.AppConfiguration.Navigation.links.startProcess"
                                    }
                                }
                            },
@@ -115,10 +111,6 @@ define("config/AppConfiguration", [
                                    "users": {
                                        "url": "#users/",
                                        "name": "config.AppConfiguration.Navigation.links.users"
-                                   },
-                                   "processDashboard": {
-                                       "url": "#processes/",
-                                       "name": "config.AppConfiguration.Navigation.links.startProcess"
                                    }
                                }    
                            },

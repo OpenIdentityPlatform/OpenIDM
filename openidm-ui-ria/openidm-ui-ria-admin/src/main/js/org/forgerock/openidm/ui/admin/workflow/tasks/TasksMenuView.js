@@ -239,11 +239,20 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         },
         
         refreshAssignedSelectors: function() {
-            _.each($("select[name=assignedUser]"), function(target) {
-                var assignedUser = $(target).parent().parent().find('input[name=assignedUser]').val();
+            _.each($("select[name=assignedUser]"), _.bind(function(target) {
+                var assignedUser = $(target).parent().parent().find('input[name=assignedUser]').val(), task, i, user;
                 
-                //TODO load users which can be assigned to this task
-                //TODO add options
+                task = this.getTaskFromCacheById($(target).closest("tr").find("input[name=taskId]").val());
+                
+                if(task) {
+                    for(i = 0; i < task.usersToAssign.users.length; i++) {
+                        user = task.usersToAssign.users[i];
+
+                        if($(target).find("option[value="+ user.username +"]").length === 0 && user.username !== conf.loggedUser.userName) {
+                            $(target).append('<option value="'+ user.username +'">'+ user.displayableName +'</option');
+                        }
+                    }
+                }
                 
                 if(conf.loggedUser.userName === assignedUser) {
                     $(target).val('me');
@@ -256,7 +265,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                 } else if(assignedUser !== "null") {
                     $(target).val(assignedUser);
                 }
-            });
+            }, this));
             
             console.log("refresing selectors");
         },
@@ -267,7 +276,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         
         getActions: function(task) {
             if(this.category === 'all') {
-                return '<select name="assignedUser" style="width: 180px"><option value="null">' + $.t("common.task.unassigned") 
+                return '<select name="assignedUser" class="select-static-medium"><option value="null">' + $.t("common.task.unassigned") 
                     + '</option><option value="me">' + $.t("common.task.assignToMe")
                     + '</option></select> <a href="#" class="button choosable choosable-static detailsLink">' + $.t("common.form.details")
                     + '</a>';
