@@ -234,7 +234,30 @@ function cannotContainOthers(fullObject, value, params, property) {
 
 function requiredIfConfigured(fullObject, value, params, property) {
     var currentValue = openidm.read("config/" + params.configBase),
-        baseKeyArray = params.baseKey.split(".");
+        baseKeyArray = params.baseKey.split("."),
+        caller = request.params._caller,
+        roles,parent,i,j,role;
+    
+    parent = request.parent;
+    if (caller && caller == "filterEnforcer") {
+        parent = request.parent.parent;
+    }
+
+    if (parent.security) {
+        roles = parent.security["openidm-roles"];
+        if (params && params.exceptRoles) {
+            for (i = 0; i < params.exceptRoles.length; i++) {
+                role = params.exceptRoles[i];
+                if (roles) {
+                    for (j = 0; j < roles.length; j++) {
+                        if (role === roles[j]) {
+                            return [];
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     for (var i in baseKeyArray)
         currentValue = currentValue[baseKeyArray[i]];
