@@ -50,7 +50,7 @@
  OpenIDM writes all system and custom log messages to the files.</para>
 
  <para>You can update the configuration to attach loggers to individual
- packages, setting the log level to using the following values.</para>
+ packages, setting the log level to one of the following values.</para>
  <programlisting language="none">
 SEVERE (highest value)
 WARNING
