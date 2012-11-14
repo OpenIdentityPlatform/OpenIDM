@@ -448,14 +448,15 @@
   <para>Data flow for synchronization involves the following elements:
   </para>
   <itemizedlist>
-  <listitem><para>Three types of configuration files.</para></listitem>
+  <listitem><para>Connector configuration files 
+  (<filename>conf/provisioner-*.json</filename>), with one file per external 
+  resource.</para></listitem>
+  <listitem><para>Synchronization mappings file 
+  (<filename>conf/sync.json</filename>), with one file per OpenIDM instance.
+  </para></listitem>
   <listitem><para>A links table that OpenIDM maintains in its repository.</para></listitem>
   <listitem><para>The scripts required to check objects and manipulate attributes.</para></listitem>
   </itemizedlist>
- <para>Typically, you only edit two of the three types of configuration files 
- - connector configuration files, with one file per external resource, and the 
- synchronization mappings file (<filename>conf/sync.json</filename>), with one 
- file per OpenIDM instance.</para>
 
   <variablelist>
    <varlistentry>
@@ -1999,7 +2000,7 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
   <filename>openidm/conf/sync.json</filename> for reconciliation, LiveSync,
   and for pushing changes made to managed objects to external resources.
   You can, however, provide alternative mappings for scheduled reconciliation
-  by adding the mapping to the scheduler configuration instead of referencing 
+  by adding the mapping to the schedule configuration instead of referencing 
   a mapping in <filename>sync.json</filename>.</para>
 
   <programlisting language="javascript">
