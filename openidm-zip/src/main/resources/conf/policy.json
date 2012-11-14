@@ -126,7 +126,10 @@
                             "policyId" : "required-if-configured",
                             "params" : {
                                 "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.securityQuestions"
+                                "baseKey" : "configuration.securityQuestions",
+                                "exceptRoles" : [
+                                    "openidm-admin"
+                                ]
                             }
                         }
                     ]
@@ -138,7 +141,10 @@
                             "policyId" : "required-if-configured",
                             "params" : {
                                 "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.securityQuestions"
+                                "baseKey" : "configuration.securityQuestions",
+                                "exceptRoles" : [
+                                    "openidm-admin"
+                                ]
                             }
                         },
                         {
@@ -192,7 +198,10 @@
                             "policyId" : "required-if-configured",
                             "params" : {
                                 "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.siteIdentification"
+                                "baseKey" : "configuration.siteIdentification",
+                                "exceptRoles" : [
+                                    "openidm-admin"
+                                ]
                             }
                         }
                     ]

@@ -127,10 +127,36 @@ var accessConfig = { "configs" : [
             "roles" : "openidm-authorized", // openidm-authorized is logged-in users
             "methods": "*",
             "actions" : "*",
-            "customAuthz" : "ownDataOnly()"
+            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['query-all']})" // query-all used by workflow
         },
         {
             "pattern" : "endpoint/getnotifications",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        {
+            "pattern" : "endpoint/getnotifications/*",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        
+        // workflow related endpoints.  We need to build these up with custom Authz functions
+        {   
+            "pattern" : "endpoint/getprocessesforuser",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        {   
+            "pattern" : "workflow/processdefinition/*",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        {   
+            "pattern" : "workflow/processinstance/*",
             "roles" : "openidm-authorized",
             "methods": "*",
             "actions" : "*"

@@ -69,11 +69,11 @@ if (!object.password) {
 if (uiConfig.configuration.siteIdentification) {
 
     if (!object.siteImage) {
-        object.siteImage = "1";
+        object.siteImage = "user.png";
     }
 
     if (!object.passPhrase) {
-        object.passPhrase = "";
+        object.passPhrase = "Welcome new user";
     }
 
 }
@@ -84,7 +84,7 @@ if (uiConfig.configuration.securityQuestions) {
     }
 
     if (!object.securityQuestion) {
-        object.securityQuestion = "";
+        object.securityQuestion = "1";
     }
 
     if (!object.securityAnswerAttempts) {
