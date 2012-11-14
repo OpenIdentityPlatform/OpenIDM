@@ -181,7 +181,7 @@ function validNameFormatWhenPresent(fullObject, value, params, property) {
 
 function minLengthWhenPresent(fullObject, value, params, property) { 
     var minLength = params.minLength;
-    if (typeof(value) === "string" && value.length < minLength) {
+    if (typeof(value) === "string" && value.length && value.length < minLength) {
         return [ { "policyRequirement" : "MIN_LENGTH", "params" : {"minLength":minLength} } ];
     }
     return [];
