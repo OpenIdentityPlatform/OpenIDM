@@ -50,7 +50,7 @@ public class JsonUserQuery extends UserQueryImpl {
     @Override
     public List<User> executeList(CommandContext commandContext, Page page) {
         JsonValue params = new JsonValue(new HashMap());
-        params.put("_query-id", "query-all-ids");
+        params.put("_queryId", "query-all-ids");
         try {
             JsonValue result = identityService.getAccessor().query("managed/user", params);
             List<User> userList = new ArrayList<User>();
@@ -67,9 +67,9 @@ public class JsonUserQuery extends UserQueryImpl {
     public long executeCount(CommandContext commandContext) {
         JsonValue params = new JsonValue(new HashMap());
         if (null == getId()) {
-            params.put("_query-id", "query-all-ids");
+            params.put("_queryId", "query-all-ids");
         } else {
-            params.put("_query-id", "for-userName");
+            params.put("_queryId", "for-userName");
             params.put("uid", getId());
         }
         try {
@@ -83,7 +83,7 @@ public class JsonUserQuery extends UserQueryImpl {
     @Override
     public User executeSingleResult(CommandContext commandContext) {
         JsonValue params = new JsonValue(new HashMap());
-        params.put("_query-id", "for-userName");
+        params.put("_queryId", "for-userName");
         params.put("uid", getId());
         try {
             JsonValue result = identityService.getAccessor().query("managed/user", params);

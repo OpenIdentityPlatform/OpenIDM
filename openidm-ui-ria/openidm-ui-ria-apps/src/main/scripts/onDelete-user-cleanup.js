@@ -25,7 +25,7 @@
 var userId = object._id;
 
 var findUserApplicationLnksParams = {
-    "_query-id": "user_application_lnk-for-user",
+    "_queryId": "user_application_lnk-for-user",
     "userId": userId
 };
 

@@ -71,7 +71,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     
     obj.getTaskDefinition = function(processDefinitionId, taskDefinitionKey, successCallback, errorCallback) {
         console.debug("get task definition");
-        this.serviceCall({url: taskDefinitionUrl + "?_query-id=query-taskdefinition&" 
+        this.serviceCall({url: taskDefinitionUrl + "?_queryId=query-taskdefinition&" 
             + $.param({processDefinitionId: processDefinitionId, taskDefinitionKey: taskDefinitionKey}), success: successCallback, error: errorCallback} );
     };
     
@@ -95,7 +95,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getAllTasks = function(successCallback, errorCallback) {
         console.info("getting all tasks");
 
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=query-all-ids", success: function(data) {
+        obj.serviceCall({url: taskManagementUrl + "?_queryId=query-all-ids", success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -105,7 +105,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getAllProcessInstances = function(successCallback, errorCallback) {
         console.info("getting all process instances");
 
-        obj.serviceCall({url: processManagementUrl + "?_query-id=query-all-ids", success: function(data) {
+        obj.serviceCall({url: processManagementUrl + "?_queryId=query-all-ids", success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -149,7 +149,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     
     obj.getAllTasksForProccess = function(proccessNameKey, successCallback, errorCallback) {
         console.info("getting all unassigned tasks");
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=filtered-query&" + $.param({key: proccessNameKey}), success: function(data) {
+        obj.serviceCall({url: taskManagementUrl + "?_queryId=filtered-query&" + $.param({key: proccessNameKey}), success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -159,7 +159,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getTasksAssignedToUser = function(userName, successCallback, errorCallback) {
         console.info("getting all tasks assigned to user " + userName);
     
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=filtered-query&" + $.param({assignee: userName}), success: function(data) {
+        obj.serviceCall({url: taskManagementUrl + "?_queryId=filtered-query&" + $.param({assignee: userName}), success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }

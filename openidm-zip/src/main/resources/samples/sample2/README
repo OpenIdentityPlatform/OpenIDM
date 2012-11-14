@@ -48,4 +48,4 @@ reconciliation:
 The following curl command requests all identifiers in OpenIDM's internal
 repository. Use it to see the results after reconciliation for example.
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"

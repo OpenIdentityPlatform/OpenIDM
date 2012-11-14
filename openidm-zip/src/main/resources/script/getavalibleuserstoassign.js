@@ -8,7 +8,7 @@ getUserById = function(userId) {
 
 getUserByName = function(userName) {
     var params = {
-        "_query-id": "for-userName",
+        "_queryId": "for-userName",
         "uid": userName
     };
     result = openidm.query("managed/user", params);
@@ -39,7 +39,7 @@ if (!task) {
     throw "Task Not Found";
 }
 var taskDefinitionQueryParams = {
-    "_query-id": "query-taskdefinition",
+    "_queryId": "query-taskdefinition",
     "processDefinitionId": task.processDefinitionId,
     "taskDefinitionKey": task.taskDefinitionKey
 };
@@ -65,7 +65,7 @@ for (var i = 0; i < taskCandidateGroupArray.length; i++) {
 for (var i = 0; i < candidateGroups.length; i++) {
     var candidateGroup = candidateGroups[i];
     var params = {
-        "_query-id": "get-users-of-role",
+        "_queryId": "get-users-of-role",
         "role": candidateGroup
     };
     var result = openidm.query("managed/user", params);

@@ -14,7 +14,7 @@ var getProcessInstance = function(processInstanceId) {
 var getTaskDefinition = function(processDefinitionId, taskDefinitionKey) {
     if (!taskDefinitions[processDefinitionId+"|"+taskDefinitionKey]) {
         var taskDefinitionQueryParams = {
-            "_query-id": "query-taskdefinition",
+            "_queryId": "query-taskdefinition",
             "processDefinitionId": processDefinitionId,
             "taskDefinitionKey": taskDefinitionKey
         };
@@ -27,7 +27,7 @@ var getTaskDefinition = function(processDefinitionId, taskDefinitionKey) {
 var getUsersWhoCanBeAssignedToTask = function(taskId) {
     if (!usersWhoCanBeAssignedToTask[taskId]) {
         var usersWhoCanBeAssignedToTaskQueryParams = {
-                "_query-id": "query-by-task-id",
+                "_queryId": "query-by-task-id",
                 "taskId": taskId
             };
         var usersWhoCanBeAssignedToTaskResult = openidm.query("endpoint/getavalibleuserstoassign", usersWhoCanBeAssignedToTaskQueryParams);
@@ -41,7 +41,7 @@ var getUser = function(userId) {
         var user = openidm.read("managed/user/"+userId);
         if (!user) {
             var params = {
-                "_query-id": "for-userName",
+                "_queryId": "for-userName",
                 "uid": userId
             };
             var result = openidm.query("managed/user", params);
@@ -94,7 +94,7 @@ if (!request.params || (!request.params.userId && !request.params.userName)) {
 var tasks;
 if (request.params.viewType === 'assignee') {
     var userAssignedTasksQueryParams = {
-        "_query-id": "filtered-query",
+        "_queryId": "filtered-query",
         "assignee": userName
     };
     tasks = openidm.query("workflow/taskinstance", userAssignedTasksQueryParams).result;
@@ -102,7 +102,7 @@ if (request.params.viewType === 'assignee') {
     var tasksUniqueMap = {};
     
     var userCandidateTasksQueryParams = {
-      "_query-id": "filtered-query",
+      "_queryId": "filtered-query",
       "taskCandidateUser": userName
     };
     var userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result;
@@ -111,7 +111,7 @@ if (request.params.viewType === 'assignee') {
     }
     
     var userGroupCandidateTasksQueryParams = {
-      "_query-id": "filtered-query",
+      "_queryId": "filtered-query",
       "taskCandidateGroup": roles
     };
     var userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;

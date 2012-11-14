@@ -49,7 +49,7 @@ if (
         request.params["_action"] === "setNewPasswordForUserName" ) {
     
     if (request.params.uid) {
-        userQuery = openidm.query("managed/user", {"_query-id": "for-userName", "uid": request.params.uid } );
+        userQuery = openidm.query("managed/user", {"_queryId": "for-userName", "uid": request.params.uid } );
         
         if (userQuery.result.length) {
             

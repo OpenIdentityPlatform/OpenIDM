@@ -7,7 +7,7 @@
         "waitForCompletion" : false,
         "numberOfThreads" : 5,
         "scan" : {
-            "_query-id" : "scan-tasks",
+            "_queryId" : "scan-tasks",
             "object" : "managed/user",
             "property" : "/sunset/date",
 

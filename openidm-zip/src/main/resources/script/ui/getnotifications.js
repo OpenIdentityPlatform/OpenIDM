@@ -33,7 +33,7 @@ var userId = request.parent.security.userid.id, res = {};
 
 if(request.parent.security.userid.component !== "internal/user") {
     var params = {
-        "_query-id": "get-notifications-for-user",
+        "_queryId": "get-notifications-for-user",
         "userId": userId
     };
       

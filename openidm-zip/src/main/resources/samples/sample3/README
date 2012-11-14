@@ -66,7 +66,7 @@ To try the example, follow these steps.
 
     7. Retrieve the list of users from OpenIDM's internal repository:
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
     {
         "query-time-ms": 0,
         "result": [

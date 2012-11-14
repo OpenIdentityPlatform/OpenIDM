@@ -25,7 +25,7 @@
 var parent = request.parent;
 
 if (parent.type !== 'root') {
-    params = {  '_query-id' : 'filtered-query',
+    params = {  '_queryId' : 'filtered-query',
                 '_var-lnkId' : request.id.split("/").slice(-1)[0]
             }
 

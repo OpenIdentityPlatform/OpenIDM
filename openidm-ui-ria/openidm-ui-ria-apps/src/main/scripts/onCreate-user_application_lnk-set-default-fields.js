@@ -32,7 +32,7 @@
   
 var userApplicationLnk = openidm.decrypt(object);
 var params = {
-    "_query-id": "get-user-app-link-by-user-and-app",
+    "_queryId": "get-user-app-link-by-user-and-app",
     "uid": userApplicationLnk.userId,
     "applicationId": userApplicationLnk.applicationId
 };

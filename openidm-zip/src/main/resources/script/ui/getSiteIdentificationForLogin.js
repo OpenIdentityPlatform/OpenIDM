@@ -37,7 +37,7 @@
  */
 
 var params = {
-    "_query-id": "for-userName",
+    "_queryId": "for-userName",
     "uid": request.params.login
 }, res = {};
       
