@@ -114,6 +114,12 @@ public class ScriptThrownException extends ScriptException {
                 return new ObjectSetException(openidmCode.intValue(), message, failureDetail, throwable);
             }
         }
-        return new JsonResourceException(defaultCode, defaultMsg, this);
+        if (defaultMsg != null) {
+            return new JsonResourceException(defaultCode, defaultMsg, this);
+        } else if (value == null) {
+            return new JsonResourceException(defaultCode, this);
+        } else {
+            return new JsonResourceException(defaultCode, value.toString(), this);
+        }
     }
 }
