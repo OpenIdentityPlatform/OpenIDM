@@ -439,7 +439,10 @@ function validate(policies, fullObject, propName, propValue, retArray) {
 }
 
 function mergePolicies(oldPolicies, newPolicies) {
-    returnPolicies = oldPolicies.slice(0);
+    var returnPolicies = new Array();
+    for (var p in oldPolicies) {
+        returnPolicies.push(p);
+    }
     var found = false;
     for (var i = 0; i < newPolicies.length; i++) {
         var newPolicy = newPolicies[i];
@@ -478,7 +481,11 @@ function updateResourceConfig(resource, id) {
             var prop = props[j];
             if (newProp.name === prop.name) {
                 found = true;
-                prop.policies = mergePolicies(prop.policies, newProp.policies);
+                if (prop.policies.length > 0) {
+                    prop.policies = mergePolicies(prop.policies, newProp.policies);
+                } else {
+                    prop.policies = newProp.policies;
+                }
             }
         }
         if (!found) {
