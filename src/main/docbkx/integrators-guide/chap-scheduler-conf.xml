@@ -448,10 +448,9 @@
   <para>The following example defines a scheduled scanning task that triggers 
   a sunset script. This sample configuration file is provided in the OpenIDM 
   delivery as 
-  <filename>openidm/samples/taskscanner/schedule-taskscan_sunset.json</filename>. 
+  <filename>openidm/samples/taskscanner/conf/schedule-taskscan_sunset.json</filename>. 
   To use this sample file, you must copy it to the <filename>openidm/conf</filename> 
-  directory.
-  </para>
+  directory.</para>
   
   <programlisting language="javascript">
 {
@@ -460,6 +459,9 @@
     "schedule" : "0 0 * * * ?",
     "invokeService" : "taskscanner",
     "invokeContext" : {
+        "waitForCompletion" : false,
+        "maxRecords" : 2000,
+        "numberOfThreads" : 5,
         "scan" : {
             "object" : "managed/user",
             "_query-id" : "scan-tasks",
@@ -485,8 +487,42 @@
 }</programlisting>
 
  <variablelist>
-  <para>The <literal>"invokeContext"</literal> parameter takes two properties:
+  <para>The <literal>"invokeContext"</literal> parameter takes the following 
+  properties:
   </para>
+  <varlistentry>
+   <term><literal>"waitForCompletion"</literal> (optional)</term>
+   <listitem>
+    <para>This property specifies whether the task should be performed 
+    synchronously. Tasks are performed asynchronously by default (with 
+    <literal>waitForCompletion</literal> set to false). A task ID (such as 
+    <literal>{"_id":"354ec41f-c781-4b61-85ac-93c28c180e46"}</literal>) is 
+    returned immediately. If this property is set to true, tasks are performed 
+    synchronously and the ID is not returned until all tasks have completed.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><literal>"maxRecords"</literal> (optional)</term>
+   <listitem>
+    <para>The maximum number of records that can be processed. This property 
+    is not set by default so the number of records is unlimited. If a maximum 
+    number of records is specified, that number will be spread evenly over the 
+    number of threads.
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><literal>"numberOfThreads"</literal> (optional)</term>
+   <listitem>
+    <para>By default, the task scanner runs in a multi-threaded manner, that 
+    is, numerous threads are dedicated to the same scanning task run. 
+    Multithreading generally improves the performance of the task scanner. The 
+    default number of threads for a single scanning task is ten. To change this 
+    default, set the <literal>"numberOfThreads"</literal> property.
+    </para>
+   </listitem>
+  </varlistentry>  
   <varlistentry>
    <term><literal>"scan"</literal></term>
    <listitem>
@@ -571,7 +607,15 @@
        <term><literal>"recovery"</literal> (optional)</term>
        <listitem>
         <para>Specifies a configurable timeout, after which the task scanner 
-        process ends.</para>
+        process ends. In a scenario with clustered OpenIDM instances, there 
+        might be more than one task scanner running at a time. A task 
+        cannot be executed by two task scanners at the same time. When one 
+        task scanner "claims" a task, it indicates that the task has been 
+        started. That task is then unavailable to be claimed by another task 
+        scanner and remains unavailable until the end of the task is indicated. 
+        In the event that the first task scanner does not complete the task by 
+        the specified timeout, for whatever reason, a second task scanner can 
+        pick up the task.</para>
        </listitem>
       </varlistentry>
      </variablelist> 
@@ -594,7 +638,7 @@
      objectID is useful for performing updates with the script as it allows you 
      to target the object directly, for example: 
      <literal>openidm.update(objectID, input['_rev'], input);</literal>. A sample 
-     script file is provided in <filename>openidm/samples/taskscanner/sunset.js</filename>. 
+     script file is provided in <filename>openidm/samples/taskscanner/script/sunset.js</filename>. 
      To use this sample file, you must copy it to the <filename>openidm/script</filename> 
      directory. The sample script marks all user objects that match the 
      specified conditions as "inactive". You can use this sample script to 
@@ -611,18 +655,155 @@
 
  <section xml:id="task-scanner-rest">
   <title>Managing Scanning Tasks Over REST</title>
-  <para>You can interact with the task scanner over the REST interface by 
-  using the REST endpoint <literal>openidm/taskscanner</literal>. For example, 
-  the following REST command executes a task named "taskscan_sunrise". The 
-  task itself is defined in a file named 
-  <filename>openidm/conf/schedule-taskscan_sunrise.json</filename>.</para>
+   <para>You can trigger, cancel, and monitor scanning tasks over the REST 
+   interface, using the REST endpoint 
+   <literal>http://localhost:8080/openidm/taskscanner</literal>.</para>
+   
+   <section xml:id="triggering-task-scanner">
+    <title>Triggering a Scanning Task</title>
+    <para>The following REST command executes a task named "taskscan_sunrise". 
+    The task itself is defined in a file named 
+    <filename>openidm/conf/schedule-taskscan_sunset.json</filename>.</para>
  
-  <screen width="91"><?dbfo pgwide="1"?>$ curl
+    <screen width="91"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunrise"
- </screen> 
+ "http://localhost:8080/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset"
+   </screen>
+   
+   <para>By default, a scanning task ID is returned immediately when the task 
+   is initiated. Clients can make subsequent calls to the task scanner service, 
+   using this task ID to query its state and to call operations on it.</para>
+    
+   <para>For example, the scanning task initiated previously would return
+    something similar to the following, as soon as it was initiated:</para>
+    
+   <screen>{"_id":"edfaf59c-aad1-442a-adf6-3620b24f8385"}</screen>
+    
+    <para>To have the scanning task complete before the ID is returned, set the 
+    <literal>waitForCompletion</literal> property to <literal>true</literal> 
+    in the task definition file (<filename>schedule-taskscan_sunset.json</filename>). 
+    You can also set the property directly over the REST interface when the task is 
+    initiated. For example:</para>
+
+    <screen width="100"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/taskscanner?_action=execute&amp;name=schedule/taskscan_sunset&amp;waitForCompletion=true"
+    </screen>       
+   
+   </section>
+   
+   <section xml:id="canceling-task-scanner">
+    <title>Canceling a Scanning Task</title>
+    <para>You can cancel a scanning task by sending a REST call with the 
+    <literal>cancel</literal> action, specifying the task ID. For example, the 
+    following call cancels the scanning task initiated in the previous section.
+    </para>
+    
+    <screen width="91"><?dbfo pgwide="1"?>$curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/taskscanner/edfaf59c-aad1-442a-adf6-3620b24f8385?_action=cancel"
+    </screen>
+    
+    <para>The output for a scanning task cancelation request is similar to the
+    following, but on a single line:</para>
+    
+    <screen width="91">
+    {"_id":"edfaf59c-aad1-442a-adf6-3620b24f8385",
+     "action":"cancel",
+     "status":"SUCCESS"}
+    </screen>    
+    
+   </section>
+   
+   <section xml:id="listing-task-scanner">
+   <title>Listing Scanning Tasks</title>
+    
+    <para>You can display a list of scanning tasks that have completed, and 
+    those that are in progress, by running a RESTful GET on 
+    <literal>"http://localhost:8080/openidm/taskscanner"</literal>. The following 
+    example displays all scanning tasks.</para>
+    
+    <screen>$curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/taskscanner"
+    </screen>
+    
+    <para>The output of such a request is similar to the following, with one 
+    item for each scanning task. The output appears on a single line, but
+    has been indented here, for legibility.</para>
+    
+    <screen width="91">{"tasks": [
+    {
+      "_id": "edfaf59c-aad1-442a-adf6-3620b24f8385",
+      "progress": {
+        "state": "COMPLETED",
+        "processed": 2400,
+        "total": 2400,
+        "successes": 2400,
+        "failures": 0
+      },
+      "started": 1352455546149,
+      "ended": 1352455546182
+    }
+  ]
+}
+    </screen>
+    
+    <variablelist>
+     <para>Each scanning task has the following properties:</para>
+     <varlistentry>
+      <term><literal>_id</literal></term>
+      <listitem>
+       <para>The ID of the scanning task.</para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>progress</literal></term>
+      <listitem>
+       <para>The progress of the scanning task, summarised in the following 
+       fields:</para>
+       <simplelist>
+        <member><literal>state</literal> - the overall state of the task, 
+          <literal>INITIALIZED</literal>, <literal>ACTIVE</literal>, <literal>
+          COMPLETED</literal>, <literal>CANCELLED</literal>, or <literal>
+          ERROR</literal>
+        </member>
+        <member><literal>processed</literal> - the number of processed records
+        </member>
+        <member><literal>total</literal> - the total number of records</member>
+        <member><literal>successes</literal> - the number of records processed 
+        successfully</member>
+        <member><literal>failures</literal> - the number of records not able 
+        to be processed</member>
+       </simplelist>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term><literal>started</literal></term>
+      <listitem>
+       <para>The time at which the scanning task started, .</para>
+      </listitem>
+     </varlistentry>     <varlistentry>
+      <term><literal>ended</literal></term>
+      <listitem>
+       <para>The time at which the scanning task ended.</para>
+      </listitem>
+     </varlistentry>                
+    </variablelist> 
+    
+    <para>The number of processed tasks whose details are retained is governed 
+    by the <literal>"openidm.taskscanner.maxcompletedruns"</literal> property 
+    in the <filename>conf/boot.properties</filename> file. By default, the 
+    last one hundred completed tasks are retained.</para>
+   </section>
  
  </section>
 
