@@ -27,8 +27,14 @@
 define("org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function (AbstractConfigurationAware) {
-    
-    var obj = new AbstractConfigurationAware();
 
+    obj = {};
+    
+    //will be populated from ui-configuration
+    obj.notificationTypes = {};
+    
+    //will be populated from ui-configuration
+    obj.defaultType = {};
+    
     return obj;
 });

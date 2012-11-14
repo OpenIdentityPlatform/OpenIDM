@@ -270,7 +270,14 @@
          },
          "notification" : {
             "notifications" : "Notifications",
-            "deleteThisMessage" : "Delete this message"
+            "deleteThisMessage" : "Delete this message",
+            "type" : "Notification type",
+            "message" : "Message",
+            "types" : {
+                "info" : "Info",
+                "warning" : "Warning",
+                "error" : "Error"
+            }
          }
     },
     "openidm" : {

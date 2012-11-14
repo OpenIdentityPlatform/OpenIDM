@@ -134,17 +134,6 @@ define("config/AppConfiguration", [
                    } 
                },
                {
-                   moduleClass: "org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper",
-                   configuration: {
-                       typeToIconMapping: {
-                           "1": "images/notifications/pending.png",
-                           "2": "images/notifications/group_added.png",
-                           "3": "images/notifications/approved.png",
-                           "4": "images/notifications/removed.png"
-                       }
-                   } 
-               },
-               {
                    moduleClass: "org/forgerock/openidm/ui/admin/workflow/FormManager",
                    configuration: {
                        forms: { // Workflow User Task to View mapping
