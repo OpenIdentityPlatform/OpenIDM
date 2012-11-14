@@ -332,7 +332,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
         
         requeueTask: function(id, callback) {
             if(id) {
-                workflowManager.assignTaskToUser(id, "", _.bind(function() {
+                workflowManager.assignTaskToUser(id, null, _.bind(function() {
                     callback(this);
                 }, this), function() {
                     callback(this);
