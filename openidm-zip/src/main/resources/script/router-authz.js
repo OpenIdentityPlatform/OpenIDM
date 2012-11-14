@@ -296,5 +296,8 @@ function allow() {
 }
 
 if (!allow()) {
-    throw "Access denied";
+    throw { 
+        "openidmCode" : 403, 
+        "message" : "Access denied"
+    } 
 }

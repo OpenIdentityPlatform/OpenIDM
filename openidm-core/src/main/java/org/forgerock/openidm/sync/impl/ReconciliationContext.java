@@ -175,7 +175,11 @@ public class ReconciliationContext {
      */
     Executor getExcecutor() {
         int noOfThreads = mapping.getTaskThreads();
-        return Executors.newFixedThreadPool(noOfThreads);
+        if (noOfThreads > 0) {
+            return Executors.newFixedThreadPool(noOfThreads);
+        } else {
+            return null;
+        }
     }
 
     /**
