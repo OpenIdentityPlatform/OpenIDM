@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/customview/SendNotific
         template: "templates/admin/workflow/processes/customview/SendNotificationTemplate.html",
         
         prepareData: function(callback) {
-             var notificatintype;
+             var notificationType, nTypes;
              _.extend(this.data, this.processDefinition);
              this.data.loggedUser = conf.loggedUser;
              
