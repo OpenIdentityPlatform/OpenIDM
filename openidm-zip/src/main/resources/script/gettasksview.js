@@ -103,7 +103,7 @@ if (request.params.viewType === 'assignee') {
     
     var userCandidateTasksQueryParams = {
       "_query-id": "filtered-query",
-      "candidate": userName
+      "taskCandidateUser": userName
     };
     var userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result;
     for (var i = 0; i < userCandidateTasks.length; i++) {
@@ -112,7 +112,7 @@ if (request.params.viewType === 'assignee') {
     
     var userGroupCandidateTasksQueryParams = {
       "_query-id": "filtered-query",
-      "candidate-group": roles
+      "taskCandidateGroup": roles
     };
     var userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
     for (var i = 0; i < userGroupCandidateTasks.length; i++) {
