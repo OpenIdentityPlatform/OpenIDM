@@ -48,9 +48,9 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         },
         
         generateItemView: function(item) {
-            var iconLink, message, requester, requestDate, requestDateString, deleteLink, id;
+            var iconLink, message, requester, requestDate, requestDateString, deleteLink, id, notType;
             
-            var notType = notificationViewHelper.notificationTypes[item.notificationType];
+            notType = notificationViewHelper.notificationTypes[item.notificationType];
             if (notType) {
                 iconLink = notificationViewHelper.notificationTypes[item.notificationType].iconPath;
             }
