@@ -118,11 +118,16 @@ var accessConfig = { "configs" : [
             "methods": "read",
             "actions" : "*"
         },
+        {  "pattern" : "authentication",
+            "roles" : "openidm-authorized",
+            "methods": "action",
+            "actions" : "reauthenticate"
+        },
         {   "pattern" : "*",
             "roles" : "openidm-authorized", // openidm-authorized is logged-in users
             "methods": "*",
             "actions" : "*",
-            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['for-credentials']})"
+            "customAuthz" : "ownDataOnly()"
         },
         {
             "pattern" : "endpoint/getnotifications",

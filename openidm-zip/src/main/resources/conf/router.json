@@ -15,20 +15,6 @@
                 "create",
                 "update"
             ]
-        },
-        {
-            "pattern" : "^managed/user/.*",
-            "methods" : [
-                "query"
-            ],
-            "condition" : {
-                "type" : "text/javascript",
-                "source" : "request.params['_query-id'] == 'for-credentials'"
-            },
-            "onResponse" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onResponse-for-credentials.js"
-            }
-        }        
+        }
     ]
 }
