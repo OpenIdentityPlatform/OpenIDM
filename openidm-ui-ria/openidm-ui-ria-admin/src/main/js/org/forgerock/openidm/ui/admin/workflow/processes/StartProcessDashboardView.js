@@ -43,6 +43,8 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
             "click .processName": "showStartProcessView"
         },
         
+        element: "#processes",
+        
         render: function(args) {
             var i, processId;
             if (args && args[0] && args[0] !== '') {
@@ -54,7 +56,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
                     for (i = 0; i < processDefinitions.length; i++) {
                         $("#processList").append("<div><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
                                 + "<input type='hidden' name='id' value='" + processDefinitions[i]._id +"' />"
-                                + "<div>");
+                                + "</div>");
                     }
                 });
                 if (processId) {
@@ -66,7 +68,13 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
         showStartProcessView: function(event) {
             event.preventDefault();
             var id = $(event.target).parent().find('[name="id"]').val();
-            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "startProcesses", args: [id], trigger: false});
+            //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "startProcesses", args: [id], trigger: false});
+            
+            $("#processDetails").remove();
+            $(".selected-process").removeClass('selected-process');
+            $(event.target).closest('div').addClass('selected-process');
+            $(event.target).closest('div').append('<div id="processDetails" style="margin-top: 10px;"></div>');
+            
             startProcessView.render(id);
         },
         
