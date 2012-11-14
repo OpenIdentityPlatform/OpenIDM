@@ -4,7 +4,6 @@
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
     "queries" : {
-        "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
         "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = '${value}'",
         "get-users-of-role" : "select userName FROM ${_resource} WHERE roles matches '^(.*,)?${role}(,.*)?$'",
