@@ -159,6 +159,7 @@
             "search" : "Search",
             "submit" : "Submit",
             "actions" : "Actions",
+            "complete" : "Complete",
             "copyright" : "Copyright (c) 2010-11 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
             "validation" : {

@@ -33,9 +33,8 @@ var userId = request.parent.security.userid.id, res = {};
 
 if(request.parent.security.userid.component !== "internal/user") {
     var params = {
-        "_query-id": "get-by-field-value",
-        "field": "receiverId",
-        "value": userId
+        "_query-id": "get-notifications-for-user",
+        "userId": userId
     };
       
     var ret = openidm.query("repo/ui/notification", params);

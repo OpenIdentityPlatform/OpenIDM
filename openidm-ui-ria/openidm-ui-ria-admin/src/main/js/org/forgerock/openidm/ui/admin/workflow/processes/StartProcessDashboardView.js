@@ -54,13 +54,17 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
                 this.clearStartProcessView();
                 workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser.userName, function(processDefinitions) {
                     for (i = 0; i < processDefinitions.length; i++) {
-                        $("#processList").append("<div><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
+                        $("#processList").append("<div class='process-item'><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
                                 + "<input type='hidden' name='id' value='" + processDefinitions[i]._id +"' />"
                                 + "</div>");
                     }
                 });
                 if (processId) {
-                    startProcessView.render(processId);
+                    startProcessView.render(processId, "", function() {
+                        if($("#processContent").html() === "") {
+                            $("#processContent").html('No data required');
+                        }
+                    });
                 }
             });
         },
@@ -75,7 +79,11 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
             $(event.target).closest('div').addClass('selected-process');
             $(event.target).closest('div').append('<div id="processDetails" style="margin-top: 10px;"></div>');
             
-            startProcessView.render(id);
+            startProcessView.render(id, "", function() {
+                if($("#processContent").html() === "") {
+                    $("#processContent").html('Empty');
+                }
+            });
         },
         
         clearStartProcessView: function() {
