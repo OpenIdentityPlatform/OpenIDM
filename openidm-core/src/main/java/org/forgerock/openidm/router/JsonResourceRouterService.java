@@ -405,14 +405,13 @@ public class JsonResourceRouterService implements JsonResource {
                 try {
                     onRequest.exec(scope);
                 } catch (ScriptThrownException ste) {
-                    LOGGER.debug("Validation failed", ste);
-                    Object value = ste.getValue();
-                    throw new JsonResourceException(JsonResourceException.FORBIDDEN, 
-                     value == null ? null : value.toString());
+                    JsonResourceException ex = ste.toJsonResourceException(null);
+                    LOGGER.debug("onRequest exception", ste);
+                    throw ex;
                 } catch (ScriptException se) {
                     String msg = pointer + " onRequest script encountered exception";
                     LOGGER.debug(msg, se);
-                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
+                    throw se.toJsonResourceException(msg);
                 }
             }
         }
@@ -431,7 +430,7 @@ public class JsonResourceRouterService implements JsonResource {
                 } catch (ScriptException se) {
                     String msg = pointer + " onResponse script encountered exception";
                     LOGGER.debug(msg, se);
-                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
+                    throw se.toJsonResourceException(msg);
                 }
             }
         }
@@ -450,7 +449,7 @@ public class JsonResourceRouterService implements JsonResource {
                 } catch (ScriptException se) {
                     String msg = pointer + " onFailure script encountered exception";
                     LOGGER.debug(msg, se);
-                    throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
+                    throw se.toJsonResourceException(msg);
                 }
             }
         }

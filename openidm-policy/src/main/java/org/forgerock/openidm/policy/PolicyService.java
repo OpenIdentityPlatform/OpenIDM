@@ -175,9 +175,9 @@ public class PolicyService implements JsonResource {
             scope.put("request", request.getObject());
             return new JsonValue(script.exec(scope));
         } catch (ScriptThrownException ste) {
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, ste.getValue().toString(), ste);
+            throw ste.toJsonResourceException(null);
         } catch (ScriptException se) {
-            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, se);
+            throw se.toJsonResourceException("Failure in executing policy script: " + se.getMessage());
         } finally {
             ObjectSetContext.pop();
         }

@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -42,7 +44,7 @@ public class ForbiddenException extends ObjectSetException {
     public ForbiddenException(String message) {
         super(JsonResourceException.FORBIDDEN, message);
     }
-    
+
     /**
      * Constructs a new exception with the specified cause.
      */
@@ -56,4 +58,19 @@ public class ForbiddenException extends ObjectSetException {
     public ForbiddenException(String message, Throwable cause) {
         super(JsonResourceException.FORBIDDEN, message, cause);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public ForbiddenException(String message, Map<String, Object> failureDetail) {
+        super(JsonResourceException.FORBIDDEN, message, failureDetail);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public ForbiddenException(String message, Map<String, Object> failureDetail, Throwable cause) {
+        super(JsonResourceException.FORBIDDEN, message, failureDetail, cause);
+    }
+
 }
