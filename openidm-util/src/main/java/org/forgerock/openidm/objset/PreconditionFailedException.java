@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -55,5 +57,19 @@ public class PreconditionFailedException extends ObjectSetException {
      */
     public PreconditionFailedException(String message, Throwable cause) {
         super(JsonResourceException.VERSION_MISMATCH, message, cause);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public PreconditionFailedException(String message, Map<String, Object> failureDetail) {
+        super(JsonResourceException.VERSION_MISMATCH, message, failureDetail);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public PreconditionFailedException(String message, Map<String, Object> failureDetail, Throwable cause) {
+        super(JsonResourceException.VERSION_MISMATCH, message, failureDetail, cause);
     }
 }

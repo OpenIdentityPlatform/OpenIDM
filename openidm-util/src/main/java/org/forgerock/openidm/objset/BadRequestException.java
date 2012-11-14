@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -61,4 +63,17 @@ public class BadRequestException extends ObjectSetException {
         super(JsonResourceException.BAD_REQUEST, message, cause);
     }
 
+    /**
+     * @inheritDoc
+     */
+    public BadRequestException(String message, Map<String, Object> failureDetail) {
+        super(JsonResourceException.BAD_REQUEST, message, failureDetail);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public BadRequestException(String message, Map<String, Object> failureDetail, Throwable cause) {
+        super(JsonResourceException.BAD_REQUEST, message, failureDetail, cause);
+    }
 }

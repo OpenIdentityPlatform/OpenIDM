@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -55,5 +57,19 @@ public class InternalServerErrorException extends ObjectSetException {
      */
     public InternalServerErrorException(String message, Throwable cause) {
         super(JsonResourceException.INTERNAL_ERROR, message, cause);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public InternalServerErrorException(String message, Map<String, Object> failureDetail) {
+        super(JsonResourceException.INTERNAL_ERROR, message, failureDetail);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public InternalServerErrorException(String message, Map<String, Object> failureDetail, Throwable cause) {
+        super(JsonResourceException.INTERNAL_ERROR, message, failureDetail, cause);
     }
 }

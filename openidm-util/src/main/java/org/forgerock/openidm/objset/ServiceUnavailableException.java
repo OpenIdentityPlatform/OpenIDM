@@ -17,6 +17,8 @@
 package org.forgerock.openidm.objset;
 
 // JSON Resource
+import java.util.Map;
+
 import org.forgerock.json.resource.JsonResourceException;
 
 /**
@@ -55,5 +57,19 @@ public class ServiceUnavailableException extends ObjectSetException {
      */
     public ServiceUnavailableException(String message, Throwable cause) {
         super(JsonResourceException.UNAVAILABLE, message, cause);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public ServiceUnavailableException(String message, Map<String, Object> failureDetail) {
+        super(JsonResourceException.UNAVAILABLE, message, failureDetail);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public ServiceUnavailableException(String message, Map<String, Object> failureDetail, Throwable cause) {
+        super(JsonResourceException.UNAVAILABLE, message, failureDetail, cause);
     }
 }
