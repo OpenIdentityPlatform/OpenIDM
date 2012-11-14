@@ -187,7 +187,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             } 
             
             this.$el.accordion('destroy');
-            this.$el.accordion({collapsible: true, active: false, heightStyle: "content", event: "noevent"});
+            this.$el.accordion({heightStyle: "content", collapsible: true, active: false, autoHeight: false, event: "noevent"});
             
             this.$el.find(".ui-accordion-header").on('mouseenter', function(event) {                
                 $.doTimeout('tasksAccordion', 150, _.bind(function() {

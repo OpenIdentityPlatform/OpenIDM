@@ -36,8 +36,11 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
     "org/forgerock/openidm/ui/admin/notifications/NotificationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
-    "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, NotificationsView, conf, notificationDelegate, taskDetailsView) {
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView",
+    "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView"
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, 
+    NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
+    
     var TasksDashboard = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TasksDashboardTemplate.html",
         
@@ -54,6 +57,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
+                startProcessView.render();
                 
                 if (params.mode === "user") {
                     //notifications

@@ -67,7 +67,8 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
                 
                 workflowManager.startProcessById(this.processDefinition._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "startedProcess");
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processesDashboard", trigger: true});
+                    //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
+                    eventManager.sendEvent("refreshTasksMenu");
                 }, this));
             }
         },
