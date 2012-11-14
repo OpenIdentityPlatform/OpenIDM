@@ -175,7 +175,7 @@ function isQueryOneOf(allowedQueries) {
     if (
             request.method === "query" &&
             allowedQueries[request.id] &&
-            contains(allowedQueries[request.id], request.params["_query-id"])
+            contains(allowedQueries[request.id], request.params["_queryId"])
        )
     {
         return true
@@ -212,7 +212,7 @@ function ownDataOnly() {
 }
 
 function disallowQueryExpression() {
-    if (request.params && typeof request.params['_query-expression'] != "undefined") {
+    if (request.params && typeof request.params['_queryExpression'] != "undefined") {
         return false;
     }
     return true;

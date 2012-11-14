@@ -134,7 +134,7 @@ function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
 
 function unique(fullObject, value, params, property) {
     var queryParams = {
-            "_query-id": "get-by-field-value",
+            "_queryId": "get-by-field-value",
             "field": property,
             "value": value
             },

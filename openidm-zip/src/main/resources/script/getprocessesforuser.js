@@ -5,7 +5,7 @@ getUser = function(userId) {
         var user = openidm.read("managed/user/"+userId);
         if (!user) {
             var params = {
-                "_query-id": "for-userName",
+                "_queryId": "for-userName",
                 "uid": userId
             };
             result = openidm.query("managed/user", params);
@@ -86,7 +86,7 @@ var processesForUser = [];
 
 
 var processDefinitionsQueryParams = {
-    "_query-id": "query-all-ids",
+    "_queryId": "query-all-ids",
 };
 
 processDefinitions = openidm.query("workflow/processdefinition", processDefinitionsQueryParams).result;

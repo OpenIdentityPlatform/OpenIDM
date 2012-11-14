@@ -91,7 +91,7 @@ public class ActivitiUtil {
     }
     
     public static String getQueryIdFromRequest(JsonValue request) {
-        return request.get("params").get("_query-id").asString();
+        return request.get("params").get("_queryId").asString();
     }
     
     public static String getParamFromRequest(JsonValue request, String paramName) {

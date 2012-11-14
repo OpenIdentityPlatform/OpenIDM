@@ -1,7 +1,7 @@
 var userId = object._id;
 
 var findUserNotificationsParams = {
-    "_query-id": "notifications-for-user",
+    "_queryId": "notifications-for-user",
     "userId": userId
 };
 

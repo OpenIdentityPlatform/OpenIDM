@@ -52,7 +52,7 @@ public class AuthenticationITCase {
         expect().
                 body("error", equalTo(401)).
         when().
-                get("/openidm/managed/user?_query-id=query-all-ids");
+                get("/openidm/managed/user?_queryId=query-all-ids");
 
     }
 
@@ -88,7 +88,7 @@ public class AuthenticationITCase {
         // W/o authentication, query should fail.
         expect().
                 body("error", equalTo(401)).
-        get("/openidm/managed/user?_query-id=query-all-ids");
+        get("/openidm/managed/user?_queryId=query-all-ids");
     }
 
     @Test(groups="authentication")
@@ -99,7 +99,7 @@ public class AuthenticationITCase {
             when().
             with().
                     headers("X-OpenIDM-Username", "openidm-admin", "X-OpenIDM-Password","openidm-admin").
-            get("/openidm/managed/user?_query-id=query-all-ids").asString();
+            get("/openidm/managed/user?_queryId=query-all-ids").asString();
     }
 
     @Test(groups="authentication")
@@ -109,7 +109,7 @@ public class AuthenticationITCase {
                 given().
                         headers("X-OpenIDM-Username", "openidm-admin","X-OpenIDM-Password", "openidm-admin").
                 when().
-                        get("/openidm/managed/user?_query-id=query-all-ids");
+                        get("/openidm/managed/user?_queryId=query-all-ids");
 
         // Get a single cookie value:
         String cookieValue = response.cookie("JSESSIONID");
@@ -119,7 +119,7 @@ public class AuthenticationITCase {
         expect().
                 statusCode(200).
         when().
-                get("/openidm/managed/user?_query-id=query-all-ids").asString();
+                get("/openidm/managed/user?_queryId=query-all-ids").asString();
 
 
     }
