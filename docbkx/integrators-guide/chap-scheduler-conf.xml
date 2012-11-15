@@ -291,7 +291,7 @@
         "script": {
             "type": "text/javascript",
             "source": "java.lang.System.out.println('Hello World’);"
-        },
+        }
     }
 }</programlisting>
 
