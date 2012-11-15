@@ -53,9 +53,15 @@ if (request.method == "read") {
     if(notification.receiverId === request.parent.security.userid.id) {
         openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
     } else {
-        throw "Access denied";
+        throw { 
+            "openidmCode" : 403, 
+            "message" : "Access denied"
+        } 
     }    
 } else {
-    throw "Unsupported operation: " + request.method;
+    throw { 
+        "openidmCode" : 403, 
+        "message" : "Access denied"
+    } 
 }
 
