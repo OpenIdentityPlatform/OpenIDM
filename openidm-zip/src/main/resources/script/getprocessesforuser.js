@@ -37,13 +37,13 @@ contains = function(object, comaseparatedList) {
 
 isProcessAvalibleForUser = function(processAccessPolicies, processDefinition, userRoles) {
     for (var i = 0; i < processAccessPolicies.length; i++) {
-        var props =  processAccessPolicies[i].properties;
-        var key = props.key;
+        var props =  processAccessPolicies[i].propertiesCheck;
+        var property = props.property;
         var matches = props.matches;
-        var requiresPrivilage = props.requiresPrivilage;
+        var requiresRole = props.requiresRole;
         
-        if (processDefinition[key].match(matches)) {
-            if (!contains(requiresPrivilage, userRoles)) {
+        if (processDefinition[property].match(matches)) {
+            if (!contains(requiresRole, userRoles)) {
                 return false;
             }
         }
@@ -53,7 +53,7 @@ isProcessAvalibleForUser = function(processAccessPolicies, processDefinition, us
 
 getProcessesAvalibleForUser = function(processDefinitions, userRoles) {
     var processesAvalibleToUser = [];
-    var processAccessPolicies = openidm.read("config/process/access").policies;
+    var processAccessPolicies = openidm.read("config/process/access").workflowAccess;
     for (var i = 0; i < processDefinitions.length; i++) {
         var processDefinition = processDefinitions[i];
         if (isProcessAvalibleForUser(processAccessPolicies, processDefinition, userRoles)) {
