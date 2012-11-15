@@ -130,7 +130,7 @@ var accessConfig = { "configs" : [
             "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['query-all']})" // query-all used by workflow
         },
         {
-            "pattern" : "endpoint/getnotifications",
+            "pattern" : "endpoint/usernotifications",
             "roles" : "openidm-authorized",
             "methods": "*",
             "actions" : "*"

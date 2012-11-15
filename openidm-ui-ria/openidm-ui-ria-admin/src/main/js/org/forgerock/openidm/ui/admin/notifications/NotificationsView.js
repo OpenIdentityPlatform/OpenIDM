@@ -101,7 +101,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         
         installAccordion: function(){
             $("#items").accordion({
-                event: "mouseenter", 
+                event: "click", 
                 active: false,
                 collapsible:true
             });
