@@ -120,16 +120,21 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             
             eventManager.unregisterListener("refreshTasksMenu");
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
-                this.candidateTasks.render("all", $("#candidateTasks"));                
-                this.myTasks.render("assigned", $("#myTasks"));
+                this.refreshMenus();
                 startProcessView.render();
             }, this));
             
             eventManager.unregisterListener("refreshMyTasksMenu");
             eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
-                this.myTasks.render("assigned", $("#myTasks"));
-                this.candidateTasks.render("all", $("#candidateTasks"));   
+                this.refreshMenus();
+                startProcessView.render();
             }, this));
+        },
+        
+        refreshMenus: function() {        
+            this.myTasks.render("assigned", $("#myTasks"));
+            
+            this.candidateTasks.render("all", $("#candidateTasks"));  
         }
     });
 
