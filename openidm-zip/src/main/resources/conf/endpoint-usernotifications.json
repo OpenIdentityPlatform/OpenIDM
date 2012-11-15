@@ -1,5 +1,5 @@
 {
     "context" : "endpoint/usernotifications",
     "type" : "text/javascript",
-    "file" : "script/ui/userNotifications.js"
+    "file" : "bin/defaults/script/ui/notification/userNotifications.js"
 }

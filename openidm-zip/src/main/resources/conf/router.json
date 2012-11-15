@@ -9,7 +9,7 @@
         {
             "onRequest" : {
                 "type" : "text/javascript",
-                "file" : "script/policyFilter.js"
+                "file" : "bin/defaults/script/policyFilter.js"
             },
             "methods" : [
                 "create",
