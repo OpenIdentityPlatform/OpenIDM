@@ -254,7 +254,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
 -- Table `openidm`.`manageduserapplicationlnk`
 -- -----------------------------------------------------
