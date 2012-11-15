@@ -378,8 +378,9 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Start OpenIDM
   Services</citetitle></link>.</para>
   
-  <para>Reconcile the objects in the resources, either by editing
-  <filename>conf/sync.json</filename> to set <literal>"enabled" : true</literal>
+  <para>Reconcile the objects in the resources, either by setting 
+  <literal>"enabled" : true</literal>in the schedule configuration file 
+  (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json.json</filename>) 
   and then waiting until the scheduled reconciliation happens, or by using the
   REST interface, as follows:</para>
 
