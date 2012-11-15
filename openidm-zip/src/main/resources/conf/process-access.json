@@ -1,0 +1,12 @@
+{
+    "policies": [
+        {
+            "id" : "allAuthorized",
+            "properties" : {
+                "key" : "_id",
+                "matches" : ".*",
+                "requiresPrivilage" : "openidm-authorized"
+            }
+        }
+        ]
+}

@@ -70,7 +70,9 @@
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset my password"
+                "resetPassword" : "Reset my password",
+                "siteIdentificationHeader": "Site Identification",
+                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -157,6 +159,7 @@
             "search" : "Search",
             "submit" : "Submit",
             "actions" : "Actions",
+            "complete" : "Complete",
             "copyright" : "Copyright (c) 2010-11 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
             "validation" : {
@@ -169,6 +172,7 @@
                 "MIN_LENGTH" : "At least __minLength__ characters",
                 "REQUIRED" : "Cannot be blank",
                 "UNIQUE" : "Already exists",
+                "REAUTH_REQUIRED" : "",
                 "formContainsErrors" : "Form contains validation errors",
                 "atLeastOneCapitalLetter" : "At least one capital letter",
                 "atLeastOneNumber" : "At least one number",
@@ -210,7 +214,7 @@
             "address2" : "Address 2",
             "country" : "Country",
             "city" : "City",
-            "role" : "Role",
+            "role" : "Admin Role",
             "stateProvince" : "State/Province",
             "phoneNumber" : "Mobile Phone",
             "postalCode" : "Postal Code",
@@ -267,7 +271,14 @@
          },
          "notification" : {
             "notifications" : "Notifications",
-            "deleteThisMessage" : "Delete this message"
+            "deleteThisMessage" : "Delete this message",
+            "type" : "Notification type",
+            "message" : "Message",
+            "types" : {
+                "info" : "Info",
+                "warning" : "Warning",
+                "error" : "Error"
+            }
          }
     },
     "openidm" : {

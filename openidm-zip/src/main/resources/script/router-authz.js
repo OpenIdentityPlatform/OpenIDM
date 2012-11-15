@@ -61,7 +61,7 @@ var accessConfig = { "configs" : [
           "methods": "read",
           "actions" : "*"
       },
-  
+      
       // These options should only be available anonymously if selfReg is enabled
       {  "pattern" : "config/ui/*",
           "roles" : "openidm-reg",
@@ -75,18 +75,27 @@ var accessConfig = { "configs" : [
           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
           "actions" : "*"
       },
-      // Anonymous user can invoke some queries which are public as part of the forgot password process:
-      {  "pattern" : "managed/user/",
+
+      // Anonymous user can call the siteIdentification endpoint if it is enabled:
+      {  "pattern" : "endpoint/siteIdentification",
           "roles" : "openidm-reg",
-          "methods": "query",
-          "customAuthz" : "checkIfUIIsEnabled('forgottenPassword') && isQueryOneOf({ 'managed/user/': ['check-userName-availability', 'get-security-question', 'for-security-answer', 'set-newPassword-for-userName-and-security-answer'] })",
+          "methods": "*",
+          "customAuthz" : "checkIfUIIsEnabled('siteIdentification')",
           "actions" : "*"
       },
-      // This is needed by both self reg and forgot password
+
+      // Anonymous user can call the securityQA endpoint if it enabled:
+      {  "pattern" : "endpoint/securityQA",
+          "roles" : "openidm-reg",
+          "methods": "*",
+          "customAuthz" : "checkIfUIIsEnabled('securityQuestions')",
+          "actions" : "*"
+      },
+      // This is needed by both self reg and security questions
       {  "pattern" : "policy/managed/user/*",
           "roles" : "openidm-reg",
           "methods": "read,action",
-          "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('forgottenPassword')",
+          "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')",
           "actions" : "*"
       },
 
@@ -109,11 +118,48 @@ var accessConfig = { "configs" : [
             "methods": "read",
             "actions" : "*"
         },
+        {  "pattern" : "authentication",
+            "roles" : "openidm-authorized",
+            "methods": "action",
+            "actions" : "reauthenticate"
+        },
         {   "pattern" : "*",
             "roles" : "openidm-authorized", // openidm-authorized is logged-in users
             "methods": "*",
             "actions" : "*",
-            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['for-credentials']})"
+            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['query-all']})" // query-all used by workflow
+        },
+        {
+            "pattern" : "endpoint/getnotifications",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        {
+            "pattern" : "endpoint/getnotifications/*",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        
+        // workflow related endpoints.  We need to build these up with custom Authz functions
+        {   
+            "pattern" : "endpoint/getprocessesforuser",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        {   
+            "pattern" : "workflow/processdefinition/*",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
+        },
+        {   
+            "pattern" : "workflow/processinstance/*",
+            "roles" : "openidm-authorized",
+            "methods": "*",
+            "actions" : "*"
         },
 
         // Clients authenticated via SSL mutual authentication
@@ -129,7 +175,7 @@ function isQueryOneOf(allowedQueries) {
     if (
             request.method === "query" &&
             allowedQueries[request.id] &&
-            contains(allowedQueries[request.id], request.params["_query-id"])
+            contains(allowedQueries[request.id], request.params["_queryId"])
        )
     {
         return true
@@ -166,7 +212,7 @@ function ownDataOnly() {
 }
 
 function disallowQueryExpression() {
-    if (request.params && typeof request.params['_query-expression'] != "undefined") {
+    if (request.params && typeof request.params['_queryExpression'] != "undefined") {
         return false;
     }
     return true;

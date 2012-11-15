@@ -464,7 +464,7 @@
         "numberOfThreads" : 5,
         "scan" : {
             "object" : "managed/user",
-            "_query-id" : "scan-tasks",
+            "_queryId" : "scan-tasks",
             "property" : "sunset/date",
             "condition" : {
                 "before" : "${Time.now}"
@@ -537,7 +537,7 @@
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term><literal>"_query-id"</literal></term>
+      <term><literal>"_queryId"</literal></term>
       <listitem>
        <para>Specifies the query that is performed. The queries that can be 
        set here are defined in the database configuration file (either 

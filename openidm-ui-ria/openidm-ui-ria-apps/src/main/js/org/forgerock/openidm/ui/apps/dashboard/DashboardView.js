@@ -33,7 +33,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/DashboardView", [
     "org/forgerock/openidm/ui/apps/dashboard/NotificationsView",
     "org/forgerock/openidm/ui/apps/FrequentlyUsedApplicationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
@@ -63,7 +63,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/DashboardView", [
                         baseUserInfoView.render();
                     
                         //notifications
-                        notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
+                        notificationDelegate.getNotificationsForUser(function(notifications) {
                             
                             notifications.sort(function(a, b) {
                                 if (a.requestDate < b.requestDate) {

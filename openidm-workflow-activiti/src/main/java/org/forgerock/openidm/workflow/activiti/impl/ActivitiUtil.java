@@ -25,7 +25,11 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.util.DateUtil;
+import org.joda.time.DateTime;
 
 /**
  * Utility class for Activiti workflow integration
@@ -65,8 +69,15 @@ public class ActivitiUtil {
      * @return request body
      */
     public static Map<String, Object> getRequestBodyFromRequest(JsonValue request) {
-        return request.get("value").isNull() ? 
-                new HashMap(1) : new HashMap<String, Object>(request.get("value").expect(Map.class).asMap());
+        if (!request.get("value").isNull()) {
+            JsonValue val = request.get("value");
+            val.getTransformers().add(new DatePropertyTransformer());
+            val.applyTransformers();
+            val = val.copy();
+            return new HashMap<String, Object>(val.expect(Map.class).asMap());
+        } else {
+            return new HashMap(1);
+        }
     }
     
     /**
@@ -80,10 +91,22 @@ public class ActivitiUtil {
     }
     
     public static String getQueryIdFromRequest(JsonValue request) {
-        return request.get("params").get("_query-id").asString();
+        return request.get("params").get("_queryId").asString();
     }
     
     public static String getParamFromRequest(JsonValue request, String paramName) {
         return request.get(ActivitiConstants.REQUEST_PARAMS).get(paramName).asString();
+    }
+    
+    private static class DatePropertyTransformer implements JsonTransformer {
+        @Override
+        public void transform(JsonValue value) throws JsonException {
+            if (null != value && value.isString()) {
+                DateTime d = DateUtil.getDateUtil().parseIfDate(value.asString());
+                if (d != null){
+                    value.setObject(d.toDate());
+                }
+            }
+        }
     }
 }

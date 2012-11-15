@@ -34,7 +34,7 @@ To try the sample, follow these steps.
 
     4. See the users from the CSV file show up in the OpenIDM repository.
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
     {
         "query-time-ms": 0,
         "result": [

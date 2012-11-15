@@ -51,6 +51,15 @@
                             "params" : {
                                 "disallowedFields" : "userName,givenName,familyName"
                             }
+                        },
+                        {
+                            "policyId" : "re-auth-required",
+                            "params" : {
+                                "exceptRoles" : [
+                                    "openidm-admin",
+                                    "openidm-reg"
+                                ]
+                            }
                         }
                     ]
                 },
@@ -117,7 +126,10 @@
                             "policyId" : "required-if-configured",
                             "params" : {
                                 "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.securityQuestions"
+                                "baseKey" : "configuration.securityQuestions",
+                                "exceptRoles" : [
+                                    "openidm-admin"
+                                ]
                             }
                         }
                     ]
@@ -129,13 +141,25 @@
                             "policyId" : "required-if-configured",
                             "params" : {
                                 "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.securityQuestions"
+                                "baseKey" : "configuration.securityQuestions",
+                                "exceptRoles" : [
+                                    "openidm-admin"
+                                ]
                             }
                         },
                         {
                             "policyId" : "minimum-length",
                             "params" : {
                                 "minLength" : 16
+                            }
+                        },
+                        {
+                            "policyId" : "re-auth-required",
+                            "params" : {
+                                "exceptRoles" : [
+                                    "openidm-admin",
+                                    "openidm-reg"
+                                ]
                             }
                         }
                     ]
@@ -174,7 +198,10 @@
                             "policyId" : "required-if-configured",
                             "params" : {
                                 "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.siteIdentification"
+                                "baseKey" : "configuration.siteIdentification",
+                                "exceptRoles" : [
+                                    "openidm-admin"
+                                ]
                             }
                         }
                     ]

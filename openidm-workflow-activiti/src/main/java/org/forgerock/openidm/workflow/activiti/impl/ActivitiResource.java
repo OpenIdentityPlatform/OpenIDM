@@ -34,7 +34,9 @@ import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.form.FormProperty;
 import org.activiti.engine.form.StartFormData;
+import org.activiti.engine.form.TaskFormData;
 import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricProcessInstanceQuery;
 import org.activiti.engine.impl.RepositoryServiceImpl;
@@ -52,6 +54,7 @@ import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
@@ -396,6 +399,8 @@ public class ActivitiResource implements JsonResource {
                 Map value = new HashMap<String, Object>(request.get(ActivitiConstants.REQUEST_BODY).expect(Map.class).asMap());
                 if (value.get(ActivitiConstants.ACTIVITI_ASSIGNEE) != null) {
                     task.setAssignee(value.get(ActivitiConstants.ACTIVITI_ASSIGNEE).toString());
+                } else {
+                    task.setAssignee(null);
                 }
                 if (value.get(ActivitiConstants.ACTIVITI_DESCRIPTION) != null) {
                     task.setDescription(value.get(ActivitiConstants.ACTIVITI_DESCRIPTION).toString());
@@ -447,6 +452,11 @@ public class ActivitiResource implements JsonResource {
                     result.add(ActivitiConstants.ACTIVITI_PRIORITY, task.getPriority());
                     result.add(ActivitiConstants.ACTIVITI_TASKDEFINITIONKEY, task.getTaskDefinitionKey());
                     result.add(ActivitiConstants.ACTIVITI_VARIABLES, processEngine.getTaskService().getVariables(task.getId()));
+                    result.add("formdata", queryTaskDefinition(task.getProcessDefinitionId(), task.getTaskDefinitionKey()).asMap());
+                    TaskFormData data = processEngine.getFormService().getTaskFormData(task.getId());
+                    for (FormProperty p : data.getFormProperties()) {
+                        result.get(new JsonPointer("formdata/formProperties/" + p.getId())).asMap().put(ActivitiConstants.FORMPROPERTY_VALUE, p.getValue());
+                    }
                     result.add("_rev", "0");
                 }
                 return result;
@@ -487,13 +497,11 @@ public class ActivitiResource implements JsonResource {
      * @return taskdefinition description
      * @throws JsonResourceException
      */
-    public JsonValue queryTaskDefinition(String procDefId, String taskDefinitionKey) throws JsonResourceException {
+        public JsonValue queryTaskDefinition(String procDefId, String taskDefinitionKey) throws JsonResourceException {
         JsonValue result = new JsonValue(new HashMap<String, Object>());
-        List resultList = new LinkedList();
         try {
             ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl)processEngine.getRepositoryService()).getDeployedProcessDefinition(procDefId);
             convertTaskDefinition(result, procdef, taskDefinitionKey);
-            result.add("result", resultList);
             return result;
         } catch (ActivitiException e) {
             throw new JsonResourceException(JsonResourceException.NOT_FOUND);

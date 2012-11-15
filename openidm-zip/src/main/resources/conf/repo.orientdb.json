@@ -4,12 +4,9 @@
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
     "queries" : {
-        "for-credentials" : "select * FROM ${_resource} WHERE userName = '${uid}'",
         
         "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = '${value}'",
-        "check-userName-availability" : "select userName FROM ${_resource} WHERE userName = '${uid}'",
-        "get-security-question" : "select securityQuestion FROM ${_resource} WHERE userName = '${uid}'",
-        "for-security-answer" : "select _openidm_id FROM ${_resource} WHERE userName = '${uid}'",
+        "get-users-of-role" : "select userName FROM ${_resource} WHERE roles matches '^(.*,)?${role}(,.*)?$'",
         
         "query-all-ids" : "select _openidm_id from ${_resource}",
         "query-all" : "select ${fields} from ${_resource}",
@@ -22,14 +19,8 @@
         "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
         
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
-        "set-newPassword-for-userName-and-security-answer" : "SELECT * FROM ${_resource} WHERE userName = '${username}'",
+        "get-notifications-for-user" : "select * FROM ${_resource} WHERE receiverId = '${userId}'",
         
-        "notifications-for-user": "SELECT * FROM ${_resource} WHERE receiverId = '${userId}'",
-        "user_application_lnk-for-user": "SELECT * FROM ${_resource} WHERE userId = '${userId}'",
-        "query-all-user_application_lnk": "select * from ${_resource}",
-        "user_application_lnk-for-id": "select * from ${_resource} WHERE _openidm_id = '${userApplicationLnkId}'",
-        "get-user-app-link-by-user-and-app": "select * from ${_resource} WHERE userId = '${uid}' and applicationId = '${applicationId}'",
-
         "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
     },
     "dbStructure" : {
@@ -44,15 +35,6 @@
                 ]
             },
             "managed_user" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    }
-                ]
-            },
-            "managed_user_application_lnk" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",

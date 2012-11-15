@@ -1,14 +1,17 @@
 <div class="column-layout">
-	<div class="column">
-		<form class="form  center">
-		    <div id="taskContent"></div>
-		    {{#equals category "assigned"}}
-		    <div id="actions" class="field field-submit">
-		        <a href="#" class="closeLink">{{t "common.form.close"}}</a>
-		        <a href="#" class="requeueLink">{{t "common.task.requeue"}}</a>
-		        <input type="submit" name="saveButton" value='{{t "common.form.update"}}' class="button active">
-		    </div>
-		    {{/equals}}
+	<div class="column offset20">
+		<form class="form center shadow round bg-gradient" style="padding: 15px; margin-top: 20px;">
+			<fieldset>
+			    <!-- close action <a href="#" class="img-close">a</a> -->
+			    <div id="taskContent" class="bg-white border-gray round" style="padding: 15px"></div>
+			    {{#equals category "assigned"}}
+			    <div id="actions" class="field field-submit" style="margin-bottom: 0">
+			        <a href="#" class="closeLink">{{t "common.form.close"}}</a>
+			        <a href="#" class="requeueLink">{{t "common.task.requeue"}}</a>
+			        <input type="submit" name="saveButton" value='{{t "common.form.complete"}}' class="button active gray">
+			    </div>
+			    {{/equals}}
+		    </fieldset>
 		</form>
 	</div>
 </div>

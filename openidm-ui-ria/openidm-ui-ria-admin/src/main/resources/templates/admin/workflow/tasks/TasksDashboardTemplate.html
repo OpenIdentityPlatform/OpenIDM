@@ -1,20 +1,19 @@
-<div class="content">
-       <div class="column-layout">
-           <div class="column5">
-               <h2 class="header">{{t "common.task.myTasks"}}</h2>
-               <div id="myTasks" class="tasks-table"></div>
-               
-               <h2 class="header">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h2>
-               <div id="candidateTasks" class="tasks-table"></div>
-           </div>
-           <div class="column3">
-               {{#shouldDisplayNotificationsAndProfile}}
-               <h2 class="header">{{t "common.notification.notifications"}}</h2>
-               <div id="notifications" style="margin-bottom: 15px;" ></div>
-               
-               <h2 class="header">{{t "common.user.profile"}}</h2>
-               <div id="profileInfo"></div>
-               {{/shouldDisplayNotificationsAndProfile}}
-           </div>
-       </div>
+<div class="content" id="task-dashboard">
+	<div class="column-layout">
+	    <div class="column5">
+	        <h2 class="header">{{t "common.task.myTasks"}}</h2>
+	        <div id="myTasks" class="tasks-table"></div>
+	        
+	        <h2 class="header">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h2>
+	        <div id="candidateTasks" class="tasks-table"></div>
+	        
+	        <div id="processes"></div>
+	    </div>
+	    <div class="column3">
+	        {{#shouldDisplayNotifications}}
+	        <h2 class="header">{{t "common.notification.notifications"}}</h2>
+	        <div id="notifications" style="margin-bottom: 15px;" ></div>
+	        {{/shouldDisplayNotifications}}
+	    </div>
+	</div>
 </div>

@@ -47,12 +47,6 @@
             <classifier>www</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-ui-ria-apps</artifactId>
-            <type>zip</type>
-            <classifier>www</classifier>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
@@ -147,13 +141,6 @@
                                             <type>zip</type>
                                             <classifier>www</classifier>
                                         </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.forgerock.openidm</groupId>
-                                            <artifactId>openidm-ui-ria-apps</artifactId>        
-                                            <version>${openidm.version}</version>
-                                            <type>zip</type>
-                                            <classifier>www</classifier>
-                                        </artifactItem>
                                     </artifactItems>
                                 </configuration>
                             </execution>
@@ -195,7 +182,6 @@
                             <excludes>
                                 <exclude>**/libs/*.js</exclude>
                                 <exclude>**/*Test.js</exclude>
-                                <exclude>**/*TasksMenuView.js</exclude>
                             </excludes>
                         </configuration>
                         <executions>
@@ -238,13 +224,6 @@
                                             <groupId>org.forgerock.commons.ui</groupId>
                                             <artifactId>forgerock-ui-user</artifactId>
                                             <version>${forgerock-ui.version}</version>
-                                            <type>zip</type>
-                                            <classifier>www</classifier>
-                                        </artifactItem>
-                                        <artifactItem>
-                                            <groupId>org.forgerock.openidm</groupId>
-                                            <artifactId>openidm-ui-ria-apps</artifactId>        
-                                            <version>${openidm.version}</version>
                                             <type>zip</type>
                                             <classifier>www</classifier>
                                         </artifactItem>

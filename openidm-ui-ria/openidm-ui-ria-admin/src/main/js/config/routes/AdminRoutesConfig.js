@@ -31,76 +31,56 @@ define("config/routes/AdminRoutesConfig", [
 ], function() {
     
     var obj = {
-            "": {
-              view: "org/forgerock/openidm/ui/admin/Dashboard",
-              role: "openidm-authorized",
-              url: "",
-              forceUpdate: true
-          },     
-            
-          //for admin
-            "adminUsers": {
-                view: "org/forgerock/openidm/ui/admin/users/UsersView",
-                url: "users/",
-                role: "admin"
-            },
-            "adminUserProfile" : {
-                view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
-                role: "admin",
-                url: /^users\/show\/(([A-Za-z0-9_\-\.@])+)\/$/,
-                pattern: "users/show/?/"
-            },
-            "adminUserChangePassword" : {
-                base: "adminUserProfile",
-                dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
-                url: /^users\/(([A-Za-z0-9_\-\.@])+)\/change_password\/$/,
-                pattern: "users/?/change_password/",
-                role: "admin"
-            },
-            "adminUsersAdd" : {
-                view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
-                role: "admin",
-                url: "users/add/"
-            },
-            
-            "processesDashboard": {
-                view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
-                role: "admin",
-                url: "processes/",
-                forceUpdate: true
-            },
-            "startProcesses": {
-                view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
-                role: "admin",
-                url: /^processes\/([A-Za-z0-9:]+)/,
-                pattern: "processes/?/"
-            },
-            "completeTask": {
-                view: "org/forgerock/openidm/ui/admin/Dashboard",
-                role: "admin",
-                url: /^tasks\/([0-9]+)/,
-                pattern: "tasks/?/"
-            },  
-            
-            //for apps
-            "addMoreAppsView": {
-                view: "org/forgerock/openidm/ui/apps/AddMoreAppsView",
-                role: "openidm-authorized", 
-                excludedRole: "openidm-admin",
-                url: "applications/addmore/"
-            },
-            "allApps": {
-                view: "org/forgerock/openidm/ui/apps/AllAppsView",
-                role: "openidm-authorized",  
-                excludedRole: "openidm-admin",
-                url: "applications/all/"
-            },
-            "apps": {
-                view: "org/forgerock/openidm/ui/apps/AppsView",
-                role: "openidm-authorized",    
-                excludedRole: "openidm-admin",
-                url: "applications/"
-            }
+        "": {
+            view: "org/forgerock/openidm/ui/admin/Dashboard",
+            role: "openidm-authorized",
+            url: "",
+            forceUpdate: true
+        },     
+        
+        //for admin
+        "adminUsers": {
+            view: "org/forgerock/openidm/ui/admin/users/UsersView",
+            url: "users/",
+            role: "admin"
+        },
+        "adminUserProfile" : {
+            view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
+            role: "admin",
+            url: /^users\/show\/(([A-Za-z0-9_\-\.@])+)\/$/,
+            pattern: "users/show/?/"
+        },
+        "adminUserChangePassword" : {
+            base: "adminUserProfile",
+            dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
+            url: /^users\/(([A-Za-z0-9_\-\.@])+)\/change_password\/$/,
+            pattern: "users/?/change_password/",
+            role: "admin"
+        },
+        "adminUsersAdd" : {
+            view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
+            role: "admin",
+            url: "users/add/"
+        },
+        
+        "processesDashboard": {
+            view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
+            role: "admin",
+            url: "processes/",
+            forceUpdate: true
+        },
+        "startProcesses": {
+            view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
+            role: "admin",
+            url: /^processes\/([A-Za-z0-9:]+)/,
+            pattern: "processes/?/"
+        },
+        "completeTask": {
+            view: "org/forgerock/openidm/ui/admin/Dashboard",
+            role: "admin",
+            url: /^tasks\/([0-9]+)/,
+            pattern: "tasks/?/"
+        }
     };
     
     return obj;

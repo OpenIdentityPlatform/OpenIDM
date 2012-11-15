@@ -28,8 +28,6 @@ define("org/forgerock/openidm/ui/apps/main", [
 	"./dashboard/DashboardView",
 	"./dashboard/BaseUserInfoView",
 	"./UsersApplicationsView",
-	"./dashboard/NotificationsView",
-	"./dashboard/NotificationViewHelper",
 	"./AllAppsView",
 	"./FrequentlyUsedApplicationsView",
 	"./AddMoreAppsView",

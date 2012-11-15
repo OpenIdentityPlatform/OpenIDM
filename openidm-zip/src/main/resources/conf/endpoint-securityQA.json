@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/securityQA",
+    "type" : "text/javascript",
+    "file" : "script/ui/securityQA.js"
+}

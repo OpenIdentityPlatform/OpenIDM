@@ -32,13 +32,15 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
 ], function(constants, serviceInvoker) {
     
-    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl;
+    var obj = {}, taskManagementUrl, processManagementUrl, taskDefinitionUrl, processDefinitionUrl, endpointUrl, processDefinitiosEndpointUrl;
     
     taskManagementUrl       =   "/openidm/workflow/taskinstance";
     taskDefinitionUrl = "/openidm/workflow/taskdefinition";
     processManagementUrl    =   "/openidm/workflow/processinstance";
     processDefinitionUrl = "/openidm/workflow/processdefinition";
-    
+    endpointUrl = "/openidm/endpoint/gettasksview";
+    processDefinitiosEndpointUrl = "/openidm/endpoint/getprocessesforuser";
+
 
     obj.startProccess = function(proccessNameKey, params, successCallback, errorCallback) {
         console.debug("start proccess");
@@ -69,7 +71,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     
     obj.getTaskDefinition = function(processDefinitionId, taskDefinitionKey, successCallback, errorCallback) {
         console.debug("get task definition");
-        this.serviceCall({url: taskDefinitionUrl + "?_query-id=query-taskdefinition&" 
+        this.serviceCall({url: taskDefinitionUrl + "?_queryId=query-taskdefinition&" 
             + $.param({processDefinitionId: processDefinitionId, taskDefinitionKey: taskDefinitionKey}), success: successCallback, error: errorCallback} );
     };
     
@@ -93,7 +95,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getAllTasks = function(successCallback, errorCallback) {
         console.info("getting all tasks");
 
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=query-all-ids", success: function(data) {
+        obj.serviceCall({url: taskManagementUrl + "?_queryId=query-all-ids", success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -103,25 +105,25 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getAllProcessInstances = function(successCallback, errorCallback) {
         console.info("getting all process instances");
 
-        obj.serviceCall({url: processManagementUrl + "?_query-id=query-all-ids", success: function(data) {
+        obj.serviceCall({url: processManagementUrl + "?_queryId=query-all-ids", success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
         }, error: errorCallback} );
     };
     
-    obj.getAllProcessDefinitions = function(successCallback, errorCallback) {
+    obj.getAllProcessDefinitions = function(userName, successCallback, errorCallback) {
         console.info("getting all process definitions");
         
-        obj.serviceCall({url: processDefinitionUrl + "?_query-id=query-all-ids", success: function(data) {
+        obj.serviceCall({url: processDefinitiosEndpointUrl + "?userName=" + userName, success: function(data) {
             if(successCallback) {
-                successCallback(data.result);
+                successCallback(data);
             }
         }, error: errorCallback} );
     };
-    
-    obj.getAllUniqueProcessDefinitions = function(successCallback, errorCallback) {
-        obj.getAllProcessDefinitions( function(processDefinitions) {
+        
+    obj.getAllUniqueProcessDefinitions = function(userName, successCallback, errorCallback) {
+        obj.getAllProcessDefinitions(userName, function(processDefinitions) {
             
             var result = {}, ret = [], i, processDefinition, splittedProcessDefinition, processName, currentProcessVersion, newProcesVersion, r;
             for (i=0; i < processDefinitions.length; i++) {
@@ -147,7 +149,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     
     obj.getAllTasksForProccess = function(proccessNameKey, successCallback, errorCallback) {
         console.info("getting all unassigned tasks");
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=filtered-query&" + $.param({key: proccessNameKey}), success: function(data) {
+        obj.serviceCall({url: taskManagementUrl + "?_queryId=filtered-query&" + $.param({key: proccessNameKey}), success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -157,7 +159,7 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
     obj.getTasksAssignedToUser = function(userName, successCallback, errorCallback) {
         console.info("getting all tasks assigned to user " + userName);
     
-        obj.serviceCall({url: taskManagementUrl + "?_query-id=filtered-query&" + $.param({assignee: userName}), success: function(data) {
+        obj.serviceCall({url: taskManagementUrl + "?_queryId=filtered-query&" + $.param({assignee: userName}), success: function(data) {
             if(successCallback) {
                 successCallback(data.result);
             }
@@ -253,7 +255,28 @@ define("org/forgerock/openidm/ui/admin/workflow/WorkflowDelegate", [
             }
             result[taskInstanceProcessName][taskInstanceTaskName].tasks.push(taskView);
         }
+        
         return result;
+    };
+    
+    obj.getAllTaskUsingEndpoint = function(userId, successCallback, errorCallback) {
+        obj.serviceCall({url: endpointUrl + "?userId=" + userId, success: function(data) {
+            if(_.isEmpty(data)) {
+                errorCallback();
+            } else if(successCallback) {
+                successCallback(data);
+            }
+        }, error: errorCallback} );
+    };
+    
+    obj.getMyTaskUsingEndpoint = function(userId, successCallback, errorCallback) {
+        obj.serviceCall({url: endpointUrl + "?userId=" + userId + "&viewType=assignee", success: function(data) {
+            if(_.isEmpty(data)) {
+                errorCallback();
+            } else if(successCallback) {
+                successCallback(data);
+            }
+        }, error: errorCallback} );
     };
     
     return obj;

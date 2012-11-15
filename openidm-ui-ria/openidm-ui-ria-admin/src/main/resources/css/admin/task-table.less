@@ -4,6 +4,7 @@ input:disabled, select:disabled {
 }
 
 .tasks-table {
+
     margin-bottom: 20px;
     table {
         width: 100%;
@@ -18,6 +19,12 @@ input:disabled, select:disabled {
             padding: 9px;
             text-align: left;
         }
+        
+        thead th:last-child {
+            width: 200px;
+            text-align: right;
+        }
+        
         thead {
             /* .linear-gradient; */
             background-color: #EDEDED;
@@ -47,7 +54,13 @@ input:disabled, select:disabled {
                 padding: 0 5px;
                 text-align: right;
             } 
+            select {
+                width: 150px;
+            }
+                
         }
+        
+        
         
        
         
@@ -74,4 +87,60 @@ input:disabled, select:disabled {
         padding: 10px;
     }
     
+}
+
+#processList {
+    div.process-item {
+        padding: 10px;
+        div.column-layout {
+            float: none;
+        }
+    }
+    a {
+        font-size: 14px;
+        color: #5A646D;
+    }
+    div.selected-process {
+        background-color: #ffffff;
+        border: 1px solid #E6E6E6;
+        .rounded-corners;
+        a {
+            font-weight: bold;
+        }
+    }
+}
+
+#task-dashboard {
+    form.form {
+        div.field {
+            clear: both;
+            margin-bottom: 10px;
+            min-height: 40px;
+            label {
+                width: 200px;
+            }
+            div.validation-message {
+                clear: both;
+                margin-left: 220px;
+                height: 15px;
+                text-align: left;
+                display: block;
+            }
+            input, select, textarea {
+                float: left;
+            }
+            span {
+                float: left;
+                padding-top: 7px;
+            }
+            &.field-submit {
+                text-align: right;
+                margin: 10px 0 0 0; 
+                input {
+                    float: none;
+                }
+            }
+        }
+        
+    }
 }

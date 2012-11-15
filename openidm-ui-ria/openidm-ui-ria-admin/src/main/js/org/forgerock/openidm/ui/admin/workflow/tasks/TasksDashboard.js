@@ -33,19 +33,20 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView",
-    "org/forgerock/openidm/ui/apps/dashboard/BaseUserInfoView",
-    "org/forgerock/openidm/ui/apps/dashboard/NotificationsView",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationsView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
-    "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView"
-], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, baseUserInfoView, NotificationsView, conf, notificationDelegate, taskDetailsView) {
+    "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
+    "org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView",
+    "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView"
+], function(AbstractView, workflowManager, eventManager, constants, TasksMenuView, 
+    NotificationsView, conf, notificationDelegate, taskDetailsView, startProcessView) {
+    
     var TasksDashboard = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TasksDashboardTemplate.html",
-                
         
-        render: function(mode, args) {
+        render: function(params, args) {
             //decide whether to display notification and profile 
-            this.data = {shouldDisplayNotificationsAndProfile: mode.adminMode !== "openidm-admin" };
+            this.data = {shouldDisplayNotifications: params.mode !== "openidm-admin" };
             
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
@@ -56,11 +57,11 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
+                startProcessView.render();
                 
-                if (mode.adminMode === "admin") {
-                    baseUserInfoView.render();
+                if (params.mode === "user") {
                     //notifications
-                    notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
+                    notificationDelegate.getNotificationsForUser(function(notifications) {
                         
                         notifications.sort(function(a, b) {
                             if (a.requestDate < b.requestDate) {
@@ -97,13 +98,18 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             tr = root.find("[name=taskId][value="+event.id+"]").closest("tr");
             
             tr.after(this.getDetailsRow());
-            
-            taskDetailsView.render(event.id, event.category, function() {
+
+            taskDetailsView.render(event.task, event.definition, event.category, function() {
                 $("#myTasks").accordion("resize");   
                 $("#candidateTasks").accordion("resize");
                 
                 if(event.category === "all") {
                     $("#taskDetails input, #taskDetails select").attr("disabled", "true");
+                    $("#taskDetails span").hide();
+                }
+                
+                if(root.find("#taskContent").html() === "") {
+                    root.find("#taskContent").html('No data required');
                 }
             });   
         },
@@ -116,11 +122,13 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
                 this.candidateTasks.render("all", $("#candidateTasks"));                
                 this.myTasks.render("assigned", $("#myTasks"));
+                startProcessView.render();
             }, this));
             
             eventManager.unregisterListener("refreshMyTasksMenu");
             eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
                 this.myTasks.render("assigned", $("#myTasks"));
+                this.candidateTasks.render("all", $("#candidateTasks"));   
             }, this));
         }
     });

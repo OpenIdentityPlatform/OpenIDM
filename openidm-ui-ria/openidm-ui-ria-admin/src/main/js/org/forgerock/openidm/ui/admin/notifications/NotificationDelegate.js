@@ -22,13 +22,34 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define*/
+/*global $, define */
 
-define("org/forgerock/openidm/ui/apps/dashboard/NotificationViewHelper", [
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function (AbstractConfigurationAware) {
-    
-    var obj = new AbstractConfigurationAware();
+/**
+ * @author jdabrowski
+ */
+define("org/forgerock/openidm/ui/admin/notifications/NotificationDelegate", [
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function(constants, AbstractDelegate, configuration, eventManager) {
+
+    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/getnotifications");
+
+    obj.getNotificationsForUser = function(successCallback, errorCallback) {
+        obj.serviceCall({
+            url: "", 
+            success: function (data) {
+                if(successCallback) {
+                    successCallback(data);
+                }
+            },
+            error: errorCallback
+        });
+    };
 
     return obj;
 });
+
+
+

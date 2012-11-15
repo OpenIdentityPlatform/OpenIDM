@@ -66,57 +66,53 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                 workflowManager.completeTask(this.task._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
                     eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
+                    eventManager.sendEvent("refreshTasksMenu");
                 }, this));
             }
         },
         
-        render: function(id, category, callback) { 
+        render: function(task, definition, category, callback) { 
             this.data = _.extend(this.data, {category: category});
             
             this.parentRender(function() {
-                workflowManager.getTask(id, _.bind(function(task) {
-                    this.task = task;
-                    
-                    workflowManager.getTaskDefinition(task.processDefinitionId, task.taskDefinitionKey, _.bind(function(definition) {
+                this.task = task;
+
+                var template = this.getGenerationTemplate(definition), view, passJSLint;
+                delete this.definitionFormPropertyMap;
+                
+                if(definition.formResourceKey) {
+                    view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
+                    if (view.render) {
+                        view.render(task, category, null, callback);
+                        return;
+                    } else {
+                        console.log("There is no view defined for " + definition.formResourceKey);
+                    }
+                } 
+                
+                if(template !== false) {
+                    templateTaskForm.render(task, category, template, _.bind(function() {
+                        validatorsManager.bindValidators(this.$el);
+                        validatorsManager.validateAllFields(this.$el);
                         
-                        var template = this.getGenerationTemplate(definition), view, passJSLint;
-                        delete this.definitionFormPropertyMap;
-                        
-                        if(definition.formResourceKey) {
-                            view = require(tasksFormManager.getViewForForm(definition.formResourceKey));
-                            if (view.render) {
-                                view.render(task, category, null, callback);
-                                return;
-                            } else {
-                                console.log("There is no view defined for " + definition.formResourceKey);
-                            }
-                        } 
-                        
-                        if(template !== false) {
-                            templateTaskForm.render(task, category, template, _.bind(function() {
-                                validatorsManager.bindValidators(this.$el);
-                                validatorsManager.validateAllFields(this.$el);
-                                
-                                if(callback) {
-                                    callback();
-                                }
-                            }, this));
-                            return;
-                        } else {
-                            this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                            templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
-                                validatorsManager.bindValidators(this.$el);
-                                validatorsManager.validateAllFields(this.$el);
-                                
-                                if(callback) {
-                                    callback();
-                                }
-                            }, this));
-                            
-                            return;
+                        if(callback) {
+                            callback();
                         }
-                    }, this));                  
-                }, this));
+                    }, this));
+                    return;
+                } else {
+                    this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
+                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
+                        validatorsManager.bindValidators(this.$el);
+                        validatorsManager.validateAllFields(this.$el);
+                        
+                        if(callback) {
+                            callback();
+                        }
+                    }, this));
+                    
+                    return;
+                }
             });            
         },
         

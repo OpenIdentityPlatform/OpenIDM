@@ -59,8 +59,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                 delete data.oldEmail;
                 delete data.oldUserName;
                 
-                data.roles = data.roles.join(",");
-                //data.userName = data.email.toLowerCase();
+                data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get().join(",");
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
@@ -145,7 +144,11 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             this.$el.find("input[name=deleteButton]").val($.t("common.form.delete"));
             this.$el.find("input[name=backButton]").val($.t("common.form.back"));
             this.$el.find("input[name=oldUserName]").val(this.editedUser.userName);
-            this.$el.find("select[name=roles]").val(this.editedUser.roles.split(","));
+            
+            _.each(this.editedUser.roles.split(","), _.bind(function(v) {
+                this.$el.find("input[name=roles][value="+v+"]").attr('checked', true);
+            }, this));
+            
             validatorsManager.validateAllFields(this.$el);
             
             countryStateDelegate.getAllCountries(_.bind(function(countries) {
