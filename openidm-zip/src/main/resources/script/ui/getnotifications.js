@@ -1,7 +1,7 @@
-/*! @license 
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,29 +23,25 @@
  */
 
 /**
- * @author jdabrowski
+ * @author mbilski
  * 
- * This script validates if user application link is valid.
+ * This script returns the notification for logged user
+ * 
  */
 
-var errors = [];
+var userId = request.parent.security.userid.id, res = {};
 
-function requiredValidator(toValidate, fieldName) {
-    if (!toValidate || toValidate === "") {
-        errors.push(fieldName + " is required");
-        return false;
+if(request.parent.security.userid.component !== "internal/user") {
+    var params = {
+        "_queryId": "get-notifications-for-user",
+        "userId": userId
+    };
+      
+    var ret = openidm.query("repo/ui/notification", params);
+    
+    if(ret && ret.result) {
+        res = ret.result
     }
-    return true;
 }
 
-function isUserApplicationLnk() {
-    var userApplicationLnk = openidm.decrypt(object);
-    requiredValidator(userApplicationLnk.state, "Approval State");
-    requiredValidator(userApplicationLnk.userId, "User Id");
-    requiredValidator(userApplicationLnk.applicationId, "Application Id");
-    if(errors.length > 0) {
-    	throw errors;
-    }
-};
-
-isUserApplicationLnk();
+res

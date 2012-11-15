@@ -57,7 +57,7 @@ public class ObjectManagementITCase {
                 expect().
                         statusCode(200).
                 when().
-                        get("/openidm/managed/user/?_query-id=query-all-ids").asString();        JsonPath jp = new JsonPath(json);
+                        get("/openidm/managed/user/?_queryId=query-all-ids").asString();        JsonPath jp = new JsonPath(json);
         jp.setRoot("result");
         ids = jp.getList("_id");
         if(ids == null ) return;
@@ -113,7 +113,7 @@ public class ObjectManagementITCase {
                 expect().
                         statusCode(200).
                 when().
-                        get("/openidm/managed/user/?_query-id=query-all-ids").asString();
+                        get("/openidm/managed/user/?_queryId=query-all-ids").asString();
         JsonPath jp = new JsonPath(json);
         jp.setRoot("result");
         ids = jp.getList("_id");

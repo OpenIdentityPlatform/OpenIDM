@@ -113,7 +113,7 @@
   <screen>$ curl
  --dump-header /dev/stdout
  --user openidm-admin:openidm-admin
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
 
 HTTP/1.1 200 OK
 Set-Cookie: JSESSIONID=2l0zobpuk6st1b2m7gvhg5zas;Path=/
@@ -130,7 +130,7 @@ $ curl
  --dump-header /dev/stdout
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
 
 HTTP/1.1 200 OK
 Set-Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8;Path=/
@@ -146,7 +146,7 @@ Transfer-Encoding: chunked
 $ curl
  --dump-header /dev/stdout
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
 
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
@@ -166,7 +166,7 @@ Transfer-Encoding: chunked
  --header "X-OpenIDM-NoSession: true"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
 
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=UTF-8
@@ -352,7 +352,7 @@ $ cli.sh encrypt newpwd
   <screen width="91">$curl 
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user?_query-expression=select+*+from+managedobjects"</screen>
+ "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"</screen>
   
   <para>By default, direct HTTP access to native queries is disallowed, and 
   should remain so in production systems. To enable native queries on the JDBC 

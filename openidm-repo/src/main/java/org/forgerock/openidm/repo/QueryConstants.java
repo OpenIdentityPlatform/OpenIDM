@@ -45,7 +45,7 @@ public final class QueryConstants {
      * 
      * When both an expression and ID are present, the query expression takes precedent
      */
-    public final static String QUERY_EXPRESSION = "_query-expression";
+    public final static String QUERY_EXPRESSION = "_queryExpression";
     
     /**
      * Query input key.
@@ -60,7 +60,7 @@ public final class QueryConstants {
      * 
      * When both an expression and ID are present, the query expression takes precedent
      */    
-    public final static String QUERY_ID = "_query-id";
+    public final static String QUERY_ID = "_queryId";
     
     /**
      * System populated query input key.

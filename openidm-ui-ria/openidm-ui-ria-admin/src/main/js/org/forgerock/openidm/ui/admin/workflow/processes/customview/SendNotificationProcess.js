@@ -31,16 +31,24 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/customview/SendNotific
     "org/forgerock/openidm/ui/admin/workflow/processes/AbstractProcessForm",
     "org/forgerock/commons/ui/user/delegates/UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(AbstractProcessForm, userDelegate, conf, validatorsManager) {
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper"
+], function(AbstractProcessForm, userDelegate, conf, validatorsManager, notificationViewHelper) {
     var SendNotificationProcess = AbstractProcessForm.extend({
         
         template: "templates/admin/workflow/processes/customview/SendNotificationTemplate.html",
         
         prepareData: function(callback) {
+             var nTypes, notificationType;
              _.extend(this.data, this.processDefinition);
              this.data.loggedUser = conf.loggedUser;
-             this.data.notificationTypes = {x:"x", y:"y", z:"z"};
+             
+             nTypes = {};
+             for (notificationType in notificationViewHelper.notificationTypes) {
+                 nTypes[notificationType] = $.t(notificationViewHelper.notificationTypes[notificationType].name);
+             }
+             this.data.notificationTypes = nTypes;
+             this.data.defaultNotificationType = notificationViewHelper.defaultType;
              
             _.bind(function() {
                 

@@ -64,7 +64,7 @@ define("org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate", [
         obj.userApplicationLnksCallback = successCallback;
         obj.numberOfUserApplicationLnks = 0;
 
-        obj.serviceCall({url: "/?_query-id=query-all-user_application_lnk", success: function(data) {
+        obj.serviceCall({url: "/?_queryId=query-all-user_application_lnk", success: function(data) {
             if(successCallback) {
                 obj.userApplicationLnks = obj.rebuildLnks(data.result);
                 successCallback(data.result);
@@ -106,7 +106,7 @@ define("org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate", [
     obj.getUserApplicationLnksForUser = function(uid, successCallback, errorCallback) {
         var result;
         obj.serviceCall({
-            url: "/?_query-id=user_application_lnk-for-user&" + $.param({userId: uid}), 
+            url: "/?_queryId=user_application_lnk-for-user&" + $.param({userId: uid}), 
             success: function (data) {
                 if(successCallback) {
                     result = data.result;

@@ -874,7 +874,7 @@
  --data '{
           "replace":"familyName","value": "Brown"
          }'
- "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=joe"
+ "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=joe"
    </screen>
    
    <note>
@@ -1648,7 +1648,7 @@
 "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"</programlisting>
 
    <para>The following correlation query example shows the JavaScript to call
-   the query defined for OrientDB. The <literal>_query-id</literal> property
+   the query defined for OrientDB. The <literal>_queryId</literal> property
    value matches the name of the query specified in
    <filename>openidm/conf/repo.orientdb.json</filename>,
    <literal>for-userName</literal>. The <literal>source.name</literal> value
@@ -1661,7 +1661,7 @@
   "correlationQuery": {
     "type": "text/javascript",
     "source":
-      "var query = {'_query-id' : 'for-userName', 'uid' : source.name}; query;"
+      "var query = {'_queryId' : 'for-userName', 'uid' : source.name}; query;"
   }
 }</programlisting>
 

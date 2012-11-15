@@ -1,0 +1,5 @@
+{
+    "context" : "endpoint/getprocessesforuser",
+    "type" : "text/javascript",
+    "file" : "script/getprocessesforuser.js"
+}

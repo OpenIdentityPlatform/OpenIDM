@@ -27,10 +27,10 @@
 /**
  * @author jdabrowski
  */
-define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
+define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
     "org/forgerock/commons/ui/common/components/LineTableView",
-    "org/forgerock/openidm/ui/apps/dashboard/NotificationViewHelper",
-    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -48,8 +48,13 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
         },
         
         generateItemView: function(item) {
-            var iconLink, message, requester, requestDate, requestDateString, deleteLink, id;
-            iconLink = notificationViewHelper.configuration.typeToIconMapping[item.notificationType];
+            var iconLink, message, requester, requestDate, requestDateString, deleteLink, id, notType;
+            
+            notType = notificationViewHelper.notificationTypes[item.notificationType];
+            if (notType) {
+                iconLink = notificationViewHelper.notificationTypes[item.notificationType].iconPath;
+            }
+            
             message = item.message;
             requester = item.requester;
             requestDate = dateUtil.formatDate(item.createDate);
@@ -58,7 +63,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
             id = item._id;
             
             return '<div class="notification-title">' 
-                     + '<img src="' + iconLink + '"/>'
+                     + (iconLink ? '<img src="' + iconLink + '"/>' : '')
                      + '<a name="title" href="#">' + message + '</a>'
                   + '</div>'
                   + '<div class="notification-details">'
@@ -79,7 +84,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
             return $.t("openidm.ui.apps.dashboard.NotificationsView.seeMoreNotifications");
         },
         
-        maxToShow: 6,
+        maxToShow: 0,
         
         getHeightForItemsNumber: function(itemsNumber) {
             return this.itemHeight * ( itemsNumber - 1 ) + this.openItemHeight;
@@ -112,7 +117,7 @@ define("org/forgerock/openidm/ui/apps/dashboard/NotificationsView", [
                 self.installAccordion(); 
             }, function() {
                 eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
-                notificationDelegate.getNotificationsForUser(conf.loggedUser._id, function(notifications) {
+                notificationDelegate.getNotificationsForUser(function(notifications) {
                     self.items = notifications;
                     self.rebuildView();
                     self.installAccordion();

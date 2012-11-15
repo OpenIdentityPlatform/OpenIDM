@@ -46,6 +46,10 @@ define("org/forgerock/openidm/ui/admin/main", [
 	
 	"./workflow/WorkflowDelegate",
 	
-	"./Dashboard"
+	"./Dashboard",
+	
+	"./notifications/NotificationDelegate",
+	"./notifications/NotificationsView",
+	"./notifications/NotificationViewHelper"
 	
 ]);

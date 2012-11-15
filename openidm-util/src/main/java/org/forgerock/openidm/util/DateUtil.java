@@ -130,6 +130,24 @@ public class DateUtil {
         DateTimeFormatter parser = ISODateTimeFormat.dateTime();
         return parser.withOffsetParsed().parseDateTime(timestamp);
     }
+    
+    /**
+     * Parses an ISO8601 compliant timestamp into a DateTime object
+     * Checks the length of the timestamp and returns null if the string is
+     * not ISO8601 compliant
+     * @param timestamp timestamp to parse
+     * @return 
+     */
+    public DateTime parseIfDate(String timestamp) {
+        DateTime d = null;
+        if (timestamp.length() == 26) {
+            try {
+                d = DateUtil.getDateUtil().parseTimestamp(timestamp);
+            } catch (IllegalArgumentException e) {
+            }
+        }
+        return d;
+    }
 
     /**
      * return the number of days between the two dates.

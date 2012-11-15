@@ -51,41 +51,41 @@ var policyConfig = {
             },
             {
                 "policyId" : "valid-date",
-                "policyExec" : "validDate",
+                "policyExec" : "validDateWhenPresent",
                 "clientValidation": true,
                 "policyRequirements": ["VALID_DATE"]
             },
             {
                 "policyId" : "valid-email-address-format",
-                "policyExec" : "validEmailAddressFormat",
+                "policyExec" : "validEmailAddressFormatWhenPresent",
                 "clientValidation": true,
                 "policyRequirements": ["VALID_EMAIL_ADDRESS_FORMAT"]
             },
             {
                 "policyId" : "valid-name-format",
-                "policyExec" : "validNameFormat",
+                "policyExec" : "validNameFormatWhenPresent",
                 "clientValidation": true,
                 "policyRequirements": ["VALID_NAME_FORMAT"]
             },
             {
                 "policyId" : "valid-phone-format",
-                "policyExec" : "validPhoneFormat",
+                "policyExec" : "validPhoneFormatWhenPresent",
                 "clientValidation": true,
                 "policyRequirements": ["VALID_PHONE_FORMAT"]
             },
             {   "policyId" : "at-least-X-capitals",
                 "clientValidation": true,
-                "policyExec" : "atLeastXCapitalLetters", 
+                "policyExec" : "atLeastXCapitalLettersWhenPresent", 
                 "policyRequirements" : ["AT_LEAST_X_CAPITAL_LETTERS"]
             },
             {   "policyId" : "at-least-X-numbers",
                 "clientValidation": true,
-                "policyExec" : "atLeastXNumbers", 
+                "policyExec" : "atLeastXNumbersWhenPresent", 
                 "policyRequirements" : ["AT_LEAST_X_NUMBERS"]
             },
             {   "policyId" : "minimum-length",
                 "clientValidation": true,
-                "policyExec" : "propertyMinLength", 
+                "policyExec" : "minLengthWhenPresent", 
                 "policyRequirements" : ["MIN_LENGTH"]
             },
             {   "policyId" : "cannot-contain-others",
@@ -106,6 +106,19 @@ var policyConfig = {
         ] 
     };
 
+function required(fullObject, value, params, propName) {
+    if (value === undefined) {
+        return [ { "policyRequirement" : "REQUIRED" } ];
+    }
+    return [];
+}
+
+function notEmpty(fullObject, value, params, property) { 
+    if (typeof(value) !== "string" || !value.length)
+        return [ {"policyRequirement": "REQUIRED"}];
+    else
+        return []; 
+}
 
 function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
     var failures = [],
@@ -117,6 +130,85 @@ function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
          failures = [{"policyRequirement": "NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES", params: {"max":params.max,"numMinutes":params.numMinutes}}];
     }
     return failures;
+}
+
+function unique(fullObject, value, params, property) {
+    var queryParams = {
+            "_queryId": "get-by-field-value",
+            "field": property,
+            "value": value
+            },
+        existing,requestId,requestBaseArray;
+    
+    if (value && value.length)
+    {
+        requestBaseArray = request.id.split("/");
+        if (requestBaseArray.length === 3) {
+            requestId = requestBaseArray.pop();
+        }
+        existing = openidm.query(requestBaseArray.join("/"),  queryParams);
+
+        if (existing.result.length != 0 && (!requestId || (existing.result[0]["_id"] != requestId))) {
+            return [{"policyRequirement": "UNIQUE"}];
+        }
+    }
+    return [];
+}
+
+function validDateWhenPresent(fullObject, value, params, property) {
+    if (typeof(value) === "string" && value.length && isNaN(new Date(value).getTime())) {
+        return [ {"policyRequirement": "VALID_DATE"}];
+    }
+    else
+        return [];
+}
+
+function validPhoneFormatWhenPresent(fullObject, value, params, property) {
+    var phonePattern = /^\+?([0-9\- \(\)])*$/;
+    if (typeof(value) === "string" && value.length && !phonePattern.test(value))
+        return [ {"policyRequirement": "VALID_PHONE_FORMAT"}];
+    else
+        return [];
+}
+
+function validNameFormatWhenPresent(fullObject, value, params, property) {
+    var namePattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/;
+    if (typeof(value) === "string" && value.length && !namePattern.test(value))
+        return [ {"policyRequirement": "VALID_NAME_FORMAT"}];
+    else
+        return [];
+}
+
+function minLengthWhenPresent(fullObject, value, params, property) { 
+    var minLength = params.minLength;
+    if (typeof(value) === "string" && value.length && value.length < minLength) {
+        return [ { "policyRequirement" : "MIN_LENGTH", "params" : {"minLength":minLength} } ];
+    }
+    return [];
+} 
+
+function atLeastXCapitalLettersWhenPresent(fullObject, value, params, property) {
+    var reg = /[(A-Z)]/g;
+    if (typeof value === "string" && value.length && (value.match(reg) === null || value.match(reg).length < params.numCaps)) {
+        return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
+    }
+    return [];
+}
+
+function atLeastXNumbersWhenPresent(fullObject, value, params, property) {
+    var reg = /\d/g;
+    if (typeof value === "string" && value.length && (value.match(reg) === null || value.match(reg).length < params.numNums)) {
+        return [ { "policyRequirement" : "AT_LEAST_X_NUMBERS", "params" : {"numNums": params.numNums}  } ];
+    }
+    return [];
+}
+
+function validEmailAddressFormatWhenPresent(fullObject, value, params, property) {
+    var emailPattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/; 
+    if (typeof value === "string" && value.length && !emailPattern.test(value))
+        return [ {"policyRequirement": "VALID_EMAIL_ADDRESS_FORMAT"}];
+    else
+        return [];
 }
 
 function cannotContainOthers(fullObject, value, params, property) {
@@ -140,54 +232,32 @@ function cannotContainOthers(fullObject, value, params, property) {
     return [];
 }
 
-function validDate(fullObject, value, params, property) {
-    if (value && value.length && isNaN(new Date(value).getTime())) {
-        return [ {"policyRequirement": "VALID_DATE"}];
-    }
-    else
-        return [];
-}
-
-function validPhoneFormat(fullObject, value, params, property) {
-    var phonePattern = /^\+?([0-9\- \(\)])*$/;
-    if (value && value.length && !phonePattern.test(value))
-        return [ {"policyRequirement": "VALID_PHONE_FORMAT"}];
-    else
-        return [];
-}
-
-function validNameFormat(fullObject, value, params, property) {
-    var namePattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/;
-    if (value && value.length && !namePattern.test(value))
-        return [ {"policyRequirement": "VALID_NAME_FORMAT"}];
-    else
-        return [];
-}
-
-function validEmailAddressFormat(fullObject, value, params, property) {
-    var emailPattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/; 
-    if (value && value.length && !emailPattern.test(value))
-        return [ {"policyRequirement": "VALID_EMAIL_ADDRESS_FORMAT"}];
-    else
-        return [];
-}
-
-function required(fullObject, value, params, propName) {
-    if (value === undefined) {
-        return [ { "policyRequirement" : "REQUIRED" } ];
-    }
-    return [];
-}
-
-function notEmpty(fullObject, value, params, property) { 
-    if (!value || !value.length)
-        return [ {"policyRequirement": "REQUIRED"}];
-    else
-        return []; 
-}
 function requiredIfConfigured(fullObject, value, params, property) {
     var currentValue = openidm.read("config/" + params.configBase),
-        baseKeyArray = params.baseKey.split(".");
+        baseKeyArray = params.baseKey.split("."),
+        caller = request.params._caller,
+        roles,parent,i,j,role;
+    
+    parent = request.parent;
+    if (caller && caller == "filterEnforcer") {
+        parent = request.parent.parent;
+    }
+
+    if (parent.security) {
+        roles = parent.security["openidm-roles"];
+        if (params && params.exceptRoles) {
+            for (i = 0; i < params.exceptRoles.length; i++) {
+                role = params.exceptRoles[i];
+                if (roles) {
+                    for (j = 0; j < roles.length; j++) {
+                        if (role === roles[j]) {
+                            return [];
+                        }
+                    }
+                }
+            }
+        }
+    }
     
     for (var i in baseKeyArray)
         currentValue = currentValue[baseKeyArray[i]];
@@ -196,62 +266,6 @@ function requiredIfConfigured(fullObject, value, params, property) {
         return [ {"policyRequirement": "REQUIRED"}];
     else
         return [];
-}
-
-function unique(fullObject, value, params, property) {
-    var queryParams = {
-            "_query-id": "get-by-field-value",
-            "field": property,
-            "value": value
-            },
-        existing,requestId,requestBaseArray;
-    
-    if (value && value.length)
-    {
-        requestBaseArray = request.id.split("/");
-        if (requestBaseArray.length === 3) {
-            requestId = requestBaseArray.pop();
-        }
-        existing = openidm.query(requestBaseArray.join("/"),  queryParams);
-
-        if (existing.result.length != 0 && (!requestId || (existing.result[0]["_id"] != requestId))) {
-            return [{"policyRequirement": "UNIQUE"}];
-        }
-    }
-    return [];
-}
-
-function propertyMinLength(fullObject, value, params, property) { 
-    var minLength = params.minLength;
-    if (typeof value !== "string" || value.length < minLength) {
-        return [ { "policyRequirement" : "MIN_LENGTH", "params" : {"minLength":minLength} } ];
-    }
-    return [];
-} 
-
-function atLeastXCapitalLetters(fullObject, value, params, property) {
-    var reg = /[(A-Z)]/g;
-    if (typeof value !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numCaps) {
-        return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
-    }
-    return [];
-}
-
-function atLeastXNumbers(fullObject, value, params, property) {
-    var reg = /\d/g;
-    if (typeof value !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numNums) {
-        return [ { "policyRequirement" : "AT_LEAST_X_NUMBERS", "params" : {"numNums": params.numNums}  } ];
-    }
-    return [];
-}
-
-function getPolicy(policyId) {
-    for (var i = 0; i < policyConfig.policies.length; i++) {
-        if (policyConfig.policies[i].policyId == policyId) {
-            return policyConfig.policies[i];
-        }
-    }
-    return null;
 }
 
 function reauthRequired(fullObject, value, params, propName) {
@@ -292,6 +306,23 @@ function reauthRequired(fullObject, value, params, propName) {
         }
     }
     return [];
+}
+
+//    End of policy enforcement functions 
+
+
+
+
+
+// Internal policy code below
+
+function getPolicy(policyId) {
+    for (var i = 0; i < policyConfig.policies.length; i++) {
+        if (policyConfig.policies[i].policyId == policyId) {
+            return policyConfig.policies[i];
+        }
+    }
+    return null;
 }
 
 function getPropertyValue(requestObject, propName) {

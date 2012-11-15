@@ -33,17 +33,6 @@
         },
         {
             "name" : "group"
-        },
-        {
-            "name" : "user_application_lnk",
-            "onCreate" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/user_application_lnk/onCreate-user_application_lnk-set-default-fields.js"
-            },
-            "onValidate" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/user_application_lnk/onValidate-user_application_lnk.js"
-            }
         }
     ]
 }

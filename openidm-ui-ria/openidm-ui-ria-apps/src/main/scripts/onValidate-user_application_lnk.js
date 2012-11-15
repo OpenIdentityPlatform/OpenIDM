@@ -1,4 +1,4 @@
-/**
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -22,34 +22,30 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global $, define */
-
 /**
  * @author jdabrowski
+ * 
+ * This script validates if user application link is valid.
  */
-define("org/forgerock/openidm/ui/apps/delegates/NotificationDelegate", [
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/repo/ui/notification");
+var errors = [];
 
-    obj.getNotificationsForUser = function(uid, successCallback, errorCallback) {
-        obj.serviceCall({
-            url: "?_query-id=notifications-for-user&" + $.param({userId: uid}), 
-            success: function (data) {
-                if(successCallback) {
-                    successCallback(data.result);
-                }
-            },
-            error: errorCallback
-        });
-    };
+function requiredValidator(toValidate, fieldName) {
+    if (!toValidate || toValidate === "") {
+        errors.push(fieldName + " is required");
+        return false;
+    }
+    return true;
+}
 
-    return obj;
-});
+function isUserApplicationLnk() {
+    var userApplicationLnk = openidm.decrypt(object);
+    requiredValidator(userApplicationLnk.state, "Approval State");
+    requiredValidator(userApplicationLnk.userId, "User Id");
+    requiredValidator(userApplicationLnk.applicationId, "Application Id");
+    if(errors.length > 0) {
+    	throw errors;
+    }
+};
 
-
-
+isUserApplicationLnk();

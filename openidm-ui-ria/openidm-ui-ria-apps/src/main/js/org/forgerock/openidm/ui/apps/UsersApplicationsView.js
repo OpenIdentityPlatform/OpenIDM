@@ -34,7 +34,7 @@ define("org/forgerock/openidm/ui/apps/UsersApplicationsView", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/apps/delegates/NotificationDelegate",
+    "org/forgerock/openidm/ui/admin/notifications/NotificationDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/apps/delegates/UserApplicationLnkDelegate",
     "org/forgerock/commons/ui/common/main/UniversalCachedDelegate"

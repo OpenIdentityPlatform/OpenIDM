@@ -108,10 +108,10 @@
         <para>set of parameters that can be substituted as tokens into the query. Reserved property keys are defined in QueryConstants. </para>
         <orderedlist>
             <listitem>
-                <para>The reserved property _query-id (QueryConstants.QUERY_ID) can specify a pre-configured parameterized query to execute</para>
+                <para>The reserved property _queryId (QueryConstants.QUERY_ID) can specify a pre-configured parameterized query to execute</para>
             </listitem>
             <listitem>
-                <para>The reserved properties _query-expressions ((QueryConstants.QUERY_EXPRESSION) (and optional _query-type) allow to pass add-hoc queries rather than specifying a query by id</para>
+                <para>The reserved properties _queryExpressions ((QueryConstants.QUERY_EXPRESSION) (and optional _query-type) allow to pass add-hoc queries rather than specifying a query by id</para>
             </listitem>
             <listitem>
                 <para>The optional reserved properties _page-from (*), _page-size (*), _page-direction (*) can be used to page through the results either forwards or backwards. For the first page, the _page-from property can be empty; in the result meta-data the query will return two tokens for subsequent use in the _page-from parameter - a token representing the first record to page backwards, and a token representing the last record to page forward </para>

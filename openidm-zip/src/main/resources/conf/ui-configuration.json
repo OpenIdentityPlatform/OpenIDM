@@ -1,14 +1,33 @@
 {
     "configuration" : {
         "selfRegistration" : false,
-        "forgottenPassword" : false,
         "securityQuestions" : false,
         "siteIdentification" : false,
         "language" : "en-US",
         "roles" : {
-            "openidm-admin" : "System administrator",
             "admin" : "Administrator",
             "openidm-authorized" : "User"
-        }
+        },
+        "siteImages" : [
+            "mail.png",
+            "user.png",
+            "report.png",
+            "twitter.png"
+        ],
+        "notificationTypes" : {
+            "info" : {
+                "name" : "common.notification.types.info",
+                "iconPath" : "images/notifications/info.png"
+            },
+            "warning" : {
+                "name" : "common.notification.types.warning",
+                "iconPath" : "images/notifications/warning.png"
+            },
+            "error" : {
+                "name" : "common.notification.types.error",
+                "iconPath" : "images/notifications/error.png"
+            }
+        },
+        "defaultNotificationType" : "info"
     }
 }

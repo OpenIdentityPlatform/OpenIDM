@@ -50,10 +50,10 @@ public class JsonGroupQuery extends GroupQueryImpl {
     public List<Group> executeList(CommandContext commandContext, Page page) {
         JsonValue params = new JsonValue(new HashMap());
         if (null == getUserId()) {
-            params.put("_query-id", "query-all-ids");
+            params.put("_queryId", "query-all-ids");
         } else {
             //TODO Find groups for user
-            params.put("_query-id", "query-all-ids");
+            params.put("_queryId", "query-all-ids");
         }
         try {
             JsonValue result = identityService.getAccessor().query("managed/group", params);
@@ -71,9 +71,9 @@ public class JsonGroupQuery extends GroupQueryImpl {
     public long executeCount(CommandContext commandContext) {
         JsonValue params = new JsonValue(new HashMap());
         if (null == getId()) {
-            params.put("_query-id", "query-all-ids");
+            params.put("_queryId", "query-all-ids");
         } else {
-            params.put("_query-id", "find-by-id");
+            params.put("_queryId", "find-by-id");
             params.put("id", getId());
         }
         try {
@@ -87,7 +87,7 @@ public class JsonGroupQuery extends GroupQueryImpl {
     @Override
     public Group executeSingleResult(CommandContext commandContext) {
         JsonValue params = new JsonValue(new HashMap());
-        params.put("_query-id", "find-by-id");
+        params.put("_queryId", "find-by-id");
         params.put("id", getId());
         try {
             JsonValue result = identityService.getAccessor().query("managed/group", params);
