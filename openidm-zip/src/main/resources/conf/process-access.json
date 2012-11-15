@@ -1,12 +1,11 @@
 {
-    "policies": [
+    "workflowAccess" : [
         {
-            "id" : "allAuthorized",
-            "properties" : {
-                "key" : "_id",
+            "propertiesCheck" : {
+                "property" : "_id",
                 "matches" : ".*",
-                "requiresPrivilage" : "openidm-authorized"
+                "requiresRole" : "openidm-authorized"
             }
         }
-        ]
+    ]
 }
