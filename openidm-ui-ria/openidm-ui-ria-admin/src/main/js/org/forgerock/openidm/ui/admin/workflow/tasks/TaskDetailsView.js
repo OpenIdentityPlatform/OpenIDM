@@ -65,7 +65,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                 
                 workflowManager.completeTask(this.task._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
+                    //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
                     eventManager.sendEvent("refreshTasksMenu");
                 }, this));
             }

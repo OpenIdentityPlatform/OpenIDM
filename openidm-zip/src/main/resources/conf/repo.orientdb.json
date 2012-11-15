@@ -19,7 +19,7 @@
         "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
         
         "for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'",
-        "get-notifications-for-user" : "select * FROM ${_resource} WHERE receiverId = '${userId}'",
+        "get-notifications-for-user" : "select * FROM ${_resource} WHERE receiverId = '${userId}' order by createDate desc",
         
         "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
     },
