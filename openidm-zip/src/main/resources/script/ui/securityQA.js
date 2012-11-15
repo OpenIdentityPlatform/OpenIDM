@@ -38,6 +38,15 @@
  *  newPassword: new password to assign to user; used by action setNewPasswordForUserName
  * 
  */
+
+
+if (request.method !== "query") {
+    throw { 
+        "openidmCode" : 403, 
+        "message" : "Access denied"
+    } 
+}
+
 var response    = {},
     userQuery   = {},
     user        = {},
