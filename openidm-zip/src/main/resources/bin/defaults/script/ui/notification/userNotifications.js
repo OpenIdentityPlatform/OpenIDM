@@ -48,9 +48,14 @@ if (request.method == "read") {
     
     res
 } else if (request.method == "delete"){
-    //TODO: get notification, check if it's user's; if yes, then delete notification  
+    var notification = openidm.read("repo/ui/notification/"+request.parent.query.notificationId);
+    
+    if(notification.receiverId === request.parent.security.userid.id) {
+        openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
+    } else {
+        throw "Access denied";
+    }    
 } else {
     throw "Unsupported operation: " + request.method;
 }
-
 
