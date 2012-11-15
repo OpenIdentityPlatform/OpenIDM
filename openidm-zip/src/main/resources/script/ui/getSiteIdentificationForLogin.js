@@ -36,6 +36,13 @@
  * 
  */
 
+if (request.method !== "query") {
+    throw { 
+        "openidmCode" : 403, 
+        "message" : "Access denied"
+    } 
+}
+
 var params = {
     "_queryId": "for-userName",
     "uid": request.params.login
