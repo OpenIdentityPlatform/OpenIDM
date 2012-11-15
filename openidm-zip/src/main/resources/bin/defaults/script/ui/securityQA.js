@@ -113,6 +113,12 @@ if (
         
     }
 }
+else { // apparently they have provided an unsupported action
+    throw { 
+        "openidmCode" : 403, 
+        "message" : "Access denied"
+    } 
+}
 
 
 response;
