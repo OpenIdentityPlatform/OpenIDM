@@ -823,7 +823,7 @@ INFO: XPath currently not supported as expressionLanguage
   &lt;process id=&quot;process2&quot; name=&quot;process2&quot;&gt;
     &lt;startEvent id=&quot;startevent1&quot; name=&quot;Start&quot;&gt;&lt;/startEvent&gt;
     &lt;scriptTask id=&quot;scripttask2&quot; name=&quot;Read Users&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[currentUsers = openidm.query('managed/user', ['_query-id':'query-all-ids'])
+      &lt;script&gt;&lt;![CDATA[currentUsers = openidm.query('managed/user', ['_queryId':'query-all-ids'])
 out:println 'current users in the repository: 'currentUsers]]&gt;&lt;/script&gt;
     &lt;/scriptTask&gt;
     &lt;scriptTask id=&quot;scripttask3&quot; name=&quot;Create Dagobert&quot; scriptFormat=&quot;groovy&quot;&gt;
@@ -857,7 +857,7 @@ revision = user5['_rev'].toString()
 openidm.delete(&quot;managed/user/&quot;+ _id, revision)]]&gt;&lt;/script&gt;
     &lt;/scriptTask&gt;
     &lt;scriptTask id=&quot;scripttask7&quot; name=&quot;Read Users&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[currentUsers = openidm.query('managed/user', ['_query-id':'query-all-ids'])
+      &lt;script&gt;&lt;![CDATA[currentUsers = openidm.query('managed/user', ['_queryId':'query-all-ids'])
 out:println 'current users in the repository: 'currentUsers]]&gt;&lt;/script&gt;
     &lt;/scriptTask&gt;
     &lt;endEvent id=&quot;endevent1&quot; name=&quot;End&quot;&gt;&lt;/endEvent&gt;

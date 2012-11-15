@@ -868,10 +868,10 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST -d '[{"replace":"/adPassword","value": "Password"}]' 
- http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-username&amp;uid=DDOE</screen>
+ http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-username&amp;uid=DDOE</screen>
 
       <para>For the syntax on how to formulate the query
-      <literal>_query-id=for-username&amp;uid=DDOE</literal> see
+      <literal>_queryId=for-username&amp;uid=DDOE</literal> see
       <xref linkend="managed-objects-programmatic-query"/>.</para>
     </section>
 
@@ -906,7 +906,7 @@ val = openidm.read("managed/foobar/myidentifier")</programlisting>
 
      <programlisting language="javascript">
 var params = {
-    "_query-id": "my-custom-query-id",
+    "_queryId": "my-custom-query-id",
     "mycustomtoken": "samplevalue"
 };
 val = openidm.query("managed/foobar", params);</programlisting>

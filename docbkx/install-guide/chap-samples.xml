@@ -230,7 +230,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"</screen>
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"</screen>
 
    <para>The resulting JSON object should look something like this, but all on
    one line.</para>
@@ -321,7 +321,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
    </screen>
 
    <para>The resulting JSON object should look something like this, but all on
@@ -484,7 +484,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
    </screen>
 
    <para>The resulting JSON object should look something like this, but all on
@@ -522,7 +522,7 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST   
  -d '[{"replace":"/ldapGroups","value": ["cn=openidm2,ou=Groups,dc=example,dc=com"]}]' 
- "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=jdoe"   
+ "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"   
    </screen>
    
    <para>On Windows, you might need to escape certain characters, so your REST 
@@ -533,7 +533,7 @@ $ curl
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  -d "[{\"replace\":\"/ldapGroups\",\"value\": [\"cn=openidm2,ou=Groups,dc=example,dc=com\"]}]"
- "http://localhost:8080/openidm/managed/user?_action=patch&amp;_query-id=for-userName&amp;uid=jdoe"
+ "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"
   </screen>
    
    <para>This will change the user's ldapGroups property in OpenIDM from 
@@ -836,7 +836,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/group/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/group/?_queryId=query-all-ids"
    </screen>
 
    <para>The resulting JSON object should look something like this, but all on
@@ -999,7 +999,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"</screen>
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"</screen>
 
    <para>The result should resemble the following JSON object.</para>
 
@@ -1084,7 +1084,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"</screen>
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"</screen>
 
    <para>The result should resemble the following JSON object, but all on one
    line.</para>
@@ -1394,7 +1394,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"</screen>
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"</screen>
 
     <para>The result should resemble the following JSON object, though all
    on one line.</para>

@@ -254,7 +254,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
             "target": "managed/user",
             "correlationQuery": {
                 "type": "text/javascript",
-                "source": "var query = {'_query-id' : 'for-userName',
+                "source": "var query = {'_queryId' : 'for-userName',
                     'uid' :  source.name};query;"
             },
             "properties": [
@@ -403,7 +403,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <para>After reconciliation runs, you can use the REST interface to display
   all users in the local repository. Use a REST client to perform an HTTP 
   GET on the following URL:
-  <literal>http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</literal> 
+  <literal>http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</literal> 
   with the headers <literal>"X-OpenIDM-Username: openidm-admin"</literal> and 
   <literal>"X-OpenIDM-Password: openidm-admin"</literal>.
   </para>
@@ -416,7 +416,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
 
 {
  "query-time-ms":1,
@@ -555,13 +555,13 @@ access.csv activity.csv recon.csv</screen>
   linkend="sample-running-reconciliation"><citetitle>Running
   Reconciliation</citetitle></link>. After reconciliation has run, query the
   local repository to see the new user appear in the list of all users under
-  <literal>http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids</literal>.</para>
+  <literal>http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids</literal>.</para>
 
   <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- http://localhost:8080/openidm/managed/user/?_query-id=query-all-ids
+ http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids
  
 {
  "query-time-ms":1,
