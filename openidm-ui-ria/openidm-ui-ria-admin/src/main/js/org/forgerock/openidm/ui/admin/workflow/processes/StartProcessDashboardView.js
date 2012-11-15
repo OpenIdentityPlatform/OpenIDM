@@ -72,7 +72,6 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
         showStartProcessView: function(event) {
             event.preventDefault();
             var id = $(event.target).parent().find('[name="id"]').val();
-            //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "startProcesses", args: [id], trigger: false});
             
             $("#processDetails").remove();
             $(".selected-process").removeClass('selected-process');

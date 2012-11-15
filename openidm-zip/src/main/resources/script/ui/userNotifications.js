@@ -25,23 +25,32 @@
 /**
  * @author mbilski
  * 
- * This script returns the notification for logged user
+ * Endpoint for managing user notifications
  * 
  */
 
-var userId = request.parent.security.userid.id, res = {};
+if (request.method == "read") {
 
-if(request.parent.security.userid.component !== "internal/user") {
-    var params = {
-        "_queryId": "get-notifications-for-user",
-        "userId": userId
-    };
-      
-    var ret = openidm.query("repo/ui/notification", params);
-    
-    if(ret && ret.result) {
-        res = ret.result
+    var userId = request.parent.security.userid.id, res = {};
+
+    if(request.parent.security.userid.component !== "internal/user") {
+        var params = {
+            "_queryId": "get-notifications-for-user",
+            "userId": userId
+        };
+          
+        var ret = openidm.query("repo/ui/notification", params);
+        
+        if(ret && ret.result) {
+            res = ret.result
+        }
     }
+    
+    res
+} else if (request.method == "delete"){
+    //TODO: get notification, check if it's user's; if yes, then delete notification  
+} else {
+    throw "Unsupported operation: " + request.method;
 }
 
-res
+
