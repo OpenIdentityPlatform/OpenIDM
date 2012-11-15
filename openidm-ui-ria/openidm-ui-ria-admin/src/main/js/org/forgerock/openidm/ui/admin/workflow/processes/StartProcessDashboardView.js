@@ -52,7 +52,7 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
             }
             this.parentRender(function() {
                 this.clearStartProcessView();
-                workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser.userName, function(processDefinitions) {
+                workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser._id, function(processDefinitions) {
                     for (i = 0; i < processDefinitions.length; i++) {
                         $("#processList").append("<div class='process-item'><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
                                 + "<input type='hidden' name='id' value='" + processDefinitions[i]._id +"' />"
