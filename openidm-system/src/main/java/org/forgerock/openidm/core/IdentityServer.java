@@ -362,10 +362,7 @@ public class IdentityServer implements PropertyAccessor {
         if (null == location) {
             location = getProperty(ServerConstants.PROPERTY_SERVER_ROOT, null, String.class);
         }
-        if (null == location) {
-            location = getProperty(ServerConstants.PROPERTY_SERVER_ROOT, null, String.class);
-        }
-        return new File(null != location ? location : "");
+        return new File(null != location ? location : "").getAbsoluteFile();
     }
 
     public URL getInstallLocationURL() {
