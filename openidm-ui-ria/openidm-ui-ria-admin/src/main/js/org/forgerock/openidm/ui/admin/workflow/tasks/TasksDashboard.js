@@ -109,7 +109,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 }
                 
                 if(root.find("#taskContent").html() === "") {
-                    root.find("#taskContent").html('No data required');
+                    root.find("#taskContent").css("text-align","left");
+                    root.find("#taskContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
                 }
             });   
         },

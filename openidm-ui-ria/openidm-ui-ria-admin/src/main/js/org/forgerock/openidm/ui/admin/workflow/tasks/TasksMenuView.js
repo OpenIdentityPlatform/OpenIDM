@@ -45,7 +45,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             "change select[name=assignedUser]": "claimTask",
             "mouseenter .userLink": "showUser",
             "click .closeLink" : "hideDetails",
-            "click .requeueLink" : "requeueTaskHandler"
+            "click [name=requeueButton]" : "requeueTaskHandler"
         },
         
         tasks: {},
@@ -197,7 +197,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             active = false;
             if(this.$el.hasClass('ui-accordion') && before === types) {
                 active = this.$el.accordion("option", "active");
-                console.log("KURWAAA" + active);
             }
             
             this.$el.accordion('destroy');
