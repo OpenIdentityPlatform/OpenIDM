@@ -251,7 +251,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     for(i = 0; i < task.usersToAssign.users.length; i++) {
                         user = task.usersToAssign.users[i];
 
-                        if($(target).find("option[value="+ user.username +"]").length === 0 && user.username !== conf.loggedUser.userName) {
+                        if($(target).find("option[value='"+ user.username +"']").length === 0 && user.username !== conf.loggedUser.userName) {
                             $(target).append('<option value="'+ user.username +'">'+ user.displayableName +'</option');
                         }
                     }
