@@ -1,5 +1,5 @@
 {
-    "context" : "endpoint/getavalibleuserstoassign",
+    "context" : "endpoint/getavailableuserstoassign",
     "type" : "text/javascript",
     "file" : "bin/defaults/script/workflow/getavalibleuserstoassign.js"
 }

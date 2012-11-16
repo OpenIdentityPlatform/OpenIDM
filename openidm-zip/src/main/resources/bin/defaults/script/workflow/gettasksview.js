@@ -72,7 +72,7 @@ var getUsersWhoCanBeAssignedToTask = function(taskId) {
         
         var usersWhoCanBeAssignedToTaskResult = { users : []};
         if(isTaskManager) {        
-            usersWhoCanBeAssignedToTaskResult = openidm.query("endpoint/getavalibleuserstoassign", usersWhoCanBeAssignedToTaskQueryParams);
+            usersWhoCanBeAssignedToTaskResult = openidm.query("endpoint/getavailableuserstoassign", usersWhoCanBeAssignedToTaskQueryParams);
         }
         usersWhoCanBeAssignedToTask[taskId] = usersWhoCanBeAssignedToTaskResult;
     }
