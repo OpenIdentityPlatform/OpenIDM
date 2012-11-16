@@ -215,7 +215,7 @@ function isMyTask() {
 
 function canUpdateTask() {
     var taskInstanceId = request.id.split("/")[2];
-    return isUserCandidateForTask(taskInstanceId);
+    return isMyTask() || isUserCandidateForTask(taskInstanceId);
 }
 
 function isUserCandidateForTask(taskInstanceId) {
