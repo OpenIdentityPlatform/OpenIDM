@@ -103,7 +103,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                     return;
                 } else {
                     this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
+                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition, task.formProperties), _.bind(function() {
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
                         
@@ -119,9 +119,11 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
         
         getGenerationTemplate: function(definition) {
             var property;
-            for(property in definition.formProperties) {
-                if(property === "_formGenerationTemplate") {
-                    return definition.formProperties[property].defaultExpression.expressionText;
+            console.log(definition);
+            for(i = 0; i < definition.formProperties.length; i++) {
+                var property = definition.formProperties[i];
+                if(property._id === "_formGenerationTemplate") {
+                    return property.defaultExpression.expressionText;
                 }
             }
             return false;
