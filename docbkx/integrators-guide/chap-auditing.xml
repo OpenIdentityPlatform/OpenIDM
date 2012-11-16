@@ -501,16 +501,18 @@
    <screen>"passwordFields" : [ "password", "username" ]</screen>
 
    <variablelist>
-    <para>The <literal>logTo</literal> list lets you define where OpenIDM
-    writes the log.</para>
+    <para>The <literal>logTo</literal> list enables you to specify where 
+    OpenIDM writes the log.</para>
     <varlistentry>
      <term><literal>csv</literal></term>
      <listitem>
       <para>Write to a comma-separated variable format file in the location
-      specified relative to the directory where you installed OpenIDM.</para>
+      specified, relative to the directory in which you installed OpenIDM.</para>
       <para>Audit file names are fixed, <filename>access.csv</filename>,
       <filename>activity.csv</filename>, and
       <filename>recon.csv</filename>.</para>
+      <para>The <literal>"recordDelimiter"</literal> property enables you to 
+      specify the separator between each record.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
