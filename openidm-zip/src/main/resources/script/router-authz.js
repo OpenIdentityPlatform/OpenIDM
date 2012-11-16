@@ -78,7 +78,7 @@ var accessConfig =
            "roles"      : "openidm-reg",
            "methods"    : "create",
            "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedRoles('openidm-authorized')"
         },
 
         // Anonymous user can call the siteIdentification endpoint if it is enabled:
@@ -112,8 +112,7 @@ var accessConfig =
             "pattern"   : "*",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
-            "actions"   : "*", // default to all actions allowed
-            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+            "actions"   : "*" // default to all actions allowed
         },
         
         // admin can request anything in managed/user
@@ -121,21 +120,19 @@ var accessConfig =
             "pattern"   : "managed/user/*",
             "roles"     : "admin",
             "methods"   : "*", // default to all methods allowed
-            "actions"   : "*", // default to all actions allowed
-            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+            "actions"   : "*" // default to all actions allowed
         },
         {  
             "pattern"   : "managed/user",
             "roles"     : "admin",
             "methods"   : "*", // default to all methods allowed
-            "actions"   : "*", // default to all actions allowed
-            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+            "actions"   : "*" // default to all actions allowed
         },
         
         // Additional checks for authenticated users
         {  
             "pattern"   : "policy/*",
-            "roles"     : "openidm-authorized",
+            "roles"     : "openidm-authorized", // openidm-authorized is logged-in users
             "methods"   : "read,action",
             "actions"   : "*"
         },
@@ -153,12 +150,12 @@ var accessConfig =
         },
         {   
             "pattern"   : "*",
-            "roles"     : "openidm-authorized", // openidm-authorized is logged-in users
+            "roles"     : "openidm-authorized",
             "methods"   : "*",
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly()"
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
         },
-        
+
         // enforcement of which notifications you can read and delete is done within the endpoint 
         {
             "pattern"   : "endpoint/usernotifications",
@@ -332,15 +329,50 @@ function ownDataOnly() {
 
 }
 
-function disallowQueryExpression() {
-    if (request.params && typeof request.params['_queryExpression'] != "undefined") {
-        return false;
+function managedUserRestrictedToAllowedRoles(allowedRolesList) {
+    var i = 0,requestedRoles = [];
+    
+    if (!request.id.match(/^managed\/user/)) {
+        return true;
+    }
+    
+    if (request.method === "patch") {
+        if (!request.value.length) { // would be strange, but worth checking
+            return true; // true because they don't appear to be setting anything
+        }
+        
+        for (i in request.value) {
+            if (request.value[i].test    === "roles" || 
+                request.value[i].add     === "roles" || 
+                request.value[i].replace === "roles" ) {
+                
+                requestedRoles = requestedRoles.concat(request.value[i].value.split(','))
+            }
+        }
+    } else if ((request.method === "create" || request.method === "update") && 
+                request.value && request.value.roles) {
+        
+        if (typeof request.value.roles !== "string") { // this would also be strange, but worth checking
+            return false; // false because I don't know (and so don't trust) what they are trying to set.
+        }
+        
+        requestedRoles = request.value.roles.split(",");
+    }
+    
+    if (requestedRoles.length) { // if there are no requested roles, then no problem
+        // we could accept a csv list or an array of roles for the rolesList arg.
+        if (typeof allowedRolesList === "string") {
+            allowedRolesList = allowedRolesList.split(',');
+        }
+        
+        for (i in requestedRoles) {
+            if (! contains(allowedRolesList, requestedRoles[i])) {
+                return false;
+            }
+        }
     }
     return true;
 }
-
-
-
 
 //////// Do not alter functions below here as part of your authz configuration
 
