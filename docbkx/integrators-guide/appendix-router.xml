@@ -275,6 +275,7 @@ responseFilter 1
 {
   "error": integer,
   "reason": string,
+  "message": string,
   "detail": string
 }</programlisting>
 
@@ -294,10 +295,18 @@ responseFilter 1
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>"detail"</term>
+     <term>"message"</term>
      <listitem>
       <para>string</para>
-      <para>The detailed message for the exception.</para>
+      <para>A brief message describing the exception.</para>
+     </listitem>
+    </varlistentry>    
+    <varlistentry>
+     <term>"detail"</term>
+     <listitem>
+      <para>(optional), string</para>
+      <para>A detailed description of the exception, in structured JSON format, 
+      suitable for programmatic evaluation.</para>
      </listitem>
     </varlistentry>
    </variablelist>
