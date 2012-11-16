@@ -162,7 +162,7 @@ var accessConfig =
         {
             "pattern"   : "workflow/taskinstance/*",
             "roles"     : "openidm-authorized",
-            "methods"   : "update",
+            "methods"   : "read,update",
             "actions"   : "*",
             "customAuthz" : "canUpdateTask()"
         },
@@ -192,19 +192,78 @@ var accessConfig =
 };
 
 function isMyTask() {
-    return true;
+    var taskInstanceId = request.id.split("/")[2];
+    var taskInstance = openidm.read("workflow/taskinstance/" + taskInstanceId);
+    return taskInstance.assignee === request.parent.security.username;
 }
 
 function canUpdateTask() {
-    return true;
+    var taskInstanceId = request.id.split("/")[2];
+    return isUserCandidateForTask(taskInstanceId);
+}
+
+function isUserCandidateForTask(taskInstanceId) {
+    
+    var userCandidateTasksQueryParams = {
+        "_queryId": "filtered-query",
+        "taskCandidateUser": request.parent.security.username
+    };
+    var userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result;
+    for (var i = 0; i < userCandidateTasks.length; i++) {
+        if (taskInstanceId === userCandidateTasks[i]._id) {
+            return true;
+        }
+    }
+        
+    var roles = "";
+    for (var i = 0; i < request.parent.security['openidm-roles'].length; i++) {
+        var role = request.parent.security['openidm-roles'][i];
+        if (i === 0) {
+            roles = role;
+        } else {
+            roles = roles + "," + role;
+        }
+    }
+    
+    var userGroupCandidateTasksQueryParams = {
+        "_queryId": "filtered-query",
+        "taskCandidateGroup": roles
+    };    
+    var userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
+    for (var i = 0; i < userGroupCandidateTasks.length; i++) {
+        if (taskInstanceId === userGroupCandidateTasks[i]._id) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 function isAllowedToStartProcess() {
-    return true;
+    var processDefinitionId = request.value._processDefinitionId;
+    return isProcessOnUsersList(processDefinitionId);
 }
 
 function isOneOfMyWorkflows() {
-    return true;
+    var processDefinitionId = request.id.split("/")[2];
+    return isProcessOnUsersList(processDefinitionId);
+}
+
+function isProcessOnUsersList(processDefinitionId) {
+    var processesForUserQueryParams = {
+        "_queryId": "query-processes-for-user",
+        "userId": request.parent.security.userid.id
+    };
+    var processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams);
+      
+    var isProcessOneOfUserProcesses = false;
+    for (var i = 0; i < processesForUser.length; i++) {
+        var processForUser = processesForUser[i];
+        if (processDefinitionId === processForUser._id) {
+            isProcessOneOfUserProcesses = true;
+        }
+    }
+    return isProcessOneOfUserProcesses;
 }
 
 function isQueryOneOf(allowedQueries) {

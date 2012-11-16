@@ -93,6 +93,14 @@ getProcessesAvalibleForUser = function(processDefinitions, userRoles) {
     return processesAvalibleToUser;
 }
 
+
+
+
+
+
+
+//code:
+
 if (!request.params || (!request.params.userId && !request.params.userName)) {
     throw "Required params: userId or userName";
 } else {
@@ -105,11 +113,6 @@ if (!request.params || (!request.params.userId && !request.params.userName)) {
     }
 }
 
-
-
-
-
-//code:
 var processDefinitions = {};
 var users = {};
 var processesForUser = [];
