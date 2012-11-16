@@ -53,6 +53,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
             if(validatorsManager.formNotInvalid(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false), param;
                 delete params.saveButton;
+                delete params.requeueButton;
                 for (param in params) {
                     if (_.isNull(params[param])) {
                         delete params[param];

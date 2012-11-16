@@ -7,7 +7,7 @@
 			    {{#equals category "assigned"}}
 			    <div id="actions" class="field field-submit" style="margin-bottom: 0">
 			        <a href="#" class="closeLink">{{t "common.form.close"}}</a>
-			        <a href="#" class="requeueLink">{{t "common.task.requeue"}}</a>
+			        <input type="submit" name="requeueButton" value='{{t "common.task.requeue"}}' class="button active gray">
 			        <input type="submit" name="saveButton" value='{{t "common.form.complete"}}' class="button active gray">
 			    </div>
 			    {{/equals}}
