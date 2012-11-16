@@ -124,11 +124,11 @@ for (var i = 0; i < candidateUsers.length; i++) {
 }
 
 
-var avalibleUsersToAssign = { users : []};
+var availableUsersToAssign = { users : []};
 for (var userName in usersToAdd) {
     var user = getUserByName(userName);
     if (user) {
-        avalibleUsersToAssign.users.push({_id: user._id, username: userName, displayableName: getDisplayableOf(user)});
+        availableUsersToAssign.users.push({_id: user._id, username: userName, displayableName: getDisplayableOf(user)});
     }
 }
 
@@ -136,8 +136,8 @@ var assigneeUserName = task.assignee;
 if (assigneeUserName && assigneeUserName !== '') {
     var user = getUserByName(assigneeUserName);
     if (user) {
-        avalibleUsersToAssign.assignee = {_id: user._id, username: assigneeUserName, displayableName: getDisplayableOf(user)};
+        availableUsersToAssign.assignee = {_id: user._id, username: assigneeUserName, displayableName: getDisplayableOf(user)};
     }
 }
 
-avalibleUsersToAssign
+availableUsersToAssign
