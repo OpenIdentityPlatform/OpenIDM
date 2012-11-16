@@ -107,10 +107,26 @@ var accessConfig =
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
         },
 
-      // admin can request anything
+      // openidm-admin can request anything
         {  
             "pattern"   : "*",
             "roles"     : "openidm-admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+        },
+        
+        // admin can request anything in managed/user
+        {  
+            "pattern"   : "managed/user/*",
+            "roles"     : "admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+        },
+        {  
+            "pattern"   : "managed/user",
+            "roles"     : "admin",
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
@@ -140,7 +156,7 @@ var accessConfig =
             "roles"     : "openidm-authorized", // openidm-authorized is logged-in users
             "methods"   : "*",
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['query-all']})" // query-all used by workflow
+            "customAuthz" : "ownDataOnly()"
         },
         
         // enforcement of which notifications you can read and delete is done within the endpoint 
@@ -427,6 +443,7 @@ function allow() {
 }
 
 if (!allow()) {
+//    java.lang.System.out.println(request);
     throw { 
         "openidmCode" : 403, 
         "message" : "Access denied"
