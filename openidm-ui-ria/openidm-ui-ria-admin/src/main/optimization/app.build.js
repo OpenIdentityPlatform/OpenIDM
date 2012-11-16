@@ -13,12 +13,19 @@
 		    "config/process/UserConfig",
 		    "config/process/CommonConfig",
 		    "mustache",
+		    "i18next",
 		    "backbone",
 		    "underscore",
 		    "spin",
 		    "js2form",
 		    "form2js",
-		    "contentflow"
+		    "contentflow",
+		    "spin",
+		    "dataTable",
+		    "jqueryui",
+		    "doTimeout",
+		    "handlebars",
+		    "moment"
 		]
 	} ]
 })
