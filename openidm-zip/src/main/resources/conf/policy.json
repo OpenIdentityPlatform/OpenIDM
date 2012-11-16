@@ -57,6 +57,7 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
+                                    "admin",
                                     "openidm-reg"
                                 ]
                             }
@@ -158,6 +159,7 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
+                                    "admin",
                                     "openidm-reg"
                                 ]
                             }
