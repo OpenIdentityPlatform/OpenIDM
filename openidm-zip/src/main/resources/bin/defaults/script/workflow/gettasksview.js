@@ -61,7 +61,19 @@ var getUsersWhoCanBeAssignedToTask = function(taskId) {
                 "_queryId": "query-by-task-id",
                 "taskId": taskId
             };
-        var usersWhoCanBeAssignedToTaskResult = openidm.query("endpoint/getavalibleuserstoassign", usersWhoCanBeAssignedToTaskQueryParams);
+        
+        var isTaskManager = false;
+        for(i = 0; i < request.parent.security['openidm-roles'].length; i++) {
+            if(request.parent.security['openidm-roles'][i] === 'tasks-manager') {
+                isTaskManager = true;
+                break;
+            }
+        }        
+        
+        var usersWhoCanBeAssignedToTaskResult = { users : []};
+        if(isTaskManager) {        
+            usersWhoCanBeAssignedToTaskResult = openidm.query("endpoint/getavalibleuserstoassign", usersWhoCanBeAssignedToTaskQueryParams);
+        }
         usersWhoCanBeAssignedToTask[taskId] = usersWhoCanBeAssignedToTaskResult;
     }
     return usersWhoCanBeAssignedToTask[taskId];
