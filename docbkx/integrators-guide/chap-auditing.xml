@@ -355,7 +355,7 @@
   <title>Audit Configuration</title>
 
   <para>OpenIDM exposes the audit logging configuration under
-  <literal>http://<replaceable>host</replaceable>:<replaceable>port</replaceable>/openidm/config/audit</literal>
+  <literal>http://localhost:8080/openidm/config/audit</literal>
   for the REST API, and in the file <filename>conf/audit.json</filename> where
   you installed OpenIDM. The default <filename>conf/audit.json</filename> file
   contains the following object.</para>
@@ -447,6 +447,42 @@
      </listitem>
     </varlistentry>
    </variablelist>
+   
+   <para>You can optionally add a <literal>filter</literal> 
+   <literal>triggers</literal> list that specifies the actions that are logged 
+   for a particular trigger. For example, the following addition to the 
+   <filename>audit.json</filename> file specifies that only 
+   <literal>create</literal> and <literal>update</literal> actions are logged 
+   for an activity that was triggered by a <literal>recon</literal>.</para>
+   
+   <programlisting language="javascript">
+   ...
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ],
+                "triggers" : {
+                    "recon" : [
+                        "create",
+                        "update"
+                    ]
+                }
+            },
+            "watchedFields" : [ ],   
+   ...
+   </programlisting>
+   
+   <para>If a trigger is provided, but no actions are specified, nothing is 
+   logged for that trigger. If a trigger is omitted, all actions are logged 
+   for that trigger. In the current OpenIDM release, only the 
+   <literal>recon</literal> trigger is implemented. For a list of reconciliation 
+   actions that can be logged, see <link xlink:href="integrators-guide#sync-actions" 
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Synchronization 
+   Actions</citetitle></link>.</para>
    
    <para>The <literal>watchedFields</literal> parameter enables you to specify 
    a list of fields that should be "watched" for changes. When the value of one 
