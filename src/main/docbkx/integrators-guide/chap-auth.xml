@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Managing Authentication, Authorization &amp; RBAC</title>
+ <title>Managing Authentication, Authorization and RBAC</title>
  <indexterm>
   <primary>Authentication</primary>
  </indexterm>
@@ -86,15 +86,15 @@
      default. Change the password immediately after installation. For
      instructions, see <link xlink:role="http://docbook.org/xlink/role/olink"
      xlink:href="integrators-guide#security-replace-default-user-password"
-     ><citetitle>To Replace the Default User &amp;
-     Password</citetitle></link>.</para>
+     ><citetitle>To Replace the Default User and Password</citetitle></link>.</para>
      </listitem>
     </varlistentry>
    </variablelist>
 
    <para>OpenIDM stores internal users and their role membership in a table
    in the repository called <literal>internaluser</literal> when implemented
-   in MySQL.</para>
+   in MySQL, and in the <literal>internal_user</literal> table for an OrientDB 
+   repository.</para>
   </section>
   
   <section xml:id="managed-users">
@@ -105,10 +105,11 @@
   </indexterm>
 
    <para>External users that OpenIDM manages are referred to as managed users.
-   OpenIDM stores managed users in the managed objects table of the repository,
-   called <literal>managedobjects</literal> when implemented in MySQL. A second
-   table, <literal>managedobjectproperties</literal> in MySQL, serves as the
-   index table.</para>
+   When implemented in MySQL, OpenIDM stores managed users in the managed 
+   objects table of the repository, named <literal>managedobjects</literal>. 
+   A second MySQL table, <literal>managedobjectproperties</literal>, serves as 
+   the index table. When implemented in OrientDB, managed objects are stored in 
+   the table <literal>managed_user</literal>.</para>
 
    <para>By default, the attribute names for managed user login and password
    are <literal>email</literal> and <literal>password</literal>,
@@ -185,6 +186,22 @@
         "openidm-authorized"
     ]
 }</programlisting>
+
+ <para>You can explicitly define the properties that constitute passwords or 
+ roles by setting the <literal>propertyMapping</literal> object in the 
+ <filename>conf/authentication.json</filename> file. By default, the property 
+ mapping is configured as follows:</para>
+ 
+ <programlisting language="javascript">
+ ...
+    "propertyMapping" : {
+        "userId" : "_id",
+        "userCredential" : "password",
+        "userRoles" : "roles"
+    },
+ ... 
+ </programlisting>
+
  </section>
 
  <section xml:id="openidm-roles">
@@ -228,10 +245,11 @@
    </varlistentry>
   </variablelist>
   
-  <para>You configure default roles assigned to successfully authenticated
-  users authentication using the <literal>defaultUserRoles</literal> property
-  in <filename>openidm/conf/authentication.json</filename>, which takes a list.
-  The default value is <literal>openidm-authorized</literal>.</para>
+  <para>You configure the default roles that are assigned to successfully 
+  authenticated users by setting the <literal>defaultUserRoles</literal> 
+  property in <filename>openidm/conf/authentication.json</filename>, which 
+  takes a list. The default value is <literal>openidm-authorized</literal>.
+  </para>
 
    <programlisting language="javascript">
 {

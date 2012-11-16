@@ -130,9 +130,8 @@
    </listitem>
    <listitem>
     <para>OpenIDM recognizes changes to JSON files when it is running. OpenIDM
-    must be running when you delete configuration objects, even if you do so <!-- Why is this the case. Surely if you delete a conf object while 
-                                                                                  OpenIDM is off, it will restart with the new conf? -->
-    by editing the JSON files.</para>
+    must be running when you delete configuration objects, even if you do so by 
+    editing the JSON files.</para>
    </listitem>
    <listitem>
     <para>OpenIDM polls the JSON files in the <literal>conf</literal> directory
@@ -142,6 +141,11 @@
     <programlisting>
     # openidm.fileinstall.enabled=false
     </programlisting>
+    <para>Scripts are loaded when the configuration calls the script. 
+    Modifications to scripts are therefore not applied dynamically. If you 
+    modify a script, you must either modify the configuration that calls the 
+    script, or restart the component that uses the modified script. It is not 
+    necessary to restart OpenIDM for script modifications to take effect.</para>
    </listitem>
    <listitem>
     <para>OpenIDM stores its configuration in the internal database by default. 
