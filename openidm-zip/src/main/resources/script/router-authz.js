@@ -330,36 +330,49 @@ function ownDataOnly() {
 }
 
 function managedUserRestrictedToAllowedRoles(allowedRolesList) {
-    var i = 0,requestedRoles = [];
+    var i = 0,requestedRoles = [],params = {};
     
     if (!request.id.match(/^managed\/user/)) {
         return true;
     }
+
+    if (request.value) {
+        params = request.value;
+    }
+    else if (request.params) {
+        params = request.params;
+    } 
+    else { // this would be strange, but worth checking
+        return true; // true because they don't appear to be setting anything
+    }
+
     
-    if (request.method === "patch") {
-        if (!request.value.length) { // would be strange, but worth checking
-            return true; // true because they don't appear to be setting anything
-        }
-        
-        for (i in request.value) {
-            if (request.value[i].test    === "roles" || 
-                request.value[i].add     === "roles" || 
-                request.value[i].replace === "roles" ) {
+    if (request.method === "patch" || (request.method === "action" && request.params["_action"] === "patch")) {
+        for (i in params) {
+            if ((params[i].test && params[i].test.match(/^\/?roles$/)) ||
+                (params[i].add && params[i].add.match(/^\/?roles$/)) || 
+                (params[i].replace && params[i].replace.match(/^\/?roles$/))) {
                 
-                requestedRoles = requestedRoles.concat(request.value[i].value.split(','))
+                requestedRoles = requestedRoles.concat(params[i].value.split(','))
             }
         }
     } else if ((request.method === "create" || request.method === "update") && 
-                request.value && request.value.roles) {
+                params && (params.roles || params["/roles"])) {
         
-        if (typeof request.value.roles !== "string") { // this would also be strange, but worth checking
+        if (typeof params.roles !== "string" && typeof params["/roles"] !== "string") { // this would also be strange, but worth checking
             return false; // false because I don't know (and so don't trust) what they are trying to set.
         }
         
-        requestedRoles = request.value.roles.split(",");
+        if (params.roles) {
+            requestedRoles = requestedRoles.concat(params.roles.split(","));
+        }
+        if (params["/roles"]) {
+            requestedRoles = requestedRoles.concat(params['/roles'].split(","));
+        }
     }
     
     if (requestedRoles.length) { // if there are no requested roles, then no problem
+
         // we could accept a csv list or an array of roles for the rolesList arg.
         if (typeof allowedRolesList === "string") {
             allowedRolesList = allowedRolesList.split(',');
