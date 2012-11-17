@@ -408,7 +408,7 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException TODO.
      */
     private void deleteTargetObject(JsonValue target) throws SynchronizationException {
-        if (target.get("_id").isString()) { // forgiving delete
+        if (target != null && target.get("_id").isString()) { // forgiving delete
             EventEntry measure = Publisher.start(EVENT_DELETE_TARGET, target, null);
             try {
                 String id = LazyObjectAccessor.qualifiedId(targetObjectSet,
