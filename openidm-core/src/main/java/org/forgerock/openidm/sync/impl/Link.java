@@ -292,6 +292,7 @@ class Link {
         }
         this._id = jv.get("_id").required().asString();
         this._rev = jv.get("_rev").asString(); // optional
+        this.initialized = true;
     }
 
     /**
