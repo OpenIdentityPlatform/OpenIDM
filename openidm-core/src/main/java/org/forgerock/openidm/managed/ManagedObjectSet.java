@@ -457,7 +457,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
             params.add("_action", "validateObject");
             params.add("value", newValue);
             JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
-            if (!result.get("result").asBoolean()) {
+            if (!result.isNull() && !result.get("result").asBoolean()) {
                 LOGGER.debug("Requested patch failed policy validation: {}", result);
                 throw new ForbiddenException("Failed policy validation", result.asMap());
             }

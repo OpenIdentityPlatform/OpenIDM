@@ -667,7 +667,7 @@ class ObjectMapping implements SynchronizationListener {
             reconContext.getStatistics().targetQueryStart();
             List<String> remainingTargetIds = 
                     Collections.synchronizedList(queryAllIds(targetObjectSet, reconContext));
-            reconContext.setTargetIds(new ArrayList(remainingTargetIds)); // TODO: cleanup
+            reconContext.setTargetIds(new ArrayList(remainingTargetIds));
             reconContext.getStatistics().targetQueryEnd();
 
             // Optionally get all links up front as well
@@ -688,6 +688,8 @@ class ObjectMapping implements SynchronizationListener {
                     rootContext, allLinks, remainingTargetIds);
             sourcePhase.execute();
             measureSource.end();
+
+            LOGGER.debug("Remaining targets after source phase : {}", remainingTargetIds);
 
             EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
@@ -780,6 +782,7 @@ class ObjectMapping implements SynchronizationListener {
         String[] targetIds = op.getTargetIds();
         for (String handledId : targetIds) {
             remainingTargetIds.remove(handledId);
+            LOGGER.trace("Removed target from remaining targets: {}", handledId);
         }
 
         if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
@@ -951,6 +954,10 @@ class ObjectMapping implements SynchronizationListener {
          * i.e. a linkObject with id of null represents a link that does not exist (yet)
          */
         public Link linkObject = new Link(ObjectMapping.this);
+        // This operation  newly created the link. 
+        // linkObject above may not be set for newly created links
+        boolean linkCreated; 
+        
         /** TODO: Description. */
         public Situation situation;
         /** TODO: Description. */
@@ -1172,6 +1179,7 @@ class ObjectMapping implements SynchronizationListener {
                                 targetObjectAccessor = createTargetObject(createTargetObject);
                                 boolean wasLinked = PendingLink.wasLinked(context);
                                 if (wasLinked) {
+                                    linkCreated = true;
                                     LOGGER.debug(
                                             "Pending link for {} during {} has already been created, skipping additional link processing",
                                             sourceId, reconId);
@@ -1193,6 +1201,7 @@ class ObjectMapping implements SynchronizationListener {
                                 if (linkObject._id == null) {
                                     try {
                                         createLink(getSourceObjectId(), targetId, reconId);
+                                        linkCreated = true;
                                     } catch (SynchronizationException ex) {
                                         // Allow for link to have been created in the meantime, e.g. programmatically
                                         // create would fail with a failed precondition for link already existing
@@ -1228,7 +1237,9 @@ class ObjectMapping implements SynchronizationListener {
                                 if (getTargetObjectId() != null) { // forgiving; does nothing if no target
                                     execScript("onDelete", onDeleteScript);
                                     deleteTargetObject(getTargetObject());
-                                    targetObjectAccessor = null;
+                                    // Represent as not existing anymore so it gets removed from processed targets
+                                    targetObjectAccessor = new LazyObjectAccessor(service, 
+                                            targetObjectSet, getTargetObjectId(), null);
                                 }
                                 // falls through to unlink the deleted target
                             case UNLINK:
@@ -1280,6 +1291,7 @@ class ObjectMapping implements SynchronizationListener {
             linkObject.sourceId = sourceId;
             linkObject.targetId = targetId;
             linkObject.create();
+            initializeLink(linkObject);
             LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", new Object[] {sourceId, targetId, reconId});
         }
 
@@ -1323,7 +1335,7 @@ class ObjectMapping implements SynchronizationListener {
         protected boolean isTargetValid() throws SynchronizationException {
             boolean result = false;
             if (hasTargetObject()) { // must have a target object to qualify
-                if (validTarget != null) {
+                if (validTarget != null && getTargetObject() != null) { // forces pulling object into memory
                     Map<String, Object> scope = service.newScope();
                     scope.put("target", getTargetObject().asMap());
                     try {
@@ -1407,6 +1419,7 @@ class ObjectMapping implements SynchronizationListener {
         }
     }
 
+/*
     public static class SyncRunnable implements Callable<Void> {
         
         SyncOperation syncOp;
@@ -1425,7 +1438,7 @@ class ObjectMapping implements SynchronizationListener {
             return null;
         }
     }
-/*
+
     public void feedSync(int feedSize) {
         
         
@@ -1484,7 +1497,9 @@ class ObjectMapping implements SynchronizationListener {
             } finally {
                 measurePerform.end();
                 if (reconContext != null){
-                    reconContext.getStatistics().getSourceStat().processed(getSourceObjectId(), getTargetObjectId(), linkExisted, getLinkId(), situation, action);
+                    // The link ID presence after the action can not be interpreted as an indication if the link has been created
+                    reconContext.getStatistics().getSourceStat().processed(getSourceObjectId(), getTargetObjectId(), 
+                            linkExisted, getLinkId(), linkCreated, situation, action);
                 }
             }
         }
@@ -1698,7 +1713,8 @@ class ObjectMapping implements SynchronizationListener {
             } finally {
                 measurePerform.end();
                 if (reconContext != null) {
-                    reconContext.getStatistics().getTargetStat().processed(getSourceObjectId(), getTargetObjectId(), linkExisted, getLinkId(), situation, action);
+                    reconContext.getStatistics().getTargetStat().processed(getSourceObjectId(), getTargetObjectId(), linkExisted, getLinkId(), linkCreated,
+                            situation, action);
                 }
             }
         }
