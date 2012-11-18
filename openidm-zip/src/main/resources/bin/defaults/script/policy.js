@@ -141,14 +141,10 @@ function noInternalUserConflict(fullObject, value, params, property) {
             "_queryId": "credential-internaluser-query",
             "username": value
             },
-        existing,requestId,requestBaseArray;
+        existing;
     
     if (value && value.length)
     {
-        requestBaseArray = request.id.split("/");
-        if (requestBaseArray.length === 3) {
-            requestId = requestBaseArray.pop();
-        }
         existing = openidm.query("repo/internal/user",  queryParams);
 
         if (existing.result.length != 0) {
