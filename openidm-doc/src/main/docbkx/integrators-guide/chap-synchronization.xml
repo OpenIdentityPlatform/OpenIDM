@@ -211,8 +211,7 @@
     </screen>
     
     <para>The output of such a request is similar to the following, with one 
-    item for each reconciliation run. The output appears on a single line, but
-    has been indented here, for legibility.</para>
+    item for each reconciliation run.</para>
     
     <screen width="91">{"reconciliations":[
  {"_id":"d3040cc9-ec2e-41b8-86c4-72393087a626",
@@ -244,8 +243,8 @@
        }
     }
  },
- "started":"2012-10-10T13:02:36.624+00:00",
- "ended":"2012-10-10T13:02:54.960+00:00"},    
+ "started":"2012-11-18T08:48:00.031Z",
+ "ended":"2012-11-18T08:48:00.160Z"},    
     </screen>
     
     <variablelist>
