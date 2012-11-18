@@ -458,11 +458,9 @@
   <listitem><para>The scripts required to check objects and manipulate attributes.</para></listitem>
   </itemizedlist>
 
-  <variablelist>
-   <varlistentry>
-    <term>Connector configuration files</term>
+  <section xml:id="connector-config-files">
+    <title>Connector Configuration Files</title>
 
-    <listitem>
      <indexterm>
       <primary>Synchronization</primary>
       <secondary>Connectors</secondary>
@@ -517,13 +515,11 @@
      configuration. Note that the connector file only maps external resource
      objects to OpenIDM objects. To construct attributes and to manipulate
      their values, you use the synchronization mappings file.</para>
-    </listitem>
-   </varlistentry>
+    </section>
 
-   <varlistentry>
-    <term>Synchronization mappings file</term>
+   <section xml:id="synchronization-mappings-file">
+    <title>Synchronization Mappings File</title>
 
-    <listitem>
      <indexterm>
       <primary>Synchronization</primary>
       <secondary>Mappings</secondary>
@@ -747,9 +743,29 @@
      <para>See the <link xlink:href="integrators-guide#appendix-scripting"
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scripting
      Reference</citetitle></link> appendix for more on scripting.</para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
+ 
+   <para>By default, all mappings participate in automatic synchronization 
+   operations. You can prevent a specific mapping from participating in 
+   automatic synchronization by setting the <literal>"enableSync"</literal> 
+   property of that mapping to false. In the following example, automatic 
+   synchronization is disabled. This means that changes to objects in the LDAP 
+   directory are not automatically propagated to the internal repository. 
+   To propagate the changes to the internal repository, reconciliation must be 
+   launched manually.</para>
+   
+   <programlisting language="javascript">
+{
+    "mappings" : [
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "enableSync" : false,
+             ....
+}   
+   </programlisting>
+     
+   </section>
 
   <section xml:id="sync-encrypted-values">
    <title>Using Encrypted Values</title>
@@ -1921,7 +1937,8 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
   <link xlink:href="integrators-guide#chap-scheduler-conf" 
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling Tasks 
   and Events</citetitle></link>.</para>
- 
+  
+  <section xml:id="configuring-sync-schedule">
   <para>Each scheduled reconciliation and LiveSync task requires a schedule 
   configuration file in <filename>opendidm/conf</filename>. By convention, 
   files are named <filename>openidm/conf/schedule-<replaceable>schedule-name
@@ -1988,6 +2005,8 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
   <literal>system/<replaceable>resource-name</replaceable>/<replaceable>
   object-type</replaceable></literal>.
     </para>
+  
+  </section>
   
   <section xml:id="alternative-mapping">
   <title>Alternative Mappings</title>
