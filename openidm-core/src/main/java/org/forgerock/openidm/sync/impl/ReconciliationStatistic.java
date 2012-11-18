@@ -124,8 +124,18 @@ public class ReconciliationStatistic {
         linkQueryEndTime = System.currentTimeMillis();
     }
 
-    
-    public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, Situation situation, Action action) {
+    /**
+     * Handle the processed notification to update the statistics appropriately
+     * @param sourceId The source id processed, or null if none
+     * @param targetId The target id processed, or null if none
+     * @param linkExisted indication if the link existed before the operation
+     * @param linkId the link identifier, if available. For created links this may not currently be available.
+     * @param linkCreated indication if a new link was created during the operation
+     * @param situation the assessed situation
+     * @param action the action that was processed
+     */
+    public void processed(String sourceId, String targetId, boolean linkExisted, String linkId, boolean linkWasCreated,
+            Situation situation, Action action) {
         if (sourceId != null) {
             sourceProcessed.incrementAndGet();
         }
@@ -137,12 +147,11 @@ public class ReconciliationStatistic {
                 targetProcessed.incrementAndGet();
             }
         }
-        if (linkId != null) {
-            if (linkExisted) {
-                linkProcessed.incrementAndGet();
-            } else {
-                linkCreated.incrementAndGet();
-            }
+        if (linkExisted) {
+            linkProcessed.incrementAndGet();
+        }
+        if (linkWasCreated) {
+            linkCreated.incrementAndGet();
         }
     }
     
