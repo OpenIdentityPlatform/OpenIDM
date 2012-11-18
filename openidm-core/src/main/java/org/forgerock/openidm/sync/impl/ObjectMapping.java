@@ -1058,13 +1058,16 @@ class ObjectMapping implements SynchronizationListener {
          */
         protected boolean hasTargetObject() throws SynchronizationException {
             boolean defined = false;
-            if (targetObjectAccessor == null || (!isTargetLoaded() && targetObjectAccessor.getLocalId() == null)) {
+            
+            if (isTargetLoaded()) {
+                // Check against already laoded/defined object first, without causing new load
+                defined = (targetObjectAccessor.getObject() != null);
+            } else if (targetObjectAccessor == null || targetObjectAccessor.getLocalId() == null) {
+                // If it's not loaded, but no id to load is available it has no target
                 defined = false;
             } else {
-                if (isTargetLoaded() && targetObjectAccessor.getObject() != null) {
-                    // Check against already laoded/defined object first, without causing new load
-                    defined = true;
-                } else if (reconContext != null && reconContext.getTargetIds() != null) {
+                // Either check against a list of all targets, or load to check for existence
+                if (reconContext != null && reconContext.getTargetIds() != null) {
                     // If available, check against all queried existing IDs
                     defined = reconContext.getTargetIds().contains(targetObjectAccessor.getLocalId());
                 } else {
@@ -1072,6 +1075,7 @@ class ObjectMapping implements SynchronizationListener {
                     defined = (targetObjectAccessor.getObject() != null);
                 }
             }
+            
             return defined;
         }
 
@@ -1234,7 +1238,7 @@ class ObjectMapping implements SynchronizationListener {
                                 }
                                 break; // terminate UPDATE
                             case DELETE:
-                                if (getTargetObjectId() != null) { // forgiving; does nothing if no target
+                                if (getTargetObjectId() != null && getTargetObject() != null) { // forgiving; does nothing if no target
                                     execScript("onDelete", onDeleteScript);
                                     deleteTargetObject(getTargetObject());
                                     // Represent as not existing anymore so it gets removed from processed targets
