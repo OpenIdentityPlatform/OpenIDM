@@ -16,6 +16,9 @@
                         },
                         {
                             "policyId" : "unique"
+                        },
+                        {
+                            "policyId" : "no-internal-user-conflict"
                         }
                     ]
                 },
