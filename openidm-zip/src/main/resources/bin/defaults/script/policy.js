@@ -260,9 +260,11 @@ function requiredIfConfigured(fullObject, value, params, property) {
         caller = request.params._caller,
         roles,parent,i,j,role;
     
-    parent = request.parent;
-    if (caller && caller == "filterEnforcer") {
-        parent = request.parent.parent;
+    parent = request;
+    
+    while (!parent.security || !parent.security["openidm-roles"]) {
+        i++;
+        parent = parent.parent;
     }
 
     if (parent.security) {
