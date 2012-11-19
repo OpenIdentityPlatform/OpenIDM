@@ -22,9 +22,6 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-//var params;
-//var value;
-//var fullObject;
 var returnObject = {};
 var failedPolicies = new Array();
 
@@ -257,16 +254,12 @@ function cannotContainOthers(fullObject, value, params, property) {
 function requiredIfConfigured(fullObject, value, params, property) {
     var currentValue = openidm.read("config/" + params.configBase),
         baseKeyArray = params.baseKey.split("."),
-        caller = request.params._caller,
-        roles,parent,i,j,role;
-    
-    parent = request.parent;
-    if (caller && caller == "filterEnforcer") {
-        parent = request.parent.parent;
-    }
+        roles,security,i,j,role;
 
-    if (parent.security) {
-        roles = parent.security["openidm-roles"];
+    security = getHighestRequest(request).security;
+
+    if (security) {
+        roles = security["openidm-roles"];
         if (params && params.exceptRoles) {
             for (i = 0; i < params.exceptRoles.length; i++) {
                 role = params.exceptRoles[i];
@@ -291,23 +284,21 @@ function requiredIfConfigured(fullObject, value, params, property) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var exceptRoles, parent, type, roles, caller, i, j;
-    caller = request.params._caller;
-    parent = request.parent;
-    if (caller && caller == "filterEnforcer") {
-        parent = request.parent.parent;
-    }
-    type = parent.type;
-    if (parent.security) {
-        roles = parent.security["openidm-roles"];
+    var exceptRoles, highestRequest, type, role, roles, i, j;
+
+    highestRequest = getHighestRequest(request);
+
+    type = highestRequest.type;
+    if (highestRequest.security) {
+        roles = highestRequest.security["openidm-roles"];
         if (params && params.exceptRoles) {
             exceptRoles = params.exceptRoles;
             if (exceptRoles) {
                 for (i = 0; i < exceptRoles.length; i++) {
-                    var role = exceptRoles[i];
+                    role = exceptRoles[i];
                     if (roles) {
                         for (j = 0; j < roles.length; j++) {
-                            if (role == roles[j]) {
+                            if (role === roles[j]) {
                                 return [];
                             }
                         }
@@ -317,7 +308,7 @@ function reauthRequired(fullObject, value, params, propName) {
         }
     }
     
-    if (type == "http") {
+    if (type === "http") {
         try {
             var actionParams = {
                 "_action": "reauthenticate"
@@ -337,6 +328,14 @@ function reauthRequired(fullObject, value, params, propName) {
 
 
 // Internal policy code below
+
+function getHighestRequest(request) {
+    var currentRequest = request;
+    while (currentRequest.parent && typeof(currentRequest.security) === "undefined") {
+        currentRequest = currentRequest.parent;
+    }
+    return currentRequest;
+}
 
 function getPolicy(policyId) {
     for (var i = 0; i < policyConfig.policies.length; i++) {
