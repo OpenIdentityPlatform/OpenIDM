@@ -151,7 +151,7 @@ var accessConfig =
         {   
             "pattern"   : "*",
             "roles"     : "openidm-authorized",
-            "methods"   : "*",
+            "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
             "actions"   : "*",
             "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
         },
@@ -339,9 +339,6 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
     if (request.value) {
         params = request.value;
     }
-    else if (request.params) {
-        params = request.params;
-    } 
     else { // this would be strange, but worth checking
         return true; // true because they don't appear to be setting anything
     }
