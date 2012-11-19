@@ -313,9 +313,6 @@
     openidm['delete']('managed/user/'+ user._id, user._rev)
    </programlisting>
    
-   <para>where the revision (<literal>_rev</literal>) is an optional parameter.
-   </para>
-   
    <para>Calling <literal>openidm.delete()</literal> directly from a JavaScript 
    results in an error similar to the following:</para>
    
