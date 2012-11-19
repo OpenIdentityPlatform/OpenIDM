@@ -55,27 +55,27 @@ var accessConfig =
       // Anyone can read from these endpoints
         {  
            "pattern"    : "info/*",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*"
         },
         {  
            "pattern"    : "config/ui/configuration",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*"
         },
         // These options should only be available anonymously if selfReg is enabled
         {  
            "pattern"    : "config/ui/*",
-           "roles"      : "openidm-reg",
+           "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
         },
         {  
            "pattern"    : "managed/user/*",
-           "roles"      : "openidm-reg",
+           "roles"      : "*",
            "methods"    : "create",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedRoles('openidm-authorized')"
@@ -84,7 +84,7 @@ var accessConfig =
         // Anonymous user can call the siteIdentification endpoint if it is enabled:
         {  
            "pattern"    : "endpoint/siteIdentification",
-           "roles"      : "openidm-reg",
+           "roles"      : "*",
            "methods"    : "*",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('siteIdentification')"
@@ -93,7 +93,7 @@ var accessConfig =
         // Anonymous user can call the securityQA endpoint if it enabled:
         {  
            "pattern"    : "endpoint/securityQA",
-           "roles"      : "openidm-reg",
+           "roles"      : "*",
            "methods"    : "*",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
@@ -101,7 +101,7 @@ var accessConfig =
         // This is needed by both self reg and security questions
         {  
            "pattern"    : "policy/managed/user/*",
-           "roles"      : "openidm-reg",
+           "roles"      : "*",
            "methods"    : "read,action",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
