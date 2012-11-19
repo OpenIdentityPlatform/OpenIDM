@@ -49,6 +49,10 @@ var policyConfig = {
                 "policyExec" : "unique",  
                 "policyRequirements" : ["UNIQUE"]
             },
+            {   "policyId" : "no-internal-user-conflict",
+                "policyExec" : "noInternalUserConflict",  
+                "policyRequirements" : ["UNIQUE"]
+            },
             {
                 "policyId" : "valid-date",
                 "policyExec" : "validDateWhenPresent",
@@ -130,6 +134,24 @@ function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
          failures = [{"policyRequirement": "NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES", params: {"max":params.max,"numMinutes":params.numMinutes}}];
     }
     return failures;
+}
+
+function noInternalUserConflict(fullObject, value, params, property) {
+    var queryParams = {
+            "_queryId": "credential-internaluser-query",
+            "username": value
+            },
+        existing;
+    
+    if (value && value.length)
+    {
+        existing = openidm.query("repo/internal/user",  queryParams);
+
+        if (existing.result.length != 0) {
+            return [{"policyRequirement": "UNIQUE"}];
+        }
+    }
+    return [];
 }
 
 function unique(fullObject, value, params, property) {

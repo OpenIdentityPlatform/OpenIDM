@@ -48,128 +48,236 @@
  * starting with "managed/".  Note: it would not match "managed", which would need to have its 
  * own entry in the config.
  */
-var accessConfig = { "configs" : [
+var accessConfig = 
+{ 
+    "configs" : [
 
       // Anyone can read from these endpoints
-      {  "pattern" : "info/*",
-          "roles" : "openidm-reg,openidm-authorized",
-          "methods": "read",
-          "actions" : "*"
-      },
-      {  "pattern" : "config/ui/configuration",
-          "roles" : "openidm-reg,openidm-authorized",
-          "methods": "read",
-          "actions" : "*"
-      },
-      
-      // These options should only be available anonymously if selfReg is enabled
-      {  "pattern" : "config/ui/*",
-          "roles" : "openidm-reg",
-          "methods": "read",
-          "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
-          "actions" : "*"
-      },
-      {  "pattern" : "managed/user/*",
-          "roles" : "openidm-reg",
-          "methods": "create",
-          "customAuthz" : "checkIfUIIsEnabled('selfRegistration')",
-          "actions" : "*"
-      },
+        {  
+           "pattern"    : "info/*",
+           "roles"      : "openidm-reg,openidm-authorized",
+           "methods"    : "read",
+           "actions"    : "*"
+        },
+        {  
+           "pattern"    : "config/ui/configuration",
+           "roles"      : "openidm-reg,openidm-authorized",
+           "methods"    : "read",
+           "actions"    : "*"
+        },
+        // These options should only be available anonymously if selfReg is enabled
+        {  
+           "pattern"    : "config/ui/*",
+           "roles"      : "openidm-reg",
+           "methods"    : "read",
+           "actions"    : "*",
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
+        },
+        {  
+           "pattern"    : "managed/user/*",
+           "roles"      : "openidm-reg",
+           "methods"    : "create",
+           "actions"    : "*",
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedRoles('openidm-authorized')"
+        },
 
-      // Anonymous user can call the siteIdentification endpoint if it is enabled:
-      {  "pattern" : "endpoint/siteIdentification",
-          "roles" : "openidm-reg",
-          "methods": "*",
-          "customAuthz" : "checkIfUIIsEnabled('siteIdentification')",
-          "actions" : "*"
-      },
+        // Anonymous user can call the siteIdentification endpoint if it is enabled:
+        {  
+           "pattern"    : "endpoint/siteIdentification",
+           "roles"      : "openidm-reg",
+           "methods"    : "*",
+           "actions"    : "*",
+           "customAuthz" : "checkIfUIIsEnabled('siteIdentification')"
+        },
 
-      // Anonymous user can call the securityQA endpoint if it enabled:
-      {  "pattern" : "endpoint/securityQA",
-          "roles" : "openidm-reg",
-          "methods": "*",
-          "customAuthz" : "checkIfUIIsEnabled('securityQuestions')",
-          "actions" : "*"
-      },
-      // This is needed by both self reg and security questions
-      {  "pattern" : "policy/managed/user/*",
-          "roles" : "openidm-reg",
-          "methods": "read,action",
-          "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')",
-          "actions" : "*"
-      },
+        // Anonymous user can call the securityQA endpoint if it enabled:
+        {  
+           "pattern"    : "endpoint/securityQA",
+           "roles"      : "openidm-reg",
+           "methods"    : "*",
+           "actions"    : "*",
+           "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
+        },
+        // This is needed by both self reg and security questions
+        {  
+           "pattern"    : "policy/managed/user/*",
+           "roles"      : "openidm-reg",
+           "methods"    : "read,action",
+           "actions"    : "*",
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
+        },
 
-      // admin can request anything
-        {  "pattern" : "*",
-            "roles" : "openidm-admin",
-            "methods": "*", // default to all methods allowed
-            "actions" : "*", // default to all actions allowed
-            "customAuthz" : "disallowQueryExpression()" // default to only allowing parameterized queries
+      // openidm-admin can request anything
+        {  
+            "pattern"   : "*",
+            "roles"     : "openidm-admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*" // default to all actions allowed
+        },
+        
+        // admin can request anything in managed/user
+        {  
+            "pattern"   : "managed/user/*",
+            "roles"     : "admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*" // default to all actions allowed
+        },
+        {  
+            "pattern"   : "managed/user",
+            "roles"     : "admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*" // default to all actions allowed
         },
         
         // Additional checks for authenticated users
-        {  "pattern" : "policy/*",
-            "roles" : "openidm-authorized",
-            "methods": "read,action",
-            "actions" : "*"
+        {  
+            "pattern"   : "policy/*",
+            "roles"     : "openidm-authorized", // openidm-authorized is logged-in users
+            "methods"   : "read,action",
+            "actions"   : "*"
         },
-        {  "pattern" : "config/ui/*",
-            "roles" : "openidm-authorized",
-            "methods": "read",
-            "actions" : "*"
+        {  
+            "pattern"   : "config/ui/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "read",
+            "actions"   : "*"
         },
-        {  "pattern" : "authentication",
-            "roles" : "openidm-authorized",
-            "methods": "action",
-            "actions" : "reauthenticate"
+        {  
+            "pattern"   : "authentication",
+            "roles"     : "openidm-authorized",
+            "methods"   : "action",
+            "actions"   : "reauthenticate"
         },
-        {   "pattern" : "*",
-            "roles" : "openidm-authorized", // openidm-authorized is logged-in users
-            "methods": "*",
-            "actions" : "*",
-            "customAuthz" : "ownDataOnly() || isQueryOneOf({'managed/user/': ['query-all']})" // query-all used by workflow
+        {   
+            "pattern"   : "*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
+            "actions"   : "*",
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
         },
+
+        // enforcement of which notifications you can read and delete is done within the endpoint 
         {
-            "pattern" : "endpoint/getnotifications",
-            "roles" : "openidm-authorized",
-            "methods": "*",
-            "actions" : "*"
-        },
-        {
-            "pattern" : "endpoint/getnotifications/*",
-            "roles" : "openidm-authorized",
-            "methods": "*",
-            "actions" : "*"
+            "pattern"   : "endpoint/usernotifications",
+            "roles"     : "openidm-authorized",
+            "methods"   : "read,delete",
+            "actions"   : "*"
         },
         
-        // workflow related endpoints.  We need to build these up with custom Authz functions
-        {   
-            "pattern" : "endpoint/getprocessesforuser",
-            "roles" : "openidm-authorized",
-            "methods": "*",
-            "actions" : "*"
+        // Workflow-related endpoints for authorized users
+        {
+            "pattern"   : "workflow/taskinstance/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "action",
+            "actions"   : "complete",
+            "customAuthz" : "isMyTask()"
         },
-        {   
-            "pattern" : "workflow/processdefinition/*",
-            "roles" : "openidm-authorized",
-            "methods": "*",
-            "actions" : "*"
+        {
+            "pattern"   : "workflow/taskinstance/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "read,update",
+            "actions"   : "*",
+            "customAuthz" : "canUpdateTask()"
         },
-        {   
-            "pattern" : "workflow/processinstance/*",
-            "roles" : "openidm-authorized",
-            "methods": "*",
-            "actions" : "*"
+        {
+            "pattern"   : "workflow/processinstance/",
+            "roles"     : "openidm-authorized",
+            "methods"   : "action",
+            "actions"   : "createProcessInstance",
+            "customAuthz": "isAllowedToStartProcess()"
+        },
+        {
+            "pattern"   : "workflow/processdefinition/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "*",
+            "actions"   : "read",
+            "customAuthz": "isOneOfMyWorkflows()"
         },
 
         // Clients authenticated via SSL mutual authentication
-        {       "pattern" : "*",
-                "roles" : "openidm-cert",
-                "methods": "",  // default to no methods allowed
-                "actions" : ""  // default to no actions allowed
-        },
+        {
+            "pattern"   : "*",
+            "roles"     : "openidm-cert",
+            "methods"   : "",  // default to no methods allowed
+            "actions"   : ""  // default to no actions allowed
+        }
+    ] 
+};
 
-        ] };
+function isMyTask() {
+    var taskInstanceId = request.id.split("/")[2];
+    var taskInstance = openidm.read("workflow/taskinstance/" + taskInstanceId);
+    return taskInstance.assignee === request.parent.security.username;
+}
+
+function canUpdateTask() {
+    var taskInstanceId = request.id.split("/")[2];
+    return isMyTask() || isUserCandidateForTask(taskInstanceId);
+}
+
+function isUserCandidateForTask(taskInstanceId) {
+    
+    var userCandidateTasksQueryParams = {
+        "_queryId": "filtered-query",
+        "taskCandidateUser": request.parent.security.username
+    };
+    var userCandidateTasks = openidm.query("workflow/taskinstance", userCandidateTasksQueryParams).result;
+    for (var i = 0; i < userCandidateTasks.length; i++) {
+        if (taskInstanceId === userCandidateTasks[i]._id) {
+            return true;
+        }
+    }
+        
+    var roles = "";
+    for (var i = 0; i < request.parent.security['openidm-roles'].length; i++) {
+        var role = request.parent.security['openidm-roles'][i];
+        if (i === 0) {
+            roles = role;
+        } else {
+            roles = roles + "," + role;
+        }
+    }
+    
+    var userGroupCandidateTasksQueryParams = {
+        "_queryId": "filtered-query",
+        "taskCandidateGroup": roles
+    };    
+    var userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
+    for (var i = 0; i < userGroupCandidateTasks.length; i++) {
+        if (taskInstanceId === userGroupCandidateTasks[i]._id) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+function isAllowedToStartProcess() {
+    var processDefinitionId = request.value._processDefinitionId;
+    return isProcessOnUsersList(processDefinitionId);
+}
+
+function isOneOfMyWorkflows() {
+    var processDefinitionId = request.id.split("/")[2];
+    return isProcessOnUsersList(processDefinitionId);
+}
+
+function isProcessOnUsersList(processDefinitionId) {
+    var processesForUserQueryParams = {
+        "_queryId": "query-processes-for-user",
+        "userId": request.parent.security.userid.id
+    };
+    var processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams);
+      
+    var isProcessOneOfUserProcesses = false;
+    for (var i = 0; i < processesForUser.length; i++) {
+        var processForUser = processesForUser[i];
+        if (processDefinitionId === processForUser._id) {
+            isProcessOneOfUserProcesses = true;
+        }
+    }
+    return isProcessOneOfUserProcesses;
+}
 
 function isQueryOneOf(allowedQueries) {
     if (
@@ -194,16 +302,26 @@ function ownDataOnly() {
     var userId = "";
     
     userId = request.id.match(/managed\/user\/(.*)/i);
-    if (userId && userId.length == 2)
+    if (userId && userId.length === 2)
     {
         userId = userId[1];
     }
-    else if (request.params && request.params.userId)
-    {
+    
+    if (request.params && request.params.userId)
+    {   
+        // something funny going on if we have two different values for userId
+        if (userId !== null && userId.length && userId !== request.params.userId) {
+            return false;
+        } 
         userId = request.params.userId;
     }
-    else if (request.value && request.value.userId)
+    
+    if (request.value && request.value.userId)
     {
+        // something funny going on if we have two different values for userId
+        if (userId !== null  && userId.length && userId !== request.params.userId) {
+            return false;
+        } 
         userId = request.value.userId;
     }
     
@@ -211,15 +329,60 @@ function ownDataOnly() {
 
 }
 
-function disallowQueryExpression() {
-    if (request.params && typeof request.params['_queryExpression'] != "undefined") {
-        return false;
+function managedUserRestrictedToAllowedRoles(allowedRolesList) {
+    var i = 0,requestedRoles = [],params = {};
+    
+    if (!request.id.match(/^managed\/user/)) {
+        return true;
+    }
+
+    if (request.value) {
+        params = request.value;
+    }
+    else { // this would be strange, but worth checking
+        return true; // true because they don't appear to be setting anything
+    }
+
+    
+    if (request.method === "patch" || (request.method === "action" && request.params["_action"] === "patch")) {
+        for (i in params) {
+            if ((params[i].test && params[i].test.match(/^\/?roles$/)) ||
+                (params[i].add && params[i].add.match(/^\/?roles$/)) || 
+                (params[i].replace && params[i].replace.match(/^\/?roles$/))) {
+                
+                requestedRoles = requestedRoles.concat(params[i].value.split(','))
+            }
+        }
+    } else if ((request.method === "create" || request.method === "update") && 
+                params && (params.roles || params["/roles"])) {
+        
+        if (typeof params.roles !== "string" && typeof params["/roles"] !== "string") { // this would also be strange, but worth checking
+            return false; // false because I don't know (and so don't trust) what they are trying to set.
+        }
+        
+        if (params.roles) {
+            requestedRoles = requestedRoles.concat(params.roles.split(","));
+        }
+        if (params["/roles"]) {
+            requestedRoles = requestedRoles.concat(params['/roles'].split(","));
+        }
+    }
+    
+    if (requestedRoles.length) { // if there are no requested roles, then no problem
+
+        // we could accept a csv list or an array of roles for the rolesList arg.
+        if (typeof allowedRolesList === "string") {
+            allowedRolesList = allowedRolesList.split(',');
+        }
+        
+        for (i in requestedRoles) {
+            if (! contains(allowedRolesList, requestedRoles[i])) {
+                return false;
+            }
+        }
     }
     return true;
 }
-
-
-
 
 //////// Do not alter functions below here as part of your authz configuration
 
@@ -238,9 +401,9 @@ function passesAccessConfig(id, roles, method, action) {
                     // Check action
                     if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
                         if (typeof(config.customAuthz) != 'undefined') {
-                        	if (eval(config.customAuthz)) {
-                        		return true;
-                        	}
+                            if (eval(config.customAuthz)) {
+                                return true;
+                            }
                         } else {
                             return true;
                         }
@@ -322,6 +485,7 @@ function allow() {
 }
 
 if (!allow()) {
+//    java.lang.System.out.println(request);
     throw { 
         "openidmCode" : 403, 
         "message" : "Access denied"

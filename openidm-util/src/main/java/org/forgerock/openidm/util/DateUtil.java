@@ -135,12 +135,14 @@ public class DateUtil {
      * Parses an ISO8601 compliant timestamp into a DateTime object
      * Checks the length of the timestamp and returns null if the string is
      * not ISO8601 compliant
+     * Accepted formats: yyyy-MM-ddTHH:mm:ss.SSSZ, yyyy-MM-ddTHH:mm:ss.SSS+00, yyyy-MM-ddTHH:mm:ss.SSS+00:00
      * @param timestamp timestamp to parse
      * @return 
      */
     public DateTime parseIfDate(String timestamp) {
         DateTime d = null;
-        if (timestamp.length() == 26) {
+        if (timestamp.length() > 23 &&
+                timestamp.length() < 30) {
             try {
                 d = DateUtil.getDateUtil().parseTimestamp(timestamp);
             } catch (IllegalArgumentException e) {

@@ -1,5 +1,5 @@
 {
     "context" : "endpoint/securityQA",
     "type" : "text/javascript",
-    "file" : "script/ui/securityQA.js"
+    "file" : "bin/defaults/script/ui/securityQA.js"
 }

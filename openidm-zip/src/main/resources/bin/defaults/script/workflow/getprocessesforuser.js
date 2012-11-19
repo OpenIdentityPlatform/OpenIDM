@@ -1,3 +1,33 @@
+/*! @license 
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+if (request.method !== "query") {
+    throw { 
+        "openidmCode" : 403, 
+        "message" : "Access denied"
+    } 
+}
 var users = {};
 
 getUser = function(userId) {
@@ -37,13 +67,13 @@ contains = function(object, comaseparatedList) {
 
 isProcessAvalibleForUser = function(processAccessPolicies, processDefinition, userRoles) {
     for (var i = 0; i < processAccessPolicies.length; i++) {
-        var props =  processAccessPolicies[i].properties;
-        var key = props.key;
+        var props =  processAccessPolicies[i].propertiesCheck;
+        var property = props.property;
         var matches = props.matches;
-        var requiresPrivilage = props.requiresPrivilage;
+        var requiresRole = props.requiresRole;
         
-        if (processDefinition[key].match(matches)) {
-            if (!contains(requiresPrivilage, userRoles)) {
+        if (processDefinition[property].match(matches)) {
+            if (!contains(requiresRole, userRoles)) {
                 return false;
             }
         }
@@ -53,7 +83,7 @@ isProcessAvalibleForUser = function(processAccessPolicies, processDefinition, us
 
 getProcessesAvalibleForUser = function(processDefinitions, userRoles) {
     var processesAvalibleToUser = [];
-    var processAccessPolicies = openidm.read("config/process/access").policies;
+    var processAccessPolicies = openidm.read("config/process/access").workflowAccess;
     for (var i = 0; i < processDefinitions.length; i++) {
         var processDefinition = processDefinitions[i];
         if (isProcessAvalibleForUser(processAccessPolicies, processDefinition, userRoles)) {
@@ -62,6 +92,14 @@ getProcessesAvalibleForUser = function(processDefinitions, userRoles) {
     }
     return processesAvalibleToUser;
 }
+
+
+
+
+
+
+
+//code:
 
 if (!request.params || (!request.params.userId && !request.params.userName)) {
     throw "Required params: userId or userName";
@@ -75,11 +113,6 @@ if (!request.params || (!request.params.userId && !request.params.userName)) {
     }
 }
 
-
-
-
-
-//code:
 var processDefinitions = {};
 var users = {};
 var processesForUser = [];

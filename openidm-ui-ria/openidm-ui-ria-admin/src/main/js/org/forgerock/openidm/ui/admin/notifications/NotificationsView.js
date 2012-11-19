@@ -59,19 +59,19 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
             requester = item.requester;
             requestDate = dateUtil.formatDate(item.createDate);
             
-            deleteLink = '<a name="deleteLink" href="#">' + $.t("common.notification.deleteThisMessage") + '</a>';
+            deleteLink = '<a name="deleteLink" href="#" style="float: right;">X</a>';
             id = item._id;
             
             return '<div class="notification-title">' 
                      + (iconLink ? '<img src="' + iconLink + '"/>' : '')
-                     + '<a name="title" href="#">' + message + '</a>'
+                     + '<a name="title" href="#" style="float: left;">' + message + '</a>'
+                     +  deleteLink + '<div style="clear: both;"></div>'
                   + '</div>'
-                  + '<div class="notification-details">'
+                  + '<div class="notification-details" style="clear: both;">'
                       + '<div class="details"> '
                       + $.t("common.application.requestedBy") +': ' 
                       + (requester ? requester : $.t("common.user.system")) + '</br>' 
                       + requestDate + '</div>'
-                      + deleteLink
                       + '<input type="hidden" name="id" value=' + id + ' />'
                   + '</div>';
         },
@@ -101,7 +101,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         
         installAccordion: function(){
             $("#items").accordion({
-                event: "mouseenter", 
+                event: "click", 
                 active: false,
                 collapsible:true
             });
@@ -110,7 +110,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         deleteLink: function(event) {
             var notificationId, self=this;
             event.preventDefault();
-            notificationId = $(event.target).next().val();
+            notificationId = $(event.target).parent().next().find("input[name=id]").val();
             
             notificationDelegate.deleteEntity(notificationId, function() {
                 self.removeItemAndRebuild(notificationId);

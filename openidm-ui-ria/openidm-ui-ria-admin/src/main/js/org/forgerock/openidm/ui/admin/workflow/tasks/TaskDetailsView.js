@@ -53,6 +53,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
             if(validatorsManager.formNotInvalid(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false), param;
                 delete params.saveButton;
+                delete params.requeueButton;
                 for (param in params) {
                     if (_.isNull(params[param])) {
                         delete params[param];
@@ -65,7 +66,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                 
                 workflowManager.completeTask(this.task._id, params, _.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "completedTask");
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
+                    //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "", trigger: true});
                     eventManager.sendEvent("refreshTasksMenu");
                 }, this));
             }
@@ -102,7 +103,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
                     return;
                 } else {
                     this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
+                    templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties(definition, task.formProperties), _.bind(function() {
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
                         
@@ -117,10 +118,11 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
         },
         
         getGenerationTemplate: function(definition) {
-            var property;
-            for(property in definition.formProperties) {
-                if(property === "_formGenerationTemplate") {
-                    return definition.formProperties[property].defaultExpression.expressionText;
+            var property, i;
+            for(i = 0; i < definition.formProperties.length; i++) {
+                property = definition.formProperties[i];
+                if(property._id === "_formGenerationTemplate") {
+                    return property.defaultExpression.expressionText;
                 }
             }
             return false;

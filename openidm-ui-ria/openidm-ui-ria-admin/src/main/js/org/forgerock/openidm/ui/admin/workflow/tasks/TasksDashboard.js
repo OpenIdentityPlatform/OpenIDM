@@ -109,7 +109,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 }
                 
                 if(root.find("#taskContent").html() === "") {
-                    root.find("#taskContent").html('No data required');
+                    root.find("#taskContent").css("text-align","left");
+                    root.find("#taskContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
                 }
             });   
         },
@@ -120,16 +121,21 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
             
             eventManager.unregisterListener("refreshTasksMenu");
             eventManager.registerListener("refreshTasksMenu", _.bind(function(event) {
-                this.candidateTasks.render("all", $("#candidateTasks"));                
-                this.myTasks.render("assigned", $("#myTasks"));
+                this.refreshMenus();
                 startProcessView.render();
             }, this));
             
             eventManager.unregisterListener("refreshMyTasksMenu");
             eventManager.registerListener("refreshMyTasksMenu", _.bind(function(event) {
-                this.myTasks.render("assigned", $("#myTasks"));
-                this.candidateTasks.render("all", $("#candidateTasks"));   
+                this.refreshMenus();
+                startProcessView.render();
             }, this));
+        },
+        
+        refreshMenus: function() {        
+            this.myTasks.render("assigned", $("#myTasks"));
+            
+            this.candidateTasks.render("all", $("#candidateTasks"));  
         }
     });
 

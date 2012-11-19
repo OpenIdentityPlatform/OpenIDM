@@ -6,7 +6,8 @@
         "language" : "en-US",
         "roles" : {
             "admin" : "Administrator",
-            "openidm-authorized" : "User"
+            "openidm-authorized" : "User",
+            "tasks-manager" : "Tasks Manager"
         },
         "siteImages" : [
             "mail.png",

@@ -1,6 +1,6 @@
 {
     "type" : "text/javascript",
-    "file" : "script/policy.js",
+    "file" : "bin/defaults/script/policy.js",
     "resources" : [
         {
             "resource" : "managed/user/*",
@@ -16,6 +16,9 @@
                         },
                         {
                             "policyId" : "unique"
+                        },
+                        {
+                            "policyId" : "no-internal-user-conflict"
                         }
                     ]
                 },
@@ -57,6 +60,7 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
+                                    "admin",
                                     "openidm-reg"
                                 ]
                             }
@@ -158,6 +162,7 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
+                                    "admin",
                                     "openidm-reg"
                                 ]
                             }

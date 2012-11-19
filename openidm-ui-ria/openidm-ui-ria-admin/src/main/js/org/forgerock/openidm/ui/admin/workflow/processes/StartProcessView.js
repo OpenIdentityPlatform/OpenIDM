@@ -118,10 +118,11 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessView", [
         },
         
         getGenerationTemplate: function(definition) {
-            var property;
-            for(property in definition.formProperties) {
-                if(property === "_formGenerationTemplate") {
-                    return definition.formProperties[property].defaultExpression.expressionText;
+            var property, i;
+            for(i = 0; i < definition.formProperties.length; i++) {
+                property = definition.formProperties[i];
+                if(property._id === "_formGenerationTemplate") {
+                    return property.defaultExpression.expressionText;
                 }
             }
             return false;
