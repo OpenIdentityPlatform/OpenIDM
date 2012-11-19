@@ -73,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                     userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        router.routeTo("adminUserProfile", {args: [data.userName]});
+                        router.routeTo("adminUserProfile", {args: [data.userName], trigger : true});
                         self.reloadData();
                     });
                 });
