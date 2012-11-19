@@ -17,15 +17,15 @@ The sample includes these configuration files also installed in the conf/
 directory when you unpack OpenIDM.
 
 *   conf/provisioner.openicf-xml.json shows the XML connector configuration.
-*   conf/scheduler-reconcile_systemXmlAccounts_managedUser.json includes a
-    scheduler configuration you can use to run reconciliation periodically.
+*   conf/schedule-reconcile_systemXmlAccounts_managedUser.json includes a
+    schedule configuration you can use to run reconciliation periodically.
 *   conf/sync.json describes how identities in the XML file source map to
     identities in the internal repository target.
 
 Data for this sample is stored in data/xmlConnectorData.xml. The initial
-XML file contains a single identity.
+XML file contains two identities.
 
-$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+$ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
 Alternatively, edit conf/scheduler-reconcile_systemXmlAccounts_managedUser.json
 to enable scheduled reconciliation:
