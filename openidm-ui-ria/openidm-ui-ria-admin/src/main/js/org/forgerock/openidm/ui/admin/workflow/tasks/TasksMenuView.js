@@ -45,7 +45,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             "change select[name=assignedUser]": "claimTask",
             "mouseenter .userLink": "showUser",
             "click .closeLink" : "hideDetails",
-            "click .requeueLink" : "requeueTaskHandler"
+            "click [name=requeueButton]" : "requeueTaskHandler"
         },
         
         tasks: {},
@@ -142,6 +142,10 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             }
                         
             this.category = category;
+            this.callback = callback;
+            
+            this.$el.prev().show();
+            this.$el.show();
             
             if(category === "all") {
                 workflowManager.getAllTaskUsingEndpoint(conf.loggedUser._id, _.bind(this.displayTasks, this), _.bind(this.errorHandler, this));
@@ -155,18 +159,22 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
             if(this.category === "assigned") {
                 this.$el.append('<b>' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksAssigned") + '</b>');
             } else {
-                this.$el.append('<b>' + $.t("openidm.ui.admin.tasks.TasksMenuView.noTasksInGroupQueue") + '</b>');
+                this.$el.prev().hide();
+                this.$el.hide();
             }
         },
         
         displayTasks: function(tasks) {
-            var process, data, processName, taskType, taskName, actions, i, task;
+            var process, data, processName, taskType, taskName, actions, i, task, active, before, types = 0;
             
+            before = this.$el.find(".ui-accordion-header").length;
             this.tasks = tasks;
             this.$el.html('');
             
             for(processName in tasks) {
                 process = tasks[processName];
+                
+                types++;
                 
                 data = {
                     processName: process.name,
@@ -186,24 +194,19 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                 this.$el.append(uiUtils.fillTemplateWithData("templates/admin/workflow/tasks/ProcessUserTaskTableTemplate.html", data));
             } 
             
+            active = false;
+            if(this.$el.hasClass('ui-accordion') && before === types) {
+                active = this.$el.accordion("option", "active");
+            }
+            
             this.$el.accordion('destroy');
-            this.$el.accordion({heightStyle: "content", collapsible: true, active: false, autoHeight: false, event: "noevent"});
-            
-            this.$el.find(".ui-accordion-header").on('mouseenter', function(event) {                
-                $.doTimeout('tasksAccordion', 150, _.bind(function() {
-                    $(".ui-accordion").not($(this).parent()).accordion({active: false});
-                    
-                    if(!$(this).hasClass('ui-state-active')) {
-                        $(this).parent().accordion({active: $(this).index() / 2});
-                    }
-                }, this));
-            });
-            
-            this.$el.find(".ui-accordion-header").click(function(event) {
-                event.preventDefault();
-            });
+            this.$el.accordion({heightStyle: "content", collapsible: true, autoHeight: false, active: active});
             
             this.refreshAssignedSelectors();
+            
+            if(this.callback) {
+                this.callback();
+            }
         },
         
         getParamsForTaskType: function(taskType) {
@@ -248,7 +251,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksMenuView", [
                     for(i = 0; i < task.usersToAssign.users.length; i++) {
                         user = task.usersToAssign.users[i];
 
-                        if($(target).find("option[value="+ user.username +"]").length === 0 && user.username !== conf.loggedUser.userName) {
+                        if($(target).find("option[value='"+ user.username +"']").length === 0 && user.username !== conf.loggedUser.userName) {
                             $(target).append('<option value="'+ user.username +'">'+ user.displayableName +'</option');
                         }
                     }

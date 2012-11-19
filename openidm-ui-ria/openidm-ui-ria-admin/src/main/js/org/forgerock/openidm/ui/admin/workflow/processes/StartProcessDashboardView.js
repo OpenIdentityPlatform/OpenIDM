@@ -52,19 +52,19 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
             }
             this.parentRender(function() {
                 this.clearStartProcessView();
-                workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser.userName, function(processDefinitions) {
+                workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser._id, function(processDefinitions) {
                     for (i = 0; i < processDefinitions.length; i++) {
                         $("#processList").append("<div class='process-item'><a href='#' class='processName'>" + processDefinitions[i].name + "</a> "
                                 + "<input type='hidden' name='id' value='" + processDefinitions[i]._id +"' />"
                                 + "</div>");
                     }
+                    
+                    if(processDefinitions.length === 0) {
+                        $("#processList").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noProcesses"));
+                    }
                 });
                 if (processId) {
-                    startProcessView.render(processId, "", function() {
-                        if($("#processContent").html() === "") {
-                            $("#processContent").html('No data required');
-                        }
-                    });
+                    this.renderStartProcessView(processId);
                 }
             });
         },
@@ -72,16 +72,21 @@ define("org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardV
         showStartProcessView: function(event) {
             event.preventDefault();
             var id = $(event.target).parent().find('[name="id"]').val();
-            //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "startProcesses", args: [id], trigger: false});
             
             $("#processDetails").remove();
             $(".selected-process").removeClass('selected-process');
             $(event.target).closest('div').addClass('selected-process');
             $(event.target).closest('div').append('<div id="processDetails" style="margin-top: 10px;"></div>');
             
+            this.renderStartProcessView(id);
+        },
+        
+        renderStartProcessView: function(id) {
             startProcessView.render(id, "", function() {
+                $("#processContent [disabled]:hidden").filter(function(){return $(this).siblings(":visible").length === 0;}).parent().hide();
+                
                 if($("#processContent").html() === "") {
-                    $("#processContent").html('Empty');
+                    $("#processContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
                 }
             });
         },

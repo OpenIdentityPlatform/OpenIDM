@@ -4,15 +4,11 @@
             "name" : "user",
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "script/ui/onCreate-user-set-default-fields.js"
-            },
-            "onValidate" : {
-                "type" : "text/javascript",
-                "file" : "script/ui/onValidate-user-sensitive-fields.js"
+                "file" : "bin/defaults/script/ui/onCreate-user-set-default-fields.js"
             },
             "onDelete" : {
                 "type" : "text/javascript",
-                "file" : "script/ui/onDetele-user-cleanup.js"
+                "file" : "bin/defaults/script/ui/onDelete-user-cleanup.js"
             },
             "properties" : [
                 {

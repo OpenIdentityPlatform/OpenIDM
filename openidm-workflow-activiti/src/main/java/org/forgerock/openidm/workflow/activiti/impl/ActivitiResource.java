@@ -23,13 +23,13 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import org.activiti.engine.ActivitiException;
 import org.activiti.engine.FormService;
 import org.activiti.engine.ProcessEngine;
@@ -54,7 +54,6 @@ import org.activiti.engine.task.DelegationState;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResource;
@@ -452,11 +451,14 @@ public class ActivitiResource implements JsonResource {
                     result.add(ActivitiConstants.ACTIVITI_PRIORITY, task.getPriority());
                     result.add(ActivitiConstants.ACTIVITI_TASKDEFINITIONKEY, task.getTaskDefinitionKey());
                     result.add(ActivitiConstants.ACTIVITI_VARIABLES, processEngine.getTaskService().getVariables(task.getId()));
-                    result.add("formdata", queryTaskDefinition(task.getProcessDefinitionId(), task.getTaskDefinitionKey()).asMap());
                     TaskFormData data = processEngine.getFormService().getTaskFormData(task.getId());
+                    List<Map> propertyValues = new ArrayList<Map>();
                     for (FormProperty p : data.getFormProperties()) {
-                        result.get(new JsonPointer("formdata/formProperties/" + p.getId())).asMap().put(ActivitiConstants.FORMPROPERTY_VALUE, p.getValue());
+                        Map<String, String> entry = new HashMap<String, String>();
+                        entry.put(p.getId(), p.getValue());
+                        propertyValues.add(entry);
                     }
+                    result.add(ActivitiConstants.FORMPROPERTIES, propertyValues);
                     result.add("_rev", "0");
                 }
                 return result;
@@ -706,9 +708,9 @@ public class ActivitiResource implements JsonResource {
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, startFormData.getFormKey());
         }
         DefaultStartFormHandler handler = (DefaultStartFormHandler) def.getStartFormHandler();
-        Map<String, Map> propertyMap = new LinkedHashMap<String, Map>();
-        addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
-        result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
+        List<Map> propertyList = new ArrayList<Map>();
+        addFormHandlerData(propertyList, handler.getFormPropertyHandlers());
+        result.add(ActivitiConstants.FORMPROPERTIES, propertyList);
         result.add("_rev", "0");
         return result;
     }
@@ -733,9 +735,9 @@ public class ActivitiResource implements JsonResource {
             result.add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, handler.getFormKey());
             result.add(ActivitiConstants.ACTIVITI_DUEDATE, def.getDueDateExpression());
             result.add(ActivitiConstants.ACTIVITI_PRIORITY, def.getPriorityExpression());
-            Map<String, Map> propertyMap = new LinkedHashMap<String, Map>();
-            addFormHandlerData(propertyMap, handler.getFormPropertyHandlers());
-            result.add(ActivitiConstants.FORMPROPERTIES, propertyMap);
+            List<Map> propertyList = new ArrayList<Map>();
+            addFormHandlerData(propertyList, handler.getFormPropertyHandlers());
+            result.add(ActivitiConstants.FORMPROPERTIES, propertyList);
             return result;
         }
         throw new JsonResourceException(JsonResourceException.NOT_FOUND);
@@ -743,12 +745,13 @@ public class ActivitiResource implements JsonResource {
     
     /**
      * Add FormProperty related data to the map of task properties
-     * @param propertyMap map containing the result
+     * @param propertyList map containing the result
      * @param handlers list of handlers to process
      */
-    private void addFormHandlerData(Map<String, Map> propertyMap, List<FormPropertyHandler> handlers) {
+    private void addFormHandlerData(List<Map> propertyList, List<FormPropertyHandler> handlers) {
         for (FormPropertyHandler h : handlers) {
             Map<String, Object> entry = new HashMap<String, Object>();
+            entry.put(ActivitiConstants.ID, h.getId());
             entry.put(ActivitiConstants.FORMPROPERTY_DEFAULTEXPRESSION, h.getDefaultExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLEEXPRESSION, h.getVariableExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
@@ -763,7 +766,7 @@ public class ActivitiResource implements JsonResource {
             entry.put(ActivitiConstants.FORMPROPERTY_READABLE, h.isReadable());
             entry.put(ActivitiConstants.FORMPROPERTY_REQUIRED, h.isRequired());
             entry.put(ActivitiConstants.FORMPROPERTY_WRITABLE, h.isWritable());
-            propertyMap.put(h.getId(), entry);
+            propertyList.add(entry);
         }
     }
 }

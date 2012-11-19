@@ -1,7 +1,7 @@
-/*
+/*! @license 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,26 +22,19 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/**
- * @author mbilski
- * 
- * This script returns the notification for logged user
- * 
- */
+var userId = object._id;
 
-var userId = request.parent.security.userid.id, res = {};
+var findUserNotificationsParams = {
+    "_queryId": "get-notifications-for-user",
+    "userId": userId
+};
 
-if(request.parent.security.userid.component !== "internal/user") {
-    var params = {
-        "_queryId": "get-notifications-for-user",
-        "userId": userId
-    };
-      
-    var ret = openidm.query("repo/ui/notification", params);
-    
-    if(ret && ret.result) {
-        res = ret.result
+notificationQueryResult = openidm.query("repo/ui/notification", findUserNotificationsParams);
+if (notificationQueryResult.result && notificationQueryResult.result.length!=0) {
+        
+    for (notificationPointer in notificationQueryResult.result) {
+        var notification = notificationQueryResult.result[notificationPointer];
+        openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
     }
+        
 }
-
-res

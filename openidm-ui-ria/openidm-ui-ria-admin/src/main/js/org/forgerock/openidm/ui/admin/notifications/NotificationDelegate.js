@@ -34,7 +34,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationDelegate", [
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(constants, AbstractDelegate, configuration, eventManager) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/getnotifications");
+    var obj = new AbstractDelegate(constants.host + "/openidm/endpoint/usernotifications");
 
     obj.getNotificationsForUser = function(successCallback, errorCallback) {
         obj.serviceCall({
@@ -46,6 +46,12 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationDelegate", [
             },
             error: errorCallback
         });
+    };
+    
+    obj.deleteEntity = function(id, successCallback, errorCallback) {
+        console.debug("delete entity");
+        var callParams = {url: "?notificationId=" + id, type: "DELETE", success: successCallback, error: errorCallback };
+        this.serviceCall(callParams);
     };
 
     return obj;
