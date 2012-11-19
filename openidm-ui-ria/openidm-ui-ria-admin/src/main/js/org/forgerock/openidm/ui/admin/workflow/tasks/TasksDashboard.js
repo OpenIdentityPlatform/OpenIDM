@@ -104,6 +104,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 $("#candidateTasks").accordion("resize");
                 
                 if(event.category === "all") {
+                    $("#taskDetails input:enabled, #taskDetails select:enabled").filter(function(){return $(this).val() === "";}).parent().hide();
                     $("#taskDetails input, #taskDetails select").attr("disabled", "true");
                     $("#taskDetails span").hide();
                 }
