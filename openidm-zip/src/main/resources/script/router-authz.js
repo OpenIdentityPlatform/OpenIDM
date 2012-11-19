@@ -112,7 +112,8 @@ var accessConfig =
             "pattern"   : "*",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
-            "actions"   : "*" // default to all actions allowed
+            "actions"   : "*", // default to all actions allowed,
+            "customAuthz": "notProhibitedRequest()"
         },
         
         // admin can request anything in managed/user
@@ -153,7 +154,13 @@ var accessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized') && notProhibitedRequest()"
+        },
+        {   
+            "pattern"   : "system/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "action",
+            "actions"   : "executeScript"
         },
 
         // enforcement of which notifications you can read and delete is done within the endpoint 
@@ -193,7 +200,13 @@ var accessConfig =
             "actions"   : "read",
             "customAuthz": "isOneOfMyWorkflows()"
         },
-
+        {
+            "pattern"   : "system/*",
+            "roles"     : "*",
+            "methods"   : "*",
+            "actions"   : "*",
+            "customAuthz": "noHTTPCalls()"
+        },
         // Clients authenticated via SSL mutual authentication
         {
             "pattern"   : "*",
@@ -384,8 +397,69 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
     return true;
 }
 
+function noHTTPCalls() {
+    return getHighestRequest(request).type !== "http";
+}
+
+// needed for those cases where everything else would be allowed
+function notProhibitedRequest() {
+    var i,prohibitedRules = 
+    {
+        "configs" : 
+        [
+           {  
+               "pattern"    : "system/*",
+               "roles"      : "*",
+               "methods"    : "*",
+               "actions"    : "*"
+            }
+        ]
+    },
+    id=request.id, 
+    roles=getHighestRequest(request).security["openidm-roles"], 
+    method=request.method, 
+    action;
+    
+    if (request.params && request.params['_action']) {
+        action = request.params['_action'];
+    }    
+    
+    // inverse of function passesAccessConfig
+    for (i = 0; i < prohibitedRules.configs.length; i++) {
+        var config = prohibitedRules.configs[i];
+        var pattern = config.pattern;
+        // Check resource ID
+        if (matchesResourceIdPattern(id, pattern)) {
+            // Check roles
+            if (containsItems(roles, config.roles.split(','))) {
+                // Check method
+                if (method == 'undefined' || containsItem(method, config.methods)) {
+                    // Check action
+                    if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
+                        if (typeof(config.customAuthz) != 'undefined') {
+                            if (eval(config.customAuthz)) {
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 //////// Do not alter functions below here as part of your authz configuration
 
+function getHighestRequest(request) {
+    var currentRequest = request;
+    while (currentRequest.parent && typeof(currentRequest.security) === "undefined") {
+        currentRequest = currentRequest.parent;
+    }
+    return currentRequest;
+}
 
 
 function passesAccessConfig(id, roles, method, action) {
