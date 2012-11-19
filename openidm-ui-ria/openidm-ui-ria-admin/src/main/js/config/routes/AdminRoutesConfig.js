@@ -33,7 +33,7 @@ define("config/routes/AdminRoutesConfig", [
     var obj = {
         "": {
             view: "org/forgerock/openidm/ui/admin/Dashboard",
-            role: "openidm-authorized",
+            role: "openidm-authorized,openidm-admin",
             url: "",
             forceUpdate: true
         },     
@@ -42,11 +42,11 @@ define("config/routes/AdminRoutesConfig", [
         "adminUsers": {
             view: "org/forgerock/openidm/ui/admin/users/UsersView",
             url: "users/",
-            role: "admin"
+            role: "openidm-admin"
         },
         "adminUserProfile" : {
             view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
-            role: "admin",
+            role: "openidm-admin",
             url: /^users\/show\/(([A-Za-z0-9_\-\.@])+)\/$/,
             pattern: "users/show/?/"
         },
@@ -55,29 +55,29 @@ define("config/routes/AdminRoutesConfig", [
             dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
             url: /^users\/(([A-Za-z0-9_\-\.@])+)\/change_password\/$/,
             pattern: "users/?/change_password/",
-            role: "admin"
+            role: "openidm-admin"
         },
         "adminUsersAdd" : {
             view: "org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView",
-            role: "admin",
+            role: "openidm-admin",
             url: "users/add/"
         },
         
         "processesDashboard": {
             view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
-            role: "admin",
+            role: "openidm-admin",
             url: "processes/",
             forceUpdate: true
         },
         "startProcesses": {
             view: "org/forgerock/openidm/ui/admin/workflow/processes/StartProcessDashboardView",
-            role: "admin",
+            role: "openidm-admin",
             url: /^processes\/([A-Za-z0-9:]+)/,
             pattern: "processes/?/"
         },
         "completeTask": {
             view: "org/forgerock/openidm/ui/admin/Dashboard",
-            role: "admin",
+            role: "openidm-admin",
             url: /^tasks\/([0-9]+)/,
             pattern: "tasks/?/"
         }

@@ -88,19 +88,6 @@ define("config/AppConfiguration", [
                    moduleClass: "org/forgerock/commons/ui/common/components/Navigation",
                    configuration: {
                        links: {
-                           "admin" : {
-                               "role": "admin",
-                               "urls": {
-                                   "dashboard": {
-                                       "url": "#/",
-                                       "name": "config.AppConfiguration.Navigation.links.dashboard"
-                                   },
-                                   "users": {
-                                       "url": "#users/",
-                                       "name": "config.AppConfiguration.Navigation.links.users"
-                                   }
-                               }
-                           },
                            "openidm-admin" : {
                                "role": "openidm-admin",
                                "urls": {
