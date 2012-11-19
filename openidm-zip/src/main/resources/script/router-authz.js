@@ -140,12 +140,6 @@ var accessConfig =
             "actions"   : "*",
             "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
         },
-        {   
-            "pattern"   : "system/*",
-            "roles"     : "openidm-authorized",
-            "methods"   : "action",
-            "actions"   : "executeScript"
-        },
 
         // enforcement of which notifications you can read and delete is done within the endpoint 
         {
@@ -375,6 +369,8 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
 }
 
 //////// Do not alter functions below here as part of your authz configuration
+
+
 
 function passesAccessConfig(id, roles, method, action) {
     for (var i = 0; i < accessConfig.configs.length; i++) {
