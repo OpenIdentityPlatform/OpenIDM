@@ -51,8 +51,7 @@
 var accessConfig = 
 { 
     "configs" : [
-
-      // Anyone can read from these endpoints
+        // Anyone can read from these endpoints
         {  
            "pattern"    : "info/*",
            "roles"      : "*",
@@ -61,21 +60,21 @@ var accessConfig =
         },
         {  
            "pattern"    : "config/ui/configuration",
-           "roles"      : "*",
+           "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "read",
            "actions"    : "*"
         },
         // These options should only be available anonymously if selfReg is enabled
         {  
            "pattern"    : "config/ui/*",
-           "roles"      : "*",
+           "roles"      : "openidm-reg",
            "methods"    : "read",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
         },
         {  
            "pattern"    : "managed/user/*",
-           "roles"      : "*",
+           "roles"      : "openidm-reg",
            "methods"    : "create",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedRoles('openidm-authorized')"
@@ -84,7 +83,7 @@ var accessConfig =
         // Anonymous user can call the siteIdentification endpoint if it is enabled:
         {  
            "pattern"    : "endpoint/siteIdentification",
-           "roles"      : "*",
+           "roles"      : "openidm-reg",
            "methods"    : "*",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('siteIdentification')"
@@ -93,7 +92,7 @@ var accessConfig =
         // Anonymous user can call the securityQA endpoint if it enabled:
         {  
            "pattern"    : "endpoint/securityQA",
-           "roles"      : "*",
+           "roles"      : "openidm-reg",
            "methods"    : "*",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
@@ -101,31 +100,16 @@ var accessConfig =
         // This is needed by both self reg and security questions
         {  
            "pattern"    : "policy/managed/user/*",
-           "roles"      : "*",
+           "roles"      : "openidm-reg",
            "methods"    : "read,action",
            "actions"    : "*",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
         },
 
-      // openidm-admin can request anything
+        // openidm-admin can request anything
         {  
             "pattern"   : "*",
             "roles"     : "openidm-admin",
-            "methods"   : "*", // default to all methods allowed
-            "actions"   : "*", // default to all actions allowed,
-            "customAuthz": "notProhibitedRequest()"
-        },
-        
-        // admin can request anything in managed/user
-        {  
-            "pattern"   : "managed/user/*",
-            "roles"     : "admin",
-            "methods"   : "*", // default to all methods allowed
-            "actions"   : "*" // default to all actions allowed
-        },
-        {  
-            "pattern"   : "managed/user",
-            "roles"     : "admin",
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*" // default to all actions allowed
         },
@@ -154,7 +138,7 @@ var accessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized') && notProhibitedRequest()"
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
         },
         {   
             "pattern"   : "system/*",
@@ -199,13 +183,6 @@ var accessConfig =
             "methods"   : "*",
             "actions"   : "read",
             "customAuthz": "isOneOfMyWorkflows()"
-        },
-        {
-            "pattern"   : "system/*",
-            "roles"     : "*",
-            "methods"   : "*",
-            "actions"   : "*",
-            "customAuthz": "noHTTPCalls()"
         },
         // Clients authenticated via SSL mutual authentication
         {
@@ -397,70 +374,7 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
     return true;
 }
 
-function noHTTPCalls() {
-    return getHighestRequest(request).type !== "http";
-}
-
-// needed for those cases where everything else would be allowed
-function notProhibitedRequest() {
-    var i,prohibitedRules = 
-    {
-        "configs" : 
-        [
-           {  
-               "pattern"    : "system/*",
-               "roles"      : "*",
-               "methods"    : "*",
-               "actions"    : "*"
-            }
-        ]
-    },
-    id=request.id, 
-    roles=getHighestRequest(request).security["openidm-roles"], 
-    method=request.method, 
-    action;
-    
-    if (request.params && request.params['_action']) {
-        action = request.params['_action'];
-    }    
-    
-    // inverse of function passesAccessConfig
-    for (i = 0; i < prohibitedRules.configs.length; i++) {
-        var config = prohibitedRules.configs[i];
-        var pattern = config.pattern;
-        // Check resource ID
-        if (matchesResourceIdPattern(id, pattern)) {
-            // Check roles
-            if (containsItems(roles, config.roles.split(','))) {
-                // Check method
-                if (method == 'undefined' || containsItem(method, config.methods)) {
-                    // Check action
-                    if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
-                        if (typeof(config.customAuthz) != 'undefined') {
-                            if (eval(config.customAuthz)) {
-                                return false;
-                            }
-                        } else {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return true;
-}
-
 //////// Do not alter functions below here as part of your authz configuration
-
-function getHighestRequest(request) {
-    var currentRequest = request;
-    while (currentRequest.parent && typeof(currentRequest.security) === "undefined") {
-        currentRequest = currentRequest.parent;
-    }
-    return currentRequest;
-}
-
 
 function passesAccessConfig(id, roles, method, action) {
     for (var i = 0; i < accessConfig.configs.length; i++) {

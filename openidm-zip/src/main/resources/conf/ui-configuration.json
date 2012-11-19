@@ -5,7 +5,7 @@
         "siteIdentification" : false,
         "language" : "en-US",
         "roles" : {
-            "admin" : "Administrator",
+            "openidm-admin" : "Administrator",
             "openidm-authorized" : "User",
             "tasks-manager" : "Tasks Manager"
         },
