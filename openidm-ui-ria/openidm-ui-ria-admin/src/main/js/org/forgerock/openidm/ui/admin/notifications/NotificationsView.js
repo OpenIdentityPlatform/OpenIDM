@@ -110,7 +110,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         deleteLink: function(event) {
             var notificationId, self=this;
             event.preventDefault();
-            notificationId = $(event.target).parent().next().find("input[name=id]").val();
+            notificationId = $(event.target).parent().parent().next().find("input[name=id]").val();
             
             notificationDelegate.deleteEntity(notificationId, function() {
                 self.removeItemAndRebuild(notificationId);
