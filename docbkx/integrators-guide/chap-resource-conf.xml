@@ -1109,8 +1109,13 @@
    >OpenICF Connnector Server</link> page for instructions on installing a .NET
    connector server. Take care to set the key as described in the
    instructions.</para>
-
-   <para>The following excerpt shows the configuration for the connector.</para>
+   
+   <section xml:id="configuring-ad-connector">
+    <title>Configuring the Active Directory Connector</title>
+    <para>A sample Active Directory Connector configuration file is provided 
+    in <filename>opendim/samples/provisioners/provisioner.openicf-ad.json</filename>. 
+    The following excerpt shows the configuration for the connector.
+    </para>
 
    <programlisting language="javascript">
 {
@@ -1238,6 +1243,75 @@
      </listitem>
     </varlistentry>
    </variablelist>
+   </section>
+   
+   <section xml:id="ad-powershell">
+    <title>Using PowerShell Scripts With the Active Directory Connector</title>
+    
+    <para>The Active Directory connector supports PowerShell scripting. The 
+    following example shows a simple PowerShell script that is referenced in 
+    the connector configuration and can be called over the REST interface.
+    </para>
+    
+    <para>This PowerShell script creates a new MS SQL user with a username 
+    that is specified when the script is called. The script sets the user's 
+    password to <literal>Passw0rd</literal> and, optionally, gives the user a 
+    role. Save this script as <filename>openidm/script/createUser.ps1</filename>.
+    </para>
+    
+    <programlisting language="powershell" width="100">
+    if ($loginName -ne $NULL) {
+	[System.Reflection.Assembly]::LoadWithPartialName('Microsoft.SqlServer.SMO') | Out-Null
+	$sqlSrv = New-Object ('Microsoft.SqlServer.Management.Smo.Server') ('WIN-C2MSQ8G1TCA')
+ 
+	$login = New-Object -TypeName ('Microsoft.SqlServer.Management.Smo.Login') ($sqlSrv, $loginName)
+	$login.LoginType = 'SqlLogin'
+	$login.PasswordExpirationEnabled = $false
+	$login.Create('Passw0rd')
+	#  The next two lines are optional, and to give the new login a server role, optional
+	$login.AddToRole('sysadmin')
+	$login.Alter()
+} else {
+	$Error_Message = [string]"Required variables 'loginName' is missing!"
+    Write-Error $Error_Message
+    throw $Error_Message
+}
+    </programlisting>
+    
+    <para>Now edit the Active Directory connector configuration to reference 
+    the script. Add the following section to the connector configuration file 
+    (<filename>opendim/conf/provisioner.openicf-ad.json</filename>).</para>
+    
+    <programlisting language="javascript">
+"systemActions" : [   
+    {
+        "_script-id" : "ConnectorScriptName",
+        "actions" : [
+            {
+                "systemType" : ".*ActiveDirectoryConnector",
+                "actionType" : "Shell",
+                "actionSource" : "@echo off \r\n echo %loginName%\r\n"
+            },
+            {
+                "systemType" : ".*ActiveDirectoryConnector",
+                "actionType" : "PowerShell",
+                "actionFile" : "script/createUser.ps1"
+            }
+        ]
+    }
+]   
+    </programlisting>
+    
+    <para>To call the PowerShell script over the REST interface, use the 
+    following request, specifying the userName as input:</para>
+    
+    <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/ActiveDirectory/account?_action=script
+ &amp;_script-id=ConnectorScriptName&amp;loginName=myUser"</screen>
+   </section>
   </section>
 
   <section xml:id="csv-file-connector">
