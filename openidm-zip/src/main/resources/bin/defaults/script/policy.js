@@ -338,6 +338,10 @@ function reauthRequired(fullObject, value, params, propName) {
 
 // Internal policy code below
 
+function addPolicy(policy) {
+    policyConfig.policies.push(policy);
+}
+
 function getPolicy(policyId) {
     for (var i = 0; i < policyConfig.policies.length; i++) {
         if (policyConfig.policies[i].policyId == policyId) {

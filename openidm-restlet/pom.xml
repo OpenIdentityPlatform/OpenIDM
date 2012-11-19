@@ -48,6 +48,10 @@
             <artifactId>org.forgerock.json.resource.restlet</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>org.forgerock.restlet</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
             <version>${openidm.version}</version>
