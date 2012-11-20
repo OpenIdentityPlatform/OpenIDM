@@ -54,16 +54,17 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
             event.preventDefault();
             
             if(validatorsManager.formValidated(this.$el)) {
-                var data = form2js(this.$el.attr("id"), '.', false), self = this;
+                var data = form2js(this.$el.attr("id"), '.', false), self = this, oldUserName;
                 delete data.lastPasswordSet;
                 delete data.oldEmail;
-                delete data.oldUserName;
+                oldUserName = data.oldUserName;
+                delete data.oldUserName;                
                 
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get().join(",");
                 data.phoneNumber = data.phoneNumber.split(' ').join('').split('-').join('').split('(').join('').split(')').join('');
                 
                 userDelegate.patchUserDifferences(this.editedUser, data, function() {
-                    if(self.editedUser.userName === conf.loggedUser.userName) {
+                    if(oldUserName === conf.loggedUser.userName && data.userName !== conf.loggedUser.userName) {
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
                         eventManager.sendEvent(constants.EVENT_LOGOUT);
                         return;
@@ -72,7 +73,7 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserProfileView", [
                     userDelegate.getForUserName(data.userName, function(user) {
                         self.editedUser = user;
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-                        router.routeTo("adminUserProfile", {args: [data.userName]});
+                        router.routeTo("adminUserProfile", {args: [data.userName], trigger : true});
                         self.reloadData();
                     });
                 });

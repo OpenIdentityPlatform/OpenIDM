@@ -1,4 +1,4 @@
-/*! @license 
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All Rights Reserved

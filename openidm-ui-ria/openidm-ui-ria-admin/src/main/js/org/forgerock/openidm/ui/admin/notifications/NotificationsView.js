@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
             requester = item.requester;
             requestDate = dateUtil.formatDate(item.createDate);
             
-            deleteLink = '<a name="deleteLink" href="#" style="float: right;">X</a>';
+            deleteLink = '<a name="deleteLink" href="#" style="float: right;"><img src="images/cross.png" /></a>';
             id = item._id;
             
             return '<div class="notification-title">' 
@@ -110,7 +110,7 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
         deleteLink: function(event) {
             var notificationId, self=this;
             event.preventDefault();
-            notificationId = $(event.target).parent().next().find("input[name=id]").val();
+            notificationId = $(event.target).parent().parent().next().find("input[name=id]").val();
             
             notificationDelegate.deleteEntity(notificationId, function() {
                 self.removeItemAndRebuild(notificationId);
