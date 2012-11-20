@@ -91,6 +91,7 @@
                 "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
             },
             "EnterOldPasswordDialog" : {
+                "passwordAndSecurityQuestionChange" : "Password and security question change",
                 "enterYourOldPassword" : "Please enter your old password"
             },
             "ForgottenPasswordTemplate" : {
@@ -140,6 +141,7 @@
             "false" : "False",
             "update" : "Update",
             "save" : "Save",
+            "create" : "Create",
             "cancel" : "Cancel",
             "close" : "Close",
             "logout" : "Log out",
