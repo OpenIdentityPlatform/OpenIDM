@@ -46,7 +46,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
         
         render: function(params, args) {
             //decide whether to display notification and profile 
-            this.data = {shouldDisplayNotifications: params.mode !== "openidm-admin" };
+            this.data = {shouldDisplayNotifications: true }; // formerly: params.mode !== "openidm-admin"
             
             this.myTasks = new TasksMenuView();
             this.candidateTasks = new TasksMenuView();
