@@ -22,9 +22,6 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-//var params;
-//var value;
-//var fullObject;
 var returnObject = {};
 var failedPolicies = new Array();
 
@@ -141,13 +138,16 @@ function noInternalUserConflict(fullObject, value, params, property) {
             "_queryId": "credential-internaluser-query",
             "username": value
             },
-        existing;
-    
+        existing,requestId,requestBaseArray;
     if (value && value.length)
     {
+        requestBaseArray = request.id.split("/");
+        if (requestBaseArray.length === 3) {
+            requestId = requestBaseArray.pop();
+        }
         existing = openidm.query("repo/internal/user",  queryParams);
 
-        if (existing.result.length != 0) {
+        if (existing.result.length != 0 && (!requestId || (existing.result[0]["_id"] != requestId))) {
             return [{"policyRequirement": "UNIQUE"}];
         }
     }
@@ -260,9 +260,11 @@ function requiredIfConfigured(fullObject, value, params, property) {
         caller = request.params._caller,
         roles,parent,i,j,role;
     
-    parent = request.parent;
-    if (caller && caller == "filterEnforcer") {
-        parent = request.parent.parent;
+    parent = request;
+    
+    while (!parent.security || !parent.security["openidm-roles"]) {
+        i++;
+        parent = parent.parent;
     }
 
     if (parent.security) {
@@ -307,7 +309,7 @@ function reauthRequired(fullObject, value, params, propName) {
                     var role = exceptRoles[i];
                     if (roles) {
                         for (j = 0; j < roles.length; j++) {
-                            if (role == roles[j]) {
+                            if (role === roles[j]) {
                                 return [];
                             }
                         }
@@ -317,7 +319,7 @@ function reauthRequired(fullObject, value, params, propName) {
         }
     }
     
-    if (type == "http") {
+    if (type === "http") {
         try {
             var actionParams = {
                 "_action": "reauthenticate"

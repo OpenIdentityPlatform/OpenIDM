@@ -1,7 +1,7 @@
-/*! @license 
+/** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -51,11 +51,10 @@
 var accessConfig = 
 { 
     "configs" : [
-
-      // Anyone can read from these endpoints
+        // Anyone can read from these endpoints
         {  
            "pattern"    : "info/*",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*"
         },
@@ -107,24 +106,10 @@ var accessConfig =
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
         },
 
-      // openidm-admin can request anything
+        // openidm-admin can request anything
         {  
             "pattern"   : "*",
             "roles"     : "openidm-admin",
-            "methods"   : "*", // default to all methods allowed
-            "actions"   : "*" // default to all actions allowed
-        },
-        
-        // admin can request anything in managed/user
-        {  
-            "pattern"   : "managed/user/*",
-            "roles"     : "admin",
-            "methods"   : "*", // default to all methods allowed
-            "actions"   : "*" // default to all actions allowed
-        },
-        {  
-            "pattern"   : "managed/user",
-            "roles"     : "admin",
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*" // default to all actions allowed
         },
@@ -193,7 +178,6 @@ var accessConfig =
             "actions"   : "read",
             "customAuthz": "isOneOfMyWorkflows()"
         },
-
         // Clients authenticated via SSL mutual authentication
         {
             "pattern"   : "*",
