@@ -875,7 +875,7 @@ public class ConnectorUtil {
                 } else if (sourceClass == String.class) {
                     String s = (String) source;
                     if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false")) {
-                        result = targetClazz.cast(Boolean.valueOf((String) source));
+                        result = (T) Boolean.valueOf((String) source);
                         coerced = true;
                     }
                 }
@@ -966,7 +966,7 @@ public class ConnectorUtil {
                     result = (T) Float.valueOf(((Integer) source).floatValue());
                     coerced = true;
                 } else if (sourceClass == String.class) {
-                    result = targetClazz.cast(Float.valueOf((String) source));
+                    result = (T) Float.valueOf((String) source);
                     coerced = true;
                 }
             } else if (targetClazz.equals(GuardedByteArray.class)) {
@@ -1019,7 +1019,7 @@ public class ConnectorUtil {
                     result = (T) source;
                     coerced = true;
                 } else if (sourceClass == String.class) {
-                    result = targetClazz.cast(Long.valueOf((String) source));
+                    result = (T) Long.valueOf((String) source);
                     coerced = true;
                 }
             } else if (targetClazz.equals(Name.class)) {
