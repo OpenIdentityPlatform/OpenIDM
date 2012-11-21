@@ -264,6 +264,9 @@ function requiredIfConfigured(fullObject, value, params, property) {
     
     while (!parent.security || !parent.security["openidm-roles"]) {
         i++;
+        if(!parent.parent) {
+            break;
+        }
         parent = parent.parent;
     }
 
