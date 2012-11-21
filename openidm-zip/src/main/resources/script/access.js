@@ -23,9 +23,9 @@
  */
 
 /**
- * A configuration for allowed requests.  Each entry in the config contains a pattern to match
- * against the incoming request ID and, in the event of a match, the associated roles, methods,
- * and actions that are allowed for requests on that particular pattern.
+ * A configuration for allowed HTTP requests. Each entry in the configuration contains a pattern 
+ * to match against the incoming request ID and, in the event of a match, the associated roles, 
+ * methods, and actions that are allowed for requests on that particular pattern.
  *
  * pattern:  A pattern to match against an incoming request's resource ID
  * roles:  A comma separated list of allowed roles
@@ -39,7 +39,7 @@
  * starting with "managed/".  Note: it would not match "managed", which would need to have its 
  * own entry in the config.
  */
-var accessConfig = 
+var httpAccessConfig = 
 { 
     "configs" : [
         // Anyone can read from these endpoints
