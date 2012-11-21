@@ -221,13 +221,27 @@ function passesAccessConfig(id, roles, method, action) {
         var pattern = config.pattern;
         // Check resource ID
         if (matchesResourceIdPattern(id, pattern)) {
+            // Check excludePatterns
+            if (typeof(config.excludePatterns) != 'undefined' && config.excludePatterns != null) {
+                var excluded = config.excludePatterns.split(',');
+                var ex = false;
+                for (var j = 0; j < excluded.length; j++) {
+                    if (matchesResourceIdPattern(id, excluded[j])) {
+                        ex = true;
+                        break;
+                    }
+                }
+                if (ex) {
+                    continue;
+                }
+            }
             // Check roles
             if (containsItems(roles, config.roles.split(','))) {
                 // Check method
                 if (method == 'undefined' || containsItem(method, config.methods)) {
                     // Check action
                     if (action == 'undefined' || action == "" || containsItem(action, config.actions)) {
-                        if (typeof(config.customAuthz) != 'undefined') {
+                        if (typeof(config.customAuthz) != 'undefined' && config.customAuthz != null) {
                             if (eval(config.customAuthz)) {
                                 return true;
                             }
