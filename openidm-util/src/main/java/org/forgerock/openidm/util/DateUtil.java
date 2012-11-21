@@ -144,7 +144,7 @@ public class DateUtil {
         if (timestamp.length() > 23 &&
                 timestamp.length() < 30) {
             try {
-                d = DateUtil.getDateUtil().parseTimestamp(timestamp);
+                d = parseTimestamp(timestamp);
             } catch (IllegalArgumentException e) {
             }
         }
