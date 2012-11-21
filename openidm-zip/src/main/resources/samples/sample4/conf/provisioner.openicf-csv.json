@@ -28,7 +28,7 @@
         "SEARCH" : -1
     },
     "configurationProperties" : {
-        "filePath" : "data/hr.csv",
+        "filePath" : "samples/sample4/data/hr.csv",
         "uniqueAttribute" : "uid",
         "nameAttribute" : "uid",
         "passwordAttribute" : "password"

@@ -72,6 +72,7 @@
             </includes>
             <excludes>
                 <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>data/Example.ldif</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample1</outputDirectory>
         </fileSet>
@@ -97,8 +98,233 @@
                 <include>conf/**</include>
                 <include>script/**</include>
             </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
             <outputDirectory>/openidm/samples/sample2</outputDirectory>
         </fileSet>
+        <!-- Setup Sample2b  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample2b</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample2c  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample2c</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample2d  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample2d</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample3  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample3</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample3</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample4  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample4</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample4</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample5  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample5</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample5</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample6  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample6</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample6</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample7  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample7</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample7</outputDirectory>
+        </fileSet>
+        <!-- Setup Sample8  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample8</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample8</outputDirectory>
+        </fileSet>
+        
     </fileSets>
     <dependencySets>
         <dependencySet>
