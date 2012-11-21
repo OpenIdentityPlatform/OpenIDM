@@ -32,6 +32,7 @@
  * methods:  A comma separated list of allowed methods
  * actions:  A comma separated list of allowed actions
  * customAuthz: A custom function for additional authorization logic/checks (optional)
+ * excludePatterns: A comma separated list of patterns to exclude from the pattern match (optional)
  *
  * A single '*' character indicates all possible values.  With patterns ending in "/*", the "*"
  * acts as a wild card to indicate the pattern accepts all resource IDs "below" the specified
