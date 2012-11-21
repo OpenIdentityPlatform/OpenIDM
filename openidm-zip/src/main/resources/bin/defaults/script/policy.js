@@ -134,13 +134,13 @@ function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
 }
 
 function noInternalUserConflict(fullObject, value, params, property) {
-    var queryParams = {
+    if (value && value.length) {
+    	var queryParams = {
             "_queryId": "credential-internaluser-query",
             "username": value
             },
         existing,requestId,requestBaseArray;
-    if (value && value.length)
-    {
+
         requestBaseArray = request.id.split("/");
         if (requestBaseArray.length === 3) {
             requestId = requestBaseArray.pop();
