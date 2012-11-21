@@ -236,6 +236,8 @@ public class SchedulerService extends ObjectSetJsonResource {
             }
         } catch (SchedulerException e) {
             logger.error("Error shutting down in-memory scheduler", e);
+        } finally {
+            inMemoryScheduler = null;
         }
         try {
             if (persistentScheduler != null && persistentScheduler.isStarted()) {
@@ -626,7 +628,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                 persistentScheduler.shutdown();
             }
         }
-        if (schedulerConfig.exectuePersistentSchedulesEnabled()) {
+        if (schedulerConfig.executePersistentSchedulesEnabled()) {
             executePersistentSchedules = true;
         } else {
             executePersistentSchedules = false;
