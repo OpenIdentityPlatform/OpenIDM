@@ -216,8 +216,8 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
 
 
 function passesAccessConfig(id, roles, method, action) {
-    for (var i = 0; i < accessConfig.configs.length; i++) {
-        var config = accessConfig.configs[i];
+    for (var i = 0; i < httpAccessConfig.configs.length; i++) {
+        var config = httpAccessConfig.configs[i];
         var pattern = config.pattern;
         // Check resource ID
         if (matchesResourceIdPattern(id, pattern)) {
