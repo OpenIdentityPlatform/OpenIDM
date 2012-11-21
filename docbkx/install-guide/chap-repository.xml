@@ -87,7 +87,9 @@ $ cp ../samples/misc/repo.jdbc.json .</screen>
 Enter password:
 $ </screen>
    <para>This step creates an <literal>openidm</literal> database for use
-   as the internal repository.</para>
+   as the internal repository, and a user <literal>openidm</literal> with 
+   password <literal>openidm</literal> who has all the required privileges to 
+   update the database.</para>
    <screen>$ cd /path/to/mysql
 $ ./bin/mysql -u root -p 
 Enter password: 
@@ -123,23 +125,17 @@ mysql&gt; show tables;
 17 rows in set (0.00 sec)</screen>
    <para>The table names are similar to those used with OrientDB.</para>
   </step>
-  <step performance="optional">
-   <para>Optionally protect access to the <literal>openidm</literal> database
-   by creating a specific user and granting that user all privileges to update
-   the database.</para>
-  </step>
   <step>
    <para>Update <filename>openidm/conf/repo.jdbc.json</filename> as necessary,
-   especially the login and password parameters if you have created a specific
-   user for OpenIDM.</para>
+   to reflect your MySQL deployment.</para>
    <programlisting language="javascript">
 "connection" : {
     "dbType" : "MYSQL",
     "jndiName" : "",
     "driverClass" : "com.mysql.jdbc.Driver",
     <emphasis role="strong">"jdbcUrl" : "jdbc:mysql://localhost:3306/openidm",
-    "username" : "root",
-    "password" : "",</emphasis>
+    "username" : "openidm",
+    "password" : "openidm",</emphasis>
     "defaultCatalog" : "openidm",
     "maxBatchSize" : 100,
     "maxTxRetry" : 5,
