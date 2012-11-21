@@ -31,18 +31,18 @@ CREATE TABLE Organizations(
 	description varchar(32),
 	timestamp TIMESTAMP
 );
-INSERT INTO Users VALUES ("","bob","password","Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("","rowley","password","Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("","louis","password","Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("","john","password","John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP);
-INSERT INTO Users VALUES ("","jdoe","password","John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
+INSERT INTO Users VALUES ("0","bob","password","Bob", "Fleming","Bob Fleming","Bob.Fleming@example.com","HR",CURRENT_TIMESTAMP);
+INSERT INTO Users VALUES ("0","rowley","password","Rowley","Birkin","Rowley Birkin","Rowley.Birkin@example.com","SALES",CURRENT_TIMESTAMP);
+INSERT INTO Users VALUES ("0","louis","password","Louis", "Balfour","Louis Balfour","Louis.Balfour@example.com","SALES",CURRENT_TIMESTAMP);
+INSERT INTO Users VALUES ("0","john","password","John", "Smith","John Smith","John.Smith@example.com","SUPPORT",CURRENT_TIMESTAMP);
+INSERT INTO Users VALUES ("0","jdoe","password","John", "Doe","John Doe","John.Does@example.com","ENG",CURRENT_TIMESTAMP);
 
-INSERT INTO Groups VALUES ("","100","admin","Admin group",CURRENT_TIMESTAMP);
-INSERT INTO Groups VALUES ("","101","users","Users group",CURRENT_TIMESTAMP);
+INSERT INTO Groups VALUES ("0","100","admin","Admin group",CURRENT_TIMESTAMP);
+INSERT INTO Groups VALUES ("0","101","users","Users group",CURRENT_TIMESTAMP);
 
-INSERT INTO Organizations VALUES ("","HR","HR organization",CURRENT_TIMESTAMP);
-INSERT INTO Organizations VALUES ("","SALES","Sales organization",CURRENT_TIMESTAMP);
-INSERT INTO Organizations VALUES ("","SUPPORT","Support organization",CURRENT_TIMESTAMP);
-INSERT INTO Organizations VALUES ("","ENG","Engineering organization",CURRENT_TIMESTAMP);
+INSERT INTO Organizations VALUES ("0","HR","HR organization",CURRENT_TIMESTAMP);
+INSERT INTO Organizations VALUES ("0","SALES","Sales organization",CURRENT_TIMESTAMP);
+INSERT INTO Organizations VALUES ("0","SUPPORT","Support organization",CURRENT_TIMESTAMP);
+INSERT INTO Organizations VALUES ("0","ENG","Engineering organization",CURRENT_TIMESTAMP);
 
 grant all on *.* to root@'%' IDENTIFIED BY 'password';
