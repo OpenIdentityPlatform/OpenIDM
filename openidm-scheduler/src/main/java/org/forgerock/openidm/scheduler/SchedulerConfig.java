@@ -108,7 +108,7 @@ public class SchedulerConfig {
         return props;
     }
 
-    public boolean exectuePersistentSchedulesEnabled() {
+    public boolean executePersistentSchedulesEnabled() {
         return executePersistentSchedules;
     }
     
