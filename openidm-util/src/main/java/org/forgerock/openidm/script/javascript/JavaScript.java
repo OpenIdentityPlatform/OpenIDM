@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright ¬© 2012 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.script.javascript;
@@ -23,20 +23,19 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-// Mozilla Rhino
+import org.forgerock.openidm.script.Script;
+import org.forgerock.openidm.script.ScriptException;
+import org.forgerock.openidm.script.ScriptThrownException;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.mozilla.javascript.Context;
+import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.RhinoException;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-
-// OpenIDM
-import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.smartevent.Name;
-import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.openidm.script.Script;
-import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.ScriptThrownException;
+import org.mozilla.javascript.tools.shell.Global;
 
 /**
  * A JavaScript script.
@@ -195,14 +194,16 @@ public class JavaScript implements Script {
             throw new NullPointerException();
         }
         EventEntry measure = Publisher.start(monitoringEventName, scope, null);
-        Context context = Context.enter();
+        Global global = new Global();
+        Context context = ContextFactory.getGlobal().enterContext();
+        global.init(context);
         try {
             Scriptable outer = new ScriptableMap(scope);
             outer.setPrototype(scriptScope); // script level context and standard objects included with every box
             outer.setParentScope(null);
             Scriptable inner = context.newObject(outer); // inner transient scope for new properties
             inner.setPrototype(outer);
-            inner.setParentScope(null);
+            inner.setParentScope(global);
             Object result = Converter.convert(script.exec(context, inner));
             measure.setResult(result);
             return result;
@@ -222,3 +223,4 @@ public class JavaScript implements Script {
         return Name.get("openidm/internal/script/javascript/" + (file != null ? file.getName() : "embedded-source") + "/" + scriptName);
     }
 }
+
