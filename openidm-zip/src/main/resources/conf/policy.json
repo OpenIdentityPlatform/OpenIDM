@@ -60,7 +60,6 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
-                                    "admin",
                                     "openidm-reg"
                                 ]
                             }
@@ -132,8 +131,7 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.securityQuestions",
                                 "exceptRoles" : [
-                                    "openidm-admin",
-                                    "admin"
+                                    "openidm-admin"
                                 ]
                             }
                         }
@@ -148,8 +146,7 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.securityQuestions",
                                 "exceptRoles" : [
-                                    "openidm-admin",
-                                    "admin"
+                                    "openidm-admin"
                                 ]
                             }
                         },
@@ -164,7 +161,6 @@
                             "params" : {
                                 "exceptRoles" : [
                                     "openidm-admin",
-                                    "admin",
                                     "openidm-reg"
                                 ]
                             }
@@ -207,8 +203,7 @@
                                 "configBase" : "ui/configuration",
                                 "baseKey" : "configuration.siteIdentification",
                                 "exceptRoles" : [
-                                    "openidm-admin",
-                                    "admin"
+                                    "openidm-admin"
                                 ]
                             }
                         }
