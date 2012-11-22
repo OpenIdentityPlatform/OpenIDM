@@ -134,13 +134,13 @@ function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
 }
 
 function noInternalUserConflict(fullObject, value, params, property) {
-    var queryParams = {
+    if (value && value.length) {
+    	var queryParams = {
             "_queryId": "credential-internaluser-query",
             "username": value
             },
         existing,requestId,requestBaseArray;
-    if (value && value.length)
-    {
+
         requestBaseArray = request.id.split("/");
         if (requestBaseArray.length === 3) {
             requestId = requestBaseArray.pop();
@@ -264,6 +264,9 @@ function requiredIfConfigured(fullObject, value, params, property) {
     
     while (!parent.security || !parent.security["openidm-roles"]) {
         i++;
+        if(!parent.parent) {
+            break;
+        }
         parent = parent.parent;
     }
 
@@ -445,6 +448,11 @@ function validate(policies, fullObject, propName, propValue, retArray) {
         policy = getPolicy(policies[i].policyId);
         if (policy == null) {
             throw "Unknown policy " + policies[i].policyId;
+        }
+        if (typeof(policy.validateOnlyIfPresent) != 'undefined' && policy.validateOnlyIfPresent) {
+            if (typeof(propValue) == 'undefined') {
+                continue;
+            }
         }
         validationFunc = eval(policy.policyExec); 
         

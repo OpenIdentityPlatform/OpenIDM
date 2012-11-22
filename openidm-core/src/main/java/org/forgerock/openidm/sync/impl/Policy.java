@@ -22,6 +22,7 @@ import java.util.Map;
 
 // SLF4J
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.script.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,8 @@ class Policy {
     /** TODO: Description. */
     private final Script script;
 
+    private final Map<String,Object> scriptScope;
+
     /** TODO: Description. */
     private Script postAction;
 
@@ -74,9 +77,19 @@ class Policy {
         if (action.isString()) {
             this.action = action.asEnum(Action.class);
             this.script = null;
+            this.scriptScope = null;
         } else {
             this.action = null;
             this.script = Scripts.newInstance("Policy", action);
+            if (action.isMap() && action.asMap().size() > 2) {
+                // If there is additional attributes then copy them
+                scriptScope = action.copy().asMap();
+                scriptScope.remove("type");
+                scriptScope.remove("source");
+                scriptScope.remove("file");
+            } else {
+                scriptScope = null;
+            }
         }
         JsonValue pAction = config.get("postAction");
         if (pAction.isNull()) {
@@ -109,6 +122,15 @@ class Policy {
             result = action;
         } else if (script != null) { // action is dynamically determine 
             Map<String, Object> scope = service.newScope();
+            if (null != scriptScope) {
+                //Make a thread safe copy and put the variables into the scope
+                for (Map.Entry<String,Object> entry: Utils.deepCopy(scriptScope).entrySet()){
+                    if (scope.containsKey(entry.getKey())){
+                        continue;
+                    }
+                    scope.put(entry.getKey(),entry.getValue());
+                }
+            }
             Map<String, Object> recon = new HashMap<String, Object>();
             scope.put("recon",recon);
             JsonValue actionParam  = null;

@@ -1,9 +1,8 @@
 {
-    "name" : "ad",
+    "name" : "xmlfile",
     "connectorRef" : {
-        "connectorHostRef" : "#LOCAL",
-        "bundleVersion" : "1.1.0.1-SNAPSHOT",
         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleVersion" : "1.1.0.1-SNAPSHOT",
         "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
     },
     "producerBufferSize" : 100,
@@ -30,9 +29,9 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "samples/sample5/data/resource-schema-1.xsd",
-        "xsdFilePath" : "samples/sample5/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "samples/sample5/data/xml_AD_Data.xml"
+        "xsdIcfFilePath" : "samples/sample9/data/resource-schema-1.xsd",
+        "xsdFilePath" : "samples/sample9/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "samples/sample9/data/xmlConnectorData.xml"
     },
     "objectTypes" : {
         "account" : {
@@ -52,24 +51,18 @@
                     "nativeType" : "string"
                 },
                 "email" : {
-                    "type" : "array",
-                    "items" : {
-                        "type" : "string",
-                        "nativeType" : "string"
-                    },
+                    "type" : "string",
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "__UID__" : {
+                "_id" : {
                     "type" : "string",
                     "nativeName" : "__UID__"
                 },
-                "userPassword" : {
+                "password" : {
                     "type" : "string",
-                    "required" : true,
-                    "nativeName" : "__PASSWORD__",
-                    "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
-                    "flags" : [ "NOT_READABLE", "NOT_RETURNED_BY_DEFAULT" ]
+                    "nativeName" : "password",
+                    "nativeType" : "string"
                 },
                 "name" : {
                     "type" : "string",
@@ -82,10 +75,39 @@
                     "required" : true,
                     "nativeName" : "lastname",
                     "nativeType" : "string"
+                },
+                "mobileTelephoneNumber" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "mobileTelephoneNumber",
+                    "nativeType" : "string"
+                },
+                "securityQuestion" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "securityQuestion",
+                    "nativeType" : "string"
+                },
+                "securityAnswer" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "securityAnswer",
+                    "nativeType" : "string"
+                },
+                "passPhrase" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "passPhrase",
+                    "nativeType" : "string"
+                },
+                "roles" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "roles",
+                    "nativeType" : "string"
                 }
             }
         }
     },
-    "operationOptions" : {
-    }
+    "operationOptions" : { }
 }
