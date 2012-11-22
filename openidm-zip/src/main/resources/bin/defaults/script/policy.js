@@ -449,6 +449,11 @@ function validate(policies, fullObject, propName, propValue, retArray) {
         if (policy == null) {
             throw "Unknown policy " + policies[i].policyId;
         }
+        if (typeof(policy.validateOnlyIfPresent) != 'undefined' && policy.validateOnlyIfPresent) {
+            if (typeof(propValue) == 'undefined') {
+                continue;
+            }
+        }
         validationFunc = eval(policy.policyExec); 
         
         if (propValue && openidm.isEncrypted(propValue)) {
