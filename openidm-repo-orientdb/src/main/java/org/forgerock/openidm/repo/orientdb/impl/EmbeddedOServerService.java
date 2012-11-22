@@ -154,10 +154,11 @@ public class EmbeddedOServerService {
         listener2.portRange = "2480-2480";
         listener2.protocol = "http";
 
-        OServerCommandConfiguration command1 = new OServerCommandConfiguration();
-        command1.pattern = "POST|*.action GET|*.action";
-        command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
-        command1.parameters = new OServerEntryConfiguration[0];
+//        NOTE: no longer used in 1.3
+//        OServerCommandConfiguration command1 = new OServerCommandConfiguration();
+//        command1.pattern = "POST|*.action GET|*.action";
+//        command1.implementation = "com.orientechnologies.orient.server.network.protocol.http.command.post.OServerCommandPostAction";
+//        command1.parameters = new OServerEntryConfiguration[0];
 
         // Access to the studio web app
         OServerCommandConfiguration command2 = new OServerCommandConfiguration();
@@ -168,7 +169,7 @@ public class EmbeddedOServerService {
         command2.parameters[1] = new OServerEntryConfiguration("http.cache:default", "Cache-Control: max-age=120");
 
         listener2.commands = new OServerCommandConfiguration[]{
-                command1,
+//                command1,
                 command2
         };
 
