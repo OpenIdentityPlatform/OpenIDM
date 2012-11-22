@@ -723,12 +723,17 @@
    
    <varlistentry>
     <term>In <filename>openidm/conf/managed.json</filename></term>
-    <listitem><para>onRetrieve, onValidate</para></listitem>
+    <listitem><para>onRetrieve, onValidate</para>
+    <para>Note that <literal>managed.json</literal> supports only one script 
+    per hook. If multiple scripts are defined for the same hook, only the last 
+    one is kept.</para></listitem>
    </varlistentry>
    
    <varlistentry>
     <term>In <filename>openidm/conf/router.json</filename></term>
-    <listitem><para>onRequest, onResponse, onFailure</para></listitem>
+    <listitem><para>onRequest, onResponse, onFailure</para>
+    <para><literal>router.json</literal> supports multiple scripts per hook.
+    </para></listitem>
    </varlistentry>
   
   </variablelist>

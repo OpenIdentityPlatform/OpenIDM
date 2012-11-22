@@ -2,7 +2,7 @@
     "name" : "xmlfile",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-        "bundleVersion" : "1.1.0.0",
+        "bundleVersion" : "1.1.0.1-SNAPSHOT",
         "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
     },
     "producerBufferSize" : 100,
@@ -29,9 +29,9 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "data/resource-schema-1.xsd",
-        "xsdFilePath" : "data/resource-schema-extension.xsd",
-        "xmlFilePath" : "data/xmlConnectorData.xml"
+        "xsdIcfFilePath" : "samples/sample7/data/resource-schema-1.xsd",
+        "xsdFilePath" : "samples/sample7/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "samples/sample7/data/xmlConnectorData.xml"
     },
     "objectTypes" : {
         "account" : {

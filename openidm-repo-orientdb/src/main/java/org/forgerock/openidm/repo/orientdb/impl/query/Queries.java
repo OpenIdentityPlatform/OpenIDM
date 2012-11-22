@@ -106,10 +106,14 @@ public class Queries {
         
         if (foundQueryInfo != null) {
             OSQLSynchQuery<ODocument> query = null;
-            boolean tryPrepared = foundQueryInfo.isUsePrepared();
+            
+            // Disabled prepared statements until pooled usage is clarified 
+            // boolean tryPrepared = foundQueryInfo.isUsePrepared();
+            boolean tryPrepared = false;
+            
             if (tryPrepared) {
                 // Try to use the prepared statement, which supports token substitution of where clause
-                query = foundQueryInfo.getPreparedQuery();                
+                query = foundQueryInfo.getPreparedQuery();
                 logger.debug("Prepared query {} ", query);
             } else {
                 // Substitute tokens manually, which supports replacing any part of the query
@@ -152,6 +156,9 @@ public class Queries {
                 // TODO: consider differentiating between bad configuration and bad request
                 throw new BadRequestException("Query is invalid: " 
                         + foundQueryInfo.getQueryString() + " " + ex.getMessage(), ex);
+            } catch (RuntimeException ex) {
+                logger.warn("Unexpected failure during DB query: {}", ex.getMessage());
+                throw ex;
             } finally {
                 measure.end();
             }
