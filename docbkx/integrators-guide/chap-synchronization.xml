@@ -1537,7 +1537,7 @@
             "name"                     : "systemMyLDAPAccounts_managedUser",
             "source"                   : "system/MyLDAP/account",
             "target"                   : "managed/user",
-            "correlateEmptyTargetSet"  : "true"
+            "correlateEmptyTargetSet"  : true
         },
     ]
 }</programlisting>
@@ -1563,7 +1563,7 @@
             "name": "systemMyLDAPAccounts_managedUser",
             "source": "system/MyLDAP/account",
             "target": "managed/user"
-            "prefetchLinks" : "false"
+            "prefetchLinks" : false
         }
     ]
 }</programlisting>
