@@ -67,7 +67,7 @@
  </section>
 
   <section xml:id="installing-openidm">
-   <title>Installing &amp; Running OpenIDM</title>
+   <title>Installing and Running OpenIDM</title>
    
    <para>Follow the procedures in this section to install and run
    OpenIDM.</para>
@@ -132,9 +132,9 @@ $</screen>
    </indexterm>
     <para>Follow these steps to run OpenIDM interactively.</para>
 
-    <para>To run OpenIDM as a background process, see the chapter on <link
+    <para>To run OpenIDM as a background process, see <link
     xlink:href="integrators-guide#chap-services"
-    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Starting &amp;
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Starting and
     Stopping OpenIDM</citetitle></link> in the <citetitle>Integrator's
     Guide</citetitle>.</para>
 
@@ -150,19 +150,20 @@ Using OPENIDM_OPTS:   -Xmx1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
--&gt;</screen>
+OpenIDM version "2.1.0-SNAPSHOT" (revision: 1583)
+-> OpenIDM ready</screen>
       </step>
       <step>
        <para>Start OpenIDM (Windows).</para>
-       <screen>$ cd \path\to\openidm
-$ startup.bat
-Start in debug mode [1] default
-Start in normal mode [2]
-Show help [3]
-Chose a number (1-3):
-
-Listening for transport dt_socket at address: 5005
-...
+       <screen>&lt; cd \path\to\openidm
+&lt; startup.bat
+"Using OPENIDM_HOME:   \path\to\openidm"
+"Using OPENIDM_OPTS:   -Xmx1024m -Dfile.encoding=UTF-8"
+"Using LOGGING_CONFIG:
+ -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
+Using boot properties at \path\to\openidm\conf\boot\boot.properties
+OpenIDM version "2.1.0-SNAPSHOT" (revision: 1583)
+-> OpenIDM ready
 -&gt;</screen>
       </step>
      </stepalternatives>
@@ -173,29 +174,50 @@ Listening for transport dt_socket at address: 5005
      command.</para>
      <screen>-&gt; scr list
    Id   State          Name
-[  16] [active       ] org.forgerock.openidm.config.starter
-[   7] [active       ] org.forgerock.openidm.external.rest
-[  11] [active       ]
- org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[   1] [active       ] org.forgerock.openidm.router
-[  18] [active       ] org.forgerock.openidm.scheduler
-[  13] [active       ] org.forgerock.openidm.restlet
-[   6] [unsatisfied  ] org.forgerock.openidm.external.email
-[  15] [active       ] org.forgerock.openidm.repo.orientdb
-[   5] [active       ] org.forgerock.openidm.sync
-[   3] [active       ] org.forgerock.openidm.script
-[   2] [active       ] org.forgerock.openidm.scope
-[   9] [active       ] org.forgerock.openidm.http.contextregistrator
-[  17] [active       ] org.forgerock.openidm.config
-[   0] [active       ] org.forgerock.openidm.audit
-[  14] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
-[   4] [active       ] org.forgerock.openidm.managed
-[  12] [active       ] org.forgerock.openidm.provisioner.openicf
-[   8] [active       ] org.forgerock.openidm.authentication
-[  10] [active       ] org.forgerock.openidm.provisioner
+scr list 
+   Id   State          Name
+[  23] [active       ] org.forgerock.openidm.endpoint
+[  24] [active       ] org.forgerock.openidm.endpoint
+[  26] [active       ] org.forgerock.openidm.endpoint
+[  12] [active       ] org.forgerock.openidm.endpoint
+[  27] [active       ] org.forgerock.openidm.endpoint
+[  25] [active       ] org.forgerock.openidm.endpoint
+[  18] [unsatisfied  ] org.forgerock.openidm.info
+[  22] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  31] [active       ] org.forgerock.openidm.ui.simple
+[  29] [active       ] org.forgerock.openidm.restlet
+[   3] [active       ] org.forgerock.openidm.repo.orientdb
+[   7] [active       ] org.forgerock.openidm.scope
+[   5] [active       ] org.forgerock.openidm.audit
+[  33] [active       ] org.forgerock.openidm.schedule
+[   2] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
+[  32] [active       ] org.forgerock.openidm.workflow
+[   9] [active       ] org.forgerock.openidm.managed
+[  28] [active       ] org.forgerock.openidm.provisioner.openicf
+[  17] [active       ] org.forgerock.openidm.health
+[  21] [active       ] org.forgerock.openidm.provisioner
+[   0] [active       ] org.forgerock.openidm.config.starter
+[  35] [active       ] org.forgerock.openidm.taskscanner
+[  15] [active       ] org.forgerock.openidm.external.rest
+[   6] [active       ] org.forgerock.openidm.router
+[  34] [active       ] org.forgerock.openidm.scheduler
+[  14] [unsatisfied  ] org.forgerock.openidm.external.email
+[  11] [active       ] org.forgerock.openidm.sync
+[  20] [active       ] org.forgerock.openidm.policy
+[   8] [active       ] org.forgerock.openidm.script
+[  10] [active       ] org.forgerock.openidm.recon
+[   4] [active       ] org.forgerock.openidm.http.contextregistrator
+[   1] [active       ] org.forgerock.openidm.config
+[  13] [active       ] org.forgerock.openidm.endpointservice
+[  30] [unsatisfied  ] org.forgerock.openidm.servletfilter
+[  19] [active       ] org.forgerock.openidm.infoservice
+[  16] [active       ] org.forgerock.openidm.authentication
+-> 
+
 -&gt;</screen>
-     <para>If startup was successful, all states except <literal>email</literal>
-     and <literal>repo.jdbc</literal> are active. If any other services remain
+     <para>If startup was successful, all states except <literal>email</literal>, 
+     <literal>repo.jdbc</literal>, <literal>info</literal>, and 
+     <literal>servletfilter</literal> are active. If any other services remain
      <literal>unsatisfied</literal>, check <filename>openidm/logs</filename>
      for errors, and refer to the chapter on <link
      xlink:href="integrators-guide#chap-troubleshooting"
