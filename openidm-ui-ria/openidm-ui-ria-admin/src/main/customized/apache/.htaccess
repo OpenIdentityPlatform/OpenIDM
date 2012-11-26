@@ -1,4 +1,4 @@
 RewriteEngine On
 RewriteBase /
 
-RewriteRule ^openidm/managed/(.*)$ http://localhost:8080/openidm/managed/$1 [P,L]
+RewriteRule ^openidm/(.*)$ http://localhost:8080/openidm/$1 [P,L]
