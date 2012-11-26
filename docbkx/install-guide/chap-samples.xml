@@ -1503,14 +1503,6 @@ mail: jdoe@example.com
   xlink:href='http://www.simplecloud.info/specs/draft-scim-core-schema-01.html'
   >SCIM schema 1.0 - draft</link>.</para>
 
-  <note>
-   <para>This sample requires that you set up MySQL to hold the OpenIDM internal
-   repository, as described in the chapter, <link
-   xlink:href="install-guide#chap-repository"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing a
-   Repository For Production</citetitle></link>.</para>
-  </note>
-
   <section xml:id="install-sample7">
    <title>Install the Sample</title>
    <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>,
