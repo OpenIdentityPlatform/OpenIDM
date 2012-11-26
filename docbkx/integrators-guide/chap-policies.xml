@@ -264,6 +264,10 @@ function required(fullObject, value, params, propName) {
         <listitem>
           <para><literal>"resources"</literal> provides an array of resource 
           objects, in JSON format, that are subject to the policy service. 
+          Resource objects are identified by the <literal>"resource"</literal> 
+          parameter, which indicates the URI and supports wildcard syntax. For 
+          example, <literal>"managed/user/*"</literal> indicates that the 
+          policy applies to all objects under <literal>/managed/user</literal>. 
           Each resource has the following properties:</para>
             <simplelist>
               <member><literal>"name"</literal> - the name of the property to 
