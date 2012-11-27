@@ -324,7 +324,32 @@
             </excludes>
             <outputDirectory>/openidm/samples/sample8</outputDirectory>
         </fileSet>
-        
+        <!-- Setup Sample9  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/provisioner.openicf-ldap.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+                <exclude>data/Example.ldif</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample9</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/provisioner.openicf-xml.json</exclude>
+                <exclude>conf/schedule-reconcile_systemXmlAccounts_managedUser.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/sample9</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
