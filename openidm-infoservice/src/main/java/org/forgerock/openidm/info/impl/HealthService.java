@@ -83,6 +83,8 @@ public class HealthService implements HealthInfo {
     ServiceListener svcListener;
     BundleListener bundleListener;
 
+    ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+
     // Whether we consider the underlying framework as started
     private volatile boolean frameworkStarted = false;
     // Flag to help in processing state during start-up. 
@@ -307,7 +309,9 @@ public class HealthService implements HealthInfo {
                 }
             }
         };
-        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        if (scheduledExecutor.isShutdown()) {
+            scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        }
         scheduledExecutor.schedule(command, serviceStartMax, TimeUnit.MILLISECONDS);
     }
 
@@ -468,6 +472,9 @@ public class HealthService implements HealthInfo {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        if (scheduledExecutor != null) {
+            scheduledExecutor.shutdown();
+        }
         if (frameworkListener != null) {
             context.getBundleContext().removeFrameworkListener(frameworkListener);
         }
