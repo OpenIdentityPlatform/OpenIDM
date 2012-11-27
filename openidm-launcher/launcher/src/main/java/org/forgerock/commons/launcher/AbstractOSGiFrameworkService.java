@@ -80,38 +80,46 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
     public void start() throws Exception {
         // Create an instance of the framework.
         FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
-        final Framework fmw = factory.newFramework(getConfigurationProperties());
+        Framework newFramework = framework.getAndSet(factory.newFramework(getConfigurationProperties()));
+        if (null != newFramework) {
+            //Another thread has started the Framework
+            return;
+        }
         // Initialize the framework, but don't start it yet.
-        fmw.init();
-        // Use the system bundle context to process auto- install,
-        // update, uninstall and start bundles.
-        process(fmw.getBundleContext());
-        registerServices(fmw.getBundleContext());
+        framework.get().init();
+        try {
+            // Use the system bundle context to process auto- install,
+            // update, uninstall and start bundles.
+            process(framework.get().getBundleContext());
+            registerServices(framework.get().getBundleContext());
 
-        Callable<Void> container = new Callable<Void>() {
-            public Void call() throws Exception {
-                FrameworkEvent event;
-                do {
-                    // Start the framework.
-                    framework.set(fmw);
-                    fmw.start();
-                    // Wait for framework to stop to exit the VM.
-                    event = fmw.waitForStop(0);
+            Callable<Void> container = new Callable<Void>() {
+                public Void call() throws Exception {
+                    FrameworkEvent event;
+                    do {
+                        // Start the framework.
+                        framework.get().start();
+                        // Wait for framework to stop to exit the VM.
+                        event = framework.get().waitForStop(0);
+                    }
+                    // If the framework was updated, then restart it.
+                    while (event.getType() == FrameworkEvent.STOPPED_UPDATE);
+                    return null;
                 }
-                // If the framework was updated, then restart it.
-                while (event.getType() == FrameworkEvent.STOPPED_UPDATE);
-                return null;
-            }
-        };
+            };
 
-        if (isNewThread()) {
-            if (started.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
-                Executors.newSingleThreadExecutor().submit(container);
-            } else if (isVerbose()) {
-                System.out.println("OSGi Framework has been started already!");
+            if (isNewThread()) {
+                if (started.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
+                    Executors.newSingleThreadExecutor().submit(container);
+                } else if (isVerbose()) {
+                    System.out.println("OSGi Framework has been started already!");
+                }
+            } else {
+                container.call();
             }
-        } else {
-            container.call();
+        } catch (Exception e) {
+            stop();
+            throw e;
         }
     }
 
