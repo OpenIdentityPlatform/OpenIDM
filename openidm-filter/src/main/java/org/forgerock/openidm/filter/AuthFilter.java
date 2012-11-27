@@ -96,6 +96,7 @@ import org.slf4j.LoggerFactory;
 })
 public class AuthFilter 
         implements Filter, AuthFilterService, JsonResource {
+
     private final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
     /** Attribute in session containing authenticated username. */
@@ -109,6 +110,9 @@ public class AuthFilter
 
     /** Attribute in session containing user's resource (managed_user or internal_user) */
     public static final String RESOURCE_ATTRIBUTE = "openidm.resource";
+    
+    /** Attribute in request to indicate to openidm down stream that an authentication filter has secured the request */
+    public static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
 
     // name of the header containing the client IPAddress, used for the audit record
@@ -195,6 +199,8 @@ public class AuthFilter
         req.setAttribute(USERID_ATTRIBUTE, authData.userId);
         req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
         req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
+        req.setAttribute(OPENIDM_AUTHINVOKED, "openidmfilter");
+ 
         chain.doFilter(new UserWrapper(req, authData.username, authData.userId, authData.roles), res);
     }
 

@@ -13,18 +13,10 @@
  *
  * Copyright © 2012 ForgeRock AS. All rights reserved.
  */
-package org.forgerock.openidm.filterregistration;
-
-import org.forgerock.json.fluent.JsonValue;
 
 /**
- * Interface for servlet filter registration services
- * @author aegloff
+ * OpenIDM servlet filter registration handling implementation.
+ * <p>
+ * This package defines the related classes necessary to implement adding custom servlet filters into OpenIDM
  */
-public interface ServletFilterRegistrator {
-    /**
-     * @return The registrator configuration
-     */
-    JsonValue getConfiguration();
-}
-
+package org.forgerock.openidm.filterregistration.impl;
