@@ -53,8 +53,6 @@ define("org/forgerock/openidm/ui/admin/users/AdminUserRegistrationView", [
                 data.roles = this.$el.find("input[name=roles]:checked").map(function(){return $(this).val();}).get().join(",");
                 delete data.terms;
                 delete data.passwordConfirm;
-                data.securityQuestion = 1;
-                data.securityAnswer = "";
                 
                 this.delegate.createEntity(data, function(user) {
                     eventManager.sendEvent(constants.EVENT_USER_SUCCESSFULY_REGISTERED, { user: data, selfRegistration: false });
