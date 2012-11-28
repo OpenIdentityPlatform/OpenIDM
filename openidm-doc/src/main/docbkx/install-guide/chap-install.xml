@@ -150,7 +150,7 @@ Using OPENIDM_OPTS:   -Xmx1024m
 Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
 Using boot properties at /path/to/openidm/conf/boot/boot.properties
-OpenIDM version "2.1.0-SNAPSHOT" (revision: 1583)
+OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
 -> OpenIDM ready</screen>
       </step>
       <step>
@@ -162,7 +162,7 @@ OpenIDM version "2.1.0-SNAPSHOT" (revision: 1583)
 "Using LOGGING_CONFIG:
  -Djava.util.logging.config.file=\path\to\openidm\conf\logging.properties"
 Using boot properties at \path\to\openidm\conf\boot\boot.properties
-OpenIDM version "2.1.0-SNAPSHOT" (revision: 1583)
+OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
 -> OpenIDM ready
 -&gt;</screen>
       </step>
@@ -177,11 +177,7 @@ OpenIDM version "2.1.0-SNAPSHOT" (revision: 1583)
 scr list 
    Id   State          Name
 [  23] [active       ] org.forgerock.openidm.endpoint
-[  24] [active       ] org.forgerock.openidm.endpoint
-[  26] [active       ] org.forgerock.openidm.endpoint
-[  12] [active       ] org.forgerock.openidm.endpoint
-[  27] [active       ] org.forgerock.openidm.endpoint
-[  25] [active       ] org.forgerock.openidm.endpoint
+...
 [  18] [unsatisfied  ] org.forgerock.openidm.info
 [  22] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
 [  31] [active       ] org.forgerock.openidm.ui.simple
@@ -272,7 +268,7 @@ scr list
     <link xlink:href="https://chrome.google.com/webstore/detail/simple-rest-client/fhjcajmcbmldlhcimfajhfbgofnpcjmb">
     Simple REST Client</link> for Chrome, or <link xlink:href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">
     RESTClient</link> for Firefox. Alternatively you can use the 
-    <command>curl</command> command-line tool that is included with most
+    <command>curl</command> command-line utility that is included with most
      operating systems. For more information on <command>curl</command>, see 
      <link xlink:href="http://curl.haxx.se/">http://curl.haxx.se/</link>. If 
      you cannot locate the <command>curl</command> command on your system, you 
@@ -307,7 +303,9 @@ scr list
  "userName":"joe",
  "givenName":"joe",
  "familyName":"smith",
- "email":["joe@example.com"],
+ "email":"joe@example.com",
+ "phoneNumber":"555-123-1234"
+ "password":"TestPassw0rd"
  "description":"My first user"
  }'
  http://localhost:8080/openidm/managed/user/joe
@@ -324,7 +322,9 @@ scr list
  \"userName\":\"joe\",
  \"givenName\":\"joe\",
  \"familyName\":\"smith\",
- \"email\":[\"joe@example.com\"],
+ \"email\":\"joe@example.com\",
+ \"phoneNumber\":\"555-123-1234\",
+ \"password\":\"TestPassw0rd\",
  \"description\":\"My first user\"
  }"
  http://localhost:8080/openidm/managed/user/joe
@@ -342,16 +342,29 @@ scr list
  http://localhost:8080/openidm/managed/user/joe
 
 {
-    "familyName": "smith",
-    "userName": "joe",
-    "givenName": "joe",
-    "_id": "joe",
-    "_rev": "0",
-    "email": [ "joe@example.com" ],
-    "description": "My first user"
- }</screen>
-     <para>The JSON output shown above is formatted for easier reading. OpenIDM
-     returns the JSON object all on one line.</para>
+  "stateProvince": "",
+  "userName": "joe",
+  "roles": "openidm-authorized",
+  "givenName": "joe",
+  "address2": "",
+  "lastPasswordAttempt": "Wed Nov 28 2012 22:19:35 GMT+0200 (SAST)",
+  "address1": "",
+  "familyName": "smith",
+  "passwordAttempts": "0",
+  "_rev": "0",
+  "_id": "joe",
+  "country": "",
+  "city": "",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "phoneNumber": "555-123-1234",
+  "email": "joe@example.com",
+  "description": "My first user",
+  "accountStatus": "active"
+}</screen>
+     <para>OpenIDM returns the JSON object all on one line. To format the JSON 
+     for legibility, use a JSON parser, such as <link 
+     xlink:href="http://stedolan.github.com/jq/">jq</link>.</para>
     </step>
    </procedure>
 
