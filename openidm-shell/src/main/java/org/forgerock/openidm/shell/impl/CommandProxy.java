@@ -23,6 +23,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Function;
 import org.forgerock.openidm.shell.CustomCommandScope;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,8 +46,12 @@ public class CommandProxy implements Function {
             } else {
                 return Reflective.invoke(session, tgt, function, arguments);
             }
+        } catch(IllegalArgumentException e) {
+            List<Object> method = new ArrayList<Object>();
+            method.add(function);
+            session.getConsole().println(Reflective.invoke(session, tgt, "getUsage", method));
+            return null;
         } finally {
-
         }
     }
 }

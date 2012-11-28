@@ -45,10 +45,6 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-jetty-bundle</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <scope>provided</scope>
@@ -122,10 +118,8 @@
                     <instructions>
                         <!-- allow for dynamic discovery of bundles --> 
                         <DynamicImport-Package>*</DynamicImport-Package>
-<!--                        <Bundle-ClassPath></Bundle-ClassPath>
-                        <Export-Package>;version=${openidm.version},;version=${openidm.version}</Export-Package>
-                        <Private-Package></Private-Package>
-                        -->
+                        <Export-Package>org.forgerock.openidm.filterregistration;version=${openidm.version},;version=${openidm.version}</Export-Package>
+                        <Private-Package>org.forgerock.openidm.filterregistration.impl</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

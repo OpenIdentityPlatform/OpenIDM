@@ -453,10 +453,10 @@ password=<replaceable>password</replaceable></programlisting>
 
   <para>You can run OpenIDM in the background as a service (daemon), and
   add startup and shutdown scripts to manage the service at system boot
-  and shutdown. For details see the section titled <link
+  and shutdown. For more information, see <link
   xlink:role="http://docbook.org/xlink/role/olink"
-  xlink:href="integrators-guide#startup-shutdown"><citetitle>Startup &amp;
-  Shutdown</citetitle></link>.</para>
+  xlink:href="integrators-guide#chap-services"><citetitle>Starting and 
+  Stopping OpenIDM</citetitle></link>.</para>
 
   <para>See your operating system documentation for details on adding a
   service such as OpenIDM to be started at boot and shut down at system

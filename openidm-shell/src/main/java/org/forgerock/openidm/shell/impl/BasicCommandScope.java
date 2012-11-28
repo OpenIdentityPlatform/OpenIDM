@@ -20,12 +20,8 @@ package org.forgerock.openidm.shell.impl;
 
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
-import org.apache.felix.service.command.Parameter;
 import org.forgerock.openidm.shell.CustomCommandScope;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -33,15 +29,15 @@ import java.util.*;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class BasicCommandScope implements CustomCommandScope {
+public class BasicCommandScope extends CustomCommandScope {
 
     /**
      * {@inheritDoc}
      */
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
-        help.put("help", "displays available commands");
-        help.put("exit", "exit from the console");
+        help.put("help", getShortHeader("help"));
+        help.put("exit", getShortHeader("exit"));
         return help;
 
     }
@@ -54,7 +50,7 @@ public class BasicCommandScope implements CustomCommandScope {
     }
 
 
-    @Descriptor("displays available commands")
+    @Descriptor("Displays available commands.")
     public void help(CommandSession session) {
         ServiceLoader<CustomCommandScope> ldr = ServiceLoader.load(CustomCommandScope.class);
         for (CustomCommandScope cmdScope : ldr) {
@@ -66,13 +62,13 @@ public class BasicCommandScope implements CustomCommandScope {
         }
     }
 
-    @Descriptor("exit from the console")
+    @Descriptor("Exit from the console.")
     public void exit() {
         System.exit(0);
     }
 
 
-    @Descriptor("displays information about a specific command")
+    @Descriptor("Displays information about a specific command.")
     public void help(CommandSession session, @Descriptor("target command") String name) {
         Map<String, List<Method>> commands = getCommands();
 
@@ -97,93 +93,17 @@ public class BasicCommandScope implements CustomCommandScope {
         }
 
         if ((methods != null) && (methods.size() > 0)) {
-            for (Method m : methods) {
-                Descriptor d = m.getAnnotation(Descriptor.class);
-                if (d == null) {
-                    session.getConsole().println("\n" + m.getName());
-                } else {
-                    session.getConsole().println("\n" + m.getName() + " - " + d.value());
+            StringBuilder help = new StringBuilder();
+            for (int i = 0; i < methods.size(); i++) {
+                Method m = methods.get(i);
+                if (i > 0) {
+                    help.append("\n");
                 }
-
-                session.getConsole().println("   scope: " + name.substring(0, name.indexOf(':')));
-
-                // Get flags and options.
-                Class[] paramTypes = m.getParameterTypes();
-                Map<String, Parameter> flags = new TreeMap();
-                Map<String, String> flagDescs = new TreeMap();
-                Map<String, Parameter> options = new TreeMap();
-                Map<String, String> optionDescs = new TreeMap();
-                List<String> params = new ArrayList();
-                Annotation[][] anns = m.getParameterAnnotations();
-                for (int paramIdx = 0; paramIdx < anns.length; paramIdx++) {
-                    Parameter p = findAnnotation(anns[paramIdx], Parameter.class);
-                    d = findAnnotation(anns[paramIdx], Descriptor.class);
-                    if (p != null) {
-                        if (p.presentValue().equals(Parameter.UNSPECIFIED)) {
-                            options.put(p.names()[0], p);
-                            if (d != null) {
-                                optionDescs.put(p.names()[0], d.value());
-                            }
-                        } else {
-                            flags.put(p.names()[0], p);
-                            if (d != null) {
-                                flagDescs.put(p.names()[0], d.value());
-                            }
-                        }
-                    } else if (d != null) {
-                        params.add(paramTypes[paramIdx].getSimpleName());
-                        params.add(d.value());
-                    } else {
-                        params.add(paramTypes[paramIdx].getSimpleName());
-                        params.add("");
-                    }
-                }
-
-                // Print flags and options.
-                if (flags.size() > 0) {
-                    session.getConsole().println("   flags:");
-                    for (Map.Entry<String, Parameter> entry : flags.entrySet()) {
-                        // Print all aliases.
-                        String[] names = entry.getValue().names();
-                        session.getConsole().print("      " + names[0]);
-                        for (int aliasIdx = 1; aliasIdx < names.length; aliasIdx++) {
-                            session.getConsole().print(", " + names[aliasIdx]);
-                        }
-                        session.getConsole().println("   " + flagDescs.get(entry.getKey()));
-                    }
-                }
-                if (options.size() > 0) {
-                    session.getConsole().println("   options:");
-                    for (Map.Entry<String, Parameter> entry : options.entrySet()) {
-                        // Print all aliases.
-                        String[] names = entry.getValue().names();
-                        session.getConsole().print("      " + names[0]);
-                        for (int aliasIdx = 1; aliasIdx < names.length; aliasIdx++) {
-                            session.getConsole().print(", " + names[aliasIdx]);
-                        }
-                        session.getConsole().println("   "
-                                + optionDescs.get(entry.getKey())
-                                + ((entry.getValue().absentValue() == null) ? ""
-                                : " [optional]"));
-                    }
-                }
-                if (params.size() > 0) {
-                    session.getConsole().println("   parameters:");
-                    for (Iterator<String> it = params.iterator(); it.hasNext(); ) {
-                        session.getConsole().println("      " + it.next() + "   " + it.next());
-                    }
-                }
+                help.append("Info: ").append(getHeader(m)).append("\n");
+                help.append(getUsage(m)).append("\n");
             }
+            session.getConsole().print(help.toString());
         }
-    }
-
-    private static <T extends Annotation> T findAnnotation(Annotation[] annotations, Class<T> clazz) {
-        for (int i = 0; (annotations != null) && (i < annotations.length); i++) {
-            if (clazz.isInstance(annotations[i])) {
-                return clazz.cast(annotations[i]);
-            }
-        }
-        return null;
     }
 
     private Map<String, List<Method>> getCommands() {

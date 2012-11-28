@@ -32,7 +32,7 @@ import org.forgerock.openidm.shell.CustomCommandScope;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public abstract class AbstractRemoteCommandScope implements CustomCommandScope {
+public abstract class AbstractRemoteCommandScope extends CustomCommandScope {
 
     private JsonResource router;
 

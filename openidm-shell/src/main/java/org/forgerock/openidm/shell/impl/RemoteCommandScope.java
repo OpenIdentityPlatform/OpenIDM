@@ -60,9 +60,9 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
      */
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
-        help.put("configimport", "imports the configuration set from local file/directory");
-        help.put("configexport", "exports the entire configuration set");
-        help.put("configureconnector", "Generate connector configuration");
+        help.put("configimport", getLongHeader("configimport"));
+        help.put("configexport", getLongHeader("configexport"));
+        help.put("configureconnector", getLongHeader("configureconnector"));
         return help;
     }
 
@@ -73,19 +73,19 @@ public class RemoteCommandScope extends AbstractRemoteCommandScope {
         return "remote";
     }
 
-    @Descriptor("imports the configuration set from local 'conf' directory")
+    @Descriptor("Imports the configuration set from local 'conf' directory")
     public void configimport(
             CommandSession session,
             @Descriptor("Replace the entire config set by deleting the additional configuration") @Parameter(
-                    names = { "-r", "--replaceall" }, presentValue = "true", absentValue = "false") boolean replaceall) {
+                    names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false") boolean replaceall) {
         configimport(session, replaceall, "conf");
     }
 
-    @Descriptor("imports the configuration set from local file/directory")
+    @Descriptor("Imports the configuration set from local file/directory")
     public void configimport(
             CommandSession session,
             @Descriptor("Replace the entire config set by deleting the additional configuration") @Parameter(
-                    names = { "-r", "--replaceall" }, presentValue = "true", absentValue = "false") boolean replaceall,
+                    names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false") boolean replaceall,
             @Descriptor("source directory") String source) {
         File file = IdentityServer.getFileForPath(source);
         session.getConsole().println(

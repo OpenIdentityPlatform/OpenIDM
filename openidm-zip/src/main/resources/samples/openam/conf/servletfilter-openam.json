@@ -8,5 +8,14 @@
     "systemProperties" : {
         "openam.agents.bootstrap.dir" : "/jetty_v61_agent/lib"
     },
+    "requestAttributes" : {
+        "openidm.authinvoked" : "servletfilter-openam"
+    },
+    "scriptExtensions" : {
+        "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "script/security/populateContext.js"
+        }
+    },
     "filterClass" : "com.sun.identity.agents.filter.AmAgentFilter"
 }
