@@ -52,46 +52,54 @@ var policyConfig = {
             },
             {
                 "policyId" : "valid-date",
-                "policyExec" : "validDateWhenRequired",
+                "policyExec" : "validDate",
                 "clientValidation": true,
+                "validateOnlyIfPresent": true,
                 "policyRequirements": ["VALID_DATE"]
             },
             {
                 "policyId" : "valid-email-address-format",
-                "policyExec" : "validEmailAddressFormatWhenRequired",
+                "policyExec" : "validEmailAddressFormat",
                 "clientValidation": true,
+                "validateOnlyIfPresent": true,
                 "policyRequirements": ["VALID_EMAIL_ADDRESS_FORMAT"]
             },
             {
                 "policyId" : "valid-name-format",
-                "policyExec" : "validNameFormatWhenRequired",
+                "policyExec" : "validNameFormat",
                 "clientValidation": true,
+                "validateOnlyIfPresent": true,
                 "policyRequirements": ["VALID_NAME_FORMAT"]
             },
             {
                 "policyId" : "valid-phone-format",
-                "policyExec" : "validPhoneFormatWhenRequired",
+                "policyExec" : "validPhoneFormat",
                 "clientValidation": true,
+                "validateOnlyIfPresent": true,
                 "policyRequirements": ["VALID_PHONE_FORMAT"]
             },
             {   "policyId" : "at-least-X-capitals",
+                "policyExec" : "atLeastXCapitalLetters", 
                 "clientValidation": true,
-                "policyExec" : "atLeastXCapitalLettersWhenRequired", 
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["AT_LEAST_X_CAPITAL_LETTERS"]
             },
             {   "policyId" : "at-least-X-numbers",
+                "policyExec" : "atLeastXNumbers", 
                 "clientValidation": true,
-                "policyExec" : "atLeastXNumbersWhenRequired", 
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["AT_LEAST_X_NUMBERS"]
             },
             {   "policyId" : "minimum-length",
+                "policyExec" : "minLength", 
                 "clientValidation": true,
-                "policyExec" : "minLengthWhenRequired", 
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["MIN_LENGTH"]
             },
             {   "policyId" : "cannot-contain-others",
-                "clientValidation": true,
                 "policyExec" : "cannotContainOthers", 
+                "clientValidation": true,
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["CANNOT_CONTAIN_OTHERS"]
             },
             {
@@ -106,38 +114,6 @@ var policyConfig = {
             }
         ] 
     };
-
-// this function must be defined and identical on both the client and the server side if it to be used in a 
-// function that is identified as "clientValidation": true
-var checkIfRequiredApplies = function(allPolicyRequirements,failedPolicyRequirements,value) {
-    var i,j,
-        hasRequired=false,
-        requireFailed=false;
-    
-    if (typeof(allPolicyRequirements) !== "undefined") {
-        for (i in allPolicyRequirements) {
-            if (allPolicyRequirements[i]  === "REQUIRED") {
-                hasRequired = true;
-                break;
-            }
-        }
-    }
-    if (hasRequired && typeof(failedPolicyRequirements) !== "undefined") {
-        for (j in failedPolicyRequirements) {
-            if (failedPolicyRequirements[j].policyRequirement  === "REQUIRED") {
-                requireFailed = true;
-                break;
-            }
-        }
-    }
-    // this means that the 'required' flag has not been set, even though this field is empty; 
-    // this indicates the required attribute is not being enforced 
-    if (hasRequired && !requireFailed && !(typeof(value) === "string" && value.length)) { 
-        return false; // do not attempt to impose this policy rule on this optional field
-    } else {
-        return hasRequired;
-    }
-};
 
 function required(fullObject, value, params, propName) {
     if (value === undefined) {
@@ -157,9 +133,8 @@ function maxAttemptsTriggersLockCooldown(fullObject, value, params, property) {
     var failures = [],
         lastFailedDate = new Date(fullObject[params.dateTimeField]);
     
-    if (    value > params.max &&
-            (lastFailedDate.getTime() + (1000*60*params.numMinutes)) > (new Date()).getTime()
-    ) { 
+    if (value > params.max &&
+        (lastFailedDate.getTime() + (1000*60*params.numMinutes)) > (new Date()).getTime()) { 
          failures = [{"policyRequirement": "NO_MORE_THAN_X_ATTEMPTS_WITHIN_Y_MINUTES", params: {"max":params.max,"numMinutes":params.numMinutes}}];
     }
     return failures;
@@ -209,75 +184,68 @@ function unique(fullObject, value, params, property) {
     return [];
 }
 
-function validDateWhenRequired(fullObject, value, params, property) {
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || isNaN(new Date(value).getTime()))) {
+function validDate(fullObject, value, params, property) {
+    if (typeof(value) !== "string" || !value.length || isNaN(new Date(value).getTime())) {
         return [ {"policyRequirement": "VALID_DATE"}];
     } else {
         return [];
     }
 }
 
-function validPhoneFormatWhenRequired(fullObject, value, params, property) {
+function validPhoneFormat(fullObject, value, params, property) {
     var phonePattern = /^\+?([0-9\- \(\)])*$/;
 
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || !phonePattern.test(value))) {
+    if (typeof(value) !== "string" || !value.length || !phonePattern.test(value)) {
         return [ {"policyRequirement": "VALID_PHONE_FORMAT"}];
     } else {
         return [];
     }
 }
 
-function validNameFormatWhenRequired(fullObject, value, params, property) {
+function validNameFormat(fullObject, value, params, property) {
     var namePattern = /^([A-Za'-\u0105\u0107\u0119\u0142\u00F3\u015B\u017C\u017A\u0104\u0106\u0118\u0141\u00D3\u015A\u017B\u0179\u00C0\u00C8\u00CC\u00D2\u00D9\u00E0\u00E8\u00EC\u00F2\u00F9\u00C1\u00C9\u00CD\u00D3\u00DA\u00DD\u00E1\u00E9\u00ED\u00F3\u00FA\u00FD\u00C2\u00CA\u00CE\u00D4\u00DB\u00E2\u00EA\u00EE\u00F4\u00FB\u00C3\u00D1\u00D5\u00E3\u00F1\u00F5\u00C4\u00CB\u00CF\u00D6\u00DC\u0178\u00E4\u00EB\u00EF\u00F6\u00FC\u0178\u00A1\u00BF\u00E7\u00C7\u0152\u0153\u00DF\u00D8\u00F8\u00C5\u00E5\u00C6\u00E6\u00DE\u00FE\u00D0\u00F0\-\s])+$/;
 
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || !namePattern.test(value))) {
+    if (typeof(value) !== "string" || !value.length || !namePattern.test(value)) {
         return [ {"policyRequirement": "VALID_NAME_FORMAT"}];
     } else {
         return [];
     }
 }
 
-function minLengthWhenRequired(fullObject, value, params, property) {
+function minLength(fullObject, value, params, property) {
     var minLength = params.minLength;
     
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || value.length < minLength)) {
+    if (typeof(value) !== "string" || !value.length || value.length < minLength) {
         return [ { "policyRequirement" : "MIN_LENGTH", "params" : {"minLength":minLength} } ];
     } else {
         return [];
     }
 }
 
-function atLeastXCapitalLettersWhenRequired(fullObject, value, params, property) {
+function atLeastXCapitalLetters(fullObject, value, params, property) {
     var reg = /[(A-Z)]/g;
     
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numCaps)) {
+    if (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numCaps) {
         return [ { "policyRequirement" : "AT_LEAST_X_CAPITAL_LETTERS", "params" : {"numCaps": params.numCaps} } ];
     } else {
         return [];
     }
 }
 
-function atLeastXNumbersWhenRequired(fullObject, value, params, property) {
+function atLeastXNumbers(fullObject, value, params, property) {
     var reg = /\d/g;
     
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numNums)) {
+    if (typeof(value) !== "string" || !value.length || value.match(reg) === null || value.match(reg).length < params.numNums) {
         return [ { "policyRequirement" : "AT_LEAST_X_NUMBERS", "params" : {"numNums": params.numNums}  } ];
     } else {
         return [];
     }
 }
 
-function validEmailAddressFormatWhenRequired(fullObject, value, params, property) {
+function validEmailAddressFormat(fullObject, value, params, property) {
     var emailPattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/; 
     
-    if (checkIfRequiredApplies(this.allPolicyRequirements, this.failedPolicyRequirements, value) && 
-        (typeof(value) !== "string" || !value.length || !emailPattern.test(value))) {
+    if (typeof(value) !== "string" || !value.length || !emailPattern.test(value)) {
         return [ {"policyRequirement": "VALID_EMAIL_ADDRESS_FORMAT"}];
     } else {
         return [];
