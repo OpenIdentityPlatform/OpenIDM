@@ -211,6 +211,13 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
     return true;
 }
 
+function disallowQueryExpression() {
+    if (request.params && typeof request.params['_queryExpression'] != "undefined") {
+        return false;
+    }
+    return true;
+}
+
 //////// Do not alter functions below here as part of your authz configuration
 
 
