@@ -98,7 +98,7 @@ var httpAccessConfig =
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
         },
 
-        // openidm-admin can request anything
+        // openidm-admin can request nearly anything (some exceptions being a few system endpoints)
         {  
             "pattern"   : "*",
             "roles"     : "openidm-admin",
@@ -106,6 +106,20 @@ var httpAccessConfig =
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowQueryExpression()",
             "excludePatterns": "system/*"
+        },
+        // additional rules for openidm-admin that selectively enable certain parts of system/
+        {  
+            "pattern"   : "system/*",
+            "roles"     : "openidm-admin",
+            "methods"   : "create,read,update,delete,patch,query", // restrictions on 'action'
+            "actions"   : "",
+            "customAuthz" : "disallowQueryExpression()"
+        },
+        {  
+            "pattern"   : "system/*",
+            "roles"     : "openidm-admin",
+            "methods"   : "action",
+            "actions"   : "createconfiguration"
         },
         
         // Additional checks for authenticated users
