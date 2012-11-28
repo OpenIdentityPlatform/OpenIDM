@@ -165,9 +165,9 @@
             "copyright" : "Copyright (c) 2010-12 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
             "validation" : {
-                "VALID_PHONE_FORMAT": "Contains invalid characters",
-                "VALID_NAME_FORMAT": "Contains invalid characters",
-                "VALID_EMAIL_ADDRESS_FORMAT": "Not a valid email address",
+                "VALID_PHONE_FORMAT": "Must be a valid phone number",
+                "VALID_NAME_FORMAT": "Must have valid name characters",
+                "VALID_EMAIL_ADDRESS_FORMAT": "Must be a valid email address",
                 "AT_LEAST_X_CAPITAL_LETTERS" : "At least __numCaps__ capital letters",
                 "AT_LEAST_X_NUMBERS" : "At least __numNums__ numbers",
                 "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__",

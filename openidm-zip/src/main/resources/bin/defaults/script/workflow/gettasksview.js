@@ -63,7 +63,7 @@ var getUsersWhoCanBeAssignedToTask = function(taskId) {
             };
         
         var isTaskManager = false;
-        for(i = 0; i < request.parent.security['openidm-roles'].length; i++) {
+        for(var i = 0; i < request.parent.security['openidm-roles'].length; i++) {
             if(request.parent.security['openidm-roles'][i] === 'tasks-manager') {
                 isTaskManager = true;
                 break;
