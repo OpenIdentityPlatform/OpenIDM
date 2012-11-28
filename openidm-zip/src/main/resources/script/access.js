@@ -103,7 +103,8 @@ var httpAccessConfig =
             "pattern"   : "*",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
-            "actions"   : "*" // default to all actions allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowQueryExpression()"
         },
         
         // Additional checks for authenticated users
@@ -130,7 +131,7 @@ var httpAccessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized')"
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized') && disallowQueryExpression()"
         },
 
         // enforcement of which notifications you can read and delete is done within the endpoint 
