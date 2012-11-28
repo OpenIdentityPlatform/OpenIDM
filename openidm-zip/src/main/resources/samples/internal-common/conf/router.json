@@ -3,7 +3,7 @@
         {
             "onRequest" : {
                 "type" : "text/javascript",
-                "file" : "script/router-authz.js"
+                "file" : "bin/defaults/script/router-authz.js"
             }
         }
     ]

@@ -36,6 +36,10 @@ import org.slf4j.LoggerFactory;
 // TODO: replace use of this class with TokenHandler in org.forgerock.openidm.repo.util
 public class TokenHandler {
 
+    public static final String PREFIX_UNQUOTED = "unquoted";
+
+    public static final String PREFIX_DOTNOTATION = "dotnotation";
+
     final static Logger logger = LoggerFactory.getLogger(TokenHandler.class);
     
     // The OpenIDM query token is of format ${token-name}
@@ -55,12 +59,21 @@ public class TokenHandler {
         java.util.regex.Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buffer = new StringBuffer();
         while (matcher.find()) {
-            String tokenKey = matcher.group(1);       
+            String fullTokenKey = matcher.group(1);
+            String tokenKey = fullTokenKey;
+            String tokenPrefix = null;
+            String[] tokenKeyParts = tokenKey.split(":", 2);
+            // if prefix found
+            if (tokenKeyParts.length == 2) {
+                tokenPrefix = tokenKeyParts[0];
+                tokenKey = tokenKeyParts[1];
+            }
             if (!params.containsKey(tokenKey)) {
                 // fail with an exception if token not found
                 throw new BadRequestException("Missing entry in params passed to query for token " + tokenKey);
             } else {
                 Object replacement = params.get(tokenKey);
+
                 if (replacement instanceof List) {
                     StringBuffer commaSeparated = new StringBuffer();
                     boolean first = true;
@@ -77,6 +90,25 @@ public class TokenHandler {
                 if (replacement == null) {
                     replacement = "";
                 }
+                
+                // Optional control of representation via prefix
+                if (tokenPrefix != null) {
+                    if (tokenPrefix.equals(PREFIX_UNQUOTED)) {
+                        // Leave replacement unquoted
+                    } else if (tokenPrefix.equals(PREFIX_DOTNOTATION)) {
+                        // Convert Json Pointer to OrientDB dot notation
+                        String dotDelimited = replacement.toString().replace('/', '.');
+                        if (dotDelimited.startsWith(".")) {
+                            replacement = dotDelimited.substring(1);
+                        } else {
+                            replacement = dotDelimited;
+                        }
+                    }
+                } else {
+                    // Default is single quoted string replacement
+                    replacement = "'" + replacement + "'";
+                }
+                
                 matcher.appendReplacement(buffer, "");
                 buffer.append(replacement);
             }
@@ -96,15 +128,29 @@ public class TokenHandler {
      * 
      * @param queryString the query with OpenIDM format tokens ${token}
      * @return the query with all tokens replaced with the OrientDB style tokens :token
+     * @throws PrepareNotSupported if this method knows a given statement can not be converted into a prepared statement.
+     * That a statement was not rejected here though does not mean it could not fail during the parsing phase later.
      */
-    String replaceTokensWithOrientToken(String queryString) {
+    String replaceTokensWithOrientToken(String queryString) throws PrepareNotSupported {
         Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buf = new StringBuffer();
         while (matcher.find()) {
             String origToken = matcher.group(1);
-            if (origToken != null && origToken.length() > 0) {
+            
+            String tokenKey = origToken;
+            String tokenPrefix = null;
+            String[] tokenKeyParts = tokenKey.split(":", 2);
+            // if prefix found
+            if (tokenKeyParts.length == 2) {
+                tokenPrefix = tokenKeyParts[0];
+                tokenKey = tokenKeyParts[1];
+            }
+            if (tokenPrefix != null && tokenPrefix.equals(PREFIX_DOTNOTATION)) {
+                throw new PrepareNotSupported("Prepared query not supported for params with dotnotation conversion");
+            }
+            if (tokenKey != null && tokenKey.length() > 0) {
                 // OrientDB token is of format :token-name
-                String newToken = ":" + origToken;
+                String newToken = ":" + tokenKey;
                 matcher.appendReplacement(buf, "");
                 buf.append(newToken);
             }

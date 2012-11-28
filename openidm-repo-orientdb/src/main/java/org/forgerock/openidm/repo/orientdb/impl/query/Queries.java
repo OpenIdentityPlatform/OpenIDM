@@ -180,7 +180,7 @@ public class Queries {
         Map<String, QueryInfo> prepQueries = new HashMap<String, QueryInfo>();
         
         // Query all IDs is a mandatory query, default it and allow override.
-        QueryInfo defaultAllIdsQuery = prepareQuery("select _openidm_id from ${_resource}");
+        QueryInfo defaultAllIdsQuery = prepareQuery("select _openidm_id from ${unquoted:_resource}");
         prepQueries.put("query-all-ids", defaultAllIdsQuery);
         
         // Populate/Override with Queries configured
@@ -241,6 +241,9 @@ public class Queries {
             String replacedQueryString = tokenHandler.replaceTokensWithOrientToken(queryString);
             OSQLSynchQuery<ODocument> query = new OSQLSynchQuery<ODocument>(replacedQueryString);
             queryInfo = new QueryInfo(true, query, queryString);
+        } catch (PrepareNotSupported ex) {
+            // Statement not in a format that it can be converted into prepared statement
+            queryInfo = new QueryInfo(false, null, queryString);
         } catch (com.orientechnologies.orient.core.exception.OQueryParsingException ex) {
             // With current OrientDB impl parsing will actually only fail on first use, 
             // hence unless the implementation changes this is unlikely to trigger

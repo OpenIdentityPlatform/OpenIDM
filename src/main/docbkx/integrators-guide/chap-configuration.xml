@@ -385,6 +385,28 @@
     "operationOptions": {}
 }</screen>
 
+  <para>You can change the configuration over REST by using an HTTP PUT request 
+  to modify the required configuration object. The following example modifies 
+  the <filename>router.json</filename> file to remove all filters, effectively 
+  bypassing any policy validation.</para>
+  
+  <programlisting language="javascript">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request PUT
+ --data '{
+          "filters" : [
+             {
+                "onRequest" : {
+                   "type" : "text/javascript",
+                   "file" : "script/router-authz.js"
+                }
+              }
+           ]
+           }'
+ "http://localhost:8080/openidm/config/router"
+  </programlisting>
+
   <para>See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
   Reference</citetitle></link> appendix for additional details and

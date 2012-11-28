@@ -55,7 +55,7 @@ import org.forgerock.openidm.shell.CustomCommandScope;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class LocalCommandScope implements CustomCommandScope {
+public class LocalCommandScope extends CustomCommandScope {
 
     private static String DOTTED_PLACEHOLDER = "............................................";
     private final ObjectMapper mapper = new ObjectMapper();
@@ -65,10 +65,9 @@ public class LocalCommandScope implements CustomCommandScope {
      */
     public Map<String, String> getFunctionMap() {
         Map<String, String> help = new HashMap<String, String>();
-        help.put("validate", "Validates all json configuration file in /conf folder.");
-        help.put("encrypt", "Encrypt input string");
-        help.put("keytool",
-                "Export or import SecretKeyEntry. Keytool does not allow to export or import SecretKeyEntries.");
+        help.put("validate", getLongHeader("validate"));
+        help.put("encrypt", getLongHeader("encrypt"));
+        help.put("keytool", getLongHeader("keytool"));
         return help;
     }
 
@@ -79,11 +78,11 @@ public class LocalCommandScope implements CustomCommandScope {
         return "local";
     }
 
-    @Descriptor("")
+    @Descriptor("Export or import a SecretKeyEntry. The Java Keytool does not allow for exporting or importing SecretKeyEntries.")
     public void keytool(CommandSession session, @Parameter(names = { "-i", "--import" },
             presentValue = "true", absentValue = "false") boolean doImport, @Parameter(names = {
         "-e", "--export" }, presentValue = "true", absentValue = "false") boolean doExport,
-            @Descriptor("Key alias") String alias) {
+            @Descriptor("key alias") String alias) {
         if (doImport ^ doExport) {
             String type =
                     IdentityServer.getInstance().getProperty("openidm.keystore.type",
@@ -187,6 +186,7 @@ public class LocalCommandScope implements CustomCommandScope {
         }
     }
 
+    @Descriptor("Validates all json configuration files in the configuration (default: /conf) folder.")
     public void validate(CommandSession session) {
         File file = IdentityServer.getFileForProjectPath("conf");
         session.getConsole().println(
@@ -218,7 +218,7 @@ public class LocalCommandScope implements CustomCommandScope {
         }
     }
 
-    @Descriptor("Encrypt the input string")
+    @Descriptor("Encrypt the input string.")
     public void encrypt(CommandSession session, @Parameter(names = { "-j", "--json" },
             presentValue = "false", absentValue = "true") boolean isString) {
         session.getConsole().append("Enter the ").append(isString ? "String" : "Json").println(
@@ -226,10 +226,10 @@ public class LocalCommandScope implements CustomCommandScope {
         encrypt(session, isString, loadFromConsole(session));
     }
 
-    @Descriptor("Encrypt the input string")
+    @Descriptor("Encrypt the input string.")
     public void encrypt(CommandSession session, @Parameter(names = { "-j", "--json" },
             presentValue = "false", absentValue = "true") boolean isString,
-            @Descriptor("Source string to encrypt") String name) {
+            @Descriptor("source string to encrypt") String name) {
         try {
             JsonValue secure =
                     CryptoServiceFactory.getInstance().encrypt(
