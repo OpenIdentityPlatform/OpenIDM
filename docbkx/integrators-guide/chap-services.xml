@@ -308,7 +308,7 @@ Stopping OpenIDM (454)</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/info/ping"
+ "http://localhost:8080/openidm/info/login"
 
  {
   "username":"openidm-admin",
