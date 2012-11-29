@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -76,15 +77,16 @@ public class IdentityServer implements PropertyAccessor {
      *            properties.
      */
     private IdentityServer(PropertyAccessor properties) {
-        PropertyAccessor propertyAccessor = properties;
-        if (null == propertyAccessor) {
-            propertyAccessor = new SystemPropertyAccessor(null);
+        if (null == properties) {
+            configProperties = new SystemPropertyAccessor(null);
+            bootFileProperties = Collections.emptyMap();
+        } else {
+            configProperties = properties;
+            String bootFileName =
+                    getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
+                            ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
+            bootFileProperties = loadProps(bootFileName);
         }
-        configProperties = propertyAccessor;
-        String bootFileName =
-                getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
-                        ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
-        bootFileProperties = loadProps(bootFileName);
     }
 
     public static IdentityServer getInstance() {

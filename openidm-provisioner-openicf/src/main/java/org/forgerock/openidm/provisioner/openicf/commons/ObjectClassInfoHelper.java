@@ -191,6 +191,10 @@ public class ObjectClassInfoHelper {
             }
         }
         result.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(source.getUid().getUidValue()));
+        if (null != source.getUid().getRevision()) {
+            //System supports Revision
+            result.put(ServerConstants.OBJECT_PROPERTY_REV, source.getUid().getRevision());
+        }
         return result;
     }
 
