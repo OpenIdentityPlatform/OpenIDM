@@ -70,7 +70,7 @@
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset my password",
+                "resetPassword" : "Reset your password",
                 "siteIdentificationHeader": "Site Identification",
                 "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
             },
