@@ -1285,7 +1285,7 @@
     <programlisting language="javascript">
 "systemActions" : [   
     {
-        "_script-id" : "ConnectorScriptName",
+        "_scriptId" : "ConnectorScriptName",
         "actions" : [
             {
                 "systemType" : ".*ActiveDirectoryConnector",
@@ -1310,7 +1310,7 @@
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  "http://localhost:8080/openidm/system/ActiveDirectory/account?_action=script
- &amp;_script-id=ConnectorScriptName&amp;loginName=myUser"</screen>
+ &amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
    </section>
   </section>
 
