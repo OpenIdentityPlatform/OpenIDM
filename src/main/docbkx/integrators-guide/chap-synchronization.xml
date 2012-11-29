@@ -886,9 +886,9 @@
  --header "X-OpenIDM-Password: openidm-admin"
  --header "Content-Type: application/json"
  --request POST
- --data '{
+ --data '[{
           "replace":"familyName","value": "Brown"
-         }'
+         }]'
  "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=joe"
    </screen>
    
