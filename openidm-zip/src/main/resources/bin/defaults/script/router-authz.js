@@ -286,7 +286,7 @@ function containsItems(items, configItems) {
         return true;
     }
     for (var i = 0; i < items.length; i++) {
-        if (contains(configItems, items[i])) {
+        if (containsIgnoreCase(configItems, items[i])) {
             return true;
         }
     }
@@ -297,7 +297,25 @@ function containsItem(item, configItems) {
     if (configItems == "*") {
         return true;
     }
-    return contains(configItems.split(','), item);
+    return containsIgnoreCase(configItems.split(','), item);
+}
+
+function containsIgnoreCase(a, o) {
+    if (typeof(a) != 'undefined' && a != null) {
+        for (var i = 0; i <= a.length; i++) {
+            var str1 = o, str2 = a[i];
+            if (typeof(o) != 'undefined' && o != null) {
+                str1 = o.toLowerCase();
+            }
+            if (typeof(a[i]) != 'undefined' && a[i] != null) {
+                str2 = a[i].toLowerCase();
+            }
+            if (str1 === str2) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function contains(a, o) {
