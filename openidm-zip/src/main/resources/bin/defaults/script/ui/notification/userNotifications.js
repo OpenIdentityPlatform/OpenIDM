@@ -33,17 +33,15 @@ if (request.method == "read") {
 
     var userId = request.parent.security.userid.id, res = {};
 
-    if(request.parent.security.userid.component !== "internal/user") {
-        var params = {
-            "_queryId": "get-notifications-for-user",
-            "userId": userId
-        };
-          
-        var ret = openidm.query("repo/ui/notification", params);
-        
-        if(ret && ret.result) {
-            res = ret.result
-        }
+    var params = {
+        "_queryId": "get-notifications-for-user",
+        "userId": userId
+    };
+      
+    var ret = openidm.query("repo/ui/notification", params);
+    
+    if(ret && ret.result) {
+        res = ret.result
     }
     
     res

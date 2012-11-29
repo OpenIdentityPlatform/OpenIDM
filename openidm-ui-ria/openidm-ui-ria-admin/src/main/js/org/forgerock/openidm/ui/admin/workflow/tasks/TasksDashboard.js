@@ -59,7 +59,6 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                 this.myTasks.render("assigned", $("#myTasks"));
                 startProcessView.render();
                 
-                if (params.mode === "user") {
                     //notifications
                     notificationDelegate.getNotificationsForUser(function(notifications) {
                         
@@ -76,7 +75,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TasksDashboard", [
                         notificationsView = new NotificationsView();
                         notificationsView.render({el: $("#notifications"), items: notifications});
                     });
-                }
+                    
                 if (args && args[0] && args[0] !== '') {
                     this.showDetails({id: args[0]});
                 }
