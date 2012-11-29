@@ -30,12 +30,12 @@ import java.util.Map;
 /**
  * OSGi services wanting to be schedulable via the Scheduler service must
  * implement this interface.
- * 
+ *
  * @author aegloff
  */
 
 public interface ScheduledService {
-    
+
     // Reserved keys for the ScheduledService execution context map
     final static String CONFIG_NAME = "scheduler.config-name";
     final static String INVOKER_NAME = "scheduler.invoker-name";
@@ -44,14 +44,15 @@ public interface ScheduledService {
     final static String NEXT_FIRE_TIME = "scheduler.next-fire-time";
     final static String CONFIGURED_INVOKE_SERVICE = "scheduler.invokeService";
     final static String CONFIGURED_INVOKE_CONTEXT = "scheduler.invokeContext";
-    
+    final static String CONFIGURED_INVOKE_LOG_LEVEL = "scheduler.invokeLogLevel";
+
     /**
      * Invoked by the scheduler when the scheduler triggers.
-     * 
+     *
      * @param context Context information passed by the scheduler service
-     * @throws ExecutionException if execution of the scheduled work failed. 
+     * @throws ExecutionException if execution of the scheduled work failed.
      * Implementations can also throw RuntimeExceptions which will get logged.
-     * @throws org.forgerock.openidm.scheduler.ExecutionException 
+     * @throws org.forgerock.openidm.scheduler.ExecutionException
      */
     void execute(Map<String, Object> context) throws ExecutionException;
 }
