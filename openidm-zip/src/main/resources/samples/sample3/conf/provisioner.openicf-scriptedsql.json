@@ -41,12 +41,12 @@
         "jdbcDriver" : "com.mysql.jdbc.Driver",
         "jdbcConnectionUrl" : "jdbc:mysql://localhost:3306/HRDB",
         "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
-        "createScriptFileName" : "/opt/111/openidm/tools/CreateScript.groovy",
-        "testScriptFileName" : "/opt/111/openidm/tools/TestScript.groovy",
-        "searchScriptFileName" : "/opt/111/openidm/tools/SearchScript.groovy",
-        "deleteScriptFileName" : "/opt/111/openidm/tools/DeleteScript.groovy",
-        "updateScriptFileName" : "/opt/111/openidm/tools/UpdateScript.groovy",
-        "syncScriptFileName" : "/opt/111/openidm/tools/SyncScript.groovy"
+        "createScriptFileName" : "/opt/openidm/samples/sample3/tools/CreateScript.groovy",
+        "testScriptFileName" : "/opt/openidm/samples/sample3/tools/TestScript.groovy",
+        "searchScriptFileName" : "/opt/openidm/samples/sample3/tools/SearchScript.groovy",
+        "deleteScriptFileName" : "/opt/openidm/samples/sample3/tools/DeleteScript.groovy",
+        "updateScriptFileName" : "/opt/openidm/samples/sample3/tools/UpdateScript.groovy",
+        "syncScriptFileName" : "/opt/openidm/samples/sample3/tools/SyncScript.groovy"
     },
     "objectTypes" : {
         "group" : {
