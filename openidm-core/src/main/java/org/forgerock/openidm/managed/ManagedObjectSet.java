@@ -23,45 +23,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// OSGi
-import org.osgi.framework.ServiceReference;
-
-// JSON Fluent
 import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.resource.JsonResourceContext;
-
-// OpenIDM
-import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.script.Script;
-import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.Scripts;
-import org.forgerock.openidm.script.ScriptThrownException;
-import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.openidm.sync.SynchronizationListener;
-
-// Deprecated
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
 import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.patch.JsonPatchWrapper;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.script.Script;
+import org.forgerock.openidm.script.ScriptException;
+import org.forgerock.openidm.script.ScriptThrownException;
+import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.SynchronizationListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides access to a set of managed objects of a given type.
@@ -106,6 +94,9 @@ class ManagedObjectSet extends ObjectSetJsonResource {
     /** Properties for which triggers are executed during object set operations. */
     private ArrayList<ManagedObjectProperty> properties = new ArrayList<ManagedObjectProperty>();
 
+    /** Flag for indicating if policy enforcement is enabled */
+    private boolean enforcePolicies;
+    
     /**
      * Constructs a new managed object set.
      *
@@ -127,6 +118,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         for (JsonValue property : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(service, property));
         }
+        enforcePolicies = Boolean.parseBoolean(IdentityServer.getInstance().getProperty("openidm.policy.enforcement.enabled", "true"));
         LOGGER.debug("Instantiated managed object set: {}", name);
     }
 
@@ -456,10 +448,12 @@ class ManagedObjectSet extends ObjectSetJsonResource {
             // Validate policies on the patched object
             params.add("_action", "validateObject");
             params.add("value", newValue);
-            JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
-            if (!result.isNull() && !result.get("result").asBoolean()) {
-                LOGGER.debug("Requested patch failed policy validation: {}", result);
-                throw new ForbiddenException("Failed policy validation", result.asMap());
+            if (enforcePolicies) {
+                JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
+                if (!result.isNull() && !result.get("result").asBoolean()) {
+                    LOGGER.debug("Requested patch failed policy validation: {}", result);
+                    throw new ForbiddenException("Failed policy validation", result.asMap());
+                }
             }
 
             try {

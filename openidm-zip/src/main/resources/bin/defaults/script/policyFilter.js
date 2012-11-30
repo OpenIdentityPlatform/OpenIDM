@@ -28,7 +28,9 @@ params._caller = "filterEnforcer";
 
 var result;
 
-if (!(request.id.indexOf("policy/")==0)) {
+var enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
+
+if (!(request.id.indexOf("policy/")==0) && enforce !== "false") {
     result = openidm.action("policy/" + request.id, params, request.value);
     
     if (!result.result) {
