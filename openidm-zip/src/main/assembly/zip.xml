@@ -359,7 +359,7 @@
             <excludes>
                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
                 <exclude>org.osgi:*</exclude>
-                <exclude>org.forgerock.openicf.connectors.*:openicf-*</exclude>
+                <exclude>org.forgerock.openicf.connectors:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
@@ -388,7 +388,7 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
-                <include>org.forgerock.openicf.connectors.*:*-connector</include>
+                <include>org.forgerock.openicf.connectors:*-connector</include>
             </includes>
         </dependencySet>
         <dependencySet>
