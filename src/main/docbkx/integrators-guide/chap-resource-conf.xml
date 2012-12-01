@@ -781,7 +781,7 @@
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.identityconnectors.ldap.LdapConnector",
         "bundleName":
-            "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+            "org.forgerock.openicf.connectors.ldap-connector",
         "bundleVersion": "<?eval ${openicfBundleVersion}?>"
     }
 }</programlisting>
@@ -1331,7 +1331,7 @@
     "connectorHostRef": "#LOCAL",
     "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
     "bundleName":
-      "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
+      "org.forgerock.openicf.connectors.csvfile-connector",
     "bundleVersion": "<?eval ${openicfBundleVersion}?>"
   }
 }</programlisting>
@@ -1537,7 +1537,7 @@ return id;
     {
       "connectorName": "org.identityconnectors.ldap.LdapConnector",
       "bundleName":
-        "org.forgerock.openicf.connectors.ldap.openicf-ldap-connector",
+        "org.forgerock.openicf.connectors.ldap-connector",
       "bundleVersion": "<?eval ${openicfBundleVersion}?>"
     },
     {
@@ -1549,9 +1549,9 @@ return id;
     {
       "connectorHostRef":
        "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
-      "connectorName": "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector",
+      "connectorName": "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector",
       "bundleName":
-       "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
+       "org.forgerock.openicf.connectors.scriptedsql-connector",
       "bundleVersion": "<?eval ${openicfBundleVersion}?>"
     },
     {
@@ -1559,7 +1559,7 @@ return id;
        "osgi:service/org.forgerock.openicf.framework.api.osgi.ConnectorManager",
       "connectorName": "org.forgerock.openicf.csvfile.CSVFileConnector",
       "bundleName":
-       "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
+       "org.forgerock.openicf.connectors.csvfile-connector",
       "bundleVersion": "<?eval ${openicfBundleVersion}?>"
     }
   ]

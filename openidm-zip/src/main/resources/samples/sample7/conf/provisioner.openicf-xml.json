@@ -1,9 +1,9 @@
 {
     "name" : "xmlfile",
     "connectorRef" : {
-        "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
+        "bundleName"    : "org.forgerock.openicf.connectors.xml-connector",
         "bundleVersion" : "1.1.0.1-SNAPSHOT",
-        "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
+        "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     },
     "producerBufferSize" : 100,
     "connectorPoolingSupported" : true,
