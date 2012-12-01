@@ -102,7 +102,7 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
      <screen>$ cd /path/to
 $ unzip ~/Downloads/openidm-<?eval ${docTargetVersion}?>.zip
 ...
-  inflating: openidm/connectors/openicf-scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
+  inflating: openidm/connectors/scriptedsql-connector-<?eval ${openicfBundleVersion}?>.jar
   inflating: openidm/bin/felix.jar   
   inflating: openidm/bin/openidm.jar
 $</screen>
