@@ -2,9 +2,9 @@
    "name" : "HR",
    "connectorRef" :
       {
-         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.file.openicf-csvfile-connector",
-         "bundleVersion" : "1.1.0.0"
+          "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
+          "bundleVersion" : "1.1.0.1-SNAPSHOT",
+          "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
       },
    "poolConfigOption" :
       {
