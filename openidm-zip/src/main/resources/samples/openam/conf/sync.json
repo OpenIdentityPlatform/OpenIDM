@@ -1,0 +1,127 @@
+{
+    "mappings" : [
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "file" : "script/ldapBackCorrelationQuery.js"
+            },
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "familyName",
+                    "target" : "sn"
+                },
+                {
+                    "source" : "familyName",
+                    "target" : "cn"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "password",
+                    "target" : "__PASSWORD__"
+                },
+                {
+                    "source" : "assignedDashboard",
+                    "target" : "assignedDashboard"
+                },
+                {
+                    "source" : "email",
+                    "target" : "mail"
+                }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.__PASSWORD__ = source.password;target.dn = 'uid=' + source.userName + ',ou=People,dc=openam,dc=forgerock,dc=org';"
+            },
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "links" : "systemLdapAccounts_managedUser",
+            "properties" : [
+                {
+                    "source" : "assignedDashboard",
+                    "target" : "assignedDashboard"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        }
+    ]
+}
