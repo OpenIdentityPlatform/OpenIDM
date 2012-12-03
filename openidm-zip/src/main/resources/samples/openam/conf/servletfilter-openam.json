@@ -9,7 +9,8 @@
         "openam.agents.bootstrap.dir" : "/jetty_v61_agent/lib"
     },
     "requestAttributes" : {
-        "openidm.authinvoked" : "servletfilter-openam"
+        "openidm.authinvoked" : "servletfilter-openam",
+        "openidm.username" : "anonymous"
     },
     "scriptExtensions" : {
         "augmentSecurityContext" : {

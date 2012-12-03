@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="org.forgerock.openidm.ui">
+  <signal id="requestWithdrawn" name="Request Withdrawn"></signal>
+  <process id="UserApplicationAcceptance" name="Request Application">
+    <endEvent id="endevent1" name="End"></endEvent>
+    <userTask id="usertask1" name="Application Acceptance" activiti:candidateUsers="openidm-admin" activiti:candidateGroups="openidm-admin" activiti:formKey="org.forgerock.applicationAcceptance" activiti:priority="5">
+      <extensionElements>
+        <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+          <activiti:value id="accept" name="Accept"></activiti:value>
+          <activiti:value id="reject" name="Reject"></activiti:value>
+        </activiti:formProperty>
+        <activiti:formProperty id="_formGenerationTemplate" type="string" default="
+
+&lt;div class=&quot;field&quot;&gt;  
+
+&lt;label class=&quot;light&quot;&gt;{{t &quot;common.form.decision&quot;}}&lt;/label&gt; 
+
+{{select  variables.decisionOptions &quot;decision&quot; &quot;0&quot; &quot;&quot;  &quot; data-validator='required' &quot;}}
+
+&lt;span class=&quot;ok&quot; style=&quot;&quot;&gt;✔&lt;/span&gt;
+&lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt; &lt;/div&gt;
+
+"></activiti:formProperty>
+      </extensionElements>
+    </userTask>
+    <scriptTask id="scripttask1" name="Approve application" scriptFormat="groovy">
+      <script><![CDATA[
+out:println "Request has been accepted"
+]]></script>
+    </scriptTask>
+    <scriptTask id="scripttask2" name="Disapprove app" scriptFormat="groovy">
+      <script><![CDATA[
+out:println "Request has been rejected"]]></script>
+    </scriptTask>
+    <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway" default="flow4"></exclusiveGateway>
+    <scriptTask id="scripttask3" name="Prepare data for sending notification" scriptFormat="groovy">
+      <script><![CDATA[if (decision == 'accept') {
+	out:println "Sending notification as accepted"
+	notificationType = "3"
+        notificationMessage = "Request for applications " + application.name + "  has been approved"
+} else {
+	out:println "Sending notification as rejected"
+	notificationType = "4"
+        notificationMessage = "Request for applications " + application.name + "  has been rejected "
+}
+]]></script>
+    </scriptTask>
+    <scriptTask id="scripttask4" name="Assign Application" scriptFormat="groovy">
+      <script><![CDATA[
+
+def application = binding.variables.lnkId
+def alreadyAssigned = false
+def userId = binding.variables._requestor;
+
+def amUser = openidm.read("system/ldap/account/uid=" + userId + ",ou=People,dc=openam,dc=forgerock,dc=org");
+
+for (app in amUser.assignedDashboard) {
+    if (app.toLowerCase() == application.toLowerCase()) {
+    	out:println(userId + " already has " + app)
+    	alreadyAssigned = true
+    }
+}
+
+if (!alreadyAssigned) {
+	amUser.assignedDashboard.push(application)
+	openidm.update("system/ldap/account/uid=" + userId + ",ou=People,dc=openam,dc=forgerock,dc=org", '', amUser)
+}
+
+]]></script>
+    </scriptTask>
+    <scriptTask id="scripttask5" name="Read User Data" scriptFormat="groovy">
+      <script><![CDATA[
+
+
+]]></script>
+    </scriptTask>
+    <scriptTask id="scripttask6" name="Read Application Data" scriptFormat="groovy">
+      <script><![CDATA[
+
+]]></script>
+    </scriptTask>
+    <exclusiveGateway id="exclusivegateway2" name="Exclusive Gateway" default="flow22"></exclusiveGateway>
+    <exclusiveGateway id="exclusivegateway3" name="Exclusive Gateway"></exclusiveGateway>
+    <exclusiveGateway id="exclusivegateway4" name="Exclusive Gateway"></exclusiveGateway>
+    <startEvent id="startevent2" name="Start">
+      <extensionElements>
+        <activiti:formProperty id="lnkId" name="User Application Lnk Id" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="_requestor" name="Business Key" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="_businessKey" name="Business Key" type="string" required="true"></activiti:formProperty>
+        <activiti:formProperty id="_formGenerationTemplate" type="string" default="
+
+
+&lt;input type=&quot;hidden&quot; name=&quot;lnkId&quot; id=&quot;lnkId&quot;&gt;
+&lt;input type=&quot;hidden&quot; name=&quot;_businessKey&quot; id=&quot;_businessKey&quot;&gt;
+&lt;input type=&quot;hidden&quot; name=&quot;_requestor&quot; id=&quot;_requestor&quot;&gt;
+
+&lt;div id=&quot;availableApps&quot;&gt;Loading Applications List From OpenAM...&lt;/div&gt;
+&lt;script&gt;
+$(&quot;#availableApps&quot;).on(&quot;click&quot;, &quot;a&quot;, function (e) {
+    e.preventDefault();
+    $(this).closest(&apos;ul&apos;).find(&apos;li&apos;).css(&apos;border-color&apos;, &apos;&apos;);
+    $(this).closest(&apos;li&apos;).css(&quot;border-color&quot;, &quot;red&quot;);
+
+
+    $(&quot;#lnkId&quot;).val($(this).attr(&apos;appId&apos;));
+    $(&quot;#_businessKey&quot;).val($(this).attr(&apos;appId&apos;) + (new Date()).getTime());
+        });
+        require([&quot;org/forgerock/openam/ui/apps/AMDelegate&quot;,&quot;org/forgerock/commons/ui/common/main/Configuration&quot;], function (am,conf) { 
+            $(&quot;#_requestor&quot;).val(conf.loggedUser.userName);
+            am.getAvailableApplications(function (data) {
+                    var content = $(&quot;&lt;div/&gt;&quot;),
+                                  sortedKeys = _.sortBy(_.keys(data), function(v) { return v; }),
+                                                i=0;
+
+        content.append(&quot;&lt;h2 class=&apos;header&apos;&gt;Available Applications&lt;/h2&gt;&lt;ul class=&apos;appsDashboard&apos;/&gt;&quot;);
+                for (i in sortedKeys) {
+                            content.find(&apos;ul&apos;).append(&apos;&lt;li&gt;&lt;a href=&quot;#&quot; appId=&quot;&apos; + sortedKeys[i] + &apos;&quot;&gt;&lt;img src=&quot;&apos; + data[sortedKeys[i]].dashboardIcon[0] + &apos;&quot;&gt;&apos;+ data[sortedKeys[i]].dashboardName[0] +&apos;&lt;/a&gt;&lt;/li&gt;&apos;);
+                                    }
+                                            $(&quot;#availableApps&quot;).empty().append(content);
+                                                        });
+                                                        });
+
+&lt;/script&gt;
+"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <scriptTask id="scripttask8" name="Prepare Task" scriptFormat="groovy">
+      <script><![CDATA[ 
+decisionOptions = [ 'accept' : 'common.form.accept' , 'reject' : 'common.form.reject', '__null' : '  ']
+]]></script>
+    </scriptTask>
+
+    <callActivity id="callactivity1" name="Send notification" calledElement="sendNotificationProcess">
+      <extensionElements>
+        <activiti:in sourceExpression="${userApplicationLnk.requester}" target="notificationRequesterDiasplayable"></activiti:in>
+        <activiti:in sourceExpression="${user._id}" target="notificationReceiverId"></activiti:in>
+        <activiti:in sourceExpression="${notificationType}" target="notificationType"></activiti:in>
+        <activiti:in sourceExpression="${notificationMessage}" target="notificationMessage"></activiti:in>
+      </extensionElements>
+    </callActivity>
+
+    <sequenceFlow id="flow20" name="" sourceRef="startevent2" targetRef="scripttask5"></sequenceFlow>
+    <sequenceFlow id="flow21" name="" sourceRef="scripttask5" targetRef="exclusivegateway2"></sequenceFlow>
+    <sequenceFlow id="flow22" name="" sourceRef="exclusivegateway2" targetRef="scripttask8"></sequenceFlow>
+    <sequenceFlow id="flow23" name="" sourceRef="scripttask8" targetRef="usertask1"></sequenceFlow>
+    <sequenceFlow id="flow14" name="" sourceRef="usertask1" targetRef="exclusivegateway1"></sequenceFlow>
+    <sequenceFlow id="flow3" name="" sourceRef="exclusivegateway1" targetRef="scripttask4">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow4" name="" sourceRef="exclusivegateway1" targetRef="endevent1"></sequenceFlow>
+    <sequenceFlow id="flow10" name="" sourceRef="scripttask4" targetRef="endevent1"></sequenceFlow>
+
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_UserApplicationAcceptance">
+    <bpmndi:BPMNPlane bpmnElement="UserApplicationAcceptance" id="BPMNPlane_UserApplicationAcceptance">
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35" width="35" x="1590" y="250"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="usertask1" id="BPMNShape_usertask1">
+        <omgdc:Bounds height="55" width="105" x="746" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask1" id="BPMNShape_scripttask1">
+        <omgdc:Bounds height="55" width="105" x="1045" y="177"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask2" id="BPMNShape_scripttask2">
+        <omgdc:Bounds height="55" width="105" x="1045" y="328"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40" width="40" x="967" y="247"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask3" id="BPMNShape_scripttask3">
+        <omgdc:Bounds height="55" width="105" x="1270" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask4" id="BPMNShape_scripttask4">
+        <omgdc:Bounds height="55" width="105" x="100" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask5" id="BPMNShape_scripttask5">
+        <omgdc:Bounds height="55" width="105" x="240" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask6" id="BPMNShape_scripttask6">
+        <omgdc:Bounds height="55" width="105" x="390" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway2" id="BPMNShape_exclusivegateway2">
+        <omgdc:Bounds height="40" width="40" x="540" y="247"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway3" id="BPMNShape_exclusivegateway3">
+        <omgdc:Bounds height="40" width="40" x="886" y="247"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway4" id="BPMNShape_exclusivegateway4">
+        <omgdc:Bounds height="40" width="40" x="1182" y="247"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent2" id="BPMNShape_startevent2">
+        <omgdc:Bounds height="35" width="35" x="10" y="250"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask8" id="BPMNShape_scripttask8">
+        <omgdc:Bounds height="55" width="105" x="610" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="callactivity1" id="BPMNShape_callactivity1">
+        <omgdc:Bounds height="55" width="105" x="1430" y="240"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="987" y="247"></omgdi:waypoint>
+        <omgdi:waypoint x="986" y="204"></omgdi:waypoint>
+        <omgdi:waypoint x="1045" y="204"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="987" y="287"></omgdi:waypoint>
+        <omgdi:waypoint x="986" y="358"></omgdi:waypoint>
+        <omgdi:waypoint x="1045" y="355"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="205" y="267"></omgdi:waypoint>
+        <omgdi:waypoint x="240" y="267"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow14" id="BPMNEdge_flow14">
+        <omgdi:waypoint x="851" y="267"></omgdi:waypoint>
+        <omgdi:waypoint x="886" y="267"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="flow20" id="BPMNEdge_flow20">
+                    <omgdi:waypoint x="45" y="267"></omgdi:waypoint>
+                            <omgdi:waypoint x="100" y="267"></omgdi:waypoint>
+                                  </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge bpmnElement="flow21" id="BPMNEdge_flow21">
+        <omgdi:waypoint x="45" y="267"></omgdi:waypoint>
+        <omgdi:waypoint x="100" y="267"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow22" id="BPMNEdge_flow22">
+        <omgdi:waypoint x="580" y="267"></omgdi:waypoint>
+        <omgdi:waypoint x="610" y="267"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow23" id="BPMNEdge_flow23">
+        <omgdi:waypoint x="715" y="267"></omgdi:waypoint>
+        <omgdi:waypoint x="746" y="267"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

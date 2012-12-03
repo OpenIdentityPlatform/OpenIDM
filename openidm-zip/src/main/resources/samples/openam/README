@@ -1,0 +1,80 @@
+This sample shows how to do integration between OpenIDM and OpenAM to provide a single-sign on dashboard.
+
+The basic setup changes the default installation in several important ways. Each section below describes the 
+necessary steps.
+
+Setup of OpenAM auth filter for OpenIDM
+=======================================
+DOCUMENTATION GOES HERE
+    
+Setup of provisioning to OpenDJ
+===============================
+Users that exist in OpenIDM's managed user store need to be provisioned into OpenAM's instance of OpenDJ. This is accomplished with
+the file conf/provisioner.openicf-ldap.json.  You will need to update the "host" parameter to refer to your OpenDJ instance (likely the
+same host name as your OpenAM instance). Also, you need to update the credentials parameter to use whatever password you have specified 
+for the Directory Manager record within your OpenAM instance.
+
+Setup of a reverse proxy
+========================
+In this example, the reverse proxy used is Apache 2, however the same functionality could be done with other
+web servers so long as they perform the same functions. There are three configuration changes that need to be made
+to a default apache installation: 
+
+ 1) Setting the DocumentRoot to the appropriate copy of the UI:
+ 
+    DocumentRoot /path/to/openidm/ui/openidm-ui-ria-admin-apache/
+    (You may need to adjust the related 'Directory' tag as well to match this setting)
+    
+ 2) Setting a reverse proxy for OpenIDM
+ 
+    ProxyPass /openidm http://yourIDMServer:8080/openidm
+    ProxyPassReverse /openidm http://yourIDMServer:8080/openidm
+    
+ 3) Setting a reverse proxy for OpenAM
+ 
+    ProxyPass /openam http://yourAMServer:8080/openidm
+    ProxyPassReverse /openam http://yourAMServer:8080/openidm
+
+These settings can either be made globally or within a VirtualHost configuration.
+
+Changing the UI
+===============
+Now accessible from your web server, the UI needs to be modified to use the facilities provided by OpenAM. The
+modifications are bundled together into a diff file located in the same folder as this README file, named:
+    openam-ui-rXXXX.diff
+The rXXXX indicates the revision of the core UI that the diff was made against.  If you are working against a newer
+copy of the UI, there may be some problems with applying the diff.
+
+You can apply the patch like so: 
+openidm-ui-ria-admin-apache$ patch -p1 -i ../../samples/openam/openam-ui.diff
+
+Updating the configuration
+==========================
+You must update the conf/ui-configuration.json file to refer to your installation of OpenAM.  This should be the 
+same server base path used in your filter setup.
+
+Setup of the workflow
+=====================
+Copy the workflow/UserApplicationAcceptance.bar file into your base project workflow folder.  By default the openidm-admin
+role is used for application approvals; this can be changed by unzipping the .bar file and editing the xml file:
+
+    <userTask id="usertask1" name="Application Acceptance" activiti:candidateUsers="openidm-admin" activiti:candidateGroups="openidm-admin" .....
+
+Setup of provisioning to external systems
+=========================================
+With the above completed, your OpenIDM system is ready to serve the Single-Sign On Dashboard UI supported by OpenAM. For this to 
+perform useful tasks, however, Dashboard application entries must be defined in OpenAM for users to choose from.  These can be any
+URL+Icon+Name, however it should be some location that a user with a valid SSO token to that OpenAM instance can make use of.  For
+example, this could be an internal application that is secured with the same OpenAM instance.  Another example is a cloud application
+that works with SAML2 or OAuth; in this case the URL will need to be to the OpenAM endpoint which handles the authentication setup to 
+that cloud application.  Simply providing a link to these applications is of limited value, however.  The real power of the SSO dashboard
+starts to become apparent when OpenIDM is also provisioning users into these same applications. The provisioning necessarily is highly-site
+specific, and so must be done by the implementor as an addition to this sample setup.  The main additions that will be necessary are:
+    1) conf/provisioner.<remoteSystem>.json
+        New file providing configuration necessary to work with remote system
+    2) conf/schedule-reconcile_system<remoteSystem>Users_managedUser.json
+        New file to determine how often the remote system is reconciled with managed/users
+    3) conf/sync.json
+        Update to sample file which defines how to map managed/user properties to remote system properties
+    4) script/<remoteSystem>BackCorrelationQuery.js
+        New file used to populate query parameters as part of the reconciliation process
