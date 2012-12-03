@@ -87,7 +87,7 @@
             "uid",
             "cn"
         ],
-        "host" : "ec2-23-23-11-214.compute-1.amazonaws.com",
+        "host" : "yourAMServer",
         "groupMemberAttribute" : "uniqueMember",
         "accountSearchFilter" : null,
         "passwordHashAlgorithm" : null,
