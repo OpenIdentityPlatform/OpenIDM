@@ -37,7 +37,7 @@
  </indexterm>
  <indexterm>
   <primary>Samples</primary>
-  <secondary>Sample 1 - XML file</secondary>
+  <secondary>Sample 0 - XML file</secondary>
  </indexterm>
  <indexterm>
   <primary>Repository database</primary>
@@ -140,8 +140,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   Synchronization</citetitle></link> in the <citetitle>Integrator's
   Guide</citetitle>.</para>
 
-  <para>This sample connects to an XML file holding sample user data. The XML
-  file is configured as the authoritative source. In this sample, users are
+  <para>This sample connects to an XML file that holds sample user data. The 
+  XML file is configured as the authoritative source. In this sample, users are
   created in the local repository to show you how you can manage local users
   through the REST APIs. You can also use OpenIDM without storing managed
   objects for users in the local repository, instead reconciling and
@@ -209,7 +209,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
      <programlisting language="javascript">{
     "enabled" : false,
     "type": "cron",
-    "schedule": "0 0/1 * * * ?",
+    "schedule": "30 0/1 * * * ?",
     "persisted" : true,
     "misfirePolicy" : "fireAndProceed",
     "invokeService": "org.forgerock.openidm.sync",
@@ -650,7 +650,7 @@ access.csv activity.csv recon.csv</screen>
   "givenName":"James",
   "email": ["jberg@example.com"],
   "description":"Created by OpenIDM REST.",
-  "password":"asdfkj23"
+  "password":"MyPassw0rd"
  }'
  "http://localhost:8080/openidm/managed/user/jberg"
 
@@ -667,7 +667,7 @@ access.csv activity.csv recon.csv</screen>
  \"givenName\":\"James\",
  \"email\":\"jberg@example.com\",
  \"description\":\"Created by OpenIDM REST.\",
- \"password\":\"asdfkj23\"
+ \"password\":\"MyPassw0rd\"
  }"
  "http://localhost:8080/openidm/managed/user/jberg"
 
