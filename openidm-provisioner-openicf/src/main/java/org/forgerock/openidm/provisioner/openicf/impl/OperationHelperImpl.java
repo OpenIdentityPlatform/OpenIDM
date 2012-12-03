@@ -130,6 +130,10 @@ public class OperationHelperImpl implements OperationHelper {
     public JsonValue build(ConnectorObject source) throws Exception {
         JsonValue result = objectClassInfoHelper.build(source, cryptoService);
         resetUid(source.getUid(), result);
+        if (null != source.getUid().getRevision()) {
+            //System supports Revision
+            result.put(ServerConstants.OBJECT_PROPERTY_REV, source.getUid().getRevision());
+        }
         return result;
     }
 

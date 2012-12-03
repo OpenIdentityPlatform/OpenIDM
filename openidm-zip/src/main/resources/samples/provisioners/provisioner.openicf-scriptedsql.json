@@ -9,9 +9,9 @@
     "hasId" : "true",
     "connectorRef" :
     {
-        "bundleName" : "org.forgerock.openicf.connectors.db.openicf-scriptedsql-connector",
-        "bundleVersion" : "1.1.0.0",
-        "connectorName" : "org.forgerock.openicf.scriptedsql.ScriptedSQLConnector"
+        "bundleName"    : "org.forgerock.openicf.connectors.scriptedsql-connector",
+        "bundleVersion" : "1.1.0.1-SNAPSHOT",
+        "connectorName" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
     },
     "producerBufferSize" : 100,
     "connectorPoolingSupported" : true,

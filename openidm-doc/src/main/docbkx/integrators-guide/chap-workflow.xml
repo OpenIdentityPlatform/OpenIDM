@@ -75,9 +75,9 @@
   <para>Using BPMN 2.0, you can add artifacts describing workflow and business
   process behavior to OpenIDM for provisioning and other purposes. For example,
   you can craft the actual artifacts defining business processes and workflow
-  in a text editor such as <command>vi</command>, or using a special Eclipse
-  plugin. The Eclipse plugin provides visual design capabilities, simplifying
-  packaging and deployment of the artifact to OpenIDM. See the <link
+  in a text editor, or using a special Eclipse plugin. The Eclipse plugin 
+  provides visual design capabilities, simplifying packaging and deployment of 
+  the artifact to OpenIDM. See the <link
   xlink:href="http://docs.codehaus.org/display/ACT/Activiti+BPMN+2.0+Eclipse+Plugin"
   xlink:show="new">Activiti BPMN 2.0 Eclipse Plugin</link> documentation for
   instructions on installing Activiti Eclipse BPMN 2.0 Designer.</para>
@@ -121,9 +121,10 @@
   
   <para>To verify the workflow integration you need at least one workflow 
   definition in the <literal><replaceable>/path/to/openidm</replaceable
-  >/workflow</literal> directory. A sample workflow (<filename>example.bpmn20.xml
-  </filename>) is provided in the <literal><replaceable>/path/to/openidm
-  </replaceable>/samples/misc</literal> directory. Copy this workflow to the 
+  >/workflow</literal> directory. A sample workflow 
+  (<filename>example.bpmn20.xml</filename>) is provided in the 
+  <literal><replaceable>/path/to/openidm</replaceable>/samples/misc</literal> 
+  directory. Copy this workflow to the 
   <literal><replaceable>/path/to/openidm</replaceable>/workflow</literal> 
   directory to test the workflow integration.</para>
   
@@ -137,14 +138,19 @@ $ cp samples/misc/example.bpmn20.xml workflow/</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/workflow"
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
   </screen>
   <para>The sample workflow definition that you copied in the previous step is 
   named <literal>osgiProcess</literal>. The result of the preceding REST call 
   is therefore something like:</para>
   
   <screen>
-  {"osgiProcess:1:3":{"name":"Osgi process","key":"osgiProcess"}}
+ {"result":[
+      {"_id":"osgiProcess:1:3",
+       "name":"Osgi process"
+      }
+    ]
+ }
   </screen>
   
   <para>The <literal>osgiProcess</literal> definition calls OpenIDM, queries 
@@ -157,33 +163,24 @@ $ cp samples/misc/example.bpmn20.xml workflow/</screen>
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"key":"osgiProcess"}'
+ --data '{"_key":"osgiProcess"}'
   </screen>
   
   <para>The workflow prints the list of workflow definitions to the OpenIDM 
   console. With the default sample, you should see something like this on the 
   console:</para>
-  <screen width="100"><?dbfo pgwide="1"?>
-script task using expression resolver: [osgiProcess:1:3:[name:Osgi process, key:osgiProcess]]
-script task using resolver: [osgiProcess:1:3:[name:Osgi process, key:osgiProcess]]
+  <screen>
+script task using resolver: [
+  result:[
+    [_id:osgiProcess:1:3, name:Osgi process]
+  ]
+]
+script task using expression resolver: [
+  result:[
+    [_id:osgiProcess:1:3, name:Osgi process]
+  ]
+]
   </screen>
- 
-   <section xml:id="openidm-activity-limitations">
-    <title>Known Issues &amp; Limitations</title>
-    <itemizedlist>
-     <para>The following issues and limitations exist for the  
-     embedded workflow and business process engine.</para>
-     <listitem>
-     <para>OpenIDM does not include a form generator, making it difficult to
-     include embedded forms (OPENIDM-468).</para>
-     </listitem>
-     <listitem>
-     <!-- TODO: Issue ID? -->
-     <para>Error handling needs improvement.</para>
-     </listitem>
-    </itemizedlist>
-   </section>
- </section>
  
  <section xml:id="setting-up-remote-integration">
   <title>Setting Up Remote Integration</title>
@@ -369,7 +366,7 @@ $ ./startup.sh
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET 
- "http://localhost:8080/openidm/workflow"
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
     </screen>
    </step>
    <step>
@@ -399,12 +396,17 @@ $ ./startup.sh
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"key":"osgiProcess"}'
+ --data '{"_key":"osgiProcess"}'
     </screen>
     <para>The request should return a process ID, similar to the following:</para>
     <screen>
-    {"id":"301","processInstanceId":"301","status":"ended",
-    "businessKey":null,"processDefinitionId":"osgiProcess:1:3"}
+{
+  "_id":"614",
+  "processInstanceId":"614",
+  "status":"ended",
+  "businessKey":null,
+  "processDefinitionId":"osgiProcess:7:603"
+}
     </screen>
     <para>This request starts the osgiProcess and writes the list of installed 
     workflows to the Tomcat server log file (<filename>/path/to/activiti/apps/
@@ -444,10 +446,9 @@ $ ./startup.sh
   configuration:</para>
   
   <programlisting language="javascript">
-  {
-    "enabled"  : "true",
-    "location" : "embedded",
-    },
+{
+   "enabled"  : "true"
+}
   </programlisting>
   
   <para>You can disable the workflow module by setting the "enabled" property 
@@ -597,7 +598,7 @@ $ ./startup.sh
   <para>You can invoke workflows and business processes from any trigger point 
   within OpenIDM, including reacting to situations discovered during
   reconciliation. Workflows can be invoked from script files, using the 
-  <literal>openidm.action()</literal> function, or directly from the REST 
+  <literal>openidm.create()</literal> function, or directly from the REST 
   interface.</para>
   
   <para>The following sample script extract shows how to invoke a workflow from 
@@ -609,23 +610,116 @@ $ ./startup.sh
  */
 
 var params = {
- "foo" : "bar"
+ "foo" : "bar",
+ "_key": "myWorkflow"
 };
 
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, 
-{"key":"myWorkflow", "keyrequired" : params});
+openidm.create('workflow/processinstance', params);
 </programlisting>
 
   <para>You can invoke the same workflow from the REST interface by sending 
   the following REST call to OpenIDM:</para>
-  <screen>$ curl
+  <screen width="90">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
  "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
- --data '{"key":"myWorkflow", "foo":"bar"}'
+ --data '{"_key":"myWorkflow", "foo":"bar"}'
+  </screen>
+  
+  <para>There are two ways in which you can specify the workflow definition 
+  that is used when a new workflow instance is started.</para>
+  
+  <itemizedlist>
+    <listitem>
+      <para><literal>_key</literal> specifies the <literal>id</literal> 
+      attribute of the workflow process definition, for example:</para>
+      <programlisting language="javascript">
+&lt;process id="sendNotificationProcess" name="Send Notification Process"&gt;
+      </programlisting>
+      <para>If there is more than more than one workflow definition with the 
+      same <literal>_key</literal> parameter, the latest deployed version of 
+      the workflow definition is invoked.
+      </para>
+    </listitem>
+    <listitem>
+      <para><literal>_processDefinitionId</literal> specifies the ID that is 
+      generated by the Activiti Process Engine when a workflow definition is 
+      deployed, for example:</para>
+      <programlisting language="javascript">
+"sendNotificationProcess:1:104";
+      </programlisting>
+      <para>You can obtain the <literal>processDefinitionId</literal> by 
+      querying the available workflows, for example:</para>
+      <programlisting language="javascript">      
+ {
+  "result": [
+    {
+      "name": "Process Start Auto Generated Task Auto Generated",
+      "_id": "ProcessSAGTAG:1:728"
+    },
+    {
+      "name": "Process Start Auto Generated Task Empty",
+      "_id": "ProcessSAGTE:1:725"
+    },
+    ...     
+      </programlisting>
+      <para>If you specify a <literal>_key</literal> and a 
+      <literal>_processDefinitionId</literal>, the 
+      <literal>_processDefinitionId</literal> is used because it is more 
+      precise.</para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>You can use the optional <literal>_businessKey</literal> parameter to 
+  add specific business logic information to the workflow when it is invoked.
+  For example, the following workflow invocation assigns the workflow a 
+  business key of <literal>"newOrder"</literal>. This business key can later 
+  be used to query "newOrder" processes.</para>
+  <screen width="90">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+ --data '{"_key":"myWorkflow", "_businessKey":"newOrder"}'
   </screen>
  </section>
+
+ <section xml:id="querying-activiti-workflows">
+  <title>Querying Activiti Workflows</title>
+
+  <para>The Activiti implementation supports filtered queries that enable you 
+  to query the running process instances based on specific query parameters. 
+  For example, the following query returns all process instances with the 
+  business key <literal>"newOrder"</literal>, as invoked in the previous 
+  section.</para>
+  
+  <screen width="102">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_queryId=filtered-query
+ &amp;businessKey=newOrder"
+  </screen>  
+  
+  <para>You can query process instances based on the value of any process 
+  instance variable by prefixing the variable name with <literal>_var-</literal>.
+  For example:</para>
+
+  <screen width="102">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/workflow/processinstance?_queryId=filtered-query
+ &amp;_var-processvariablename=processvariablevalue"
+  </screen>   
+
+  <para>The standard Activiti properties can be queried using the Activiti 
+  notation, for example, 
+  <literal>processDefinitionId=managedUserApproval:1:6405</literal>. The query 
+  syntax applies to all queries with <literal>_queryId=filtered-query</literal>.
+  </para>
+</section>
 
  <section xml:id="sample-activiti-workflows">
   <title>Example Activiti Workflows With OpenIDM</title>
@@ -702,7 +796,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
      &lt;extensionElements&gt;
        &lt;activiti:field name=&quot;to&quot; expression=&quot;${toEmail}&quot;
        &gt;&lt;/activiti:field&gt;
-       &lt;activiti:field name=&quot;from&quot; expression=&quot;no-reply@forgerock.com&quot;
+       &lt;activiti:field name=&quot;from&quot; expression=&quot;${fromSender}&quot;
        &gt;&lt;/activiti:field&gt;
        &lt;activiti:field name=&quot;subject&quot; expression=&quot;Simple Email Notification&quot;
        &gt;&lt;/activiti:field&gt;
@@ -743,7 +837,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
    directory.</para>
 
    <para>After you deploy the .bar, create a script named <filename>
-   openidm/script/invokeEmailNotification.js</filename>. The script
+   openidm/script/triggerEmailNotification.js</filename>. The script
    invokes the workflow.</para>
 
    <programlisting language="javascript">
@@ -752,12 +846,12 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
  */
 
 var params = {
+ "_key" : "EmailNotification",
  "fromSender" : "noreply@openidm",
  "toEmail" : "jdoe@example.com"
 };
 
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, 
-{"key":"emailNotification", "keyrequired" : params});
+openidm.create('workflow/processinstance', params);
 </programlisting>
 
    <para>You can also invoke the workflow over the REST interface with the 
@@ -766,7 +860,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
    <screen width="100"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin" 
  --header "X-OpenIDM-Password: openidm-admin"
- --data '{"key":"emailNotification", "fromSender":"noreply@openidm", "toEmail":"jdoe@example.com"}'
+ --data '{"_key":"EmailNotification", "fromSender":"noreply@openidm", "toEmail":"jdoe@example.com"}'
  --request POST 
  "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
    </screen>
@@ -785,7 +879,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
    "invokeContext" : {
        "script" : {
            "type" : "text/javascript",
-           "file" : "script/invokeEmailNotification.js"
+           "file" : "script/triggerEmailNotification.js"
        },
    }
 }</programlisting>
@@ -1139,5 +1233,6 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
     }
 }</programlisting>
   </section>
- </section>
+  </section>
+</section>
 </chapter>

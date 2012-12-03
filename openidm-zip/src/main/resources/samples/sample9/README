@@ -12,7 +12,7 @@ To try the sample, follow these steps.
     1. Copy the sample configuration and data.
 
     $ cd /path/to/openidm
-    $ cp -r samples/sample9/conf samples/sample9/workflow.
+    $ cp -r samples/sample9/conf samples/sample9/workflow .
 
     2. Start OpenIDM.
 

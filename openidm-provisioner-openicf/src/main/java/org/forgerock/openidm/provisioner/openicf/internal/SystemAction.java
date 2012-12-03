@@ -44,9 +44,9 @@ import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
  */
 public class SystemAction {
 
-    public static final String SCRIPT_EXECUTE_MODE = "_script-execute-mode";
-    public static final String SCRIPT_VARIABLE_PREFIX = "_script-variable-prefix";
-    public static final String SCRIPT_ID = "_script-id";
+    public static final String SCRIPT_EXECUTE_MODE = "_scriptExecuteMode";
+    public static final String SCRIPT_VARIABLE_PREFIX = "_scriptVariablePrefix";
+    public static final String SCRIPT_ID = "_scriptId";
 
     private final String name;
     private final List<SystemTypeAction> actions;

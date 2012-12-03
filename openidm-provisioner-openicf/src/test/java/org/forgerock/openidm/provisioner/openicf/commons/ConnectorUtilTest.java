@@ -200,6 +200,12 @@ public class ConnectorUtilTest {
     public void testCoercedTypeCasting() throws Exception {
         BigInteger bigInteger = ConnectorUtil.coercedTypeCasting(new Integer(20), BigInteger.class);
         Assert.assertEquals(bigInteger.intValue(), 20);
+        Boolean booleanValue = ConnectorUtil.coercedTypeCasting("true",boolean.class);
+        Assert.assertTrue(booleanValue);
+        Integer integerValue = ConnectorUtil.coercedTypeCasting("636",int.class);
+        Assert.assertEquals(integerValue, (Integer)636);
+        float floatValue = ConnectorUtil.coercedTypeCasting("636",float.class);
+        Assert.assertEquals(floatValue, 636.0f);
     }
 
     public APIConfiguration getRuntimeAPIConfiguration() {

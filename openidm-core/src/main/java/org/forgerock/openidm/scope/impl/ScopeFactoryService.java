@@ -20,47 +20,29 @@ package org.forgerock.openidm.scope.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-// OSGi
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
-
-// JSON Resource
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
-
-// Utilities
-import org.forgerock.util.Factory;
-import org.forgerock.util.LazyMap;
-
-// OpenIDM
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Function;
+import org.forgerock.util.Factory;
+import org.forgerock.util.LazyMap;
+import org.osgi.service.component.ComponentContext;
 
 /**
  * TODO: Description.
@@ -101,7 +83,7 @@ public class ScopeFactoryService implements ScopeFactory {
     public void setRouter(JsonResource router) {
         this.router = router;
     }
-
+    
     /**
      * TODO: Description.
      *
@@ -122,9 +104,48 @@ public class ScopeFactoryService implements ScopeFactory {
         return new JsonResourceAccessor(router, context);
     }
 
+    private IdentityServer identityServer;
+    private Map<String, String> propertiesCache;
+    
+    @Activate
+    void activate(ComponentContext compContext) {
+        identityServer = IdentityServer.getInstance();
+        propertiesCache = new ConcurrentHashMap<String, String>();
+    }
+    
+    private String getProperty(String key, String defaultValue, boolean useCache) {
+        if (useCache) {
+            if (!propertiesCache.containsKey(key)) {
+                String value = identityServer.getProperty(key, defaultValue);
+                propertiesCache.put(key, value);
+            }
+            return propertiesCache.get(key);
+        } else {
+            return identityServer.getProperty(key, defaultValue);
+        }
+    }
+    
     @Override
     public Map<String, Object> newInstance(final JsonValue context) {
         Map<String, Object> scope = new HashMap<String, Object>();
+        scope.put("identityServer", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
+            @Override public Map<String, Object> newInstance() {
+                HashMap<String, Object> identityServer = new HashMap<String, Object>();
+                // getProperty
+                identityServer.put("getProperty", new Function() {
+                    @Override
+                    public Object call(Map<String, Object> scope,
+                     Map<String, Object> _this, List<Object> params) throws Throwable {
+                        JsonValue p = paramsValue(params);
+                        String key = p.get(0).required().asString();
+                        String def = p.get(1).asString();
+                        boolean useCache = p.get(2).defaultTo(false).asBoolean();
+                        return getProperty(key, def, useCache);
+                    }
+                });
+                return identityServer;
+            }
+        }));
         scope.put("openidm", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
             @Override public Map<String, Object> newInstance() {
                 HashMap<String, Object> openidm = new HashMap<String, Object>();
