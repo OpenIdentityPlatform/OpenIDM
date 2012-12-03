@@ -74,8 +74,8 @@
     <row>
      <entry>Repository objects</entry>
      <entry>The equivalent of arbitrary database table access. Appropriate
-     when it is appropriate to manage data purely through the underlying
-     data store or repository API.</entry>
+     for managing data purely through the underlying data store or repository 
+     API.</entry>
      <entry>Persistence and API access</entry>
     </row>
     <row>
@@ -116,7 +116,7 @@
   section on <link xlink:href="integrators-guide#rest-uri-scheme"
   xlink:role="http://docbook.org/xlink/role/olink">
   <citetitle>URI Scheme</citetitle></link> for information on how to
-  construct and object ID.</para>
+  construct an object ID.</para>
 
   <programlisting language="javascript">
 val = openidm.read("managed/organization/mysampleorg")
@@ -135,6 +135,13 @@ openidm.update("config/custom/mylookuptable", mymap)
 
 openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
 
+  <para>For managed objects, you can partially update an object with the 
+  <literal>patch()</literal> function.</para>
+  
+  <programlisting language="javascript">
+openidm.patch("managed/organization/mysampleorg", rev, value)
+</programlisting>  
+  
   <para>The <literal>create()</literal>, <literal>delete()</literal>, and
   <literal>query()</literal> functions work in similar fashion.</para>
 
@@ -247,7 +254,7 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
     <para>Properties can be defined to be strictly derived from other
     properties within the object. This allows computed and composite
     values to be created in the object. Whenever an object undergoes a
-    change, all derived properties are recomputed. The value of derived
+    change, all derived properties are recomputed. The values of derived
     properties are stored in the data store, and are not recomputed upon
     retrieval.</para>
 
@@ -653,7 +660,9 @@ openidm.update("repo/custom/mylookuptable", mymap)</programlisting>
      <term>source, file</term>
      <listitem>
       <para>string, required (only one, source or file is required)</para>
-      <para>Specifies the source code of the script (key word script), or the pointer to the file containing the script (key word file), to be executed.</para>
+      <para>Specifies the source code of the script to be executed (if the 
+      keyword is "source"), or a pointer to the file that contains the script 
+      (if the keyword is "file").</para>
      </listitem>
     </varlistentry>
    </variablelist>
@@ -860,9 +869,24 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
     <section xml:id="managed-objects-programmatic-patch">
      <title>Patching Objects</title>
 
-     <para>You can partially update an object using a patch, which changes only
-     the specified properties of the object. OpenIDM supports patch by query,
-     so the caller need not know the identifier of the object to change.</para>
+     <para>You can partially update a managed object using the patch method, 
+     which changes only the specified properties of the object. OpenIDM 
+     implements the JSON patch media type version 02, described at 
+     <link xlink:href="https://tools.ietf.org/html/draft-pbryan-json-patch-02">
+     https://tools.ietf.org/html/draft-pbryan-json-patch-02</link>.</para>
+     
+     <para>The following script example updates an object type.</para>
+     
+          <programlisting language="javascript">
+openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
+
+     <para>The patch method supports a revision of <literal>"null"</literal>, 
+     which effectively disables the MVCC mechanism, that is, changes are 
+     applied, regardless of revision. In the REST interface, this matches the 
+     <literal>If-Match: "*"</literal> condition supported by patch.</para>
+     
+     <para>The API supports patch by query, so the caller does not need to 
+     know the identifier of the object to change.</para>
 
      <screen width="90"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -873,6 +897,7 @@ openidm.update("managed/foobar/myidentifier", expectedRev, mymap)</programlistin
       <para>For the syntax on how to formulate the query
       <literal>_queryId=for-username&amp;uid=DDOE</literal> see
       <xref linkend="managed-objects-programmatic-query"/>.</para>
+      
     </section>
 
     <section xml:id="managed-objects-programmatic-delete">
@@ -1088,6 +1113,7 @@ openidm.create("config/custom/myconfig", mymap)</programlisting>
    </section>
 
    <section xml:id="configuration-objects-programmatic-update">
+     <title>Updating Objects</title>
 
     <para>The following script example updates an object type.</para>
     <programlisting language="javascript">var expectedRev = origMap._rev
