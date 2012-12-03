@@ -6,5 +6,7 @@
     "invokeContext": {
         "action": "liveSync",
         "source" : "system/ldap/account"
-    }
+    },
+    "invokeLogLevel": "debug"
+
 }

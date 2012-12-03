@@ -130,6 +130,7 @@ public class ServletFilterRegistratorSvc implements ServletFilterRegistrator {
             // default
             urlPatterns = new ArrayList<String>();
             urlPatterns.add("/openidm/*");
+            urlPatterns.add("/openidmui/*");
         } else {
             urlPatterns = rawUrlPatterns.asList(String.class);
         }

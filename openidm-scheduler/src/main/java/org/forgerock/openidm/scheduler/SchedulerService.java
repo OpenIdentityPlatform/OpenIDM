@@ -79,13 +79,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Scheduler service using Quartz
- * 
+ *
  * @author aegloff
  * @author ckienle
  */
 
 @Component(name = "org.forgerock.openidm.scheduler", immediate=true, policy=ConfigurationPolicy.REQUIRE)
-@Service(value = {SchedulerService.class, JsonResource.class}, serviceFactory=false) 
+@Service(value = {SchedulerService.class, JsonResource.class}, serviceFactory=false)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Scheduler Service using Quartz"),
@@ -94,7 +94,7 @@ import org.slf4j.LoggerFactory;
 public class SchedulerService extends ObjectSetJsonResource {
     final static Logger logger = LoggerFactory.getLogger(SchedulerService.class);
 
-    // Keys in the OSGi configuration     
+    // Keys in the OSGi configuration
     public final static String SCHEDULE_ENABLED = "enabled";
     public final static String SCHEDULE_TYPE = "type";
     public final static String SCHEDULE_START_TIME = "startTime";
@@ -103,62 +103,63 @@ public class SchedulerService extends ObjectSetJsonResource {
     public final static String SCHEDULE_TIME_ZONE = "timeZone";
     public final static String SCHEDULE_INVOKE_SERVICE = "invokeService";
     public final static String SCHEDULE_INVOKE_CONTEXT = "invokeContext";
+    public final static String SCHEDULE_INVOKE_LOG_LEVEL = "invokeLogLevel";
     public final static String SCHEDULE_PERSISTED = "persisted";
     public final static String SCHEDULE_MISFIRE_POLICY = "misfirePolicy";
 
     // Valid configuration values
-    public final static String SCHEDULE_TYPE_CRON = "cron"; 
-    
+    public final static String SCHEDULE_TYPE_CRON = "cron";
+
     // Default service PID prefix to use if the invokeService name is a fragment
     public final static String SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
-    
+
     // Misfire Policies
     public final static String MISFIRE_POLICY_DO_NOTHING = "doNothing";
     public final static String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
-    
+
     // Internal service tracker
     final static String SERVICE_TRACKER = "scheduler.service-tracker";
     final static String SERVICE_PID = "scheduler.service-pid";
-    
+
     final static String GROUP_NAME = "scheduler-service-group";
-    
+
     private static Scheduler inMemoryScheduler;
     private static Scheduler persistentScheduler = null;
     private static SchedulerConfig schedulerConfig = null;
-    
+
     private Map<String, ScheduleConfigService> configMap = new HashMap<String, ScheduleConfigService>();
     private static Object CONFIG_SERVICE_LOCK = new Object();
-    
+
     private static Object LOCK = new Object();
-    
+
     private boolean executePersistentSchedules = false;
     private boolean started = false;
-    
+
     EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
-    
+
     // Optional user defined name for this instance, derived from the file install name
     String configFactoryPID;
-    
+
     // Tracks OSGi services that match the configured service PID
     ServiceTracker scheduledServiceTracker;
-    
+
     @Reference
     ConfigurationAdmin configAdmin;
-    
+
     @Reference
     RepositoryService repo;
-    
+
     @Activate
-    void activate(ComponentContext compContext) throws SchedulerException, ParseException { 
+    void activate(ComponentContext compContext) throws SchedulerException, ParseException {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        
+
         String pid = (String)compContext.getProperties().get("config.factory-pid");
         if (pid != null) {
-            logger.warn("Please rename the schedule configuration file for " + pid 
+            logger.warn("Please rename the schedule configuration file for " + pid
                     + " to conform to the 'schedule-<name>.json' format");
             return;
         }
-        
+
         synchronized (CONFIG_SERVICE_LOCK) {
             // TODO: This should be reworked to start after all "core" services are available
             logger.info("Starting Scheduler Service");
@@ -167,18 +168,18 @@ public class SchedulerService extends ObjectSetJsonResource {
             // Initialize the schedulers (if they haven't been already)
             initInMemoryScheduler();
             initPersistentScheduler(compContext);
-            
+
             // Start processing schedules
             logger.info("Starting Volatile Scheduler");
             inMemoryScheduler.start();
-            
+
             if (executePersistentSchedules) {
                 logger.info("Starting Persistent Scheduler");
                 persistentScheduler.start();
             } else {
                 logger.info("Persistent Schedules will not be executed on this node");
             }
-            
+
             logger.info("There are {} jobs waiting to be scheduled", configMap.size());
             Set<String> keys = configMap.keySet();
             for (String key : keys) {
@@ -220,9 +221,9 @@ public class SchedulerService extends ObjectSetJsonResource {
     public void unregisterConfigService(ScheduleConfigService service) {
         synchronized (CONFIG_SERVICE_LOCK) {
             if (!started) {
-                configMap.remove(service.getJobName());                                                                                                                    
+                configMap.remove(service.getJobName());
             } else {
-                
+
             }
         }
     }
@@ -246,11 +247,11 @@ public class SchedulerService extends ObjectSetJsonResource {
         } catch (SchedulerException e) {
             logger.error("Error shutting down persistent scheduler", e);
         }
-    }   
-    
+    }
+
     /**
      * Schedules a job.
-     * 
+     *
      * @param scheduleConfig    The schedule configuration
      * @param jobName           The job name
      * @param update            Whether to delete the old job if present
@@ -259,10 +260,10 @@ public class SchedulerService extends ObjectSetJsonResource {
      * @throws ParseException
      * @throws ObjectAlreadyExistsException
      */
-    public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update) 
+    public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update)
             throws SchedulerException, ParseException, ObjectAlreadyExistsException {
         Scheduler scheduler = null;
-        
+
         try {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
@@ -271,15 +272,15 @@ public class SchedulerService extends ObjectSetJsonResource {
                 // If the schedule is disabled, remove from scheduler and return
                 if (!scheduleConfig.getEnabled()) {
                     logger.info("Schedule {} is disabled", jobName);
-                    if (jobExists(jobName, scheduleConfig.getPersisted()) && 
+                    if (jobExists(jobName, scheduleConfig.getPersisted()) &&
                             scheduler.deleteJob(jobName, GROUP_NAME)) {
                         logger.debug("Schedule was deleted from scheduler");
                     }
                     return false;
                 }
-                
+
                 // Attempt to add the scheduler
-                if (scheduler != null && scheduleConfig.getCronSchedule() != null 
+                if (scheduler != null && scheduleConfig.getCronSchedule() != null
                         && scheduleConfig.getCronSchedule().length() > 0) {
                     JobDetail job = new JobDetail(jobName, GROUP_NAME, SchedulerServiceJob.class);
                     job.setVolatility(scheduleConfig.getPersisted());
@@ -299,7 +300,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                 }
             }
         } catch (ParseException ex) {
-            logger.warn("Parsing of scheduler configuration failed, can not create scheduler service for " 
+            logger.warn("Parsing of scheduler configuration failed, can not create scheduler service for "
                     + jobName + ": " + ex.getMessage(), ex);
             throw ex;
         } catch (ObjectAlreadyExistsException ex) {
@@ -308,13 +309,13 @@ public class SchedulerService extends ObjectSetJsonResource {
             logger.warn("Failed to create scheduler service for " + jobName + ": " + ex.getMessage(), ex);
             throw ex;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Creates and returns a CronTrigger using the supplied schedule configuration.
-     * 
+     *
      * @param scheduleConfig    The schedule configuration
      * @param jobName           The name of the job to associate the trigger with
      * @return                  The created Trigger
@@ -326,20 +327,20 @@ public class SchedulerService extends ObjectSetJsonResource {
         Date endTime = scheduleConfig.getEndTime();
         String misfirePolicy = scheduleConfig.getMisfirePolicy();
         TimeZone timeZone = scheduleConfig.getTimeZone();
-        
+
         CronTrigger trigger = new CronTrigger("trigger-" + jobName, GROUP_NAME, cronSchedule);
-        
+
         if (startTime != null) {
             trigger.setStartTime(startTime); // TODO: review time zone consistency with cron trigger timezone
         }
-        
+
         if (endTime != null) {
             trigger.setEndTime(endTime);
         }
         if (timeZone != null) {
             trigger.setTimeZone(timeZone);
         }
-        
+
         if (misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED)) {
             trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
         } else if (misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
@@ -347,26 +348,28 @@ public class SchedulerService extends ObjectSetJsonResource {
         }
         return trigger;
     }
-    
+
     /**
      * Creates and returns a JobDataMap using the supplied schedule configuration.
-     * 
+     *
      * @param scheduleConfig    The schedule configuration
      * @return                  The created JobDataMap
      */
     private JobDataMap createJobDataMap(ScheduleConfig scheduleConfig) {
         String invokeService = scheduleConfig.getInvokeService();
         Object invokeContext = scheduleConfig.getInvokeContext();
+        String invokeLogLevel = scheduleConfig.getInvokeLogLevel();
         JobDataMap map = new JobDataMap();
         map.put(ScheduledService.CONFIG_NAME, "scheduler"+ (configFactoryPID != null ? "-" + configFactoryPID : ""));
         map.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
         map.put(ScheduledService.CONFIGURED_INVOKE_CONTEXT, invokeContext);
+        map.put(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL, invokeLogLevel);
         return map;
     }
-    
+
     /**
      * Returns the Scheduler corresponding to whether the supplied schedule configuration is persistent.
-     * 
+     *
      * @param scheduleConfig    The schedule configuration
      * @return                  The Scheduler
      * @throws SchedulerException
@@ -377,10 +380,10 @@ public class SchedulerService extends ObjectSetJsonResource {
         }
         return inMemoryScheduler;
     }
-    
+
     /**
      * Creates a random Job name.
-     * 
+     *
      * @return  A job name
      */
     private String createJobName() {
@@ -388,10 +391,10 @@ public class SchedulerService extends ObjectSetJsonResource {
         sb.append(UUID.randomUUID());
         return sb.toString();
     }
-    
+
     /**
      * Determines if a job already exists.
-     * 
+     *
      * @param jobName       The name of the job
      * @param persisted     If the job is persisted or not
      * @return              True if the job exists, false otherwise
@@ -474,13 +477,13 @@ public class SchedulerService extends ObjectSetJsonResource {
                 throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "No ID specified");
             }
             object.put("_id", id);
-            
+
             // Default incoming config to "persisted" if not specified
             Object persistedValue = object.get(SchedulerService.SCHEDULE_PERSISTED);
             if (persistedValue == null) {
                 object.put(SchedulerService.SCHEDULE_PERSISTED, new Boolean(true));
             }
-            
+
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
 
             try {
@@ -577,11 +580,11 @@ public class SchedulerService extends ObjectSetJsonResource {
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params)
             throws ObjectSetException {
-        
+
         if (params.get("_action") == null) {
             throw new BadRequestException("Expecting _action parameter");
         }
-        
+
         String action = (String)params.get("_action");
         try {
             if (action.equals("create")) {
@@ -603,21 +606,21 @@ public class SchedulerService extends ObjectSetJsonResource {
             throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Error updating schedule", e);
         }
     }
-    
+
     private String trimTrailingSlash(String id) {
         if (id.endsWith("/")) {
             return id.substring(0, id.length()-1);
         }
         return id;
     }
-    
+
     public boolean isConfigured() {
         if (schedulerConfig == null) {
             return false;
         }
         return true;
     }
-    
+
     public void initPersistentScheduler(ComponentContext compContext) throws SchedulerException {
         boolean alreadyConfigured = (schedulerConfig != null);
         JsonValue configValue = enhancedConfig.getConfigurationAsJson(compContext);
@@ -647,9 +650,9 @@ public class SchedulerService extends ObjectSetJsonResource {
     private void initInMemoryScheduler() throws SchedulerException {
         try {
             if (inMemoryScheduler == null) {
-                // Quartz tries to be too smart about classloading, 
+                // Quartz tries to be too smart about classloading,
                 // but relies on the thread context classloader to load classload helpers
-                // That is not a good idea in OSGi, 
+                // That is not a good idea in OSGi,
                 // hence, hand it the OSGi classloader for the ClassLoadHelper we want it to find
                 ClassLoader original = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());

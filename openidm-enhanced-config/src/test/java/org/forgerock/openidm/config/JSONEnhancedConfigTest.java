@@ -32,7 +32,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.core.SystemPropertyAccessor;
 import org.testng.annotations.Test;
 
 /**
@@ -43,6 +45,7 @@ import org.testng.annotations.Test;
 public class JSONEnhancedConfigTest {
     @Test
     public void testGetConfiguration() throws Exception {
+        
         // Redirect to a test Boot file
         String bootFile =
                 URLDecoder.decode(JSONEnhancedConfigTest.class.getResource(
@@ -50,6 +53,8 @@ public class JSONEnhancedConfigTest {
         System.setProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION, bootFile);
         System.setProperty("system.environment", "TEST");
 
+        IdentityServer.initInstance(new SystemPropertyAccessor(null));
+        
         /*
          * {"attr1" : "&{property1}","attr2" : "pre &{property2}-post","attr3" :
          * "&{not-available}","attr4":{"subattr1" :

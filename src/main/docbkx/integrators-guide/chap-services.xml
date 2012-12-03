@@ -174,7 +174,8 @@ Stopping OpenIDM (454)</screen>
        writes its cache. Specifying a working location separates the project 
        from the cached data that the system needs to store. The working 
        location includes everything that is in the default 
-       <literal>openidm/db</literal> and <literal>openidm/logs</literal> 
+       <literal>openidm/db</literal> and <literal>openidm/audit</literal>, 
+       <literal>openidm/felix-cache</literal>, and <literal>openidm/logs</literal>
        directories.</para>
        <para>The following command specifies that OpenIDM writes its cached 
        data to <filename>/Users/admin/openidm/storage</filename>:</para>

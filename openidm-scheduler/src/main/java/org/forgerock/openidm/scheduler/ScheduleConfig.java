@@ -41,7 +41,7 @@ import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 
 public class ScheduleConfig {
-    
+
     private Boolean enabled = null;
     private Boolean persisted = null;
     private String misfirePolicy = null;
@@ -52,7 +52,8 @@ public class ScheduleConfig {
     private TimeZone timeZone = null;
     private String invokeService = null;
     private Object invokeContext = null;
-    
+    private String invokeLogLevel = null;
+
     public ScheduleConfig(JsonValue config) {
         JsonValue enabledValue = config.get(SchedulerService.SCHEDULE_ENABLED);
         if (enabledValue.isString()) {
@@ -67,7 +68,7 @@ public class ScheduleConfig {
             persisted = persistedValue.defaultTo(Boolean.FALSE).asBoolean();
         }
         misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY).defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
-        if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) && 
+        if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) &&
                 !misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_DO_NOTHING)) {
             throw new InvalidException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
         }
@@ -75,8 +76,8 @@ public class ScheduleConfig {
         scheduleType = config.get(SchedulerService.SCHEDULE_TYPE).asString();
         invokeService = config.get(SchedulerService.SCHEDULE_INVOKE_SERVICE).asString();
         if (!StringUtils.isNotBlank(invokeService)) {
-            throw new InvalidException("Invalid scheduler configuration, the " 
-                    + SchedulerService.SCHEDULE_INVOKE_SERVICE 
+            throw new InvalidException("Invalid scheduler configuration, the "
+                    + SchedulerService.SCHEDULE_INVOKE_SERVICE
                     + " property needs to be set but is empty. "
                     + "Complete config:" + config);
         } else {
@@ -87,6 +88,7 @@ public class ScheduleConfig {
             }
         }
         invokeContext = config.get(SchedulerService.SCHEDULE_INVOKE_CONTEXT).getObject();
+        invokeLogLevel = config.get(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL).defaultTo("info").asString();
         String timeZoneString = config.get(SchedulerService.SCHEDULE_TIME_ZONE).asString();
         String startTimeString = config.get(SchedulerService.SCHEDULE_START_TIME).asString();
         String endTimeString = config.get(SchedulerService.SCHEDULE_END_TIME).asString();
@@ -102,21 +104,21 @@ public class ScheduleConfig {
             startTime = parsed.getTime();
             // TODO: enhanced logging for failure
         }
-        
+
         if (StringUtils.isNotBlank(endTimeString)) {
             Calendar parsed = DatatypeConverter.parseDateTime(endTimeString);
             endTime = parsed.getTime();
             // TODO: enhanced logging for failure
         }
-        
+
         if (StringUtils.isNotBlank(scheduleType)) {
             if (!scheduleType.equals(SchedulerService.SCHEDULE_TYPE_CRON)) {
-                throw new InvalidException("Scheduler configuration contains unknown schedule type " 
+                throw new InvalidException("Scheduler configuration contains unknown schedule type "
                         + scheduleType + ". Known types include " + SchedulerService.SCHEDULE_TYPE_CRON);
             }
         }
     }
-    
+
     public ScheduleConfig(CronTrigger trigger, JobDataMap map, boolean persisted) {
         this.persisted = persisted;
         this.enabled = true;
@@ -125,6 +127,7 @@ public class ScheduleConfig {
         this.endTime = trigger.getEndTime();
         this.timeZone = trigger.getTimeZone();
         this.invokeService = (String)map.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
+        this.invokeLogLevel = (String)map.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL);
         this.invokeContext = map.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
         this.scheduleType = SchedulerService.SCHEDULE_TYPE_CRON;
         int mp = trigger.getMisfireInstruction();
@@ -134,7 +137,7 @@ public class ScheduleConfig {
             this.misfirePolicy = SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED;
         }
     }
-    
+
     public JsonValue getConfig() {
         HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(SchedulerService.SCHEDULE_ENABLED, getEnabled());
@@ -144,12 +147,13 @@ public class ScheduleConfig {
         map.put(SchedulerService.SCHEDULE_TYPE, getScheduleType());
         map.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, getInvokeService());
         map.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, getInvokeContext());
+        map.put(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL, getInvokeLogLevel());
         map.put(SchedulerService.SCHEDULE_TIME_ZONE, getTimeZone());
         map.put(SchedulerService.SCHEDULE_START_TIME, getStartTime());
         map.put(SchedulerService.SCHEDULE_END_TIME, getEndTime());
         return new JsonValue(map);
     }
-    
+
     public Boolean getEnabled() {
         return enabled;
     }
@@ -179,6 +183,9 @@ public class ScheduleConfig {
     }
     public Object getInvokeContext() {
         return invokeContext;
+    }
+    public String getInvokeLogLevel() {
+        return invokeLogLevel;
     }
 
     public void setEnabled(Boolean enabled) {
@@ -219,5 +226,9 @@ public class ScheduleConfig {
 
     public void setInvokeContext(Object invokeContext) {
         this.invokeContext = invokeContext;
+    }
+
+    public void setInvokeLogLevel(String invokeLogLevel) {
+        this.invokeLogLevel = invokeLogLevel;
     }
 }
