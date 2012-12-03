@@ -11,17 +11,24 @@
     <process id="osgiProcess" name="Osgi process">
 
         <startEvent id="start" />
-        <sequenceFlow sourceRef="start" targetRef="serviceTask"/>
-        <serviceTask id="serviceTask" activiti:expression="${openidm.read('workflow')}"
-                 activiti:resultVariableName="idmresult"/>
-        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask1"/>
+        <sequenceFlow sourceRef="start" targetRef="scripttask1"/>
         <scriptTask id="scripttask1" scriptFormat="groovy">
             <script>
-                out:println "script task using expression resolver: " + idmresult
-                out:println "script task using resolver: " + openidm.read('workflow')
+                params = [_queryId:'query-all-ids']
+                out:println "script task using resolver: " + openidm.query('workflow/processdefinition', params)
             </script>
         </scriptTask>
-        <sequenceFlow sourceRef="scripttask1" targetRef="end"/>
+        <sequenceFlow sourceRef="scripttask1" targetRef="serviceTask"/>
+        <serviceTask id="serviceTask" activiti:expression="${openidm.query('workflow/processdefinition', params)}"
+                 activiti:resultVariableName="idmresult"/>
+        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask2"/>
+        
+        <scriptTask id="scripttask2" scriptFormat="groovy">
+            <script>
+                out:println "script task using expression resolver: " + idmresult
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="scripttask2" targetRef="end"/>
         <endEvent id="end"/>
 
     </process>
