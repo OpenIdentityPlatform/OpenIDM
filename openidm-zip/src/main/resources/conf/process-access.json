@@ -6,6 +6,14 @@
                 "matches" : ".*",
                 "requiresRole" : "openidm-authorized"
             }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "_id",
+                "matches" : ".*",
+                "requiresRole" : "openidm-admin"
+            }
         }
+        
     ]
 }
