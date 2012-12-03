@@ -544,7 +544,7 @@ function notNull(fullObject, value, params, property) {
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  --data '{ "password" : "12345" }' 
- "http://localhost:8080/openidm/managed/user/bjensen?_action=validateProperty"
+ "http://localhost:8080/openidm/policy/managed/user/bjensen?_action=validateProperty"
  
 {
     "result": false,
@@ -583,7 +583,7 @@ function notNull(fullObject, value, params, property) {
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
  --data '{ "password" : "1NewPassword" }' 
- "http://localhost:8080/openidm/managed/user/bjensen?_action=validateProperty"
+ "http://localhost:8080/openidm/policy/managed/user/bjensen?_action=validateProperty"
  
 {
     "result": true,

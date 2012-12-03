@@ -135,7 +135,8 @@
  "misfirePolicy" : "<replaceable>optional, string</replaceable>",
  "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
  "invokeService" : "<replaceable>service identifier</replaceable>",
- "invokeContext" : "<replaceable>service specific context info</replaceable>"
+ "invokeContext" : "<replaceable>service specific context info</replaceable>",
+ "invokeLogLevel": "<replaceable>(optional) debug</replaceable>"
 }</programlisting>
 
  <variablelist>
@@ -298,6 +299,26 @@
     <para>Note that these are sample configurations only. Your own schedule 
     configuration will differ according to your specific requirements.</para>
    </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>invokelogLevel (optional)</term>
+   <listitem>
+    <para>Specifies the level at which the invocation will be logged. 
+    Particularly for schedules that run very frequently, such as LiveSync, the 
+    scheduled task can generate significant output to the log file, and the log 
+    level should be adjusted accordingly. The default schedule log level is 
+    <literal>info</literal>. The value can be set to any one of the <link 
+    xlink:href="http://www.slf4j.org/apidocs/org/apache/commons/logging/Log.html">SLF4J</link> 
+    log levels:</para>
+    <itemizedlist>
+     <listitem><para><literal>"trace"</literal></para></listitem>
+     <listitem><para><literal>"debug"</literal></para></listitem>
+     <listitem><para><literal>"info"</literal></para></listitem>
+     <listitem><para><literal>"warn"</literal></para></listitem>
+     <listitem><para><literal>"error"</literal></para></listitem>
+     <listitem><para><literal>"fatal"</literal></para></listitem>     
+    </itemizedlist>
+   </listitem>   
   </varlistentry>
  </variablelist>
 
