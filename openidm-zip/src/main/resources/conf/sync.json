@@ -50,10 +50,6 @@
                     "target" : "securityAnswer"
                 },
                 {
-                    "source" : "passPhrase",
-                    "target" : "passPhrase"
-                },
-                {
                     "source" : "roles",
                     "target" : "roles"
                 }
