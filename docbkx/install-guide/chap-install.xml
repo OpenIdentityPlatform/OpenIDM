@@ -304,8 +304,8 @@ scr list
  "givenName":"joe",
  "familyName":"smith",
  "email":"joe@example.com",
- "phoneNumber":"555-123-1234"
- "password":"TestPassw0rd"
+ "phoneNumber":"555-123-1234",
+ "password":"TestPassw0rd",
  "description":"My first user"
  }'
  http://localhost:8080/openidm/managed/user/joe
