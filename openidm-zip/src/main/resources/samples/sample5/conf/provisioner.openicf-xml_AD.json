@@ -32,7 +32,8 @@
     "configurationProperties" : {
         "xsdIcfFilePath" : "samples/sample5/data/resource-schema-1.xsd",
         "xsdFilePath" : "samples/sample5/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "samples/sample5/data/xml_AD_Data.xml"
+        "xmlFilePath" : "samples/sample5/data/xml_AD_Data.xml",
+        "createFileIfNotExists" : true
     },
     "objectTypes" : {
         "account" : {
