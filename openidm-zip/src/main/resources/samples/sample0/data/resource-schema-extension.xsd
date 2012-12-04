@@ -16,7 +16,6 @@
                 <xsd:element name="securityQuestion" type="xsd:string" />
                 <xsd:element name="securityAnswer" type="xsd:string" />
                 <xsd:element name="password" type="xsd:string" />
-                <xsd:element name="passPhrase" type="xsd:string" />
                 <xsd:element name="roles" type="xsd:string" minOccurs="0"/>
                 <xsd:element ref="icf:__DESCRIPTION__"  minOccurs="0"/>
             </xsd:sequence>

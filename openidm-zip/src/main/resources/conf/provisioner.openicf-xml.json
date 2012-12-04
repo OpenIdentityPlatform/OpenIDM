@@ -94,12 +94,6 @@
                     "nativeName" : "securityAnswer",
                     "nativeType" : "string"
                 },
-                "passPhrase" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "passPhrase",
-                    "nativeType" : "string"
-                },
                 "roles" : {
                     "type" : "string",
                     "required" : false,
