@@ -64,8 +64,12 @@
  
   <para>A default policy applies to all managed objects. You can configure the 
   default policy to suit your requirements, or you can extend the policy 
-  service by supplying your own scripted policies.
-  </para>
+  service by supplying your own scripted policies.</para>
+  
+  <para>For testing purposes you can disable policy enforcement by setting 
+  <literal>openidm.policy.enforcement.enabled</literal> to <literal>false</literal> 
+  in the <filename>conf/boot/boot.properties</filename> file. You should not 
+  disable policy enforcement in production.</para>
 
   <section xml:id="configuring-default-policy">
     <title>Configuring the Default Policy</title>
