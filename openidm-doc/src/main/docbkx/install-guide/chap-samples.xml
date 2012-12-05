@@ -1251,7 +1251,7 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   <section xml:id="run-sample7">
    <title>Running the Sample</title>
 
-   <para>Start OpenIDM, and then run the reconciliation to pull the user from
+   <para>Run a reconciliation to pull the user from
    <filename>samples/sample7/data/xmlConnectorData.xml</filename> into the 
    OpenIDM internal repository.</para>
 
@@ -1428,4 +1428,134 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
 </programlisting>
   </section>
  </section>
+ 
+ <section xml:id="more-sample9">
+  <title>Sample 9 - Asynchronous Reconciliation Using Workflows</title>
+  <indexterm>
+   <primary>Samples</primary>
+   <secondary>Sample 9 - asynchronous reconciliation</secondary>
+  </indexterm>
+  <para>Sample 9 demonstrates asynchronous reconciliation using workflows. 
+  Reconciliation generates an approval request for each ABSENT user. The 
+  configuration for this action is defined in the <filename>conf/sync.json</filename> 
+  file, which specifies that an <literal>ABSENT</literal> condition should 
+  launch the <literal>managedUserApproval</literal> workflow:</para>
+  <progamlisting language="javascript">
+...
+                {
+                    "situation" : "ABSENT",
+                    "action" : {
+                        "workflowName" : "managedUserApproval",
+                        "type" : "text/javascript",
+                        "file" : "bin/defaults/script/workflow/workflow.js"
+                    }
+                },
+ ...
+  </progamlisting>
+
+  <para>When the request is approved by an administrator, the absent users are 
+  created by an asynchronous reconciliation process.</para>
+  
+    <section xml:id="install-sample9">
+     <title>Install the Sample</title>
+     <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
+     then start OpenIDM with the configuration for sample 9.</para>
+
+     <screen>$ ./startup.sh -p samples/sample9</screen>
+     
+     <para>Copy the workflow process definition from sample 9 into the workflow 
+     directory:</para>
+     
+     <screen>$ cd /path/to/openidm
+     $ cp samples/sample9/workflow/managedUserApproval.bar workflow/</screen>
+     
+    </section>
+
+    <section xml:id="run-sample9">
+     <title>Running the Sample</title>
+     
+     <orderedlist>
+     
+       <listitem>
+         <para>Run reconciliation over the REST interface.</para>
+         <screen width="99"><?dbfo pgwide="1"?>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+         </screen>
+         <para>Successful reconciliation returns an "_id" object.</para>
+         <para>The reconciliation starts an approval workflow for each ABSENT 
+         user. These approval workflows (named <literal>managedUserApproval</literal>) 
+         wait for the request to be approved by an administrator.</para>         
+       </listitem>
+       
+       <listitem>
+         <para>Query the invoked workflow task instances over REST.</para>
+         <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
+         </screen>
+         <para>The request returns a workflow process ID.</para>
+         <screen>
+{
+  "result": [
+    {
+      "name": "Evaluate request",
+      "_id": "13"
+    }
+  ]
+}
+        </screen>
+       </listitem>
+       
+       <listitem>
+         <para>Approve the requests over REST, by setting the 
+         <literal>"requestApproved"</literal> parameter for the specified task 
+         instance to <literal>"true"</literal>.
+         </para>
+         <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ --data '{"requestApproved": "true"}'
+ "http://localhost:8080/openidm/workflow/taskinstance/13?_action=complete"        
+         </screen>
+         <para>A successful call returns the following:</para>
+         <screen>{"Task action performed":"complete"}</screen>
+       </listitem>
+       
+       <listitem>
+         <para>Once the request has been approved, an asynchronous 
+         reconciliation operation runs, which creates the users whose accounts 
+         were approved in the previous step.</para>
+         <para>List the users that were created by the asynchronous 
+         reconciliation.</para>
+         <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+         </screen>
+         <para>One user is returned.</para>
+         <screen>
+ {
+  "conversion-time-ms": 0,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "1"
+    }
+  ],
+  "query-time-ms": 1
+}     
+         </screen>
+       </listitem>
+     </orderedlist>
+    
+    </section>
+  
+  </section>
 </chapter>
