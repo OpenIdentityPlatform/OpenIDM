@@ -65,11 +65,6 @@
   <para>A default policy applies to all managed objects. You can configure the 
   default policy to suit your requirements, or you can extend the policy 
   service by supplying your own scripted policies.</para>
-  
-  <para>For testing purposes you can disable policy enforcement by setting 
-  <literal>openidm.policy.enforcement.enabled</literal> to <literal>false</literal> 
-  in the <filename>conf/boot/boot.properties</filename> file. You should not 
-  disable policy enforcement in production.</para>
 
   <section xml:id="configuring-default-policy">
     <title>Configuring the Default Policy</title>
@@ -226,7 +221,7 @@ function required(fullObject, value, params, propName) {
       <programlisting type="javascript">
 {
     "type" : "text/javascript",
-    "file" : "script/policy.js",
+    "file" : "bin/defaults/script/policy.js",
     "resources" : [
         {
             "resource" : "managed/user/*",
@@ -388,6 +383,30 @@ function notNull(fullObject, value, params, property) {
     </programlisting>   
 
   </section>
+  
+  <section xml:id="disabling-policies">
+    <title>Disabling Policy Enforcement</title>
+    
+     <para>Policy enforcement refers to the automatic validation of data in 
+     the repository when it is created, updated, or patched. In certain 
+     situations you might want to disable policy enforcement temporarily. You 
+     might, for example, want to import existing data that does not meet the 
+     validation requirements with the intention of cleaning up this data at a 
+     later stage.</para>
+       
+     <para>You can disable policy enforcement by setting 
+     <literal>openidm.policy.enforcement.enabled</literal> to 
+     <literal>false</literal> in the <filename>conf/boot/boot.properties</filename> 
+     file. This setting disables policy enforcement in the back-end only, and 
+     has no impact on direct policy validation calls to the Policy Service 
+     (which the user interface makes to validate input fields). So, with policy 
+     enforcement disabled, data added directly over REST is not subject to 
+     validation, but data added with the UI is still subject to validation.
+     </para>
+      
+     <para>Disabling policy enforcement permanently in a production system is 
+     not recommended.</para>
+  </section> 
   
   <section xml:id="policies-over-REST">
     <title>Managing Policies Over REST</title>
