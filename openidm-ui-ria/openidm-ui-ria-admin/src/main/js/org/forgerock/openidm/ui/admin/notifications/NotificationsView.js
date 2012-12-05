@@ -64,8 +64,8 @@ define("org/forgerock/openidm/ui/admin/notifications/NotificationsView", [
             
             return '<div class="notification-title">' 
                      + (iconLink ? '<img src="' + iconLink + '"/>' : '')
-                     + '<a name="title" href="#" style="float: left;">' + message + '</a>'
-                     +  deleteLink + '<div style="clear: both;"></div>'
+                     +  deleteLink + '<a name="title" href="#">' + message + '</a>'
+                     + '<div style="clear: both;"></div>'
                   + '</div>'
                   + '<div class="notification-details" style="clear: both;">'
                       + '<div class="details"> '
