@@ -94,9 +94,12 @@
                 manager:startUserId, department:department, jobTitle:jobTitle, phoneNumber:phoneNumber, 
                 email:email, startDate:startDate, endDate:endDate, password:password, description:description,
                 provisionToXML:provisionToXML]
-                params = [_queryId:'query-all-ids']
                 out:println "User coming from UI " + user
                 openidm.create('managed/user', user)
+                
+                readStartUserFromRepoParams = [_queryId:'for-userName',uid:startUserId]
+                startUserFromRepo = openidm.query('managed/user', readStartUserFromRepoParams)
+                readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]
             </script>
         </scriptTask>
         <sequenceFlow sourceRef="decideApprovalTask" targetRef="createManagedUser">
@@ -105,16 +108,39 @@
         <sequenceFlow sourceRef="decideApprovalTask" targetRef="end"></sequenceFlow>
 
         <sequenceFlow sourceRef="createManagedUser" targetRef="serviceTask"/>
-        <serviceTask id="serviceTask" activiti:expression="${openidm.query('managed/user', params)}"
-                     activiti:resultVariableName="idmresult"/>
-        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask2"/>
+        <serviceTask id="serviceTask" activiti:expression="${openidm.query('managed/user', readNewUserFromRepoParams)}"
+                     activiti:resultVariableName="newUserFromRepo"/>
+        <sequenceFlow sourceRef="serviceTask" targetRef="sendNotification"/>
 
-        <scriptTask id="scripttask2" scriptFormat="groovy">
+        <scriptTask id="sendNotification" scriptFormat="groovy">
             <script>
-                out:println "Managed users in OpenIDM: " + idmresult
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+                requestDate = formatUTC.format(new Date());
+                
+                def newRequesterNotification = [
+                                        "receiverId": startUserFromRepo.result[0]._id,
+                                        "requesterId" : "",
+                                        "requester" : "",
+                                        "createDate" : requestDate,
+                                        "notificationType" : "info",
+                                        "notificationSubtype" : "",
+                                        "message" : "The requested user " + userName + " was successfully created"
+                                ];
+                def newContractorNotification = [
+                                        "receiverId": newUserFromRepo.result[0]._id,
+                                        "requesterId" : "",
+                                        "requester" : "",
+                                        "createDate" : requestDate,
+                                        "notificationType" : "info",
+                                        "notificationSubtype" : "",
+                                        "message" : "Your user was created"
+                                ];
+                openidm.create("repo/ui/notification/", newRequesterNotification)
+                openidm.create("repo/ui/notification/", newContractorNotification)
             </script>
         </scriptTask>
-        <sequenceFlow sourceRef="scripttask2" targetRef="end"/>
+        <sequenceFlow sourceRef="sendNotification" targetRef="end"/>
         <endEvent id="end"/>
 
     </process>
