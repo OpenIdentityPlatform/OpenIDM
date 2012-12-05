@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions id="definitions"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:activiti="http://activiti.org/bpmn"
+             targetNamespace="Examples" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="
+             http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
+    <process id="contractorOnboarding" name="Contractor onboarding process">
+        <startEvent id="start" activiti:initiator="startUserId" >
+            <extensionElements>
+                <activiti:formProperty id="userName"
+                           name="Username"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="givenName"
+                           name="First Name"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="familyName"
+                           name="Last Name"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="department"
+                           name="Department"
+                           type="string" />
+                <activiti:formProperty id="jobTitle"
+                           name="Job Title"
+                           type="string" />
+                <activiti:formProperty id="phoneNumber"
+                           name="Phone Number"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="email"
+                           name="Email"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="startDate"
+                           name="Start Date"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="endDate"
+                           name="End Date"
+                           type="string" />
+                <activiti:formProperty id="password"
+                           name="Password"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="description"
+                           name="Description"
+                           required="true"
+                           type="string" />
+                <activiti:formProperty id="provisionToXML"
+                           name="Create in XMLFile"
+                           type="boolean" />
+            </extensionElements>
+        </startEvent>
+        
+        <sequenceFlow sourceRef="start" targetRef="requestMadeGateway"/>
+        
+        <exclusiveGateway id="requestMadeGateway" name="Request Made"></exclusiveGateway>
+        
+        <scriptTask id="decisionPrep" name="Prepare Task" scriptFormat="groovy">
+          <script><![CDATA[ 
+            decisionOptions = [ 'accept' : 'common.form.accept' , 'reject' : 'common.form.reject', '__null' : '  ']
+          ]]></script>
+        </scriptTask>
+        <userTask id="decideApprovalTask" name="Contractor Approval" activiti:candidateGroups="manager">
+          <extensionElements>
+            <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+              <activiti:value id="accept" name="Accept"></activiti:value>
+              <activiti:value id="reject" name="Reject"></activiti:value>
+            </activiti:formProperty>
+            <activiti:formProperty id="_formGenerationTemplate" type="string" default="
+    
+            &lt;div class=&quot;field&quot;&gt;  
+    
+            &lt;label class=&quot;light&quot;&gt;{{t &quot;common.form.decision&quot;}}&lt;/label&gt; 
+    
+            {{select  variables.decisionOptions &quot;decision&quot; &quot;0&quot; &quot;&quot;  &quot; data-validator='required' &quot;}}
+    
+            &lt;span class=&quot;ok&quot; style=&quot;&quot;&gt;✔&lt;/span&gt;
+            &lt;div class=&quot;validation-message&quot;&gt;&lt;/div&gt; &lt;/div&gt;
+    
+            "></activiti:formProperty>
+          </extensionElements>
+        </userTask>
+        <sequenceFlow sourceRef="requestMadeGateway" targetRef="decisionPrep"/>
+        <sequenceFlow sourceRef="decisionPrep" targetRef="decideApprovalTask"/>
+
+        <scriptTask id="createManagedUser" scriptFormat="groovy">
+            <script>
+                user = [userName:userName, givenName:givenName, familyName:familyName,
+                manager:startUserId, department:department, jobTitle:jobTitle, phoneNumber:phoneNumber, 
+                email:email, startDate:startDate, endDate:endDate, password:password, description:description,
+                provisionToXML:provisionToXML]
+                params = [_queryId:'query-all-ids']
+                out:println "User coming from UI " + user
+                openidm.create('managed/user', user)
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="decideApprovalTask" targetRef="createManagedUser">
+          <conditionExpression xsi:type="tFormalExpression"><![CDATA[ ${decision=='accept'} ]]></conditionExpression>
+        </sequenceFlow>
+        <sequenceFlow sourceRef="decideApprovalTask" targetRef="end"></sequenceFlow>
+
+        <sequenceFlow sourceRef="createManagedUser" targetRef="serviceTask"/>
+        <serviceTask id="serviceTask" activiti:expression="${openidm.query('managed/user', params)}"
+                     activiti:resultVariableName="idmresult"/>
+        <sequenceFlow sourceRef="serviceTask" targetRef="scripttask2"/>
+
+        <scriptTask id="scripttask2" scriptFormat="groovy">
+            <script>
+                out:println "Managed users in OpenIDM: " + idmresult
+            </script>
+        </scriptTask>
+        <sequenceFlow sourceRef="scripttask2" targetRef="end"/>
+        <endEvent id="end"/>
+
+    </process>
+
+</definitions>
