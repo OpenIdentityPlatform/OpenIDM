@@ -69,13 +69,11 @@
                 },
                 "department" : {
                     "type" : "string",
-                    "required" : true,
                     "nativeName" : "department",
                     "nativeType" : "string"
                 },
                 "jobTitle" : {
                     "type" : "string",
-                    "required" : true,
                     "nativeName" : "jobTitle",
                     "nativeType" : "string"
                 },
