@@ -23,9 +23,9 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -61,11 +61,7 @@ import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.ScriptThrownException;
-import org.forgerock.openidm.script.Utils;
 import org.forgerock.openidm.util.DateUtil;
 import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
 import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
@@ -114,7 +110,9 @@ public class AuthFilter
     /** Attribute in request to indicate to openidm down stream that an authentication filter has secured the request */
     public static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
-
+    /** Re-authentication password header */
+    public static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
+    
     // name of the header containing the client IPAddress, used for the audit record
     // typically X-Forwarded-For
     static String logClientIPHeader = null;
@@ -311,7 +309,14 @@ public class AuthFilter
      */
     public AuthData reauthenticate(JsonValue request) throws AuthException {
         JsonValue secCtx = getSecurityContext(request);
-        String reauthPassword = secCtx.get("headers").get("X-OpenIDM-Reauth-Password").asString();
+        JsonValue headers = secCtx.get("headers");
+        String reauthPassword = null;
+        for (Entry<String, Object> entry : headers.asMap().entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(HEADER_REAUTH_PASSWORD)) {
+                reauthPassword = (String)entry.getValue();
+                break;
+            }
+        }
         AuthData ad = new AuthData();
         ad.username = secCtx.get("security").get("username").asString();
         if (ad.username == null || reauthPassword == null || ad.username.equals("") || reauthPassword.equals("")) {
