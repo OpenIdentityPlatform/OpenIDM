@@ -534,7 +534,7 @@ function notNull(fullObject, value, params, property) {
           "roles":"admin",
           "userName":"bjones@example.com",
           "password":"123"}' 
- "http://localhost:8080/openidm/policy/managed/user/bgeldorf?_action=validateObject"
+ "http://localhost:8080/openidm/policy/managed/user/bjones?_action=validateObject"
 
 {"result":false,
  "failedPolicyRequirements":[
