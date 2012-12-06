@@ -212,8 +212,10 @@ public class TaskScannerJob {
                 break; // Jump out quick since we've cancelled the job
             }
             // Check if this object has a STARTED time already
-            String startTimeString = input.get(context.getStartField()).asString();
-            if (startTimeString != null) {
+            JsonValue startTime = input.get(context.getStartField());
+            String startTimeString = null;
+            if (startTime != null) {
+                startTimeString = startTime.asString();
                 DateTime startedTime = DATE_UTIL.parseTimestamp(startTimeString);
 
                 // Skip if the startTime + interval has not been passed
