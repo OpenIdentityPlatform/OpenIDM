@@ -523,7 +523,7 @@ function notNull(fullObject, value, params, property) {
       <programlisting language="javascript">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET      
+ --request POST      
  --data '{"familyName":"Jones",
           "givenName":"Bob",
           "_id":"bjones",
@@ -565,7 +565,7 @@ function notNull(fullObject, value, params, property) {
       <programlisting language="javascript">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET
+ --request POST
  --data '{ "password" : "12345" }' 
  "http://localhost:8080/openidm/policy/managed/user/bjensen?_action=validateProperty"
  
@@ -604,7 +604,7 @@ function notNull(fullObject, value, params, property) {
       <programlisting language="javascript">$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET
+ --request POST
  --data '{ "password" : "1NewPassword" }' 
  "http://localhost:8080/openidm/policy/managed/user/bjensen?_action=validateProperty"
  
