@@ -379,7 +379,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   Services</citetitle></link>.</para>
   
   <para>Reconcile the objects in the resources, either by setting 
-  <literal>"enabled" : true</literal>in the schedule configuration file 
+  <literal>"enabled" : true</literal> in the schedule configuration file 
   (<filename>conf/schedule-reconcile_systemXmlAccounts_managedUser.json.json</filename>) 
   and then waiting until the scheduled reconciliation happens, or by using the
   REST interface, as follows:</para>
@@ -648,7 +648,8 @@ access.csv activity.csv recon.csv</screen>
   "userName":"jberg",
   "familyName":"Berg",
   "givenName":"James",
-  "email": ["jberg@example.com"],
+  "email":"jberg@example.com",
+  "phoneNumber":"5556787",
   "description":"Created by OpenIDM REST.",
   "password":"MyPassw0rd"
  }'
@@ -666,6 +667,7 @@ access.csv activity.csv recon.csv</screen>
  \"familyName\":\"Berg\",
  \"givenName\":\"James\",
  \"email\":\"jberg@example.com\",
+ \"phoneNumber\":\"5556787\", 
  \"description\":\"Created by OpenIDM REST.\",
  \"password\":\"MyPassw0rd\"
  }"

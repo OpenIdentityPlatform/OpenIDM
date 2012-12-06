@@ -195,7 +195,7 @@ description: Created for OpenIDM
    then start OpenIDM with the configuration for sample 2.</para>
    
    <screen>$ cd /path/to/openidm
-   $ ./startup.sh -p samples/sample2</screen>
+$ ./startup.sh -p samples/sample2</screen>
 
   </section>
 
@@ -278,7 +278,7 @@ $ curl
    then start OpenIDM with the configuration for sample 2b.</para>
    
    <screen>$ cd /path/to/openidm
-   $ ./startup.sh -p samples/sample2b</screen>
+$ ./startup.sh -p samples/sample2b</screen>
   </section>
 
   <section xml:id="run-sample2b">
@@ -361,8 +361,13 @@ $ curl
    <para>Test that the reconciliation has been successful by locating the new 
    user in the LDAP directory.</para>
    
-   <screen>$ ./ldapsearch -h localhost -p "1389" -D "cn=directory manager" \
-   -w password -b "dc=example,dc=com" "uid=fdoe"
+   <screen>$ /path/to/OpenDJ/bin/ldapsearch
+ --bindDN "cn=Directory Manager"
+ --bindPassword password
+ --hostname localhost
+ --port 1389
+ --baseDN "dc=example,dc=com"
+ "uid=fdoe"
 dn: uid=fdoe,ou=People,dc=example,dc=com
 mail: fdoe@example.com
 givenName: Felicitas
@@ -415,9 +420,8 @@ cn: openidm2
 objectClass: groupOfUniqueNames
 objectClass: top</programlisting>
    
-   <para>Make sure that the user with the dn 
-   <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you 
-   import these groups.</para> 
+   <para>The user with dn <literal>uid=jdoe,ou=People,dc=example,dc=com</literal> 
+   is also imported with the <filename>Example.ldif</filename> file.</para> 
   </section>
   
   <section xml:id="install-sample2c">
@@ -427,7 +431,7 @@ objectClass: top</programlisting>
    then start OpenIDM with the configuration for sample 2c.</para>
 
    <screen>$ cd /path/to/openidm
-   $ ./startup.sh -p samples/sample2c</screen>
+$ ./startup.sh -p samples/sample2c</screen>
   </section>
   
   <section xml:id="run-sample2c">
@@ -503,11 +507,21 @@ $ curl
  "http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=jdoe"
   </screen>
    
-   <para>This will change the user's ldapGroups property in OpenIDM from 
-   <filename>"cn=openidm,ou=Groups,dc=example,dc=com"</filename> to 
-   <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and, as a 
+   <para>This will change the user's <literal>ldapGroups</literal> property 
+   in OpenIDM from <filename>"cn=openidm,ou=Groups,dc=example,dc=com"</filename> 
+   to <filename>"cn=openidm2,ou=Groups,dc=example,dc=com"</filename> and, as a 
    result, the user will be removed from the one LDAP group and added to 
    the other LDAP group on OpenDJ.</para>
+   
+   <para>By default, automatic synchronization is enabled. This means that 
+   when you update a managed object, any mappings defined in the 
+   <filename>sync.json</filename> file are automatically executed to update 
+   the target system. For more information, see <link 
+   xlink:href="integrators-guide#synchronization-mappings-file" 
+   xlink:role="http://docbook.org/xlink/role/olink">
+   <citetitle>Synchronization Mappings File</citetitle></link> in the 
+   <citetitle>Integrator's Guide</citetitle>.</para>
+   
   </section>
  </section>
   
@@ -550,9 +564,8 @@ objectClass: groupOfUniqueNames
 objectClass: top
 </programlisting>
    
-   <para>Make sure that the user with the dn 
-   <filename>uid=jdoe,ou=People,dc=example,dc=com</filename> exists before you 
-   import these groups.</para> 
+   <para>The user with dn <literal>uid=jdoe,ou=People,dc=example,dc=com</literal> 
+   is also imported with the <filename>Example.ldif</filename> file.</para>
   </section>  
   
   <section xml:id="install-sample2d">
@@ -562,7 +575,7 @@ objectClass: top
    then start OpenIDM with the configuration for sample 2d.</para>
 
    <screen>$ cd /path/to/openidm
-   $ ./startup.sh -p samples/sample2d</screen>
+$ ./startup.sh -p samples/sample2d</screen>
 
   </section>
   
@@ -614,22 +627,16 @@ $ curl
  --request GET
  "http://localhost:8080/openidm/managed/group/b0982152-5099-4358-bdd1-45a39ebe0d77"</screen>
  
-   <para>Your group's object should look like: </para>
+   <para>Your group's object should be similar to the following:</para>
    
    <programlisting language="javascript">
 {
-   "_rev":"1",
-   "dn":"cn=openidm2,ou=Groups,dc=example,dc=com",
+   "_rev":"0",
+   "dn":"cn=openidm,ou=Groups,dc=example,dc=com",
    "_id":"b0982152-5099-4358-bdd1-45a39ebe0d77",
-   "description":[
-      "openidm test group"
-   ],
-   "uniqueMember":[
-      "uid=jdoe,ou=People,dc=example,dc=com",
-   ],
-   "name":[
-      "openidm2"
-   ]
+   "description":[],
+   "uniqueMember":["uid=jdoe,ou=People,dc=example,dc=com",],
+   "name":["openidm"]
 }   
    </programlisting>
  
@@ -700,7 +707,7 @@ $ </screen>
      <listitem>
       <para>Start OpenIDM with the configuration for sample 3.</para>
       <screen>$ cd /path/to/openidm
-   $ ./startup.sh -p samples/sample3</screen>    
+$ ./startup.sh -p samples/sample3</screen>    
      </listitem>
    </itemizedlist> 
 
@@ -783,7 +790,7 @@ $ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET
- "http://localhost:8080/openidm/managed/user/dc870bff-c2e9-4378-8ac1-45ee085b09bf"</screen>
+ "http://localhost:8080/openidm/managed/user/8366a23d-f6cf-46df-9746-469bf45aafcd"</screen>
   </section>
  </section>
  
@@ -1089,7 +1096,8 @@ objectclass: organizationalunit
    <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
    then start OpenIDM with the configuration for sample 6.</para>
 
-   <screen>$ ./startup.sh -p samples/sample6</screen>
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample6</screen>
   </section>
 
   <section xml:id="run-sample6">
@@ -1125,8 +1133,7 @@ $ curl
  --request GET
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"</screen>
 
-    <para>The result should resemble the following JSON object, though all
-   on one line.</para>
+    <para>The result should resemble the following JSON object.</para>
 
     <programlisting language="javascript">
 {
@@ -1236,16 +1243,12 @@ mail: jdoe@example.com
 
   <section xml:id="install-sample7">
    <title>Install the Sample</title>
-   
-   <para>Set up MySQL to hold the OpenIDM internal repository, as described 
-   in <link xlink:href="install-guide#chap-repository"
-xlink:role="http://docbook.org/xlink/role/olink"><citetitle
->Installing a Repository For Production</citetitle></link>.</para>
 
    <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
    then start OpenIDM with the configuration for sample 7.</para>
 
-   <screen>$ ./startup.sh -p samples/sample7</screen>
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample7</screen>
   </section>
 
   <section xml:id="run-sample7">
@@ -1396,7 +1399,8 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
    <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
    then start OpenIDM with the configuration for sample 8.</para>
 
-   <screen>$ ./startup.sh -p samples/sample8</screen>
+   <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample8</screen>
 
    <para>The scripts under <filename>samples/sample8/script/</filename>
    show brief log message examples.</para>
@@ -1440,7 +1444,7 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
   configuration for this action is defined in the <filename>conf/sync.json</filename> 
   file, which specifies that an <literal>ABSENT</literal> condition should 
   launch the <literal>managedUserApproval</literal> workflow:</para>
-  <progamlisting language="javascript">
+  <programlisting language="javascript">
 ...
                 {
                     "situation" : "ABSENT",
@@ -1451,17 +1455,18 @@ xlink:role="http://docbook.org/xlink/role/olink"><citetitle
                     }
                 },
  ...
-  </progamlisting>
+  </programlisting>
 
   <para>When the request is approved by an administrator, the absent users are 
   created by an asynchronous reconciliation process.</para>
   
-    <section xml:id="install-sample9">
+  <section xml:id="install-sample9">
      <title>Install the Sample</title>
      <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
      then start OpenIDM with the configuration for sample 9.</para>
 
-     <screen>$ ./startup.sh -p samples/sample9</screen>
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample9</screen>
      
      <para>Copy the workflow process definition from sample 9 into the workflow 
      directory:</para>
