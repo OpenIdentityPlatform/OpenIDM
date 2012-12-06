@@ -51,7 +51,7 @@ if (null == process.result || 0 == process.result.length) {
      */
     recon.actionParam._key = workflowName;
     logger.trace("asynchronous reconciliation: Start '{}' process", recon.actionParam._key)
-    openidm.create('workflow/processinstance', recon.actionParam);
+    openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, recon.actionParam);
 }
 
 /*

@@ -258,6 +258,16 @@ If-Match: "0"
 HTTP/1.1 204 No Content
 ETag: "1"
 ...</programlisting>
+     <para>Example Response (success, with data)</para>
+     <programlisting language="http">
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=1kke440cyv1vivbrid6ljso7b;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: application/json; charset=UTF-8
+ETag: "1"
+...
+{"_id":"5752c0fd9509","_rev":"2"}
+     </programlisting>
      <para>Example Response (version conflict)</para>
      <programlisting language="http">
 HTTP/1.1 409 Conflict
