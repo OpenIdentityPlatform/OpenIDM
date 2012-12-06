@@ -570,8 +570,7 @@
       <term><literal>"property"</literal></term>
       <listitem>
        <para>Defines the object property against which the range query is 
-       performed. In the preceding example, the query is run against all 
-       <literal>managed/user</literal> objects.</para>
+       performed.</para>
       </listitem>
      </varlistentry>
      <varlistentry>

@@ -598,7 +598,7 @@ $ ./startup.sh
   <para>You can invoke workflows and business processes from any trigger point 
   within OpenIDM, including reacting to situations discovered during
   reconciliation. Workflows can be invoked from script files, using the 
-  <literal>openidm.create()</literal> function, or directly from the REST 
+  <literal>openidm.action()</literal> function, or directly from the REST 
   interface.</para>
   
   <para>The following sample script extract shows how to invoke a workflow from 
@@ -614,7 +614,8 @@ var params = {
  "_key": "myWorkflow"
 };
 
-openidm.create('workflow/processinstance', params);
+openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"},
+ {"keyrequired" : params});
 </programlisting>
 
   <para>You can invoke the same workflow from the REST interface by sending 
@@ -851,7 +852,8 @@ var params = {
  "toEmail" : "jdoe@example.com"
 };
 
-openidm.create('workflow/processinstance', params);
+openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, 
+{"keyrequired" : params});
 </programlisting>
 
    <para>You can also invoke the workflow over the REST interface with the 
