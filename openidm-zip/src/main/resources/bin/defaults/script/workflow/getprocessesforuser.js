@@ -73,12 +73,12 @@ isProcessAvalibleForUser = function(processAccessPolicies, processDefinition, us
         var requiresRole = props.requiresRole;
         
         if (processDefinition[property].match(matches)) {
-            if (!contains(requiresRole, userRoles)) {
-                return false;
+            if (contains(requiresRole, userRoles)) {
+                return true;
             }
         }
     }
-    return true;
+    return false;
 }
 
 getProcessesAvalibleForUser = function(processDefinitions, userRoles) {
