@@ -504,15 +504,15 @@ function validate(policies, fullObject, propName, propValue, retArray) {
 
 function mergePolicies(oldPolicies, newPolicies) {
     var returnPolicies = new Array();
-    for (var p in oldPolicies) {
-        returnPolicies.push(p);
+    for (var i = 0; i < oldPolicies.length; i++) {
+        returnPolicies.push(oldPolicies[i]);
     }
     var found = false;
     for (var i = 0; i < newPolicies.length; i++) {
         var newPolicy = newPolicies[i];
         for (var j = 0; j < returnPolicies.length; j++) {
             var policy = returnPolicies[j];
-            if (newPolicy.name === policy.name) {
+            if (newPolicy.policyId === policy.policyId) {
                 // update old policy with new config
                 returnPolicies[j] = newPolicy;
                 found = true;
@@ -520,15 +520,13 @@ function mergePolicies(oldPolicies, newPolicies) {
         }
         if (!found) {
             var p = {};
-            p.policyId = newPolicy.get("policyId");
-            p.params = new Array();
-            for (var key in newPolicy.get("params")) {
-                var param = {};
-                param[key] = newPolicy.get("params").get(key);
-                p.params.push(param);
+            p.policyId = newPolicy.policyId;
+            p.params = {};
+            for (var key in newPolicy.params) {
+                p.params[key] = newPolicy.params[key];
             }
             // add new policy
-            returnPolicies.push(newPolicy);
+            returnPolicies.push(p);
         }
         found = false;
     }
