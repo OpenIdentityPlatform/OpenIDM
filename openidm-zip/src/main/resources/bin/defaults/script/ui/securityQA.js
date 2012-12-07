@@ -74,7 +74,7 @@ if (
                     user.securityAnswerAttempts = (typeof (user.securityAnswerAttempts) === "number") ? user.securityAnswerAttempts+1 : 1;
                     
                     // This could throw a policy violation if there is one in place enforcing a maximum number of attempts 
-                    openidm.patch("managed/user/" + user._id, user._rev, [{"replace": "securityAnswerAttempts", "value": user.securityAnswerAttempts}]); 
+                    openidm.patch("managed/user/" + user._id, null, [{"replace": "securityAnswerAttempts", "value": user.securityAnswerAttempts}]); 
 
                     if(!user.securityAnswer || openidm.decrypt(user.securityAnswer) !== request.params['securityAnswer']) {
                         throw "Incorrect Answer";
@@ -91,7 +91,7 @@ if (
                             response._id = user._id;
                         }
                         
-                        openidm.patch("managed/user/" + user._id, user._rev, patch);
+                        openidm.patch("managed/user/" + user._id, null, patch);
                         
                         response.result = "correct";
                         
@@ -101,7 +101,7 @@ if (
                 }
                 catch (err) {
                     user = openidm.read("managed/user/" + userQuery.result[0]._id);
-                    openidm.patch("managed/user/" + user._id, user._rev, [{"replace": "lastSecurityAnswerAttempt", "value": (new Date()).toString()}]);
+                    openidm.patch("managed/user/" + user._id, null, [{"replace": "lastSecurityAnswerAttempt", "value": (new Date()).toString()}]);
                     
                     response.errorDetail = err;
                     response.result = "error";
