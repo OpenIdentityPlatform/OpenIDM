@@ -352,6 +352,13 @@
         </fileSet>
         <!-- Setup sampleWorkflow  -->
         <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>conf/workflow.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/sampleWorkflow</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${basedir}/src/main/resources/conf</directory>
             <includes>
                 <include>**</include>
