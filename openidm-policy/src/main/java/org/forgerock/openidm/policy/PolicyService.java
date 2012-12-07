@@ -41,6 +41,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceContext;
 import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
@@ -166,9 +167,24 @@ public class PolicyService implements JsonResource {
         }
         logger.debug("Cannot unregister resource configuration for {}. Resource configuration does not exist", resourceName);
     }
-
+    
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         Map<String, Object> scope = Utils.deepCopy(parameters.asMap());
+        JsonValue params = request.get("params");
+        JsonValue caller = params.get("_caller");
+        JsonValue parent = request.get("parent");
+        if (parent.get("_isDirectHttp").isNull()) {
+            boolean isHttp = false;
+            if (!caller.isNull() && caller.asString().equals("filterEnforcer")) {
+                parent = parent.get("parent");
+            }
+            if (!parent.isNull() && !parent.get("type").isNull()) {
+                isHttp = parent.get("type").asString().equals("http");
+            }
+            request.add("_isDirectHttp", isHttp);
+        } else {
+            request.add("_isDirectHttp", parent.get("_isDirectHttp").asBoolean());
+        }
         ObjectSetContext.push(request);
         try {
             scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));

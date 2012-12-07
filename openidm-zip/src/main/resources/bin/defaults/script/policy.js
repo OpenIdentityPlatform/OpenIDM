@@ -321,7 +321,6 @@ function reauthRequired(fullObject, value, params, propName) {
     if (caller && caller == "filterEnforcer") {
         parent = request.parent.parent;
     }
-    type = parent.type;
     if (parent.security) {
         roles = parent.security["openidm-roles"];
         if (params && params.exceptRoles) {
@@ -340,8 +339,8 @@ function reauthRequired(fullObject, value, params, propName) {
             }
         }
     }
-    
-    if (type === "http") {
+    var isHttp = request._isDirectHttp;
+    if (isHttp == "true" || isHttp == true) {
         try {
             var actionParams = {
                 "_action": "reauthenticate"
