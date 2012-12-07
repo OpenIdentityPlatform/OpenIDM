@@ -14,28 +14,29 @@
     "queries" : {
         "genericTables" : {
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}",
-            "check-userName-availability" : "SELECT prop.propvalue FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "links-for-targetId-db2" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND prop.partpropvalue = ${targetId} AND objtype.objecttype = ${_resource}",
-            "for-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "links-for-sourceId-db2" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND prop.partpropvalue = ${sourceId} AND objtype.objecttype = ${_resource}",
-            "get-security-question" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue, credprop.proptype FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/securityQuestion' AND conditionprop.propkey='/email' AND conditionprop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "set-newPassword-for-userName-and-security-answer" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}",
-            "links-for-sourceId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/sourceId' AND prop.partpropvalue = ${sourceId} AND objtype.objecttype = ${_resource}",
-            "get-profile" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "links-for-targetId" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/targetId' AND prop.partpropvalue = ${targetId} AND objtype.objecttype = ${_resource}",
-            "query-all-ids" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
+            "get-by-field-value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/' + ${field} AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
+            "get-users-of-role" : "select 'userName' as propkey, propvalue from ${_dbSchema}.${_propTable} where ${_mainTable}_id IN (SELECT prop.${_mainTable}_id from ${_dbSchema}.${_propTable} prop WHERE prop.propkey='/roles' AND prop.propvalue like '%'+${role}+'%') and propkey = '/userName'",
+            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
-            "query-count-matching-username" : "SELECT '/count' as propkey, count(distinct credprop.propkey, credprop.propvalue) as propvalue FROM openidm.managedobjectproperties credprop  INNER JOIN openidm.managedobjects obj ON obj.id = credprop.managedobjects_id  INNER JOIN openidm.managedobjectproperties conditionprop ON obj.id = conditionprop.managedobjects_id INNER JOIN openidm.objecttypes objtype ON objtype.id = obj.objecttypes_id  WHERE  credprop.propkey = '/_id' AND (conditionprop.propkey='/userName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%')  OR conditionprop.propkey='/givenName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/familyName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%')) AND objtype.objecttype = ${_resource} order by 1",
-            "query-matching-username" : "select fullobject from openidm.managedobjects where objectid in (SELECT distinct credprop.propvalue FROM openidm.managedobjectproperties credprop  INNER JOIN openidm.managedobjects obj ON obj.id = credprop.managedobjects_id  INNER JOIN openidm.managedobjectproperties conditionprop ON obj.id = conditionprop.managedobjects_id INNER JOIN openidm.objecttypes objtype ON objtype.id = obj.objecttypes_id  WHERE credprop.propkey = '/_id' AND  (conditionprop.propkey='/userName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/givenName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%') OR conditionprop.propkey='/familyName' AND conditionprop.partpropvalue like concat('%',${usernameToMatch},'%')) AND objtype.objecttype = 'managed/user' order by 1) limit 30",
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.partpropvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}"
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.partpropvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propkey=${taskState.completed} AND complete.propvalue is NULL )"
         },
         "explicitTables" : {
-            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
+            "get-users-of-role" : "select objectid from ${_dbSchema}.${_table} where roles like '$'+${role}+'%'",
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
-            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "for-internalcredentials" : "select * FROM openidm.internaluser WHERE objectid = ${uid}",
+            "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverid = ${userId} order by createdate desc",
+
+            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
             "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
-            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}"
+
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType} AND secondid = ${secondId}",
+            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linktype = ${linkType}",
+
+            "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
         }
     },
     "resourceMapping" : {
@@ -49,6 +50,11 @@
                 "mainTable" : "managedobjects",
                 "propertiesTable" : "managedobjectproperties",
                 "searchableDefault" : true
+            },
+            "scheduler" : {
+                "mainTable" : "schedulerobjects",
+                "propertiesTable" : "schedulerobjectproperties",
+                "searchableDefault" : true
             }
         },
         "explicitMapping" : {
@@ -60,6 +66,20 @@
                     "linkType" : "linktype",
                     "firstId" : "firstid",
                     "secondId" : "secondid"
+                }
+            },
+            "ui/notification" : {
+                "table" : "uinotification",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "requester" : "requester",
+                    "requesterId" : "requesterId",
+                    "receiverId" : "receiverId",
+                    "createDate" : "createDate",
+                    "notificationType" : "notificationType",
+                    "notificationSubtype" : "notificationSubtype",
+                    "message" : "message"
                 }
             },
             "internal/user" : {

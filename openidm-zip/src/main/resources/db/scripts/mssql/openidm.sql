@@ -311,6 +311,74 @@ CREATE  TABLE [openidm].[auditaccess] (
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditaccess, 'COLUMN', activitydate;
 END
 
+
+-- -----------------------------------------------------
+-- Table `openidm`.`schedulerobjects`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='schedulerobjects' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[schedulerobjects]
+(
+  id NUMERIC(19,0) NOT NULL IDENTITY ,
+  objecttypes_id NUMERIC(19,0) NOT NULL ,
+  objectid NVARCHAR(255) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  fullobject NTEXT NULL ,
+  CONSTRAINT fk_schedulerobjects_objecttypes
+    FOREIGN KEY (objecttypes_id)
+    REFERENCES [openidm].[objecttypes] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  PRIMARY KEY CLUSTERED (id),
+);
+CREATE INDEX fk_schedulerobjects_objecttypes ON [openidm].[schedulerobjects] (objecttypes_id ASC);
+CREATE UNIQUE INDEX idx_schedulerobjects_object ON [openidm].[schedulerobjects] (objecttypes_id ASC, objectid ASC);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`schedulerobjectproperties`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='schedulerobjectproperties' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[schedulerobjectproperties] (
+  schedulerobjects_id NUMERIC(19,0) NOT NULL ,
+  propkey NVARCHAR(255) NOT NULL ,
+  proptype NVARCHAR(32) NULL ,
+  propvalue NVARCHAR(MAX) NULL ,
+  CONSTRAINT fk_schedulerobjectproperties_schedulerobjects
+    FOREIGN KEY (schedulerobjects_id)
+    REFERENCES [openidm].[schedulerobjects] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+);
+ALTER TABLE [openidm].[schedulerobjectproperties] ADD partpropvalue AS CAST(propvalue AS VARCHAR(255)) persisted;
+CREATE INDEX fk_schedulerobjectproperties_schedulerobjects ON [openidm].[schedulerobjectproperties] (schedulerobjects_id ASC);
+CREATE INDEX idx_schedulerobjectproperties_prop ON [openidm].[schedulerobjectproperties] (propkey ASC, partpropvalue ASC);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`uinotification`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='uinotification' and xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[uinotification] (
+  objectid NVARCHAR(38) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  notificationtype NVARCHAR(255) NOT NULL ,
+  createdate NVARCHAR(255) NOT NULL ,
+  message NTEXT NOT NULL ,
+  requester NVARCHAR(255) NULL ,
+  receiverid NVARCHAR(38) NOT NULL ,
+  requesterid NVARCHAR(38) NULL ,
+  notificationsubtype NVARCHAR(255) NULL ,
+  PRIMARY KEY CLUSTERED (objectid) 
+);
+EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', uinotification, 'COLUMN', createdate;
+END
+
+
 -- -----------------------------------------------------
 -- Data for table `openidm`.`internaluser`
 -- -----------------------------------------------------
