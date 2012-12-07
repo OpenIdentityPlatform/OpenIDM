@@ -87,6 +87,10 @@ if (!object.phoneNumber) {
     object.phoneNumber = "";
 }
 
+if (!object.email) {
+    object.email = "";
+}
+
 //password and security answer are generated if missing just to keep those attributes filled
 if (!object.password) {
     object.password = java.util.UUID.randomUUID().toString();
