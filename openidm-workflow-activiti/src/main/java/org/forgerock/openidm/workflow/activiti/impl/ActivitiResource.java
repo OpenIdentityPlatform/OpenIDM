@@ -255,9 +255,9 @@ public class ActivitiResource implements JsonResource {
                     return result;
                 }
                 throw new JsonResourceException(JsonResourceException.BAD_REQUEST, "Unknown query-id");
-            case create:    //start new workflow
-            case action:
+            case action:    //start new workflow
                 return startProcessInstance(request);
+            case create:
             case delete:
             case patch:
             case read:
