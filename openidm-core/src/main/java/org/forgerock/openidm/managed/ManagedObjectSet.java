@@ -448,6 +448,10 @@ class ManagedObjectSet extends ObjectSetJsonResource {
             // Validate policies on the patched object
             params.add("_action", "validateObject");
             params.add("value", newValue);
+            if (isPublicContext()) {
+                ObjectSetContext.get().add("_isDirectHttp", true);
+            }
+            
             if (enforcePolicies) {
                 JsonValue result = new JsonValue(service.getRouter().action("policy/" + managedId(id), params.asMap()));
                 if (!result.isNull() && !result.get("result").asBoolean()) {
