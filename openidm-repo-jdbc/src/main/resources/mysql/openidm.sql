@@ -2,7 +2,7 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL';
 
-CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 ;
+CREATE SCHEMA IF NOT EXISTS `openidm` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_bin;
 USE `openidm` ;
 
 -- -----------------------------------------------------
@@ -252,21 +252,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
     REFERENCES `openidm`.`schedulerobjects` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `openidm`.`manageduserapplicationlnk`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`manageduserapplicationlnk` (
-  `objectid` VARCHAR(38) NOT NULL ,
-  `rev` VARCHAR(38) NOT NULL ,
-  `state` VARCHAR(38) NOT NULL ,
-  `applicationId` VARCHAR(38) NOT NULL ,
-  `userId` VARCHAR(38) NOT NULL ,
-  `lastTimeUsed` VARCHAR(80) NULL ,
-  `requester` VARCHAR(255) NULL ,
-  `link` VARCHAR(255) NULL ,
-  PRIMARY KEY (`objectid`) )
 ENGINE = InnoDB;
 
 

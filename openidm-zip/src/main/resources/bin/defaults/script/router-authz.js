@@ -156,8 +156,8 @@ function ownDataOnly() {
 
 }
 
-function managedUserRestrictedToAllowedRoles(allowedRolesList) {
-    var i = 0,requestedRoles = [],params = {};
+function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
+    var i = 0,requestedRoles = [],params = {},currentUser = {};
     
     if (!request.id.match(/^managed\/user/)) {
         return true;
@@ -169,45 +169,43 @@ function managedUserRestrictedToAllowedRoles(allowedRolesList) {
     else { // this would be strange, but worth checking
         return true; // true because they don't appear to be setting anything
     }
-
     
-    if (request.method === "patch" || (request.method === "action" && request.params["_action"] === "patch")) {
-        for (i in params) {
-            if ((params[i].test && params[i].test.match(/^\/?roles$/)) ||
-                (params[i].add && params[i].add.match(/^\/?roles$/)) || 
-                (params[i].replace && params[i].replace.match(/^\/?roles$/))) {
-                
-                requestedRoles = requestedRoles.concat(params[i].value.split(','))
-            }
-        }
-    } else if ((request.method === "create" || request.method === "update") && 
-                params && (params.roles || params["/roles"])) {
-        
-        if (typeof params.roles !== "string" && typeof params["/roles"] !== "string") { // this would also be strange, but worth checking
-            return false; // false because I don't know (and so don't trust) what they are trying to set.
-        }
-        
-        if (params.roles) {
-            requestedRoles = requestedRoles.concat(params.roles.split(","));
-        }
-        if (params["/roles"]) {
-            requestedRoles = requestedRoles.concat(params['/roles'].split(","));
-        }
+    // we could accept a csv list or an array of properties for the allowedPropertiesList arg.
+    if (typeof allowedPropertiesList === "string") {
+        allowedPropertiesList = allowedPropertiesList.split(',');
     }
     
-    if (requestedRoles.length) { // if there are no requested roles, then no problem
+    if (request.method === "patch" || (request.method === "action" && request.params["_action"] === "patch")) {
+        // check each of the fields they are attempting to patch and make sure they are approved
+        for (i in params) {
+            if ((params[i].test && !containsIgnoreCase(allowedPropertiesList, params[i].test.replace(/^\//, ''))) ||
+                (params[i].add && !containsIgnoreCase(allowedPropertiesList, params[i].add.replace(/^\//, ''))) || 
+                (params[i].replace && !containsIgnoreCase(allowedPropertiesList, params[i].replace.replace(/^\//, '')))) {
 
-        // we could accept a csv list or an array of roles for the rolesList arg.
-        if (typeof allowedRolesList === "string") {
-            allowedRolesList = allowedRolesList.split(',');
+                return false;
+            }
         }
-        
-        for (i in requestedRoles) {
-            if (! contains(allowedRolesList, requestedRoles[i])) {
+    } else if (request.method === "update") {
+        currentUser = openidm.read(request.id);
+        if (!currentUser || currentUser._id !== request.parent.security.userid.id) { // this would be odd, but just in case
+            return false;
+        }
+        for (i in params) {
+            // if the new value does not match the current value, then they must be updating it
+            // if the field they are attempting to update isn't allowed for them, then reject request.
+            if (currentUser[i] !== params[i] && !containsIgnoreCase(allowedPropertiesList,i)) {
+                return false;
+            }
+        }
+    } else if (request.method === "create") {
+        for (i in params) {
+            // they should only be providing parameters that they are allowed to define
+            if (!containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
             }
         }
     }
+
     return true;
 }
 
