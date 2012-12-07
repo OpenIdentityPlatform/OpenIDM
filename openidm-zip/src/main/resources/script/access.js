@@ -40,6 +40,9 @@
  * starting with "managed/".  Note: it would not match "managed", which would need to have its 
  * own entry in the config.
  */
+var allowedPropertiesForManagedUser =   "userName,password,email,givenName,familyName,phoneNumber," + 
+                                        "address1,address2,city,stateProvince,postalCode,country,siteImage," + 
+                                        "passPhrase,securityAnswer,securityQuestion";
 var httpAccessConfig = 
 { 
     "configs" : [
@@ -69,7 +72,7 @@ var httpAccessConfig =
            "roles"      : "openidm-reg",
            "methods"    : "create",
            "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedRoles('openidm-authorized')"
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"')"
         },
 
         // Anonymous user can call the siteIdentification endpoint if it is enabled:
@@ -146,7 +149,7 @@ var httpAccessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "create,read,update,patch,action,query", // note the missing 'delete' - by default, users cannot delete things
             "actions"   : "*",
-            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedRoles('openidm-authorized') && disallowQueryExpression()",
+            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()",
             "excludePatterns": "system/*"
         },
 
