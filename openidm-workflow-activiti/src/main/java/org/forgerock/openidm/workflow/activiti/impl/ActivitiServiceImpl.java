@@ -113,6 +113,7 @@ public class ActivitiServiceImpl implements JsonResource {
     public static final String CONFIG_CONNECTION = "connection";
     public static final String CONFIG_JNDI_NAME = "jndiName";
     public static final String CONFIG_HISTORY = "history";
+    public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
     private String jndiName;
     private boolean selfMadeProcessEngine = true;
     @Reference(name = "processEngine",
@@ -151,6 +152,7 @@ public class ActivitiServiceImpl implements JsonResource {
     private String mailpassword;
     private boolean starttls;
     private String historyLevel;
+    private String workflowDir;
 
     public enum EngineLocation {
 
@@ -263,7 +265,7 @@ public class ActivitiServiceImpl implements JsonResource {
                                 props.put("felix.fileinstall.poll", "2000");
                                 props.put("felix.fileinstall.noInitialDelay", "true");
                                 //TODO java.net.URLDecoder.decode(IdentityServer.getFileForPath("workflow").getAbsolutePath(),"UTF-8")
-                                props.put("felix.fileinstall.dir", IdentityServer.getFileForInstallPath("workflow").getAbsolutePath());
+                                props.put("felix.fileinstall.dir", IdentityServer.getFileForInstallPath(workflowDir).getAbsolutePath());
                                 props.put("felix.fileinstall.filter", ".*\\.bar|.*\\.xml");
                                 props.put("felix.fileinstall.bundles.new.start", "true");
                                 props.put("config.factory-pid", "activiti");
@@ -343,6 +345,7 @@ public class ActivitiServiceImpl implements JsonResource {
                 password = config.get(new JsonPointer(CONFIG_ENGINE_PASSWORD)).asString();
             }
             historyLevel = config.get(CONFIG_HISTORY).asString();
+            workflowDir = config.get(CONFIG_WORKFLOWDIR).defaultTo("workflow").asString();
         }
     }
 
