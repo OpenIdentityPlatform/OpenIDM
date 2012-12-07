@@ -214,7 +214,7 @@ public class TaskScannerJob {
             // Check if this object has a STARTED time already
             JsonValue startTime = input.get(context.getStartField());
             String startTimeString = null;
-            if (startTime != null) {
+            if (startTime != null && !startTime.isNull()) {
                 startTimeString = startTime.asString();
                 DateTime startedTime = DATE_UTIL.parseTimestamp(startTimeString);
 
