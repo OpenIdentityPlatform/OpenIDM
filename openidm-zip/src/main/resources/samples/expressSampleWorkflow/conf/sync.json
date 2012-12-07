@@ -113,11 +113,11 @@
                 "type" : "text/javascript",
                 "source" : "source.provisionToXML == '1'"
             },
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "source" : "var map = {'query': { 'Equals': {'field' : 'name','values' : [source.userName]}}};map;"
+            },
             "properties" : [
-                {
-                    "source" : "_id",
-                    "target" : "_id"
-                },
                 {
                     "target" : "name",
                     "source" : "userName"
@@ -219,7 +219,7 @@
             "enableSync" : false,
             "correlationQuery" : {
                 "type" : "text/javascript",
-                "source" : "var map = {'query': { 'Equals': {'field' : '_id','values' : source._id}}};map;"
+                "source" : "var map = {'query': { 'Equals': {'field' : '_id','values' : [source._id]}}};map;"
             },
             "properties" : [
                 {
