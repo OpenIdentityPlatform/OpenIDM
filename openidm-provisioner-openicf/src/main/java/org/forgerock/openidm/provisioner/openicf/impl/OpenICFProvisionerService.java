@@ -597,10 +597,11 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
 
     /** TODO: Description. */
     private enum ActionId {
-        script;
+        script, authenticate;
     }
 
-    public JsonValue action(Id id, ActionId actionId, JsonValue entity, JsonValue params) throws JsonResourceException {
+    public JsonValue action(Id id, ActionId actionId, JsonValue entity, JsonValue params) throws Exception {
+        JsonValue result = null;
         switch (actionId) {
             case script:
                 SystemAction action = systemActions.get(params.get(SystemAction.SCRIPT_ID).required().asString());
@@ -610,7 +611,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                     if (null != scriptContextBuilderList) {
                         OperationHelper helper = operationHelperBuilder
                                 .build(id.getObjectType(), params, cryptoService);
-                        JsonValue result = new JsonValue(new HashMap<String, Object>());
+                        result = new JsonValue(new HashMap<String, Object>());
 
                         boolean onConnector = !"resource"
                                 .equalsIgnoreCase(params.get(SystemAction.SCRIPT_EXECUTE_MODE).asString());
@@ -730,8 +731,25 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
                             "SystemAction not found: " + params.get("name").getObject());
                 }
+            case authenticate:
+                OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
+                if (helper.isOperationPermitted(AuthenticationApiOp.class)) {
+                    OperationOptionsBuilder operationOptionsBuilder = helper
+                            .getOperationOptionsBuilder(AuthenticationApiOp.class, null, null);
+
+                    String username = params.get("username").required().asString();
+                    String password = params.get("password").required().asString();
+
+                    Uid uid = getConnectorFacade()
+                            .authenticate(helper.getObjectClass(), username, new GuardedString(password.toCharArray()),
+                                    operationOptionsBuilder.build());
+                    result = new JsonValue(new HashMap<String, Object>());
+                    helper.resetUid(uid, result);
+                } else {
+                    logger.debug("Operation AUTHENTICATE of {} is not permitted", id);
+                }
         }
-        return null;
+        return result;
     }
 
     /**
