@@ -15,8 +15,8 @@
         "links-for-secondId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND secondId = ${secondId}",
         "links-for-linkType" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType}",
         
-        "credential-query" : "SELECT * FROM ${unquoted:_resource} WHERE userName.toLowerCase() = ${username}",
-        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id.toLowerCase() = ${username}",
+        "credential-query" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${username}",
+        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
         
         "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}",
         "get-notifications-for-user" : "select * FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
