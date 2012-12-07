@@ -169,9 +169,14 @@ public class ScopeFactoryService implements ScopeFactory {
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue p = paramsValue(params);
                         try {
-                            return accessor(context).read(
+                            JsonValue result = accessor(context).read(
                               p.get(0).required().asString()
-                            ).getWrappedObject();
+                            );
+                            if (result != null) {
+                                return result.getWrappedObject();
+                            } else {
+                                return null;
+                            }
                         } catch (JsonResourceException jre) {
                             if (jre.getCode() == JsonResourceException.NOT_FOUND) {
                                 return null; // indicates no such record without throwing exception
@@ -228,10 +233,15 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue p = paramsValue(params);
-                        return accessor(context).query(
+                        JsonValue result = accessor(context).query(
                           p.get(0).required().asString(),
                           p.get(1).required()
-                        ).getWrappedObject();
+                        );
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // action(string id, object params, any value)
@@ -244,11 +254,16 @@ public class ScopeFactoryService implements ScopeFactory {
                         if (value.isNull()) {
                             value = p.get(1).get("_entity"); // backwards compatibility
                         }
-                        return accessor(context).action(
+                        JsonValue result = accessor(context).action(
                           p.get(0).required().asString(),
                           p.get(1).required(),
                           value
-                        ).getWrappedObject();
+                        );
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // encrypt(any value, string cipher, string alias)
@@ -257,11 +272,16 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue jv = paramsValue(params);
-                        return cryptoService.encrypt(
+                        JsonValue result = cryptoService.encrypt(
                           jv.get(0).required(),
                           jv.get(1).required().asString(),
                           jv.get(2).required().asString()
-                        ).getWrappedObject();
+                        );
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // decrypt(any value)
@@ -270,9 +290,14 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue jv = paramsValue(params);
-                        return cryptoService.decrypt(
+                        JsonValue result = cryptoService.decrypt(
                           jv.get(0).required()
-                        ).getObject();
+                        );
+                        if (result != null) {
+                            return result.getObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // isEncrypted(any value)

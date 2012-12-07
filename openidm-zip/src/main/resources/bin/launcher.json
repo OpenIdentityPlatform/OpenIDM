@@ -43,7 +43,8 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-httpcontext-*.jar"
+                    "**/openidm-httpcontext-*.jar",
+                    "**/groovy-all*.jar"
                 ],
                 "start-level":9,
                 "action":"install.start"
@@ -67,7 +68,8 @@
                     "**/openidm-httpcontext-*.jar",
                     "**/pax-web-jetty-bundle*.jar",
                     "**/pax-web-extender-whiteboard*.jar",
-                    "**/openidm-scheduler*.jar"
+                    "**/openidm-scheduler*.jar",
+                    "**/groovy-all*.jar"
                 ]
             },
             {

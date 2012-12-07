@@ -365,6 +365,15 @@ scr list
      <para>OpenIDM returns the JSON object all on one line. To format the JSON 
      for legibility, use a JSON parser, such as <link 
      xlink:href="http://stedolan.github.com/jq/">jq</link>.</para>
+     <para>Notice that more attributes are returned for user <literal>joe</literal> 
+     than the attributes you added in the previous step. The additional 
+     attributes are added by a script named 
+     <literal>onCreate-user-set-default-fields.js</literal> that is triggered 
+     whan a new user is created. For more information, see <link 
+     xlink:href="integrators-guide#managed-object-configuration" 
+     xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed Object 
+     Configuration</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
+     </para>
     </step>
    </procedure>
 
