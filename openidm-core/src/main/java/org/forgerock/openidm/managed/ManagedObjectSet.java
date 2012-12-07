@@ -40,6 +40,7 @@ import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
+import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.patch.JsonPatchWrapper;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.script.Script;
@@ -96,7 +97,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
 
     /** Flag for indicating if policy enforcement is enabled */
     private boolean enforcePolicies;
-    
+
     /**
      * Constructs a new managed object set.
      *
@@ -463,8 +464,9 @@ class ManagedObjectSet extends ObjectSetJsonResource {
             try {
                 update(id, _rev, decrypted, newValue);
                 retry = false;
+                LOGGER.debug("Patch successful!");
                 logActivity(id, "Patch " + patch, oldValue, newValue);
-            } catch (ConflictException e) {
+            } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     LOGGER.debug("Unable to update due to revision conflict. Retrying.");
                 } else {
