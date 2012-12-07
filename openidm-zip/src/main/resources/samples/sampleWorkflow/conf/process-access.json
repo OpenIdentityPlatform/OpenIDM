@@ -1,0 +1,18 @@
+{
+    "workflowAccess" : [
+        {
+            "propertiesCheck" : {
+                "property" : "name",
+                "matches" : "Contractor onboarding process",
+                "requiresRole" : "employee"
+            }
+        },
+        {
+            "propertiesCheck" : {
+                "property" : "name",
+                "matches" : "Contractor onboarding process",
+                "requiresRole" : "manager"
+            }
+        }
+    ]
+}
