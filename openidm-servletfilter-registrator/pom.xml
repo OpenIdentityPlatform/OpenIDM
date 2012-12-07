@@ -118,7 +118,7 @@
                     <instructions>
                         <!-- allow for dynamic discovery of bundles --> 
                         <DynamicImport-Package>*</DynamicImport-Package>
-                        <Export-Package>org.forgerock.openidm.filterregistration;version=${openidm.version},;version=${openidm.version}</Export-Package>
+                        <Export-Package>org.forgerock.openidm.filterregistration;version=${openidm.version}</Export-Package>
                         <Private-Package>org.forgerock.openidm.filterregistration.impl</Private-Package>
                     </instructions>
                 </configuration>

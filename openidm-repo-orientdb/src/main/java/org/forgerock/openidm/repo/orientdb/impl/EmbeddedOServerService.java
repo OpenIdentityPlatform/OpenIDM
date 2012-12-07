@@ -205,15 +205,18 @@ public class EmbeddedOServerService {
         // Defaulted to the same as the regular user
         String rootPwd = config.get("embeddedServer").get("rootPwd").defaultTo(pwd).asString();
         configuration.users = new OServerUserConfiguration[]{
-                new OServerUserConfiguration("root", pwd, "*")
+                new OServerUserConfiguration("root", rootPwd, "*")
         };
         configuration.properties = new OServerEntryConfiguration[]{
                 new OServerEntryConfiguration("server.cache.staticResources", "false"),
-                new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio")
+                new OServerEntryConfiguration("orientdb.www.path", "db/util/orientdb/studio"),
+                new OServerEntryConfiguration("orient.home", dbFolder.getAbsolutePath())
                 //new OServerEntryConfiguration("log.console.level", "info"),
                 //new OServerEntryConfiguration("log.file.level", "fine")
-
         };
+        // OrientDB currently logs a warning if this is not set, 
+        // although it should be taking the setting from the config above instead.
+        System.setProperty("ORIENTDB_HOME", dbFolder.getAbsolutePath());
 
         return configuration;
     }
