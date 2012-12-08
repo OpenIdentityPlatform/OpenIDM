@@ -343,15 +343,17 @@ function reauthRequired(fullObject, value, params, propName) {
     var isHttp = request._isDirectHttp;
     if (isHttp == "true" || isHttp == true) {
         
-        currentObject = openidm.read(request.id);
-        if (openidm.isEncrypted(currentObject[propName])) {
-            currentObject[propName] = openidm.decrypt(currentObject[propName]);
+        if (request.id && !request.id.match('/$')) { 
+            // only do a read if there is no id specified, in the case of new records 
+            currentObject = openidm.read(request.id);
+            if (openidm.isEncrypted(currentObject[propName])) {
+                currentObject[propName] = openidm.decrypt(currentObject[propName]);
+            }
+            if (currentObject[propName] === fullObject[propName]) {
+                // this means the value hasn't changed, so don't complain about reauth
+                return [];
+            }
         }
-        if (currentObject[propName] === fullObject[propName]) {
-            // this means the value hasn't changed, so don't complain about reauth
-            return [];
-        }
-        
         try {
             var actionParams = {
                 "_action": "reauthenticate"

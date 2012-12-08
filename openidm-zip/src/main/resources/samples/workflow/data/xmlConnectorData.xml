@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<icf:OpenICFContainer
+    xmlns:icf="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
+    xmlns:ri="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://openidm.forgerock.com/xml/ns/public/resource/instances/resource-schema-extension data/resource-schema-extension.xsd http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd data/resource-schema-1.xsd">
+    <ri:__ACCOUNT__>
+        <icf:__UID__>user1</icf:__UID__>
+        <icf:__NAME__>user1</icf:__NAME__>
+        <ri:firstname>Ordinary</ri:firstname>
+        <ri:lastname>Employee</ri:lastname>
+                <ri:manager>manager1</ri:manager>
+                <ri:department>dep1</ri:department>
+                <ri:jobTitle>job1</ri:jobTitle>
+        <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+        <ri:email>user1@example.com</ri:email>
+        <ri:startDate></ri:startDate>
+        <ri:endDate></ri:endDate>
+        <icf:__PASSWORD__>Welcome1</icf:__PASSWORD__>
+        <ri:roles>openidm-authorized,employee</ri:roles>
+        <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+    </ri:__ACCOUNT__>
+
+    <ri:__ACCOUNT__>
+        <icf:__UID__>manager1</icf:__UID__>
+        <icf:__NAME__>manager1</icf:__NAME__>
+        <ri:firstname>Big</ri:firstname>
+        <ri:lastname>Manager</ri:lastname>
+                <ri:manager></ri:manager>
+                <ri:department>dep1</ri:department>
+                <ri:jobTitle>Manager</ri:jobTitle>
+        <ri:mobileTelephoneNumber>1234567</ri:mobileTelephoneNumber>
+        <ri:email>manager1@example.com</ri:email>
+        <ri:startDate></ri:startDate>
+        <ri:endDate></ri:endDate>
+        <icf:__PASSWORD__>Welcome1</icf:__PASSWORD__>
+        <ri:roles>openidm-authorized,manager</ri:roles>
+        <icf:__DESCRIPTION__>Created By XML1</icf:__DESCRIPTION__>
+    </ri:__ACCOUNT__>
+
+</icf:OpenICFContainer>
