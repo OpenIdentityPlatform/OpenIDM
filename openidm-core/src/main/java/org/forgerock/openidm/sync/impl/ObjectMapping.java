@@ -157,6 +157,12 @@ class ObjectMapping implements SynchronizationListener {
     private Boolean correlateEmptyTargetSet;
     
     /**
+     * Whether to maintain links for sync-d targets
+     * Default to {@code TRUE}
+     */
+    private Boolean linkingEnabled;
+    
+    /**
      * The number of processing threads to use in reconciliation
      */
 // TODO: make configurable
@@ -203,12 +209,17 @@ class ObjectMapping implements SynchronizationListener {
         }
         correlateEmptyTargetSet = config.get("correlateEmptyTargetSet").defaultTo(Boolean.FALSE).asBoolean();
         syncEnabled = config.get("enableSync").defaultTo(Boolean.TRUE).asBoolean();
+        linkingEnabled = config.get("enableLinking").defaultTo(Boolean.TRUE).asBoolean();
 
         LOGGER.debug("Instantiated {}", name);
     }
 
     public boolean isSyncEnabled() {
         return syncEnabled.booleanValue();
+    }
+    
+    public boolean isLinkingEnabled() {
+        return linkingEnabled.booleanValue();
     }
 
     /**
@@ -1177,10 +1188,20 @@ class ObjectMapping implements SynchronizationListener {
                                 JsonValue context = ObjectSetContext.get();
                                 // Allow the early link creation as soon as the target identifier is known
                                 String sourceId = getSourceObjectId();
-                                PendingLink.populate(context, ObjectMapping.this.name, sourceId, getSourceObject(), reconId,
-                                        situation);
+                                if (isLinkingEnabled()) {
+                                    PendingLink.populate(context, ObjectMapping.this.name, sourceId, getSourceObject(), 
+                                            reconId, situation);
+                                }
 
                                 targetObjectAccessor = createTargetObject(createTargetObject);
+                                
+                                if (!isLinkingEnabled()) {
+                                    LOGGER.debug(
+                                            "Linking disabled for {} during {}, skipping additional link processing",
+                                            sourceId, reconId);
+                                    break;
+                                }
+                                
                                 boolean wasLinked = PendingLink.wasLinked(context);
                                 if (wasLinked) {
                                     linkCreated = true;
@@ -1202,7 +1223,7 @@ class ObjectMapping implements SynchronizationListener {
                                     throw new SynchronizationException("no target object to link");
                                 }
 
-                                if (linkObject._id == null) {
+                                if (isLinkingEnabled() && linkObject._id == null) {
                                     try {
                                         createLink(getSourceObjectId(), targetId, reconId);
                                         linkCreated = true;
@@ -1219,7 +1240,7 @@ class ObjectMapping implements SynchronizationListener {
                                         }
                                     }
                                 }
-                                if (linkObject._id != null && !targetId.equals(linkObject.targetId)) {
+                                if (isLinkingEnabled() && linkObject._id != null && !targetId.equals(linkObject.targetId)) {
                                     linkObject.targetId = targetId;
                                     linkObject.update();
                                 }
@@ -1568,6 +1589,10 @@ class ObjectMapping implements SynchronizationListener {
          */
         private void assessSituation() throws SynchronizationException {
             situation = null;
+            if (!isLinkingEnabled()) {
+                initializeLink(null); // If we're not linking, set link to none
+            }
+            
             if (getSourceObjectId() != null && linkObject.initialized == false) { // In case the link was not pre-read get it here
                 linkObject.getLinkForSource(getSourceObjectId());
             }
