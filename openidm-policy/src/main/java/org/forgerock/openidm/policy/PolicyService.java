@@ -33,6 +33,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -105,7 +106,34 @@ public class PolicyService implements JsonResource {
     private ServiceRegistration service = null;
 
     @Activate
-    protected void activate(ComponentContext context) {
+    protected void activate(ComponentContext context) throws Exception{
+        logger.debug("Activating service with configuration {}", context.getProperties());
+        try {
+            setConfig(context);
+        } catch (Exception ex) {
+            logger.warn("Configuration invalid, can not activate service.", ex);
+            throw ex;
+        }
+        logger.info("OpenIDM Policy Service component is activated.");
+    }
+    
+    /** 
+     * Configuration modified handling
+     * Ensures the service stays registered
+     * even whilst configuration changes
+     */
+    @Modified
+    void modified(ComponentContext context) throws Exception {
+        logger.debug("Reconfiguring service with configuration {}", context.getProperties());
+        try {
+            setConfig(context);
+        } catch (Exception ex) {
+            logger.warn("Configuration invalid, can not reconfigure service.", ex);
+            throw ex;
+        }
+    }
+    
+    private void setConfig(ComponentContext context) {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
 
         // Initiate the Script
@@ -128,8 +156,6 @@ public class PolicyService implements JsonResource {
             configuration.add("additionalPolicies", list);
         }
         parameters = configuration;
-
-        logger.info("OpenIDM Policy Service component is activated.");
     }
 
     @Deactivate
