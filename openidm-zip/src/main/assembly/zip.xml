@@ -350,6 +350,36 @@
             </excludes>
             <outputDirectory>/openidm/samples/sample9</outputDirectory>
         </fileSet>
+        <!-- Setup workflow sample -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>conf/workflow.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/workflow</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/conf</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>managed.json</exclude>
+                <exclude>process-access.json</exclude>
+                <exclude>provisioner.openicf-xml.json</exclude>
+                <exclude>sync.json</exclude>
+                <exclude>ui-configuration.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <excludes>
+                <exclude>samples/**</exclude>
+                <exclude>conf/**</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/workflow</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>

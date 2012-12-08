@@ -1,0 +1,34 @@
+{
+    "objects" : [
+        {
+            "name" : "user",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/onCreate-user-set-default-fields.js"
+            },
+            "onDelete" : {
+                "type" : "text/javascript",
+                "file" : "bin/defaults/script/ui/onDelete-user-cleanup.js"
+            },
+            "properties" : [
+                {
+                    "name" : "securityAnswer",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    },
+                    "scope" : "private"
+                },
+                {
+                    "name" : "password",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    },
+                    "scope" : "private"
+                }
+            ]
+        },
+        {
+            "name" : "group"
+        }
+    ]
+}
