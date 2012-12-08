@@ -110,6 +110,7 @@ var policyConfig = {
             },
             {   "policyId" : "re-auth-required",
                 "policyExec" : "reauthRequired", 
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["REAUTH_REQUIRED"]
             }
         ] 
@@ -315,7 +316,7 @@ function requiredIfConfigured(fullObject, value, params, property) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var exceptRoles, parent, type, roles, caller, i, j;
+    var exceptRoles, parent, type, roles, caller, i, j, currentObject;
     caller = request.params._caller;
     parent = request.parent;
     if (caller && caller == "filterEnforcer") {
@@ -341,6 +342,16 @@ function reauthRequired(fullObject, value, params, propName) {
     }
     var isHttp = request._isDirectHttp;
     if (isHttp == "true" || isHttp == true) {
+        
+        currentObject = openidm.read(request.id);
+        if (openidm.isEncrypted(currentObject[propName])) {
+            currentObject[propName] = openidm.decrypt(currentObject[propName]);
+        }
+        if (currentObject[propName] === fullObject[propName]) {
+            // this means the value hasn't changed, so don't complain about reauth
+            return [];
+        }
+        
         try {
             var actionParams = {
                 "_action": "reauthenticate"
