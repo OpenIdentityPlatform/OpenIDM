@@ -38,6 +38,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -384,25 +385,43 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
 
     @Activate
-    void activate(ComponentContext compContext) {
+    void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        JsonValue config = null;
         try {
-            config = enhancedConfig.getConfigurationAsJson(compContext);
-            auditLoggers = getAuditLoggers(config, compContext);
-            actionFilters = getActionFilters(config);
-            triggerFilters = getTriggerFilters(config);
-            watchFieldFilters =  getEventJsonPointerList(config, "activity", "watchedFields");
-            passwordFieldFilters = getEventJsonPointerList(config, "activity", "passwordFields");
-
             // TODO make dateUtil configurable (needs to be done in all locations)
             dateUtil = DateUtil.getDateUtil("UTC");
-            logger.debug("Audit service filters enabled: {}", actionFilters);
-        } catch (RuntimeException ex) {
+            setConfig(compContext);
+        } catch (Exception ex) {
             logger.warn("Configuration invalid, can not start Audit service.", ex);
             throw ex;
         }
         logger.info("Audit service started.");
+    }
+
+    /** 
+     * Configuration modified handling
+     * Ensures audit logging service stays registered
+     * even whilst configuration changes
+     */
+    @Modified
+    void modified(ComponentContext compContext) throws Exception {
+        logger.debug("Reconfiguring aduit service with configuration {}", compContext.getProperties());
+        try {
+            setConfig(compContext);
+        } catch (Exception ex) {
+            logger.warn("Configuration invalid, can not reconfigure Audit service.", ex);
+            throw ex;
+        }
+    }
+
+    private void setConfig(ComponentContext compContext) throws Exception {
+        JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
+        auditLoggers = getAuditLoggers(config, compContext);
+        actionFilters = getActionFilters(config);
+        triggerFilters = getTriggerFilters(config);
+        watchFieldFilters =  getEventJsonPointerList(config, "activity", "watchedFields");
+        passwordFieldFilters = getEventJsonPointerList(config, "activity", "passwordFields");
+        logger.debug("Audit service filters enabled: {}", actionFilters);
     }
 
     Map<String, List<String>> getActionFilters(JsonValue config) {
@@ -517,14 +536,6 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         }
         return configuredLoggers;
     }
-
-
-    /* Currently rely on deactivate/activate to be called by DS if config changes instead
-    @Modified
-    void modified(ComponentContext compContext) {
-    }
-    */
-
 
     @Deactivate
     void deactivate(ComponentContext compContext) {

@@ -44,6 +44,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -112,6 +113,9 @@ public class AuthFilter
 
     /** Re-authentication password header */
     public static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
+
+    /** The authentication module to delegate to */
+    private AuthModule authModule;
     
     // name of the header containing the client IPAddress, used for the audit record
     // typically X-Forwarded-For
@@ -261,7 +265,7 @@ public class AuthFilter
             throw new AuthException("");
         }
         ad.username = t[0];
-        AuthModule.authenticate(ad, t[1]);
+        authModule.authenticate(ad, t[1]);
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }
@@ -323,7 +327,7 @@ public class AuthFilter
             logger.debug("Failed authentication, missing or empty headers");
             throw new AuthException("Failed authentication, missing or empty headers");
         }
-        ad = AuthModule.authenticate(ad, reauthPassword);
+        ad = authModule.authenticate(ad, reauthPassword);
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }
@@ -340,7 +344,7 @@ public class AuthFilter
             logger.debug("Failed authentication, missing or empty headers");
             throw new AuthException();
         }
-        ad = AuthModule.authenticate(ad, password);
+        ad = authModule.authenticate(ad, password);
         if (ad.status == false) {
             throw new AuthException(ad.username);
         }
@@ -425,9 +429,7 @@ public class AuthFilter
     protected synchronized void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
         logger.info("Activating Auth Filter with configuration {}", context.getProperties());
-        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-        logClientIPHeader = (String) config.get("clientIPHeader").asString();
-        AuthModule.setConfig(config);
+        setConfig(context);
         // TODO make this configurable
         dateUtil = DateUtil.getDateUtil("UTC");
 
@@ -447,6 +449,18 @@ public class AuthFilter
         filterMapping.setUrlPatterns("/openidm/*");//, "/openidmui/*");
         //filterMapping.setInitParams(null);
         serviceRegistration = FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext().registerService(FilterMapping.class.getName(), filterMapping, null);
+    }
+
+    @Modified
+    void modified(ComponentContext context) throws Exception {
+        logger.info("Modified auth Filter with configuration {}", context.getProperties());
+        setConfig(context);
+    }
+
+    private void setConfig(ComponentContext context) {
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+        logClientIPHeader = (String) config.get("clientIPHeader").asString();
+        authModule = new AuthModule(config);
     }
 
     @Deactivate
