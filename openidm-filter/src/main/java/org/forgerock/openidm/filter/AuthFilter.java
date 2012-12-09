@@ -370,6 +370,7 @@ public class AuthFilter
             throw new AuthException(ad.username);
         }
         ad.username = certs[0].getSubjectDN().getName();
+        ad.userId = ad.username;
         ad.roles.add("openidm-cert");
         logger.debug("Authentication client certificate subject {}", ad.username );
         return ad;
