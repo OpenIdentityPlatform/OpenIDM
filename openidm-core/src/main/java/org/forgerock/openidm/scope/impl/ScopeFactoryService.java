@@ -155,11 +155,15 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue p = paramsValue(params);
-                        accessor(context).create(
+                        JsonValue result = accessor(context).create(
                           p.get(0).required().asString(),
                           p.get(1).required().expect(Map.class) // OpenIDM resources are maps only
                         );
-                        return null; // no news is good news
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // read(string id)
@@ -192,12 +196,16 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue p = paramsValue(params);
-                        accessor(context).update(
+                        JsonValue result = accessor(context).update(
                           p.get(0).required().asString(),
                           p.get(1).asString(),
                           p.get(2).required().expect(Map.class) // OpenIDM resources are maps only
                         );
-                        return null; // no news is good news
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // patch(string id, string rev, object value)
@@ -206,12 +214,16 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue p = paramsValue(params);
-                        accessor(context).patch(
+                        JsonValue result = accessor(context).patch(
                          p.get(0).required().asString(),
                          p.get(1).asString(),
                          p.get(2).required().expect(List.class)
                         );
-                        return null;
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // delete(string id, string rev)
@@ -220,11 +232,15 @@ public class ScopeFactoryService implements ScopeFactory {
                     public Object call(Map<String, Object> scope,
                      Map<String, Object> _this, List<Object> params) throws Throwable {
                         JsonValue p = paramsValue(params);
-                        accessor(context).delete(
+                        JsonValue result = accessor(context).delete(
                           p.get(0).required().asString(),
                           p.get(1).asString()
                         );
-                        return null; // no news is good news
+                        if (result != null) {
+                            return result.getWrappedObject();
+                        } else {
+                            return null;
+                        }
                     }
                 });
                 // query(string id, object params)
