@@ -4,7 +4,8 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-system-*.jar"
+                    "**/openidm-system-*.jar",
+                    "**/org.apache.servicemix.transaction-*.jar"
                 ],
                 "start-level":1,
                 "action":"install.start"
@@ -65,6 +66,7 @@
                     "**/org.apache.felix.scr-*.jar",
                     "**/org.apache.felix.configadmin*.jar",
                     "**/org.apache.felix.fileinstall*.jar",
+                    "**/org.apache.servicemix.transaction-*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/pax-web-jetty-bundle*.jar",
                     "**/pax-web-extender-whiteboard*.jar",
