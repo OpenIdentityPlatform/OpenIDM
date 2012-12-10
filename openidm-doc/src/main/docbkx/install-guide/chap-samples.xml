@@ -1468,12 +1468,6 @@ $ ./startup.sh -p samples/sample8</screen>
      <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample9</screen>
      
-     <para>Copy the workflow process definition from sample 9 into the workflow 
-     directory:</para>
-     
-     <screen>$ cd /path/to/openidm
-     $ cp samples/sample9/workflow/managedUserApproval.bar workflow/</screen>
-     
     </section>
 
     <section xml:id="run-sample9">
