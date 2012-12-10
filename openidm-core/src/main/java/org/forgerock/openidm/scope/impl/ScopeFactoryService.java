@@ -51,6 +51,7 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(
     name = "org.forgerock.openidm.scope",
+    immediate = true, 
     policy = ConfigurationPolicy.OPTIONAL
 )
 @Properties({
