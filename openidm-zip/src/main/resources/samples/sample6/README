@@ -31,24 +31,21 @@ uid=jdoe,ou=People,dc=example,dc=com, and no other entries under ou=people,o=ad.
 
 To run the sample in OpenIDM, follow these steps.
 
-    1. Copy the sample configuration and data.
+    1. Edit /path/to/openidm/samples/sample6/conf/provisioner.openicf-ad.json 
+       to change the port from 4389 to 1389 (or other port number where OpenDJ 
+       listens for LDAP).
+
+    2. Start OpenIDM with the configuration for sample 6.
 
     $ cd /path/to/openidm
-    $ cp -r samples/sample6/conf .
+    $ ./startup.sh -p samples/sample6
 
-    2. Edit conf/provisioner.openicf-ad.json to change the port from 4389 to
-       1389 (or other port number where OpenDJ listens for LDAP).
+    3. Run reconciliation.
 
-    3. Start OpenIDM.
-
-    $ ./startup.sh
-
-    4. Run reconciliation.
-
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemLdapAccounts_managedUser"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
     {"reconId":"d88ca423-d5f2-4eb5-a451-a229399f92af"}
 
-    5. Check that the user was added under ou=people,o=ad.
+    4. Check that the user was added under ou=people,o=ad.
 
     $ cd /path/to/OpenDJ/bin
     $ ./ldapsearch -p 1389 -b ou=people,o=ad "(uid=jdoe)"
@@ -64,11 +61,11 @@ To run the sample in OpenIDM, follow these steps.
     sn: Doe
     mail: jdoe@example.com
 
-    6. Edit conf/scheduler-activeSynchroniser_systemLdapAccount.json to set
-       "enabled" : true. LiveSync causes synchronization to happen as you
-       make changes.
+    5. Edit samples/sample6/conf/schedule-activeSynchroniser_systemLdapAccount.json 
+    to set "enabled" : true. LiveSync causes synchronization to happen as you 
+    make changes.
 
-    7. Using the OpenDJ Control Panel, add a new user under
+    6. Using the OpenDJ Control Panel, add a new user under
        ou=People,dc=example,dc=com, and then check the result under
        ou=people,o=ad.
 
