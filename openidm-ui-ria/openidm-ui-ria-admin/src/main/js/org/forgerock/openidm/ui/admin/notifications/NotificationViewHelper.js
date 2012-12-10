@@ -25,16 +25,21 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper", [
+    "org/forgerock/commons/ui/common/util/Constants", 
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function (AbstractConfigurationAware) {
+], function (constants, eventManager, config, AbstractConfigurationAware) {
 
     var obj = {};
-    
-    //will be populated from ui-configuration
-    obj.notificationTypes = {};
-    
-    //will be populated from ui-configuration
-    obj.defaultType = {};
-    
+    eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function (event) {
+        if(config.notificationTypes) {
+            obj.notificationTypes = config.notificationTypes;
+        }
+        
+        if(config.defaultNotificationType) {
+            obj.defaultType = config.defaultNotificationType;
+        }
+    });
     return obj;
 });
