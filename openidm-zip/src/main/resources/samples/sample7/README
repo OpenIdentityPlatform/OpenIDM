@@ -13,21 +13,17 @@ http://openidm.forgerock.org/doc/install-guide/index.html#more-sample7
 
 To try the sample, follow these steps.
 
-    1. If you have not already done so, set up MySQL to store the
-       OpenIDM internal repository as described in
-       http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository
-
-    2. Copy the sample configuration, data, and scripts.
+    1. Start OpenIDM with the configuration for sample 7.
 
     $ cd /path/to/openidm
-    $ cp -r samples/sample7/conf samples/sample7/data samples/sample7/script .
+    $ ./startup.sh samples/sample7
 
-    3. Run reconciliation to copy the user from the XML file under data/ to
+    2. Run reconciliation to copy the user from the XML file under data/ to
        the OpenIDM internal repository.
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"
 
-    4. Retrieve the user from the repository. The scripts you copied transform
+    3. Retrieve the user from the repository. The scripts you copied transform
        the user data to fit the SCIM-like schema.
 
     $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request GET "http://localhost:8080/openidm/managed/user/DDOE1"
