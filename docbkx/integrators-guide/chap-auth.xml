@@ -38,9 +38,9 @@
   <primary>Authorization</primary>
  </indexterm>
 
- <para>OpenIDM currently provides a simple, yet flexible authentication and
- authorization mechanism based on REST interface URLs and on roles stored in
- the repository.</para>
+ <para>OpenIDM provides a simple, yet flexible authentication and authorization 
+ mechanism based on REST interface URLs and on roles stored in the repository.
+ </para>
 
  <section xml:id="openidm-users">
   <title>OpenIDM Users</title>
@@ -58,10 +58,18 @@
   <section xml:id="internal-users">
    <title>Internal Users</title>
    
-   <para>OpenIDM sets up two internal users by default, anonymous and
-   openidm-admin. OpenIDM separates these accounts from all other accounts
-   to protect them from any reconciliation or sync processes. You can add
-   or remove internal users at any time.</para>
+   <para>Two internal users are created by default - <literal>anonymous</literal> 
+   and <literal>openidm-admin</literal>. These accounts are separated from 
+   other user accounts to protect them from any reconciliation or 
+   synchronization processes.</para>
+   
+   <para>OpenIDM stores internal users and their role membership in a table
+   in the repository called <literal>internaluser</literal> when implemented
+   in MySQL, and in the <literal>internal_user</literal> table for an OrientDB 
+   repository. You can add or remove internal users over the REST interface 
+   (at <literal>http://localhost:8080/openidm/repo/internal/user</literal>) or 
+   directly in the repository.
+   </para>
 
    <variablelist>
     <varlistentry>
@@ -70,18 +78,19 @@
      who do not have their own accounts. The anonymous user is primarily
      intended to allow self-registration.</para>
      <para>OpenIDM stores the anonymous user's password,
-     <literal>amonymous</literal>, in clear text in the repository internal
+     <literal>anonymous</literal>, in clear text in the repository internal
      user table. The password is not considered to be secret.</para></listitem>
     </varlistentry>
     <varlistentry>
      <term>openidm-admin</term>
      <listitem><para>This user serves as the super administrator. After
      installation, the <literal>openidm-admin</literal> user has full access,
-     and provides a fall back in case other users are locked out. Do not use
-     <literal>openidm-admin</literal> for normal tasks. Usually no one is
-     associated with the <literal>openidm-admin</literal> user, so audit log
-     records pertaining to <literal>openidm-admin</literal> do not reflect
-     the actions of any real person.</para>
+     and provides a fallback mechanism in case other users are locked out. Do 
+     not use <literal>openidm-admin</literal> for normal tasks. Under normal 
+     circumstances, no real user is associated with the 
+     <literal>openidm-admin</literal> user account, so audit log records that 
+     pertain to <literal>openidm-admin</literal> do not reflect the actions of 
+     any real person.</para>
      <para>OpenIDM encrypts the password, <literal>openidm-admin</literal>, by
      default. Change the password immediately after installation. For
      instructions, see <link xlink:role="http://docbook.org/xlink/role/olink"
@@ -90,11 +99,6 @@
      </listitem>
     </varlistentry>
    </variablelist>
-
-   <para>OpenIDM stores internal users and their role membership in a table
-   in the repository called <literal>internaluser</literal> when implemented
-   in MySQL, and in the <literal>internal_user</literal> table for an OrientDB 
-   repository.</para>
   </section>
   
   <section xml:id="managed-users">
@@ -112,7 +116,7 @@
    the table <literal>managed_user</literal>.</para>
 
    <para>By default, the attribute names for managed user login and password
-   are <literal>email</literal> and <literal>password</literal>,
+   are <literal>userName</literal> and <literal>password</literal>,
    respectively.</para>
   </section>
  </section>
@@ -128,12 +132,17 @@
   applications are expected to access the REST interface.</para>
 
   <variablelist>
-   <para>OpenIDM supports an improved authentication mechanism on the REST interface. The reason for not using standards, like basic authentication or form-based authentication, is lack of compatibility with AJAX.</para>
+   <para>OpenIDM supports an improved authentication mechanism on the REST 
+   interface. Unlike basic authentication or form-based authentication, the 
+   OpenIDM authentication mechanism is compatible with the AJAX framework.
+   </para>
    <varlistentry>
     <term>OpenIDM authentication with standard header fields</term>
     <listitem>
      <screen>$ curl --user userName:password</screen>
-     <para>This authentication is compatible with standard basic authentication except that it will not prompt for credentials if they are missing in the request.</para>
+     <para>This authentication is compatible with standard basic authentication, 
+     except that it will not prompt for credentials if they are missing in the 
+     request.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -146,14 +155,14 @@
    </varlistentry>
   </variablelist>
   
-  <para>For more details about the OpenIDM authentication mechanism please see <link
+  <para>For more information about the OpenIDM authentication mechanism, see <link
   xlink:href="integrators-guide#security-messages"
   xlink:role="http://docbook.org/xlink/role/olink">
   <citetitle>Use Message Level Security</citetitle></link>.</para>
   
-  <para>You can change the attributes OpenIDM uses to store user login and
-  password values. The attribute names are shown in a database query
-  defined in
+  <para>You can change the attributes that OpenIDM uses to store user login 
+  and password values. The attribute names are shown in a database query
+  that is defined in 
   <filename>openidm/conf/repo.<replaceable>repo-type</replaceable>.json</filename>.
   </para>
 
@@ -162,13 +171,13 @@
    <varlistentry>
     <term><literal>credential-internaluser-query</literal></term>
     <listitem>
-     <para>Uses the user object ID for login</para>
+     <para>Uses the <literal>_openidm_id</literal> attribute for login</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term><literal>credential-query</literal></term>
     <listitem>
-     <para>Uses the user email attribute for login</para>
+     <para>Uses the <literal>userName</literal> attribute for login</para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -180,11 +189,9 @@
 
    <programlisting language="javascript">
 {
-    "queryId": <emphasis role="strong">"credential-query"</emphasis>,
-    "queryOnResource": "managed/user",
-    "defaultUserRoles": [
-        "openidm-authorized"
-    ]
+    "queryId" : "credential-query",
+    "queryOnResource" : "managed/user",
+    "defaultUserRoles" : [ ]
 }</programlisting>
 
  <para>You can explicitly define the properties that constitute passwords or 
@@ -266,154 +273,151 @@
   <indexterm>
    <primary>Authorization</primary>
   </indexterm>
-
-  <para>OpenIDM access control can be based on REST interface URLs.</para>
-
-  <para>The <filename>openidm/script/router-authz.js</filename> script
-  controls access to REST interface URLs. OpenIDM calls the script for each
-  request. The script either throws the string <literal>Access denied</literal>,
-  or nothing. If it throws <literal>Access denied</literal>, then OpenIDM
-  denies the request. The default script is shown below.</para>
-
-   <programlisting language="javascript">
-const allowCert = false;
-
-function contains(a, o) {
-    if (typeof(a) != 'undefined' &amp;&amp; a != null) {
-        for (var i = 0; i &lt;= a.length; i++) {
-            if (a[i] === o) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-function allow() {
-    if (typeof(request.parent) === 'undefined' ||
-            request.parent.type != 'http') {
-        return true;
-    }
-    var roles = request.parent.security['openidm-roles'];
-    if (contains(roles, 'openidm-admin')) {
-        return true;
-    } else if (allowCert &amp;&amp; contains(roles, 'openidm-cert')) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-if (!allow()) {
-    throw "Access denied";
-}</programlisting>
-
-  <variablelist>
-   <para>The script can be seen as having three parts: constants, functions,
-   and a decision.</para>
-   <varlistentry>
-    <term>constants</term>
-    <listitem>
-     <para>The constants can function as global switches, for example to toggle
-     whether certificate-based authentication is allowed.</para>
-     <para>The example that follows shows a constant used to toggle whether
-     anonymous authentication is allowed.</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>functions</term>
-    <listitem>
-     <para>The default script defines two functions. The
-     <literal>allow()</literal> function is called by the final if-statement.
-     The <literal>contains()</literal> function takes the list of roles
-     assigned to an authenticated user, and checks whether the list contains
-     the role specified as the second argument. If the list does contain the
-     role, then <literal>contains()</literal> returns
-     <literal>true</literal>.</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>decision</term>
-    <listitem>
-     <para>The if-statement at the end of the script executes first. It calls
-     the <literal>allow()</literal> function, which calls other functions.
-     The <literal>allow()</literal> function returns true or false, triggering
-     the behavior of the final if-statement. </para>
-    </listitem>
-   </varlistentry>
-  </variablelist>
   
-  <para>The following example extends the script to filter out requests not
-  under <literal>/openidm/config</literal> or
-  <literal>/openidm/managed</literal>.</para>
-
-   <programlisting language="javascript">
-const allowCert = false;
-const allowAnon = false;
-
-function contains(a, o) {
-    if (typeof(a) != 'undefined' &amp;&amp; a != null) {
-        for (var i = 0; i &lt;= a.length; i++) {
-            if (a[i] === o) {
-                return true;
-            }
-        }
-    }
-    return false;
+  <para>OpenIDM provides role-based authorization that restricts direct 
+  HTTP access to REST interface URLs. The default authorization configuration 
+  grants different access rights to users that are assigned the roles 
+  <literal>"openidm-admin"</literal>, <literal>"openidm-cert"</literal>, 
+  <literal>"openidm-authorized"</literal>, and <literal>"openidm-reg"</literal>.
+  </para>
+  <para>Note that this access control applies to direct HTTP calls only. Access 
+  for internal calls (for example, calls from scripts) is not affected by this 
+  mechanism.</para>
+  
+  <itemizedlist>
+    <para>Authorization is configured in two script files:</para>
+    <listitem>
+      <para><filename>openidm/bin/defaults/script/router-authz.js</filename></para>
+    </listitem>
+    <listitem>
+      <para><filename>openidm/script/access.js</filename></para>
+    </listitem>
+  </itemizedlist>
+  
+  <para>OpenIDM calls these scripts for each request, via the 
+  <literal>onRequest</literal> hook that is defined in the default 
+  <filename>router.json</filename> file. The scripts either throw the string 
+  <literal>Access denied</literal>, or nothing. If 
+  <literal>Access denied</literal> is thrown, OpenIDM denies the request.
+  </para>
+  
+  <section xml:id="router-authz-js">
+    <title><literal>router-authz.js</literal></title>
+    <para>This file provides the functions that enforce access rules. For 
+    example, the following function controls whether users with a certain role 
+    can start a specified process.</para>
+    <programlisting language="javascript">
+...
+function isAllowedToStartProcess() {
+var processDefinitionId = request.value._processDefinitionId;
+return isProcessOnUsersList(processDefinitionId);
 }
+...
+    </programlisting>
+    <para>There are certain functions in <filename>router-authz.js</filename> 
+    that should <emphasis>not</emphasis> be altered. These are indicated in the 
+    file itself.</para>    
+  </section>
+  
+  <section xml:id="access-js">
+    <title><literal>access.js</literal></title>
+    <para>This file defines the access configuration for HTTP requests and 
+    references the methods defined in <filename>router-authz.js</filename>. Each 
+    entry in the configuration contains a pattern to match against the incoming 
+    request ID, and the associated roles, methods, and actions that are allowed 
+    for requests on that pattern.</para>
+    <para>The following sample configuration entry indicates the configurable 
+    parameters and their purpose.</para>
+    <programlisting language="javascript">
+        {  
+            "pattern"   : "*",
+            "roles"     : "openidm-admin",
+            "methods"   : "*", // default to all methods allowed
+            "actions"   : "*", // default to all actions allowed
+            "customAuthz" : "disallowQueryExpression()",
+            "excludePatterns": "system/*"
+        },    
+    </programlisting>
+    <para>The overall intention of this entry is to allow users with the role 
+    <literal>openidm-admin</literal> HTTP access to everything except the 
+    <literal>system</literal> endpoints. The parameters are as follows:</para>
+    
+    <itemizedlist>
+        <listitem>
+          <para><literal>"pattern"</literal> - the REST endpoint to which access 
+          is being controlled. <literal>"*"</literal> indicates access to all 
+          endpoints. <literal>"managed/user/*"</literal> would indicate access 
+          to all managed user objects.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"roles"</literal> - a comma-separated list of the roles 
+          to which this access configuration applies.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"methods"</literal> - a comma separated list of the 
+          methods to which access is being granted. The method can be one or 
+          more of <literal>create, read, update, delete, patch, action, query</literal>. 
+          A value of <literal>"*"</literal> indicates that all methods are 
+          allowed. A value of <literal>""</literal> indicates that no methods 
+          are allowed.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"actions"</literal> - a comma separated list of the 
+          allowed actions. The possible values depend on the service (URL) that 
+          is being exposed. The following list indicates the possible actions 
+          for each service.</para>
+          <simplelist>
+            <member><literal>openidm/managed</literal> - 
+              <literal>patch</literal></member>
+            <member><literal>openidm/recon</literal> - 
+              <literal>recon, cancel</literal></member>
+            <member><literal>openidm/sync</literal> - 
+              <literal>onCreate, onUpdate, onDelete, recon, performAction</literal>
+            </member>
+            <member><literal>openidm/external/email</literal> - 
+              <literal>(no action parameter applies)</literal></member>
+            <member><literal>openidm/external/rest</literal> - 
+              <literal>(no action parameter applies)</literal></member>
+            <member><literal>openidm/authentication</literal> - 
+              <literal>reauthenticate</literal></member>
+            <member><literal>openidm/system</literal> - 
+              <literal>createconfiguration</literal></member>
+            <member><literal>openidm/system/*</literal> - 
+              <literal>script</literal></member>
+            <member><literal>openidm/taskscanner</literal> - 
+              <literal>execute, cancel</literal></member>
+            <member><literal>openidm/workflow/processinstance</literal> - 
+              <literal>(no action parameter applies)</literal></member>
+            <member><literal>openidm/workflow/taskinstance</literal> - 
+              <literal>claim,complete</literal></member>                          
+          </simplelist>
+          <para>A value of <literal>"*"</literal> indicates that all actions 
+         exposed for that service are allowed. A value of <literal>""</literal> 
+         indicates that no actions are allowed.</para>
+        </listitem>
+        <listitem>
+          <para><literal>"customAuthz"</literal> - an optional parameter that 
+          enables you to specify a custom function for additional authorization 
+          checks. These functions are defined in <filename>router-atuhz.js</filename>
+          .</para>
+        </listitem>
+        <listitem>
+          <para><literal>"excludePatterns"</literal> - an optional parameter 
+          that enables you to specify particular endpoints to which access 
+          should not be given.</para>
+        </listitem>                      
+    </itemizedlist>
+  </section>
+  
+  <section xml:id="authorization-extending">
+    <title>Extending the Authorization Mechanism</title>
+    
+    <para>You can extend the default authorization mechanism by defining 
+    additional functions in <filename>router-authz.js</filename> and by 
+    creating new access control configuration definitions in 
+    <filename>access.js</filename>.</para>
+  
+  </section>
 
-function matchesContext(path, context, allowRoot, allowSubcontext) {
-    if (allowRoot &amp;&amp; path === context) {
-        return true;
-    }
-    if (allowSubcontext &amp;&amp; path.substring(0, context.length + 1)
-            === context + "/") {
-        return true;
-    }
-    return false;
-}
-
-function allow() {
-    if (typeof(request.parent) === 'undefined' ||
-            request.parent.type != 'http') {
-        return true;
-    }
-
-    // Restrict the URLs that are accessible externally
-    var path = request.parent.path;
-    if (!(matchesContext(path, "/openidm/config", true, true)
-            || matchesContext(path, "/openidm/managed", false, true))) {
-        return false;
-    }
-
-    var roles = request.parent.security['openidm-roles'];
-    if (contains(roles, 'openidm-admin')) {
-        return true;
-    } else if (allowCert &amp;&amp; contains(roles, 'openidm-cert')) {
-        return true;
-    } else if (allowAnon &amp;&amp; contains(roles, 'openidm-reg')) {
-        return true;    
-    } else {
-        return false;
-    }
-}
-
-if (!allow()) {
-    throw "Access denied";
-}</programlisting>
-
-  <para>Compared to the default, this example has a second global constant,
-  <literal>allowAnon</literal>, used to allow or deny anonymous access. The
-  new constant serves in the <literal>allow()</literal> function when checking
-  for <literal>openidm-reg</literal> membership, the role for anonymous
-  users.</para>
-
-  <para>Furthermore this example includes an additional function,
-  <literal>matchesContext()</literal>, called from the
-  <literal>allow()</literal> function before the role test. The additional test
-  filters out all requests not to <literal>/openidm/config</literal> or below
-  <literal>/openidm/managed</literal>. The context root itself is excluded in
-  the latter call to avoid actions like patch by query on
-  <filename>/openidm/managed/user</filename>.</para>
  </section>
 </chapter>
