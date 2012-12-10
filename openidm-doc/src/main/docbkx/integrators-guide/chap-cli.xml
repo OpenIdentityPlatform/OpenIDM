@@ -43,7 +43,7 @@
  
  <screen>$ cd /path/to/openidm
 $ ./cli.sh
-Using boot properties at /Users/lana/openidm/conf/boot/boot.properties
+Using boot properties at /openidm/conf/boot/boot.properties
 openidm# encrypt ....
  </screen>
  
@@ -76,6 +76,8 @@ $ ./cli.sh encrypt ...
   into a production environment. This subcommand also enables you to inspect 
   the active configuration of an OpenIDM instance.</para>
   
+  <para>OpenIDM must be running when you execute this command.</para>
+  
   <para>Usage is as follows:</para>
   
   <screen>
@@ -87,7 +89,10 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
   <screen>$ ./cli.sh configexport /tmp/conf</screen>
   
   <para>Configuration objects are exported, as <filename>.json</filename> files, 
-  to the specified directory. The following objects are exported:</para>
+  to the specified directory. Configuration files that are present in this 
+  directory are renamed as backup files, with a timestamp, for example, 
+  <filename>audit.json.2012-12-19T12-00-28.bkp</filename>, and are not 
+  overwritten. The following configuration objects are exported:</para>
   
   <itemizedlist>
     <listitem>
@@ -127,12 +132,20 @@ $ ./cli.sh configexport /<replaceable>export-location</replaceable>
     </listitem>         
      <listitem>
       <para>If workflows are defined, the configuration of the workflow engine 
-      (<filename>workflow.json</filename>)</para>
+      (<filename>workflow.json</filename>) and the workflow access 
+      configuration (<filename>process-access.json</filename>)</para>
     </listitem>
     <listitem>
      <para>Any configuration files related to the user interface 
      (<filename>ui-*.json</filename>)</para>
     </listitem>
+    <listitem>
+      <para>The configuration of any custom endpoints 
+      (<filename>endpoint-*.json</filename>)</para>
+    </listitem>
+    <listitem>
+      <para>The policy configuration (<filename>policy.json</filename>)</para>
+    </listitem>    
   </itemizedlist>
  </section>
 
@@ -266,7 +279,7 @@ INFO: CryptoService is initialized with 3 keys.
   
   <screen>
 $ ./cli.sh encrypt -j 
-Using boot properties at /Users/lana/openidm/conf/boot/boot.properties
+Using boot properties at /openidm/conf/boot/boot.properties
 Enter the Json value
 
 > Press ctrl-D to finish input
@@ -300,13 +313,56 @@ INFO: CryptoService is initialized with 3 keys.
 
  </section>
  
- <!--
- <section xml:id="keytool">     
+ <section xml:id="cli-keytool">     
    <title>keytool</title>
+   
+  <indexterm>
+    <primary>Keytool</primary>
+  </indexterm>   
 
-   <para>This subcommand exports or imports SecretKeyEntry values</para>
+   <para>The <command>keytool</command> subcommand exports or imports 
+   private key values.</para>
+   
+   <para>The Java <command>keytool</command> command enables you to export and 
+   import public keys and certificates, but not private keys. The OpenIDM 
+   <command>keytool</command> subcommand provides this functionality.</para>
+
+  <para>Usage is as follows:</para>
+  
+  <command>./cli.sh keytool [--export, --import] <replaceable>alias</replaceable>
+  </command>
+  
+  <para>For example, to export the default OpenIDM symmetric key, run the 
+  following command:</para>
+  
+  <screen>$ ./cli.sh keytool --export openidm-sym-default
+Using boot properties at /openidm/conf/boot/boot.properties
+Use KeyStore from: /openidm/security/keystore.jceks
+Please enter the password: 
+[OK] Secret key entry with algorithm AES
+AES:606d80ae316be58e94439f91ad8ce1c0
+  </screen>
+  
+  <para>The default keystore password is <literal>changeit</literal>. You 
+  should change this password after installation.</para>
+  
+  <para>To import a new secret key named <replaceable>my-new-key</replaceable>, 
+  run the following command:</para>
+  
+  <screen>$ ./cli.sh keytool --import my-new-key
+Using boot properties at /openidm/conf/boot/boot.properties
+Use KeyStore from: /openidm/security/keystore.jceks
+Please enter the password: 
+Enter the key: 
+AES:606d80ae316be58e94439f91ad8ce1c0
+  </screen>
+  
+  <para>If a secret key of that name already exists, OpenIDM returns the 
+  following error:</para>
+  
+  <screen>"KeyStore contains a key with this alias"</screen>
+   
  </section>
- -->
 
 <section xml:id="cli-validate">
   <title>validate</title>
@@ -323,19 +379,29 @@ INFO: CryptoService is initialized with 3 keys.
   
   <screen>
 $ ./cli.sh validate
+Using boot properties at /openidm/conf/boot/boot.properties
 ...................................................................
 [Validating] Load JSON configuration files from:
-[Validating] 	/Users/lana/openidm/conf
+[Validating] 	/openidm/conf
 [Validating] audit.json .................................. SUCCESS
 [Validating] authentication.json ......................... SUCCESS
+[Validating] endpoint-getavailableuserstoassign.json ..... SUCCESS
+[Validating] endpoint-getprocessesforuser.json ........... SUCCESS
+[Validating] endpoint-gettasksview.json .................. SUCCESS
+[Validating] endpoint-securityQA.json .................... SUCCESS
+[Validating] endpoint-siteIdentification.json ............ SUCCESS
+[Validating] endpoint-usernotifications.json ............. SUCCESS
 [Validating] managed.json ................................ SUCCESS
+[Validating] policy.json ................................. SUCCESS
+[Validating] process-access.json ......................... SUCCESS
+[Validating] provisioner.openicf-ldap.json ............... SUCCESS
 [Validating] provisioner.openicf-xml.json ................ SUCCESS
 [Validating] repo.orientdb.json .......................... SUCCESS
 [Validating] router.json ................................. SUCCESS
+[Validating] schedule-recon.json ......................... SUCCESS
 [Validating] schedule-reconcile_systemXmlAccounts_managedUser.json  SUCCESS
 [Validating] scheduler.json .............................. SUCCESS
 [Validating] sync.json ................................... SUCCESS
-[Validating] ui-applications.json ........................ SUCCESS
 [Validating] ui-configuration.json ....................... SUCCESS
 [Validating] ui-countries.json ........................... SUCCESS
 [Validating] ui-secquestions.json ........................ SUCCESS
