@@ -1645,8 +1645,8 @@
 
   <para>Correlation queries run against target resources. The query syntax
   therefore depends on the target system, and is either specific to the data
-  store underlying the OpenIDM repository, or to OpenICF query
-  capabilities.</para>
+  store underlying the OpenIDM repository, or to OpenICF query capabilities.
+  </para>
   
   <section xml:id="correlation-query-managed-object">
    <title>Managed Object as Correlation Query Target</title>
@@ -1660,7 +1660,12 @@
    <filename>openidm/conf/repo.orientdb.json</filename>.</para>
 
    <programlisting language="javascript">
-"for-userName" : "SELECT * FROM ${_resource} WHERE userName = '${uid}'"</programlisting>
+"for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}"
+</programlisting>
+
+   <para>By default, a <literal>${value}</literal> token replacement is 
+   assumed to be a quoted string. If the value is not a quoted string, use the 
+   <literal>unquoted:</literal> prefix, as shown above.</para>
 
    <para>The following correlation query example shows the JavaScript to call
    the query defined for OrientDB. The <literal>_queryId</literal> property
@@ -1668,8 +1673,8 @@
    <filename>openidm/conf/repo.orientdb.json</filename>,
    <literal>for-userName</literal>. The <literal>source.name</literal> value
    replaces <literal>${uid}</literal> in the query. OpenIDM replaces
-   <literal>${_resource}</literal> in the query with the name of the table that
-   holds managed objects.</para>
+   <literal>${unquoted:_resource}</literal> in the query with the name of the 
+   table that holds managed objects.</para>
 
    <programlisting language="javascript">
 {
@@ -1938,6 +1943,7 @@ externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
   and Events</citetitle></link>.</para>
   
   <section xml:id="configuring-sync-schedule">
+    <title>Configuring Scheduled Synchronization</title>
   <para>Each scheduled reconciliation and LiveSync task requires a schedule 
   configuration file in <filename>opendidm/conf</filename>. By convention, 
   files are named <filename>openidm/conf/schedule-<replaceable>schedule-name
