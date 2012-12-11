@@ -59,13 +59,13 @@ var httpAccessConfig =
            "methods"    : "read",
            "actions"    : "*"
         },
-        // These options should only be available anonymously if selfReg is enabled
+        // These options should only be available anonymously if securityQA is enabled
         {  
-           "pattern"    : "config/ui/*",
+           "pattern"    : "config/ui/secquestions",
            "roles"      : "openidm-reg",
            "methods"    : "read",
            "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
+           "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
         },
         {  
            "pattern"    : "managed/user/*",
