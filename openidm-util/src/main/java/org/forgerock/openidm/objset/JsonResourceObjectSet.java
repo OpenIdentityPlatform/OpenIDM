@@ -109,9 +109,12 @@ public final class JsonResourceObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> read(String id) throws ObjectSetException {
-        Map<String, Object> object;
+        Map<String, Object> object = null;
         try {
-            object = getAccessor().read(id).asMap();
+            JsonValue result = getAccessor().read(id);
+            if (null != result){
+                object = result.asMap();
+            }
         } catch (JsonResourceException jre) {
             throw convertException(jre);
         } catch (JsonValueException jve) {
@@ -159,20 +162,23 @@ public final class JsonResourceObjectSet implements ObjectSet {
 
     @Override
     public Map<String, Object> query(String id, Map<String, Object> params) throws ObjectSetException {
-        Map<String, Object> result;
+        Map<String, Object> object = null;
         try {
-            result = getAccessor().query(id, new JsonValue(params)).asMap();
+            JsonValue result = getAccessor().query(id, new JsonValue(params));
+            if (null != result){
+                object = result.asMap();
+            }
         } catch (JsonResourceException jre) {
             throw convertException(jre);
         } catch (JsonValueException jve) {
             throw new InternalServerErrorException(jve);
         }
-        return result;
+        return object;
     }
 
     @Override
     public Map<String, Object> action(String id, Map<String, Object> params) throws ObjectSetException {
-        Map<String, Object> result;
+        Map<String, Object> object = null;
         try {
             JsonValue parameters = new JsonValue(params).copy();
             JsonValue value = null;
@@ -180,12 +186,15 @@ public final class JsonResourceObjectSet implements ObjectSet {
                 value = parameters.get("_entity");
                 parameters.remove("_entity");
             }
-            result = getAccessor().action(id, parameters, value).asMap();
+            JsonValue result = getAccessor().action(id, parameters, value);
+            if (null != result){
+                object = result.asMap();
+            }
         } catch (JsonResourceException jre) {
             throw convertException(jre);
         } catch (JsonValueException jve) {
             throw new InternalServerErrorException(jve);
         }
-        return result;
+        return object;
     }
 }
