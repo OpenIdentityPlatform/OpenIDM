@@ -251,7 +251,7 @@
         
         <!-- Commons JSON versions -->
         <commons.util.version>1.0.0</commons.util.version>
-        <commons.json-fluent.version>1.1.0</commons.json-fluent.version>
+        <commons.json-fluent.version>1.1.1-SNAPSHOT</commons.json-fluent.version>
         <commons.json-patch.version>1.0.0</commons.json-patch.version>
         <commons.json-crypto.version>1.1.0</commons.json-crypto.version>
         <commons.json-resource.version>1.2.3-SNAPSHOT</commons.json-resource.version>
@@ -259,7 +259,7 @@
         <!-- OSGi bundles properties -->
         <!--openidm.osgi.import.openidm.version>version="[$(version;==;${openidm.osgi.version.clean}),$(version;=+;${openidm.osgi.version.clean}))"</openidm.osgi.import.openidm.version-->
         <openidm.osgi.import.openidm.version>version="[$(version;==;2.1.0),$(version;=+;2.1.0))"</openidm.osgi.import.openidm.version>
-        <openidm.osgi.import.json-fluent.version>version="[$(version;===;${commons.json-fluent.version}),$(version;==+;${commons.json-fluent.version}))"</openidm.osgi.import.json-fluent.version>
+        <openidm.osgi.import.json-fluent.version>version="[$(version;===;${commons.json-fluent.version.clean}),$(version;==+;${commons.json-fluent.version.clean}))"</openidm.osgi.import.json-fluent.version>
         <openidm.osgi.import.json-patch.version>version="[$(version;===;${commons.json-patch.version}),$(version;==+;${commons.json-patch.version}))"</openidm.osgi.import.json-patch.version>
         <openidm.osgi.import.json-crypto.version>version="[$(version;===;${commons.json-crypto.version}),$(version;==+;${commons.json-crypto.version}))"</openidm.osgi.import.json-crypto.version>
         <openidm.osgi.import.json-resource.version>version="[$(version;===;${commons.json-resource.version}),$(version;==+;${commons.json-resource.version}))"</openidm.osgi.import.json-resource.version>
@@ -689,8 +689,18 @@
                         </instructions>
                         <versions>
                             <openidm.osgi.version.clean>${openidm.version}</openidm.osgi.version.clean>
+                            <commons.json-fluent.version.clean>${commons.json-fluent.version}</commons.json-fluent.version.clean>
                         </versions>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>clean-versions</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>cleanVersions</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
