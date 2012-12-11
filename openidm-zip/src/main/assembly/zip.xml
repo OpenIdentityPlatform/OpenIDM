@@ -60,12 +60,12 @@
         <fileSet>
         	<directory>${project.build.directory}</directory>
             <excludes>
-    			<exclude>**/*</exclude>
-  			</excludes>
+             <exclude>**/*</exclude>
+            </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
         <!-- Setup Sample1  -->
-        <fileSet>
+        <!--fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
             <includes>
                 <include>**</include>
@@ -75,7 +75,7 @@
                 <exclude>data/Example.ldif</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample1</outputDirectory>
-        </fileSet>
+        </fileSet-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
