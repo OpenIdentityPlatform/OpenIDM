@@ -102,6 +102,12 @@ var policyConfig = {
                 "validateOnlyIfPresent": true,
                 "policyRequirements" : ["CANNOT_CONTAIN_OTHERS"]
             },
+            {   "policyId" : "cannot-contain-characters",
+                "policyExec" : "cannotContainCharacters", 
+                "clientValidation": true,
+                "validateOnlyIfPresent": true,
+                "policyRequirements" : ["CANNOT_CONTAIN_CHARACTERS"]
+            },
             {
                 "policyId" : "required-if-configured",
                 "policyExec": "requiredIfConfigured",
@@ -191,6 +197,26 @@ function validDate(fullObject, value, params, property) {
     } else {
         return [];
     }
+}
+
+function cannotContainCharacters(fullObject, value, params, property) {
+    var i, 
+        join = function (arr, d) { // my own join needed since it appears params.forbiddenChars is not a proper JS array with the normal join method available 
+            var j,list = "";
+            for (j in arr) {
+                list += arr[j] + d
+            }
+            return list.replace(new RegExp(d + "$"), '');
+        };
+    
+    if (typeof(value) === "string" && value.length) {
+        for (i in params.forbiddenChars) {
+            if (value.indexOf(params.forbiddenChars[i]) !== -1) {
+                return [ { "policyRequirement" : "CANNOT_CONTAIN_CHARACTERS", "params" : {"forbiddenChars" : join(params.forbiddenChars, ", ")} } ];
+            }
+        }
+    }
+    return [];
 }
 
 function validPhoneFormat(fullObject, value, params, property) {

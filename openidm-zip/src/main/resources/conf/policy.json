@@ -6,6 +6,17 @@
             "resource" : "managed/user/*",
             "properties" : [
                 {
+                    "name" : "_id",
+                    "policies" : [
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : ["/"]
+                            }
+                        }
+                    ]
+                },
+                {
                     "name" : "userName",
                     "policies" : [
                         {
@@ -19,6 +30,12 @@
                         },
                         {
                             "policyId" : "no-internal-user-conflict"
+                        },
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : ["/"]
+                            }
                         }
                     ]
                 },
@@ -214,6 +231,37 @@
         {
             "resource" : "repo/internal/user/*",
             "properties" : [
+                {
+                    "name" : "_id",
+                    "policies" : [
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : ["/"]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "userName",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "unique"
+                        },
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : ["/"]
+                            }
+                        }
+                    ]
+                },
                 {
                     "name" : "password",
                     "policies" : [
