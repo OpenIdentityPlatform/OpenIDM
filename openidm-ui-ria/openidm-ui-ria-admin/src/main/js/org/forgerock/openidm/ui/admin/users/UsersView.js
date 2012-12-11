@@ -67,8 +67,8 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
                             
                             for(i = 0; i < data.aaData.length; i++) {
                                 data.aaData[i].selector = '<input type="checkbox" />';
-                                data.aaData[i].name = '<span class="name">' + users[i].givenName + ' ' + users[i].familyName + '</span>';
-                                data.aaData[i].userName = '<span class="userName">' + users[i].userName + '</span>';
+                                data.aaData[i].name = $('<span class="name" />').text(users[i].givenName + ' ' + users[i].familyName).wrap('<p>').parent().html();
+                                data.aaData[i].userName = $('<span class="userName" />').text(users[i].userName).wrap('<p>').parent().html();
                             }
 
                             fnCallback(data);

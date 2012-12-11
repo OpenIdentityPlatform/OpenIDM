@@ -47,13 +47,13 @@ define("config/routes/AdminRoutesConfig", [
         "adminUserProfile" : {
             view: "org/forgerock/openidm/ui/admin/users/AdminUserProfileView",
             role: "openidm-admin",
-            url: /^users\/show\/(([A-Za-z0-9_\-\.@])+)\/$/,
+            url: /^users\/show\/(.+)\/$/, 
             pattern: "users/show/?/"
         },
         "adminUserChangePassword" : {
             base: "adminUserProfile",
             dialog: "org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog",
-            url: /^users\/(([A-Za-z0-9_\-\.@])+)\/change_password\/$/,
+            url: /^users\/(.+)\/change_password\/$/, 
             pattern: "users/?/change_password/",
             role: "openidm-admin"
         },
