@@ -416,7 +416,7 @@ class ManagedObjectSet extends ObjectSetJsonResource {
         logActivity(id, null, new JsonValue(encrypted), null);
         try {
             for (SynchronizationListener listener : service.getListeners()) {
-                listener.onDelete(managedId(id));
+                listener.onDelete(managedId(id), new JsonValue(encrypted));
             }
         } catch (SynchronizationException se) {
             throw new InternalServerErrorException(se);

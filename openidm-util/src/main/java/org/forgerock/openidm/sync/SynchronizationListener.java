@@ -59,7 +59,8 @@ public interface SynchronizationListener {
      * Called when a source object has been deleted.
      *
      * @param id the fully-qualified identifier of the object that was deleted.
+     * @param oldValue the value of the object prior to the delete, or {@code null} if not known.
      * @throws SynchronizationException if an exception occurs processing the notification.
      */
-    void onDelete(String id) throws SynchronizationException;
+    void onDelete(String id, JsonValue oldValue) throws SynchronizationException;
 }

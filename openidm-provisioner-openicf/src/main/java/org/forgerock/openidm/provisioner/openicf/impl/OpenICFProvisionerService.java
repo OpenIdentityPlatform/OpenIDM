@@ -855,7 +855,7 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                                             synchronizationListener.onUpdate(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null, new JsonValue(deltaObject));
                                             break;
                                         case DELETE:
-                                            synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString());
+                                            synchronizationListener.onDelete(helper.resolveQualifiedId(syncDelta.getUid()).toString(), null);
                                             break;
                                     }
                                     lastToken[0] = syncDelta.getToken();
