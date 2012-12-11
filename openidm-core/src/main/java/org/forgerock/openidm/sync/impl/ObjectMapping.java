@@ -1634,16 +1634,16 @@ class ObjectMapping implements SynchronizationListener {
                 /*
                 For sync of delete. For recon these are assessed instead in target phase
                   
-                no source, link, target & valid = source missing
-                no source, link, target & not valid = target ignored
-                no source, link, no target - link only
+                no source, link, target & valid target     -  source missing
+                no source, link, target & not valid target - target ignored
+                no source, link, no target                 - link only
                 no source, no link - can't correlate (no previous object available) - all gone
                 no source, no link - (correlate)
-                                     no target - all gone
-                                     1 target & valid - unassigned
-                                     1 target & not valid - target ignored
-                                     > 1 target & valid - ambiguous
-                                     > 1 target & not valid - unqualified
+                                     no target                       - all gone
+                                     1 target & valid (source)       - unassigned
+                                     1 target & not valid (source)   - target ignored
+                                     > 1 target & valid (source)     - ambiguous
+                                     > 1 target & not valid (source) - unqualified
                  */
                 
                 if (linkObject._id != null) {
@@ -1679,7 +1679,8 @@ class ObjectMapping implements SynchronizationListener {
                             }
                         } else if (results.size() > 1) {
                             if (valid) {
-// TODO: There may need to be a new situation here
+                                // Note this situation is used both when there is a source and a deleted source
+                                // with multiple matching targets
                                 situation = Situation.AMBIGUOUS;
                             } else {
                                 situation = Situation.UNQUALIFIED;
