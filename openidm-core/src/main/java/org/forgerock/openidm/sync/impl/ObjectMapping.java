@@ -276,19 +276,32 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * TODO: Description.
-     *
-     * @param id fully-qualified source object identifier.
-     * @param value TODO.
-     * @throws SynchronizationException TODO.
+     * @see doSourceSync(String id, JsonValue value)
+     * Convenience function with deleted defaulted to false and oldValue defaulted to null
      */
     private void doSourceSync(String id, JsonValue value) throws SynchronizationException {
+        doSourceSync(id, value, false, null);
+    }
+    
+    /**
+     * Source synchronization
+     *
+     * @param id fully-qualified source object identifier.
+     * @param value null to have it query the source state if applicable, 
+     *        or JsonValue to tell it the value of the existing source to sync
+     * @param sourceDeleted Whether the source object has been deleted
+     * @throws SynchronizationException if sync-ing fails.
+     */
+    private void doSourceSync(String id, JsonValue value, boolean sourceDeleted, JsonValue oldValue) throws SynchronizationException {
         LOGGER.trace("Start source synchronization of {} {}", id, (value == null ? "without a value" : "with a value"));
 
         String localId = id.substring(sourceObjectSet.length() + 1); // skip the slash
 // TODO: one day bifurcate this for synchronous and asynchronous source operation
         SourceSyncOperation op = new SourceSyncOperation();
-        if (value != null) {
+        op.oldValue = oldValue;
+        if (sourceDeleted) {
+            op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, localId, null);
+        } else if (value != null) {
             value.put("_id", localId); // unqualified
             op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, localId, value);
         } else {
@@ -499,9 +512,9 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     @Override
-    public void onDelete(String id) throws SynchronizationException {
+    public void onDelete(String id, JsonValue oldValue) throws SynchronizationException {
         if (isSourceObject(id)) {
-            doSourceSync(id, null); // synchronous for now
+            doSourceSync(id, null, true, oldValue); // synchronous for now
         }
     }
 
@@ -958,6 +971,8 @@ class ObjectMapping implements SynchronizationListener {
         public LazyObjectAccessor sourceObjectAccessor;
         /** Access to the target object */
         public LazyObjectAccessor targetObjectAccessor;
+        /** Optional value of the object before the change that triggered this sync, or null if not supplied */
+        public JsonValue oldValue;
 
         /**
          * Holds the link representation
@@ -1274,7 +1289,7 @@ class ObjectMapping implements SynchronizationListener {
                                 }
                                 break; // terminate DELETE and UNLINK
                             case EXCEPTION:
-                                throw new SynchronizationException(); // aborts change; recon reports
+                                throw new SynchronizationException("Situation marked as EXCEPTION"); // aborts change; recon reports
                         }
                     } catch (JsonValueException jve) {
                         throw new SynchronizationException(jve);
@@ -1319,20 +1334,33 @@ class ObjectMapping implements SynchronizationListener {
             initializeLink(linkObject);
             LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", new Object[] {sourceId, targetId, reconId});
         }
-
+        
         /**
-         * TODO: Description.
-         *
-         * @return TODO.
-         * @throws SynchronizationException TODO.
+         * Evaluated source valid on source object
+         * @see isSourceValid(JsonValue)
          */
         protected boolean isSourceValid() throws SynchronizationException {
+            return isSourceValid(null);
+        }
+
+        /**
+         * Evaluates source valid for the supplied sourceObjectOverride, or the source object 
+         * associated with the sync operation if null
+         *
+         * @return whether valid for this mapping or not.
+         * @throws SynchronizationException if evaluation failed.
+         */
+        protected boolean isSourceValid(JsonValue sourceObjectOverride) throws SynchronizationException {
             boolean result = false;
-            if (hasSourceObject()) { // must have a source object to be valid
+            if (hasSourceObject() || sourceObjectOverride != null) { // must have a source object to be valid
                 if (validSource != null) {
                     Map<String, Object> scope = service.newScope();
-                    // TODO: This forced load into mmeory is necessary until we can do on demand get in script engine
-                    scope.put("source", getSourceObject().asMap());
+                    if (sourceObjectOverride != null) {
+                        scope.put("source", sourceObjectOverride.asMap());
+                    } else {
+                        // TODO: This forced load into memory is necessary until we can do on demand get in script engine
+                        scope.put("source", getSourceObject().asMap());
+                    }
                     try {
                         Object o = validSource.exec(scope);
                         if (o == null || !(o instanceof Boolean)) {
@@ -1347,7 +1375,9 @@ class ObjectMapping implements SynchronizationListener {
                     result = true;
                 }
             }
-            LOGGER.trace("isSourceValid of {} evaluated: {}", getSourceObjectId(), result);
+            if (sourceObjectOverride == null) {
+                LOGGER.trace("isSourceValid of {} evaluated: {}", getSourceObjectId(), result);
+            }
             return result;
         }
 
@@ -1599,7 +1629,65 @@ class ObjectMapping implements SynchronizationListener {
             if (linkObject._id != null) {
                 targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, linkObject.targetId);
             }
-            if (isSourceValid()) { // source is valid for mapping
+            
+            if (!hasSourceObject()) {
+                /*
+                For sync of delete. For recon these are assessed instead in target phase
+                  
+                no source, link, target & valid = source missing
+                no source, link, target & not valid = target ignored
+                no source, link, no target - link only
+                no source, no link - can't correlate (no previous object available) - all gone
+                no source, no link - (correlate)
+                                     no target - all gone
+                                     1 target & valid - unassigned
+                                     1 target & not valid - target ignored
+                                     > 1 target & valid - ambiguous
+                                     > 1 target & not valid - unqualified
+                 */
+                
+                if (linkObject._id != null) {
+                    if (hasTargetObject()) {
+                        if (isTargetValid()) { 
+                            situation = Situation.SOURCE_MISSING;
+                        } else {
+                            // target is not valid for this mapping; ignore it
+                            situation = Situation.TARGET_IGNORED;
+                        }
+                    } else {
+                        situation = Situation.LINK_ONLY;
+                    }
+                } else {
+                    if (oldValue == null) {
+                        // If there is no previous value known we can not correlate
+                        situation = Situation.ALL_GONE;
+                    } else {
+                        // Correlate the old value to potential target(s)
+                        JsonValue results = correlateTarget(oldValue);
+                        boolean valid = isSourceValid(oldValue);
+                        if (results != null && results.size() == 0) {
+                            // We know there is no target
+                            situation = Situation.ALL_GONE;
+                        } else if (results.size() == 1) {
+                            JsonValue resultValue = results.get((Integer) 0).required();
+                            targetObjectAccessor = getCorrelatedTarget(resultValue);
+                            if (valid) { 
+                                situation = Situation.UNASSIGNED;
+                            } else {
+                                // target is not valid for this mapping; ignore it
+                                situation = Situation.TARGET_IGNORED;
+                            }
+                        } else if (results.size() > 1) {
+                            if (valid) {
+// TODO: There may need to be a new situation here
+                                situation = Situation.AMBIGUOUS;
+                            } else {
+                                situation = Situation.UNQUALIFIED;
+                            }
+                        }
+                    } 
+                } 
+            } else if (isSourceValid()) { // source is valid for mapping
                 if (linkObject._id != null) { // source object linked to target
                     if (hasTargetObject()) {
                         situation = Situation.CONFIRMED;
@@ -1646,13 +1734,25 @@ class ObjectMapping implements SynchronizationListener {
         }
 
         /**
-         * TODO: Description.
-         *
-         * @return TODO.
-         * @throws SynchronizationException TODO.
+         * Correlates (finds an associated) target for the source object
+         * @see correlateTarget(JsonValue)
+         * 
+         * @return JsonValue if found, null if none
+         * @throws SynchronizationException if the correlation failed.
+         */
+        private JsonValue correlateTarget() throws SynchronizationException {
+            return correlateTarget(null);
+        }
+        /**
+         * Correlates (finds an associated) target for the given source
+         * @param sourceObjectOverride optional explicitly supplied source object to correlate, 
+         * or null to use the source object associated with the sync operation
+         * 
+         * @return JsonValue if found, null if none
+         * @throws SynchronizationException if the correlation failed.
          */
         @SuppressWarnings("unchecked")
-        private JsonValue correlateTarget() throws SynchronizationException {
+        private JsonValue correlateTarget(JsonValue sourceObjectOverride) throws SynchronizationException {
             JsonValue result = null;
             // TODO: consider if there are cases where this would better be lazy and not get the full target
             if (hasTargetObject()) {
@@ -1662,7 +1762,11 @@ class ObjectMapping implements SynchronizationListener {
                 EventEntry measure = Publisher.start(EVENT_CORRELATE_TARGET, getSourceObject(), null);
 
                 Map<String, Object> queryScope = service.newScope();
-                queryScope.put("source", getSourceObject().asMap());
+                if (sourceObjectOverride != null) {
+                    queryScope.put("source", sourceObjectOverride.asMap());
+                } else {
+                    queryScope.put("source", getSourceObject().asMap());
+                }
                 try {
                     Object query = correlationQuery.exec(queryScope);
                     if (query == null || !(query instanceof Map)) {
@@ -1792,7 +1896,7 @@ class ObjectMapping implements SynchronizationListener {
                 situation = Situation.UNASSIGNED;
             } else {
                 sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, linkObject.sourceId);
-                if (getSourceObject() != null) { // force load to double check
+                if (getSourceObject() == null) { // force load to double check
                     situation = Situation.SOURCE_MISSING;
                 } else if (!isSourceValid()) {
                     situation = Situation.UNQUALIFIED; // Should not happen as done in source phase
