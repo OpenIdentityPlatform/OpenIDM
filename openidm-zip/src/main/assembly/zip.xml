@@ -372,14 +372,6 @@
             </excludes>
             <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <excludes>
-                <exclude>samples/**</exclude>
-                <exclude>conf/**</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/workflow</outputDirectory>
-        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>

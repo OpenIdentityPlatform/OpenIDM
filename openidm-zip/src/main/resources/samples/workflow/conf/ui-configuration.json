@@ -8,7 +8,7 @@
             "openidm-admin" : "Administrator",
             "openidm-authorized" : "User",
             "openidm-tasks-manager" : "Tasks Manager",
-            "manager" : "Contractor Manager",
+            "manager" : "Contractor Approval Manager",
             "employee" : "Employee"
         },
         "siteImages" : [
