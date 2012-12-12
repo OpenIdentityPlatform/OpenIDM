@@ -1900,11 +1900,13 @@ class ObjectMapping implements SynchronizationListener {
                 if (getSourceObject() == null) { // force load to double check
                     situation = Situation.SOURCE_MISSING;
                 } else if (!isSourceValid()) {
-                    situation = Situation.UNQUALIFIED; // Should not happen as done in source phase
-                    LOGGER.warn("Unexpected situation in target reconciliation {} {} {} {}", new Object[] {situation, getSourceObject(), targetId, linkObject});
+                    situation = Situation.UNQUALIFIED; // Should happen rarely done in source phase
+                    LOGGER.info("Situation in target reconciliation that indicates source may have changed {} {} {} {}", 
+                            new Object[] {situation, getSourceObject(), targetId, linkObject});
                 } else { // proper link
-                    situation = Situation.CONFIRMED; // Should not happen as done in source phase
-                    LOGGER.warn("Unexpected situation in target reconciliation {} {} {} {}", new Object[] {situation, getSourceObject(), targetId, linkObject});
+                    situation = Situation.CONFIRMED; // Should happen rarely as done in source phase
+                    LOGGER.info("Situation in target reconciliation that indicates source may have changed {} {} {} {}", 
+                            new Object[] {situation, getSourceObject(), targetId, linkObject});
                 }
             }
         }
