@@ -37,25 +37,23 @@
  </indexterm>
  <indexterm>
   <primary>Samples</primary>
-  <secondary>Sample 0 - XML file</secondary>
+  <secondary>Sample 1 - XML file</secondary>
  </indexterm>
  <indexterm>
   <primary>Repository database</primary>
   <secondary>Evaluation version</secondary>
  </indexterm>
 
- <para>In OpenIDM <?eval ${docTargetVersion}?>, the sample in
- <filename>openidm/samples/sample0</filename> is configured and enabled by
- default. This chapter provides an overview of the sample and how it is
+ <para>This chapter provides an overview of the first sample and how it is
  configured. To see a listing and an overview of the rest of the samples
- provided see the README found in <filename>openidm/samples</filename> and in
+ provided, see the README found in <filename>openidm/samples</filename> and in
  the chapter <link xlink:href="install-guide#chap-samples"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>More OpenIDM
  Samples</citetitle></link>.</para>
 
  <section xml:id="before-you-begin-sample">
   <title>Before You Begin</title>
-  <para>Install and start OpenIDM as described in the chapter on <link
+  <para>Install OpenIDM as described in the chapter on <link
   xlink:href="install-guide#chap-install"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installing
   OpenIDM Services</citetitle></link>.</para>
@@ -155,17 +153,17 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   <variablelist xml:id="about-the-sample-configuration">
    <title>Sample Configuration Files</title>
    <para>You can find configuration files for the sample under the
-   <filename>openidm/samples/sample0/conf</filename> directory. As you review
+   <filename>openidm/samples/sample1/conf</filename> directory. As you review
    the samples, keep the following in mind.</para>
    <orderedlist>
     <listitem>
      <para>OpenIDM regularly scans for any scheduler configuration files in the
-     <filename>openidm/conf</filename> directory.</para>
+     <filename>conf</filename> directory.</para>
     </listitem>
     <listitem>
     <para>OpenIDM's reconciliation service reads the mappings and actions for
     the source and target users from
-    <filename>openidm/conf/sync.json</filename>.</para>
+    <filename>conf/sync.json</filename>.</para>
     </listitem>
     <listitem>
     <para>Reconciliation runs, querying all users in the source, and then
@@ -183,13 +181,13 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
    sample.</para>
 
    <varlistentry>
-    <term><filename>openidm/conf/provisioner.openicf-xml.json</filename></term>
+    <term><filename>samples/sample1/conf/provisioner.openicf-xml.json</filename></term>
     <listitem>
      <para>This connector configuration file serves as the XML file resource.
      In this sample, the connector instance acts as the authoritative source
      for users. In the configuration file you can see that the
      <literal>xmlFilePath</literal> is set to
-     <filename>samples/sample0/data/xmlConnectorData.xml</filename>, which
+     <filename>samples/sample1/data/xmlConnectorData.xml</filename>, which
      contains two users, in XML format.</para>
      <para>For details on the OpenICF connector configuration files see
      <link xlink:href="integrators-guide#chap-resource-conf"
@@ -199,7 +197,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><filename>openidm/conf/schedule-reconcile_systemXmlAccounts_managedUser.json</filename></term>
+    <term><filename>samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json</filename></term>
     <listitem>
      <para>The sample schedule configuration file defines a reconciliation
      job that, if enabled by setting <literal>"enabled" : true</literal>,
@@ -237,7 +235,7 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term><filename>openidm/conf/sync.json</filename></term>
+    <term><filename>samples/sample1/conf/sync.json</filename></term>
     <listitem>
      <para>This sample configuration file defines the configuration for
      reconciliation and synchronization. The
@@ -373,10 +371,11 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
  <section xml:id="sample-running-reconciliation">
   <title>Running Reconciliation</title>
   
-  <para>If OpenIDM is not running, start it as described in the procedure
-  <link xlink:href="install-guide#run-openidm"
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>To Start OpenIDM
-  Services</citetitle></link>.</para>
+  <para>Start OpenIDM with the configuration for sample 1.</para>
+  
+  <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample1
+  </screen>
   
   <para>Reconcile the objects in the resources, either by setting 
   <literal>"enabled" : true</literal> in the schedule configuration file 
@@ -536,7 +535,7 @@ access.csv activity.csv recon.csv</screen>
   in action. During the next reconciliation, OpenIDM finds the new user in the
   source connector, and creates the user in the local repository. To add the
   user, copy the following XML into
-  <filename>openidm/samples/sample0/data/xmlConnectorData.xml</filename>.</para>
+  <filename>openidm/samples/sample1/data/xmlConnectorData.xml</filename>.</para>
 
    <programlisting language="xml">&lt;ri:__ACCOUNT__&gt;
     &lt;icf:__UID__&gt;tmorris&lt;/icf:__UID__&gt;
