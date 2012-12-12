@@ -33,11 +33,11 @@
 <title>More OpenIDM Samples</title>
 
  <para>The current distribution of OpenIDM comes with a variety of samples
- in <filename>openidm/samples/</filename>. Sample0 (
- <filename>openidm/samples/sample0</filename>) is installed by default, and is
- described in <link xlink:href="install-guide#chap-sample"
+ in <filename>openidm/samples/</filename>. Sample 1 is described in 
+ <link xlink:href="install-guide#chap-sample"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>First OpenIDM
- Sample</citetitle></link>.</para>
+ Sample</citetitle></link>. This chapter describes the remaining OpenIDM 
+ samples.</para>
 
  <section xml:id="before-you-begin-samples">
   <title>Before You Begin</title>
@@ -90,8 +90,8 @@
  </section>
 
  <section xml:id="more-sample1">
-  <title>Sample 0 - XML File</title>
-  <para>Sample 0 is described in the chapter, <link
+  <title>Sample 1 - XML File</title>
+  <para>Sample 1 is described in the chapter, <link
   xlink:href="install-guide#chap-sample"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>First OpenIDM
   Sample</citetitle></link>.</para>
