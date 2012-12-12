@@ -1,21 +1,36 @@
-The sample is the same as sample 2b except that it focuses on one special attribute, ldapGroups, which is used to synchronized ldap group memberships of users
- 
-The sample configuration connects to a local OpenDJ with the following paramers:
+Sample 2c - Synchronizing LDAP Group Membership
+-----------------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
+
+This sample is the same as sample 2b except that it focuses on one special 
+attribute, ldapGroups, which is used to synchronize LDAP group membership.
+
+To run this sample, launch OpenIDM with the sample configuration as follows:
+$ /path/to/openidm/startup.sh -p samples/sample2c
+
+or follow the documentation in the Install Guide:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample2c
+
+The sample configuration connects to a local OpenDJ with the following parameters:
 
 "host" : "localhost",
 "port" : 1389,
 "principal" : "cn=Directory Manager",
 "credentials" : "password",
 
-In opposite to sample2, this sample sync.json configuration contains two mappings from OpenDJ to OpenIDM and back. 
-The number of attributes mapped are still rather limited.
-It contains a scheduler configuration which can be used to schedule reconciliation.
-New users will be created from LDAP or existing will be updated and back-linked from OpenIDM to OpenDJ
-Changes on OpenIDM will now be pushed into the LDAP server!
+Unlike sample 2, this sample sync.json configuration contains two mappings from 
+OpenDJ to OpenIDM and back. The number of attributes mapped are limited. The 
+sample contains a schedule configuration which can be used to schedule 
+reconciliation.
 
-In addition to sample 2b it will sync ldap group membership:
+New users are created from LDAP and existing users are updated and back-linked 
+from OpenIDM to OpenDJ. Changes on OpenIDM are now pushed into the LDAP server.
 
-Add a user to an ldap group and run sync: a new attribute will be filled in the user's json representation in the repo, ldapGroups, which contains a list of the groups dns where the user is a memberOf.
+In addition to sample 2b this sample synchronizes LDAP group membership:
 
-For a more precise description on how to run the sample see:
-http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-samples
+Add a user to an LDAP group and run reconciliation. A new attribute, ldapGroups, 
+is added to the user's JSON representation in the repo. This attribute contains 
+a list of the group DNs that the user is a memberOf.

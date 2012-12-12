@@ -102,6 +102,12 @@ var policyConfig = {
                 "validateOnlyIfPresent": true,
                 "policyRequirements" : ["CANNOT_CONTAIN_OTHERS"]
             },
+            {   "policyId" : "cannot-contain-characters",
+                "policyExec" : "cannotContainCharacters", 
+                "clientValidation": true,
+                "validateOnlyIfPresent": true,
+                "policyRequirements" : ["CANNOT_CONTAIN_CHARACTERS"]
+            },
             {
                 "policyId" : "required-if-configured",
                 "policyExec": "requiredIfConfigured",
@@ -110,6 +116,7 @@ var policyConfig = {
             },
             {   "policyId" : "re-auth-required",
                 "policyExec" : "reauthRequired", 
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["REAUTH_REQUIRED"]
             }
         ] 
@@ -190,6 +197,26 @@ function validDate(fullObject, value, params, property) {
     } else {
         return [];
     }
+}
+
+function cannotContainCharacters(fullObject, value, params, property) {
+    var i, 
+        join = function (arr, d) { // my own join needed since it appears params.forbiddenChars is not a proper JS array with the normal join method available 
+            var j,list = "";
+            for (j in arr) {
+                list += arr[j] + d
+            }
+            return list.replace(new RegExp(d + "$"), '');
+        };
+    
+    if (typeof(value) === "string" && value.length) {
+        for (i in params.forbiddenChars) {
+            if (value.indexOf(params.forbiddenChars[i]) !== -1) {
+                return [ { "policyRequirement" : "CANNOT_CONTAIN_CHARACTERS", "params" : {"forbiddenChars" : join(params.forbiddenChars, ", ")} } ];
+            }
+        }
+    }
+    return [];
 }
 
 function validPhoneFormat(fullObject, value, params, property) {
@@ -315,7 +342,7 @@ function requiredIfConfigured(fullObject, value, params, property) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var exceptRoles, parent, type, roles, caller, i, j;
+    var exceptRoles, parent, type, roles, caller, i, j, currentObject;
     caller = request.params._caller;
     parent = request.parent;
     if (caller && caller == "filterEnforcer") {
@@ -341,6 +368,18 @@ function reauthRequired(fullObject, value, params, propName) {
     }
     var isHttp = request._isDirectHttp;
     if (isHttp == "true" || isHttp == true) {
+        
+        if (request.id && !request.id.match('/$')) { 
+            // only do a read if there is no id specified, in the case of new records 
+            currentObject = openidm.read(request.id);
+            if (openidm.isEncrypted(currentObject[propName])) {
+                currentObject[propName] = openidm.decrypt(currentObject[propName]);
+            }
+            if (currentObject[propName] === fullObject[propName]) {
+                // this means the value hasn't changed, so don't complain about reauth
+                return [];
+            }
+        }
         try {
             var actionParams = {
                 "_action": "reauthenticate"

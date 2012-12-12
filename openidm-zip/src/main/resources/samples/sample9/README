@@ -1,24 +1,24 @@
 Async reconciliation Sample
--------------------------
+---------------------------
 Copyright (c) 2012 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-This sample demonstrates how perform an asynchronous action from a reconciliation.
+This sample demonstrates how to perform an asynchronous action from a 
+reconciliation.
+
+For documentation pertaining to this example see:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample9
 
 To try the sample, follow these steps.
 
-    1. Copy the sample configuration and data.
+    1. Start OpenIDM with the configuration for sample 9.
 
     $ cd /path/to/openidm
-    $ cp -r samples/sample9/conf samples/sample9/workflow .
+    $ ./startup.sh -p samples/sample9
 
-    2. Start OpenIDM.
-
-    $ ./startup.sh
-
-    3. Run reconciliation.
+    2. Run reconciliation.
 
     $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
@@ -27,23 +27,22 @@ To try the sample, follow these steps.
 
     5. Query the started workflow task instances.
 
-    $curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
+    $ curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
 
         sample response:
         {"result":[{"_id":"26","name":"Evaluate request"},{"_id":"16","name":"Evaluate request"}]}
 
     6. Approve the requests.
    
-    $curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/16?_action=complete" --data '{"requestApproved": "true"}'
-    $curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/26?_action=complete" --data '{"requestApproved": "true"}'
+    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/16?_action=complete" --data '{"requestApproved": "true"}'
+    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/workflow/taskinstance/26?_action=complete" --data '{"requestApproved": "true"}'
 
-    7. Query the managed users created by the async reconciliation after the approval step.
+    7. Query the managed users created by the asynchronous reconciliation after 
+       the approval step.
 
-    $curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
+    $ curl -u openidm-admin:openidm-admin "http://localhost:8080/openidm/managed/user?_queryId=query-all-ids"
 
-The sample is also availeble with the -p samples/sample9 option now. 
-
-For testing the sample you might want to copy the following into a an exacutable text file and run it:
+To test the sample you might want to copy the following into an executable text file and run it:
 
 echo "copy the workflow and wait for 3 seconds to deploy"
 cp openidm/samples/sample9/workflow/managedUserApproval.bar openidm/workflow/

@@ -1,9 +1,15 @@
-This directory contains samples to get you started as many different
-configuration and security files you may need for your use case.
+OpenIDM Samples
+---------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
 
-Here is a brief description of each directory.  Please refer to
-the README for each sample of the documentation for more 
-details.
+This directory contains samples to get you started with the many different
+configuration and security files you may need for your specific use case.
+
+Here is a brief description of each directory.  Please refer to the README 
+for each sample or to the documentation for more information.
 
 Sample1 - XML file connector sample
 
@@ -27,10 +33,25 @@ Sample7 - Scim Schema Attributes
 
 Sample8 - Use of logging in scripts for debugging
 
-provisioners - example provisioner configuration files for different connectors
+Sample9 - Asynchronous reconciliation using workflows
 
-jscript - example javascripts
+customendpoint - a sample custom endpoint configuration
 
-security - example security files
+infoservice - a sample that shows how to use the configurable information service
 
 misc - example configuration files
+
+openam - a sample that shows how to protect OpenIDM with OpenAM
+
+provisioners - example provisioner configuration files for different connectors
+
+schedules - sample schedule configurations
+
+security - sample security files
+
+taskscanner - the sample sunset scanning task
+
+workflow - demonstrates a typical use case of a workflow for provisioning
+
+
+

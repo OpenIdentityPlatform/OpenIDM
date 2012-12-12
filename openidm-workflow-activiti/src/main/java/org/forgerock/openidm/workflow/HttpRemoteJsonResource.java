@@ -1,18 +1,18 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright © 2012 ForgeRock Inc. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License). You may not use this file except in
  * compliance with the License.
- * 
+ *
  * You can obtain a copy of the License at
  * http://forgerock.org/license/CDDLv1.0.html
  * See the License for the specific language governing
  * permission and limitations under the License.
- * 
+ *
  * When distributing Covered Code, include this CDDL
  * Header Notice in each file and include the License file
  * at http://forgerock.org/license/CDDLv1.0.html
@@ -38,9 +38,9 @@ import org.restlet.resource.ResourceException;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.restlet.engine.http.header.HeaderConstants;
 
 /**
  *
@@ -162,7 +162,12 @@ public class HttpRemoteJsonResource implements JsonResource {
                     response = clientResource.delete();
                     break;
                 case patch:
-                    conditions.setMatch(getTag(rev.required().asString()));
+                    // Condition to account for "If-Match: *" (null revision)
+                    if (rev.isNull()) {
+                        conditions.setMatch(getTag("*"));
+                    } else {
+                        conditions.setMatch(getTag(rev.required().asString()));
+                    }
                     clientResource.getRequest().setConditions(conditions);
                     clientResource.setMethod(PATCH);
                     clientResource.getRequest().setEntity(request);
@@ -213,8 +218,29 @@ public class HttpRemoteJsonResource implements JsonResource {
     private List<Tag> getTag(String tag) {
         List<Tag> result = new ArrayList<Tag>(1);
         if (null != tag && tag.trim().length() > 0) {
+            // Tags need to have double-quotations around them in order for it to parse correctly
+            // add those quotes if they do not already exist
+            if (!isQuoted(tag)) {
+                tag = addQuotes(tag);
+            }
             result.add(Tag.parse(tag));
         }
         return result;
     }
+
+    private boolean isQuoted(String tag) {
+        return tag.startsWith("\"") && tag.endsWith("\"");
+    }
+
+    private String addQuotes(String tag) {
+        return "\"" + tag + "\"";
+    }
+
+    public static void main(String[] args) {
+        Map<String, Object> o = new HashMap<String, Object>();
+        o.put("rev", null);
+        JsonValue v = new JsonValue(o);
+
+    }
+
 }

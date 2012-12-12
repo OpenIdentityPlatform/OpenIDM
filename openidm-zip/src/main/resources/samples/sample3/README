@@ -7,21 +7,14 @@ http://creativecommons.org/licenses/by-nc-nd/3.0/
 
 This sample demonstrates an example configuration for a scripted SQL
 connector, a connector that communicates with a database through configurable
-SQL scripts. This example requires a fresh installation of OpenIDM, and
-a MySQL database as an external resource to hold user objects, as well as
-MySQL Connector/J to connect to the database.
+SQL scripts. This example requires a fresh installation of OpenIDM.
 
 For documentation pertaining to this example see:
 http://openidm.forgerock.org/doc/install-guide/index.html#more-sample3
 
 To try the example, follow these steps.
 
-    1. Copy the configuration into place but do not start OpenIDM.
-
-    $ cd /path/to/openidm
-    $ cp -r samples/sample3/conf samples/sample3/tools .
-
-    2. Also copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
+    1. Copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
 
     $ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/
 
@@ -49,10 +42,9 @@ To try the example, follow these steps.
     mysql> quit
     Bye
 
-    5. Start OpenIDM.
+    5. Start OpenIDM with the configuration for sample 3.
 
-    $ cd /path/to/openidm/
-    $ ./startup.sh
+    $ /path/to/openidm/startup.sh -p samples/sample3
     ...
     -> bob
     rowley
@@ -62,7 +54,7 @@ To try the example, follow these steps.
 
     6. Run reconciliation:
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemHrdb_managedUser"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrdb_managedUser"
 
     7. Retrieve the list of users from OpenIDM's internal repository:
 

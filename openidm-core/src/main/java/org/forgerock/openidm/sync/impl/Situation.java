@@ -90,7 +90,21 @@ enum Situation {
      * Only detected during reconciliation.
      * Default action: {@code EXCEPTION}.
      */
-    SOURCE_MISSING(Action.EXCEPTION);
+    SOURCE_MISSING(Action.EXCEPTION),
+    
+    /**
+     * There is only a link, but the source and target objects do not exist. 
+     * Only detected during source object changes (delete) currently.
+     * Default action: {@code EXCEPTION}.
+     */
+    LINK_ONLY(Action.EXCEPTION),
+    
+    /**
+     * There is no source, link or target left
+     * Only detected during source object changes (delete)
+     * Default action: {@code NOREPORT}.
+     */
+    ALL_GONE(Action.NOREPORT);
 
     /** TODO: Description. */
     private Action defaultAction;

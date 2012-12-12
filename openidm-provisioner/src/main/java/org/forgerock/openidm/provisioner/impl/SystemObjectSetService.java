@@ -55,7 +55,7 @@ import java.util.Map;
  * @author $author$
  * @version $Revision$ $Date$
  */
-@Component(name = "org.forgerock.openidm.provisioner", policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
+@Component(name = "org.forgerock.openidm.provisioner", immediate = true, policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
 @Service(value = {JsonResource.class, ScheduledService.class})
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -170,10 +170,11 @@ public class SystemObjectSetService implements JsonResource,
      * Called when a source object has been deleted.
      *
      * @param id the fully-qualified identifier of the object that was deleted.
+     * @param the value before the delete, or null if not supplied 
      * @throws org.forgerock.openidm.sync.SynchronizationException
      *          if an exception occurs processing the notification.
      */
-    public void onDelete(String id) throws SynchronizationException {
+    public void onDelete(String id, JsonValue oldValue) throws SynchronizationException {
         try {
             Map<String, Object> params = new HashMap<String, Object>(2);
             params.put("_action", "ONDELETE");

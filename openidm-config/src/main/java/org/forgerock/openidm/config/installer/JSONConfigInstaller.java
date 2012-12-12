@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -57,6 +58,7 @@ import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
@@ -83,6 +85,9 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     public final static String JSON_CONFIG_PROPERTY = JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
     
     public final static String SERVICE_FACTORY_PID_ALIAS = "config.factory-pid";
+
+    private static String fileEncoding = IdentityServer.getInstance()
+            .getProperty("openidm.config.file.encoding", "UTF-8");
     
     private final Map<String, String> pidToFile = Collections.synchronizedMap(new HashMap<String, String>());
     
@@ -223,7 +228,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                                 if (entry != null) {
                                     jsonConfig = entry.toString(); 
                                 }
-                                Writer writer = new OutputStreamWriter(new FileOutputStream(file));
+                                Writer writer = new OutputStreamWriter(new FileOutputStream(file), fileEncoding);
                                 try {
                                   writer.write(jsonConfig);
                                 } finally {
@@ -295,28 +300,25 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     public static Hashtable loadConfigFile(final File f) throws IOException {
         logger.debug("Loading configuration from {}", f);
         final Hashtable ht = new Hashtable();
-        final InputStream in = new BufferedInputStream(new FileInputStream(f));
-        try {
-            if (f.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
 
-                StringBuilder fileBuf = new StringBuilder(1024);
-                BufferedReader reader = new BufferedReader(new FileReader(f));
-                try {
-                    char[] buf = new char[1024];
-                    int numRead = 0;
-                    while((numRead = reader.read(buf)) != -1){
-                        fileBuf.append(buf, 0, numRead);
-                    }
-                } finally {
-                    reader.close();
+        if (f.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
+
+            StringBuilder fileBuf = new StringBuilder(1024);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(f), fileEncoding));
+            try {
+                char[] buf = new char[1024];
+                int numRead = 0;
+                while((numRead = reader.read(buf)) != -1){
+                    fileBuf.append(buf, 0, numRead);
                 }
-
-                ht.put(JSON_CONFIG_PROPERTY, fileBuf.toString());
+            } finally {
+                reader.close();
             }
+
+            ht.put(JSON_CONFIG_PROPERTY, fileBuf.toString());
         }
-        finally{
-            in.close();
-        }
+
         return ht;
     }
     

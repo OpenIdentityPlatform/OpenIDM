@@ -248,10 +248,10 @@ public class SynchronizationService extends ObjectSetJsonResource
      */
     @Override // SynchronizationListener
     @Deprecated // use resource interface
-    public void onDelete(String id) throws SynchronizationException {
+    public void onDelete(String id, JsonValue oldValue) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             if (mapping.isSyncEnabled()) {
-                mapping.onDelete(id);
+                mapping.onDelete(id, oldValue);
             }
         }
     }
@@ -329,8 +329,8 @@ public class SynchronizationService extends ObjectSetJsonResource
                     break;
                 case onDelete:
                     id = _params.get("id").required().asString();
-                    logger.debug("Synchronization _action=onUpdate, id={}", id);
-                    onDelete(id);
+                    logger.debug("Synchronization _action=onDelete, id={}", id);
+                    onDelete(id, null);
                     break;
                 case recon:
                     result = new HashMap<String, Object>();

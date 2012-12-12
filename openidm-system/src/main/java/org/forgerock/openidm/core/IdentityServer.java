@@ -58,7 +58,7 @@ public class IdentityServer implements PropertyAccessor {
      * The singleton Identity Server instance.
      */
     private static final AtomicReference<IdentityServer> identityServer =
-            new AtomicReference<IdentityServer>(new IdentityServer(null));
+            new AtomicReference<IdentityServer>(new IdentityServer(null, null));
     private static final AtomicBoolean initialised = new AtomicBoolean(Boolean.FALSE);
     // The set of properties for the environment config.
     // Keys are lower case for easier case insensitive searching
@@ -66,6 +66,7 @@ public class IdentityServer implements PropertyAccessor {
     // System properties
     private final PropertyAccessor configProperties;
     private final Map<String, String> bootFileProperties;
+    private File bootPropertyFile = null;
 
     /**
      * Creates a new identity environment configuration initialized with a copy
@@ -76,17 +77,16 @@ public class IdentityServer implements PropertyAccessor {
      *            configuration, or {@code null} to use an empty set of
      *            properties.
      */
-    private IdentityServer(PropertyAccessor properties) {
+    private IdentityServer(PropertyAccessor properties, IdentityServer identityServer) {
         if (null == properties) {
             configProperties = new SystemPropertyAccessor(null);
-            bootFileProperties = Collections.emptyMap();
         } else {
             configProperties = properties;
-            String bootFileName =
-                    getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
-                            ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
-            bootFileProperties = loadProps(bootFileName);
         }
+        String bootFileName =
+                getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
+                        ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
+        bootFileProperties = loadProps(bootFileName, identityServer);
     }
 
     public static IdentityServer getInstance() {
@@ -112,7 +112,7 @@ public class IdentityServer implements PropertyAccessor {
      */
     public static IdentityServer initInstance(PropertyAccessor properties) {
         if (initialised.compareAndSet(Boolean.FALSE, Boolean.TRUE)) {
-            return identityServer.getAndSet(new IdentityServer(properties));
+            return identityServer.getAndSet(properties instanceof IdentityServer ? (IdentityServer)properties : new IdentityServer(properties, identityServer.get()));
         } else {
             throw new IllegalStateException("IdentityServer has been initialised already");
         }
@@ -445,7 +445,7 @@ public class IdentityServer implements PropertyAccessor {
      * 
      * @return properties in boot properties file, keys in lower case
      */
-    private Map<String, String> loadProps(String bootFileLocation) {
+    private Map<String, String> loadProps(String bootFileLocation, IdentityServer identityServer) {
         File bootFile = IdentityServer.getFileForPath(bootFileLocation, getServerRoot());
         Map<String, String> entries = new HashMap<String, String>();
 
@@ -454,10 +454,13 @@ public class IdentityServer implements PropertyAccessor {
             // logger.info("No boot properties file detected at {}.",
             // bootFile.getAbsolutePath());
             System.out.println("No boot properties file detected at " + bootFile.getAbsolutePath());
+        } else if (null != identityServer && bootFile.equals(identityServer.bootPropertyFile)) {
+           return identityServer.bootFileProperties;
         } else {
             // logger.info("Using boot properties at {}.",
             // bootFile.getAbsolutePath());
             System.out.println("Using boot properties at " + bootFile.getAbsolutePath());
+            bootPropertyFile = bootFile;
             InputStream in = null;
             try {
                 Properties prop = new Properties();

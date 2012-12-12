@@ -50,18 +50,18 @@ public class AuthModule {
     final static Logger logger = LoggerFactory.getLogger(AuthModule.class);
 
     // default properties set in config/system.properties
-    static String queryId;
-    static String queryOnResource;
-    static String internalUserQueryId;
-    static String queryOnInternalUserResource;
-    static String userIdProperty;
-    static String userCredentialProperty;
-    static String userRolesProperty;
-    static List<String> defaultRoles;
+    String queryId;
+    String queryOnResource;
+    String internalUserQueryId;
+    String queryOnInternalUserResource;
+    String userIdProperty;
+    String userCredentialProperty;
+    String userRolesProperty;
+    List<String> defaultRoles;
 
     // configuration conf/authentication.json
 
-    public static void setConfig(JsonValue config) {
+    public AuthModule(JsonValue config) {
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
@@ -96,7 +96,7 @@ public class AuthModule {
      * @return the authentication data augmented with role, id, status info. Whether authentication was successful is 
      * carried by the status property 
      */
-    public static AuthData authenticate(AuthData authData, String password) {
+    public AuthData authenticate(AuthData authData, String password) {
 
         boolean authenticated = authPass(queryId, queryOnResource, authData.username, password, authData);
         if (!authenticated) {
@@ -111,7 +111,7 @@ public class AuthModule {
         return authData;
     }
 
-    private static boolean authPass(String passQueryId, String passQueryOnResource,
+    private boolean authPass(String passQueryId, String passQueryOnResource,
             String login, String password, AuthData authData) {
         UserInfo userInfo = null;
         try {
@@ -131,7 +131,7 @@ public class AuthModule {
         return false;
     }
 
-    private static UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
+    private UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
             AuthData authData) throws Exception {
         UserInfo user = null;
         Credential credential = null;
@@ -213,7 +213,7 @@ public class AuthModule {
         return user;
     }
 
-    static Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName,
+    Credential getCredential(Object retrCred, Object retrId, String username, String retrCredPropName,
             boolean allowStringifiedEncryption) {
         Credential credential = null;
         if (retrCred instanceof String) {
@@ -244,7 +244,7 @@ public class AuthModule {
         return credential;
     }
 
-    static List addRoles(List existingRoleNames, Object retrRoles, String retrRolesPropName, List defaultRoles) {
+    List addRoles(List existingRoleNames, Object retrRoles, String retrRolesPropName, List defaultRoles) {
         if (retrRoles instanceof Collection) {
             existingRoleNames.addAll((Collection) retrRoles);
         } else if (retrRoles instanceof String) {
@@ -260,7 +260,7 @@ public class AuthModule {
         return existingRoleNames;
     }
 
-    private static List parseCommaDelimitedRoles(String rawRoles) {
+    private List parseCommaDelimitedRoles(String rawRoles) {
         List result = new ArrayList();
         if (rawRoles != null) {
             String[] split = rawRoles.split(",");
@@ -270,14 +270,14 @@ public class AuthModule {
     }
 
 
-    static JsonResourceObjectSet getRepo() {
+    JsonResourceObjectSet getRepo() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference repoRef = ctx.getServiceReference(RepositoryService.class.getName());
         return new JsonResourceObjectSet((RepositoryService)ctx.getService(repoRef));
     }
 
-    static CryptoService getCrypto() {
+    CryptoService getCrypto() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
         ServiceReference cryptoRef = ctx.getServiceReference(CryptoService.class.getName());

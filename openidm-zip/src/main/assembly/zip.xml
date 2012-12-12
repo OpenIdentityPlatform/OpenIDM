@@ -350,13 +350,13 @@
             </excludes>
             <outputDirectory>/openidm/samples/sample9</outputDirectory>
         </fileSet>
-        <!-- Setup sampleWorkflow  -->
+        <!-- Setup workflow sample -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
             <includes>
                 <include>conf/workflow.json</include>
             </includes>
-            <outputDirectory>/openidm/samples/sampleWorkflow</outputDirectory>
+            <outputDirectory>/openidm/samples/workflow</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources/conf</directory>
@@ -370,15 +370,14 @@
                 <exclude>sync.json</exclude>
                 <exclude>ui-configuration.json</exclude>
             </excludes>
-            <outputDirectory>/openidm/samples/sampleWorkflow/conf</outputDirectory>
+            <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <excludes>
-                <exclude>samples/**</exclude>
-                <exclude>conf/**</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/sampleWorkflow</outputDirectory>
+            <directory>${basedir}/src/main/resources/script</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/workflow/script</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>

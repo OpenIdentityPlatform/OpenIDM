@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-Copyright (c) 2010 ForgeRock Inc. All Rights Reserved
+Copyright (c) 2012 ForgeRock Inc. All Rights Reserved
 
 The contents of this file are subject to the terms
 of the Common Development and Distribution License
@@ -29,19 +29,6 @@ your own identifying information:
     xmlns:tns="http://openidm.forgerock.com/xml/ns/public/resource/openicf/resource-schema-1.xsd"
     elementFormDefault="qualified">
 
-    <xsd:annotation>
-        <xsd:documentation>
-            TODO
-
-            These definitions are to be considered only examples for now.
-
-            These will hopefuly get cleaned up and aligned
-            with existing common terminology and/or connectors.
-
-            Recommended namespace prefix: icf
-        </xsd:documentation>
-    </xsd:annotation>
-
     <xsd:element name="OpenICFContainer">
         <xsd:annotation>
             <xsd:documentation>This root element contains all objects.</xsd:documentation>
@@ -52,7 +39,6 @@ your own identifying information:
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
-
 
     <xsd:element name="__UID__" type="xsd:string">
         <xsd:annotation>
@@ -81,19 +67,6 @@ your own identifying information:
         </xsd:annotation>
     </xsd:element>
 
-    <xsd:element name="__PASSWORD__" type="xsd:string">
-        <xsd:annotation>
-            <xsd:documentation>
-                __PASSWORD__ attribute
-            </xsd:documentation>
-            <xsd:appinfo>
-                <tns:javaclass>org.identityconnectors.common.security.GuardedString</tns:javaclass>
-                <tns:flag>NOT_READABLE</tns:flag>
-                <tns:flag>NOT_RETURNED_BY_DEFAULT</tns:flag>
-            </xsd:appinfo>
-        </xsd:annotation>
-    </xsd:element>
-
     <xsd:element name="__SHORT_NAME__" type="xsd:string">
         <xsd:annotation>
             <xsd:documentation>
@@ -110,135 +83,6 @@ your own identifying information:
         </xsd:annotation>
     </xsd:element>
 
-    <xsd:element name="__LAST_PASSWORD_CHANGE_DATE__" type="xsd:long">
-        <xsd:annotation>
-            <xsd:documentation>
-                __LAST_PASSWORD_CHANGE_DATE__ attribute
-            </xsd:documentation>
-            <xsd:appinfo>
-                <tns:flag>NOT_CREATABLE</tns:flag>
-                <tns:flag>NOT_UPDATABLE</tns:flag>
-            </xsd:appinfo>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__PASSWORD_CHANGE_INTERVAL__" type="xsd:long">
-        <xsd:annotation>
-            <xsd:documentation>
-                __PASSWORD_CHANGE_INTERVAL__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__LAST_LOGIN_DATE__" type="xsd:long">
-        <xsd:annotation>
-            <xsd:documentation>
-                __LAST_LOGIN_DATE__ attribute
-            </xsd:documentation>
-            <xsd:appinfo>
-                <tns:flag>NOT_CREATABLE</tns:flag>
-                <tns:flag>NOT_UPDATABLE</tns:flag>
-            </xsd:appinfo>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__GROUPS__" type="xsd:string">
-        <xsd:annotation>
-            <xsd:documentation>
-                __GROUPS__ attribute
-            </xsd:documentation>
-            <xsd:appinfo>
-                <tns:flag>NOT_RETURNED_BY_DEFAULT</tns:flag>
-            </xsd:appinfo>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__ENABLE__" type="xsd:boolean">
-        <xsd:annotation>
-            <xsd:documentation>
-                __ENABLE__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__ENABLE_DATE__" type="xsd:long">
-        <xsd:annotation>
-            <xsd:documentation>
-                __ENABLE_DATE__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__DISABLE_DATE__" type="xsd:long">
-        <xsd:annotation>
-            <xsd:documentation>
-                __DISABLE_DATE__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__LOCK_OUT__" type="xsd:boolean">
-        <xsd:annotation>
-            <xsd:documentation>
-                __LOCK_OUT__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__PASSWORD_EXPIRATION_DATE__" type="xsd:long">
-        <xsd:annotation>
-            <xsd:documentation>
-                __PASSWORD_EXPIRATION_DATE__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-
-    <xsd:element name="__PASSWORD_EXPIRED__" type="xsd:boolean">
-        <xsd:annotation>
-            <xsd:documentation>
-                __PASSWORD_EXPIRED__ attribute
-            </xsd:documentation>
-        </xsd:annotation>
-    </xsd:element>
-    <xsd:element name="__CURRENT_PASSWORD__" type="xsd:string">
-        <xsd:annotation>
-            <xsd:documentation>
-                __CURRENT_PASSWORD__ attribute
-            </xsd:documentation>
-            <xsd:appinfo>
-                <tns:flag>NOT_READABLE</tns:flag>
-                <tns:flag>NOT_RETURNED_BY_DEFAULT</tns:flag>
-            </xsd:appinfo>
-        </xsd:annotation>
-    </xsd:element>
-    <xsd:element name="operation">
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:enumeration value="CREATE"/>
-                <xsd:enumeration value="AUTHENTICATE"/>
-                <xsd:enumeration value="DELETE"/>
-                <xsd:enumeration value="RESOLVEUSERNAME"/>
-                <xsd:enumeration value="SCHEMA"/>
-                <xsd:enumeration value="SCRIPTONCONNECTOR"/>
-                <xsd:enumeration value="SCRIPTONRESOURCE"/>
-                <xsd:enumeration value="SEARCH"/>
-                <xsd:enumeration value="SYNC"/>
-                <xsd:enumeration value="TEST"/>
-                <xsd:enumeration value="UPDATEATTRIBUTEVALUES"/>
-                <xsd:enumeration value="UPDATE"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-    </xsd:element>
-    <xsd:element name="flag">
-        <xsd:simpleType>
-            <xsd:restriction base="xsd:string">
-                <xsd:enumeration value="NOT_CREATABLE"/>
-                <xsd:enumeration value="NOT_UPDATEBLE"/>
-                <xsd:enumeration value="NOT_READABLE"/>
-                <xsd:enumeration value="NOT_RETURNED_BY_DEFAULT"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-    </xsd:element>
     <xsd:element name="javaclass">
         <xsd:simpleType>
             <xsd:restriction base="xsd:string">
@@ -259,6 +103,3 @@ your own identifying information:
     </xsd:element>
 
 </xsd:schema>
-
-
-

@@ -13,27 +13,23 @@ http://openidm.forgerock.org/doc/install-guide/index.html#more-sample8
 
 To try the sample, follow these steps.
 
-    1. Copy the sample configuration and data.
+    1. Start OpenIDM with the configuration for sample 8.
 
     $ cd /path/to/openidm
-    $ cp -r samples/sample8/conf samples/sample8/script .
+    $ ./startup.sh -p samples/sample8
 
-    2. Start OpenIDM.
+    2. Run reconciliation.
 
-    $ ./startup.sh
+    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
-    3. Run reconciliation.
-
-    $ curl -u openidm-admin:openidm-admin -X POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemXmlfileAccounts_managedUser"
-
-    4. Observe messages from your scripts that are logged to the OpenIDM
+    3. Observe messages from your scripts that are logged to the OpenIDM
        (Felix) console:
 
-    2012-05-25 01:37:41:276 WARN [LoggerPropertyFactory$1$2] Case no Source: the source object contains: = null 
-    2012-05-25 01:37:41:277 WARN [LoggerPropertyFactory$1$2] Case emptySource: the source object contains: = {__UID__=1, email=[mail1@example.com], name=DDOE1, lastname=Doe1, firstname=Darth1, description=Created By XML1, _id=1} 
-    2012-05-25 01:37:41:278 WARN [LoggerPropertyFactory$1$2] Case sourceDescription: the source object contains: = Created By XML1 
-    2012-05-25 01:37:41:279 WARN [LoggerPropertyFactory$1$2] Case onCreate: the source object contains: = {__UID__=1, email=[mail1@example.com], name=DDOE1, lastname=Doe1, firstname=Darth1, description=Created By XML1, _id=1} 
-    2012-05-25 01:37:41:341 WARN [LoggerPropertyFactory$1$2] Case result: the source object contains: = {UNQUALIFIED={count=0, ids=[]}, NOTVALID={count=0, ids=[]}, reconId=561d1deb-db21-4642-98e6-bd33e3421ad2, TARGET_IGNORED={count=0, ids=[]}, ABSENT={count=1, ids=[1]}, AMBIGUOUS={count=0, ids=[]}, endTime=5/25/12 1:37 PM, FOUND={count=0, ids=[]}, startTime=5/25/12 1:37 PM, allIds=247, SOURCE_IGNORED={count=0, ids=[]}, duration=121, UNASSIGNED={count=0, ids=[]}, entries=1, reconName=system/xmlfile/account, CONFIRMED={count=0, ids=[]}, MISSING={count=0, ids=[]}, SOURCE_MISSING={count=0, ids=[]}}
-
+    2012-12-10 21:53:08:691 WARN Case no Source: the source object contains: = null  [js]
+    2012-12-10 21:53:08:693 WARN Case emptySource: the source object contains: = {name=DDOE1, firstname=Darth1, __UID__=1, email=[mail1@example.com], description=Created By XML1, lastname=Doe1, _id=1}  [js]
+    2012-12-10 21:53:08:694 WARN Case sourceDescription: the source object contains: = Created By XML1  [js]
+    2012-12-10 21:53:08:695 WARN Case onCreate: the source object contains: = {name=DDOE1, firstname=Darth1, __UID__=1, email=[mail1@example.com], description=Created By XML1, lastname=Doe1, _id=1}  [js]
+    2012-12-10 21:53:08:817 WARN Case result: the source object contains: = {SOURCE_IGNORED={count=0, ids=[]}, UNQUALIFIED={count=0, ids=[]}, NOTVALID={count=0, ids=[]}, processed=1, UNASSIGNED={count=0, ids=[]}, TARGET_IGNORED={count=0, ids=[]}, CONFIRMED={count=0, ids=[]}, AMBIGUOUS={count=0, ids=[]}, ABSENT={count=1, ids=[1]}, MISSING={count=0, ids=[]}, SOURCE_MISSING={count=0, ids=[]}, FOUND={count=0, ids=[]}}  [js]
+    
     Read the short scripts in samples/sample8/script/ to see examples of how
     to use the logger object.
