@@ -356,7 +356,7 @@ require([&quot;org/forgerock/commons/ui/common/main/ValidatorsManager&quot;], fu
                 manager:startUserId, department:department, jobTitle:jobTitle, phoneNumber:phoneNumber, 
                 email:email, startDate:startDate, endDate:endDate, password:password, description:description,
                 provisionToXML:provisionToXML]
-                out:println "User coming from UI " + user
+
                 openidm.create('managed/user', user)
                 
                 readNewUserFromRepoParams = [_queryId:'for-userName',uid:userName]

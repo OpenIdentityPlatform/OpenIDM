@@ -14,22 +14,21 @@ http://openidm.forgerock.org/doc/install-guide/index.html#more-sample4
 
 To try the sample, follow these steps.
 
-    1. Copy the sample configuration and data.
+    1. Data for this sample is in the CSV file, samples/sample4/data/hr.csv.
 
     $ cd /path/to/openidm
-    $ cp -r samples/sample4/conf samples/sample4/data .
-    $ cat data/hr.csv
+    $ cat samples/sample4/data/hr.csv
     firstName, uid, "lastName","email", "employeeNumber", password
     "Darth", "DDOE", "Doe", "doe@forgerock.org", "123456", "Z29vZA=="
     "Darth", "VDART", "Vader", "vader@forgerock.org", "654321", "Z29vZA=="
 
-    2. Start OpenIDM.
+    2. Start OpenIDM with the configuration for sample 4.
 
-    $ ./startup.sh
+    $ ./startup.sh -p samples/sample4
 
     3. Run reconciliation.
 
-    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/sync?_action=recon&mapping=systemHrAccounts_managedUser"
+    $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemHrAccounts_managedUser"
     {"reconId":"84b55592-a2d5-438a-ba71-c5e9a7a93938"}
 
     4. See the users from the CSV file show up in the OpenIDM repository.

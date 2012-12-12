@@ -1,10 +1,12 @@
 {
     "enabled" : false,
-    "type": "cron",
-    "schedule": "0 0/1 * * * ?",
-    "invokeService": "sync",
-    "invokeContext": {
-        "action": "reconcile",
-        "mapping": "systemXmlfileAccounts_managedUser"
+    "type" : "cron",
+    "schedule" : "0 0/1 * * * ?",
+    "persisted" : true,
+    "misfirePolicy" : "fireAndProceed",
+    "invokeService" : "org.forgerock.openidm.sync",
+    "invokeContext" : {
+        "action" : "reconcile",
+        "mapping" : "systemXmlfileAccounts_managedUser"
     }
 }

@@ -29,9 +29,9 @@
         "SCHEMA" : -1
     },
     "configurationProperties" : {
-        "xsdIcfFilePath" : "samples/sampleWorkflow/data/resource-schema-1.xsd",
-        "xsdFilePath" : "samples/sampleWorkflow/data/resource-schema-extension.xsd",
-        "xmlFilePath" : "samples/sampleWorkflow/data/xmlConnectorData.xml"
+        "xsdIcfFilePath" : "&{launcher.project.location}/data/resource-schema-1.xsd",
+        "xsdFilePath" : "&{launcher.project.location}/data/resource-schema-extension.xsd",
+        "xmlFilePath" : "&{launcher.project.location}/data/xmlConnectorData.xml"
     },
     "objectTypes" : {
         "account" : {
@@ -41,8 +41,7 @@
             "nativeType" : "__ACCOUNT__",
             "properties" : {
                 "_id" : {
-                    "type" : "string",
-                    "nativeName" : "__UID__"
+                    "type" : "string"
                 },
                 "name" : {
                     "type" : "string",

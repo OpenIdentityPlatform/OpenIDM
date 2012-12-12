@@ -157,7 +157,11 @@ function ownDataOnly() {
 }
 
 function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
-    var i = 0,requestedRoles = [],params = {},currentUser = {};
+    var i = 0,requestedRoles = [],params = {},currentUser = {},
+        getTopLevelProp = function (prop) {
+            // removes a leading slash and only returns the first part of a string before a possible subsequent slash
+            return prop.replace(/^\//, '').match(/^[^\/]+/)[0];
+        };
     
     if (!request.id.match(/^managed\/user/)) {
         return true;
@@ -178,10 +182,9 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
     if (request.method === "patch" || (request.method === "action" && request.params["_action"] === "patch")) {
         // check each of the fields they are attempting to patch and make sure they are approved
         for (i in params) {
-            if ((params[i].test && !containsIgnoreCase(allowedPropertiesList, params[i].test.replace(/^\//, ''))) ||
-                (params[i].add && !containsIgnoreCase(allowedPropertiesList, params[i].add.replace(/^\//, ''))) || 
-                (params[i].replace && !containsIgnoreCase(allowedPropertiesList, params[i].replace.replace(/^\//, '')))) {
-
+            if ((params[i].test && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(params[i].test))) ||
+                (params[i].add && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(params[i].add))) || 
+                (params[i].replace && !containsIgnoreCase(allowedPropertiesList, getTopLevelProp(params[i].replace)))) {
                 return false;
             }
         }
@@ -193,7 +196,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         for (i in params) {
             // if the new value does not match the current value, then they must be updating it
             // if the field they are attempting to update isn't allowed for them, then reject request.
-            if (currentUser[i] !== params[i] && !containsIgnoreCase(allowedPropertiesList,i)) {
+            if (!deepCompare(currentUser[i],params[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
             }
         }
@@ -218,7 +221,27 @@ function disallowQueryExpression() {
 
 //////// Do not alter functions below here as part of your authz configuration
 
-
+function deepCompare(obj1, obj2) {
+    //reinventing the wheel a bit, here; eventually move to underscore's isEqual method
+    var i,t1 = typeof(obj1), t2 = typeof(obj2);
+    if (t1 !== t2) {
+        return false; // mismatching types indicate a failed match
+    } else if ((t1 === "string" || t1 === "number" || t1 === "boolean")) {
+        return obj1 === obj2; // simple comparisons work in this case
+    } else { // they must both be objects, so traverse them
+        for (i in obj1) {
+            if (!deepCompare(obj1[i], obj2[i])) { // recurse through the object, checking each child property
+                return false;
+            }
+        }
+        for (i in obj2) { // checks for any properties in obj2 which were not in obj1, and so missed above
+            if (typeof(obj1[i]) === "undefined") {
+                return false;
+            }
+        }
+        return true;
+    }
+}
 
 function passesAccessConfig(id, roles, method, action) {
     for (var i = 0; i < httpAccessConfig.configs.length; i++) {

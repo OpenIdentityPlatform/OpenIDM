@@ -5,7 +5,7 @@
          "connectorHostRef" : "dotnet",
          "connectorName" : "Org.IdentityConnectors.ActiveDirectory.ActiveDirectoryConnector",
          "bundleName" : "ActiveDirectory.Connector",
-         "bundleVersion" : "1.0.0.5570"
+         "bundleVersion" : "1.0.0.0"
       },
    "poolConfigOption" :
       {

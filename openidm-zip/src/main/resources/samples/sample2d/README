@@ -1,18 +1,32 @@
-The sample is the same as sample 2c except that it focuses on syncing  ldapGroups.
+Sample 2d - Synchronizing LDAP Groups
+-------------------------------------
+Copyright (c) 2012 ForgeRock AS
+This work is licensed under a Creative Commons Attribution-
+NonCommercial-NoDerivs 3.0 Unported License. See
+http://creativecommons.org/licenses/by-nc-nd/3.0/
+
+This sample is the same as sample 2c except that it focuses on synchronizing 
+LDAP groups.
+
+To run this sample, launch OpenIDM with the sample configuration as follows:
+$ /path/to/openidm/startup.sh -p samples/sample2d
+
+or follow the documentation in the Install Guide:
+http://openidm.forgerock.org/doc/install-guide/index.html#more-sample2d
  
-The sample configuration connects to a local OpenDJ with the following paramers:
+The sample configuration connects to a local OpenDJ server with the following 
+parameters:
 
 "host" : "localhost",
 "port" : 1389,
 "principal" : "cn=Directory Manager",
 "credentials" : "password",
 
-In opposite to sample2, this sample sync.json configuration contains three mappings:two for user objects and one for group objects. 
-The number of attributes mapped are still rather limited.
+Unlike sample2, this sample sync.json configuration contains three mappings - 
+two for user objects and one for group objects. The number of attributes mapped 
+is limited.
 
-New groups will be created from LDAP by running a reconciliation against the ldap groups.
-
-Ti will sync cn and dn of the groups as well as the description and the uniqueMember attribute which contains a list of all of this group's member's dns.
-
-For a more precise description on how to run the sample see:
-http://openidm.forgerock.org/doc/install-guide/OpenIDM-Install-Guide.html#chap-samples
+New groups are created from LDAP by running a reconciliation against the LDAP 
+groups. Reconciliation synchronizes the cn and dn of the groups as well as the 
+description and the uniqueMember attribute which contains a list of all the 
+member DNs of this group.
