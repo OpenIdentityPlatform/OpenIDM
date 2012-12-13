@@ -47,6 +47,8 @@
         "database" : "HRDB",
         "jdbcDriver" : "com.mysql.jdbc.Driver",
         "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
+        "autoCommit" : true,
+        "reloadScriptOnExecution" : false,
         "createScriptFileName" : "/opt/openidm/samples/scriptedsql/CreateScript.groovy",
         "testScriptFileName" : "/opt/openidm/samples/scriptedsql/TestScript.groovy",
         "searchScriptFileName" : "/opt/openidm/samples/scriptedsql/SearchScript.groovy",
@@ -137,10 +139,10 @@
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "__PASSWORD__" :
+                "password" :
                 {
                     "type" : "string",
-                    "nativeName" : "password",
+                    "nativeName" : "__PASSWORD__",
                     "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
                     "flags" :
                     [
