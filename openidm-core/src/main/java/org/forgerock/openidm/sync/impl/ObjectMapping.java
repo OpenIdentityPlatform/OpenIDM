@@ -1289,7 +1289,7 @@ class ObjectMapping implements SynchronizationListener {
                                 }
                                 break; // terminate DELETE and UNLINK
                             case EXCEPTION:
-                                throw new SynchronizationException("Situation marked as EXCEPTION"); // aborts change; recon reports
+                                throw new SynchronizationException("Situation " + situation + " marked as EXCEPTION"); // aborts change; recon reports
                         }
                     } catch (JsonValueException jve) {
                         throw new SynchronizationException(jve);
