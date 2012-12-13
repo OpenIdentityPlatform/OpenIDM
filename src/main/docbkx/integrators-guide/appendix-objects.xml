@@ -431,7 +431,7 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
       <para>Call object <literal>onRetrieve</literal> trigger</para>
      </listitem>
      <listitem>
-      <para>Per-property within the object (order undefined):</para>
+      <para>Per-property within the object:</para>
       <itemizedlist>
        <listitem>
         <para>Call property <literal>onRetrieve</literal> trigger</para>
@@ -450,7 +450,7 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
       <title>Object Storage Sequence</title>
 
       <listitem>
-       <para>Per-property within the object (order undefined):</para>
+       <para>Per-property within the object:</para>
        <itemizedlist>
         <listitem>
          <para>Call property <literal>onValidate</literal> trigger</para>
@@ -458,15 +458,10 @@ openidm.patch("managed/organization/mysampleorg", rev, value)
         <listitem>
          <para>Call object <literal>onValidate</literal> trigger</para>
         </listitem>
-        <listitem>
-         <para>Perform schema validation (see the <link
-         linkend="managed-object-schema-validation"><citetitle>Schema
-         Validation</citetitle></link> section)</para>
-        </listitem>
        </itemizedlist>
       </listitem>
       <listitem>
-       <para>Per-property trigger within the object (order undefined):</para>
+       <para>Per-property trigger within the object:</para>
        <itemizedlist>
         <listitem>
          <para>Call property <literal>onStore</literal> trigger</para>

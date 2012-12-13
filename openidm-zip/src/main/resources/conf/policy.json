@@ -243,26 +243,6 @@
                     ]
                 },
                 {
-                    "name" : "userName",
-                    "policies" : [
-                        {
-                            "policyId" : "required"
-                        },
-                        {
-                            "policyId" : "not-empty"
-                        },
-                        {
-                            "policyId" : "unique"
-                        },
-                        {
-                            "policyId" : "cannot-contain-characters",
-                            "params" : {
-                                "forbiddenChars" : ["/"]
-                            }
-                        }
-                    ]
-                },
-                {
                     "name" : "password",
                     "policies" : [
                         {

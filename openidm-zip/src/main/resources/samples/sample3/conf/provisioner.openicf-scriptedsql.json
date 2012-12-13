@@ -37,7 +37,6 @@
         "database" : "HRDB",
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
-        "keyColumn" : "uid",
         "jdbcDriver" : "com.mysql.jdbc.Driver",
         "jdbcConnectionUrl" : "jdbc:mysql://localhost:3306/HRDB",
         "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
@@ -116,9 +115,9 @@
                     "nativeName" : "email",
                     "nativeType" : "string"
                 },
-                "__PASSWORD__" : {
+                "password" : {
                     "type" : "string",
-                    "nativeName" : "password",
+                    "nativeName" : "__PASSWORD__",
                     "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
                     "flags" : [ "NOT_READABLE", "NOT_RETURNED_BY_DEFAULT" ]
                 },

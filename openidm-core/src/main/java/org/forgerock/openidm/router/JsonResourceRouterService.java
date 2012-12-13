@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,6 +32,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // OSGi
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Filter;
+
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -64,6 +69,8 @@ import org.forgerock.json.resource.SimpleJsonResource.Method;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.objset.ForbiddenException;
 import org.forgerock.openidm.objset.InternalServerErrorException;
+import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
+import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.scope.ScopeFactory;
 import org.forgerock.openidm.script.Script;
 import org.forgerock.openidm.script.ScriptException;
@@ -72,7 +79,6 @@ import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-
 
 /**
  * Provides internal routing for a top-level object set.
@@ -115,8 +121,13 @@ public class JsonResourceRouterService implements JsonResource {
     /** TODO: Description. */
     private ComponentContext context;
 
-    /** TODO: Description. */
-    @Reference(
+    /** 
+     * Currently handled via service tracker instead, 
+     * until SCR implementation properly resolves and cleanly shuts down this scneario 
+     * 1.6.0 Logs exceptions at shut-down
+     * 1.6.2 Misses some registered events / getService returns null
+     */
+/*    @Reference(
         name = "ref_JsonResourceRouterService_JsonResource",
         referenceInterface = JsonResource.class,
         bind = "bind",
@@ -129,16 +140,16 @@ public class JsonResourceRouterService implements JsonResource {
     protected synchronized void bind(JsonResource resource, Map<String, Object> properties) {
         Object prefix = properties.get(PREFIX_PROPERTY);
         if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-            router.getRoutes().put((String)prefix, resource);
+            router.addRoute((String)prefix, resource);
         }
     }
     protected synchronized void unbind(JsonResource resource, Map<String, Object> properties) {
         Object prefix = properties.get(PREFIX_PROPERTY);
         if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-            router.getRoutes().remove(prefix);
+            router.removeRoute((String)prefix);
         }
     }
-
+*/
     /** Scope factory service. */
     @Reference(
         name = "ref_JsonResourceRouterService_ScopeFactory",
@@ -192,9 +203,50 @@ public class JsonResourceRouterService implements JsonResource {
         }
     }
 
+    ServiceTrackerNotifier tracker;
+    
     @Activate
     protected synchronized void activate(ComponentContext context) {
         LOGGER.info("Activate router configuration, properties: {}", context.getProperties());
+        final BundleContext bundleContext = context.getBundleContext();
+        
+        // Use a service tracker to register and deregister services on the router
+        ServiceTrackerListener listener = new ServiceTrackerListener() {
+            public void addedService(ServiceReference reference, Object service) {
+                String prefix = (String) reference.getProperty(PREFIX_PROPERTY);
+                if (prefix != null) {
+                    if (service == null) {
+                        LOGGER.warn("Framework issue, service in service tracker is null for {}", prefix);
+                    } else {
+                        router.addRoute(prefix, (JsonResource) service);
+                        LOGGER.debug("Added route for {} {}", prefix, service);
+                    }
+                }
+            }
+
+            public void removedService(ServiceReference reference, Object service) {
+                String prefix = (String) reference.getProperty(PREFIX_PROPERTY);
+                if (prefix != null) {
+                    router.removeRoute(prefix);
+                    LOGGER.debug("Removed route for {} {}", prefix);
+                }
+            }
+
+            public void modifiedService(ServiceReference reference, Object service) {
+                String prefix = (String) reference.getProperty(PREFIX_PROPERTY);
+                if (prefix != null) {
+                    if (service == null) {
+                        LOGGER.warn("Framework issue, service in service tracker is null for {}", prefix);
+                    } else {
+                        router.replaceRoute(prefix, (JsonResource) service);
+                        LOGGER.debug("Replaced route for {} {}", prefix, service);
+                    }
+                }
+            }
+        };
+        tracker = new ServiceTrackerNotifier(context.getBundleContext(), JsonResource.class.getName(), null, listener);
+        tracker.open();
+        
         init(context);
     }
 
@@ -207,6 +259,9 @@ public class JsonResourceRouterService implements JsonResource {
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
         chain.getFilters().clear();
+        if (tracker != null) {
+            tracker.close();
+        }
         this.context = null;
     }
     
@@ -298,6 +353,30 @@ public class JsonResourceRouterService implements JsonResource {
     private class Router extends JsonResourceRouter {
         public Map<String, JsonResource> getRoutes() {
             return routes;
+        }
+        public synchronized void addRoute(String prefix, JsonResource resource) {
+            LinkedHashMap<String, JsonResource> copyOnWrite = 
+                    new LinkedHashMap<String, JsonResource>(router.getRoutes());
+            copyOnWrite.put(prefix, resource);
+            routes = copyOnWrite;
+            LOGGER.debug("Routes state after add: {}", routes);
+        }
+        
+        public synchronized void removeRoute(String prefix) {
+            LinkedHashMap<String, JsonResource> copyOnWrite = 
+                    new LinkedHashMap<String, JsonResource>(router.getRoutes());
+            copyOnWrite.remove(prefix);
+            routes = copyOnWrite;
+            LOGGER.debug("Routes state after delete: {}", routes);
+        }
+        
+        public synchronized void replaceRoute(String prefix, JsonResource resource) {
+            LinkedHashMap<String, JsonResource> copyOnWrite = 
+                    new LinkedHashMap<String, JsonResource>(router.getRoutes());
+            copyOnWrite.remove(prefix);
+            copyOnWrite.put(prefix, resource);
+            routes = copyOnWrite;
+            LOGGER.debug("Routes state after replace: {}", routes);
         }
     }
 

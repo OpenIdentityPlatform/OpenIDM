@@ -114,38 +114,40 @@ public class OpenIDMELResolver extends ELResolver {
      */
     @Override
     public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
-        OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-        router = session.getOpenIDM();
-        context.setPropertyResolved(true);
-        try {
-            switch (SimpleJsonResource.Method.valueOf((String) method)) {
-                case read:
-                    return router.read((String) params[0]);
-                case query:
-                    return router.query((String) params[0], (Map<String, Object>) params[1]);
-                case create:
-                    router.create((String) params[0], (Map<String, Object>) params[1]);
-                    return null;
-                case update:
-                    router.update((String) params[0], (String) params[1], (Map<String, Object>) params[2]);
-                    return null;
-                case delete:
-                    router.delete((String) params[0], (String) params[1]);
-                    return null;
-                case action:
-                    return router.action((String) params[0], (Map<String, Object>) params[1]);
-                case patch:
-                    router.patch((String) params[0], (String) params[1], (Patch) params[2]);
-                    return null;
-                default:
-                    throw new BadRequestException("The requested method is not available: " + method);
-            }
+        if (base instanceof ObjectSet) {
+            OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
+            router = session.getOpenIDM();
+            context.setPropertyResolved(true);
+            try {
+                switch (SimpleJsonResource.Method.valueOf((String) method)) {
+                    case read:
+                        return router.read((String) params[0]);
+                    case query:
+                        return router.query((String) params[0], (Map<String, Object>) params[1]);
+                    case create:
+                        router.create((String) params[0], (Map<String, Object>) params[1]);
+                        return null;
+                    case update:
+                        router.update((String) params[0], (String) params[1], (Map<String, Object>) params[2]);
+                        return null;
+                    case delete:
+                        router.delete((String) params[0], (String) params[1]);
+                        return null;
+                    case action:
+                        return router.action((String) params[0], (Map<String, Object>) params[1]);
+                    case patch:
+                        router.patch((String) params[0], (String) params[1], (Patch) params[2]);
+                        return null;
+                    default:
+                        throw new BadRequestException("The requested method is not available: " + method);
+                }
 
-        } catch (ObjectSetException ex) {
-            LOGGER.error(OpenIDMELResolver.class.getName(), ex);
-        } catch (IllegalArgumentException ex) {
-            LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+            } catch (ObjectSetException ex) {
+                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+            } catch (IllegalArgumentException ex) {
+                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+            }
         }
-        return super.invoke(context, base, method, paramTypes, params);
+        return null;
     }
 }
