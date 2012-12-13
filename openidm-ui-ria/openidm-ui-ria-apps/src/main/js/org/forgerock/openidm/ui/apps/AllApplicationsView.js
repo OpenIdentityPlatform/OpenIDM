@@ -30,7 +30,7 @@
 define("org/forgerock/openidm/ui/apps/AllApplicationsView", [
     "org/forgerock/openidm/ui/apps/BaseApplicationsView",
     "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(BaseApplicationsView, applicationDelegate, userDelegate, conf) {
     

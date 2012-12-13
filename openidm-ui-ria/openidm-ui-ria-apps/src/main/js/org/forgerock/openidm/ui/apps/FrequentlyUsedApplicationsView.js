@@ -29,7 +29,7 @@
  */
 define("org/forgerock/openidm/ui/apps/FrequentlyUsedApplicationsView", [
     "org/forgerock/openidm/ui/apps/BaseApplicationsView",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"

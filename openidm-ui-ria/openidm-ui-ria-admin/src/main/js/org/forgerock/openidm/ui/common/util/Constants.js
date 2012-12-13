@@ -24,22 +24,20 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/notifications/NotificationViewHelper", [
-    "org/forgerock/commons/ui/common/util/Constants", 
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function (constants, eventManager, config, AbstractConfigurationAware) {
+define("org/forgerock/openidm/ui/common/util/Constants", [
+    "org/forgerock/commons/ui/common/util/Constants"
+], function (commonConstants) {
+    commonConstants.context = "openidm";
 
-    var obj = {};
-    eventManager.registerListener(constants.EVENT_APP_INTIALIZED, function (event) {
-        if(config.notificationTypes) {
-            obj.notificationTypes = config.notificationTypes;
-        }
-        
-        if(config.defaultNotificationType) {
-            obj.defaultType = config.defaultNotificationType;
-        }
-    });
-    return obj;
+    commonConstants.OPENIDM_HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
+    commonConstants.OPENIDM_HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
+    commonConstants.OPENIDM_HEADER_PARAM_LOGOUT = "X-OpenIDM-Logout";
+    commonConstants.OPENIDM_HEADER_PARAM_NO_SESION = "X-OpenIDM-NoSession";
+    commonConstants.OPENIDM_HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
+
+    commonConstants.OPENIDM_ANONYMOUS_USERNAME = "anonymous";
+    commonConstants.OPENIDM_ANONYMOUS_PASSWORD = "anonymous";
+
+    
+    return commonConstants;
 });
