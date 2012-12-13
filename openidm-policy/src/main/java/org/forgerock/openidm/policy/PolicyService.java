@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = PolicyService.PID, policy = ConfigurationPolicy.REQUIRE,
         description = "OpenIDM Policy Service", immediate = true)
-@Service(value = {PolicyService.class, JsonResource.class})
+@Service()
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Policy Service"),
@@ -117,6 +117,7 @@ public class PolicyService implements JsonResource {
         logger.info("OpenIDM Policy Service component is activated.");
     }
     
+    
     /** 
      * Configuration modified handling
      * Ensures the service stays registered
@@ -132,7 +133,7 @@ public class PolicyService implements JsonResource {
             throw ex;
         }
     }
-    
+
     private void setConfig(ComponentContext context) {
         JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
 

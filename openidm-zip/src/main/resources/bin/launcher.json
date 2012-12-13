@@ -5,9 +5,17 @@
                 "location":"bundle",
                 "includes":[
                     "**/openidm-system-*.jar",
-                    "**/org.apache.servicemix.transaction-*.jar"
+                    "**/javax.transaction-*.jar"
                 ],
                 "start-level":1,
+                "action":"install.start"
+            },
+            {
+                "location":"bundle",
+                "includes":[
+                    "**/org.apache.servicemix.transaction-*.jar"
+                ],
+                "start-level":2,
                 "action":"install.start"
             },
             {
@@ -19,7 +27,7 @@
                     "**/openidm-config*.jar",
                     "**/openidm-crypto*.jar"
                 ],
-                "start-level":2,
+                "start-level":3,
                 "action":"install.start"
             },
             {
@@ -29,7 +37,7 @@
                     "**/openidm-repo-orientdb*.jar",
                     "**/org.apache.felix.scr-*.jar"
                 ],
-                "start-level":3,
+                "start-level":4,
                 "action":"install.start"
             },
             {
@@ -38,7 +46,7 @@
                     "**/org.apache.felix.configadmin*.jar",
                     "**/org.apache.felix.fileinstall*.jar"
                 ],
-                "start-level":4,
+                "start-level":5,
                 "action":"install.start"
             },
             {
@@ -66,6 +74,7 @@
                     "**/org.apache.felix.scr-*.jar",
                     "**/org.apache.felix.configadmin*.jar",
                     "**/org.apache.felix.fileinstall*.jar",
+                    "**/javax.transaction-*.jar",
                     "**/org.apache.servicemix.transaction-*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/pax-web-jetty-bundle*.jar",
