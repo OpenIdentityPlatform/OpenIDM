@@ -31,7 +31,7 @@ define("org/forgerock/openidm/ui/admin/users/ChangeUserPasswordDialog", [
     "org/forgerock/commons/ui/common/components/Dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"

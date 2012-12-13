@@ -30,7 +30,7 @@
 define("org/forgerock/openidm/ui/apps/BaseApplicationsView", [
     "org/forgerock/commons/ui/common/components/GridTableView",
     "org/forgerock/openidm/ui/apps/delegates/ApplicationDelegate",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/UniversalCachedDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils"
