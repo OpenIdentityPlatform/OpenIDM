@@ -36,6 +36,9 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
@@ -45,6 +48,10 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+
+import org.forgerock.json.patch.JsonPatch;
+
+import org.forgerock.json.resource.JsonResource;
 
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
@@ -98,6 +105,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     List<JsonPointer> passwordFieldFilters;
 
     List<AuditLogger> auditLoggers;
+    JsonValue config; // Existing active configuration
     DateUtil dateUtil;
 
     static {
@@ -105,7 +113,28 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
         mapper = new ObjectMapper(jsonFactory);
     }
-
+    
+    /** Although we may not need the router here, 
+         https://issues.apache.org/jira/browse/FELIX-3790
+        if using this with for scr 1.6.2
+        Ensure we do not get bound on router whilst it is activating
+    */
+/*    @Reference(
+        referenceInterface = JsonResource.class,
+        bind = "bindRouter",
+        unbind = "unbindRouter",
+        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        policy = ReferencePolicy.STATIC,
+        target = "(service.pid=org.forgerock.openidm.router)"
+    )
+    Object router;
+    protected void bindRouter(JsonResource router) {
+        this.router = router;
+    }
+    protected void unbindRouter(JsonResource router) {
+        this.router = router;
+    }
+*/
     /**
      * Gets an object from the audit logs by identifier. The returned object is not validated
      * against the current schema and may need processing to conform to an updated schema.
@@ -407,15 +436,24 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     void modified(ComponentContext compContext) throws Exception {
         logger.debug("Reconfiguring aduit service with configuration {}", compContext.getProperties());
         try {
-            setConfig(compContext);
+            JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
+            if (hasConfigChanged(config, newConfig)) {
+                deactivate(compContext);
+                activate(compContext);
+                logger.info("Reconfigured audit service {}", compContext.getProperties());
+            }
         } catch (Exception ex) {
             logger.warn("Configuration invalid, can not reconfigure Audit service.", ex);
             throw ex;
         }
     }
+    
+    private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
+        return JsonPatch.diff(existingConfig, newConfig).size() > 0;
+    }
 
     private void setConfig(ComponentContext compContext) throws Exception {
-        JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
+        config = enhancedConfig.getConfigurationAsJson(compContext);
         auditLoggers = getAuditLoggers(config, compContext);
         actionFilters = getActionFilters(config);
         triggerFilters = getTriggerFilters(config);
