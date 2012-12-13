@@ -89,11 +89,12 @@
  <section xml:id="scripting-example">
   <title>Examples</title>
 
-  <para>The following example returns <literal>true</literal> if the
-  <literal>employeeType</literal> is equal to <literal>external</literal>,
-  otherwise returns <literal>false</literal>. This script can be useful during
-  reconciliation to establish whether the source object should be a part of
-  the reconciliation, or ignored.</para>
+  <para>The following example (included in the <filename>sync.json</filename> 
+  file) returns <literal>true</literal> if the <literal>employeeType</literal> 
+  is equal to <literal>external</literal>, otherwise returns 
+  <literal>false</literal>. This script can be useful during reconciliation to 
+  establish whether the source object should be a part of the reconciliation, 
+  or ignored.</para>
 
   <programlisting language="javascript">
 "validTarget": {
@@ -101,9 +102,9 @@
   "source": "object.employeeType == 'external'"
 }</programlisting>
 
-  <para>The following example sets the <literal>__PASSWORD__</literal>
-  attribute to <literal>defaultpwd</literal> when OpenIDM creates a target
-  object.</para>
+  <para>The following example (included in the <filename>sync.json</filename> 
+  file) sets the <literal>__PASSWORD__</literal> attribute to 
+  <literal>defaultpwd</literal> when OpenIDM creates a target object.</para>
 
   <programlisting language="javascript">
 "onCreate" : {
@@ -111,8 +112,9 @@
   "source": "target.__PASSWORD__ = 'defaultpwd'"
 }</programlisting>
 
-  <para>The following example shows a trigger to create Solaris home
-  directories using a script. The script is located in a file,
+  <para>The following example (included in the <filename>router.json</filename> 
+  file) shows a trigger to create Solaris home directories using a script. 
+  The script is located in a file,
   <filename>/path/to/openidm/script/createUnixHomeDir.js</filename>.</para>
 
   <programlisting language="javascript">
@@ -723,7 +725,8 @@
    
    <varlistentry>
     <term>In <filename>openidm/conf/managed.json</filename></term>
-    <listitem><para>onRetrieve, onValidate</para>
+    <listitem><para>onCreate, onRead, onUpdate, onDelete, onValidate, 
+    onRetrieve and onStore</para>
     <para>Note that <literal>managed.json</literal> supports only one script 
     per hook. If multiple scripts are defined for the same hook, only the last 
     one is kept.</para></listitem>
