@@ -302,34 +302,10 @@ function cannotContainOthers(fullObject, value, params, property) {
 
 function requiredIfConfigured(fullObject, value, params, property) {
     var currentValue = openidm.read("config/" + params.configBase),
-        baseKeyArray = params.baseKey.split("."),
-        caller = request.params._caller,
-        roles,parent,i,j,role;
+        baseKeyArray = params.baseKey.split(".");
     
-    parent = request;
-    
-    while (!parent.security || !parent.security["openidm-roles"]) {
-        i++;
-        if(!parent.parent) {
-            break;
-        }
-        parent = parent.parent;
-    }
-
-    if (parent.security) {
-        roles = parent.security["openidm-roles"];
-        if (params && params.exceptRoles) {
-            for (i = 0; i < params.exceptRoles.length; i++) {
-                role = params.exceptRoles[i];
-                if (roles) {
-                    for (j = 0; j < roles.length; j++) {
-                        if (role === roles[j]) {
-                            return [];
-                        }
-                    }
-                }
-            }
-        }
+    if (checkExceptRoles(params.exceptRoles)) {
+        return [];
     }
     
     for (var i in baseKeyArray)
@@ -342,36 +318,16 @@ function requiredIfConfigured(fullObject, value, params, property) {
 }
 
 function reauthRequired(fullObject, value, params, propName) {
-    var exceptRoles, parent, type, roles, caller, i, j, currentObject;
-    caller = request.params._caller;
-    parent = request.parent;
-    if (caller && caller == "filterEnforcer") {
-        parent = request.parent.parent;
+    if (checkExceptRoles(params.exceptRoles)) {
+        return [];
     }
-    if (parent.security) {
-        roles = parent.security["openidm-roles"];
-        if (params && params.exceptRoles) {
-            exceptRoles = params.exceptRoles;
-            if (exceptRoles) {
-                for (i = 0; i < exceptRoles.length; i++) {
-                    var role = exceptRoles[i];
-                    if (roles) {
-                        for (j = 0; j < roles.length; j++) {
-                            if (role === roles[j]) {
-                                return [];
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    
     var isHttp = request._isDirectHttp;
     if (isHttp == "true" || isHttp == true) {
         
         if (request.id && !request.id.match('/$')) { 
             // only do a read if there is no id specified, in the case of new records 
-            currentObject = openidm.read(request.id);
+            var currentObject = openidm.read(request.id);
             if (openidm.isEncrypted(currentObject[propName])) {
                 currentObject[propName] = openidm.decrypt(currentObject[propName]);
             }
@@ -399,6 +355,36 @@ function reauthRequired(fullObject, value, params, propName) {
 
 
 // Internal policy code below
+
+function checkExceptRoles(exceptRoles) {
+    var i, j, roles, role, security = getSecurityContext(request);
+    if (security != null) {
+        roles = security["openidm-roles"];
+        if (exceptRoles) {
+            for (i = 0; i < exceptRoles.length; i++) {
+                role = exceptRoles[i];
+                if (roles) {
+                    for (j = 0; j < roles.length; j++) {
+                        if (role === roles[j]) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    false
+}
+
+function getSecurityContext(ctxt) {
+    if (typeof(ctxt) === 'undefined') {
+        return null;
+    } else if (typeof(ctxt.security) !== 'undefined') {
+        return ctxt.security;
+    } else {
+        return getSecurityContext(ctxt.parent);
+    }
+}
 
 function addPolicy(policy) {
     policyConfig.policies.push(policy);
