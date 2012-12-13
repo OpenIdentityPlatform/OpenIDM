@@ -29,7 +29,7 @@
  */
 define("org/forgerock/openidm/ui/admin/users/UsersView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate",
+    "UserDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "dataTable",

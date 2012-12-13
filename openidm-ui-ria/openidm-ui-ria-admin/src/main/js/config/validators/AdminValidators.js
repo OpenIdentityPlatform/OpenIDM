@@ -28,7 +28,7 @@
  * @author mbilski
  */
 define("config/validators/AdminValidators", [
-    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+    "UserDelegate"
 ], function(userDelegate) {
     var obj = {
             "required_long": {

@@ -36,7 +36,7 @@ define("config/process/AdminConfig", [
             startEvent: constants.EVENT_PROFILE_DELETE_USER_REQUEST,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "UserDelegate",
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/main/Router"
             ],
@@ -60,7 +60,7 @@ define("config/process/AdminConfig", [
             startEvent: constants.EVENT_USER_LIST_DELETE_USER_REQUEST,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/user/delegates/UserDelegate",
+                "UserDelegate",
                 "org/forgerock/commons/ui/common/main/Configuration"
             ],
             processDescription: function(event, userDelegate, globalConfiguration) {
