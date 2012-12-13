@@ -36,7 +36,7 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
     "org/forgerock/openidm/ui/admin/workflow/FormManager",
     "org/forgerock/openidm/ui/admin/workflow/tasks/TemplateTaskForm",
     "org/forgerock/commons/ui/common/util/FormGenerationUtils",
-    "org/forgerock/commons/ui/user/delegates/UserDelegate"
+    "UserDelegate"
 ], function(AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm, formGenerationUtils, userDelegate) {
     var TaskDetailsView = AbstractView.extend({
         template: "templates/admin/workflow/tasks/TaskDetailsTemplate.html",
