@@ -656,14 +656,6 @@
                 <version>1.0.2</version>
                 <scope>test</scope>
             </dependency>
-            
-            <!-- UI -->
-            <dependency>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jquery-amd</artifactId>
-                <version>1.7.1-alpha-1</version>
-                <type>js</type>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
