@@ -39,7 +39,12 @@
 
  <variablelist>
   <para>When you unpack and start OpenIDM <?eval ${docTargetVersion}?>, you
-  create the following files and directories.</para>
+  create the following files and directories. Note that the precise paths will 
+  depend on the install, project, and working directories that you have selected 
+  during startup. For more information, see <link 
+  xlink:href="integrators-guide#startup-configuration" 
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Specifying the OpenIDM Startup Configuration</citetitle></link>.</para>
   
   <varlistentry>
     <term><filename>openidm/audit/</filename></term>
