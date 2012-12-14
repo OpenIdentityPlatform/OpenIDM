@@ -1041,9 +1041,9 @@
      <para>All valid objects from the source</para>
 
      <para>OpenIDM assigns valid source objects <literal>qualifies=1</literal>.
-     Invalid objects, including those not found in the source system, and those
-     filtered out by the script specified in the <literal>validSource</literal>
-     property are assigned <literal>qualifies=0</literal>.</para>
+     Invalid objects, including those not found in the source system, and 
+     those filtered out by the script specified <literal>validSource</literal> 
+     property, are assigned <literal>qualifies=0</literal>.</para>
     </listitem>
     <listitem>
      <para>All records from the appropriate link table</para>
@@ -1509,7 +1509,69 @@
     </varlistentry>
    </variablelist>
   </section>
- </section> 
+ </section>
+ 
+ <section xml:id="asynchronous-reconciliation">
+   <title>Asynchronous Reconciliation</title>
+   
+   <para>Reconciliation can work in tandem with workflows to provide 
+   additional business logic to the reconciliation process. You can define 
+   scripts to determine the action that should be taken for a particular 
+   reconciliation situation. A reconciliation process can launch a workflow 
+   after it has assessed a situation, and then perform the reconciliation, or 
+   some other action.</para>
+   <para>For example, you might want a reconciliation process to assess new user 
+   accounts that need to be created on a target resource. However, new user 
+   account creation might require some kind of approval from a manager before 
+   the accounts are actually created. The initial reconciliation process can 
+   assess the accounts that need to be created, launch a workflow to request 
+   management approval for those accounts, and then relaunch the reconciliation 
+   process to create the accounts, once the management approval has been 
+   received.</para>
+   <para>In this scenario, the defined script returns <literal>IGNORE</literal> 
+   for new accounts and the reconciliation engine does not continue processing 
+   the given object. The script then initiates an asynchronous process which 
+   calls back and completes the reconciliation process at a later stage.</para>
+   <para>A sample configuration for this scenario is available in 
+   <filename>openidm/samples/sample9</filename>, and described in <link 
+   xlink:href="install-guide#more-sample9" 
+   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Sample 9 - 
+   Asynchronous Reconciliation Using Workflows</citetitle></link> in the 
+   <citetitle>Installation Guide</citetitle>.</para>
+   
+   <orderedlist>
+     <para>Configuring asynchronous reconciliation involves the following 
+     steps:</para>
+     <listitem>
+       <para>Create the workflow definition file (<literal>.bar</literal> file) 
+       and place it in the <filename>openidm/workflow</filename> directory. 
+       For more information about creating workflows, see <link 
+       xlink:href="integrators-guide#chap-workflow" xlink:role="http://docbook.org/xlink/role/olink">
+       <citetitle>Integrating Business Processes and Workflows</citetitle></link>.
+       </para>
+     </listitem>
+     <listitem>
+       <para>Modify the <filename>conf/sync.json</filename> file for the 
+       situation or situations that should call the workflow. Reference the 
+       workflow name in the configuration for that situation.</para>
+       <para>For example, the following <filename>sync.json</filename> extract 
+       calls the <literal>managedUserApproval</literal> workflow if the 
+       situation is assessed as <literal>ABSENT</literal>:</para>
+       <programlisting language="javascript">
+                {
+                    "situation" : "ABSENT",
+                    "action" : {
+                        "workflowName" : "managedUserApproval",
+                        "type" : "text/javascript",
+                        "file" : "bin/defaults/script/workflow/workflow.js"
+                    }
+                },       
+       </programlisting>
+     </listitem>
+     <listitem><para>In the sample configuration, the workflow calls a second, 
+     asynchronous reconciliation process as a final step.</para></listitem>
+   </orderedlist>
+ </section>
 
  <section xml:id="reconciliation-optimization">
   <title>Reconciliation Optimization</title>
