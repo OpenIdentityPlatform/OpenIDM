@@ -130,7 +130,7 @@ public class HttpRemoteJsonResource implements JsonResource {
             Representation request = null;
             JsonValue value = jsonValues.get("value");
             if (!value.isNull()) {
-                request = new JacksonRepresentation<Map>(value.expect(Map.class).asMap());
+                request = new JacksonRepresentation<Object>(value.getObject());
             }
 
             // Prepare ETag
