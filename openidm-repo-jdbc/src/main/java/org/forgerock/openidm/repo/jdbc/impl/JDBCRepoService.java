@@ -43,11 +43,13 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
@@ -125,6 +127,7 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
     TableHandler defaultTableHandler;
 
     final EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+    JsonValue config;
 
     /**
      * Gets an object from the repository by identifier. The returned object is not validated
@@ -582,10 +585,14 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         return bootRepo;
     }
 
+    /**
+     * Activates the JDBC Repository Service
+     * 
+     * @param compContext   The component context
+     */
     @Activate
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        JsonValue config = null;
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
@@ -598,6 +605,57 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
         logger.info("Repository started.");
     }
 
+    /**
+     * Deactivates the JDBC Repository Service
+     * 
+     * @param compContext   the component context
+     */
+    @Deactivate
+    void deactivate(ComponentContext compContext) {
+        logger.debug("Deactivating Service {}", compContext);
+        logger.info("Repository stopped.");
+    }
+    
+    /** 
+     * Handles configuration updates without interrupting the service
+     * 
+     * @param compContext   the component context
+     */
+    @Modified
+    void modified(ComponentContext compContext) throws Exception {
+        logger.debug("Reconfiguring the JDBC Repository Service with configuration {}", compContext.getProperties());
+        try {
+            JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
+            if (hasConfigChanged(config, newConfig)) {
+                deactivate(compContext);
+                activate(compContext);
+                logger.info("Reconfigured the JDBC Repository Service {}", compContext.getProperties());
+            }
+        } catch (Exception ex) {
+            logger.warn("Configuration invalid, can not reconfigure the JDBC Repository Service.", ex);
+            throw ex;
+        }
+    }
+    
+    /**
+     * Compares the current configuration with a new configuration to determine if the
+     * configuration has changed
+     * 
+     * @param existingConfig    the current configuration object
+     * @param newConfig         the new configuration object
+     * @return                  true if the configurations differ, false otherwise    
+     */
+    private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
+        return JsonPatch.diff(existingConfig, newConfig).size() > 0;
+    }
+    
+    /**
+     * Initializes the JDBC Repository Service with the supplied configuration
+     * 
+     * @param config            the configuration object
+     * @param bundleContext     the bundle context
+     * @throws InvalidException
+     */
     void init(JsonValue config, BundleContext bundleContext) throws InvalidException {
         try {
             String enabled = config.get("enabled").asString();
@@ -886,21 +944,5 @@ public class JDBCRepoService extends ObjectSetJsonResource implements Repository
                         new DefaultSQLExceptionHandler());
         }
         return handler;
-    }
-
-    /* Currently rely on deactivate/activate to be called by DS if config changes instead
-    @Modified
-    void modified(ComponentContext compContext) {
-        logger.info("Configuration of repository changed.");
-        deactivate(compContext);
-        activate(compContext);
-    }
-    */
-
-
-    @Deactivate
-    void deactivate(ComponentContext compContext) {
-        logger.debug("Deactivating Service {}", compContext);
-        logger.info("Repository stopped.");
     }
 }
