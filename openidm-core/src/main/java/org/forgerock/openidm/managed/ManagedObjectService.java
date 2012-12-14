@@ -85,7 +85,7 @@ public class ManagedObjectService extends JsonResourceRouter {
         referenceInterface = JsonResource.class,
         bind = "bindRouter",
         unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+        cardinality = ReferenceCardinality.OPTIONAL_UNARY, // This would be more appropriate MANDATORY_UNARY, but scr 1.6.0 creates shutdown noise with it
         policy = ReferencePolicy.STATIC,
         target = "(service.pid=org.forgerock.openidm.router)"
     )
