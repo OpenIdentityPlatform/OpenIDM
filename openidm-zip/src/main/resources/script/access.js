@@ -192,7 +192,7 @@ var httpAccessConfig =
         },
         // Clients authenticated via SSL mutual authentication
         {
-            "pattern"   : "managed/user/*",
+            "pattern"   : "managed/user",
             "roles"     : "openidm-cert",
             "methods"   : "patch,action",
             "actions"   : "patch",
