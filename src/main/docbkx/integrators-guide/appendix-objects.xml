@@ -890,7 +890,7 @@ openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
  http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=DDOE</screen>
 
       <para>For the syntax on how to formulate the query
-      <literal>_queryId=for-username&amp;uid=DDOE</literal> see
+      <literal>_queryId=for-userName&amp;uid=DDOE</literal> see
       <xref linkend="managed-objects-programmatic-query"/>.</para>
       
     </section>
