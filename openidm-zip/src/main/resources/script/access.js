@@ -192,10 +192,11 @@ var httpAccessConfig =
         },
         // Clients authenticated via SSL mutual authentication
         {
-            "pattern"   : "*",
+            "pattern"   : "managed/user/*",
             "roles"     : "openidm-cert",
-            "methods"   : "",  // default to no methods allowed
-            "actions"   : ""  // default to no actions allowed
+            "methods"   : "patch,action",
+            "actions"   : "patch",
+            "customAuthz" : "isQueryOneOf({'managed/user': ['for-userName']}) && managedUserRestrictedToAllowedProperties('password')"
         }
     ] 
 };
