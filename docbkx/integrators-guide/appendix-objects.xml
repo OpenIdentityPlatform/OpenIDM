@@ -886,8 +886,8 @@ openidm.patch("managed/foobar/myidentifier", rev, value)</programlisting>
      <screen width="90"><?dbfo pgwide="1"?>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request POST -d '[{"replace":"/adPassword","value": "Password"}]' 
- http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-username&amp;uid=DDOE</screen>
+ --request POST -d '[{"replace":"/password","value": "Passw0rd"}]' 
+ http://localhost:8080/openidm/managed/user?_action=patch&amp;_queryId=for-userName&amp;uid=DDOE</screen>
 
       <para>For the syntax on how to formulate the query
       <literal>_queryId=for-username&amp;uid=DDOE</literal> see
