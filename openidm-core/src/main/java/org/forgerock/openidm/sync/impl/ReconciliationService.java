@@ -284,6 +284,10 @@ public class ReconciliationService extends ObjectSetJsonResource
      * @return a new reconciliation context
      */
     private ReconciliationContext newReconContext(JsonValue mapping) throws SynchronizationException {
+        if (mappings == null) {
+            throw new SynchronizationException("Unknown mapping type, no mappings configured");
+        }
+        
         JsonValue context = ObjectSetContext.get();
         ObjectMapping objMapping = null;
         if (mapping.isString()) {

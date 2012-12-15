@@ -22,9 +22,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -103,6 +105,22 @@ class ObjectMapping implements SynchronizationListener {
 
     /** The link type to use */
     LinkType linkType;
+    
+    /**
+     * Whether to link source IDs in a case sensitive fashion.
+     * Only effective if this mapping defines links, is ignored if this 
+     * mapping re-uses another mapping's links
+     * Default to {@code TRUE}
+     */
+    private Boolean sourceIdsCaseSensitive;
+    
+    /**
+     * Whether to link target IDs in a case sensitive fashion.
+     * Only effective if this mapping defines links, is ignored if this 
+     * mapping re-uses another mapping's links
+     * Default to {@code TRUE}
+     */
+    private Boolean targetIdsCaseSensitive;
 
     /** TODO: Description. */
     private String sourceObjectSet;
@@ -171,7 +189,7 @@ class ObjectMapping implements SynchronizationListener {
     /** TODO: Description. */
     private SynchronizationService service;
 
-    /** TODO: Description. */
+    /** Whether synchronization (automatic propagation of changes as they are detected) is enabled on that mapping */
     private Boolean syncEnabled;
 
     /**
@@ -187,6 +205,8 @@ class ObjectMapping implements SynchronizationListener {
         linkTypeName = config.get("links").defaultTo(name).asString();
         sourceObjectSet = config.get("source").required().asString();
         targetObjectSet = config.get("target").required().asString();
+        sourceIdsCaseSensitive = config.get("sourceIdsCaseSensitive").defaultTo(Boolean.TRUE).asBoolean();
+        targetIdsCaseSensitive = config.get("targetIdsCaseSensitive").defaultTo(Boolean.TRUE).asBoolean();
         validSource = Scripts.newInstance("ObjectMapping", config.get("validSource"));
         validTarget = Scripts.newInstance("ObjectMapping", config.get("validTarget"));
         correlationQuery = Scripts.newInstance("ObjectMapping", config.get("correlationQuery"));
@@ -276,6 +296,26 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
+     * @return The setting for whether to link 
+     * source IDs in a case sensitive fashion.
+     * Only effective if the mapping defines the links,
+     * not if the mapping re-uses another mapping's links
+     */
+    public boolean getSourceIdsCaseSensitive() {
+        return sourceIdsCaseSensitive.booleanValue();
+    }
+
+    /**
+     * @return The setting for whether to link 
+     * target IDs in a case sensitive fashion.
+     * Only effective if the mapping defines the links,
+     * not if the mapping re-uses another mapping's links
+     */
+    public boolean getTargetIdsCaseSensitive() {
+        return targetIdsCaseSensitive.booleanValue();
+    }
+
+    /**
      * @see doSourceSync(String id, JsonValue value)
      * Convenience function with deleted defaulted to false and oldValue defaulted to null
      */
@@ -327,22 +367,39 @@ class ObjectMapping implements SynchronizationListener {
     }
 
     /**
-     * Get all IDs for a given object set as a list
+     * Get all IDs for a given object set as List and in case sensitive fashion
+     * @see queryAllIds(String, ReconciliationContext, Collection)
+     */
+    private List<String> queryAllIds(final String objectSet, ReconciliationContext reconContext) 
+            throws SynchronizationException {
+        return (List<String>) queryAllIds(objectSet, reconContext, Collections.synchronizedList(new ArrayList<String>()), true);
+    }
+    
+    /**
+     * Get all IDs for a given object set
      *
      * @param objectSet the object set to query
-     * @return the list of (unqualified) ids
+     * @param collectionToPopulate the collection to populate with results
+     * @param caseSensitive whether the collection should be populated in case
+     * sensitive fashion, or if false it populates as lower case only  
+     * @return the collection of (unqualified) ids
      * @throws SynchronizationException if retrieving or processing the ids failed
      */
-    private List<String> queryAllIds(final String objectSet, ReconciliationContext reconContext)
-            throws SynchronizationException {
-        List<String> ids = Collections.synchronizedList(new ArrayList<String>());
+    private Collection<String> queryAllIds(final String objectSet, ReconciliationContext reconContext, 
+            Collection collectionToPopulate, boolean caseSensitive) throws SynchronizationException {
+        Collection<String> ids = collectionToPopulate;
+
         HashMap<String, Object> query = new HashMap<String, Object>();
         query.put(QueryConstants.QUERY_ID, QueryConstants.QUERY_ALL_IDS);
         try {
             JsonValue objList = new JsonValue(service.getRouter().query(objectSet, query))
                     .get(QueryConstants.QUERY_RESULT).required().expect(List.class);
             for (JsonValue obj : objList) {
-                ids.add(obj.get("_id").asString());
+                String value = obj.get("_id").asString();
+                if (!caseSensitive) {
+                    value = (value == null ? null : linkType.normalizeId(value));
+                }
+                ids.add(value);
             }
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
@@ -689,8 +746,8 @@ class ObjectMapping implements SynchronizationListener {
             }
 
             reconContext.getStatistics().targetQueryStart();
-            List<String> remainingTargetIds = 
-                    Collections.synchronizedList(queryAllIds(targetObjectSet, reconContext));
+            Collection<String> remainingTargetIds = queryAllIds(targetObjectSet, reconContext,
+                    Collections.synchronizedList(new ArrayList<String>()), linkType.isTargetCaseSensitive());
             reconContext.setTargetIds(new ArrayList(remainingTargetIds));
             reconContext.getStatistics().targetQueryEnd();
 
@@ -772,17 +829,18 @@ class ObjectMapping implements SynchronizationListener {
      * @param reconContext reconciliation context
      * @param rootContext json resource root ctx
      * @param allLinks all links if pre-queried, or null for on-demand link querying
-     * @param remainingTargetIds The list to update/remove any targets that were matched
+     * @param remainingTargetIds The set to update/remove any targets that were matched
      * @throws SynchronizationException if there is a failure reported in reconciling this id
      */
     void reconSourceById(String sourceId, ReconciliationContext reconContext, JsonValue rootContext, 
-            Map<String, Link> allLinks, List<String> remainingTargetIds) throws SynchronizationException {
+            Map<String, Link> allLinks, Collection<String> remainingTargetIds) throws SynchronizationException {
         SourceSyncOperation op = new SourceSyncOperation();
         op.reconContext = reconContext;
         ReconEntry entry = new ReconEntry(op, rootContext, dateUtil);
         op.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceId);
         if (allLinks != null) {
-            op.initializeLink(allLinks.get(sourceId));
+            String normalizedSourceId = linkType.normalizeSourceId(sourceId);
+            op.initializeLink(allLinks.get(normalizedSourceId));
         }
         entry.sourceId = LazyObjectAccessor.qualifiedId(sourceObjectSet, sourceId);
         op.reconId = reconContext.getReconId();
@@ -837,11 +895,11 @@ class ObjectMapping implements SynchronizationListener {
         JsonValue parentContext;
         JsonValue rootContext; 
         Map<String, Link> allLinks;
-        List<String> remainingTargetIds; 
+        Collection<String> remainingTargetIds; 
         
         public SourceReconTask(String sourceId, ReconciliationContext reconContext,
                 JsonValue parentContext, JsonValue rootContext,
-                Map<String, Link> allLinks, List<String> remainingTargetIds) {
+                Map<String, Link> allLinks, Collection<String> remainingTargetIds) {
             this.sourceId = sourceId;
             this.reconContext = reconContext;
             this.parentContext = parentContext;
@@ -869,11 +927,11 @@ class ObjectMapping implements SynchronizationListener {
         JsonValue parentContext;
         JsonValue rootContext; 
         Map<String, Link> allLinks;
-        List<String> remainingTargetIds; 
+        Collection<String> remainingTargetIds; 
         
         public SourceReconPhase(Iterator<String> sourceIdsIter, ReconciliationContext reconContext,
                 JsonValue parentContext, JsonValue rootContext,
-                Map<String, Link> allLinks, List<String> remainingTargetIds) {
+                Map<String, Link> allLinks, Collection<String> remainingTargetIds) {
             super(sourceIdsIter, reconContext);
             this.parentContext = parentContext;
             this.rootContext = rootContext;
@@ -1095,7 +1153,9 @@ class ObjectMapping implements SynchronizationListener {
                 // Either check against a list of all targets, or load to check for existence
                 if (reconContext != null && reconContext.getTargetIds() != null) {
                     // If available, check against all queried existing IDs
-                    defined = reconContext.getTargetIds().contains(targetObjectAccessor.getLocalId());
+                    // If target system has case insensitive IDs, compare without regard to case
+                    String normalizedTargetId = linkType.normalizeTargetId(targetObjectAccessor.getLocalId());
+                    defined = reconContext.getTargetIds().contains(normalizedTargetId);
                 } else {
                     // If no lists of existing ids is available, do a load of the object to check
                     defined = (targetObjectAccessor.getObject() != null);
@@ -1255,7 +1315,7 @@ class ObjectMapping implements SynchronizationListener {
                                         }
                                     }
                                 }
-                                if (isLinkingEnabled() && linkObject._id != null && !targetId.equals(linkObject.targetId)) {
+                                if (isLinkingEnabled() && linkObject._id != null && !linkObject.targetEquals(targetId)) {
                                     linkObject.targetId = targetId;
                                     linkObject.update();
                                 }
@@ -1665,8 +1725,8 @@ class ObjectMapping implements SynchronizationListener {
                         // Correlate the old value to potential target(s)
                         JsonValue results = correlateTarget(oldValue);
                         boolean valid = isSourceValid(oldValue);
-                        if (results != null && results.size() == 0) {
-                            // We know there is no target
+                        if (results == null || results.size() == 0) {
+                            // Results null means no correlation query defined, size 0 we know there is no target
                             situation = Situation.ALL_GONE;
                         } else if (results.size() == 1) {
                             JsonValue resultValue = results.get((Integer) 0).required();

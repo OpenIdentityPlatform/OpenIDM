@@ -3,6 +3,7 @@
         {
             "name" : "systemLdapAccounts_managedUser",
             "source" : "system/ldap/account",
+            "sourceIdsCaseSensitive" : false,
             "target" : "managed/user",
             "properties" : [
                 { "source" : "cn", "target" : "displayName" },
@@ -18,7 +19,7 @@
                 { "situation" : "ABSENT", "action" : "CREATE" },
                 { "situation" : "AMBIGUOUS", "action" : "IGNORE" },
                 { "situation" : "MISSING", "action" : "IGNORE" },
-                { "situation" : "SOURCE_MISSING", "action" : "IGNORE" },
+                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
                 { "situation" : "UNQUALIFIED", "action" : "DELETE" },
                 { "situation" : "UNASSIGNED", "action" : "IGNORE" }
             ]
@@ -27,6 +28,7 @@
             "name" : "managedUser_systemADAccounts",
             "source" : "managed/user",
             "target" : "system/ad/account",
+            "targetIdsCaseSensitive" : false,
             "properties" : [
                 { "source" : "givenName", "target" : "givenName" },
                 { "source" : "familyName", "target" : "sn" },
@@ -45,8 +47,8 @@
                 { "situation" : "ABSENT", "action" : "CREATE" },
                 { "situation" : "AMBIGUOUS", "action" : "IGNORE" },
                 { "situation" : "MISSING", "action" : "IGNORE" },
-                { "situation" : "SOURCE_MISSING", "action" : "IGNORE" },
-                { "situation": "UNQUALIFIED", "action": "DELETE" },
+                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
+                { "situation" : "UNQUALIFIED", "action": "DELETE" },
                 { "situation" : "UNASSIGNED", "action" : "IGNORE" }
             ]
         }        
