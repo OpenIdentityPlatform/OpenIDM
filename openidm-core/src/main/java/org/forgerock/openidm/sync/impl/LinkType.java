@@ -53,6 +53,10 @@ class LinkType {
     // The linked object sets, bi-directional
     String firstObjectSet;
     String secondObjectSet;
+    
+    // Whether linking should be case sensitive on the first or second IDs
+    boolean firstCaseSensitive;
+    boolean secondCaseSensitive;
 
     // Represents how this LinkType matches a given ObjectMapping
     Match match;
@@ -83,10 +87,10 @@ class LinkType {
         
         LinkType.Match match = Match.getLinkTypeMatch(forMapping, linkDefiner);
    
-        return new LinkType(linkDefiner.getName(), linkDefiner.getSourceObjectSet(), linkDefiner.getTargetObjectSet(), match);
+        return new LinkType(linkDefiner.getName(), linkDefiner.getSourceObjectSet(), linkDefiner.getTargetObjectSet(), 
+                linkDefiner.getSourceIdsCaseSensitive(), linkDefiner.getTargetIdsCaseSensitive(), match);
     }
-    
-    
+
     public String getName() {
         return name;
     }
@@ -95,13 +99,83 @@ class LinkType {
         return Match.MATCH_REVERSE.equals(match);
     }
     
-    LinkType(String name, String firstObjectSet, String secondObjectSet, Match match) {
+    public boolean getFirstCaseSensitive() {
+        return firstCaseSensitive;
+    }
+    
+    public boolean getSecondCaseSensitive() {
+        return secondCaseSensitive;
+    }
+    
+    LinkType(String name, String firstObjectSet, String secondObjectSet, 
+            boolean firstCaseSensitive, boolean secondCaseSensitive, Match match) {
         this.name = name;
         this.firstObjectSet = firstObjectSet;
         this.secondObjectSet = secondObjectSet;
+        this.firstCaseSensitive = firstCaseSensitive;
+        this.secondCaseSensitive = secondCaseSensitive;
         this.match = match;
     } 
+
+    /**
+     * Normalizes the source ID if required, e.g. make lower case for 
+     * case insensitive id comparison purposes
+     * @param aSourceId the original id
+     * @return normalized id
+     */
+    public String normalizeSourceId(String aSourceId) {
+        if (!isSourceCaseSensitive()) {
+            return (aSourceId == null ? null : aSourceId.toLowerCase());
+        } else {
+            return aSourceId;
+        }
+    }
+
+    /**
+     * Normalizes the target ID if required, e.g. make lower case for 
+     * case insensitive id comparison purposes
+     * @param aSourceId the original id
+     * @return normalized id
+     */
+    public String normalizeTargetId(String aTargetId) {
+        if (!isSourceCaseSensitive()) {
+            return (aTargetId == null ? null : aTargetId.toLowerCase());
+        } else {
+            return aTargetId;
+        }
+    }
     
+    /**
+     * Unconditionally normalizes the given ID, currently to lower case
+     * @param anId the original id
+     * @return normalized id
+     */
+    public String normalizeId(String anId) {
+        return (anId == null ? null : anId.toLowerCase());
+    }
+
+    /**
+     * @return whether the source id is case sensitive
+     */
+    public boolean isSourceCaseSensitive() {
+        if (useReverse()) {
+            return getSecondCaseSensitive();
+        } else {
+            return getFirstCaseSensitive();
+        }
+    }
+
+    /**
+     * @return whether the target id is case sensitive
+     */
+    public boolean isTargetCaseSensitive() {
+        if (useReverse()) {
+            return getFirstCaseSensitive();
+        } else {
+            return getSecondCaseSensitive();
+        }
+    }
+
     /**
      * Determines whether the link types are compatible and in which order (direction)
      */

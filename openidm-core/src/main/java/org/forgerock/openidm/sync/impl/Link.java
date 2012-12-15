@@ -151,6 +151,8 @@ class Link {
             sourceId = jv.get("firstId").required().asString();
             targetId = jv.get("secondId").required().asString();
         }
+        sourceId = mapping.getLinkType().normalizeSourceId(sourceId);
+        targetId = mapping.getLinkType().normalizeTargetId(targetId);
         initialized = true;
     }
 
@@ -161,6 +163,10 @@ class Link {
      */
     private JsonValue toJsonValue() {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
+        
+        sourceId = mapping.getLinkType().normalizeSourceId(sourceId);
+        targetId = mapping.getLinkType().normalizeTargetId(targetId);
+
         jv.put("linkType", mapping.getLinkType().getName());
         if (mapping.getLinkType().useReverse()) {
             jv.put("secondId", sourceId);
@@ -185,14 +191,15 @@ class Link {
     /**
      * Gets the link for a given object mapping source
      *
-     * @param sourceId the object mapping source system identifier
+     * @param aSourceId the object mapping source system identifier
      * @throws SynchronizationException if the query could not be performed.
      */
-    void getLinkForSource(String sourceId) throws SynchronizationException {
+    void getLinkForSource(String aSourceId) throws SynchronizationException {
+        aSourceId = mapping.getLinkType().normalizeSourceId(aSourceId);
         if (mapping.getLinkType().useReverse()) {
-            getLinkFromSecond(sourceId);
+            getLinkFromSecond(aSourceId);
         } else {
-            getLinkFromFirst(sourceId);
+            getLinkFromFirst(aSourceId);
         }
     }
 
@@ -222,11 +229,12 @@ class Link {
      * @param targetId the object mapping target system identifier
      * @throws SynchronizationException if the query could not be performed.
      */
-    void getLinkForTarget(String targetId) throws SynchronizationException {
+    void getLinkForTarget(String aTargetId) throws SynchronizationException {
+        aTargetId = mapping.getLinkType().normalizeTargetId(aTargetId);
         if (mapping.getLinkType().useReverse()) {
-            getLinkFromFirst(targetId);
+            getLinkFromFirst(aTargetId);
         } else {
-            getLinkFromSecond(targetId);
+            getLinkFromSecond(aTargetId);
         }
     }
     
@@ -274,6 +282,21 @@ class Link {
             }
         }
         return sourceIdToLink;
+    }
+    
+    /** Compares the given Id to the current targetId,
+     * taking into account the settings for case sensitivity
+     * @param compareTargetId The target id to compare
+     * @return true if the given Id is considered equivalent to the current target id
+     */
+    public boolean targetEquals(String compareTargetId) { 
+        String normalizedCompId = mapping.getLinkType().normalizeTargetId(compareTargetId);
+        String normalizedTargetId = mapping.getLinkType().normalizeTargetId(targetId);
+        if (normalizedTargetId != null) {
+            return normalizedTargetId.equals(normalizedCompId);
+        } else {
+            return normalizedTargetId == normalizedCompId;
+        }
     }
 
     /**
