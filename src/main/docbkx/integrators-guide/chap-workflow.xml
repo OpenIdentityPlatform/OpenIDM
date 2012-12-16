@@ -30,7 +30,7 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Integrating Business Processes &amp; Workflows</title>
+ <title>Integrating Business Processes and Workflows</title>
  <indexterm>
   <primary>Workflow</primary>
  </indexterm>
@@ -725,9 +725,9 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
  <section xml:id="sample-activiti-workflows">
   <title>Example Activiti Workflows With OpenIDM</title>
 
-  <para>This section describes two example workflows, one using email
-  notification, the other involving a sunset process triggered during
-  reconciliation.</para>
+  <para>This section describes two example workflows - an email notification 
+  workflow, and a workflow that demonstrates provisioning, using the 
+  browser-based user interface.</para>
   
   <section xml:id="example-activiti-email-notification-flow">
    <title>Example Email Notification Workflow</title>
@@ -895,81 +895,255 @@ INFO: XPath currently not supported as expressionLanguage
     -->
   </section>
   
-  <!--  Add Matthias's simpler example when I've tested it 
-  <section xml:id="example-activiti-list-users-flow">
-   <title>Example User Add Workflow</title>
-   <itemizedlist>
-     <para>This example defines a workflow that does the following:</para>
-     <listitem><para>Lists all users</para>
-     </listitem>
-     <listitem><para>Creates a new user</para>
-     </listitem>
-     <listitem><para>Reads the new user</para>
-     </listitem>
-     <listitem><para>Updates the new user</para>
-     </listitem>
-     <listitem><para>Deletes the new user</para>
-     </listitem>
-     <listitem><para>Lists all users again</para>
-     </listitem>
-   </itemizedlist>
-   <programlisting language="xml">
-   &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-  &lt;definitions xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:activiti=&quot;http://activiti.org/bpmn&quot; xmlns:bpmndi=&quot;http://www.omg.org/spec/BPMN/20100524/DI&quot; xmlns:omgdc=&quot;http://www.omg.org/spec/DD/20100524/DC&quot; xmlns:omgdi=&quot;http://www.omg.org/spec/DD/20100524/DI&quot; typeLanguage=&quot;http://www.w3.org/2001/XMLSchema&quot; expressionLanguage=&quot;http://www.w3.org/1999/XPath&quot; targetNamespace=&quot;http://www.activiti.org/test&quot;&gt;
-  &lt;process id=&quot;process2&quot; name=&quot;process2&quot;&gt;
-    &lt;startEvent id=&quot;startevent1&quot; name=&quot;Start&quot;&gt;&lt;/startEvent&gt;
-    &lt;scriptTask id=&quot;scripttask2&quot; name=&quot;Read Users&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[currentUsers = openidm.query('managed/user', ['_queryId':'query-all-ids'])
-out:println 'current users in the repository: 'currentUsers]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;scriptTask id=&quot;scripttask3&quot; name=&quot;Create Dagobert&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[def user = [ 'userName':'daduck',
- 'givenName':'Donald',
- 'familyName':'Duck1',
- 'email':['daduck@example.com'] ]
-openidm.create('managed/user/' + _id, user)]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;scriptTask id=&quot;scripttask4&quot; name=&quot;Read Dagobert&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[user2 = openidm.read(&quot;managed/user/&quot;+ _id)
-out:println 'first read of user2: ' + user2]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;scriptTask id=&quot;scripttask1&quot; name=&quot;Update Dagobert&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[
-user3 = openidm.read(&quot;managed/user/&quot;+ _id)
-out:println 'Read into user3 before update : ' + user3
-revision = user3['_rev'].toString()
-user3['givenName'] = new_givenName
-openidm.update(&quot;managed/user/&quot;+ _id, revision, user3)]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;scriptTask id=&quot;scripttask5&quot; name=&quot;Read Dagobert 2&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[user2 = openidm.read(&quot;managed/user/&quot;+ _id)
-out:println 'Second read of user2: ' + user2
-user4 = openidm.read(&quot;managed/user/&quot;+ _id)
-out:println 'First read of user4: ' + user4]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;scriptTask id=&quot;scripttask6&quot; name=&quot;Delete Dagobert&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[user5 = openidm.read(&quot;managed/user/&quot;+ _id)
-revision = user5['_rev'].toString()
-openidm.delete(&quot;managed/user/&quot;+ _id, revision)]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;scriptTask id=&quot;scripttask7&quot; name=&quot;Read Users&quot; scriptFormat=&quot;groovy&quot;&gt;
-      &lt;script&gt;&lt;![CDATA[currentUsers = openidm.query('managed/user', ['_queryId':'query-all-ids'])
-out:println 'current users in the repository: 'currentUsers]]&gt;&lt;/script&gt;
-    &lt;/scriptTask&gt;
-    &lt;endEvent id=&quot;endevent1&quot; name=&quot;End&quot;&gt;&lt;/endEvent&gt;
-    &lt;sequenceFlow id=&quot;flow1&quot; name=&quot;&quot; sourceRef=&quot;startevent1&quot; targetRef=&quot;scripttask2&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow4&quot; name=&quot;&quot; sourceRef=&quot;scripttask2&quot; targetRef=&quot;scripttask3&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow3&quot; name=&quot;&quot; sourceRef=&quot;scripttask3&quot; targetRef=&quot;scripttask4&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow5&quot; name=&quot;&quot; sourceRef=&quot;scripttask4&quot; targetRef=&quot;scripttask1&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow6&quot; name=&quot;&quot; sourceRef=&quot;scripttask1&quot; targetRef=&quot;scripttask5&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow7&quot; name=&quot;&quot; sourceRef=&quot;scripttask5&quot; targetRef=&quot;scripttask6&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow8&quot; name=&quot;&quot; sourceRef=&quot;scripttask6&quot; targetRef=&quot;scripttask7&quot;&gt;&lt;/sequenceFlow&gt;
-    &lt;sequenceFlow id=&quot;flow2&quot; name=&quot;&quot; sourceRef=&quot;scripttask7&quot; targetRef=&quot;endevent1&quot;&gt;&lt;/sequenceFlow&gt;
-  &lt;/process&gt;
-   </programlisting>
+  <section xml:id="example-provisioning-workflow">
+    <title>Sample Workflow - Provisioning User Accounts</title>
+    
+    <para>This example, provided in <filename>openidm/samples/workflow</filename>, 
+    uses workflows to provision user accounts. The example demonstrates the 
+    use of the browser-based user interface to manage workflows.</para>
+    
+    <section xml:id="provisioning-sample-overview">
+    <title>Overview of the Sample</title>
+    
+    <para>The sample starts with a reconciliation process that loads user 
+    accounts from an XML file into the managed users repository. The 
+    reconciliation creates two users, with UIDs <literal>user1</literal> and 
+    <literal>manager1</literal>. Both users have the same password 
+    (<literal>Welcome1</literal>).</para>
+    
+    <para>The sample adds two new business roles to the configuration - 
+    <literal>employee</literal> (assigned to <literal>user1</literal>) and 
+    <literal>manager</literal> (assigned to <literal>manager1</literal>).</para>
+    
+    <para>As part of the provisioning, employees are required to initiate 
+    a "Contract Onboarding" process. This process is a request to add a 
+    contractor to the managed users repository, with an option to include the 
+    contractor in the original data source (the XML file).</para>
+    
+    <para>When the employee has completed the required form, the request is 
+    sent to the manager for approval. Any user with the role 
+    <literal>"manager"</literal> can claim the approval task. If the request 
+    is approved, the user is created in the managed users repository. If a 
+    request was made to add the user to the original data source (the XML file) 
+    this is done in a subsequent step.</para>
+    
+    <para>The workflow uses embedded templates to build a more sophisticated 
+    input form.  The form is validated with the server-side policy rules, 
+    described in <link xlink:href="integrators-guide#chap-policies" 
+    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Using 
+    Policies to Validate Data</citetitle></link>.</para>
+    </section>
+    
+    <section xml:id="provisioning-sample-running">
+     <title>Running the Sample</title>
+      
+     <procedure>
+     <step>
+     <para>Start OpenIDM with the configuration for the workflow sample.</para>
+     
+     <screen>$ cd /path/to/openidm
+$ ./startup.sh -p samples/workflow</screen>     
+     </step>
+     <step>
+     <para>Run reconciliation over the REST interface.</para>
+
+     <screen width="99">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/recon?_action=recon&amp;mapping=systemXmlfileAccounts_managedUser"</screen>
+
+     <para>Successful reconciliation returns an "_id" object, such as the 
+     following:</para>
+   
+     <screen>{"_id":"aea493f5-29ee-423d-b4b1-10449c60886c"}</screen>
+     <para>The two users are added to the repository. You can test this with 
+     the following REST query, which shows the two users, 
+     <literal>manager1</literal> and <literal>user1</literal>.</para>
+   
+     <screen>$ curl 
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET 
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+
+{
+  "conversion-time-ms": 0,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "manager1"
+    },
+    {
+      "_rev": "0",
+      "_id": "user1"
+    }
+  ],
+  "query-time-ms": 1
+}
+     </screen>        
+     </step>
+     
+     <step>
+     <para>Log in to the user interface as <literal>user1</literal>, with 
+     password <literal>Welcome1</literal>. For information about logging in to 
+     the user interface, see <link 
+     xlink:href="integrators-guide#ui-overview" 
+     xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>Overview of the Default User Interface</citetitle></link>.</para>
+     </step>
+     
+     <step>
+     <para>Under "Processes" click "Contractor onboarding process".</para>
+     </step>
+     
+     <step>
+     <para>Complete the details of the new user, then click Start.</para>
+     <mediaobject>
+     <alt>Contractor onboarding process form</alt>
+     <imageobject>
+     <imagedata fileref="images/ui-workflow.png" format="PNG" />
+     </imageobject>
+     </mediaobject>
+     </step>
+     <step>
+     <para>Log out of the UI.</para>
+     </step> 
+     <step>
+     <para>Log in to the UI as <literal>manager1</literal>, with password 
+     <literal>Welcome1</literal>.</para>
+     </step>
+     <step>
+     <para>Under "Tasks that are in my group's queue" click 
+     "Contractor Approval".</para>
+     </step>
+     <step>
+     <para>From the drop-down list, select "Assign to me".</para>
+     <para>Note that the "Contractor Approval" task has now moved under 
+     "My tasks".</para>
+     </step>
+     <step>
+     <para>Under "My tasks" click "Contractor Approval".</para>
+     </step>
+     <step>
+     <para>Under Actions, click Details.</para>
+     <para>The form containing the details of the contractor is displayed.</para>
+     </step>
+     <step>
+     <para>At the bottom of the form, select a decision from the drop-down 
+     list (either "Accept" or "Reject"), then click Complete.</para>
+     <para>If you Accept the new contractor details, the user account is 
+     created in the repository. You can check the new account by running the 
+     following REST command:</para>
+     <screen>$ curl 
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET 
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+
+{
+  "conversion-time-ms": 0,
+  "result": [
+    {
+      "_rev": "0",
+      "_id": "manager1"
+    },
+    {
+      "_rev": "0",
+      "_id": "user1"
+    },
+    {
+      "_rev": "0",
+      "_id": "51afe0f8-94c3-45c5-8c69-319e6ef5981f"
+    }
+  ],
+  "query-time-ms": 1
+}
+     </screen>
+     
+     <para>Display the details of the new user, by running a REST query on the 
+     user ID, as follows:</para>
+     
+     <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET     
+ "http://localhost:8080/openidm/managed/user/51afe0f8-94c3-45c5-8c69-319e6ef5981f"
+
+{
+  "city": "",
+  "country": "",
+  "address2": "",
+  "address1": "",
+  "lastPasswordAttempt": "Fri Dec 14 2012 13:54:02 GMT+0200 (SAST)",
+  "passwordAttempts": "0",
+  "stateProvince": "",
+  "postalCode": "",
+  "lastPasswordSet": "",
+  "jobTitle": "Accountant",
+  "department": "Finance",
+  "manager": "user1",
+  "familyName": "Doe",
+  "givenName": "John",
+  "userName": "johnd",
+  "_rev": "0",
+  "_id": "51afe0f8-94c3-45c5-8c69-319e6ef5981f",
+  "phoneNumber": "123456789",
+  "email": "johnd@example.com",
+  "startDate": "12/12/2012",
+  "endDate": "12/12/2012",
+  "description": "Contract accountant",
+  "provisionToXML": "1",
+  "accountStatus": "active",
+  "roles": "openidm-authorized"
+}     
+     </screen>
+     
+     <para>You can now log in to the UI as the new user (with the details that 
+     you specified in Step 5). Under "Notifications" you will see a welcome 
+     message indicating the working dates of the new user. If you log in as 
+     <literal>user1</literal> you are notified of the result of the manager's 
+     decision.</para>
+     
+     <para>If you specified that the new user should be added to the original 
+     data source, you will see that the account was added to the XML file:</para>
+     
+     <screen>$ cd /path/to/openidm
+$ cat samples/workflow/data/xmlConnectorData.xml
+...
+   &gt;ri:__ACCOUNT__&lt;
+      &gt;icf:__DESCRIPTION__&lt;Contract accountant&gt;/icf:__DESCRIPTION__&lt;
+      &gt;ri:roles&lt;openidm-authorized&gt;/ri:roles&lt;
+      &gt;ri:mobileTelephoneNumber&lt;123456789&gt;/ri:mobileTelephoneNumber&lt;
+      &gt;ri:firstname&lt;John&gt;/ri:firstname&lt;
+      &gt;ri:manager&lt;user1&gt;/ri:manager&lt;
+      &gt;ri:startDate&lt;12/12/2012&gt;/ri:startDate&lt;
+      &gt;ri:jobTitle&lt;Accountant&gt;/ri:jobTitle&lt;
+      &gt;icf:__UID__&lt;201e0d50-3313-47b3-9bd1-30c1c7dd1cee&gt;/icf:__UID__&lt;
+      &gt;icf:__NAME__&lt;johnd&gt;/icf:__NAME__&lt;
+      &gt;ri:email&lt;johnd@example.com&gt;/ri:email&lt;
+      &gt;icf:__PASSWORD__&lt;MyPassw0rd&gt;/icf:__PASSWORD__&lt;
+      &gt;ri:department&lt;Finance&gt;/ri:department&lt;
+      &gt;ri:endDate&lt;12/12/2012&gt;/ri:endDate&lt;
+      &gt;ri:lastname&lt;Doe&gt;/ri:lastname&lt;
+   &gt;/ri:__ACCOUNT__&lt;
+...
+     </screen>
+     
+     <para>If you declined the approval request, the user will not be created 
+     in either data source.</para>    
+     </step>   
+     </procedure>
+     
+     <para>You can see the details of the workflow definition in 
+     <filename>samples/workflow/workflow/contractorOnboarding.bpmn20.xml</filename>.
+     </para> 
+
+    </section>
+
   </section>
-  -->
-  
+
+<!-- Replace with the provisioning workflow example   -->
   <section xml:id="example-activiti-recon-sunset-flow">
    <title>Example Sunset Workflow Triggered By Reconciliation</title>
 
@@ -1235,6 +1409,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
     }
 }</programlisting>
   </section>
+
   </section>
 </section>
 </chapter>
