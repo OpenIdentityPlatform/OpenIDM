@@ -117,7 +117,7 @@ public class SynchronizationService extends ObjectSetJsonResource
         bind = "bindRouter",
         unbind = "unbindRouter",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
+        policy = ReferencePolicy.DYNAMIC,
         target = "(service.pid=org.forgerock.openidm.router)"
     )
     private ObjectSet router;
@@ -135,7 +135,7 @@ public class SynchronizationService extends ObjectSetJsonResource
         bind = "bindScopeFactory",
         unbind = "unbindScopeFactory",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC
+        policy = ReferencePolicy.DYNAMIC
     )
     private ScopeFactory scopeFactory;
     protected void bindScopeFactory(ScopeFactory scopeFactory) {
