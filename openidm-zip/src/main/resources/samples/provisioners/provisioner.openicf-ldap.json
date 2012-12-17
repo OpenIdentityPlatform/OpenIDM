@@ -2,9 +2,8 @@
    "name" : "OpenDJ",
    "connectorRef" :
       {
-         "connectorHostRef" : "#LOCAL",
           "bundleName"    : "org.forgerock.openicf.connectors.ldap-connector",
-          "bundleVersion" : "1.1.0.1-SNAPSHOT",
+          "bundleVersion" : "1.1.0.1",
           "connectorName" : "org.identityconnectors.ldap.LdapConnector"
       },
    "poolConfigOption" :
