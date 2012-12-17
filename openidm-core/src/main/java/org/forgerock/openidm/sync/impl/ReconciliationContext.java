@@ -194,11 +194,14 @@ public class ReconciliationContext {
     
     /**
      * @param targetIds the list of all ids in the target object set
+     * If the target system IDs are case insensitive, the ids are kept in normalized (lower case) form
      */
     void setTargetIds(List<String> targetIds) {
         // Choose a hash based collection as we need fast "contains" handling
         this.targetIds = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-        this.targetIds.addAll(targetIds);
+        if (targetIds != null) {
+            this.targetIds.addAll(targetIds);
+        }
         this.totalTargetEntries = Integer.valueOf(targetIds.size());
     }
     

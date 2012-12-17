@@ -30,7 +30,7 @@
  xsi:schemaLocation="http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd"
  xmlns:xlink="http://www.w3.org/1999/xlink"
  xmlns:xinclude="http://www.w3.org/2001/XInclude">
- <title>Configuration Options</title>
+ <title>Configuring OpenIDM</title>
 
  <para>OpenIDM configuration is split between <filename>.properties</filename> and container
  configuration files, and also dynamic configuration objects. The majority
@@ -45,7 +45,7 @@
  configuration objects, or by using the JSON file based views.</para>
 
  <section xml:id="configuration-objects">
-  <title>About Configuration Objects</title>
+  <title>OpenIDM Configuration Objects</title>
   <indexterm>
    <primary>Objects</primary>
    <secondary>Configuration objects</secondary>
@@ -484,9 +484,8 @@
    </screen>
    
   </example>
-  </section>
   
-  <section>
+  <section xml:id="property-substitution-system">
    <title>Using Property Value Substitution With System Properties</title>
   
   <para>You can use property value substitution in conjunction with the system 
@@ -546,11 +545,11 @@
  
  </section>
  
- <section>
- <title>Limitations of Property Value Substitution</title>
- <itemizedlist>
- <para>Note the following limitations when you use property value substitution:
- </para>
+  <section xml:id="property-substitution-limitations">
+   <title>Limitations of Property Value Substitution</title>
+   <itemizedlist>
+   <para>Note the following limitations when you use property value 
+   substitution:</para>
  <listitem><para>You cannot reference complex objects or properties with syntaxes 
  other than String. Property values are resolved from the 
  <literal>boot.properties</literal> file or from the System properties and the 
@@ -606,6 +605,7 @@
  </itemizedlist>
  </section>
  
+ </section>
  <!-- Add this section when you have been able to test the example
  </section>
  <section xml:id="optimizing-the-openidm-object-model">
@@ -710,5 +710,189 @@ tables).</para></listitem>
 </orderedlist>
  </section>
  -->
+  
+  <section xml:id="adding-custom-endpoints">
+    <title>Adding Custom Endpoints</title>
+    
+    <para>You can customize OpenIDM to meet the specific requirements of your 
+    deployment by adding your own RESTful endpoints. Endpoints are configured 
+    in files named <filename>conf/endpoint-<replaceable>name</replaceable>.json</filename>,
+    where <replaceable>name</replaceable> generally describes the purpose of the 
+    endpoint.</para>
+    
+    <para>A sample custom endpoint configuration is provided at 
+    <filename>openidm/samples/customendpoint</filename>. The sample includes 
+    two files:</para>
+    
+    <simplelist>
+      <member><filename>conf/endpoint-echo.json</filename>, which provides the 
+      configuration for the endpoint.</member>
+      <member><filename>script/echo.js</filename>, which is launched when the 
+      endpoint is accessed.</member>      
+    </simplelist>
+    
+    <para>The structure of an endpoint configuration file is as follows:</para>
+    
+    <programlisting language="javascript">
+{ 
+  "context" : "endpoint/echo", 
+  "type" : "text/javascript", 
+  "file" : "script/echo.js" 
+}    
+    </programlisting>
+        
+    <variablelist>
+      <varlistentry>
+        <term><literal>"context"</literal></term>
+        <listitem>
+          <para>The URL context under which the endpoint is registered. 
+          Currently this <emphasis>must</emphasis> be under 
+          <literal>endpoint/</literal>. An endpoint registered under the 
+          context <literal>endpoint/echo</literal> is addressable over REST at 
+          <literal>http://localhost:8080/openidm/endpoint/echo</literal> and 
+          with the internal resource API, for example 
+          <literal>openidm.read("endpoint/echo")</literal>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>"type"</literal></term>
+        <listitem>
+          <para>The type of implementation. Currently only 
+          <literal>"text/javascript"</literal> is supported.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>"source"</literal> or <literal>"file</literal></term>
+        <listitem>
+          <para>The actual script, inline, or a pointer to the file that 
+          contains the script. The sample script, 
+          (<filename>samples/customendpoint/script/echo.js</filename>) simply 
+          returns the HTTP request when a request is made on that endpoint.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    
+    <para>The endpoint script has a <literal>request</literal> variable 
+    available in its scope. The request structure carries all the information 
+    about the request, and includes the following properties:</para>
+    
+    <variablelist>
+      <varlistentry>
+      <term><literal>id</literal></term>
+      <listitem>
+        <para>The local ID, without the <literal>endpoint/</literal> prefix, 
+        for example, <literal>echo</literal>.</para>
+      </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>method</literal></term>
+        <listitem>
+          <para>The requested operation, that is, <literal>create</literal>, 
+          <literal>read</literal>, <literal>update</literal>, 
+          <literal>delete</literal>, <literal>patch</literal>, 
+          <literal>query</literal> or <literal>action</literal>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>params</literal></term>
+        <listitem>
+         <para>The parameters that are passed in. For example, for an HTTP GET 
+         with <literal>?param=x</literal>, the request contains 
+         <literal>"params":{"param":"x"}</literal>.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><literal>parent</literal></term>
+        <listitem>
+          <para>Provides the context for the invocation, including headers and 
+          security.</para>
+          <para>Note that the interface for this context is still evolving and 
+          may change in a future release.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    
+    <para>A script implementation should check and reject requests for methods 
+    that it does not support. For example, the following implementation 
+    supports only the <literal>read</literal> method:</para>
+    
+    <programlisting language="javascript">
+if (request.method == "read") {
+    ...
+} else {
+    throw "Unsupported operation: " + request.method;
+}
+    </programlisting>
+    
+    <para>The final statement in the script is the return value. Unlike for 
+    functions, at this global scope there is no <literal>return</literal> 
+    keyword. In the following example, the value of the last statement 
+    (<literal>x</literal>) is returned.</para>
+    
+    <programlisting language="javascript">
+var x = "Sample return"
+functioncall();
+x
+    </programlisting>
+    
+    <para>The following example uses the sample provided in 
+    <literal>openidm/samples/customendpoint</literal> and shows the complete 
+    request structure, which is returned by the query.</para>
+    
+    <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET
+ "http://localhost:8080/openidm/endpoint/echo?param=x"
+{
+  "type": "resource",
+  "uuid": "21c5ddc6-a66e-464e-9fa4-9b777505799e",
+  "params": {
+    "param": "x"
+  },
+  "method": "query",
+  "parent": {
+    "path": "/openidm/endpoint/echo",
+    "headers": {
+      "Accept": "*/*",
+      "User-Agent": "curl/7.21.4 ... OpenSSL/0.9.8r zlib/1.2.5",
+      "Authorization": "Basic b3BlbmlkbS1hZG1pbjpvcGVuaWRtLWFkbWlu",
+      "Host": "localhost:8080"
+    },
+    "query": {
+      "param": "x"
+    },
+    "method": "GET",
+    "parent": {
+      "uuid": "bec97cbf-8618-42f8-a841-9f5f112538e9",
+      "parent": null,
+      "type": "root"
+    },
+    "type": "http",
+    "uuid": "7fb3e0d9-5f56-4b15-b710-28f2147cf4b4",
+    "security": {
+      "openidm-roles": [
+        "openidm-admin",
+        "openidm-authorized"
+      ],
+      "username": "openidm-admin",
+      "userid": {
+        "component": "internal/user",
+        "id": "openidm-admin"
+      }
+    }
+  },
+  "id": "echo"
+} 
+    </screen>    
+    
+    <para>You must protect access to any custom endpoints by configuring the 
+    appropriate authorization for those contexts. For more information, see 
+    the <link xlink:href="integrators-guide#openidm-authorization" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Authorization</citetitle></link> section.</para>
 
+  </section>
+  
 </chapter>

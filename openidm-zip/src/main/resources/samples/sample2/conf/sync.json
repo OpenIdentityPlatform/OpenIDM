@@ -18,7 +18,7 @@
                 { "situation" : "ABSENT", "action" : "CREATE" },
                 { "situation" : "AMBIGUOUS", "action" : "EXCEPTION" },
                 { "situation" : "MISSING", "action" : "UNLINK" },
-                { "situation" : "SOURCE_MISSING", "action" : "EXCEPTION" },
+                { "situation" : "SOURCE_MISSING", "action" : "DELETE" },
                 { "situation" : "UNQUALIFIED", "action" : "DELETE" },
                 { "situation" : "UNASSIGNED", "action" : "DELETE" }
             ]

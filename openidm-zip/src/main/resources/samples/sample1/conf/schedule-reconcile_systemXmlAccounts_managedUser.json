@@ -4,7 +4,7 @@
     "schedule" : "0 0/1 * * * ?",
     "persisted" : true,
     "misfirePolicy" : "fireAndProceed",
-    "invokeService" : "org.forgerock.openidm.sync",
+    "invokeService" : "sync",
     "invokeContext" : {
         "action" : "reconcile",
         "mapping" : "systemXmlfileAccounts_managedUser"

@@ -176,7 +176,8 @@ OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
    Id   State          Name
 scr list 
    Id   State          Name
-[  23] [active       ] org.forgerock.openidm.endpoint
+   Id   State          Name
+[  27] [active       ] org.forgerock.openidm.endpoint
 ...
 [  18] [unsatisfied  ] org.forgerock.openidm.info
 [  22] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
@@ -185,11 +186,11 @@ scr list
 [   3] [active       ] org.forgerock.openidm.repo.orientdb
 [   7] [active       ] org.forgerock.openidm.scope
 [   5] [active       ] org.forgerock.openidm.audit
-[  33] [active       ] org.forgerock.openidm.schedule
+[  33] [unsatisfied  ] org.forgerock.openidm.schedule
 [   2] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
 [  32] [active       ] org.forgerock.openidm.workflow
 [   9] [active       ] org.forgerock.openidm.managed
-[  28] [active       ] org.forgerock.openidm.provisioner.openicf
+[  28] [unsatisfied  ] org.forgerock.openidm.provisioner.openicf
 [  17] [active       ] org.forgerock.openidm.health
 [  21] [active       ] org.forgerock.openidm.provisioner
 [   0] [active       ] org.forgerock.openidm.config.starter
@@ -198,7 +199,7 @@ scr list
 [   6] [active       ] org.forgerock.openidm.router
 [  34] [active       ] org.forgerock.openidm.scheduler
 [  14] [unsatisfied  ] org.forgerock.openidm.external.email
-[  11] [active       ] org.forgerock.openidm.sync
+[  11] [unsatisfied  ] org.forgerock.openidm.sync
 [  20] [active       ] org.forgerock.openidm.policy
 [   8] [active       ] org.forgerock.openidm.script
 [  10] [active       ] org.forgerock.openidm.recon
@@ -208,18 +209,12 @@ scr list
 [  30] [unsatisfied  ] org.forgerock.openidm.servletfilter
 [  19] [active       ] org.forgerock.openidm.infoservice
 [  16] [active       ] org.forgerock.openidm.authentication
--> 
-
 -&gt;</screen>
-     <para>If startup was successful, all states except <literal>email</literal>, 
-     <literal>repo.jdbc</literal>, <literal>info</literal>, and 
-     <literal>servletfilter</literal> are active. If any other services remain
-     <literal>unsatisfied</literal>, check <filename>openidm/logs</filename>
-     for errors, and refer to the chapter on <link
-     xlink:href="integrators-guide#chap-troubleshooting"
-     xlink:role="http://docbook.org/xlink/role/olink"
-     ><citetitle>Troubleshooting</citetitle></link> in the
-     <citetitle>Integrator's Guide</citetitle>.</para>
+     <para>A default startup does not include certain configurable services, 
+     which will indicate an <literal>unsatisfied</literal> state until they 
+     are included in the configuration. As you work through the sample 
+     configurations described later in this guide, you will notice that these 
+     services are active.</para>
     </step>
     <step>
      <para>Alternatively, you can manage the container and services from the

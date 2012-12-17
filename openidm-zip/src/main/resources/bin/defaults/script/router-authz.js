@@ -108,7 +108,6 @@ function isProcessOnUsersList(processDefinitionId) {
 
 function isQueryOneOf(allowedQueries) {
     if (
-            request.method === "query" &&
             allowedQueries[request.id] &&
             contains(allowedQueries[request.id], request.params["_queryId"])
        )
@@ -190,7 +189,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         }
     } else if (request.method === "update") {
         currentUser = openidm.read(request.id);
-        if (!currentUser || currentUser._id !== request.parent.security.userid.id) { // this would be odd, but just in case
+        if (!currentUser) { // this would be odd, but just in case
             return false;
         }
         for (i in params) {

@@ -68,7 +68,7 @@ public class ScopeFactoryService implements ScopeFactory {
         bind="bindCryptoService",
         unbind="unbindCryptoService",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC
+        policy = ReferencePolicy.DYNAMIC
     )
     private CryptoService cryptoService;
     protected void bindCryptoService(CryptoService cryptoService) {

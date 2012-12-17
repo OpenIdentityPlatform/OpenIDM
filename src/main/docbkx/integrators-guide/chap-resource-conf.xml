@@ -1309,8 +1309,7 @@
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- "http://localhost:8080/openidm/system/ActiveDirectory/account?_action=script
- &amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
+ "http://localhost:8080/openidm/system/ActiveDirectory/account?_action=script&amp;_scriptId=ConnectorScriptName&amp;loginName=myUser"</screen>
    </section>
   </section>
 

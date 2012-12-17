@@ -449,31 +449,28 @@ $ ./startup.sh -p samples/sample1
  --request GET
  "http://localhost:8080/openidm/managed/user/bjensen"
 
- {
- "_id":"bjensen",
- "_rev":"0",
- "frequentlyUsedApplications":"",
- "passwordAttempts":"0",
- "familyName":"Jensen",
- "address1":"",
- "address2":"",
- "givenName":"Barbara",
- "securityQuestion":"1",
- "country":"",
- "city":"",
- "siteImage":"1",
- "lastPasswordSet":"",
- "postalCode":"",
- "phoneNumber":"1234567",
- "passPhrase":"",
- "email":"bjensen@example.com",
- "description":"Created By XML1",
- "accountStatus":"active",
- "roles":"openidm-authorized",
- "userApplicationsOrder":"",
- "stateProvince":"",
- "userName":"bjensen@example.com"
- }</screen>
+{
+  "stateProvince": "",
+  "userName": "bjensen@example.com",
+  "roles": "openidm-authorized",
+  "description": "Created By XML1",
+  "givenName": "Barbara",
+  "address2": "",
+  "lastPasswordAttempt": "Mon Dec 17 2012 11:56:56 GMT+0200 (SAST)",
+  "address1": "",
+  "familyName": "Jensen",
+  "passwordAttempts": "0",
+  "_rev": "0",
+  "_id": "bjensen",
+  "securityQuestion": "1",
+  "country": "",
+  "city": "",
+  "lastPasswordSet": "",
+  "postalCode": "",
+  "phoneNumber": "1234567",
+  "email": "bjensen@example.com",
+  "accountStatus": "active"
+}</screen>
 
   <para>In the OrientDB console, connect to the database, and then query the
   users and audit logs. The following shows edited excerpts from a console

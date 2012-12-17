@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework-osgi</artifactId>
-            <version>1.1.0.1-SNAPSHOT</version>
+            <version>1.1.1.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.forgerock.openicf.framework</groupId>
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-test-common</artifactId>
-            <version>1.1.0.1-SNAPSHOT</version>
+            <version>1.1.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -209,17 +209,17 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework</artifactId>
-                                    <version>1.1.0.1-SNAPSHOT</version>
+                                    <version>1.1.1.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.forgerock.openicf.framework</groupId>
                                     <artifactId>connector-framework-internal</artifactId>
-                                    <version>1.1.0.1-SNAPSHOT</version>
+                                    <version>1.1.1.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.codehaus.groovy</groupId>
                                     <artifactId>groovy-all</artifactId>
-                                    <version>1.8.7</version>
+                                    <version>2.0.5</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.testOutputDirectory}/connectorServer/lib</outputDirectory>

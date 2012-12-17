@@ -1,9 +1,8 @@
 {
     "name" : "hrdb",
     "connectorRef" : {
-        "connectorHostRef" : "#LOCAL",
         "bundleName"    : "org.forgerock.openicf.connectors.scriptedsql-connector",
-        "bundleVersion" : "1.1.0.1-SNAPSHOT",
+        "bundleVersion" : "1.1.0.1",
         "connectorName" : "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector"
     },
     "producerBufferSize" : 100,

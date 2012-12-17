@@ -147,54 +147,76 @@ public class CSVAuditLogger implements AuditLogger {
         // TODO: replace ID handling utility
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];
-
-        // TODO: optimize buffered, cached writing
-        FileWriter fileWriter = null;
-        try {
-            // TODO: Optimize ordering etc.
-            Collection<String> fieldOrder =
-                    new TreeSet<String>(Collator.getInstance());
-            fieldOrder.addAll(obj.keySet());
-
-            File auditFile = new File(auditLogDir, type + ".csv");
-            // Create header if creating a new file
-            if (!auditFile.exists()) {
-                synchronized (this) {
-                    File auditTmpFile = new File(auditLogDir, type + ".tmp");
-                    boolean created = auditTmpFile.createNewFile();
-                    if (created) {
-                        FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
-                        writeHeaders(fieldOrder, tmpFileWriter);
-                        tmpFileWriter.close();
-                        auditTmpFile.renameTo(auditFile);
+        
+        // Re-try once in case the writer stream became closed for some reason
+        boolean retry = false;
+        int retryCount = 0;
+        do {
+            retry = false;
+            FileWriter fileWriter = null;
+            // TODO: optimize buffered, cached writing
+            try {
+                // TODO: Optimize ordering etc.
+                Collection<String> fieldOrder =
+                        new TreeSet<String>(Collator.getInstance());
+                fieldOrder.addAll(obj.keySet());
+    
+                File auditFile = new File(auditLogDir, type + ".csv");
+                // Create header if creating a new file
+                if (!auditFile.exists()) {
+                    synchronized (this) {
+                        FileWriter existingFileWriter = getWriter(type, auditFile, false);
+                        File auditTmpFile = new File(auditLogDir, type + ".tmp");
+                        // This is atomic, so only one caller will succeed with created
+                        boolean created = auditTmpFile.createNewFile();
+                        if (created) {
+                            FileWriter tmpFileWriter = new FileWriter(auditTmpFile, true);
+                            writeHeaders(fieldOrder, tmpFileWriter);
+                            tmpFileWriter.close();
+                            auditTmpFile.renameTo(auditFile);
+                            resetWriter(type, existingFileWriter);
+                        }
                     }
-                    resetWriter(type);
+                }
+                fileWriter = getWriter(type, auditFile, true);
+                writeEntry(fileWriter, type, auditFile, obj, fieldOrder);
+            } catch (IOException ex) {
+                if (retryCount == 0) {
+                    retry = true;
+                    logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
+                    synchronized (this) {
+                        resetWriter(type, fileWriter);
+                    }
+                } else {
+                    throw new BadRequestException(ex);
                 }
             }
-            fileWriter = getWriter(type, auditFile);
-
-            String key = null;
-            Iterator iter = fieldOrder.iterator();
-            while (iter.hasNext()) {
-                key = (String) iter.next();
-                Object value = obj.get(key);
-                fileWriter.append("\"");
-                if (value != null) {
-                    String rawStr = value.toString();
-                    // Escape quotes with double quotes
-                    String escapedStr = rawStr.replaceAll("\"", "\"\"");
-                    fileWriter.append(escapedStr);
-                }
-                fileWriter.append("\"");
-                if (iter.hasNext()) {
-                    fileWriter.append(",");
-                }
+            ++retryCount;
+        } while (retry);
+    }
+    
+    private void writeEntry(FileWriter fileWriter, String type, File auditFile, Map<String, Object> obj, Collection<String> fieldOrder) 
+            throws IOException{
+        
+        String key = null;
+        Iterator<String> iter = fieldOrder.iterator();
+        while (iter.hasNext()) {
+            key = iter.next();
+            Object value = obj.get(key);
+            fileWriter.append("\"");
+            if (value != null) {
+                String rawStr = value.toString();
+                // Escape quotes with double quotes
+                String escapedStr = rawStr.replaceAll("\"", "\"\"");
+                fileWriter.append(escapedStr);
             }
-            fileWriter.append(recordDelim);
-            fileWriter.flush();
-        } catch (Exception ex) {
-            throw new BadRequestException(ex);
+            fileWriter.append("\"");
+            if (iter.hasNext()) {
+                fileWriter.append(",");
+            }
         }
+        fileWriter.append(recordDelim);
+        fileWriter.flush();
     }
 
     private void writeHeaders(Collection<String> fieldOrder, FileWriter fileWriter)
@@ -213,11 +235,11 @@ public class CSVAuditLogger implements AuditLogger {
         fileWriter.append(recordDelim);
     }
 
-    private FileWriter getWriter(String type, File auditFile) throws IOException {
+    private FileWriter getWriter(String type, File auditFile, boolean createIfMissing) throws IOException {
         // TODO: optimize synchronization strategy
         synchronized (fileWriters) {
             FileWriter existingWriter = fileWriters.get(type);
-            if (existingWriter == null) {
+            if (existingWriter == null && createIfMissing) {
                 existingWriter = new FileWriter(auditFile, true);
                 fileWriters.put(type, existingWriter);
             }
@@ -228,19 +250,22 @@ public class CSVAuditLogger implements AuditLogger {
     // This should only be called if it is known that 
     // the writer is invalid for use or no thread has obtained it / is using it
     // In other words, it does not synchronize on the use of the writer
-    private void resetWriter(String type) {
+    // If the writerToReset doesn't exist in the fileWriters (anymore) then 
+    // another thread already reset it, and no action is taken
+    private void resetWriter(String type, FileWriter writerToReset) {
         FileWriter existingWriter = null;
         // TODO: optimize synchronization strategy
         synchronized (fileWriters) {
-            existingWriter = fileWriters.remove(type);
-        }
-        if (existingWriter != null) {
-            // attempt clean-up close
-            try {
-                existingWriter.close();
-            } catch (Exception ex) {
-                // Debug level as the writer is expected to potentially be invalid
-                logger.debug("File writer close in resetWriter reported failure ", ex);
+            existingWriter = fileWriters.get(type);
+            if (existingWriter != null && writerToReset != null && existingWriter == writerToReset) {
+                fileWriters.remove(type);
+                // attempt clean-up close
+                try {
+                    existingWriter.close();
+                } catch (Exception ex) {
+                    // Debug level as the writer is expected to potentially be invalid
+                    logger.debug("File writer close in resetWriter reported failure ", ex);
+                }
             }
         }
     }

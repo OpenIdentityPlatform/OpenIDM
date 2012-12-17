@@ -86,7 +86,7 @@ public class ManagedObjectService extends JsonResourceRouter {
         bind = "bindRouter",
         unbind = "unbindRouter",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
+        policy = ReferencePolicy.DYNAMIC,
         target = "(service.pid=org.forgerock.openidm.router)"
     )
     protected ObjectSet router;
@@ -123,7 +123,7 @@ public class ManagedObjectService extends JsonResourceRouter {
         bind="bindCryptoService",
         unbind="unbindCryptoService",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC
+        policy = ReferencePolicy.DYNAMIC
     )
     protected CryptoService cryptoService;
     protected void bindCryptoService(CryptoService cryptoService) {
@@ -140,7 +140,7 @@ public class ManagedObjectService extends JsonResourceRouter {
         bind = "bindScopeFactory",
         unbind = "unbindScopeFactory",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC
+        policy = ReferencePolicy.DYNAMIC
     )
     private ScopeFactory scopeFactory;
     protected void bindScopeFactory(ScopeFactory scopeFactory) {

@@ -2,10 +2,9 @@
    "name" : "contractordb",
    "connectorRef" :
       {
-         "connectorHostRef" : "#LOCAL",
-         "connectorName" : "org.identityconnectors.databasetable.DatabaseTableConnector",
-         "bundleName" : "org.forgerock.openicf.connectors.db.databasetable",
-         "bundleVersion" : "1.1.0.0-SNAPSHOT"
+          "bundleName"    : "org.forgerock.openicf.connectors.databasetable-connector",
+          "bundleVersion" : "1.1.0.0",
+          "connectorName" : "org.identityconnectors.databasetable.DatabaseTableConnector"
       },
    "poolConfigOption" :
       {
