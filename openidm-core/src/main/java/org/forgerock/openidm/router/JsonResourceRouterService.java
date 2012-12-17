@@ -157,7 +157,7 @@ public class JsonResourceRouterService implements JsonResource {
         bind = "bindScopeFactory",
         unbind = "unbindScopeFactory",
         cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC
+        policy = ReferencePolicy.DYNAMIC
     )
     private ScopeFactory scopeFactory;
     protected void bindScopeFactory(ScopeFactory scopeFactory) {
