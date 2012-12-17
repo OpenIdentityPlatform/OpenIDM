@@ -1527,7 +1527,7 @@ $ ./startup.sh -p samples/sample9</screen>
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request POST
- --data "{\"requestApproved\": true}" 
+ --data "{\"requestApproved\": \"true\"}"  
  "http://localhost:8080/openidm/workflow/taskinstance/13?_action=complete"        
          </screen>         
          <para>A successful call returns the following:</para>
