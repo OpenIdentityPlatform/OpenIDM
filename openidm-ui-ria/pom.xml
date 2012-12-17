@@ -59,7 +59,7 @@
     </dependencyManagement>
  
     <properties>
-        <forgerock-ui.version>1.0.0-SNAPSHOT</forgerock-ui.version>
+        <forgerock-ui.version>1.0.0</forgerock-ui.version>
     </properties>
     
 </project>
