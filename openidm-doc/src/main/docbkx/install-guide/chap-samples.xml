@@ -1513,8 +1513,8 @@ $ ./startup.sh -p samples/sample9</screen>
        <listitem>
          <para>Approve the requests over REST, by setting the 
          <literal>"requestApproved"</literal> parameter for the specified task 
-         instance to <literal>"true"</literal>.
-         </para>
+         instance to <literal>"true"</literal>.</para>
+         <para>On UNIX:</para>
          <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
@@ -1522,6 +1522,14 @@ $ ./startup.sh -p samples/sample9</screen>
  --data '{"requestApproved": "true"}'
  "http://localhost:8080/openidm/workflow/taskinstance/13?_action=complete"        
          </screen>
+         <para>On Windows:</para>
+         <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ --data "{\"requestApproved\": true}" 
+ "http://localhost:8080/openidm/workflow/taskinstance/13?_action=complete"        
+         </screen>         
          <para>A successful call returns the following:</para>
          <screen>{"Task action performed":"complete"}</screen>
        </listitem>
