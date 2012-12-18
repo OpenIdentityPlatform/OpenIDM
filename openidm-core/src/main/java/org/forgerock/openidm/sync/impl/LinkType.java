@@ -138,7 +138,7 @@ class LinkType {
      * @return normalized id
      */
     public String normalizeTargetId(String aTargetId) {
-        if (!isSourceCaseSensitive()) {
+        if (!isTargetCaseSensitive()) {
             return (aTargetId == null ? null : aTargetId.toLowerCase());
         } else {
             return aTargetId;
