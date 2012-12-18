@@ -85,6 +85,32 @@
      <para>OpenIDM infrastructure modules provide the underlying features
      needed for core services.</para>
      <varlistentry>
+      <term>BPMN 2.0 Workflow Engine</term>
+      <listitem>
+        <para>OpenIDM provides an embedded workflow and business process engine 
+        based on Activiti and the Business Process Model and Notation (BPMN) 
+        2.0 standard.</para>
+        <para>For more information, see <link 
+       xlink:href="integrators-guide#chap-workflow" 
+       xlink:role="http://docbook.org/xlink/role/olink">
+       <citetitle>Integrating Business Processes and Workflows</citetitle></link>.
+       </para>
+      </listitem>
+     </varlistentry>
+     <varlistentry>
+      <term>Task Scanner</term>
+      <listitem>
+       <para>OpenIDM provides a task scanning mechanism that enables you to 
+       perform a batch scan for a specified date in OpenIDM data, on a 
+       scheduled interval, and then to execute a task when this date is 
+       reached.</para>
+       <para>For more information, see <link 
+       xlink:href="integrators-guide#task-scanner" 
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Scanning Data to Trigger Tasks</citetitle></link>.</para>
+      </listitem>
+     </varlistentry>          
+     <varlistentry>
       <term>Scheduler</term>
       <listitem>
        <para>The scheduler provides a <command>cron</command>-like scheduling
@@ -106,6 +132,18 @@
        engine.</para>
       </listitem>
      </varlistentry>
+     <varlistentry>
+      <term>Polic Service</term>
+      <listitem>
+       <para>OpenIDM provides an extensible policy service that enables you to 
+       apply specific validation requirements to various components and 
+       properties.</para>
+       <para>For more information, see <link 
+       xlink:href="integrators-guide#chap-policies" 
+       xlink:role="http://docbook.org/xlink/role/olink"
+       ><citetitle>Using Policies to Validate Data</citetitle></link>.</para>       
+      </listitem>
+     </varlistentry>     
      <varlistentry>
       <term>Audit Logging</term>
       <listitem>
