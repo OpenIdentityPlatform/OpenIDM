@@ -134,7 +134,7 @@ $ cp samples/misc/external.email.json conf/</screen>
   <title>Sending Mail Over REST</title>
   <para>Although you are more likely to send mail from a script in production,
   you can send email using the REST API by sending an HTTP POST to
-  <literal>/openam/external/email</literal> in order to test that your
+  <literal>/openidm/external/email</literal> in order to test that your
   configuration works. You pass the message parameters as POST parameters,
   URL encoding the content as necessary.</para>
 
