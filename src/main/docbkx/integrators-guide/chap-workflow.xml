@@ -690,9 +690,9 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
   <title>Querying Activiti Workflows</title>
 
   <para>The Activiti implementation supports filtered queries that enable you 
-  to query the running process instances based on specific query parameters. 
-  For example, the following query returns all process instances with the 
-  business key <literal>"newOrder"</literal>, as invoked in the previous 
+  to query the running process instances and tasks, based on specific query 
+  parameters. For example, the following query returns all process instances 
+  with the business key <literal>"newOrder"</literal>, as invoked in the previous 
   section.</para>
   
   <screen width="102">$ curl
@@ -720,7 +720,288 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
   <literal>processDefinitionId=managedUserApproval:1:6405</literal>. The query 
   syntax applies to all queries with <literal>_queryId=filtered-query</literal>.
   </para>
-</section>
+  
+  </section>
+ </section>
+
+ <section xml:id="workflows-REST">
+   <title>Managing Workflows Over the REST Interface</title>
+   
+   <para>In addition to the queries described previously, the following 
+   examples show the endpoints that are exposed for managing workflows over 
+   the REST interface. The example output is based on the sample workflow that 
+   is provided in <literal>openidm/samples/workflow</literal>.</para>
+   
+   <variablelist>
+     <varlistentry>
+       <term><literal>openidm/workflow/processdefinition</literal></term>
+       <listitem>
+             <para>List the available workflow definitions, for example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
+ 
+ {
+  "result": [
+    {
+      "name": "Managed User Approval Workflow",
+      "_id": "managedUserApproval:1:3"
+    }
+  ]
+}        
+             </screen>
+             <para>List the workflows, based on certain filter criteria, for example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/processdefinition?_queryId=
+filtered-query&amp;category=Examples"
+ 
+ {
+  "result": [
+    {
+      "name": "Managed User Approval Workflow",
+      "_id": "managedUserApproval:1:3"
+    }
+  ]
+}          
+        </screen>   
+       </listitem> 
+     </varlistentry>
+     <varlistentry>
+       <term><literal>openidm/workflow/processdefinition/{id}</literal></term>
+       <listitem>
+             <para>Obtain detailed information for a process definition, based 
+             on the ID. (The ID can be determined by querying all available 
+             process definitions). For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/processdefinition/contractorOnboarding:1:3"
+ 
+{
+  "key": "managedUserApproval",
+  "_rev": "0",
+  "formProperties": [],
+  "category": "Examples",
+  "_id": "managedUserApproval:1:3",
+  "processDiagramResourceName": null,
+  "description": null,
+  "name": "Managed User Approval Workflow",
+  "deploymentId": "1"
+}        
+             </screen>
+         </listitem>
+       </varlistentry>
+     <varlistentry>
+       <term><literal>openidm/workflow/processinstance</literal></term>
+       <listitem>
+             <para>Obtain the list of running workflows (process instances). 
+             The query returns a list of IDs. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/processinstance?_queryId=query-all-ids"
+
+{
+  "result": [
+    {
+      "processDefinitionId": "contractorOnboarding:1:3",
+      "_id": "4"
+    }
+  ]
+}       
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Obtain the list of running workflows based on specific 
+             filter criteria. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/processinstance?_queryId=
+filtered-query&amp;businessKey=myBusinessKey"   
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Start a workflow process instance. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin" 
+ --header "X-OpenIDM-Password: openidm-admin"
+ --data {_key":"contractorOnboarding"}
+ --request POST 
+ "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
+             </screen>
+       </listitem>                
+     </varlistentry>       
+     <varlistentry>
+       <term><literal>openidm/workflow/processinstance/{id}</literal></term>
+       <listitem>
+             <para>Obtain the details of the specified process instance. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/processinstance/4"
+
+{
+  "deleteReason": null,
+  "processDefinitionId": "contractorOnboarding:1:3",
+  "_rev": "0",
+  "startTime": "2012-12-18T22:04:50.549+02:00",
+  "startUserId": "user1",
+  "_id": "4",
+  "businessKey": null,
+  "durationInMillis": null,
+  "endTime": null,
+  "superProcessInstanceId": null
+}      
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Stop the specified process instance. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request DELETE       
+ "http://localhost:8080/openidm/workflow/processinstance/4"    
+             </screen>
+       </listitem>       
+     </varlistentry>
+     <varlistentry>
+       <term><literal>openidm/workflow/taskdefinition</literal></term>
+       <listitem>
+             <para>Query a task definition based on the process definition ID 
+             and the task name (<literal>taskDefinitionKey</literal>). For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/taskdefinition?_queryId=query-taskdefinition
+&amp;processDefinitionId=contractorOnboarding:1:6&amp;taskDefinitionKey=decideApprovalTask"
+{
+  "dueDate": null,
+  "taskCandidateGroup": [
+    {
+      "expressionText": "manager"
+    }
+  ],
+  "formProperties": [
+    {
+      "type": {
+        "values": {
+          "accept": "Accept",
+          "reject": "Reject"
+...
+             </screen>
+       </listitem> 
+     </varlistentry>  
+     <varlistentry>
+       <term><literal>openidm/workflow/taskinstance</literal></term>
+       <listitem>
+             <para>Query all running task instances. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
+ 
+ {
+  "result": [
+    {
+      "name": "Contractor Approval",
+      "_id": "70"
+    }
+  ]
+}
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Query task instances based on candidate users or candidate 
+             groups. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/taskinstance?_query-id=
+ filtered-query&amp;taskCandidateUser=manager1"
+             </screen>
+             <para>or</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/taskinstance?_query-id=
+ filtered-query&amp;taskCandidateGroup=management"
+             </screen>
+             <para>Note that you can include both users and groups in the same 
+             query.</para>          
+       </listitem>       
+     </varlistentry>
+     <varlistentry>
+       <term><literal>openidm/workflow/taskinstance/{id}</literal></term>
+       <listitem>
+             <para>Obtain detailed information for a running task, based on the 
+             task ID. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request GET       
+ "http://localhost:8080/openidm/workflow/taskinstance/70"
+ 
+{
+  "dueDate": null,
+  "processDefinitionId": "contractorOnboarding:1:3",
+  "owner": null,
+  "taskDefinitionKey": "decideApprovalTask",
+  "name": "Contractor Approval",
+...
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Update task-related data stored in the Activiti workflow 
+             engine. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --header "If-Match : *"
+ --request PUT       
+ --data '{"description":"updated description"}'
+ "http://localhost:8080/openidm/workflow/taskinstance/70"
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Complete the specified task. The variables required by the 
+             task are provided in the request body. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST       
+ --data '{"requestApproved":"true"}'
+ "http://localhost:8080/openidm/workflow/taskinstance/70?_action=complete"
+             </screen>
+       </listitem>
+       <listitem>
+             <para>Claim the specified task. The ID of the user who claims the 
+             task is provided in the request body. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST       
+ --data '{"userId":"manager1"}'
+ "http://localhost:8080/openidm/workflow/taskinstance/70?_action=claim"
+             </screen>
+       </listitem>                 
+     </varlistentry>         
+   </variablelist>
+ 
+ </section>
 
  <section xml:id="sample-activiti-workflows">
   <title>Example Activiti Workflows With OpenIDM</title>
@@ -1140,276 +1421,6 @@ $ cat samples/workflow/data/xmlConnectorData.xml
      </para> 
 
     </section>
-
   </section>
-
-<!-- Replace with the provisioning workflow example   -->
-  <section xml:id="example-activiti-recon-sunset-flow">
-   <title>Example Sunset Workflow Triggered By Reconciliation</title>
-
-   <para>You can use OpenIDM to manage deferred deprovisioning and disabling 
-   of user accounts. For example, when an external consultant's contract 
-   expires or is up for renewal, you can use the workflow capabilities of 
-   OpenIDM to manage this scenario.</para>
-
-   <para>In the following example, the authoritative source is a CSV file. The 
-   target resource is an XML file. A mapping is configured to reconcile accounts 
-   between the CSV file and the XML file (no changes are made to the accounts in 
-   the internal OpenIDM repository). Initially, the user exists in the XML file 
-   only. The user is then added to the CSV file, and a reconciliation process is 
-   run. As a result of the correlation query, the syncronization engine finds the 
-   user in the XML file, and the situation therefore results in a 
-   <literal>FOUND</literal> response.</para>
-   
-   <orderedlist><para>To replicate the example, follow these steps:</para>
-     <listitem><para>Set up a CSV file connector to connect to the 
-     authoritative CSV source file. The file contains the following entry:
-     </para>
-       <!-- TODO: need a script or steps to generate dates for the example, because
-   the dates here will not be useful if you read the documentation in 2013, right? -->
-     <programlisting language="csv" width="92"><?dbfo pgwide="1"?>
-firstName,uid,"lastName","email","employeeNumber",password,"sunrise","sunset","active"
-"Darth","DDOE","Doe","doe@example.com","123456","Z29vZA==",
-"2012-06-30T00:00:00Z","2012-12-23T00:00:00Z","TRUE"</programlisting>
-     <para>The authoritative source contains the field, 
-     <literal>sunset</literal>, whose value is a date and time string that 
-     references a time in the future, in this example 
-     <literal>2012-12-23T00:00:00Z</literal>.</para>
-     <para>For information about configuring the CSV file connector, see 
-     <link xlink:role="http://docbook.org/xlink/role/olink"
-     xlink:href="integrators-guide#csv-file-connector">
-     <citetitle>CSV File Connector</citetitle></link>.</para>
-     </listitem>
-     <listitem>
-      <para>Set up a simple XML connector to replicate the fields in the 
-      authoritative CSV source on a one to one basis.</para>
-     </listitem>
-   </orderedlist>
-
-   <para></para> <!-- TODO: Howto steps or link to howto -->
-
-   <para>Define a Sunset Workflow using Activiti Eclipse BPMN 2.0
-   Designer.</para>
-
-   <mediaobject xml:id="figure-bpmn-sunset-flow">
-    <alt>Sunset workflow process</alt>
-    <imageobject>
-     <imagedata fileref="images/bpmn-sunset-flow.png" format="PNG" />
-    </imageobject>
-    <textobject>
-     <para>The sunset workflow starts by saving the invoke context, prepares
-     the call to OpenIDM, reads the user, runs an email notification, disables
-     the account, and ends.</para>
-    </textobject>
-   </mediaobject>
-
-   <para>Use the following XML artifact.</para>
-
-   <programlisting language="xml">
-&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-
-&lt;definitions id=&quot;definitions&quot;
-            xmlns=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL&quot;
-            xmlns:activiti=&quot;http://activiti.org/bpmn&quot;
-            targetNamespace=&quot;Examples&quot;
-            xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-            xsi:schemaLocation=&quot;http://www.omg.org/spec/BPMN/20100524/MODEL
-              http://www.omg.org/spec/BPMN/2.0/20100501/BPMN20.xsd&quot;&gt;
-
-    &lt;process id=&quot;sunset&quot; name=&quot;sunset usecase&quot;&gt;
-       &lt;startEvent id=&quot;start&quot; /&gt;
-       &lt;sequenceFlow sourceRef=&quot;start&quot; targetRef=&quot;saveInvokeContext&quot;/&gt;
-       &lt;scriptTask id=&quot;saveInvokeContext&quot; scriptFormat=&quot;groovy&quot;
-         activiti:returnVariable=&quot;invokecontext&quot;&gt;
-           &lt;script&gt;
-               &lt;![CDATA[
-               invokecontext =
-                 org.forgerock.openidm.objset.ObjectSetContext.get()
-              ]]&gt;
-           &lt;/script&gt;
-       &lt;/scriptTask&gt;
-       &lt;sequenceFlow sourceRef=&quot;saveInvokeContext&quot;
-         targetRef=&quot;timerintermediatecatchevent1&quot;/&gt;
-       
-       &lt;intermediateCatchEvent id=&quot;timerintermediatecatchevent1&quot;
-         name=&quot;TimerCatchEvent&quot;&gt;
-           &lt;extensionElements&gt;
-               &lt;activiti:field name=&quot;t&quot; expression=&quot;${time}&quot;
-               &gt;&lt;/activiti:field&gt;
-           &lt;/extensionElements&gt;
-           &lt;timerEventDefinition&gt;
-               &lt;timeDate &gt;${time}&lt;/timeDate&gt;
-           &lt;/timerEventDefinition&gt;
-       &lt;/intermediateCatchEvent&gt;
-       
-       &lt;sequenceFlow sourceRef=&quot;timerintermediatecatchevent1&quot;
-         targetRef=&quot;idmCall&quot;/&gt;
-       
-       
-       &lt;serviceTask id=&quot;idmCall&quot; activiti:delegateExpression=&quot;${openidm}&quot;
-         activiti:async=&quot;true&quot;&gt;
-           &lt;extensionElements&gt;
-               &lt;activiti:field name=&quot;userName&quot; expression=&quot;${userName}&quot;
-               &gt;&lt;/activiti:field&gt;
-               &lt;activiti:field name=&quot;system&quot; expression=&quot;${system}&quot;
-               &gt;&lt;/activiti:field&gt;
-           &lt;/extensionElements&gt;
-       &lt;/serviceTask&gt;
-       
-       &lt;sequenceFlow sourceRef=&quot;idmCall&quot; targetRef=&quot;readUserAccount&quot;/&gt;
-       &lt;scriptTask id=&quot;readUserAccount&quot; scriptFormat=&quot;groovy&quot;
-         activiti:returnVariable=&quot;user&quot; &gt;
-           &lt;script&gt;
-               &lt;![CDATA[
-               out:println '********Sunset date for user ' + userName
-               user = openidm.read(system + userName);
-               ]]&gt;
-           &lt;/script&gt;
-       &lt;/scriptTask&gt;
-       &lt;sequenceFlow sourceRef=&quot;readUserAccount&quot; targetRef=&quot;sendMail&quot;/&gt;
-
-       &lt;serviceTask id=&quot;sendMail&quot; name=&quot;Email Notification&quot;
-         activiti:type=&quot;mail&quot;&gt;
-           &lt;extensionElements&gt;
-               &lt;activiti:field name=&quot;to&quot; expression=&quot;${toEmail}&quot;
-               &gt;&lt;/activiti:field&gt;
-               &lt;activiti:field name=&quot;from&quot; expression=&quot;no-reply@forgerock.com&quot;
-               &gt;&lt;/activiti:field&gt;
-               &lt;activiti:field name=&quot;subject&quot; expression=&quot;Disabling User&quot;
-               &gt;&lt;/activiti:field&gt;
-               &lt;activiti:field name=&quot;text&quot;&gt;
-                   &lt;activiti:expression&gt;&lt;![CDATA[
-                   The following user has been disabled:
-                   ${user}]]&gt;
-                   &lt;/activiti:expression&gt;
-               &lt;/activiti:field&gt;
-           &lt;/extensionElements&gt;
-       &lt;/serviceTask&gt;
-
-       &lt;sequenceFlow sourceRef=&quot;sendMail&quot; targetRef=&quot;disableAccount&quot;/&gt;
-       &lt;scriptTask id=&quot;disableAccount&quot; scriptFormat=&quot;groovy&quot;&gt;
-           &lt;script&gt;
-               &lt;![CDATA[
-               out:println '********Disabling user account ' + userName
-               user['__ENABLE__'] = false
-               openidm.update(system + userName, null, user)
-               ]]&gt;
-           &lt;/script&gt;
-       &lt;/scriptTask&gt;
-       &lt;sequenceFlow sourceRef=&quot;disableAccount&quot; targetRef=&quot;end&quot;/&gt;
-       &lt;endEvent id=&quot;end&quot;/&gt;
-
-    &lt;/process&gt;
-&lt;/definitions&gt;</programlisting>
-
-   <para>Set up a deferred action during reconciliation by reacting to a
-   <literal>FOUND</literal> situation. When called, the script invoked must
-   return the proper action to the found situation, which in the case of this
-   example is <literal>LINK</literal>.</para>
-
-   <para>Add the following script to
-   <filename>script/triggerSunset.js</filename> where you installed OpenIDM,
-   invoked when reconciliation encounters a <literal>FOUND</literal>
-   situation.</para>
-
-   <programlisting language="javascript">
-/*
- * Calling 'sunrise' workflow
- */
- 
- var params = {
-    "userName" : target.__UID__,
-    "system" : "system/xmlfile/account/",
-    "time" : source.sunset,
-    "toEmail" : "manager@corp.org",
-    "fromSender" : "noreply@openidm"
-};
-
-openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, 
-{"key":"sunrise", "keyrequired" : params});
-
-</programlisting>
-
-   <para>Add the following schedule to
-   <filename>conf/scheduler-reconcile_HR_XML.json</filename> where you
-   installed OpenIDM to invoke the script.</para>
-
-   <programlisting language="javascript">
-{
-    "enabled" : true,
-    "type" : "cron",
-    "schedule" : "0 08 16 * * ?",
-    "invokeService" : "sync",
-    "invokeContext" : {
-       "action" : "reconcile",
-       "mapping" : {
-           "name" : "CSV_XML",
-           "source" : "system/CSV/persons",
-           "target" : "system/xmlfile/account",
-           "correlationQuery" : {
-               "type" : "text/javascript",
-               "source" : "var myarray = [source.uid];var map = {
-                   'query' : {
-                       'Equals': {'field' : 'name','values' : myarray}
-                   }
-               };map;"
-           },
-           "properties" : [
-               {
-                   "source" : "firstname",
-                   "target" : "firstname"
-               },
-               {
-                   "source" : "uid",
-                   "target" : "name"
-               },
-               {
-                   "source" : "lastname",
-                   "target" : "lastname"
-               },
-               {
-                   "source" : "email",
-                   "target" : "email"
-               }
-           ],
-           "policies" : [
-               {
-                   "situation" : "CONFIRMED",
-                   "action" : "IGNORE"
-               },
-               <emphasis role="bold">{
-                   "situation" : "FOUND",
-                   "action" : {
-                       "type" : "text/javascript",
-                       "file" : "script/triggerSunset.js"
-                   }
-               },</emphasis>
-               {
-                   "situation" : "ABSENT",
-                   "action" : "IGNORE"
-               },
-               {
-                   "situation" : "AMBIGUOUS",
-                   "action" : "IGNORE"
-               },
-               {
-                   "situation" : "MISSING",
-                   "action" : "IGNORE"
-               },
-               {
-                   "situation" : "UNQUALIFIED",
-                   "action" : "IGNORE"
-               },
-               {
-                   "situation" : "UNASSIGNED",
-                   "action" : "IGNORE"
-               }
-           ]
-       }
-    }
-}</programlisting>
   </section>
-
-  </section>
-</section>
 </chapter>
