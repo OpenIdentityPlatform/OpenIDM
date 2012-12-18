@@ -863,8 +863,10 @@ class ObjectMapping implements SynchronizationListener {
         }
         String[] targetIds = op.getTargetIds();
         for (String handledId : targetIds) {
-            remainingTargetIds.remove(handledId);
-            LOGGER.trace("Removed target from remaining targets: {}", handledId);
+            // If target system has case insensitive IDs, remove without regard to case
+            String normalizedHandledId = linkType.normalizeTargetId(handledId);
+            remainingTargetIds.remove(normalizedHandledId);
+            LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
         }
 
         if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
