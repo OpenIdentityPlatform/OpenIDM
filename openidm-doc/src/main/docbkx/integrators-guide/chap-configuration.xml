@@ -427,6 +427,9 @@
    <listitem><para>Define a configuration whose parameters vary between different 
    environments, for example, the URLs and passwords for test, development, 
    and production environments.</para></listitem>
+   <listitem><para>Disable certain capabilities on specific nodes. For example, 
+   you might want to disable the workflow engine on specific instances.</para>
+   </listitem>
   </itemizedlist>
   <para>When OpenIDM starts up, it combines the system configuration, which 
   might contain specific environment variables, with the defined OpenIDM 
@@ -553,7 +556,11 @@
  <listitem><para>You cannot reference complex objects or properties with syntaxes 
  other than String. Property values are resolved from the 
  <literal>boot.properties</literal> file or from the System properties and the 
- value of these properties is always in String format.</para></listitem>
+ value of these properties is always in String format.</para>
+ <para>Property substitution of boolean values is currently only supported in 
+ stringified format, that is, resulting in <literal>"true"</literal> or 
+ <literal>"false"</literal>.
+ </para></listitem>
  <listitem><para>Substitution of encrypted property values is currently not 
  supported.</para></listitem>
  <!--  TO DO
