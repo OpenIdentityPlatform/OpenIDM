@@ -1460,6 +1460,9 @@ $ ./startup.sh -p samples/sample8</screen>
   <para>When the request is approved by an administrator, the absent users are 
   created by an asynchronous reconciliation process.</para>
   
+  <para>Prepare a fresh installation of OpenIDM before trying this
+  sample.</para>
+  
   <section xml:id="install-sample9">
      <title>Install the Sample</title>
      <para>Prepare OpenIDM as described in <xref linkend="preparing-openidm"/>, 
