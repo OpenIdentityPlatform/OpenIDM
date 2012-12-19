@@ -30,67 +30,116 @@
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
+ 
+  <important>
+    <para>OpenIDM <?eval ${docTargetVersion}?> is a milestone release from the 
+    main development branch of the product. The Xpress release contains 
+    selected key features and all current fixed issues. An Xpress release 
+    undergoes important functional testing but not the complete testing cycle 
+    that is done for a full Enterprise release.</para>
+
+    <para>Xpress releases are supported through ForgeRock subscriptions and 
+    are upgradeable to the Enterprise version, which has long term support.</para>
+    
+    <para>The goal of an Xpress release is to enable you to start build phases 
+    earlier, with the most recent features, instead of having to wait for the 
+    Enterprise release date. Fixes to issues that are discovered in an Xpress 
+    release are delivered as patches to ForgeRock customers, and are 
+    guaranteed to be delivered in the Enterprise release that follows. Xpress 
+    releases are supported for a grace period after the Enterprise version has 
+    been released.</para>
+    
+    <para>With the exception of these Release Notes, the official 
+    documentation for this release is still in progress, and is accessible at 
+    <link xlink:href="http://openidm.forgerock.org/docs.html">http://openidm.forgerock.org/docs.html</link>. 
+    The complete, validated documentation set will be available with the 
+    Enterprise release.</para>
+  </important> 
 
  <itemizedlist>
   <para>OpenIDM <?eval ${docTargetVersion}?> provides many new features,
   including the following:</para>
   <listitem>
-   <para>OSGi based runtime</para>
+    <para>Browser-based user interface</para>
+    <para>Includes self service capabilities, a generic platform to expose and 
+    invoke workflows, and a notification service for tasks.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-ui" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>OpenIDM User Interface</citetitle></link> in the 
+    <citetitle>Integrator's Guide</citetitle>.</para>
   </listitem>
   <listitem>
-   <para>Embedded OrientDB as the out-of-the-box repository store</para>
+    <para>BPMN 2.0 workflow engine, embedded as an OSGi bundle and accessible 
+    over REST.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-workflow" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Integrating Business Processes and Workflows</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>
   </listitem>
   <listitem>
-   <para>Embedded Jetty Servlet container</para>
+    <para>Configurable task scheduling service, including support for 
+    clustered schedules and scanning tasks.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-scheduler-conf" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Scheduling Tasks and Events</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
-   <para>REST and Java interfaces for CRUD, queries, and actions</para>
+    <para>Configurable policy service.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-policies" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Using Policies to Validate Data</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
-   <para>Reconciliation and synchronization that can be scheduled, and also
-   triggered programmatically or over the REST interface, including LiveSync
-   for resources that expose change logs</para>
+    <para>Ability to perform batch scans to execute tasks</para>
+    <para>For more information, see <link xlink:href="integrators-guide#task-scanner" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Scanning Data to Trigger Tasks</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
-   <para>Embedded scheduler for running both reconciliation and
-    synchronization, and also scripts</para>
+    <para>Ability to create custom RESTful endpoints.</para>
+    <para>For more information, see 
+    <link xlink:href="integrators-guide#adding-custom-endpoints" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Adding Custom Endpoints</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
-   <para>Pluggable scripting facility with built-in support for
-   JavaScript</para>
+    <para>Enhanced reconciliation service, accessible over REST.</para>
+    <para>For more information, see 
+    <link xlink:href="integrators-guide#chap-synchronization" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Configuring Synchronization</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
-   <para>Outbound connectivity support, including REST and email out of the
-   box</para>
+    <para>Support for native query expressions on the JDBC repository.</para>
   </listitem>
   <listitem>
-   <para>Automatic encryption handling for sensitive configuration properties
-   and for data</para>
+    <para>Support for Powershell scripts on the Active Directory connector.
+    </para>
+    <para>For more information, see 
+    <link xlink:href="integrators-guide#ad-powershell" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Using PowerShell Scripts With the Active Directory Connector</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>     
   </listitem>
   <listitem>
-   <para>Comprehensive customization capabilities, including built-in
-   scripting hooks and request filter facilities</para>
+    <para>Reusable server configuration and property value substitution in the 
+    configuration.</para>
+    <para>For more information, see 
+    <link xlink:href="integrators-guide#using-property-substitution" 
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>Using Property Value Substitution in the Configuration</citetitle></link> 
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
-  <listitem>
-   <para>Flexible authentication and authorization policy mechanism</para>
-  </listitem>
-  <listitem>
-   <para>Integration with the <link xlink:show="new"
-   xlink:href='http://openicf.forgerock.org'>Open Identity Connector
-   Framework (OpenICF)</link></para>
-  </listitem>
-  <listitem>
-   <para>Password synchronization capabilities with plugins for OpenDJ and
-   Active Directory</para>
-  </listitem>
-  <listitem>
-   <para>Workflow and Business Process support for BPMN 2.0
-   (Experimental)</para>
-  </listitem>
+      
  </itemizedlist>
 
- <para>For installation instructions and a sample to get familiar with the
- features, see the <link xlink:href="install-guide#chap-install"
+ <para>For installation instructions and several samples to familiarize you 
+ with the features, see the <link xlink:href="install-guide#chap-install"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
  Guide</citetitle></link>.</para>
 
