@@ -224,9 +224,9 @@
 <section xml:id="ui-managing-users">
  <title>Managing User Accounts With the User Interface</title>
  
- <para>Apart from self-registration, only administrative users (with the role 
- <literal>openidm-admin</literal>) can add, modify, and delete user accounts.
- </para>
+ <para>Only administrative users (with the role <literal>openidm-admin</literal>) 
+ can add, modify, and delete user accounts. Regular users can modify certain 
+ aspects of their own accounts.</para>
  
  <procedure>
    <title>To Add a User Account</title>
