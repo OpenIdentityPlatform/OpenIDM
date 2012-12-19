@@ -104,8 +104,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   
   <para>You can also use OrientDB Studio to query the default OrientDB 
   repository. After you have installed and started OpenIDM, point your browser 
-  to <link xlink:href="http://localhost:2480/studio">
-  http://localhost:2480/studio</link>. The default database is <literal>openidm
+  to <link xlink:href="http://localhost:2480/studio/">
+  http://localhost:2480/studio/</link>. The default database is <literal>openidm
   </literal> and the default user and password are <literal>admin</literal> and 
   <literal>admin</literal>. Click Connect to connect to the repository. For 
   more information about OrientDB Studio, see the 
