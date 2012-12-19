@@ -1,9 +1,9 @@
 {
     "configuration" : {
-        "openamBaseURL" : "http://jake.forgerock.com:8081/openam",
+        "openamBaseURL" : "/openam",
         "selfRegistration" : false,
-        "securityQuestions" : true,
-        "siteIdentification" : true,
+        "securityQuestions" : false,
+        "siteIdentification" : false,
         "language" : "en-US",
         "roles" : {
             "openidm-admin" : "Administrator",

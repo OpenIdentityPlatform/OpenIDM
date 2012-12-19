@@ -1,31 +1,25 @@
 This sample shows how to do integration between OpenIDM and OpenAM to provide a single-sign on dashboard.
 
+It is assumed you have a basic installation of OpenAM already installed and accessible by the OpenIDM server.
+
 The basic setup changes the default installation in several important ways. Each section below describes the 
 necessary steps.
 
 Setup of OpenAM auth filter for OpenIDM
 =======================================
 
-Location of Agent Configuration Repository: local 
+Set Location of Agent Configuration Repository: local 
 Manually add openidm-admin user to AM
 
-    
-Setup of provisioning to OpenDJ
-===============================
-Users that exist in OpenIDM's managed user store need to be provisioned into OpenAM's instance of OpenDJ. This is accomplished with
-the file conf/provisioner.openicf-ldap.json.  You will need to update the "host" parameter to refer to your OpenDJ instance (likely the
-same host name as your OpenAM instance). Also, you need to update the credentials parameter to use whatever password you have specified 
-for the Directory Manager record within your OpenAM instance.
-
-Setup of a reverse proxy
-========================
+Setup of a reverse proxy to serve modified UI
+=============================================
 In this example, the reverse proxy used is Apache 2, however the same functionality could be done with other
 web servers so long as they perform the same functions. There are three configuration changes that need to be made
 to a default apache installation: 
 
  1) Setting the DocumentRoot to the appropriate copy of the UI:
  
-    DocumentRoot /path/to/openidm/ui/openidm-ui-ria-admin-apache/
+    DocumentRoot /path/to/openidm/samples/openam/ui/openidm-ui-ria-admin-apache/
     (You may need to adjust the related 'Directory' tag as well to match this setting)
     
  2) Setting a reverse proxy for OpenIDM
@@ -35,33 +29,17 @@ to a default apache installation:
     
  3) Setting a reverse proxy for OpenAM
  
-    ProxyPass /openam http://yourAMServer:8080/openidm
-    ProxyPassReverse /openam http://yourAMServer:8080/openidm
+    ProxyPass /openam http://yourAMServer:8080/openam
+    ProxyPassReverse /openam http://yourAMServer:8080/openam
 
-These settings can either be made globally or within a VirtualHost configuration.
+These settings can either be made globally or within a VirtualHost configuration. Now the cusomized UI built for this
+sample will be accessible via your web server.
 
-Changing the UI
-===============
-Now accessible from your web server, the UI needs to be modified to use the facilities provided by OpenAM. The
-modifications are bundled together into a diff file located in the same folder as this README file, named:
-    openam-ui-rXXXX.diff
-The rXXXX indicates the revision of the core UI that the diff was made against.  If you are working against a newer
-copy of the UI, there may be some problems with applying the diff.
+Start the OpenAM Sample
+=======================
 
-You can apply the patch like so: 
-openidm-ui-ria-admin-apache$ patch -p1 -i ../../samples/openam/openam-ui.diff
-
-Updating the configuration
-==========================
-You must update the conf/ui-configuration.json file to refer to your installation of OpenAM.  This should be the 
-same server base path used in your filter setup.
-
-Setup of the workflow
-=====================
-Copy the workflow/UserApplicationAcceptance.bar file into your base project workflow folder.  By default the openidm-admin
-role is used for application approvals; this can be changed by unzipping the .bar file and editing the xml file:
-
-    <userTask id="usertask1" name="Application Acceptance" activiti:candidateUsers="openidm-admin" activiti:candidateGroups="openidm-admin" .....
+From your openidm root folder, run this command:
+./startup.sh -p samples/openam/
 
 Setup of provisioning to external systems
 =========================================

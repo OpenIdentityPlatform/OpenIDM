@@ -461,6 +461,13 @@
             </includes>
         </dependencySet>
         <dependencySet>
+        	<unpack>true</unpack>
+            <outputDirectory>/openidm/samples/openam/ui-openam</outputDirectory>
+            <includes>
+                <include>org.forgerock.openam:openidm-ui-ria</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
