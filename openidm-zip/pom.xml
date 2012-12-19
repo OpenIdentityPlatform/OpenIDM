@@ -49,6 +49,17 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>forgerock-openam-snapshots-repository</id>
+            <name>ForgeRock OpenAM Snapshot Repository</name>
+            <url>http://maven.forgerock.org/repo/openam-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -330,7 +341,16 @@
             <version>1.0.0-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
-
+        
+        <!-- OpenAM RIA UI -->
+        <dependency>
+            <groupId>org.forgerock.openam</groupId>
+            <artifactId>openam-ui-ria</artifactId>
+            <version>10.1.0-SNAPSHOT</version>
+            <type>zip</type>
+            <classifier>www</classifier>
+        </dependency>
+        
         <!-- OpenICF -->
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
