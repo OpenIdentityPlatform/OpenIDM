@@ -141,6 +141,9 @@
     <programlisting>
     # openidm.fileinstall.enabled=false
     </programlisting>
+    <para>Before you disable automatic polling, you must have started up the 
+    OpenIDM instance at least once to ensure that the configuration has been 
+    loaded into the database.</para>
     <para>Scripts are loaded when the configuration calls the script. 
     Modifications to scripts are therefore not applied dynamically. If you 
     modify a script, you must either modify the configuration that calls the 
