@@ -88,6 +88,7 @@
  <xinclude:include href='chap-overview.xml' />
  <xinclude:include href='chap-services.xml' />
  <xinclude:include href='chap-cli.xml' />
+ <xinclude:include href='chap-ui.xml' />
  <xinclude:include href='chap-configuration.xml' />
  <xinclude:include href='chap-policies.xml' />
  <xinclude:include href='chap-logs.xml' />
