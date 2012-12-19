@@ -30,12 +30,13 @@
  xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
  xmlns:xlink='http://www.w3.org/1999/xlink'
  xmlns:xinclude='http://www.w3.org/2001/XInclude'>
- <title>Removing OpenIDM Software</title>
+ <title>Removing and Moving OpenIDM Software</title>
  <indexterm>
   <primary>Uninstalling</primary>
  </indexterm>
 
- <para>This chapter shows you how to uninstall OpenIDM software.</para>
+ <para>This chapter shows you how to uninstall OpenIDM software and to move 
+ an existing install to a different location.</para>
 
  <procedure>
   <title>To Remove OpenIDM Software</title>
@@ -57,4 +58,36 @@
    drop the <literal>openidm</literal> database.</para>
   </step>
  </procedure>
+ 
+ <procedure>
+  <title>To Move OpenIDM Software</title>
+   
+ <para>If you want to move OpenIDM to a different directory, you do not have 
+ to uninstall and reinstall. To move an existing OpenIDM instance, follow these 
+ steps:</para>
+   <step>
+     <para>Shutdown OpenIDM, as described in <link 
+     xlink:href="install-guide#stop-openidm" 
+     xlink:role="http://docbook.org/xlink/role/olink">
+     <citetitle>To Stop the OpenIDM Services</citetitle></link>.</para>
+   </step>
+   <step>
+     <para>Remove the <filename>felix-cache</filename> directory.</para>
+     <screen>$ cd path/to/openidm
+$ rm -rf felix-cache
+     </screen>
+   </step>
+   <step>
+     <para>Move the files.</para>
+     <screen>
+$ mv path/to/openidm path/to/new-openidm</screen>
+   </step>
+   <step>
+     <para>Start OpenIDM in the new location.</para>
+     <screen>$ cd path/to/new-openidm
+$ ./startup.sh
+     </screen>     
+   </step>
+ </procedure>
+ 
 </chapter>
