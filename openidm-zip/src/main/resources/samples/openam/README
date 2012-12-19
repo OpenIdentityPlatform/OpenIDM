@@ -5,7 +5,10 @@ necessary steps.
 
 Setup of OpenAM auth filter for OpenIDM
 =======================================
-DOCUMENTATION GOES HERE
+
+Location of Agent Configuration Repository: local 
+Manually add openidm-admin user to AM
+
     
 Setup of provisioning to OpenDJ
 ===============================

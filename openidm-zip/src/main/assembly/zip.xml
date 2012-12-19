@@ -30,6 +30,7 @@
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
+                <exclude>**/ui-diff/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -379,6 +380,45 @@
             </includes>
             <outputDirectory>/openidm/samples/workflow/script</outputDirectory>
         </fileSet>
+        <!-- Setup openam sample -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>conf/workflow.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/conf</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>ui-configuration.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/openam/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/script</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam/script</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/openam/ui-diff</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam/ui/openidm-ui-ria-admin</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/openam/ui-diff</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/openam/ui/openidm-ui-ria-admin-apache</outputDirectory>
+        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
@@ -409,6 +449,13 @@
         <dependencySet>
         	<unpack>true</unpack>
             <outputDirectory>/openidm/ui</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+        	<unpack>true</unpack>
+            <outputDirectory>/openidm/samples/openam/ui</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
             </includes>
