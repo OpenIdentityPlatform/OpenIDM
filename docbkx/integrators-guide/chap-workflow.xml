@@ -834,7 +834,7 @@ filtered-query&amp;businessKey=myBusinessKey"
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin" 
  --header "X-OpenIDM-Password: openidm-admin"
- --data {_key":"contractorOnboarding"}
+ --data {"_key":"contractorOnboarding"}
  --request POST 
  "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
              </screen>
