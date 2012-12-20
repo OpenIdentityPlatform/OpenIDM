@@ -145,12 +145,12 @@ $ cp samples/misc/example.bpmn20.xml workflow/</screen>
   is therefore something like:</para>
   
   <screen>
- {"result":[
-      {"_id":"osgiProcess:1:3",
-       "name":"Osgi process"
-      }
-    ]
- }
+{"result":[
+     {"_id":"osgiProcess:1:3",
+      "name":"Osgi process"
+     }
+        ]
+}
   </screen>
   
   <para>The <literal>osgiProcess</literal> definition calls OpenIDM, queries 
@@ -743,7 +743,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
  --request GET       
  "http://localhost:8080/openidm/workflow/processdefinition?_queryId=query-all-ids"
  
- {
+{
   "result": [
     {
       "name": "Managed User Approval Workflow",
@@ -760,7 +760,7 @@ openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}
  "http://localhost:8080/openidm/workflow/processdefinition?_queryId=
 filtered-query&amp;category=Examples"
  
- {
+{
   "result": [
     {
       "name": "Managed User Approval Workflow",
@@ -912,7 +912,7 @@ filtered-query&amp;businessKey=myBusinessKey"
  --request GET       
  "http://localhost:8080/openidm/workflow/taskinstance?_queryId=query-all-ids"
  
- {
+{
   "result": [
     {
       "name": "Contractor Approval",
