@@ -929,16 +929,14 @@ filtered-query&amp;businessKey=myBusinessKey"
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET       
- "http://localhost:8080/openidm/workflow/taskinstance?_query-id=
- filtered-query&amp;taskCandidateUser=manager1"
+ "http://localhost:8080/openidm/workflow/taskinstance?_queryId=filtered-query&amp;taskCandidateUser=manager1"
              </screen>
              <para>or</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request GET       
- "http://localhost:8080/openidm/workflow/taskinstance?_query-id=
- filtered-query&amp;taskCandidateGroup=management"
+ "http://localhost:8080/openidm/workflow/taskinstance?_queryId=filtered-query&amp;taskCandidateGroup=management"
              </screen>
              <para>Note that you can include both users and groups in the same 
              query.</para>          
