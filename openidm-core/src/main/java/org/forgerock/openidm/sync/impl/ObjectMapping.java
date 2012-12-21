@@ -1945,15 +1945,19 @@ class ObjectMapping implements SynchronizationListener {
         private void assessSituation() throws SynchronizationException {
             situation = null;
             String targetId = getTargetObjectId();
+            
+            // May want to consider an optimization to not query 
+            // if we don't need the link for the TARGET_IGNORED action
+            if (targetId != null) {
+                linkObject.getLinkForTarget(targetId);
+            }
+            
             if (!isTargetValid()) { // target is not valid for this mapping; ignore it
                 situation = Situation.TARGET_IGNORED;
                 if (reconContext != null && targetId != null) {
                     reconContext.getStatistics().getTargetStat().addNotValid(targetId);
                 }
                 return;
-            }
-            if (targetId != null) {
-                linkObject.getLinkForTarget(targetId);
             }
             if (linkObject._id == null || linkObject.sourceId == null) {
                 situation = Situation.UNASSIGNED;
