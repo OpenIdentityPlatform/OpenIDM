@@ -163,7 +163,7 @@
     
     <para>A default list of four images is presented for site identification.
     </para>
-    <!-- Failing to get this next bit to work 
+    <!-- Not supported for Xpress 
     You can change these images, and include additional images, by modifying 
     the <literal>siteImages</literal> property in the 
     <filename>ui-configuration.json</filename> file:</para>
@@ -265,26 +265,7 @@
      candidate user for that task.</para>
    </step>
  </procedure>
-
- <procedure>
-   <title>To Delete a User Account</title>  
-   <step>
-     <para>Log into the user interface as an administrative user.</para>
-   </step>
-   <step>
-     <para>Select the Users tab.</para>
-   </step>
-   <step>
-     <para>Click the Username of the user that you want to delete.</para>
-   </step>
-   <step>
-     <para>On the user's profile page, click Delete.</para>
-   </step>
-   <step>
-     <para>Click OK to confirm the deletion.</para>
-     <para>The user is deleted from the internal repository.</para>
-   </step>
- </procedure> 
+ 
  
  <procedure xml:id="ui-update-account">
    <title>To Update a User Account</title>  
@@ -339,6 +320,26 @@
      Update.</para>
      <para>The user password is updated in the repository.</para>
    </step>  
+ </procedure>
+ 
+  <procedure>
+   <title>To Delete a User Account</title>  
+   <step>
+     <para>Log into the user interface as an administrative user.</para>
+   </step>
+   <step>
+     <para>Select the Users tab.</para>
+   </step>
+   <step>
+     <para>Click the Username of the user that you want to delete.</para>
+   </step>
+   <step>
+     <para>On the user's profile page, click Delete.</para>
+   </step>
+   <step>
+     <para>Click OK to confirm the deletion.</para>
+     <para>The user is deleted from the internal repository.</para>
+   </step>
  </procedure>
  
 </section>
