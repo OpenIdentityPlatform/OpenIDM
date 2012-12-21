@@ -285,6 +285,7 @@
    </step>
  </procedure>
  
+ <!-- Not supported for Xpress
  <procedure>
    <title>To Deactivate a User Account</title>
    <step>
@@ -300,6 +301,7 @@
      to the system.</para>
    </step>  
  </procedure>
+ -->
  
   <procedure>
    <title>To Reset a User's Password</title>
