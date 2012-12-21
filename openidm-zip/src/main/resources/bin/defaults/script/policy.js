@@ -377,7 +377,7 @@ function checkExceptRoles(exceptRoles) {
 }
 
 function getSecurityContext(ctxt) {
-    if (typeof(ctxt) === 'undefined') {
+    if (typeof(ctxt) === 'undefined' || ctxt === null) {
         return null;
     } else if (typeof(ctxt.security) !== 'undefined') {
         return ctxt.security;

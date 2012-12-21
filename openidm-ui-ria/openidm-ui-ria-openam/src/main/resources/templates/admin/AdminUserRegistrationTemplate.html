@@ -1,0 +1,87 @@
+<div class="content-bg">
+    <h2>{{t "common.user.createNewAccount"}}</h2>
+    
+    <form action="" method="post" class="form large center">
+        <fieldset>
+            <div class="fields">
+                <div class="field">
+                    <label>{{t "common.user.username"}}</label> 
+                    <input type='text' name='userName' data-validation-dependents="password" /> <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
+                <div class="field">
+                    <label>{{t "common.user.emailAddress"}}</label> 
+                    <input type='text' name='email' /> 
+                    <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
+
+                <div class="field">
+                    <label>{{t "common.user.givenName"}}</label> 
+                    <input type='text' name='givenName' data-validation-dependents="password" /> 
+                    <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
+
+                <div class="field">
+                    <label>{{t "common.user.familyName"}}</label> 
+                    <input type='text' name='familyName' 
+                        data-validation-dependents="password" /> <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
+
+                <div class="field">
+                    <label>{{t "common.user.phoneNumber"}}</label> 
+                    <input type="text" name="phoneNumber" /> 
+
+                    <span class="error">x</span>
+                    <div class='validation-message'></div>
+                </div>
+                
+                <div class="field">
+                    <label>{{t "common.user.role"}}</label> 
+                    {{checkbox roles "roles"}}
+
+                    <span class="error"></span>
+                    <div class='validation-message'></div>
+                </div>
+                <div class="field">
+                    <label>{{t "openam.apps.available"}}</label> 
+                    {{checkbox apps "assignedDashboard"}}
+    
+                    <span class="error"></span>
+                    <div class='validation-message'></div>
+                </div>
+
+                <div class="group-field">
+                    <div class="group-field-inputs">
+                        <div class="field">
+                            <label>{{t "common.user.password"}}</label> 
+                            <input type='password' name='password' value='' data-validation-dependents="passwordConfirm"/>
+                            <span class="error">x</span>
+                        </div>
+
+                        <div class="field">
+                            <label>{{t "common.user.confirmPassword"}}</label> 
+                            <input type='password' name='passwordConfirm' value=''  data-validator="passwordConfirm" data-validator-event="keyup change" />
+                            <span class="error">x</span>
+                        </div>
+                    </div>
+                    <div class="group-field-errors validationRules" data-for-validator="password passwordConfirm">
+                        <div class="field-rule">
+                            <span class="error">x</span> 
+                            <span data-for-validator="passwordConfirm">{{t "common.form.validation.confirmationMatchesPassword"}}</span>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="field field-submit">
+                    <input type="submit" name="createButton" class="button" value='{{t "common.form.create"}}' />
+                    <div class="input-validation-message">{{t "common.form.validation.formContainsErrors"}}</div>    
+                </div>
+            </div>
+ 
+        </fieldset>
+    </form>
+
+</div>

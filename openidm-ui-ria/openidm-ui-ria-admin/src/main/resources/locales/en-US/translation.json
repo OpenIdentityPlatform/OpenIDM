@@ -287,7 +287,8 @@
     "openam" : {
         "apps" : {
             "header" : "My Applications",
-            "noneFound": "You have no applications assigned to you"
+            "noneFound": "You have no applications assigned to you",
+            "available": "Available Applications"
         }
     },    
     "openidm" : {

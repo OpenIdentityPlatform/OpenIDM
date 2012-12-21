@@ -52,18 +52,18 @@ def application = binding.variables.lnkId
 def alreadyAssigned = false
 def userId = binding.variables._requestor;
 
-def amUser = openidm.read("system/ldap/account/uid=" + userId + ",ou=People,dc=openam,dc=forgerock,dc=org");
+def amUser = openidm.query("managed/user", [_queryId:'for-userName',uid:userId]).result[0];
 
 for (app in amUser.assignedDashboard) {
     if (app.toLowerCase() == application.toLowerCase()) {
-    	out:println(userId + " already has " + app)
-    	alreadyAssigned = true
+        out:println(userId + " already has " + app)
+        alreadyAssigned = true
     }
 }
 
 if (!alreadyAssigned) {
-	amUser.assignedDashboard.push(application)
-	openidm.update("system/ldap/account/uid=" + userId + ",ou=People,dc=openam,dc=forgerock,dc=org", '', amUser)
+    amUser.assignedDashboard.push(application)
+    openidm.update("managed/user/" + amUser._id, amUser._rev, amUser)
 }
 
 ]]></script>
@@ -96,29 +96,29 @@ if (!alreadyAssigned) {
 
 &lt;div id=&quot;availableApps&quot;&gt;Loading Applications List From OpenAM...&lt;/div&gt;
 &lt;script&gt;
-$(&quot;#availableApps&quot;).on(&quot;click&quot;, &quot;a&quot;, function (e) {
-    e.preventDefault();
-    $(this).closest(&apos;ul&apos;).find(&apos;li&apos;).css(&apos;border-color&apos;, &apos;&apos;);
-    $(this).closest(&apos;li&apos;).css(&quot;border-color&quot;, &quot;red&quot;);
+
+    $(&quot;#availableApps&quot;).on(&quot;click&quot;, &quot;a&quot;, function (e) {
+        e.preventDefault();
+        $(this).closest(&apos;ul&apos;).find(&apos;li&apos;).css(&apos;border-color&apos;, &apos;&apos;);
+        $(this).closest(&apos;li&apos;).css(&quot;border-color&quot;, &quot;red&quot;);
 
 
-    $(&quot;#lnkId&quot;).val($(this).attr(&apos;appId&apos;));
-    $(&quot;#_businessKey&quot;).val($(this).attr(&apos;appId&apos;) + (new Date()).getTime());
+        $(&quot;#lnkId&quot;).val($(this).attr(&apos;appId&apos;));
+        $(&quot;#_businessKey&quot;).val($(this).attr(&apos;appId&apos;) + (new Date()).getTime());
+    });
+    
+    require([&quot;org/forgerock/openam/ui/dashboard/DashboardDelegate&quot;,&quot;org/forgerock/commons/ui/common/main/Configuration&quot;], function (am,conf) { 
+        $(&quot;#_requestor&quot;).val(conf.loggedUser.userName);
+        am.getAvailableApplications(function (data) {
+            var content = $(&quot;&lt;div/&gt;&quot;),i=0;
+
+            content.append(&quot;&lt;h2 class=&apos;header&apos;&gt;Available Applications&lt;/h2&gt;&lt;ul class=&apos;appsDashboard&apos;/&gt;&quot;);
+            for (i in data) {
+                content.find(&apos;ul&apos;).append(&apos;&lt;li&gt;&lt;a href=&quot;#&quot; appId=&quot;&apos; + data[i].dashboardName + &apos;&quot;&gt;&lt;img src=&quot;&apos; + data[i].dashboardIcon + &apos;&quot;&gt;&apos;+ data[i].dashboardName +&apos;&lt;/a&gt;&lt;/li&gt;&apos;);
+            }
+            $(&quot;#availableApps&quot;).empty().append(content);
         });
-        require([&quot;org/forgerock/openam/ui/dashboard/DashboardDelegate&quot;,&quot;org/forgerock/commons/ui/common/main/Configuration&quot;], function (am,conf) { 
-            $(&quot;#_requestor&quot;).val(conf.loggedUser.userName);
-            am.getAvailableApplications(function (data) {
-                    var content = $(&quot;&lt;div/&gt;&quot;),
-                                  sortedKeys = _.sortBy(_.keys(data), function(v) { return v; }),
-                                                i=0;
-
-        content.append(&quot;&lt;h2 class=&apos;header&apos;&gt;Available Applications&lt;/h2&gt;&lt;ul class=&apos;appsDashboard&apos;/&gt;&quot;);
-                for (i in sortedKeys) {
-                            content.find(&apos;ul&apos;).append(&apos;&lt;li&gt;&lt;a href=&quot;#&quot; appId=&quot;&apos; + sortedKeys[i] + &apos;&quot;&gt;&lt;img src=&quot;&apos; + data[sortedKeys[i]].dashboardIcon[0] + &apos;&quot;&gt;&apos;+ data[sortedKeys[i]].dashboardName[0] +&apos;&lt;/a&gt;&lt;/li&gt;&apos;);
-                                    }
-                                            $(&quot;#availableApps&quot;).empty().append(content);
-                                                        });
-                                                        });
+    });
 
 &lt;/script&gt;
 "></activiti:formProperty>

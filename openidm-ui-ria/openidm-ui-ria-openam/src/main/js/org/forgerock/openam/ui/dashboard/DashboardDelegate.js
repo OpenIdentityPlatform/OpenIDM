@@ -36,6 +36,18 @@ define("org/forgerock/openam/ui/dashboard/DashboardDelegate", [
 
     var obj = {}; 
 
+    obj.sortApps = function (apps) {
+
+        var sortedApps = _.map(_.sortBy(_.keys(apps), function (key){ return key; }), function (key) { 
+            var app = {}; 
+            app.id = key; 
+            _.each(apps[key], function (v,k) { app[k] = v[0]; });
+            return app; 
+        });
+
+        return sortedApps;
+    };
+
     obj.getMyApplications = function (callback) {
         if (typeof(obj.d) === "undefined") { 
             obj.d = new AbstractDelegate(configuration.globalData.openamBaseURL + "/json/dashboard");
@@ -44,7 +56,9 @@ define("org/forgerock/openam/ui/dashboard/DashboardDelegate", [
             url: "/assigned",
             headers: {"Cache-Control": "no-cache"},
             type: "GET",
-            success: callback
+            success: _.bind(function (apps) {
+                callback(this.sortApps(apps));
+            }, this)
         });
         
     };
@@ -57,7 +71,9 @@ define("org/forgerock/openam/ui/dashboard/DashboardDelegate", [
             url: "/available",
             headers: {"Cache-Control": "no-cache"},
             type: "GET",
-            success: callback
+            success: _.bind(function (apps) {
+                callback(this.sortApps(apps));
+            }, this)
         });
 
     };

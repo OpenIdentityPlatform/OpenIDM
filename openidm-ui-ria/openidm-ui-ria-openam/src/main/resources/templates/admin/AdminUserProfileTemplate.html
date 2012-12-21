@@ -26,6 +26,12 @@
                         <div class="validation-message"></div>
                     </div>
                     <div class="field">
+                        <label class="light">{{t "common.user.familyName"}}</label>
+                        <input type="text" name="familyName" />
+                        <span></span>
+                        <div class="validation-message"></div>
+                    </div>                    
+                    <div class="field">
                         <label class="light">{{t "common.user.accountStatus"}}</label> 
                         <select name="accountStatus" >
                             <option value="active">{{t "common.user.active"}}</option>
@@ -66,14 +72,15 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label class="light">{{t "common.user.familyName"}}</label>
-                        <input type="text" name="familyName" />
-                        <span></span>
-                        <div class="validation-message"></div>
-                    </div>
-                    <div class="field">
                         <label class="light">{{t "common.user.role"}}</label> 
                         {{checkbox roles "roles"}}
+        
+                        <span class="error"></span>
+                        <div class='validation-message'></div>
+                    </div>
+                    <div class="field">
+                        <label class="light">{{t "openam.apps.available"}}</label> 
+                        {{checkbox apps "assignedDashboard"}}
         
                         <span class="error"></span>
                         <div class='validation-message'></div>

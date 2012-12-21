@@ -2,6 +2,67 @@
     "mappings" : [
         {
             "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "properties" : [
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "familyName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "email"
+                },
+                {
+                    "source" : "uid",
+                    "target" : "userName"
+                },
+                {
+                    "source" : "assignedDashboard",
+                    "target" : "assignedDashboard"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "UNLINK"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "managedUser_systemLdapAccounts",
             "source" : "managed/user",
             "target" : "system/ldap/account",
             "correlationQuery" : {
@@ -70,52 +131,6 @@
                 {
                     "situation" : "UNQUALIFIED",
                     "action" : "DELETE"
-                },
-                {
-                    "situation" : "UNASSIGNED",
-                    "action" : "IGNORE"
-                }
-            ]
-        },
-        {
-            "name" : "managedUser_systemLdapAccounts",
-            "source" : "system/ldap/account",
-            "target" : "managed/user",
-            "links" : "systemLdapAccounts_managedUser",
-            "properties" : [
-                {
-                    "source" : "assignedDashboard",
-                    "target" : "assignedDashboard"
-                }
-            ],
-            "policies" : [
-                {
-                    "situation" : "CONFIRMED",
-                    "action" : "UPDATE"
-                },
-                {
-                    "situation" : "FOUND",
-                    "action" : "UPDATE"
-                },
-                {
-                    "situation" : "ABSENT",
-                    "action" : "IGNORE"
-                },
-                {
-                    "situation" : "AMBIGUOUS",
-                    "action" : "IGNORE"
-                },
-                {
-                    "situation" : "MISSING",
-                    "action" : "IGNORE"
-                },
-                {
-                    "situation" : "SOURCE_MISSING",
-                    "action" : "IGNORE"
-                },
-                {
-                    "situation" : "UNQUALIFIED",
-                    "action" : "IGNORE"
                 },
                 {
                     "situation" : "UNASSIGNED",
