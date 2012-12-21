@@ -19,7 +19,7 @@ to a default apache installation:
 
  1) Setting the DocumentRoot to the appropriate copy of the UI:
  
-    DocumentRoot /path/to/openidm/samples/openam/ui/openidm-ui-ria-admin-apache/
+    DocumentRoot /path/to/openidm/samples/openam/openidm-ui-ria-openam/
     (You may need to adjust the related 'Directory' tag as well to match this setting)
     
  2) Setting a reverse proxy for OpenIDM
