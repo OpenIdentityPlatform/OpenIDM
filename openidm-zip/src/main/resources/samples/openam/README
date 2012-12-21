@@ -39,7 +39,7 @@ Start the OpenAM Sample
 =======================
 
 From your openidm root folder, run this command:
-./startup.sh -p samples/openam/
+./startup.sh -p samples/openam/ -c samples/openam/bin/launcher.json 
 
 Setup of provisioning to external systems
 =========================================

@@ -37,6 +37,7 @@
     <modules>
         <module>openidm-ui-ria-apps</module>
         <module>openidm-ui-ria-admin</module>
+        <module>openidm-ui-ria-openam</module>
     </modules>
 
     <dependencyManagement>

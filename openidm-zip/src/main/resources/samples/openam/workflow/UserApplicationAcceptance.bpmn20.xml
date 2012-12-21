@@ -105,7 +105,7 @@ $(&quot;#availableApps&quot;).on(&quot;click&quot;, &quot;a&quot;, function (e) 
     $(&quot;#lnkId&quot;).val($(this).attr(&apos;appId&apos;));
     $(&quot;#_businessKey&quot;).val($(this).attr(&apos;appId&apos;) + (new Date()).getTime());
         });
-        require([&quot;org/forgerock/openam/ui/apps/AMDelegate&quot;,&quot;org/forgerock/commons/ui/common/main/Configuration&quot;], function (am,conf) { 
+        require([&quot;org/forgerock/openam/ui/dashboard/DashboardDelegate&quot;,&quot;org/forgerock/commons/ui/common/main/Configuration&quot;], function (am,conf) { 
             $(&quot;#_requestor&quot;).val(conf.loggedUser.userName);
             am.getAvailableApplications(function (data) {
                     var content = $(&quot;&lt;div/&gt;&quot;),

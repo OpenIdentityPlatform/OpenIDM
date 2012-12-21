@@ -405,20 +405,6 @@
             </includes>
             <outputDirectory>/openidm/samples/openam/script</outputDirectory>
         </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/openam/ui-diff</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/openam/ui/openidm-ui-ria-admin</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/openam/ui-diff</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/openam/ui/openidm-ui-ria-admin-apache</outputDirectory>
-        </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
@@ -453,11 +439,13 @@
                 <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
             </includes>
         </dependencySet>
+        
+        <!-- Expand AM-enhanced version of OpenIDM UI for AM sample -->
         <dependencySet>
             <unpack>true</unpack>
-            <outputDirectory>/openidm/samples/openam/ui</outputDirectory>
+            <outputDirectory>/openidm/samples/openam</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
+                <include>org.forgerock.openidm:openidm-ui-ria-openam</include>
             </includes>
         </dependencySet>
 
