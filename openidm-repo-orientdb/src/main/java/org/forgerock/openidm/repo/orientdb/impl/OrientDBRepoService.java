@@ -265,6 +265,8 @@ public class OrientDBRepoService extends ObjectSetJsonResource implements Reposi
             db.commit();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
+            // Set ID to return to caller
+            obj.put(DocumentUtil.TAG_ID, updatedDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY));
             logger.debug("Committed update for id: {} revision: {}", fullId, updatedDoc.getVersion());
             logger.trace("Update payload for id: {} doc: {}", fullId, updatedDoc);
         } catch (OConcurrentModificationException ex) {
