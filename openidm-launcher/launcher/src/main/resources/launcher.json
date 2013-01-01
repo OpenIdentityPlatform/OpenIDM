@@ -2,12 +2,12 @@
     "bundle":{
         "containers":[
             {
-                "location":"&{root}/bundle",
+                "location":"&{launcher.install.location}/bundle",
                 "includes":["*.jar"],
                 "action":"install.start"
             }
         ]
     },
-    "config.properties":"&{root}/conf/config.properties",
-    "system.properties":"&{root}/conf/system.properties"
+    "config.properties":"&{launcher.project.location}/conf/config.properties",
+    "system.properties":"&{launcher.project.location}/conf/system.properties"
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -119,10 +119,12 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
     private String configFile;
 
+    @Option(name = "-P", usage = "custom parameters to configure the container", metaVar = "attribute=value")
     private Map bootParameters;
 
     // receives other command line parameters than options
-    @Argument
+    // Disallow other arguments https://bugster.forgerock.org/jira/browse/OPENIDM-1021
+    //@Argument
     private List<String> arguments = new ArrayList<String>();
 
     /**
@@ -242,8 +244,6 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         return bootParameters;
     }
 
-    @Option(name = "-P", usage = "custom parameters to configure the container",
-            metaVar = "attribute=value")
     public void setBootParameters(Map bootParameters) {
         this.bootParameters = bootParameters;
     }
