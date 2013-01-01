@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,6 +28,8 @@ import java.io.File;
 import java.net.URLDecoder;
 import java.util.concurrent.Semaphore;
 
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
@@ -39,13 +41,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
+import static org.fest.assertions.api.Assertions.*;
 
 /**
  * A NAME does ...
  * 
  * @author Laszlo Hordos
  */
-public class OSGiServiceBeanTest {
+public class OSGiFrameworkServiceTest {
 
     private String[] arguments = null;
     private String testName;
@@ -53,7 +56,7 @@ public class OSGiServiceBeanTest {
     private final Semaphore available = new Semaphore(1, true);
 
     @Factory(dataProvider = "provider")
-    public OSGiServiceBeanTest(String testName, String[] args) {
+    public OSGiFrameworkServiceTest(String testName, String[] args) {
         this.arguments = args;
         this.testName = testName;
     }
@@ -62,14 +65,14 @@ public class OSGiServiceBeanTest {
     public static Object[][] provider() throws Exception {
         String test1 =
                 URLDecoder.decode(
-                        new File(OSGiServiceBeanTest.class.getResource("/test1/").toURI())
+                        new File(OSGiFrameworkServiceTest.class.getResource("/test1/").toURI())
                                 .toString(), "utf-8");
         String test2 =
                 URLDecoder.decode(
-                        new File(OSGiServiceBeanTest.class.getResource("/test2/").toURI())
+                        new File(OSGiFrameworkServiceTest.class.getResource("/test2/").toURI())
                                 .toString(), "utf-8");
         String install =
-                URLDecoder.decode(new File(OSGiServiceBeanTest.class.getResource("/").toURI()
+                URLDecoder.decode(new File(OSGiFrameworkServiceTest.class.getResource("/").toURI()
                         .resolve("../osgi/")).toString(), "utf-8");
         return new Object[][] {
             new Object[] {
@@ -129,5 +132,41 @@ public class OSGiServiceBeanTest {
         if ("test2".equals(testName)) {
             Assert.assertEquals(6, installedBundles.length, "Only 6 bundles should be installed");
         }
+    }
+
+    @Test
+    public void parserTestOk() throws Exception {
+        OSGiFrameworkService testable = new OSGiFrameworkService();
+        CmdLineParser parser = new CmdLineParser(testable);
+
+        String[] arguments =
+                { "-i", "install-location", "-p", "project-location", "-w", "working-location",
+                    "-c", "launcher.json", "-s", "storage-location", "-P", "key1=value1", "-P",
+                    "key2=value2", "-v", "-t" };
+
+        parser.parseArgument(arguments);
+        Assert.assertEquals(testable.getInstallDir(), "install-location");
+        Assert.assertEquals(testable.getProjectDir(), "project-location");
+        Assert.assertEquals(testable.getWorkingDir(), "working-location");
+        Assert.assertEquals(testable.getConfigFile(), "launcher.json");
+        Assert.assertEquals(testable.getStorageDir(), "storage-location");
+        Assert.assertEquals(testable.isVerbose(), true);
+        Assert.assertEquals(testable.isNewThread(), true);
+        assertThat(testable.getBootParameters()).hasSize(2).contains(entry("key1", "value1"))
+                .contains(entry("key2", "value2"));
+    }
+
+    @Test(expectedExceptions = CmdLineException.class)
+    public void parserTestFail() throws Exception {
+        OSGiFrameworkService testable = new OSGiFrameworkService();
+        CmdLineParser parser = new CmdLineParser(testable);
+
+        String[] arguments =
+                { "-i", "install-location", "-p", "project-location", "-w", "working-location",
+                    "-c", "launcher.json", "-s", "storage-location", "-P", "key=value1", "-v",
+                    "-t", "must-fail" };
+
+        parser.parseArgument(arguments);
+        Assert.fail("Argument parser should fail");
     }
 }
