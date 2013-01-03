@@ -73,6 +73,7 @@
             "name" : "managedUser_systemLdapAccounts",
             "source" : "managed/user",
             "target" : "system/ldap/account",
+            "links" : "systemLdapAccounts_managedUser",
             "correlationQuery" : {
                 "type" : "text/javascript",
                 "file" : "script/ldapBackCorrelationQuery.js"

@@ -123,6 +123,11 @@
                     "nativeName" : "mail",
                     "nativeType" : "string"
                 },
+                "telephonenumber" : {
+                    "type" : "string",
+                    "nativeName" : "telephonenumber",
+                    "nativeType" : "string"
+                },
                 "sn" : {
                     "type" : "string",
                     "nativeName" : "sn",
