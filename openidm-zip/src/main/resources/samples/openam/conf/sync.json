@@ -3,6 +3,10 @@
         {
             "name" : "systemLdapAccounts_managedUser",
             "source" : "system/ldap/account",
+            "validSource" : {
+                "type" : "text/javascript",
+                "source" : "source.uid != 'openidm-admin'"
+            },
             "target" : "managed/user",
             "properties" : [
                 {
@@ -16,6 +20,10 @@
                 {
                     "source" : "mail",
                     "target" : "email"
+                },
+                {
+                    "source" : "telephonenumber",
+                    "target" : "phoneNumber"
                 },
                 {
                     "source" : "uid",
@@ -88,7 +96,11 @@
                 },
                 {
                     "source" : "password",
-                    "target" : "__PASSWORD__"
+                    "target" : "__PASSWORD__",
+                    "condition" : {
+                        "type" : "text/javascript",
+                        "source" : "(object.password != null)"
+                    }
                 },
                 {
                     "source" : "assignedDashboard",
@@ -97,6 +109,83 @@
                 {
                     "source" : "email",
                     "target" : "mail"
+                },
+                {
+                    "source" : "phoneNumber",
+                    "target" : "telephonenumber"
+                }
+            ],
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "target.__PASSWORD__ = source.password;target.dn = 'uid=' + source.userName + ',ou=People,dc=openam,dc=forgerock,dc=org';"
+            },
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "LINK"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "CREATE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
+        },
+        {
+            "name" : "internalUser_systemLdapAccounts",
+            "source" : "repo/internal/user",
+            "validSource" : {
+                "type" : "text/javascript",
+                "source" : "source.userName == 'openidm-admin'"
+            },
+            "target" : "system/ldap/account",
+            "correlationQuery" : {
+                "type" : "text/javascript",
+                "file" : "script/ldapBackCorrelationQuery.js"
+            },
+            "properties" : [
+                {
+                    "default" : "openidm-admin",
+                    "target" : "givenName"
+                },
+                {
+                    "default" : "openidm-admin",
+                    "target" : "sn"
+                },
+                {
+                    "default" : "openidm-admin",
+                    "target" : "cn"
+                },
+                {
+                    "source" : "userName",
+                    "target" : "uid"
+                },
+                {
+                    "source" : "password",
+                    "target" : "__PASSWORD__"
                 }
             ],
             "onCreate" : {

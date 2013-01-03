@@ -35,6 +35,7 @@ var policyConfig = {
             {   "policyId" : "not-empty",
                 "policyExec" : "notEmpty",
                 "clientValidation": true,
+                "validateOnlyIfPresent": true,
                 "policyRequirements" : ["REQUIRED"]
             },
             {

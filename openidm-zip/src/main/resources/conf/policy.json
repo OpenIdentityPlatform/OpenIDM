@@ -43,9 +43,6 @@
                     "name" : "password",
                     "policies" : [
                         {
-                            "policyId" : "required"
-                        },
-                        {
                             "policyId" : "not-empty"
                         },
                         {
