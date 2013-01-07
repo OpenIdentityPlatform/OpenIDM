@@ -39,18 +39,18 @@
  <para>By default OpenIDM uses OrientDB for its internal repository so that you
  do not have to install a database in order to evaluate OpenIDM. Before using
  OpenIDM in production, you must however replace OrientDB.</para>
+ 
+ <para>OpenIDM <?eval ${docTargetVersion}?> supports the use of <link 
+ xlink:href="http://dev.mysql.com/downloads/mysql/" xlink:show="new">MySQL</link> 
+ and MS SQL as an internal repository. For details of the supported versions, 
+ see <link xlink:href="release-notes#chap-before-you-install" 
+ xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You Install 
+ OpenIDM Software</citetitle></link> in the <citetitle>Release Notes</citetitle>. 
+ After you have installed MySQL or MS SQL on the local host and <emphasis>before 
+ starting OpenIDM for the first time</emphasis>, perform the following steps.</para>
 
  <procedure xml:id="repository-mysql">
   <title>To Set Up OpenIDM With MySQL</title>
-
-  <para>OpenIDM <?eval ${docTargetVersion}?> supports use of <link
-  xlink:href="http://dev.mysql.com/downloads/mysql/" xlink:show="new"
-  >MySQL</link> as an internal repository. For details of the supported 
-  versions of MySQL, see <link xlink:href="release-notes#chap-before-you-install" 
-  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Before You Install 
-  OpenIDM Software</citetitle></link> in the <citetitle>Release Notes</citetitle>.
-  After you have installed MySQL on the local host and <emphasis>before starting 
-  OpenIDM for the first time</emphasis>, perform the following steps.</para>
 
   <step>
    <para>Download <link xlink:show="new"
@@ -143,9 +143,29 @@ mysql&gt; show tables;
 },</programlisting>
   </step>
  </procedure>
+ 
+ <procedure xml:id="repository-mssql">
+  <title>To Set Up OpenIDM With MS SQL</title>
+  
+  <para>**This procedure is still in progress.**</para>
+  <step><para>TBD</para></step>
+  
+  <!--  
 
- <para>After setting up MySQL for use as the OpenIDM internal repository,
- you can start OpenIDM. After startup, you should see that
+1) setup ms sql and allow sql authorization for your account
+2) import openidm.sql script from openidm/db/scripts/mssql/openidm.sql in the DB
+3) create the .jar file as described in openidm/db/scripts/mssql/sqljdbc4.bnd
+4) copy it to bundles
+5) copy repo./openidm/samples/misc/jdbc-mssql.json to conf
+6) rename it to repo.jdbc.json
+7) edit the connecting credentials
+8) delete repo.orientdb.json
+-->
+
+ </procedure>
+
+ <para>After setting up MySQL or MS SQL for use as the OpenIDM internal 
+ repository, you can start OpenIDM. After startup, you should see that
  <literal>repo.jdbc</literal> is <literal>active</literal>, whereas
  <literal>repo.orientdb</literal> is <literal>unsatisfied</literal>.</para>
 
