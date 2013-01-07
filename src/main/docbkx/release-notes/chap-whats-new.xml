@@ -107,6 +107,9 @@
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
+    <para>Support for MS SQL JDBC as an internal repository.</para>
+  </listitem>  
+  <listitem>
     <para>Enhanced reconciliation service, accessible over REST.</para>
     <para>For more information, see 
     <link xlink:href="integrators-guide#chap-synchronization" 
