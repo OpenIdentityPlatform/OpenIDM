@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,16 +25,20 @@ package org.forgerock.openidm.audit.impl;
 
 import java.util.Map;
 
-import org.forgerock.openidm.objset.ObjectSet;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 
 import org.osgi.framework.BundleContext;
 
 /**
  * OpenIDM audit logger
+ *
  * @author aegloff
  */
-public interface AuditLogger extends ObjectSet {
-    
+public interface AuditLogger {
+
     /**
      * Set the audit logger configuration which is a logger specific 
      * map 
@@ -42,9 +46,12 @@ public interface AuditLogger extends ObjectSet {
      * @param ctx
      */
     void setConfig(Map config, BundleContext ctx);
-    
+
     /**
      * Cleanup called when auditlogger no longer needed
      */
     void cleanup();
+    public void create(String auditType, Map<String, Object> event) throws ResourceException;
+
+    //void handle(ServerContext context, Request request, Map<String,Object> event) throws ResourceException;
 }

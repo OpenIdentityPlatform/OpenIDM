@@ -37,12 +37,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-httpcontext</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <!-- Workaround http://team.ops4j.org/browse/PAXWEB-443
         <dependency>

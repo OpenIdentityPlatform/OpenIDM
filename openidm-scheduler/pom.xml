@@ -37,12 +37,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-quartz-fragment</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -101,7 +101,7 @@
                         <Bundle-Activator>org.forgerock.openidm.scheduler.impl.Activator</Bundle-Activator>
                         <Private-Package>org.forgerock.openidm.scheduler.impl.*</Private-Package>
                         <Export-Package>
-                            org.forgerock.openidm.scheduler;version="${openidm.version}"
+                            org.forgerock.openidm.scheduler;version="${project.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

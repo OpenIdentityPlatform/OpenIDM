@@ -34,6 +34,24 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -50,17 +68,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Deprecated
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 
 /**
  * Provides access to OSGi configuration
@@ -78,7 +85,7 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "config")
 })
 @Service
-public class ConfigObjectService extends ObjectSetJsonResource {
+public class ConfigObjectService implements CollectionResourceProvider {
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
 
@@ -100,8 +107,11 @@ public class ConfigObjectService extends ObjectSetJsonResource {
      * @throws ForbiddenException  if access to the object is forbidden.
      * @throws BadRequestException if the passed identifier is invalid
      */
-    @Override
-    public Map<String, Object> read(String fullId) throws ObjectSetException {
+    public void readInstance(ServerContext context, String resourceId, ReadRequest request,
+                             ResultHandler<Resource> handler) {
+        //TODO Fix fullId
+        String fullId = request.getResourceName();
+
         logger.debug("Invoking read {}", fullId);
         Map<String, Object> result = null;
 
@@ -145,17 +155,17 @@ public class ConfigObjectService extends ObjectSetJsonResource {
                 }
                 Dictionary props = config.getProperties();
                 JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-                JsonValue value = enhancedConfig.getConfiguration(props, context.getBundleContext(), fullId, false);
+                JsonValue value = enhancedConfig.getConfiguration(props, this.context.getBundleContext(), fullId, false);
                 result = value.asMap();
                 logger.debug("Read configuration for service {}", fullId);
             }
-        } catch (ObjectSetException ex) {
-            throw ex;
+        } catch (ResourceException ex) {
+            handler.handleError(ex);
         } catch (Exception ex) {
             logger.warn("Failure to load configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to load configuration for " + fullId + ": " + ex.getMessage(), ex);
+            handler.handleError(new InternalServerErrorException("Failure to load configuration for " + fullId + ": " + ex.getMessage(), ex));
         }
-        return result;
+        handler.handleResult(new Resource("id","rev",new JsonValue(result)));
     }
 
     /**
@@ -171,11 +181,13 @@ public class ConfigObjectService extends ObjectSetJsonResource {
      * @throws PreconditionFailedException if an object with the same ID already exists.
      * @throws BadRequestException         if the passed identifier is invalid
      */
-    @Override
-    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        logger.debug("Invoking create configuration {} {}", fullId, obj);
+    public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        //TODO Fix fullId
+        String fullId = request.getResourceName() + "/" + request.getNewResourceId();
+
+        logger.debug("Invoking create configuration {} {}", fullId, request.getContent());
         if (fullId == null) {
-            throw new BadRequestException("The passed identifier to create is null");
+            handler.handleError( new BadRequestException("The passed identifier to create is null"));
         }
         ParsedId parsedId = new ParsedId(fullId);
         try {
@@ -191,26 +203,26 @@ public class ConfigObjectService extends ObjectSetJsonResource {
                 config = configAdmin.getConfiguration(qualifiedPid, null);
             }
             if (config.getProperties() != null) {
-                throw new PreconditionFailedException("Can not create a new configuration with ID "
-                        + parsedId + ", configuration for this ID already exists.");
+                handler.handleError( new PreconditionFailedException("Can not create a new configuration with ID "
+                        + parsedId + ", configuration for this ID already exists."));
             }
 
-            Dictionary dict = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, null, new JsonValue(obj));
+            Dictionary dict = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, null, request.getContent());
             if (parsedId.isFactoryConfig()) {
                 dict.put(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS, parsedId.instanceAlias); // The alias for the PID as understood by fileinstall
             }
 
             config.update(dict);
             logger.debug("Created new configuration for {} with {}", fullId, dict);
-        } catch (ObjectSetException ex) {
-            throw ex;
+        } catch (ResourceException ex) {
+            handler.handleError(ex);
         } catch (WaitForMetaData ex) {
             logger.info("No meta-data provider available yet to create and encrypt configuration for {}, retry later.", fullId, ex);
-            throw new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for "
-                    + fullId + ", retry later.", ex);
+            handler.handleError( new InternalServerErrorException("No meta-data provider available yet to create and encrypt configuration for "
+                    + fullId + ", retry later.", ex));
         } catch (Exception ex) {
             logger.warn("Failure to create configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex);
+            handler.handleError( new InternalServerErrorException("Failure to create configuration for " + fullId + ": " + ex.getMessage(), ex));
         }
     }
 
@@ -233,10 +245,13 @@ public class ConfigObjectService extends ObjectSetJsonResource {
      * @throws BadRequestException         if the passed identifier is invalid
      */
     @Override
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        logger.debug("Invoking update configuration {} {}", fullId, rev);
+    public void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
+                               ResultHandler<Resource> handler) {
+        //TODO Fix fullId
+        String fullId = request.getResourceName();
+        logger.debug("Invoking update configuration {} {}", fullId, request.getRevision());
         if (fullId == null) {
-            throw new BadRequestException("The passed identifier to update is null");
+            handler.handleError( new BadRequestException("The passed identifier to update is null"));
         }
         try {
             ParsedId parsedId = new ParsedId(fullId);
@@ -246,17 +261,32 @@ public class ConfigObjectService extends ObjectSetJsonResource {
             if (existingConfig == null) {
                 throw new NotFoundException("No existing configuration found for " + fullId + ", can not update the configuration.");
             }
-            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, new JsonValue(obj));
+            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, request.getNewContent());
             config.update(existingConfig);
             logger.debug("Updated existing configuration for {} with {}", fullId, existingConfig);
-        } catch (ObjectSetException ex) {
-            throw ex;
+        } catch (ResourceException ex) {
+            handler.handleError(ex);
         } catch (Exception ex) {
             logger.warn("Failure to update configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to update configuration for " + fullId + ": " + ex.getMessage(), ex);
+            handler.handleError( new InternalServerErrorException("Failure to update configuration for " + fullId + ": " + ex.getMessage(), ex));
         }
     }
 
+    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
+
+    public void actionInstance(ServerContext context, String resourceId, ActionRequest request, ResultHandler<JsonValue> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
+
+    public void patchInstance(ServerContext context, String resourceId, PatchRequest request, ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
+
+    public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
 
     /**
      * Deletes the specified object from the object set.
@@ -269,10 +299,13 @@ public class ConfigObjectService extends ObjectSetJsonResource {
      * @throws PreconditionFailedException if version did not match the existing object in the set.
      */
     @Override
-    public void delete(String fullId, String rev) throws ObjectSetException {
-        logger.debug("Invoking delete configuration {} {}", fullId, rev);
+    public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
+                               ResultHandler<Resource> handler) {
+        //TODO Fix fullId
+        String fullId = request.getResourceName();
+        logger.debug("Invoking delete configuration {} {}", fullId, request.getRevision());
         if (fullId == null) {
-            throw new BadRequestException("The passed identifier to delete is null");
+            handler.handleError( new BadRequestException("The passed identifier to delete is null"));
         }
         try {
             Configuration config = findExistingConfiguration(fullId);
@@ -283,11 +316,11 @@ public class ConfigObjectService extends ObjectSetJsonResource {
             }
             config.delete();
             logger.debug("Deleted configuration for {}", fullId);
-        } catch (ObjectSetException ex) {
-            throw ex;
+        } catch (ResourceException ex) {
+            handler.handleError(ex);
         } catch (Exception ex) {
             logger.warn("Failure to delete configuration for {}", fullId, ex);
-            throw new InternalServerErrorException("Failure to delete configuration for " + fullId + ": " + ex.getMessage(), ex);
+            handler.handleError( new InternalServerErrorException("Failure to delete configuration for " + fullId + ": " + ex.getMessage(), ex));
         }
     }
 

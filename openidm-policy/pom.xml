@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -91,7 +91,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.openidm.policy;version=${openidm.version},
+                            org.forgerock.openidm.policy;version=${project.version},
                         </Export-Package>
                     </instructions>
                 </configuration>

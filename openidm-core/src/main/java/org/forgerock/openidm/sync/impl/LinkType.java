@@ -31,10 +31,7 @@ import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.sync.SynchronizationException;
+
 
 /**
  * Represents the sharable Link Types, 

@@ -37,17 +37,17 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -57,7 +57,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -87,7 +87,7 @@
                 <configuration>
                     <instructions>
                         <Private-Package>org.forgerock.openidm.audit.impl.*</Private-Package>
-                        <Export-Package>org.forgerock.openidm.audit;version="${openidm.version}"</Export-Package>
+                        <!--Export-Package>org.forgerock.openidm.audit;version="${project.version}"</Export-Package-->
                     </instructions>
                 </configuration>
             </plugin>

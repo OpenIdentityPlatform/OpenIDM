@@ -40,12 +40,16 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.JsonResourceAccessor;
-import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -125,7 +129,7 @@ public class RepoJobStore implements JobStore {
     /**
      * The Repository Service Accessor
      */
-    private static JsonResourceAccessor accessor = null;
+    private static Connection accessor = null;
     
     /**
      * Creates a new <code>RepoJobStore</code>.
@@ -198,18 +202,11 @@ public class RepoJobStore implements JobStore {
      * 
      * @param router the router to set
      */
-    public void setRepositoryService(RepositoryService service) {
-        accessor = new JsonResourceAccessor(service, null);
+    public void setRepositoryService(Router service) {
+        //TODO Fix the context and the router
+        accessor = Resources.newInternalConnection(service);
     }
-    
-    /**
-     * An external method for setting the router (used in test cases).
-     * 
-     * @param router the router to set
-     */
-    public static void setService(RepositoryService service) {
-        accessor = new JsonResourceAccessor(service, null);
-    }
+
     
     @Override
     public void schedulerStarted() throws SchedulerException {
@@ -469,7 +466,7 @@ public class RepoJobStore implements JobStore {
             try {
                 // Get job group
                 jgw = getOrCreateJobGroupWrapper(jobGroup);
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error storing job", e);
                 throw new JobPersistenceException("Error" + " storing job", e);
             }
@@ -495,7 +492,7 @@ public class RepoJobStore implements JobStore {
                     logger.debug("Creating Job {} in group {}", new Object[] {jobName,jobGroup});
                     accessor.create(jobId, jw.getValue());
                 }
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error storing job", e);
                 throw new JobPersistenceException("Error" + " storing job", e);
             }
@@ -525,7 +522,7 @@ public class RepoJobStore implements JobStore {
             try {
                 // Get trigger group
                 tgw = getOrCreateTriggerGroupWrapper(groupName);
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error storing trigger", e);
                 throw new JobPersistenceException("Error" + " storing trigger", e);
             }
@@ -557,7 +554,7 @@ public class RepoJobStore implements JobStore {
                     logger.debug("Creating Trigger {}", triggerId);
                     accessor.create(triggerId, tw.getValue());
                 }
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error storing trigger", e);
                 throw new JobPersistenceException("Error" + " storing trigger", e);
             }
@@ -670,7 +667,7 @@ public class RepoJobStore implements JobStore {
         List<String> names = null;
         try {
             names = getOrCreateRepoList(getCalendarNamesRepoId(), "names");
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error getting calendar names", e);
             throw new JobPersistenceException("Error getting calendar names", e);
         }
@@ -710,7 +707,7 @@ public class RepoJobStore implements JobStore {
         List<String> names = null;
         try {
             names = getOrCreateRepoList(getJobGroupNamesRepoId(), "names");
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error getting job group names", e);
             throw new JobPersistenceException("Error getting job group names", e);
         }
@@ -730,7 +727,7 @@ public class RepoJobStore implements JobStore {
                 List<String> names = jgw.getJobNames();
                 return names.toArray(new String[names.size()]);
             }
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error getting job names", e);
             throw new JobPersistenceException("Error getting job names", e);
         }
@@ -791,7 +788,7 @@ public class RepoJobStore implements JobStore {
             if (names == null) {
                 names = new ArrayList<String>();
             }
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error getting paused trigger groups", e);
             throw new JobPersistenceException("Error getting paused trigger groups", e);
         }
@@ -803,7 +800,7 @@ public class RepoJobStore implements JobStore {
         List<String> names = null;
         try {
             names = getOrCreateRepoList(getTriggerGroupNamesRepoId(), "names");
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error getting trigger group names", e);
             throw new JobPersistenceException("Error getting trigger group names", e);
         }
@@ -823,7 +820,7 @@ public class RepoJobStore implements JobStore {
                 List<String> names = tgw.getTriggerNames();
                 return names.toArray(new String[names.size()]);
             }    
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error getting trigger names", e);
             throw new JobPersistenceException("Error getting trigger names", e);
         }
@@ -1012,7 +1009,7 @@ public class RepoJobStore implements JobStore {
                 } else {
                     return false;
                 }
-            } catch (ObjectSetException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error removing calendar {}", name, e);
                 throw new JobPersistenceException("Error deleting calendar", e);
             } catch (Exception e) {
@@ -1049,7 +1046,7 @@ public class RepoJobStore implements JobStore {
                 logger.debug("Deleting job {} in group {}", new Object[]{jobName, groupName});
                 accessor.delete(jobId, oldJw.getRevision());
                 return true;
-            } catch (ObjectSetException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error removing job {} ", jobName, e);
                 throw new JobPersistenceException("Error removing job", e);
             } catch (Exception e) {
@@ -1331,7 +1328,7 @@ public class RepoJobStore implements JobStore {
             }
             JobWrapper jw = new JobWrapper(jobMap);
             return jw;
-        } catch (ObjectSetException e) {
+        } catch (ResourceException e) {
             logger.warn("Error retrieving job", e);
             throw new JobPersistenceException("Error retrieving job", e);
         } catch (Exception e) {
@@ -1353,7 +1350,7 @@ public class RepoJobStore implements JobStore {
                 }
                 CalendarWrapper cal = new CalendarWrapper(calMap);
                 return cal;
-            } catch (ObjectSetException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error retrieving calendar", e);
                 throw new JobPersistenceException("Error retrieving calendar", e);
             } catch (Exception e) {
@@ -1542,11 +1539,13 @@ public class RepoJobStore implements JobStore {
 
     }
     
-    private JsonValue readFromRepo(String repoId) throws JsonResourceException {
+    private Resource readFromRepo(String repoId) throws ResourceException {
         try {
-            return accessor.read(repoId);
+            //TODO Get context
+            return accessor.read(new RootContext(), Requests.newReadRequest("repo",repoId));
         } catch (NotFoundException e) {
-            return new JsonValue(null);
+            return null;
+            //return new JsonValue(null);
         }
     }
 
@@ -1600,7 +1599,7 @@ public class RepoJobStore implements JobStore {
      * @throws ObjectSetException
      */
     private TriggerGroupWrapper getOrCreateTriggerGroupWrapper(String groupName) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
@@ -1635,7 +1634,7 @@ public class RepoJobStore implements JobStore {
      * @throws ObjectSetException
      */
     private JobGroupWrapper getOrCreateJobGroupWrapper(String groupName) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
@@ -1683,7 +1682,7 @@ public class RepoJobStore implements JobStore {
                         retries++;
                     }
                 }
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 throw new JobPersistenceException("Error adding waiting trigger", e);
             }
         }
@@ -1712,7 +1711,7 @@ public class RepoJobStore implements JobStore {
                     }
                 }
                 return result;
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 throw new JobPersistenceException("Error removing waiting trigger", e);
             }
         }
@@ -1740,7 +1739,7 @@ public class RepoJobStore implements JobStore {
                         retries++;
                     }
                 }
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 throw new JobPersistenceException("Error adding waiting trigger", e);
             }
         }
@@ -1770,7 +1769,7 @@ public class RepoJobStore implements JobStore {
                     }
                 }
                 return result;
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 throw new JobPersistenceException("Error removing waiting trigger", e);
             }
         }
@@ -1808,7 +1807,7 @@ public class RepoJobStore implements JobStore {
                 JsonValue newValue = accessor.update(id, (String)map.get("_rev"), new JsonValue(map));
                 acquiredTriggers.setRevision((String)newValue.asMap().get("_rev"));
                 return true;
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 throw new JobPersistenceException("Error updating acquired triggers", e);
             }
         }
@@ -1864,7 +1863,7 @@ public class RepoJobStore implements JobStore {
                 }
             }
             return new AcquiredTriggers(acquiredTriggers, revision);
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error intializing waiting triggers", e);
             throw new JobPersistenceException("Error intializing waiting triggers", e);
         }
@@ -1920,7 +1919,7 @@ public class RepoJobStore implements JobStore {
                 }
             }
             return new WaitingTriggers(waitingTriggers, revision);
-        } catch (JsonResourceException e) {
+        } catch (ResourceException e) {
             logger.warn("Error intializing waiting triggers", e);
             throw new JobPersistenceException("Error intializing waiting triggers", e);
         }
@@ -1934,7 +1933,7 @@ public class RepoJobStore implements JobStore {
      * @throws ObjectSetException
      */
     private void addTriggerGroupName(String groupName) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         addRepoListName(groupName, getTriggerGroupNamesRepoId(), "names");
     }
     
@@ -1946,7 +1945,7 @@ public class RepoJobStore implements JobStore {
      * @throws ObjectSetException
      */
     private void addJobGroupName(String groupName) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         addRepoListName(groupName, getJobGroupNamesRepoId(), "names");
     }
 
@@ -1959,7 +1958,7 @@ public class RepoJobStore implements JobStore {
      * @throws ObjectSetException
      */
     private boolean addRepoListName(String name, String id, String list) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
@@ -1991,14 +1990,14 @@ public class RepoJobStore implements JobStore {
      * @throws ObjectSetException
      */
      private boolean removeRepoListName(String name, String id, String list) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
             }
             logger.debug("Removing name: {} to {}", new Object[]{name, id});
-            Map<String, Object> map = getOrCreateRepo(id);
-            String rev = (String)map.get("_rev");
+            Resource map = getOrCreateRepo(id);
+            String rev = map.getRevision();
             
             List<String> names = (List<String>) map.get(list);
             if (names == null) {
@@ -2013,28 +2012,29 @@ public class RepoJobStore implements JobStore {
 
     }
     
-    private Map<String, Object> getOrCreateRepo(String repoId) 
-            throws JobPersistenceException, JsonResourceException {
+    private Resource getOrCreateRepo(String repoId)
+            throws JobPersistenceException, ResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
             }
-            Map<String, Object> map;
+            Resource map;
 
-            map = readFromRepo(repoId).asMap();
+            map = readFromRepo(repoId);
             
             if (map == null) {
-                map = new HashMap<String, Object>();
+                //TODO Fix me
+                //map = new HashMap<String, Object>();
                 // create in repo
                 logger.debug("Creating repo {}", repoId);
-                map = accessor.create(repoId, new JsonValue(map)).asMap();
+                //map = accessor.create(repoId, new JsonValue(map)).asMap();
             }
             return map;
         }
     }
     
     private List<String> getOrCreateRepoList(String repoId, String listId) 
-            throws JobPersistenceException, JsonResourceException {
+            throws JobPersistenceException, ResourceException {
         synchronized (lock) {
             if (!setAccessor()) {
                 throw new JobPersistenceException("Repo router is null");
@@ -2076,7 +2076,7 @@ public class RepoJobStore implements JobStore {
      * @return A JsonValue object containing the serialized trigger and other metadata
      * @throws JobPersistenceException
      */
-    private JsonValue getTriggerFromRepo(String group, String name) 
+    private Resource getTriggerFromRepo(String group, String name)
             throws JobPersistenceException {
         synchronized (lock) {
             if (!setAccessor()) {
@@ -2085,7 +2085,7 @@ public class RepoJobStore implements JobStore {
             try {
                 logger.trace("Getting trigger {} in group {} from repo", name, group);
                 return readFromRepo(getTriggersRepoId(group, name));
-            } catch (JsonResourceException e) {
+            } catch (ResourceException e) {
                 logger.warn("Error getting trigger from repo", e);
                 throw new JobPersistenceException("Error getting trigger from repo", e);
             }
@@ -2111,8 +2111,9 @@ public class RepoJobStore implements JobStore {
                     logger.trace("Getting trigger {}", getTriggersRepoId(group, name));
                 }
                 String repoId = getTriggersRepoId(group, name);
-                accessor.update(repoId, rev, tw.getValue());
-            } catch (JsonResourceException e) {
+                //TODO Get context
+                accessor.update(null, Requests.newUpdateRequest("repo",repoId,tw.getValue()));
+            } catch (ResourceException e) {
                 logger.warn("Error updating trigger in repo", e);
                 throw new JobPersistenceException("Error updating trigger in repo", e);
             }
@@ -2167,7 +2168,7 @@ public class RepoJobStore implements JobStore {
     /**
      * Processes a misfired Trigger.
      * 
-     * @param trigger the Trigger to process
+     * @param triggerWrapper the Trigger to process
      * @throws JobPersistenceException
      */
     private void processTriggerMisfired(TriggerWrapper triggerWrapper) 

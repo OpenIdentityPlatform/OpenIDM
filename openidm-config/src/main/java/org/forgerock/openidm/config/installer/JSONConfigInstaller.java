@@ -46,6 +46,9 @@ import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.metadata.impl.ProviderListener;
+
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;

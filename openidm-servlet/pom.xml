@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -22,17 +22,23 @@
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
         <version>2.1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>openidm-restlet</artifactId>
-    <name>OpenIDM Restlet integration</name>
+    <groupId>org.forgerock.openidm</groupId>
+    <artifactId>openidm-servlet</artifactId>
     <packaging>bundle</packaging>
+
+    <name>OpenIDM servlet</name>
+
     <dependencies>
+
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
@@ -44,22 +50,8 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.web</groupId>
-            <artifactId>pax-web-extender-whiteboard</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.json.resource.restlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.restlet</artifactId>
+            <artifactId>json-resource-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -72,10 +64,6 @@
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.restlet.jee</groupId>
-            <artifactId>org.restlet.ext.servlet</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
             <scope>provided</scope>
@@ -84,7 +72,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -136,10 +124,11 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.restlet;version=${openidm.version}</Export-Package>
+                        <!--Export-Package>org.forgerock.openidm.servlet;version=${project.version}</Export-Package-->
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>

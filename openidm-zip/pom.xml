@@ -54,34 +54,34 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-audit</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-shell</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-rest</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-email</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-jaas-loginmodule-repo</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-jetty-fragment</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -91,32 +91,32 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-jdbc</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-restlet</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-filter</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
          <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servletfilter-registrator</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
@@ -126,27 +126,27 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-infoservice</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-customendpoint</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-security-jetty</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-ui</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <!-- To satisfy both maven unit tests and OSGi packaging
                  this embedded jar is included as a dependency for maven
                  purposes, but explicitly excluded for the OSGi packaging -->
@@ -160,18 +160,18 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-remote</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <type>war</type>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <classifier>jar-with-dependencies</classifier>
         </dependency>
         <!-- Core OSGi -->
@@ -375,7 +375,7 @@
         </dependency>
     </dependencies>
     <build>
-        <finalName>openidm-${openidm.version}</finalName>
+        <finalName>openidm-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -409,7 +409,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.2</version>
+                <version>2.4</version>
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>

@@ -53,12 +53,12 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.activiti</groupId>
             <artifactId>activiti-engine</artifactId>
-            <version>5.10</version>
+            <version>5.11</version>
             <exclusions>
                 <exclusion>
                     <artifactId>activation</artifactId>
@@ -78,7 +78,7 @@
         <!-- REST Dependencies-->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.json.resource.restlet</artifactId>
+            <artifactId>json-resource-servlet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
@@ -128,7 +128,7 @@
                     <instructions>
                         <Private-Package>org.forgerock.openidm.workflow.activiti.impl.*</Private-Package>
                         <Export-Package>
-                            org.forgerock.openidm.workflow.activiti.*;version=${openidm.version}
+                            org.forgerock.openidm.workflow.activiti.*;version=${project.version}
                         </Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>

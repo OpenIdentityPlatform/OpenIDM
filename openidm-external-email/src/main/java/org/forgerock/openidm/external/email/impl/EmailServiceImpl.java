@@ -27,52 +27,79 @@ package org.forgerock.openidm.external.email.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.SingletonResourceProvider;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
-
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.EnhancedConfig;
-import org.forgerock.openidm.config.JSONEnhancedConfig;
-
-// Deprecated
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
-import org.forgerock.openidm.objset.Patch;
 
 /**
  * Email service implementation
+ * 
  * @author gael
  */
-@Component(name = "org.forgerock.openidm.external.email", immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Component(name = EmailServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(name = "service.description", value = "Outbound Email Service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "external/email")
-})
-public class EmailServiceImpl extends ObjectSetJsonResource {
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Outbound Email Service"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "external/email") })
+public class EmailServiceImpl implements SingletonResourceProvider {
     final static Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     public static final String PID = "org.forgerock.openidm.external.email";
-    
-    EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+
     EmailClient emailClient;
 
     @Override
-    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
+    public void actionInstance(ServerContext context, ActionRequest request,
+            ResultHandler<JsonValue> handler) {
         Map<String, Object> result = new HashMap<String, Object>();
-        logger.debug("External Email service action called for {} with {}", fullId, params);
-        emailClient.send(params);
+        logger.debug("External Email service action called for {} with {}", request
+                .getResourceName(), request.getAdditionalActionParameters());
+        try {
+            // TODO Fix the params and handle
+            emailClient.send(request.getContent().asMap());
+        } catch (ResourceException e) {
+           handler.handleError(e);
+        }
         result.put("status", "OK");
-        return result;
+    }
+
+    @Override
+    public void patchInstance(ServerContext context, PatchRequest request,
+            ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
+
+    @Override
+    public void readInstance(ServerContext context, ReadRequest request,
+            ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
+
+    @Override
+    public void updateInstance(ServerContext context, UpdateRequest request,
+            ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
     }
 
     @Activate
@@ -80,7 +107,7 @@ public class EmailServiceImpl extends ObjectSetJsonResource {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         JsonValue config = null;
         try {
-            config = enhancedConfig.getConfigurationAsJson(compContext);
+            config = JSONEnhancedConfig.newInstance().getConfigurationAsJson(compContext);
             emailClient = new EmailClient(config);
             logger.debug("external email client enabled");
         } catch (RuntimeException ex) {

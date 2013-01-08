@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-ui-ria-admin</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>

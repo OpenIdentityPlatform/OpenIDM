@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,6 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.external.email.impl;
 
 import com.sun.mail.util.MailSSLSocketFactory;
@@ -35,7 +36,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.json.resource.BadRequestException;
 
 /**
  *

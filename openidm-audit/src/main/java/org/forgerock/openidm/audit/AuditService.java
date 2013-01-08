@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,13 +23,12 @@
  */
 package org.forgerock.openidm.audit;
 
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.CollectionResourceProvider;
 
 /**
  * OpenIDM audit service
  * @author aegloff
  */
-public interface AuditService extends JsonResource {
+public interface AuditService extends CollectionResourceProvider {
     public final static String ROUTER_PREFIX = "audit";
 }
