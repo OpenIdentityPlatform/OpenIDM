@@ -1,65 +1,59 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
 package org.forgerock.openidm.config.crypto;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.codehaus.jackson.impl.DefaultPrettyPrinter;
-import org.codehaus.jackson.impl.Indenter;
-import org.codehaus.jackson.map.ObjectWriter;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.PrettyPrinter;
-
+import org.codehaus.jackson.map.ObjectWriter;
 import org.forgerock.json.crypto.JsonCryptoException;
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.installer.JSONPrettyPrint;
-import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.WaitForMetaData;
-import org.forgerock.openidm.metadata.impl.ProviderTracker;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
-
+import org.forgerock.openidm.metadata.impl.ProviderTracker;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,17 +68,17 @@ public class ConfigCrypto {
 
     static ServiceTracker cryptoTracker;
     static ConfigCrypto instance;
-    
+
     BundleContext context;
     ObjectMapper mapper = new ObjectMapper();
-    
-    String alias = "openidm-config-default"; 
-    
+
+    String alias = "openidm-config-default";
+
     JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
-    
+
     ProviderTracker providerTracker;
     ProviderListener delayedHandler;
-    
+
     private ConfigCrypto(BundleContext context, ProviderListener delayedHandler) {
         this.context = context;
         this.delayedHandler = delayedHandler;
@@ -93,10 +87,10 @@ public class ConfigCrypto {
         logger.info("Using keystore alias {} to handle config encryption", alias);
 
         providerTracker = new ProviderTracker(context, delayedHandler, false);
-        
+
         // TODO: add bundle listeners to track new installs and remove uninstalls
     }
-    
+
     public synchronized static ConfigCrypto getInstance(BundleContext context, ProviderListener providerListener) {
         if (instance == null) {
             instance = new ConfigCrypto(context, providerListener);
@@ -108,7 +102,7 @@ public class ConfigCrypto {
      * Check each provider for meta-data for a given pid until the first match is found
      * Requested each time configuration is changed so that meta data providers can handle additional plug-ins
      * 
-     * @param pidOrFactory the pid or factory pid 
+     * @param pidOrFactory the pid or factory pid
      * @param factoryAlias the alias of the factory configuration instance
      * @return the list of properties to encrypt
      */
@@ -130,7 +124,7 @@ public class ConfigCrypto {
         if (lastWaitException != null) {
             throw lastWaitException;
         }
-        
+
         return null;
     }
 
@@ -140,7 +134,7 @@ public class ConfigCrypto {
      * 
      * @param pidOrFactory the PID of either the managed service; or for factory configuration the PID of the Managed Service Factory
      * @param instanceAlias null for plain managed service, or the subname (alias) for the managed factory configuration instance
-     * @param config The OSGi configuration 
+     * @param config The OSGi configuration
      * @return The configuration with any properties encrypted that a component's meta data marks as encrypted
      * @throws InvalidException if the configuration was not valid JSON and could not be parsed
      * @throws InternalErrorException if parsing or encryption failed for technical, possibly transient reasons
@@ -151,16 +145,16 @@ public class ConfigCrypto {
         JsonValue parsed = parse(config, pidOrFactory);
         return encrypt(pidOrFactory, instanceAlias, config, parsed);
     }
-    
-    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonValue newConfig) 
+
+    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonValue newConfig)
             throws WaitForMetaData {
-        
+
         JsonValue parsed = newConfig;
         Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig); // Default to existing
-        
+
         List<JsonPointer> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, parsed);
         if (logger.isTraceEnabled()) {
-            logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props}); 
+            logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props});
         }
         if (props != null && !props.isEmpty()) {
             boolean modified = false;
@@ -175,7 +169,7 @@ public class ConfigCrypto {
                         logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointer,
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias});
                     }
-                    
+
                     // Encrypt and replace value
                     try {
                         JsonValue encryptedValue = crypto.encrypt(valueToEncrypt,
@@ -183,7 +177,7 @@ public class ConfigCrypto {
                         parsed.put(pointer, encryptedValue.getObject());
                         modified = true;
                     } catch (JsonCryptoException ex) {
-                        throw new InternalErrorException("Failure during encryption of configuration " 
+                        throw new InternalErrorException("Failure during encryption of configuration "
                                 + pidOrFactory + "-" + instanceAlias + " for property " + pointer.toString()
                                 + " : " + ex.getMessage(), ex);
                     }
@@ -199,13 +193,13 @@ public class ConfigCrypto {
                     + pidOrFactory + "-" + instanceAlias + " : " + ex.getMessage(), ex);
         }
 
-        encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value); 
-        
+        encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
+
         if (logger.isDebugEnabled()) {
-            logger.debug("Config with senstiive data encrypted {} {} : {}", 
+            logger.debug("Config with senstiive data encrypted {} {} : {}",
                     new Object[] {pidOrFactory, instanceAlias, encrypted});
         }
-        
+
         return encrypted;
     }
 
@@ -221,7 +215,7 @@ public class ConfigCrypto {
     public JsonValue parse(Dictionary<String, Object> dict, String serviceName)
             throws InvalidException, InternalErrorException {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
-        
+
         if (dict != null) {
             Map<String, Object> parsedConfig = null;
             String jsonConfig = (String) dict.get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
@@ -269,11 +263,11 @@ public class ConfigCrypto {
             } else {
                 logger.warn("Failed to get crypto service to handle configuration encryption");
                 if (logger.isTraceEnabled()) {
-                    logger.trace("List of available service {}", 
+                    logger.trace("List of available service {}",
                             Arrays.asList(context.getAllServiceReferences(null, null)));
                 }
                 throw new InternalErrorException(
-                        "Configuration handling could not locate cryptography service to encrypt configuration." 
+                        "Configuration handling could not locate cryptography service to encrypt configuration."
                         + " Cryptography service is not registered..");
             }
         } catch (Exception ex) {

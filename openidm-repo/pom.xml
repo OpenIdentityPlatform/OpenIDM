@@ -36,13 +36,13 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -59,10 +59,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            org.forgerock.openidm.repo;version="${openidm.version}",
-                            org.forgerock.openidm.repo.util;version="${openidm.version}"
-                        </Export-Package>
+                        <!--Export-Package>
+                            org.forgerock.openidm.repo;version="${project.version}",
+                            org.forgerock.openidm.repo.util;version="${project.version}"
+                        </Export-Package-->
                     </instructions>
                 </configuration>
             </plugin>

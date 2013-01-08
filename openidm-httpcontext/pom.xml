@@ -31,7 +31,7 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-httpcontext</artifactId>
-    <name>OpenIDM http context</name>
+    <name>OpenIDM HTTP Whiteboard Customizer</name>
     <packaging>bundle</packaging>
 
     <dependencies>
@@ -91,7 +91,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.http;version="${openidm.version}"</Export-Package>
+                        <Export-Package>org.forgerock.openidm.http;version="${project.version}"</Export-Package>
                         <Include-Resource>{maven-resources}</Include-Resource>
                     </instructions>
                 </configuration>

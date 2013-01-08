@@ -41,22 +41,22 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
@@ -136,10 +136,10 @@
                             org.forgerock.openidm.provisioner.openicf.internal.*
                         </Private-Package>
                         <Export-Package>
-                            org.forgerock.openidm.provisioner.openicf;version=${openidm.version},
-                            org.forgerock.openidm.provisioner.openicf.commons;version=${openidm.version},
-                            org.forgerock.openidm.provisioner.openicf.query;version=${openidm.version},
-                            org.forgerock.openidm.provisioner.openicf.query.operators;version=${openidm.version}
+                            org.forgerock.openidm.provisioner.openicf;version=${project.version},
+                            org.forgerock.openidm.provisioner.openicf.commons;version=${project.version},
+                            org.forgerock.openidm.provisioner.openicf.query;version=${project.version},
+                            org.forgerock.openidm.provisioner.openicf.query.operators;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,36 +29,41 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.json.resource.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TokenHandler {
 
     final static Logger logger = LoggerFactory.getLogger(TokenHandler.class);
-    
+
     // The OpenIDM query token is of format ${token-name}
     Pattern tokenPattern = Pattern.compile("\\$\\{(.+?)\\}");
 
     /**
-     * Replaces a query string with tokens of format ${token-name} with the values from the
-     * passed in map, where the token-name must be the key in the map
+     * Replaces a query string with tokens of format ${token-name} with the
+     * values from the passed in map, where the token-name must be the key in
+     * the map
      * 
-     * @param queryString the query with tokens
-     * @param params the parameters to replace the tokens. Values can be String or List.
+     * @param queryString
+     *            the query with tokens
+     * @param params
+     *            the parameters to replace the tokens. Values can be String or
+     *            List.
      * @return the query with all tokens replace with their found values
-     * @throws BadRequestException if token in the query is not in the passed parameters
+     * @throws BadRequestException
+     *             if token in the query is not in the passed parameters
      */
-    public String replaceTokensWithValues(String queryString, Map<String, Object> params) 
+    public String replaceTokensWithValues(String queryString, Map<String, Object> params)
             throws BadRequestException {
         java.util.regex.Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buffer = new StringBuffer();
         while (matcher.find()) {
-            String tokenKey = matcher.group(1);       
+            String tokenKey = matcher.group(1);
             if (!params.containsKey(tokenKey)) {
                 // fail with an exception if token not found
-                throw new BadRequestException("Missing entry in params passed to query for token " + tokenKey);
+                throw new BadRequestException("Missing entry in params passed to query for token "
+                        + tokenKey);
             } else {
                 Object replacement = params.get(tokenKey);
                 if (replacement instanceof List) {
@@ -84,12 +89,13 @@ public class TokenHandler {
         matcher.appendTail(buffer);
         return buffer.toString();
     }
-    
+
     /**
-     * Replaces a query string with tokens of format ${token-name} with the 
+     * Replaces a query string with tokens of format ${token-name} with the
      * specified replacement string for all tokens.
      * 
-     * @param queryString the query with tokens to replace
+     * @param queryString
+     *            the query with tokens to replace
      * @param replacement
      * @return the query with all tokens replaced
      */
@@ -98,7 +104,7 @@ public class TokenHandler {
         StringBuffer buf = new StringBuffer();
         while (matcher.find()) {
             String origToken = matcher.group(1);
-            //TODO: the size check seems invalid
+            // TODO: the size check seems invalid
             if (origToken != null) {
                 // OrientDB token is of format :token-name
                 matcher.appendReplacement(buf, "");
@@ -108,12 +114,14 @@ public class TokenHandler {
         matcher.appendTail(buf);
         return buf.toString();
     }
-    
+
     /**
-     * Extracts all the token names in the query string  of format ${token-name} 
+     * Extracts all the token names in the query string of format ${token-name}
      * 
-     * @param queryString the query with tokens
-     * @return the list of token names, in the order they appear in the queryString
+     * @param queryString
+     *            the query with tokens
+     * @return the list of token names, in the order they appear in the
+     *         queryString
      */
     public List<String> extractTokens(String queryString) {
         List<String> tokens = new ArrayList<String>();
@@ -126,16 +134,20 @@ public class TokenHandler {
     }
 
     /**
-     * Replaces some tokens in a query string with tokens of format ${token-name}  
-     * with the given replacements, which may again be tokens (e.g. in another format)
-     * or values. Tokens that have no replacement defined stay in the original token format.
+     * Replaces some tokens in a query string with tokens of format
+     * ${token-name} with the given replacements, which may again be tokens
+     * (e.g. in another format) or values. Tokens that have no replacement
+     * defined stay in the original token format.
      * 
      * 
-     * @param queryString the query with OpenIDM format tokens ${token}
-     * @param replacements the replacement values/tokens, where the key is the token name in the query string,
-     * and the value is the String to replace it with.
-     * @return the query with any defined replacement values/tokens replaced, and the remaining tokens 
-     * left in the original format
+     * @param queryString
+     *            the query with OpenIDM format tokens ${token}
+     * @param replacements
+     *            the replacement values/tokens, where the key is the token name
+     *            in the query string, and the value is the String to replace it
+     *            with.
+     * @return the query with any defined replacement values/tokens replaced,
+     *         and the remaining tokens left in the original format
      */
     public String replaceSomeTokens(String queryString, Map<String, String> replacements) {
         Matcher matcher = tokenPattern.matcher(queryString);
@@ -155,27 +167,28 @@ public class TokenHandler {
         matcher.appendTail(buf);
         return buf.toString();
     }
-    
 
-    
     /**
-     * Replaces a query string with tokens of format ${token-name} with the 
+     * Replaces a query string with tokens of format ${token-name} with the
      * token format in OrientDB, which is of the form :token-name.
      * 
-     * OrientDB tokens has some limitations, e.g. they can currently only be used
-     * in the where clause, and hence the returned string is not guaranteed to be
-     * valid for use in a prepared statement. If the parsing fails the system may
-     * have to fall back onto non-prepared statements and manual token replacement.
+     * OrientDB tokens has some limitations, e.g. they can currently only be
+     * used in the where clause, and hence the returned string is not guaranteed
+     * to be valid for use in a prepared statement. If the parsing fails the
+     * system may have to fall back onto non-prepared statements and manual
+     * token replacement.
      * 
-     * @param queryString the query with OpenIDM format tokens ${token}
-     * @return the query with all tokens replaced with the OrientDB style tokens :token
+     * @param queryString
+     *            the query with OpenIDM format tokens ${token}
+     * @return the query with all tokens replaced with the OrientDB style tokens
+     *         :token
      */
     public String replaceTokensWithOrientToken(String queryString) {
         Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buf = new StringBuffer();
         while (matcher.find()) {
             String origToken = matcher.group(1);
-            //TODO: the size check seems invalid
+            // TODO: the size check seems invalid
             if (origToken != null && origToken.length() > 3) {
                 // OrientDB token is of format :token-name
                 String newToken = ":" + origToken;

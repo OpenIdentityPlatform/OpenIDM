@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
@@ -42,17 +44,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -109,31 +101,12 @@ public class CSVAuditLogger implements AuditLogger {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> read(String fullId) throws ObjectSetException {
-        // TODO
-        return new HashMap<String,Object>();
-    }
-
-    /**
-     * Currently not supported.
-     * <p/>
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO
-        return new HashMap<String,Object>();
-    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
+    public void create(String fullId, Map<String, Object> obj) throws ResourceException {
         EventEntry measure = Publisher.start(EVENT_AUDIT_CREATE, obj, null);
         try {
             createImpl(fullId, obj);
@@ -143,7 +116,7 @@ public class CSVAuditLogger implements AuditLogger {
     }
     
     
-    private void createImpl(String fullId, Map<String, Object> obj) throws ObjectSetException {
+    private void createImpl(String fullId, Map<String, Object> obj) throws ResourceException {
         // TODO: replace ID handling utility
         String[] split = AuditServiceImpl.splitFirstLevel(fullId);
         String type = split[0];
@@ -268,37 +241,5 @@ public class CSVAuditLogger implements AuditLogger {
                 }
             }
         }
-    }
-
-    /**
-     * Audit service does not support changing audit entries.
-     */
-    @Override
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
-    }
-
-    /**
-     * Audit service currently does not support deleting audit entries.
-     */
-    @Override
-    public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
-    }
-
-    /**
-     * Audit service does not support changing audit entries.
-     */
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
-    }
-
-    /**
-     * Audit service does not support actions on audit entries.
-     */
-    @Override
-    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
     }
 }

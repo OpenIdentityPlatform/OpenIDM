@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -30,7 +30,7 @@
         <version>2.1.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-system</artifactId>
-    <name>OpenIDM Boot Module</name>
+    <name>OpenIDM system module</name>
     <packaging>bundle</packaging>
 
     <dependencies>
@@ -82,7 +82,7 @@
                 <configuration>
                     <bytecodeInjections>
                         <bytecodeInjection>
-                            <expression>${openidm.version}</expression>
+                            <expression>${project.version}</expression>
                             <targetMembers>
                                 <constant>
                                     <className>org.forgerock.openidm.core.ServerConstants</className>
@@ -118,9 +118,9 @@
                     <instructions>
                         <Bundle-Activator>org.forgerock.openidm.core.internal.Activator</Bundle-Activator>
                         <Private-Package>org.forgerock.openidm.core.internal</Private-Package>
-                        <Export-Package>
-                            org.forgerock.openidm.core;version=${openidm.version}
-                        </Export-Package>
+                        <!--Export-Package>
+                            org.forgerock.openidm.core;version=${project.version}
+                        </Export-Package-->
                         <Bundle-Category>osgi</Bundle-Category>
                     </instructions>
                 </configuration>

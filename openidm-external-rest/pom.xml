@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
@@ -94,7 +94,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.external.rest;version=${openidm.version}</Export-Package>
+                        <Export-Package>org.forgerock.openidm.external.rest;version=${project.version}</Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

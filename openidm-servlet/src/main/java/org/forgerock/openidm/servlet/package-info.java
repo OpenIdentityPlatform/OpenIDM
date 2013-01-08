@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,14 +21,10 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo;
-
-import org.forgerock.json.resource.CollectionResourceProvider;
 
 /**
- * Common OpenIDM repository interface
- * 
- * @author aegloff
+ * OpenIDM servlet registration handling implementation.
+ * <p>
+ * This package defines the related classes necessary to implement adding servlet into OpenIDM
  */
-public interface RepositoryService extends CollectionResourceProvider {
-}
+package org.forgerock.openidm.servlet;

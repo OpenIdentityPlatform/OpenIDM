@@ -103,7 +103,7 @@ class Link {
     /**
      * Queries a single link and populates the object with its settings
      *
-     * @param The query parameters
+     * @param query The query parameters
      * @throws SynchronizationException if getting and initializing the link details fail
      */
     private void getLink(JsonValue query) throws SynchronizationException {

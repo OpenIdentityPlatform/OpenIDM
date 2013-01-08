@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,19 +23,18 @@
  */
 package org.forgerock.openidm.repo;
 
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.CollectionResourceProvider;
 
 /**
  * Common OpenIDM bootstrap repository interface
  * 
- * Implementing services provide basic connectivity and access 
- * to bootstrapping configuration
+ * Implementing services provide basic connectivity and access to bootstrapping
+ * configuration
  * 
- * Every repository boot service must provide CRUD access to configuration,
- * And provide built in query support for queryid query-all-ids
+ * Every repository boot service must provide CRUD access to configuration, And
+ * provide built in query support for queryid query-all-ids
  * 
  * @author aegloff
  */
-public interface RepoBootService extends JsonResource {
+public interface RepoBootService extends CollectionResourceProvider {
 }

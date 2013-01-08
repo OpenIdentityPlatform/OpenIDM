@@ -37,25 +37,27 @@ import java.util.Vector;
 
 import org.apache.felix.cm.PersistenceManager;
 
-import org.forgerock.openidm.crypto.CryptoService;
+
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.json.resource.Context;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// Deprecated
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
 
 public class RepoPersistenceManager implements PersistenceManager, ConfigPersisterMarker {
 
@@ -73,7 +75,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     
     private BundleContext ctx;
 
-    private JsonResourceObjectSet repo;
+    private Connection repo;
 
     //Rapid development may require only memory store.
     private final boolean requireRepository = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
@@ -101,7 +103,8 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                     RepoBootService rawRepo = (RepoBootService) repoTracker.waitForService(5000);
                     if (rawRepo != null) {
                         logger.debug("Bootstrap obtained repository");
-                        repo = new JsonResourceObjectSet(rawRepo);
+                        //TODO FIX the connections
+                        repo = Resources.newInternalConnection(null);
                     } else {
                         logger.info("Failed to bootstrap repo, returned null");
                     }
@@ -144,11 +147,13 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         if (isReady(0) && requireRepository) {
             String id = pidToId(pid);
             try {
-                Map existing = repo.read(id);
+                //TODO Get the Context
+                Context ctx = new RootContext();
+                Resource existing = repo.read(ctx,Requests.newReadRequest(id));
                 exists = (existing != null);
             } catch (NotFoundException ex) {
                 exists = false;
-            } catch (ObjectSetException ex) {
+            } catch (ResourceException ex) {
                 throw new RuntimeException("Failed to check if configuration exists in repository: " + ex.getMessage(), ex);
             }
         } 
@@ -186,7 +191,9 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         try {
             if (isReady(0) && requireRepository) {
                 String id = pidToId(pid);
-                Map existing = repo.read(id);
+                //TODO Get the Context
+                Context ctx = new RootContext();
+                Resource existing = repo.read(ctx,Requests.newReadRequest(id));
                 logger.debug("Config loaded {} {}", pid, existing);
                 result = mapToDict(existing);
             } else if (!requireRepository) {
@@ -204,7 +211,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
             }
             
             logger.debug("Config loaded from temporary store {} {}", pid, result);
-        } catch (ObjectSetException ex) {
+        } catch (ResourceException ex) {
             throw new IOException("Failed to load configuration in repository: " + ex.getMessage(), ex);
         }
         return result;
@@ -307,7 +314,10 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 Map<String,Object> obj = dictToMap(properties);
                 Map<String,Object> existing = null;
                 try {
-                    existing = repo.read(id);
+                    //TODO Get the Context
+                    Context ctx = new RootContext();
+                    //TODO Fix me
+                    existing = repo.read(ctx,Requests.newReadRequest(id)).getContent().asMap();
                 } catch (NotFoundException ex) {
                     // Just detect that it doesn't exist
                 }
@@ -347,7 +357,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 tempStore.put(pid, properties);
                 logger.debug("Stored in memory {} {}", pid, properties);
             }
-        } catch (ObjectSetException ex) {
+        } catch (ResourceException ex) {
             throw new IOException("Failed to store configuration in repository: " + ex.getMessage(), ex);
         }
     }
@@ -391,7 +401,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 } while (retry);
 
             }
-        } catch (ObjectSetException ex) {
+        } catch (ResourceException ex) {
             throw new IOException("Failed to delete configuration + " + pid + " in repository: " + ex.getMessage(), ex);
         }
     }
@@ -448,7 +458,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * @return converted to legacy types
      * @throws IOException if the conversion failed 
      */
-    Dictionary mapToDict(Map properties) throws IOException {
+    Dictionary mapToDict(Resource properties) throws IOException {
         if (properties instanceof Dictionary) {
             return (Dictionary) properties;
         } else {

@@ -37,22 +37,22 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-quartz-fragment</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -109,9 +109,9 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.openidm.managed;version=${openidm.version},
-                            org.forgerock.openidm.router;version=${openidm.version},
-                            org.forgerock.openidm.sync;version=${openidm.version}
+                            org.forgerock.openidm.managed;version=${project.version},
+                            org.forgerock.openidm.router;version=${project.version},
+                            org.forgerock.openidm.sync;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>

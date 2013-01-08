@@ -1,44 +1,53 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
 package org.forgerock.openidm.audit.util;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-
-// JSON Resource
-import org.forgerock.json.resource.JsonResourceContext;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceAccessor;
-import org.forgerock.json.resource.JsonResourceException;
-
-// Deprecated
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetException;
 
 public class ActivityLog {
     final static Logger logger = LoggerFactory.getLogger(ActivityLog.class);
@@ -62,17 +71,17 @@ public class ActivityLog {
     public final static String PASSWORD_CHANGED = "passwordChanged";
 
     /**
-     * Creates a Jackson object mapper. By default, it
-     * calls {@link org.codehaus.jackson.map.ObjectMapper#ObjectMapper()}.
-     *
+     * Creates a Jackson object mapper. By default, it calls
+     * {@link org.codehaus.jackson.map.ObjectMapper#ObjectMapper()}.
+     * 
      */
     static {
-        String config = IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
+        String config =
+                IdentityServer.getInstance().getProperty(ActivityLog.class.getName().toLowerCase());
         suspendException = "suspend".equals(config);
         // TODO Allow for configured dateUtil
         dateUtil = DateUtil.getDateUtil("UTC");
     }
-
 
     public static String getRequester(JsonValue request) {
         String result = null;
@@ -87,17 +96,20 @@ public class ActivityLog {
         return result;
     }
 
-    public static void log(JsonResource router, JsonValue request, String message, String objectId,
-                           JsonValue before, JsonValue after, Status status) throws JsonResourceException {
+    public static void log(ServerContext router, Request request, String message,
+            String objectId, JsonValue before, JsonValue after, Status status)
+            throws ResourceException {
         if (request == null) {
-            request = new JsonValue(null);
+            throw new NullPointerException("Request can not be null when audit.");
         }
         // TODO: convert to flyweight?
         try {
-            Map<String, Object> activity = buildLog(request, message, objectId, before, after, status);
-            JsonResourceAccessor accessor = new JsonResourceAccessor(router, JsonResourceContext.getParentContext(request));
-            accessor.create("audit/activity", new JsonValue(activity));
-        } catch (JsonResourceException ex) {
+            Map<String, Object> activity =
+                    buildLog(router, request, message, objectId, before, after, status);
+            // TODO: UPGRADE
+            router.getConnection().create(new ServerContext(router),
+                    Requests.newCreateRequest("audit/activity", new JsonValue(activity)));
+        } catch (ResourceException ex) {
             logger.warn("Failed to write activity log {}", ex);
             if (!suspendException) {
                 throw ex;
@@ -106,59 +118,56 @@ public class ActivityLog {
         }
     }
 
-
-    public static void log(ObjectSet router, JsonValue request, String message, String objectId,
-                           JsonValue before, JsonValue after, Status status) throws ObjectSetException {
-        if (request == null) {
-            request = new JsonValue(null);
-        }
-        // TODO: convert to flyweight?
-        try {
-            Map<String, Object> activity = buildLog(request, message, objectId, before, after, status);
-            router.create("audit/activity", activity);
-        } catch (ObjectSetException ex) {
-            logger.warn("Failed to write activity log {}", ex);
-            if (!suspendException) {
-                throw ex;
-                // TODO: should this stop the activity itself?
-            }
-        }
-    }
-
-    private static Map<String, Object> buildLog(JsonValue request, String message, String objectId, JsonValue before, JsonValue after, Status status) {
+    private static Map<String, Object> buildLog(Context context, Request request, String message,
+            String objectId, JsonValue before, JsonValue after, Status status) {
         String rev = null;
-        if (after != null && after.get("_rev").isString()) {
-            rev = after.get("_rev").asString();
-        } else if (before != null && before.get("_rev").isString()) {
-            rev = before.get("_rev").asString();
+        if (after != null && after.get(ServerConstants.OBJECT_PROPERTY_REV).isString()) {
+            rev = after.get(ServerConstants.OBJECT_PROPERTY_REV).asString();
+        } else if (before != null && before.get(ServerConstants.OBJECT_PROPERTY_REV).isString()) {
+            rev = before.get(ServerConstants.OBJECT_PROPERTY_REV).asString();
         }
 
         String method;
-        try {
-            method = request.get("method").asString();
-        } catch (JsonValueException jve) {
-            method = null;
+        if (request instanceof CreateRequest) {
+            method = "create";
+        } else if (request instanceof ReadRequest) {
+            method = "read";
+        } else if (request instanceof UpdateRequest) {
+            method = "update";
+        } else if (request instanceof QueryRequest) {
+            method = "query";
+        } else if (request instanceof PatchRequest) {
+            method = "patch";
+        } else if (request instanceof DeleteRequest) {
+            method = "delete";
+        } else if (request instanceof ActionRequest) {
+            method = "action";
+        } else {
+            method = "unknown";
         }
+
         // TODO: make configurable
         if (method != null && (method.equalsIgnoreCase("read") || method.equalsIgnoreCase("query"))) {
             before = null;
             after = null;
         }
 
-        JsonValue root = JsonResourceContext.getRootContext(request);
-        JsonValue parent = JsonResourceContext.getParentContext(request);
+        // TODO: UPGRADE (Get the parent and the root context id)
+        Context root = context.asContext(RootContext.class);
+        Context parent = context.getParent();
 
         Map<String, Object> activity = new HashMap<String, Object>();
         activity.put(TIMESTAMP, dateUtil.now());
-        activity.put(ACTION, request.get("method").getObject());
+        activity.put(ACTION, method);
         activity.put(MESSAGE, message);
         activity.put(OBJECT_ID, objectId);
         activity.put(REVISION, rev);
-        activity.put(ACTIVITY_ID, request.get("uuid").getObject());
-        activity.put(ROOT_ACTION_ID, root.get("uuid").getObject());
-        activity.put(PARENT_ACTION_ID, parent.get("uuid").getObject());
-        activity.put(REQUESTER, getRequester(request));
-        activity.put(BEFORE,  JsonUtil.jsonIsNull(before) ? null : before.getWrappedObject());
+        activity.put(ACTIVITY_ID, context.getId());
+        activity.put(ROOT_ACTION_ID, root.getId());
+        activity.put(PARENT_ACTION_ID, parent.getId());
+        // TODO: UPGRADE (Get the Requester)
+        //activity.put(REQUESTER, getRequester(request));
+        activity.put(BEFORE, JsonUtil.jsonIsNull(before) ? null : before.getWrappedObject());
         activity.put(AFTER, JsonUtil.jsonIsNull(after) ? null : after.getWrappedObject());
         activity.put(STATUS, status == null ? null : status.toString());
 

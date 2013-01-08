@@ -42,28 +42,29 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-crypto-core</artifactId>
+            <artifactId>json-crypto</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>org.forgerock.json.resource</artifactId>
+            <artifactId>json-resource</artifactId>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>org.forgerock.util</artifactId>
-        </dependency>
+            <version>1.0.0</version>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-system</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.eclipse.wst.jsdt.debug</groupId>
             <artifactId>rhino.debugger</artifactId>
             <version>1.0.300.v201109150503</version>
@@ -73,7 +74,7 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
@@ -111,7 +112,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -148,19 +149,18 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            org.forgerock.openidm.audit.util;version=${openidm.version},
-                            org.forgerock.openidm.crypto;version=${openidm.version},
-                            org.forgerock.openidm.metadata;version=${openidm.version},
-                            org.forgerock.openidm.objset;version=${openidm.version},
-                            org.forgerock.openidm.osgi;version=${openidm.version},
-                            org.forgerock.openidm.patch;version=${openidm.version},
-                            org.forgerock.openidm.scope;version=${openidm.version},
-                            org.forgerock.openidm.script;version=${openidm.version},
-                            org.forgerock.openidm.script.javascript;version=${openidm.version},
-                            org.forgerock.openidm.sync;version=${openidm.version},
-                            org.forgerock.openidm.util;version=${openidm.version}
-                        </Export-Package>
+                        <!--Export-Package>
+                            org.forgerock.openidm.audit.util;version=${project.version},
+                            org.forgerock.openidm.crypto;version=${project.version},
+                            org.forgerock.openidm.metadata;version=${project.version},
+                            org.forgerock.openidm.osgi;version=${project.version},
+                            org.forgerock.openidm.patch;version=${project.version},
+                            org.forgerock.openidm.scope;version=${project.version},
+                            org.forgerock.openidm.script;version=${project.version},
+                            org.forgerock.openidm.script.javascript;version=${project.version},
+                            org.forgerock.openidm.sync;version=${project.version},
+                            org.forgerock.openidm.util;version=${project.version}
+                        </Export-Package-->
                     </instructions>
                 </configuration>
             </plugin>

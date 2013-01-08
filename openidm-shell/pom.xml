@@ -41,17 +41,17 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-rest</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.restlet.jee</groupId>
@@ -120,7 +120,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>org.forgerock.openidm.shell;version=${openidm.version}</Export-Package>
+                        <Export-Package>org.forgerock.openidm.shell;version=${project.version}</Export-Package>
                         <Bundle-Activator>org.forgerock.openidm.shell.felixgogo.Activator</Bundle-Activator>
                         <Embed-Dependency>*;artifactId=asm-all;inline=false</Embed-Dependency>
                         <Main-Class>org.forgerock.openidm.shell.impl.Main</Main-Class>

@@ -57,7 +57,6 @@
                     "**/org.forgerock.util-*.jar",
                     "**/openidm-system-*.jar",
                     "**/openidm-security-jetty*.jar",
-                    "**/openidm-jaas-loginmodule-repo*.jar",
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",
                     "**/openidm-config*.jar",

@@ -37,7 +37,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -90,10 +90,10 @@
                 <configuration>
                     <instructions>
                         <Private-Package>org.forgerock.openidm.external.email.impl.*</Private-Package>
-                        <Export-Package>
-                            org.forgerock.openidm.external.email.metadata;version=${openidm.version},
-                            org.forgerock.openidm.external.email;version="${openidm.version}"
-                        </Export-Package>
+                        <!--Export-Package>
+                            org.forgerock.openidm.external.email.metadata;version=${project.version},
+                            org.forgerock.openidm.external.email;version="${project.version}"
+                        </Export-Package-->
                     </instructions>
                 </configuration>
             </plugin>

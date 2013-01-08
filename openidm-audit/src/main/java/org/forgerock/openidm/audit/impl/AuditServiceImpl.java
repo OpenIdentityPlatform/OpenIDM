@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,59 +25,61 @@ package org.forgerock.openidm.audit.impl;
 
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
-
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Modified;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.ObjectMapper;
-
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-
 import org.forgerock.json.patch.JsonPatch;
-
-import org.forgerock.json.resource.JsonResource;
-
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.util.Action;
 import org.forgerock.openidm.audit.util.ActivityLog;
-import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
-
-// Deprecated
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetContext;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.objset.Patch;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Audit module
+ * 
  * @author aegloff
  */
 @Component(name = "org.forgerock.openidm.audit", immediate=true, policy=ConfigurationPolicy.REQUIRE)
@@ -85,9 +87,8 @@ import org.forgerock.openidm.objset.Patch;
 @Properties({
     @Property(name = "service.description", value = "Audit Service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX)
-})
-public class AuditServiceImpl extends ObjectSetJsonResource implements AuditService {
+    @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX) })
+public class AuditServiceImpl implements AuditService {
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
     private final static ObjectMapper mapper;
 
@@ -113,72 +114,78 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
         jsonFactory.configure(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS, true);
         mapper = new ObjectMapper(jsonFactory);
     }
-    
-    /** Although we may not need the router here, 
-         https://issues.apache.org/jira/browse/FELIX-3790
-        if using this with for scr 1.6.2
-        Ensure we do not get bound on router whilst it is activating
-    */
-/*    @Reference(
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    Object router;
-    protected void bindRouter(JsonResource router) {
-        this.router = router;
-    }
-    protected void unbindRouter(JsonResource router) {
-        this.router = router;
-    }
-*/
+
     /**
-     * Gets an object from the audit logs by identifier. The returned object is not validated
-     * against the current schema and may need processing to conform to an updated schema.
+     * Gets an object from the audit logs by identifier. The returned object is
+     * not validated against the current schema and may need processing to
+     * conform to an updated schema.
      * <p>
-     * The object will contain metadata properties, including object identifier {@code _id},
-     * and object version {@code _rev} to enable optimistic concurrency
-     *
-     * @param fullId the identifier of the object to retrieve from the object set.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws BadRequestException if the passed identifier is invalid
-     * @return the requested object.
+     * The object will contain metadata properties, including object identifier
+     * {@code _id}, and object version {@code _rev} to enable optimistic
+     * concurrency
+     * 
+     * {@link org.forgerock.json.resource.RequestHandler#handleRead(org.forgerock.json.resource.ServerContext, org.forgerock.json.resource.ReadRequest, org.forgerock.json.resource.ResultHandler)
+     * Reads} an existing resource within the collection.
+     * 
+     * @param context
+     *            The request server context.
+     * @param resourceId
+     *            The ID of the targeted resource within the collection.
+     * @param request
+     *            The read request.
+     * @param handler
+     *            The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleRead(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.ReadRequest,
+     *      org.forgerock.json.resource.ResultHandler)
      */
-    @Override
-    public Map<String, Object> read(String fullId) throws ObjectSetException {
-        // TODO
-        return new HashMap<String,Object>();
+    public void readInstance(ServerContext context, String resourceId, ReadRequest request,
+            ResultHandler<Resource> handler) {
+        handler.handleResult(new Resource(null, null, null));
     }
 
     /**
-     * Creates a new object in the object set.
-     * <p>
-     * This method sets the {@code _id} property to the assigned identifier for the object,
-     * and the {@code _rev} property to the revised object version (For optimistic concurrency)
+     * {@link org.forgerock.json.resource.RequestHandler#handleCreate(org.forgerock.json.resource.ServerContext,
+     * org.forgerock.json.resource.CreateRequest, org.forgerock.json.resource.ResultHandler) Adds} a new resource
+     * instance to the collection.
+     * <p/>
+     * Create requests are targeted at the collection itself and may include a user-provided resource ID for the new
+     * resource as part of the request itself. The user-provider resource ID may be accessed using the method {@link
+     * org.forgerock.json.resource.CreateRequest#getNewResourceId()}.
      *
-     * @param fullId the client-generated identifier to use, or {@code null} if server-generated identifier is requested.
-     * @param obj the contents of the object to create in the object set.
-     * @throws NotFoundException if the specified id could not be resolved.
-     * @throws ForbiddenException if access to the object or object set is forbidden.
-     * @throws PreconditionFailedException if an object with the same ID already exists.
+     * @param context
+     *         The request server context.
+     * @param request
+     *         The create request.
+     * @param handler
+     *         The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleCreate(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.CreateRequest, org.forgerock.json.resource.ResultHandler)
+     * @see org.forgerock.json.resource.CreateRequest#getNewResourceId()
      */
-    @Override
-    public void create(String fullId, Map<String, Object> obj) throws ObjectSetException {
-        logger.debug("Audit create called for {} with {}", fullId, obj);
-        
-        if (fullId == null) {
-            throw new BadRequestException("Audit service called without specifying which audit log in the identifier");
+    public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+
+        if (logger.isDebugEnabled()){
+            StringBuilder sb = new StringBuilder(request.getResourceName());
+            if (null != request.getNewResourceId()){
+                sb.append("/").append(request.getNewResourceId());
+            }
+            logger.debug("Audit create called for {} with {}", sb , request.getContent());
         }
 
-        String[] splitTypeAndId =  splitFirstLevel(fullId);
+        if (request.getResourceName() == null) {
+            handler.handleError(
+            new BadRequestException(
+                    "Audit service called without specifying which audit log in the identifier"));
+            return;
+        }
+
+        //TODO (UPGRADE) : Use Router to split
+        String[] splitTypeAndId = splitFirstLevel(request.getResourceName());
         String type = splitTypeAndId[0];
         String localId = splitTypeAndId[1];
 
-        String trigger = getTrigger();
+        String trigger = getTrigger(context);
 
         // Filter
         List<String> actionFilter = actionFilters.get(type);
@@ -188,7 +195,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             List<String> triggerActions = triggerFilter.get(trigger);
             if (triggerActions == null) {
                 logger.debug("Trigger filter not set for " + trigger + ", allowing all actions");
-            } else if (!triggerActions.contains(obj.get("action"))) {
+            } else if (!triggerActions.contains(request.getContent().get("action").asString())) {
                 logger.debug("Filtered by trigger filter");
                 return;
             }
@@ -196,7 +203,7 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
 
         if (actionFilter != null) {
             // TODO: make filters that can operate on a variety of conditions
-            if (!actionFilter.contains(obj.get("action"))) {
+            if (!actionFilter.contains(request.getContent().get("action").asString())) {
                 logger.debug("Filtered by action filter");
                 return;
             }
@@ -204,42 +211,48 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
 
         // Activity log preprocessing
         if (type.equals("activity")) {
-            processActivityLog(obj);
+            processActivityLog(request.getContent().asMap());
         }
 
         // Generate an ID if there is none
         if (localId == null || localId.isEmpty()) {
             localId = UUID.randomUUID().toString();
-            obj.put(ObjectSet.ID, localId);
+            request.getContent().put(ServerConstants.OBJECT_PROPERTY_ID, localId);
             logger.debug("Assigned id {}", localId);
         }
         String id = type + "/" + localId;
 
         // Generate unified timestamp
-        if (null == obj.get("timestamp")) {
-            obj.put("timestamp", dateUtil.now());
+        if (request.getContent().get("timestamp").isNull()) {
+            request.getContent().put("timestamp", dateUtil.now());
         }
 
-        logger.debug("Create audit entry for {} with {}", id, obj);
+        logger.debug("Create audit entry for {} with {}", id, request.getContent().getObject());
         for (AuditLogger auditLogger : auditLoggers) {
             try {
-                auditLogger.create(id, obj);
-            } catch (ObjectSetException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
-                throw ex;
+                //TODO UPDATE
+                auditLogger.create(id,request.getContent().asMap());
+            } catch (ResourceException ex) {
+                logger.warn("Failure writing audit log: {} with logger {}", new String[] { id,
+                    auditLogger.toString(), ex.getMessage() });
+                handler.handleError(ex);
             } catch (RuntimeException ex) {
-                logger.warn("Failure writing audit log: {} with logger {}", new String[] {id, auditLogger.toString(), ex.getMessage()});
+                logger.warn("Failure writing audit log: {} with logger {}", new String[] { id,
+                    auditLogger.toString(), ex.getMessage() });
                 throw ex;
             }
         }
     }
 
     /**
-     * Do any preprocessing for activity log objects
-     * Checks for any changed fields and adds those to the object
-     * Also adds a flag to detect if any of the flagged password fields have changed
-     * NOTE: both the watched fields and the password fields will be in the list of "changedField" if they differ
-     * @param activity activity object to update
+     * Do any preprocessing for activity log objects Checks for any changed
+     * fields and adds those to the object Also adds a flag to detect if any of
+     * the flagged password fields have changed NOTE: both the watched fields
+     * and the password fields will be in the list of "changedField" if they
+     * differ
+     * 
+     * @param activity
+     *            activity object to update
      */
     private void processActivityLog(Map<String, Object> activity) {
         List<String> changedFields = new ArrayList<String>();
@@ -252,27 +265,41 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             JsonValue before = new JsonValue(rawBefore);
             JsonValue after = new JsonValue(rawAfter);
 
-            // Check to see if any of the watched fields have changed and add them to the comprehensive list
+            // Check to see if any of the watched fields have changed and add
+            // them to the comprehensive list
             List<String> changedWatchFields = checkForFields(watchFieldFilters, before, after);
             changedFields.addAll(changedWatchFields);
 
-            // Check to see if any of the password fields have changed -- also update our flag
-            List<String> changedPasswordFields = checkForFields(passwordFieldFilters, before, after);
+            // Check to see if any of the password fields have changed -- also
+            // update our flag
+            List<String> changedPasswordFields =
+                    checkForFields(passwordFieldFilters, before, after);
             passwordChanged = !changedPasswordFields.isEmpty();
             changedFields.addAll(changedPasswordFields);
 
-            // Update the before and after fields with their proper string values now that we're done diffing
-            // TODO Figure out if this is even necessary? Doesn't seem to be... Once it goes to the log,
-            // the object will have toString() called on it anyway which will convert it to (seemingly) the same format
+            // Update the before and after fields with their proper string
+            // values now that we're done diffing
+            // TODO Figure out if this is even necessary? Doesn't seem to be...
+            // Once it goes to the log,
+            // the object will have toString() called on it anyway which will
+            // convert it to (seemingly) the same format
             try {
-                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : mapper.writeValueAsString(before.getObject()));
+                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : mapper
+                        .writeValueAsString(before.getObject()));
             } catch (IOException e) {
-                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : before.getObject().toString());
+                activity.put(ActivityLog.BEFORE, (JsonUtil.jsonIsNull(before)) ? null : before
+                        .getObject().toString());
             }
             try {
-                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : mapper.writeValueAsString(after.getObject())); // how can we know for system objects?
+                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : mapper
+                        .writeValueAsString(after.getObject())); // how can we
+                                                                 // know for
+                                                                 // system
+                                                                 // objects?
             } catch (IOException e) {
-                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : after.getObject().toString()); // how can we know for system objects?
+                activity.put(ActivityLog.AFTER, (JsonUtil.jsonIsNull(after)) ? null : after
+                        .getObject().toString()); // how can we know for system
+                                                  // objects?
             }
         }
 
@@ -283,19 +310,25 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
 
     /**
-     * Checks to see if there are differences between the values in two JsonValues before and after
-     * Returns a list containing the changed fields
-     *
-     * @param fieldsToCheck list of JsonPointers to search for
-     * @param before prior JsonValue
-     * @param after JsonValue after applied changes
+     * Checks to see if there are differences between the values in two
+     * JsonValues before and after Returns a list containing the changed fields
+     * 
+     * @param fieldsToCheck
+     *            list of JsonPointers to search for
+     * @param before
+     *            prior JsonValue
+     * @param after
+     *            JsonValue after applied changes
      * @return list of strings indicating which values changed
      */
-    private List<String> checkForFields(List<JsonPointer> fieldsToCheck,  JsonValue before, JsonValue after) {
+    private List<String> checkForFields(List<JsonPointer> fieldsToCheck, JsonValue before,
+            JsonValue after) {
         List<String> changedFields = new ArrayList<String>();
         for (JsonPointer jpointer : fieldsToCheck) {
-            // Need to be sure to decrypt any encrypted values so we can compare their string value
-            // (JsonValue does not have an #equals method that works for this purpose)
+            // Need to be sure to decrypt any encrypted values so we can compare
+            // their string value
+            // (JsonValue does not have an #equals method that works for this
+            // purpose)
             CryptoService crypto = CryptoServiceFactory.getInstance();
             Object beforeValue = crypto.decryptIfNecessary(before.get(jpointer)).getObject();
             Object afterValue = crypto.decryptIfNecessary(after.get(jpointer)).getObject();
@@ -308,9 +341,13 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
 
     /**
-     * Checks to see if two objects are equal either as nulls or through their comparator
-     * @param a first object to compare
-     * @param b reference object to compare against
+     * Checks to see if two objects are equal either as nulls or through their
+     * comparator
+     * 
+     * @param a
+     *            first object to compare
+     * @param b
+     *            reference object to compare against
      * @return boolean indicating equality either as nulls or as objects
      */
     private static boolean fieldsEqual(Object a, Object b) {
@@ -320,9 +357,8 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     /**
      * Searches ObjectSetContext for the value of "trigger" and return it.
      */
-    private String getTrigger() {
-        JsonValue context = ObjectSetContext.get();
-        String trigger = null;
+    private String getTrigger(Context context) {
+        /*String trigger = null;
         // Loop through parent contexts, and return highest "trigger"
         while (!context.isNull()) {
             JsonValue tmp = context.get("trigger");
@@ -331,73 +367,142 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
             }
             context = context.get("parent");
         }
-        return trigger;
+        return trigger;*/
+        //TODO UPDATE
+        return context.getId();
     }
 
     /**
      * Audit service does not support changing audit entries.
+     * <p/>
+     * {@link org.forgerock.json.resource.RequestHandler#handleUpdate(org.forgerock.json.resource.ServerContext, org.forgerock.json.resource.UpdateRequest, org.forgerock.json.resource.ResultHandler)
+     * Updates} an existing resource within the collection.
+     * 
+     * @param context
+     *            The request server context.
+     * @param resourceId
+     *            The ID of the targeted resource within the collection.
+     * @param request
+     *            The update request.
+     * @param handler
+     *            The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleUpdate(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.UpdateRequest,
+     *      org.forgerock.json.resource.ResultHandler)
      */
-    @Override
-    public void update(String fullId, String rev, Map<String, Object> obj) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
+    public void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
+                               ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Not allowed on audit service"));
     }
 
     /**
      * Audit service currently does not support deleting audit entries.
+     * <p/>
+     *  {@link org.forgerock.json.resource.RequestHandler#handleDelete(org.forgerock.json.resource.ServerContext,
+     * org.forgerock.json.resource.DeleteRequest, org.forgerock.json.resource.ResultHandler) Removes} a resource instance
+     * from the collection.
      *
-     * Deletes the specified object from the object set.
-     *
-     * @param fullId the identifier of the object to be deleted.
-     * @param rev the version of the object to delete or {@code null} if not provided.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws ForbiddenException if access to the object is forbidden.
-     * @throws ConflictException if version is required but is {@code null}.
-     * @throws PreconditionFailedException if version did not match the existing object in the set.
+     * @param context
+     *         The request server context.
+     * @param resourceId
+     *         The ID of the targeted resource within the collection.
+     * @param request
+     *         The delete request.
+     * @param handler
+     *         The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleDelete(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.DeleteRequest, org.forgerock.json.resource.ResultHandler)
      */
-    @Override
-    public void delete(String fullId, String rev) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
+    public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
+                               ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Not allowed on audit service"));
     }
+
 
     /**
      * Audit service does not support changing audit entries.
+     * <p/>
+     * {@link org.forgerock.json.resource.RequestHandler#handlePatch(org.forgerock.json.resource.ServerContext,
+     * org.forgerock.json.resource.PatchRequest, org.forgerock.json.resource.ResultHandler) Patches} an existing resource
+     * within the collection.
+     *
+     * @param context
+     *         The request server context.
+     * @param resourceId
+     *         The ID of the targeted resource within the collection.
+     * @param request
+     *         The patch request.
+     * @param handler
+     *         The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handlePatch(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.PatchRequest, org.forgerock.json.resource.ResultHandler)
      */
-    @Override
-    public void patch(String id, String rev, Patch patch) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
+    public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
+                              ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Not allowed on audit service"));
     }
 
     /**
-     * Performs the query on the specified object and returns the associated results.
-     * <p>
-     * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types.
+     * {@link org.forgerock.json.resource.RequestHandler#handleQuery(org.forgerock.json.resource.ServerContext,
+     * org.forgerock.json.resource.QueryRequest, org.forgerock.json.resource.QueryResultHandler) Searches} the collection
+     * for all resources which match the query request criteria.
      *
-     * The returned map is structured as follow:
-     * - The top level map contains meta-data about the query, plus an entry with the actual result records.
-     * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
-     *
-     * @param fullId identifies the object to query.
-     * @param params the parameters of the query to perform.
-     * @return the query results, which includes meta-data and the result records in JSON object structure format.
-     * @throws NotFoundException if the specified object could not be found.
-     * @throws BadRequestException if the specified params contain invalid arguments, e.g. a query id that is not
-     * configured, a query expression that is invalid, or missing query substitution tokens.
-     * @throws ForbiddenException if access to the object or specified query is forbidden.
+     * @param context
+     *         The request server context.
+     * @param request
+     *         The query request.
+     * @param handler
+     *         The query result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleQuery(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.QueryRequest, org.forgerock.json.resource.QueryResultHandler)
      */
-    @Override
-    public Map<String, Object> query(String fullId, Map<String, Object> params) throws ObjectSetException {
-        // TODO
-        return new HashMap<String,Object>();
+    public void queryCollection(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        handler.handleResult(new QueryResult());
     }
 
     /**
      * Audit service does not support actions on audit entries.
+     * <p/>
+     * Performs the provided {@link org.forgerock.json.resource.RequestHandler#handleAction(
+     *org.forgerock.json.resource.ServerContext, org.forgerock.json.resource.ActionRequest,
+     * org.forgerock.json.resource.ResultHandler) action} against the resource collection.
+     *
+     * @param context
+     *         The request server context.
+     * @param request
+     *         The action request.
+     * @param handler
+     *         The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleAction(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.ActionRequest, org.forgerock.json.resource.ResultHandler)
      */
-    @Override
-    public Map<String, Object> action(String fullId, Map<String, Object> params) throws ObjectSetException {
-        throw new ForbiddenException("Not allowed on audit service");
+    public void actionCollection(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        handler.handleError(new ForbiddenException("Not allowed on audit service"));
     }
+
+    /**
+     * Audit service does not support actions on audit entries.
+     * <p/>
+     * Performs the provided {@link org.forgerock.json.resource.RequestHandler#handleAction(
+     *org.forgerock.json.resource.ServerContext, org.forgerock.json.resource.ActionRequest,
+     * org.forgerock.json.resource.ResultHandler) action} against a resource within the collection.
+     *
+     * @param context
+     *         The request server context.
+     * @param resourceId
+     *         The ID of the targeted resource within the collection.
+     * @param request
+     *         The action request.
+     * @param handler
+     *         The result handler to be notified on completion.
+     * @see org.forgerock.json.resource.RequestHandler#handleAction(org.forgerock.json.resource.ServerContext,
+     *      org.forgerock.json.resource.ActionRequest, org.forgerock.json.resource.ResultHandler)
+     */
+    public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
+                               ResultHandler<JsonValue> handler) {
+        handler.handleError(new ForbiddenException("Not allowed on audit service"));
+    }
+
 
     // TODO: replace with common utility to handle ID, this is temporary
     // Assumes single level type
@@ -524,10 +629,10 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     }
 
     /**
-     * Fetches a list of JsonPointers from the config file under a specified event and field name
-     * Expects it to look similar to:
-     *
-     *<PRE>
+     * Fetches a list of JsonPointers from the config file under a specified
+     * event and field name Expects it to look similar to:
+     * 
+     * <PRE>
      * {
      *    "eventTypes": {
      *      "activity" : {
@@ -537,11 +642,15 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
      *    }
      * }
      * </PRE>
-     *
-     * @param config the config object to draw from
-     * @param event which event to draw from. ie "activity"
-     * @param fieldName which fieldName to draw from. ie "watchedFields"
-     * @return list containing the JsonPointers generated by the strings in the field
+     * 
+     * @param config
+     *            the config object to draw from
+     * @param event
+     *            which event to draw from. ie "activity"
+     * @param fieldName
+     *            which fieldName to draw from. ie "watchedFields"
+     * @return list containing the JsonPointers generated by the strings in the
+     *         field
      */
     List<JsonPointer> getEventJsonPointerList(JsonValue config, String event, String fieldName) {
         ArrayList<JsonPointer> fieldList = new ArrayList<JsonPointer>();
@@ -555,14 +664,15 @@ public class AuditServiceImpl extends ObjectSetJsonResource implements AuditServ
     List<AuditLogger> getAuditLoggers(JsonValue config, ComponentContext compContext) {
         List<AuditLogger> configuredLoggers = new ArrayList<AuditLogger>();
         List logTo = config.get(CONFIG_LOG_TO).asList();
-        for (Map entry : (List<Map>)logTo) {
+        for (Map entry : (List<Map>) logTo) {
             String logType = (String) entry.get(CONFIG_LOG_TYPE);
             // TDDO: make pluggable
             AuditLogger auditLogger = null;
             if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_CSV)) {
                 auditLogger = new CSVAuditLogger();
             } else if (logType != null && logType.equalsIgnoreCase(CONFIG_LOG_TYPE_REPO)) {
-                auditLogger = new RepoAuditLogger();
+                // TODO: UPGRADE
+                //auditLogger = new RepoAuditLogger();
             } else {
                 throw new InvalidException("Configured audit logType is unknown: " + logType);
             }

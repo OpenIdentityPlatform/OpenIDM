@@ -275,7 +275,7 @@
                                 <artifactItem>
                                     <groupId>mysql</groupId>
                                     <artifactId>mysql-connector-java</artifactId>
-                                    <version>5.1.21</version>
+                                    <version>5.1.22</version>
                                     <type>jar</type>
                                 </artifactItem>
                             </artifactItems>

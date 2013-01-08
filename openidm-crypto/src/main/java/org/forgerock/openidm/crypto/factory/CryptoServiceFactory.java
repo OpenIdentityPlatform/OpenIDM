@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CryptoServiceFactory {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceFactory.class);
+    private final static Logger logger = LoggerFactory.getLogger(CryptoServiceFactory.class);
 
     /**
      * A cryptography service instance

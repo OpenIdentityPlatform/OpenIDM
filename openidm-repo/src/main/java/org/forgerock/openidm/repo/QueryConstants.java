@@ -28,6 +28,7 @@ package org.forgerock.openidm.repo;
  *
  * @author aegloff
  */
+//TODO Use the CREST constants
 public final class QueryConstants {
     private QueryConstants() {}
 
