@@ -10,7 +10,7 @@
    "connectorRef" :
       {
          "bundleName" : "org.forgerock.openicf.connectors.file.openicf-xml-connector",
-         "bundleVersion" : "1.1.0.0",
+         "bundleVersion" : "[1.1.0.0,1.1.1.0)",
          "connectorName" : "com.forgerock.openicf.xml.XMLConnector"
       },
    "producerBufferSize" : 100,

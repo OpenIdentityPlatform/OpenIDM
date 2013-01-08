@@ -1,15 +1,15 @@
 <configuration scan="true" debug="true">
     <jmxConfigurator />
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/openidm.log</file>
-        <layout class="ch.qos.logback.classic.PatternLayout">
+        <file>${launcher.working.location}/logs/openidm.log</file>
+        <encoder>
             <Pattern>%date %level [%thread] %logger{10} [%file:%line] %msg%n</Pattern>
-        </layout>
+        </encoder>
     </appender>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>%msg%n</Pattern>
-        </layout>
+        <encoder>
+            <Pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</Pattern>
+        </encoder>
     </appender>
     <root level="info">
         <appender-ref ref="FILE"/>
