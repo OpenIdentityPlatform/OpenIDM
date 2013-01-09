@@ -398,8 +398,11 @@ return isProcessOnUsersList(processDefinitionId);
         <listitem>
           <para><literal>"customAuthz"</literal> - an optional parameter that 
           enables you to specify a custom function for additional authorization 
-          checks. These functions are defined in <filename>router-atuhz.js</filename>
+          checks. These functions are defined in <filename>router-authz.js</filename>
           .</para>
+          <para>The <literal>allowedPropertiesForManagedUser</literal> variable,
+          declared at the beginning of the file, enables you to create a white
+          list of attributes that users may modify on their own accounts.</para>
         </listitem>
         <listitem>
           <para><literal>"excludePatterns"</literal> - an optional parameter 
