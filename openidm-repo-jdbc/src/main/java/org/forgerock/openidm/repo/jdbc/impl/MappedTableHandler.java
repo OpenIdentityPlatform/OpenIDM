@@ -23,6 +23,19 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
@@ -34,24 +47,10 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
-import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
+import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Handling of tables in a generic (not object specific) layout
@@ -439,7 +438,7 @@ class ExplicitQueryResultMapper implements QueryResultMapper {
             throws SQLException {
         
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        List names = Mapping.getColumnNames(rs);
+        Set names = Mapping.getColumnNames(rs);
         while (rs.next()) {
             JsonValue obj = explicitMapping.mapToJsonValue(rs, names);
             result.add(obj.asMap());
@@ -472,7 +471,7 @@ class Mapping {
         }
     }
     
-    public JsonValue mapToJsonValue(ResultSet rs, List columnNames) throws SQLException {
+    public JsonValue mapToJsonValue(ResultSet rs, Set columnNames) throws SQLException {
         JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
         
         for (ColumnMapping entry: columnMappings) {
@@ -490,7 +489,7 @@ class Mapping {
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
         return mappedResult; 
     }
-    
+
     public String getRev(ResultSet rs) throws SQLException {
         return rs.getString(revMapping.dbColName);
     }
@@ -504,12 +503,12 @@ class Mapping {
         return sb.toString();
     }
     
-    public static List getColumnNames(ResultSet rs) throws SQLException {
-    	ArrayList names = new ArrayList();
+    public static Set<String> getColumnNames(ResultSet rs) throws SQLException {
+        TreeSet<String> set = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-            names.add(rs.getMetaData().getColumnName(i));
+            set.add(rs.getMetaData().getColumnName(i));
         }
-        return names;
+        return set;
     }
 }
 
