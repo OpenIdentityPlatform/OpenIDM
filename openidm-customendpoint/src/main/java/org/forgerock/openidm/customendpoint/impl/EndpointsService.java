@@ -37,18 +37,14 @@ import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Context;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.ObjectSetContext;
-import org.forgerock.openidm.scope.ScopeFactory;
-import org.forgerock.openidm.script.Script;
-import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.ScriptThrownException;
-import org.forgerock.openidm.script.Scripts;
-import org.forgerock.openidm.script.Utils;
-import org.forgerock.openidm.script.javascript.ScriptableWrapper;
+import org.forgerock.script.Script;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptRegistry;
+import org.forgerock.script.engine.Utils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -66,9 +62,8 @@ import org.slf4j.LoggerFactory;
 @Service()
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Custom Endpoints Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = EndpointsService.ROUTER_PREFIX)})
-public class EndpointsService implements JsonResource {
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Custom Endpoints Service")})
+public class EndpointsService implements CollectionResourceProvider {
     private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
 
     public static final String PID = "org.forgerock.openidm.endpointservice";
@@ -80,8 +75,9 @@ public class EndpointsService implements JsonResource {
 
     ComponentContext context;
 
-    @Reference(referenceInterface = ScopeFactory.class)
-    private ScopeFactory scopeFactory;
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private ScriptRegistry scriptRegistry;
 
     /** Additional endpoint service(s) configurations */
     @Reference(
@@ -105,6 +101,9 @@ public class EndpointsService implements JsonResource {
         endpointConfig.put(resourceContext, config);
         EndpointConfig effective = calculateEffectiveConfig().get(resourceContext);
         logger.debug("Effective {}: {}", effective.getName(), effective.getConfig());
+
+        //TODO This should be registerd on the Router
+
         register(effective.getConfig(), effective.getName());
     }
     protected void unbindEndpointConfig(EndpointConfig config, Map properties) {
@@ -133,8 +132,8 @@ public class EndpointsService implements JsonResource {
     protected void activate(ComponentContext context) {
         this.context = context;
 
-        JsonValue scriptConfig = null;
-        Script script = null;
+        //JsonValue scriptConfig = null;
+        //Script script = null;
         
         // Default config is a placeholder at this point
         defaultConfig = new HashMap<String, EndpointConfig>();
@@ -194,7 +193,7 @@ public class EndpointsService implements JsonResource {
         if (context != null) {
             String resourceContext = scriptConfig.get(CONFIG_RESOURCE_CONTEXT).asString();
             if (resourceContext != null) {
-                Script script = Scripts.newInstance((String)context.getProperties().get(Constants.SERVICE_PID), scriptConfig);
+                //Script script = Scripts.newInstance((String)context.getProperties().get(Constants.SERVICE_PID), scriptConfig);
                 scripts.put(resourceContext, new RegisteredScript(getParameters(scriptConfig), script, scriptConfig));
                 logger.info("Registered custom endpoint at : {} with {}", resourceContext, scriptConfig.get("file"));
             } else {
@@ -228,7 +227,7 @@ public class EndpointsService implements JsonResource {
     /**
      * {@inheritDoc}
      */
-    public JsonValue handle(JsonValue request) throws JsonResourceException {
+    public JsonValue handle(JsonValue request) throws ResourceException {
         String id = request.get("id").asString();
         
         // TODO: support registering under any context on the router
@@ -251,15 +250,15 @@ public class EndpointsService implements JsonResource {
                     return new JsonValue(ret);
                 }
             } catch (ScriptThrownException ste) {
-                throw ste.toJsonResourceException(null);
+                throw ste.toResourceException(null);
             } catch (ScriptException se) {
-                throw se.toJsonResourceException("Failure in executing script for " 
+                throw se.toResourceException("Failure in executing script for " 
                         + qualifiedId + ": " + se.getMessage());
             } finally {
                 ObjectSetContext.pop();
             }
         } else {
-            throw new JsonResourceException(JsonResourceException.NOT_FOUND, "No custom endpoint available for " + id);
+            throw new ResourceException(ResourceException.NOT_FOUND, "No custom endpoint available for " + id);
         }
     }
 
@@ -290,18 +289,18 @@ public class EndpointsService implements JsonResource {
      */
     private static class RegisteredScript {
         JsonValue parameters;
-        Script script;
+        ScriptEntry scriptEntry;
         JsonValue scriptConfig;
-        public RegisteredScript(JsonValue parameters, Script script, JsonValue scriptConfig) {
+        public RegisteredScript(JsonValue parameters, ScriptEntry script, JsonValue scriptConfig) {
             this.parameters = parameters;
-            this.script = script;
+            this.scriptEntry = script;
             this.scriptConfig = scriptConfig;
         }
         public JsonValue getParameters() {
             return this.parameters;
         }
-        public Script getScript() {
-            return this.script;
+        public Script getScript(Context context1) {
+            return this.scriptEntry.getScript(context1);
         }
         public JsonValue getScriptConfig() {
             return this.scriptConfig;

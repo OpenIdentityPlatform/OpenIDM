@@ -56,8 +56,15 @@ import org.activiti.engine.task.TaskQuery;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RouterContext;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
 import org.forgerock.openidm.util.DateUtil;
@@ -68,7 +75,7 @@ import org.forgerock.openidm.audit.util.ActivityLog;
  *
  * @author orsolyamebold
  */
-public class ActivitiResource implements JsonResource {
+public class ActivitiResource implements CollectionResourceProvider {
 
     private ProcessEngine processEngine;
  
@@ -81,33 +88,41 @@ public class ActivitiResource implements JsonResource {
     }
 
     @Override
-    public JsonValue handle(JsonValue request) throws JsonResourceException {
-        try {
-            ActivitiConstants.WorkflowPath path = getPath(request);
-            Authentication.setAuthenticatedUserId(ActivityLog.getRequester(request));
-            Method method = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
-            switch (path) {
-                case processdefinition:     //workflow/processdefinition
-                    return processDefinition(method, request);
-                case processdefinitionid:     //workflow/processdefinition/{ID}
-                    return processDefinitionId(method, request);
-                case processinstance:     //workflow/processinstance
-                    return processInstance(method, request);
-                case processinstanceid:     //workflow/processinstance/{ID}
-                    return processInstanceId(method, request);
-                case taskdefinition:    //workflow/taskdefinition
-                    return taskDefinition(method, request);
-                case taskinstance:     //workflow/taskinstance
-                    return taskInstance(method, request);
-                case taskinstanceid:     //workflow/taskinstance/{ID}
-                    return taskInstanceId(method, request);
-                default:
-                    throw new JsonResourceException(JsonResourceException.FORBIDDEN, "The path in the request is not valid");
-            }
-        } catch (JsonValueException jve) {
-            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
-        }
+    public void readInstance(ServerContext context, String resourceId, ReadRequest request, ResultHandler<Resource> handler) {
+       Map<String,String> uriTemplateVariables =  context.asContext(RouterContext.class).getUriTemplateVariables();
+       ActivitiConstants.WorkflowPath path = getPath(uriTemplateVariables);
+       //TODO Prefer multiple CollectionResourceProvider and SingletonResourceProvider
+
     }
+
+//    @Override
+//    public JsonValue handle(JsonValue request) throws JsonResourceException {
+//        try {
+//            ActivitiConstants.WorkflowPath path = getPath(request);
+//            Authentication.setAuthenticatedUserId(ActivityLog.getRequester(request));
+//            Method method = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
+//            switch (path) {
+//                case processdefinition:     //workflow/processdefinition
+//                    return processDefinition(method, request);
+//                case processdefinitionid:     //workflow/processdefinition/{ID}
+//                    return processDefinitionId(method, request);
+//                case processinstance:     //workflow/processinstance
+//                    return processInstance(method, request);
+//                case processinstanceid:     //workflow/processinstance/{ID}
+//                    return processInstanceId(method, request);
+//                case taskdefinition:    //workflow/taskdefinition
+//                    return taskDefinition(method, request);
+//                case taskinstance:     //workflow/taskinstance
+//                    return taskInstance(method, request);
+//                case taskinstanceid:     //workflow/taskinstance/{ID}
+//                    return taskInstanceId(method, request);
+//                default:
+//                    throw new JsonResourceException(JsonResourceException.FORBIDDEN, "The path in the request is not valid");
+//            }
+//        } catch (JsonValueException jve) {
+//            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
+//        }
+//    }
 
     /**
      * Parse the path element of the request

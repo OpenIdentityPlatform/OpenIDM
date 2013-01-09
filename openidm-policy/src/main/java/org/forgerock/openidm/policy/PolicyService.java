@@ -56,6 +56,7 @@ import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.script.Utils;
 import org.forgerock.openidm.util.FileUtil;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -80,8 +81,9 @@ public class PolicyService implements JsonResource {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicyService.class);
 
-    @Reference(referenceInterface = ScopeFactory.class)
-    private ScopeFactory scopeFactory;
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private ScriptRegistry scopeFactory;
 
     /** Internal object set router service. */
     @Reference(

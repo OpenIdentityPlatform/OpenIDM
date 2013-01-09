@@ -1,45 +1,34 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
 package org.forgerock.openidm.router;
 
-// Java SE
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// OSGi
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.Filter;
-
-import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
-
-// Felix SCR
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -48,61 +37,53 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
-
-// JSON Fluent
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.json.resource.JsonResourceFilter;
-import org.forgerock.json.resource.JsonResourceFilterChain;
-import org.forgerock.json.resource.JsonResourceRouter;
-import org.forgerock.json.resource.SimpleJsonResource.Method;
-
-// OpenIDM
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
-import org.forgerock.openidm.scope.ScopeFactory;
-import org.forgerock.openidm.script.Script;
-import org.forgerock.openidm.script.ScriptException;
-import org.forgerock.openidm.script.ScriptThrownException;
-import org.forgerock.openidm.script.Scripts;
+import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.script.ScriptRegistry;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides internal routing for a top-level object set.
- *
+ * 
  * @author Paul C. Bryan
  * @author aegloff
  */
-@Component(
-    name = "org.forgerock.openidm.router",
-    policy = ConfigurationPolicy.OPTIONAL,
-    metatype = true,
-    configurationFactory = false,
-    immediate = true
-)
+@Component(name = "org.forgerock.openidm.router", policy = ConfigurationPolicy.OPTIONAL,
+        metatype = true, configurationFactory = false, immediate = true)
 @Properties({
     @Property(name = "service.description", value = "OpenIDM internal JSON resource router"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.restlet.path", value = "/")
-})
+    @Property(name = "service.vendor", value = "ForgeRock AS") })
 @Service
-public class JsonResourceRouterService implements JsonResource {
+public class JsonResourceRouterService implements RequestHandler {
 
     /** TODO: Description. */
-    private final static Logger LOGGER = LoggerFactory.getLogger(JsonResourceRouterService.class);
+    private final static Logger logger = LoggerFactory.getLogger(JsonResourceRouterService.class);
 
     /** TODO: Description. */
     private static final String PREFIX_PROPERTY = "openidm.router.prefix";
@@ -111,63 +92,39 @@ public class JsonResourceRouterService implements JsonResource {
      * Event name prefix for monitoring the router
      */
     public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
-    
+
     /** TODO: Description. */
     private final Router router = new Router();
 
     /** TODO: Description. */
-    private Chain chain = new Chain(router);
-
-    /** TODO: Description. */
     private ComponentContext context;
 
-    /** 
-     * Currently handled via service tracker instead, 
-     * until SCR implementation properly resolves and cleanly shuts down this scneario 
-     * 1.6.0 Logs exceptions at shut-down
-     * 1.6.2 Misses some registered events / getService returns null
+    /**
+     * Currently handled via service tracker instead, until SCR implementation
+     * properly resolves and cleanly shuts down this scneario 1.6.0 Logs
+     * exceptions at shut-down 1.6.2 Misses some registered events / getService
+     * returns null
      */
-/*    @Reference(
-        name = "ref_JsonResourceRouterService_JsonResource",
-        referenceInterface = JsonResource.class,
-        bind = "bind",
-        unbind = "unbind",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        policy = ReferencePolicy.DYNAMIC,
-        strategy = ReferenceStrategy.EVENT
-    )
-    protected int _dummy; // whiteboard pattern
-    protected synchronized void bind(JsonResource resource, Map<String, Object> properties) {
-        Object prefix = properties.get(PREFIX_PROPERTY);
-        if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-            router.addRoute((String)prefix, resource);
-        }
-    }
-    protected synchronized void unbind(JsonResource resource, Map<String, Object> properties) {
-        Object prefix = properties.get(PREFIX_PROPERTY);
-        if (prefix != null && prefix instanceof String) { // service is specified as internally routable
-            router.removeRoute((String)prefix);
-        }
-    }
-*/
-    /** Scope factory service. */
-    @Reference(
-        name = "ref_JsonResourceRouterService_ScopeFactory",
-        referenceInterface = ScopeFactory.class,
-        bind = "bindScopeFactory",
-        unbind = "unbindScopeFactory",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.DYNAMIC
-    )
-    private ScopeFactory scopeFactory;
-    protected void bindScopeFactory(ScopeFactory scopeFactory) {
-        this.scopeFactory = scopeFactory;
-        this.scopeFactory.setRouter(this);
-    }
-    protected void unbindScopeFactory(ScopeFactory scopeFactory) {
-        this.scopeFactory.setRouter(null);
-        this.scopeFactory = null;
-    }
+    /*
+     * @Reference( name = "ref_JsonResourceRouterService_JsonResource",
+     * referenceInterface = JsonResource.class, bind = "bind", unbind =
+     * "unbind", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy =
+     * ReferencePolicy.DYNAMIC, strategy = ReferenceStrategy.EVENT ) protected
+     * int _dummy; // whiteboard pattern protected synchronized void
+     * bind(JsonResource resource, Map<String, Object> properties) { Object
+     * prefix = properties.get(PREFIX_PROPERTY); if (prefix != null && prefix
+     * instanceof String) { // service is specified as internally routable
+     * router.addRoute((String)prefix, resource); } } protected synchronized
+     * void unbind(JsonResource resource, Map<String, Object> properties) {
+     * Object prefix = properties.get(PREFIX_PROPERTY); if (prefix != null &&
+     * prefix instanceof String) { // service is specified as internally
+     * routable router.removeRoute((String)prefix); } }
+     */
+
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private ScriptRegistry scopeFactory;
+
 
     /**
      * Returns {@code true} if the values are === equal.
@@ -177,13 +134,15 @@ public class JsonResourceRouterService implements JsonResource {
     }
 
     /**
-     * Initialize the router with configuration. Supports modifying router configuration.
+     * Initialize the router with configuration. Supports modifying router
+     * configuration.
      */
     private void init(ComponentContext context) {
-        String pid = (String)context.getProperties().get("service.pid");
-        String factoryPid = (String)context.getProperties().get("service.factoryPid");
+        String pid = (String) context.getProperties().get("service.pid");
+        String factoryPid = (String) context.getProperties().get("service.factoryPid");
         if (factoryPid != null) {
-            LOGGER.warn("Factory config for router not allowed, ignoring config {}-{}", pid, factoryPid );
+            logger.warn("Factory config for router not allowed, ignoring config {}-{}", pid,
+                    factoryPid);
             return;
         }
         this.context = context;
@@ -195,31 +154,35 @@ public class JsonResourceRouterService implements JsonResource {
             }
             this.chain = chain;
         } catch (JsonValueException jve) {
-            // The router should stay up for basic support even with invalid config, do not throw Exception
-            LOGGER.warn("Router configuration error", jve);
+            // The router should stay up for basic support even with invalid
+            // config, do not throw Exception
+            logger.warn("Router configuration error", jve);
         } catch (Exception e) {
-            // The router should stay up for basic support even with invalid config, do not throw Exception
-            LOGGER.warn("Failed to configure router", e);
+            // The router should stay up for basic support even with invalid
+            // config, do not throw Exception
+            logger.warn("Failed to configure router", e);
         }
     }
 
     ServiceTrackerNotifier tracker;
-    
+
     @Activate
     protected synchronized void activate(ComponentContext context) {
-        LOGGER.info("Activate router configuration, properties: {}", context.getProperties());
+        logger.info("Activate router configuration, properties: {}", context.getProperties());
         final BundleContext bundleContext = context.getBundleContext();
-        
-        // Use a service tracker to register and deregister services on the router
+
+        // Use a service tracker to register and deregister services on the
+        // router
         ServiceTrackerListener listener = new ServiceTrackerListener() {
             public void addedService(ServiceReference reference, Object service) {
                 String prefix = (String) reference.getProperty(PREFIX_PROPERTY);
                 if (prefix != null) {
                     if (service == null) {
-                        LOGGER.warn("Framework issue, service in service tracker is null for {}", prefix);
+                        logger.warn("Framework issue, service in service tracker is null for {}",
+                                prefix);
                     } else {
                         router.addRoute(prefix, (JsonResource) service);
-                        LOGGER.debug("Added route for {} {}", prefix, service);
+                        logger.debug("Added route for {} {}", prefix, service);
                     }
                 }
             }
@@ -228,7 +191,7 @@ public class JsonResourceRouterService implements JsonResource {
                 String prefix = (String) reference.getProperty(PREFIX_PROPERTY);
                 if (prefix != null) {
                     router.removeRoute(prefix);
-                    LOGGER.debug("Removed route for {} {}", prefix);
+                    logger.debug("Removed route for {} {}", prefix);
                 }
             }
 
@@ -236,23 +199,26 @@ public class JsonResourceRouterService implements JsonResource {
                 String prefix = (String) reference.getProperty(PREFIX_PROPERTY);
                 if (prefix != null) {
                     if (service == null) {
-                        LOGGER.warn("Framework issue, service in service tracker is null for {}", prefix);
+                        logger.warn("Framework issue, service in service tracker is null for {}",
+                                prefix);
                     } else {
                         router.replaceRoute(prefix, (JsonResource) service);
-                        LOGGER.debug("Replaced route for {} {}", prefix, service);
+                        logger.debug("Replaced route for {} {}", prefix, service);
                     }
                 }
             }
         };
-        tracker = new ServiceTrackerNotifier(context.getBundleContext(), JsonResource.class.getName(), null, listener);
+        tracker =
+                new ServiceTrackerNotifier(context.getBundleContext(),
+                        JsonResource.class.getName(), null, listener);
         tracker.open();
-        
+
         init(context);
     }
 
     @Modified
     protected synchronized void modified(ComponentContext context) {
-        LOGGER.debug("Modified router configuration, properties: {}", context.getProperties());
+        logger.debug("Modified router configuration, properties: {}", context.getProperties());
         init(context);
     }
 
@@ -264,9 +230,10 @@ public class JsonResourceRouterService implements JsonResource {
         }
         this.context = null;
     }
-    
+
     /**
-     * @param request the router request
+     * @param request
+     *            the router request
      * @return an event name For monitoring purposes
      */
     Name getRouterEventName(JsonValue request) {
@@ -277,22 +244,23 @@ public class JsonResourceRouterService implements JsonResource {
         if ("query".equals(method) || "action".equals(method)) {
             idContext = request.get("id").asString();
         } else {
-            // For CRUD, patch group statistics without the local resource identifier
+            // For CRUD, patch group statistics without the local resource
+            // identifier
             idContext = stripLastId(request.get("id").asString());
         }
 
-        String eventName = new StringBuilder(EVENT_ROUTER_PREFIX)
-                .append(idContext)
-                .append("/")
-                .append(method)
-                .toString();
-        
+        String eventName =
+                new StringBuilder(EVENT_ROUTER_PREFIX).append(idContext).append("/").append(method)
+                        .toString();
+
         return Name.get(eventName);
     }
-    
+
     /**
      * Strips the local resource identifier from a qualified resource identifier
-     * @param a qualified resource identifier in String form
+     * 
+     * @param a
+     *            qualified resource identifier in String form
      * @return the resource context
      */
     private String stripLastId(String id) {
@@ -305,7 +273,52 @@ public class JsonResourceRouterService implements JsonResource {
         }
         return result;
     }
-    
+
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request,
+            ResultHandler<JsonValue> handler) {
+       //TODO fix me
+    }
+
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request,
+            ResultHandler<Resource> handler) {
+        handle(context, request, handler);
+    }
+
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request,
+            ResultHandler<Resource> handler) {
+        handle(context, request, handler);
+    }
+
+    @Override
+    public void handlePatch(ServerContext context, PatchRequest request,
+            ResultHandler<Resource> handler) {
+        handle(context, request, handler);
+    }
+
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        //TODO fix me
+    }
+
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request,
+            ResultHandler<Resource> handler) {
+        handle(context, request, handler);
+    }
+
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request,
+            ResultHandler<Resource> handler) {
+        handle(context, request, handler);
+    }
+
+    public void handle(ServerContext context, Request request, ResultHandler<Resource> handler) {
+
+    }
+
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
@@ -318,65 +331,34 @@ public class JsonResourceRouterService implements JsonResource {
             }
         }
         try {
-            JsonValue response = chain.handle(request); // dispatch to router, via filter chain
+            JsonValue response = chain.handle(request); // dispatch to router,
+            // via filter chain
             measure.setResult(response);
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Request: {}, Response: {}", request, response);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Request: {}, Response: {}", request, response);
             }
             return response;
         } catch (JsonResourceException jre) {
             measure.setResult(jre);
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Resource exception: {} processing request: {}", new Object[] {jre.toJsonValue(), request, jre});
+            if (logger.isTraceEnabled()) {
+                logger.trace("Resource exception: {} processing request: {}", new Object[] {
+                    jre.toJsonValue(), request, jre });
             }
             int code = jre.getCode();
             if (code >= 500 && code <= 599) { // HTTP server-side error
-                LOGGER.warn("JSON resource exception", jre);
+                logger.warn("JSON resource exception", jre);
             }
             throw jre;
         } catch (RuntimeException re) {
             measure.setResult(re);
-            LOGGER.warn("Uncaught runtime exception processing request: {}", request, re);
+            logger.warn("Uncaught runtime exception processing request: {}", request, re);
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
         } catch (StackOverflowError sfe) {
             measure.setResult(sfe);
-            LOGGER.warn("Uncaught stack overflow error processing request: {}", request, sfe);
+            logger.warn("Uncaught stack overflow error processing request: {}", request, sfe);
             throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR);
         } finally {
             measure.end();
-        }
-    }
-
-    /**
-     * TODO: Description.
-     */
-    private class Router extends JsonResourceRouter {
-        public Map<String, JsonResource> getRoutes() {
-            return routes;
-        }
-        public synchronized void addRoute(String prefix, JsonResource resource) {
-            LinkedHashMap<String, JsonResource> copyOnWrite = 
-                    new LinkedHashMap<String, JsonResource>(router.getRoutes());
-            copyOnWrite.put(prefix, resource);
-            routes = copyOnWrite;
-            LOGGER.debug("Routes state after add: {}", routes);
-        }
-        
-        public synchronized void removeRoute(String prefix) {
-            LinkedHashMap<String, JsonResource> copyOnWrite = 
-                    new LinkedHashMap<String, JsonResource>(router.getRoutes());
-            copyOnWrite.remove(prefix);
-            routes = copyOnWrite;
-            LOGGER.debug("Routes state after delete: {}", routes);
-        }
-        
-        public synchronized void replaceRoute(String prefix, JsonResource resource) {
-            LinkedHashMap<String, JsonResource> copyOnWrite = 
-                    new LinkedHashMap<String, JsonResource>(router.getRoutes());
-            copyOnWrite.remove(prefix);
-            copyOnWrite.put(prefix, resource);
-            routes = copyOnWrite;
-            LOGGER.debug("Routes state after replace: {}", routes);
         }
     }
 
@@ -387,6 +369,7 @@ public class JsonResourceRouterService implements JsonResource {
         public Chain(JsonResource resource) {
             this.resource = resource;
         }
+
         public List<JsonResourceFilter> getFilters() {
             return filters;
         }
@@ -420,9 +403,11 @@ public class JsonResourceRouterService implements JsonResource {
 
         /**
          * TODO: Description.
-         *
-         * @param config TODO.
-         * @throws JsonValueException TODO.
+         * 
+         * @param config
+         *            TODO.
+         * @throws JsonValueException
+         *             TODO.
          */
         public Filter(JsonValue config) throws JsonValueException {
             pointer = config.getPointer().toString();
@@ -440,56 +425,63 @@ public class JsonResourceRouterService implements JsonResource {
 
         /**
          * TODO: Description.
-         *
-         * @param method TODO.
-         * @param id TODO.
+         * 
+         * @param method
+         *            TODO.
+         * @param id
+         *            TODO.
          * @return TODO.
          */
         private boolean matches(String method, String id) {
-            return ((methods == null || methods.contains(method))
-             && (pattern == null || (id != null && pattern.matcher(id).matches())));
+            return ((methods == null || methods.contains(method)) && (pattern == null || (id != null && pattern
+                    .matcher(id).matches())));
         }
 
         /**
          * TODO: Description.
-         *
-         * @param scope TODO
+         * 
+         * @param scope
+         *            TODO
          * @return TODO.
-         * @throws JsonResourceException TODO.
+         * @throws JsonResourceException
+         *             TODO.
          */
         private boolean evalCondition(Map<String, Object> scope) throws JsonResourceException {
-            boolean result = true; // default true unless script proves otherwise
+            boolean result = true; // default true unless script proves
+                                   // otherwise
             if (condition != null) {
                 try {
                     result = Boolean.TRUE.equals(condition.exec(scope));
                 } catch (ScriptException se) {
                     String msg = pointer + " condition script encountered exception";
-                    LOGGER.debug(msg, se);
+                    logger.debug(msg, se);
                     throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, msg, se);
                 }
             }
-            LOGGER.debug("{} evalCondition yielded {}", pointer, Boolean.toString(result));
+            logger.debug("{} evalCondition yielded {}", pointer, Boolean.toString(result));
             return result;
         }
 
-       /**
+        /**
          * TODO: Description.
-         *
-         * @param scope TODO.
-         * @throws JsonResourceException TODO.
+         * 
+         * @param scope
+         *            TODO.
+         * @throws JsonResourceException
+         *             TODO.
          */
         private void onRequest(Map<String, Object> scope) throws JsonResourceException {
             if (onRequest != null) {
-                LOGGER.debug("Calling {} onRequest script", pointer); 
+                logger.debug("Calling {} onRequest script", pointer);
                 try {
                     onRequest.exec(scope);
                 } catch (ScriptThrownException ste) {
                     JsonResourceException ex = ste.toJsonResourceException(null);
-                    LOGGER.debug("onRequest exception", ste);
+                    logger.debug("onRequest exception", ste);
                     throw ex;
                 } catch (ScriptException se) {
                     String msg = pointer + " onRequest script encountered exception";
-                    LOGGER.debug(msg, se);
+                    logger.debug(msg, se);
                     throw se.toJsonResourceException(msg);
                 }
             }
@@ -497,18 +489,20 @@ public class JsonResourceRouterService implements JsonResource {
 
         /**
          * TODO: Description.
-         *
-         * @param scope TODO.
-         * @throws JsonResourceException TODO.
+         * 
+         * @param scope
+         *            TODO.
+         * @throws JsonResourceException
+         *             TODO.
          */
         private void onResponse(Map<String, Object> scope) throws JsonResourceException {
             if (onResponse != null) {
-                LOGGER.debug("Calling {} onResponse script", pointer); 
+                logger.debug("Calling {} onResponse script", pointer);
                 try {
                     onResponse.exec(scope);
                 } catch (ScriptException se) {
                     String msg = pointer + " onResponse script encountered exception";
-                    LOGGER.debug(msg, se);
+                    logger.debug(msg, se);
                     throw se.toJsonResourceException(msg);
                 }
             }
@@ -516,42 +510,49 @@ public class JsonResourceRouterService implements JsonResource {
 
         /**
          * TODO: Description.
-         *
-         * @param scope TODO.
-         * @throws JsonResourceException TODO.
+         * 
+         * @param scope
+         *            TODO.
+         * @throws JsonResourceException
+         *             TODO.
          */
         private void onFailure(Map<String, Object> scope) throws JsonResourceException {
             if (onFailure != null) {
-                LOGGER.debug("Calling {} onFailure script", pointer); 
+                logger.debug("Calling {} onFailure script", pointer);
                 try {
                     onFailure.exec(scope);
                 } catch (ScriptException se) {
                     String msg = pointer + " onFailure script encountered exception";
-                    LOGGER.debug(msg, se);
+                    logger.debug(msg, se);
                     throw se.toJsonResourceException(msg);
                 }
             }
         }
 
         /**
-         * Filters the JSON resource request and/or JSON resource response. If the
-         * {@code method}, {@code id} pattern and {@code condition} match, then the (optional)
-         * {@code onRequest}, {@code onResponse} and/or {@code onFailure} scripts are invoked.
+         * Filters the JSON resource request and/or JSON resource response. If
+         * the {@code method}, {@code id} pattern and {@code condition} match,
+         * then the (optional) {@code onRequest}, {@code onResponse} and/or
+         * {@code onFailure} scripts are invoked.
          * <p>
-         * This method creates a copy of the request value, so unlike the rules specified in
-         * the {@code JsonResourceFilter} class, the {@code onRequest} script is allowed to
-         * modify the request. The modified request is what will be passed on to the next
-         * filter/handler in the chain.
-         *
-         * @param request the JSON resource request.
-         * @param next the next filter or resource in chain.
+         * This method creates a copy of the request value, so unlike the rules
+         * specified in the {@code JsonResourceFilter} class, the
+         * {@code onRequest} script is allowed to modify the request. The
+         * modified request is what will be passed on to the next filter/handler
+         * in the chain.
+         * 
+         * @param request
+         *            the JSON resource request.
+         * @param next
+         *            the next filter or resource in chain.
          * @return the JSON resource response.
-         * @throws JsonResourceException if there is an exception handling the request.
+         * @throws JsonResourceException
+         *             if there is an exception handling the request.
          */
         @Override
         public JsonValue filter(JsonValue request, JsonResource next) throws JsonResourceException {
             Map<String, Object> scope = null;
-            
+
             if (matches(request.get("method").asString(), request.get("id").asString())) {
                 scope = scopeFactory.newInstance(request);
                 scope.put("request", request.getObject());
@@ -562,7 +563,8 @@ public class JsonResourceRouterService implements JsonResource {
             if (scope != null) {
                 onRequest(scope);
                 Object r = scope.get("request");
-                if (r != null && request != r) { // script replaced request in scope
+                if (r != null && request != r) { // script replaced request in
+                                                 // scope
                     request = new JsonValue(r);
                 }
             }

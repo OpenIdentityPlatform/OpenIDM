@@ -26,6 +26,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.javax.el.ELContext;
 import org.activiti.engine.impl.javax.el.ELResolver;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.activiti.engine.impl.context.Context;
-import org.forgerock.json.resource.SimpleJsonResource;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.Patch;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.BadRequestException;
+import org.forgerock.script.scope.ConnectionFunction;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
 
 /**
@@ -51,7 +49,7 @@ public class OpenIDMELResolver extends ELResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenIDMELResolver.class);
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
-    private ObjectSet router;
+    private ServerContext router;
 
     public Object getValue(ELContext context, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
@@ -114,37 +112,38 @@ public class OpenIDMELResolver extends ELResolver {
      */
     @Override
     public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
-        if (base instanceof ObjectSet) {
+        if (base instanceof ServerContext) {
             OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
             router = session.getOpenIDM();
             context.setPropertyResolved(true);
             try {
-                switch (SimpleJsonResource.Method.valueOf((String) method)) {
-                    case read:
-                        return router.read((String) params[0]);
-                    case query:
-                        return router.query((String) params[0], (Map<String, Object>) params[1]);
-                    case create:
-                        router.create((String) params[0], (Map<String, Object>) params[1]);
-                        return null;
-                    case update:
-                        router.update((String) params[0], (String) params[1], (Map<String, Object>) params[2]);
-                        return null;
-                    case delete:
-                        router.delete((String) params[0], (String) params[1]);
-                        return null;
-                    case action:
-                        return router.action((String) params[0], (Map<String, Object>) params[1]);
-                    case patch:
-                        router.patch((String) params[0], (String) params[1], (Patch) params[2]);
-                        return null;
-                    default:
-                        throw new BadRequestException("The requested method is not available: " + method);
-                }
+                ConnectionFunction.valueOf((String) method).call(null, params);
+//                switch (SimpleJsonResource.Method.valueOf((String) method)) {
+//                    case read:
+//                        return router.read((String) params[0]);
+//                    case query:
+//                        return router.query((String) params[0], (Map<String, Object>) params[1]);
+//                    case create:
+//                        router.create((String) params[0], (Map<String, Object>) params[1]);
+//                        return null;
+//                    case update:
+//                        router.update((String) params[0], (String) params[1], (Map<String, Object>) params[2]);
+//                        return null;
+//                    case delete:
+//                        router.delete((String) params[0], (String) params[1]);
+//                        return null;
+//                    case action:
+//                        return router.action((String) params[0], (Map<String, Object>) params[1]);
+//                    case patch:
+//                        router.patch((String) params[0], (String) params[1], (Patch) params[2]);
+//                        return null;
+//                    default:
+//                        throw new BadRequestException("The requested method is not available: " + method);
+//                }
 
-            } catch (ObjectSetException ex) {
+            } catch (ResourceException ex) {
                 LOGGER.error(OpenIDMELResolver.class.getName(), ex);
-            } catch (IllegalArgumentException ex) {
+            } catch (Exception ex) {
                 LOGGER.error(OpenIDMELResolver.class.getName(), ex);
             }
         }

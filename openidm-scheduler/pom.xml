@@ -44,6 +44,11 @@
             <artifactId>openidm-quartz-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- TODO Revisit this script dependency here -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
@@ -64,7 +69,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
