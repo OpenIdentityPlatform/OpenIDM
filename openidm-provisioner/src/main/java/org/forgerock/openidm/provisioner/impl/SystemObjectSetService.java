@@ -27,8 +27,13 @@ package org.forgerock.openidm.provisioner.impl;
 import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.Id;
@@ -62,7 +67,7 @@ import java.util.Map;
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "system")
 })
-public class SystemObjectSetService implements JsonResource,
+public class SystemObjectSetService implements CollectionResourceProvider,
 // TODO: Deprecate the following interfaces when the discovery-engine:
         SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
@@ -120,24 +125,14 @@ public class SystemObjectSetService implements JsonResource,
      *
      * @param id    the fully-qualified identifier of the object that was created.
      * @param value the value of the object that was created.
-     * @throws org.forgerock.openidm.sync.SynchronizationException
+     * @throws ResourceException
      *          if an exception occurs processing the notification.
      */
-    public void onCreate(String id, JsonValue value) throws SynchronizationException {
-        try {
-            Map<String, Object> params = new HashMap<String, Object>(2);
-            params.put("_action", "ONCREATE");
-            params.put("id", id);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(5));
-            request.put("method", "action");
-            request.put("type", "resource");
-            request.put("id", "sync");
-            request.put("params", params);
-            request.put("value", value.getObject());
-            router.handle(request);
-        } catch (JsonResourceException e) {
-            throw new SynchronizationException(e);
-        }
+    public void onCreate(ServerContext context, String id, JsonValue value) throws ResourceException {
+        ActionRequest request = Requests.newActionRequest("sync", "ONCREATE");
+        request.setAdditionalActionParameter("id", id);
+        request.setContent(value);
+        context.getConnection().action(context, request);
     }
 
     /**
@@ -146,48 +141,30 @@ public class SystemObjectSetService implements JsonResource,
      * @param id       the fully-qualified identifier of the object that was updated.
      * @param oldValue the old value of the object prior to the update.
      * @param newValue the new value of the object after the update.
-     * @throws org.forgerock.openidm.sync.SynchronizationException
+     * @throws ResourceException
      *          if an exception occurs processing the notification.
      */
-    public void onUpdate(String id, JsonValue oldValue, JsonValue newValue) throws SynchronizationException {
-        try {
-            Map<String, Object> params = new HashMap<String, Object>(2);
-            params.put("_action", "ONUPDATE");
-            params.put("id", id);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(5));
-            request.put("method", "action");
-            request.put("type", "resource");
-            request.put("id", "sync");
-            request.put("params", params);
-            request.put("value", newValue.getObject());
-            router.handle(request);
-        } catch (JsonResourceException e) {
-            throw new SynchronizationException(e);
-        }
+    public void onUpdate(ServerContext context, String id, JsonValue oldValue, JsonValue newValue)
+            throws ResourceException {
+        ActionRequest request = Requests.newActionRequest("sync", "ONUPDATE");
+        request.setAdditionalActionParameter("id", id);
+        request.setContent(newValue);
+        context.getConnection().action(context, request);
     }
 
     /**
      * Called when a source object has been deleted.
      *
      * @param id the fully-qualified identifier of the object that was deleted.
-     * @param the value before the delete, or null if not supplied 
-     * @throws org.forgerock.openidm.sync.SynchronizationException
+     * @param oldValue the value before the delete, or null if not supplied
+     * @throws ResourceException
      *          if an exception occurs processing the notification.
      */
-    public void onDelete(String id, JsonValue oldValue) throws SynchronizationException {
-        try {
-            Map<String, Object> params = new HashMap<String, Object>(2);
-            params.put("_action", "ONDELETE");
-            params.put("id", id);
-            JsonValue request = new JsonValue(new HashMap<String, Object>(4));
-            request.put("method", "action");
-            request.put("type", "resource");
-            request.put("id", "sync");
-            request.put("params", params);
-            router.handle(request);
-        } catch (JsonResourceException e) {
-            throw new SynchronizationException(e);
-        }
+    public void onDelete(ServerContext context, String id, JsonValue oldValue) throws ResourceException {
+        ActionRequest request = Requests.newActionRequest("sync", "ONDELETE");
+        request.setAdditionalActionParameter("id", id);
+        request.setContent(oldValue);
+        context.getConnection().action(context, request);
     }
 
     /**

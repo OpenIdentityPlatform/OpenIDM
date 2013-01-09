@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.joda.time.Days;
 import org.joda.time.ReadablePeriod;
@@ -46,12 +47,12 @@ public class TaskScannerContext {
     private String invokerName;
     private String scriptName;
     private JsonValue params;
-    private JsonValue context;
+    private ServerContext context;
     private boolean canceled = false;
     private TaskScannerStatistic statistics;
     private TaskScannerState state;
 
-    public TaskScannerContext(String invokerName, String scriptName, JsonValue params, JsonValue context) {
+    public TaskScannerContext(String invokerName, String scriptName, JsonValue params, ServerContext context) {
         this.invokerName = invokerName;
         this.scriptName = scriptName;
         this.params = params;
@@ -115,7 +116,7 @@ public class TaskScannerContext {
         statistics.setNumberOfTasksToProcess(number);
     }
 
-    public JsonValue getContext() {
+    public ServerContext getContext() {
         return this.context;
     }
 
@@ -132,12 +133,11 @@ public class TaskScannerContext {
     }
 
     public String getTaskScanID() {
-        return context.get("uuid").required().asString();
+        return context.getId();
     }
 
     /**
      * Retrieve the timeout period from the supplied config
-     * @param value JsonValue configuration containing "recovery/timeout"
      * @return the timeout period taken from the config
      */
     public ReadablePeriod getRecoveryTimeout() {

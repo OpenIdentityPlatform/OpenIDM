@@ -16,17 +16,13 @@
 
 package org.forgerock.openidm.sync.impl;
 
-// Java SE
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 // SLF4J
+import org.forgerock.script.ScriptRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,26 +47,11 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.fluent.JsonPointer;
 
-// JSON Resource
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceContext;
 
 // OpenIDM
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.scope.ScopeFactory;
-import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.openidm.sync.SynchronizationListener;
-
-// Deprecated
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.ObjectSetContext;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
 
 /**
  * TODO: Description.
@@ -111,39 +92,27 @@ public class SynchronizationService extends ObjectSetJsonResource
     Reconcile reconService;
 
     /** Object set router service. */
-    @Reference(
-        name = "ref_SynchronizationService_JsonResourceRouterService",
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.DYNAMIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private ObjectSet router;
-    protected void bindRouter(JsonResource router) {
-        this.router = new JsonResourceObjectSet(router);
-    }
-    protected void unbindRouter(JsonResource router) {
-        this.router = null;
-    }
+//    @Reference(
+//        name = "ref_SynchronizationService_JsonResourceRouterService",
+//        referenceInterface = JsonResource.class,
+//        bind = "bindRouter",
+//        unbind = "unbindRouter",
+//        cardinality = ReferenceCardinality.MANDATORY_UNARY,
+//        policy = ReferencePolicy.DYNAMIC,
+//        target = "(service.pid=org.forgerock.openidm.router)"
+//    )
+//    private ObjectSet router;
+//    protected void bindRouter(JsonResource router) {
+//        this.router = new JsonResourceObjectSet(router);
+//    }
+//    protected void unbindRouter(JsonResource router) {
+//        this.router = null;
+//    }
 
-    /** Scope factory service. */
-    @Reference(
-        name = "ref_SynchronizationService_ScopeFactory",
-        referenceInterface = ScopeFactory.class,
-        bind = "bindScopeFactory",
-        unbind = "unbindScopeFactory",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.DYNAMIC
-    )
-    private ScopeFactory scopeFactory;
-    protected void bindScopeFactory(ScopeFactory scopeFactory) {
-        this.scopeFactory = scopeFactory;
-    }
-    protected void unbindScopeFactory(ScopeFactory scopeFactory) {
-        this.scopeFactory = null;
-    }
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private ScriptRegistry scopeFactory;
+
 
     @Activate
     protected void activate(ComponentContext context) {

@@ -37,24 +37,28 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.JsonProcessingException;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceAccessor;
-import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.SingletonResourceProvider;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetContext;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
-import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.scope.ScopeFactory;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -67,7 +71,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "taskscanner")
 })
 @Service
-public class TaskScannerService extends ObjectSetJsonResource implements ScheduledService {
+public class TaskScannerService implements SingletonResourceProvider{
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerService.class);
 
     private final static String INVOKE_CONTEXT = "invokeContext";
@@ -81,23 +85,9 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
     Map<String, TaskScannerContext> taskScanRuns =
             Collections.synchronizedMap(new LinkedHashMap<String, TaskScannerContext>());
 
-    @Reference
-    private ScopeFactory scopeFactory;
-
-    @Reference(
-        name = "ref_ManagedObjectService_JsonResourceRouterService",
-        referenceInterface = JsonResource.class,
-        bind = "bindRouter",
-        unbind = "unbindRouter",
-        cardinality = ReferenceCardinality.MANDATORY_UNARY,
-        policy = ReferencePolicy.STATIC,
-        target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private JsonResource router;
-
-    private JsonResourceAccessor accessor() {
-        return new JsonResourceAccessor(router, ObjectSetContext.get());
-    }
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private ScriptRegistry scopeFactory;
 
     @Activate
     public void activate(ComponentContext context) {
@@ -106,49 +96,43 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
         maxCompletedRuns = Integer.parseInt(maxCompletedStr);
     }
 
-    protected void bindRouter(JsonResource router) {
-        this.router = router;
-    }
+    //TODO Deprecated: Use the action method
+//    /**
+//     * Invoked by the Task Scanner whenever the task scanner is triggered by the scheduler
+//     */
+//    @Override
+//    public void execute(Map<String, Object> context) throws ExecutionException {
+//        String invokerName = (String) context.get(INVOKER_NAME);
+//        String scriptName = (String) context.get(CONFIG_NAME);
+//        JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
+//
+//        startTaskScanJob(invokerName, scriptName, params);
+//    }
 
-    protected void unbindRouter(JsonResource router) {
-        this.router = null;
-    }
-
-    /**
-     * Invoked by the Task Scanner whenever the task scanner is triggered by the scheduler
-     */
-    @Override
-    public void execute(Map<String, Object> context) throws ExecutionException {
-        String invokerName = (String) context.get(INVOKER_NAME);
-        String scriptName = (String) context.get(CONFIG_NAME);
-        JsonValue params = new JsonValue(context).get(CONFIGURED_INVOKE_CONTEXT);
-
-        startTaskScanJob(invokerName, scriptName, params);
-    }
 
     @Override
-    public Map<String, Object> read(String id) throws ObjectSetException {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-        if (id == null) {
+    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        JsonValue result = new JsonValue(new LinkedHashMap<String, Object>());
+        if (request.getResourceName().equals("/")) {
             List<Map<String, Object>> taskList = new ArrayList<Map<String, Object>>();
             for (TaskScannerContext entry : taskScanRuns.values()) {
-                Map<String, Object> taskData = buildTaskData(entry);
-                taskList.add(taskData);
+                JsonValue taskData = buildTaskData(entry);
+                taskList.add(taskData.asMap());
             }
             result.put("tasks", taskList);
         } else {
-            TaskScannerContext foundRun = taskScanRuns.get(id);
+            TaskScannerContext foundRun = taskScanRuns.get(request.getResourceName());
             if (foundRun == null) {
-                throw new NotFoundException("Task with id '" + id + "' not found." );
+                handler.handleError(new NotFoundException("Task with id '" + request.getResourceName() + "' not found." ));
             }
             result = buildTaskData(foundRun);
         }
-        return result;
+        handler.handleResult(new Resource("TODO id", "", result));
     }
 
     // TODO maybe move this into TaskScannerContext?
-    private Map<String, Object> buildTaskData(TaskScannerContext entry) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+    private JsonValue buildTaskData(TaskScannerContext entry) {
+        JsonValue result = new JsonValue(new LinkedHashMap<String, Object>());
         result.put("_id", entry.getTaskScanID());
         result.put("progress", entry.getProgress());
         result.put("started", entry.getStatistics().getJobStartTime());
@@ -157,37 +141,32 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
     }
 
     @Override
-    public Map<String, Object> action(String id, Map<String, Object> params)
-            throws ObjectSetException {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
-
-        if (params.get("_action") == null) {
-            throw new BadRequestException("Expecting _action parameter");
-        }
+    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        JsonValue result = new JsonValue( new LinkedHashMap<String, Object>());
         
-        String action = (String) params.get("_action");
-        if (id == null) {
+        String action = request.getActionId();
+        if (request.getResourceName() == "/") {
             try {
                 if ("execute".equalsIgnoreCase(action)) {
                     try {
-                        result.put("_id", onExecute(id, params));
+                        result.put("_id", onExecute(context, request));
                     } catch (JsonProcessingException e) {
-                        throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                        handler.handleError(new InternalServerErrorException(e));
                     } catch (IOException e) {
-                        throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+                        handler.handleError(new InternalServerErrorException(e));
                     }
                 } else {
-                    throw new BadRequestException("Unknown action: " + action);
+                    handler.handleError( new BadRequestException("Unknown action: " + action));
                 }
             } catch (ExecutionException e) {
                 logger.warn(e.getMessage());
-                throw new BadRequestException(e.getMessage(), e);
+                handler.handleError( new BadRequestException(e.getMessage(), e));
             }
         } else {
             // operation on individual resource
-            TaskScannerContext foundRun = taskScanRuns.get(id);
+            TaskScannerContext foundRun = taskScanRuns.get(request.getResourceName());
             if (foundRun == null) {
-                throw new NotFoundException("Task with id '" + id + "' not found." );
+                handler.handleError( new NotFoundException("Task with id '" + request.getResourceName() + "' not found." ));
             }
 
             if ("cancel".equalsIgnoreCase(action)) {
@@ -196,11 +175,21 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
                 result.put("action", action);
                 result.put("status", "SUCCESS");
             } else {
-                throw new BadRequestException("Action '" + action + "' on Task '" + id + "' not supported " + params);
+                handler.handleError( new BadRequestException("Action '" + action + "' on Task '" + request.getResourceName() + "' not supported " + request.getAdditionalActionParameters()));
             }
         }
 
-        return result;
+        handler.handleResult(result);
+    }
+
+    @Override
+    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
+    }
+
+    @Override
+    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        handler.handleError(new ForbiddenException("Operation is not implemented"));
     }
 
     /**
@@ -211,31 +200,33 @@ public class TaskScannerService extends ObjectSetJsonResource implements Schedul
      *
      * <b><i>e.g.</b></i> "taskscan/sunset" => "config/taskscan/sunset" => "[openidm-directory]/conf/taskscan-sunset.json"<br>
      *
-     * @param id the id to perform the action on
-     * @param params field contaning the parameters of execution
+     * @param context //TODO FIXME
+     * @param request //TODO FIXME
      * @return the set of parameters supplied
      * @throws ExecutionException
      * @throws JsonProcessingException
      * @throws IOException
      */
-    private String onExecute(String id, Map<String, Object> params)
+    private String onExecute(ServerContext context, ActionRequest request)
             throws ExecutionException, JsonProcessingException, IOException {
-        String name = (String) params.get("name");
+        String name = (String) request.getAdditionalActionParameters().get("name");
         JsonValue config;
         try {
-            config = accessor().read("config/" + name);
-        } catch (JsonResourceException e) {
+            config = context.getConnection().read(context, Requests.newReadRequest("config",name)).getContent();
+        } catch (ResourceException e) {
+            //TODO Do we need this catch?
             throw new ExecutionException("Error obtaining named config: '" + name + "'", e);
         }
+        //TODO Restore the Context
         JsonValue invokeContext = config.get(INVOKE_CONTEXT);
 
-        return startTaskScanJob("REST", name, invokeContext);
+        return startTaskScanJob("REST", name, invokeContext, context);
     }
 
-    private String startTaskScanJob(String invokerName, String scriptName, JsonValue params) throws ExecutionException {
-        TaskScannerContext context = new TaskScannerContext(invokerName, scriptName, params, ObjectSetContext.get());
+    private String startTaskScanJob(String invokerName, String scriptName, JsonValue params, ServerContext serverContext) throws ExecutionException {
+        TaskScannerContext context = new TaskScannerContext(invokerName, scriptName, params, serverContext);
         addTaskScanRun(context);
-        TaskScannerJob taskScanJob = new TaskScannerJob(context, router, scopeFactory);
+        TaskScannerJob taskScanJob = new TaskScannerJob(context, serverContext, scopeFactory);
         return taskScanJob.startTask();
     }
 

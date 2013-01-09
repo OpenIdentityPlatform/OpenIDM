@@ -25,6 +25,7 @@ package org.forgerock.openidm.workflow.activiti.impl.session;
 
 import org.activiti.engine.impl.interceptor.Session;
 import org.activiti.engine.impl.interceptor.SessionFactory;
+import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
 import org.forgerock.openidm.objset.ObjectSet;
 import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
@@ -37,7 +38,7 @@ import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
  */
 public class OpenIDMSessionFactory implements SessionFactory {
 
-    private ObjectSet router;
+    private Router router;
     private String url;
     private String user;
     private String password;
@@ -76,11 +77,11 @@ public class OpenIDMSessionFactory implements SessionFactory {
      * Creates new OpenIDMSessionFactory
      * @param router Router instance of the OpenIDM
      */
-    public OpenIDMSessionFactory(ObjectSet router) {
+    public OpenIDMSessionFactory(Router router) {
         this.router = router;
     }
 
-    public void setRouter(ObjectSet router) {
+    public void setRouter(Router router) {
         this.router = router;
     }
 

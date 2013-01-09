@@ -50,6 +50,7 @@ import org.forgerock.openidm.script.ScriptThrownException;
 import org.forgerock.openidm.script.Scripts;
 import org.forgerock.openidm.script.Utils;
 import org.forgerock.openidm.script.javascript.ScriptableWrapper;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -82,8 +83,9 @@ public class InfoService implements JsonResource {
 
     ComponentContext context;
 
-    @Reference(referenceInterface = ScopeFactory.class)
-    private ScopeFactory scopeFactory;
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private ScriptRegistry scopeFactory;
 
     @Reference
     private HealthInfo healthInfoSvc;

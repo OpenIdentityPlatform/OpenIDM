@@ -47,8 +47,11 @@ import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
@@ -73,7 +76,6 @@ import org.slf4j.LoggerFactory;
  * @version $Revision$ $Date$
  */
 @Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Workflow Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -92,7 +94,7 @@ import org.slf4j.LoggerFactory;
     cardinality = ReferenceCardinality.OPTIONAL_UNARY,
     policy = ReferencePolicy.DYNAMIC,
     target = "(service.pid=org.forgerock.openidm.router)")})
-public class ActivitiServiceImpl implements JsonResource {
+public class ActivitiServiceImpl {
 
     final static Logger logger = LoggerFactory.getLogger(ActivitiServiceImpl.class);
     public final static String PID = "org.forgerock.openidm.workflow";
@@ -139,7 +141,7 @@ public class ActivitiServiceImpl implements JsonResource {
     private final OpenIDMSessionFactory idmSessionFactory = new OpenIDMSessionFactory();
     private ProcessEngineFactory processEngineFactory;
     private Configuration barInstallerConfiguration;
-    private JsonResource activitiResource;
+    private CollectionResourceProvider activitiResource;
     //Configuration variables
     private boolean enabled;
     private EngineLocation location = EngineLocation.embedded;
@@ -366,12 +368,12 @@ public class ActivitiServiceImpl implements JsonResource {
         logger.info("ProcessEngine stopped.");
     }
 
-    protected void bindRouter(JsonResource router) {
+    protected void bindRouter(Router router) {
         this.idmSessionFactory.setRouter(new JsonResourceObjectSet(router));
         this.identityService.setRouter(router);
     }
 
-    protected void unbindRouter(JsonResource router) {
+    protected void unbindRouter(Router router) {
         this.idmSessionFactory.setRouter(null);
         this.identityService.setRouter(null);
     }
@@ -382,14 +384,5 @@ public class ActivitiServiceImpl implements JsonResource {
 
     public void unbindService(JavaDelegate delegate, Map props) {
         openIDMELResolver.unbindService(delegate, props);
-    }
-
-    @Override
-    public JsonValue handle(JsonValue request) throws JsonResourceException {
-        if (activitiResource != null) {
-            return activitiResource.handle(request);
-        } else {
-            throw new ServiceUnavailableException("No workflow resource is available");
-        }
     }
 }
