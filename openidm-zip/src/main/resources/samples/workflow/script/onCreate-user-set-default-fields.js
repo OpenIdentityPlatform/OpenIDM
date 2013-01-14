@@ -32,7 +32,9 @@
  * It is run every time new user is created.
  */  
 
-uiConfig =  openidm.read("config/ui/configuration");
+/*global object */
+
+var uiConfig =  openidm.read("config/ui/configuration");
 
 object.accountStatus = 'active';
 

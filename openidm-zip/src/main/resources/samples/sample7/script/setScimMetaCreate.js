@@ -1,4 +1,8 @@
-var meta = {};
-var currentDate = new Date();
+
+/*global target */
+
+var meta = {},
+    currentDate = new Date();
+
 meta.lastModified = currentDate.toString();
 target.meta = meta;

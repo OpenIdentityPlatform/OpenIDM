@@ -1,2 +1,9 @@
-var map={"query": {"Equals": {"field": "uid", "values": [ source.userName ]}}};
-map;
+
+/*global source */
+
+(function () {
+    
+    var map={"query": {"Equals": {"field": "uid", "values": [ source.userName ]}}};
+    return map;
+    
+}());
