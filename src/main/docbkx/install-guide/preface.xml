@@ -44,7 +44,7 @@
   provision identities, and to ensure compliance with identity management
   regulations.</para>
 
-  <para>This guide covers the install, upgrade, and removal (uninstall)
+  <para>This guide covers the install and removal (uninstall)
   procedures that you theoretically perform only once per version. This
   guide aims to provide you with at least some idea of what happens
   behind the scenes when you perform the steps.</para>
@@ -58,6 +58,12 @@
   managing services on your operating systems and in your application
   servers. You can nevertheless get started with this guide, and then
   learn more as you go along.</para>
+  
+  <para>If you have a previous version of OpenIDM installed, see the 
+  <link xlink:href="release-notes#chap-compatibility" 
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Compatibility</citetitle></link> section of the 
+  <citetitle>Release Notes</citetitle> before installing this version.</para>
  </section>
 
  <xinclude:include href="../shared/sec-formatting-conventions.xml" />

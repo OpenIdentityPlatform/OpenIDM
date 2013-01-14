@@ -145,20 +145,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-ui-ria-admin</artifactId>
-            <version>${openidm.version}</version>
-            <type>zip</type>
-            <classifier>www</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-ui-ria-openam</artifactId>
-            <version>${openidm.version}</version>
-            <type>zip</type>
-            <classifier>www</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
             <!-- To satisfy both maven unit tests and OSGi packaging
@@ -341,25 +327,25 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>launcher-zip</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>1.1.0-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
-        
+
         <!-- OpenICF -->
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>connector-framework</artifactId>
-            <version>1.1.1.0</version>
+            <version>1.1.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openicf.framework</groupId>
             <artifactId>icfl-over-slf4j</artifactId>
-            <version>1.1.1.0</version>
+            <version>1.1.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.6</version>
         </dependency>
         <!-- OpenICF Connectors -->
         <dependency>
@@ -500,7 +486,7 @@
                 <dependency>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
-                    <version>1.0.7</version>
+                    <version>1.0.9</version>
                 </dependency>
             </dependencies>
         </profile>

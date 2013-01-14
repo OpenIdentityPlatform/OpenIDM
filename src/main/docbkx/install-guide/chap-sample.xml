@@ -63,11 +63,12 @@
   with OpenIDM. OrientDB is not yet supported for production use, however,
   so use a supported JDBC database when moving to production.</para>
 
-  <para>If you want to query the internal noSQL database, download and unzip
-  <link xlink:href="http://code.google.com/p/orient/wiki/Download"
-  xlink:show="new">OrientDB <?eval ${orientdbVersion}?></link>. You will find 
-  the shell console in the <filename>bin</filename> directory. Start OrientDB 
-  console using either <command>console.sh</command> or 
+  <para>If you want to query the internal noSQL database, you can download 
+  OrientDB (version <?eval ${orientdbVersion}?>) from <link 
+  xlink:href="http://code.google.com/p/orient/downloads/list">
+  http://code.google.com/p/orient/downloads/list</link>.
+  You will find the shell console in the <filename>bin</filename> directory. 
+  Start OrientDB console using either <command>console.sh</command> or 
   <command>console.bat</command>, and then connect to the running OpenIDM with 
   the <command>connect</command> command.</para>
 
@@ -104,8 +105,8 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
   
   <para>You can also use OrientDB Studio to query the default OrientDB 
   repository. After you have installed and started OpenIDM, point your browser 
-  to <link xlink:href="http://localhost:2480/studio">
-  http://localhost:2480/studio</link>. The default database is <literal>openidm
+  to <link xlink:href="http://localhost:2480/studio/">
+  http://localhost:2480/studio/</link>. The default database is <literal>openidm
   </literal> and the default user and password are <literal>admin</literal> and 
   <literal>admin</literal>. Click Connect to connect to the repository. For 
   more information about OrientDB Studio, see the 
@@ -154,8 +155,13 @@ Connecting to database [remote:localhost/openidm] with user 'admin'...OK
    <title>Sample Configuration Files</title>
    <para>You can find configuration files for the sample under the
    <filename>openidm/samples/sample1/conf</filename> directory. As you review
-   the samples, keep the following in mind.</para>
+   the sample, keep the following in mind.</para>
    <orderedlist>
+    <listitem>
+      <para>You must start OpenIDM with the sample configuration 
+      (<command>$ ./startup.sh -p samples/sample1</command>). For more 
+      information, see <xref linkend="sample-running-reconciliation" />.</para>
+    </listitem>
     <listitem>
      <para>OpenIDM regularly scans for any scheduler configuration files in the
      <filename>conf</filename> directory.</para>

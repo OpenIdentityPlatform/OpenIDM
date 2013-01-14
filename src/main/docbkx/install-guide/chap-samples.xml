@@ -1239,7 +1239,7 @@ mail: jdoe@example.com
   from external accounts and construct a JSON object for users stored in the
   OpenIDM repository. For more information about SCIM schema, see <link xlink:show="new"
   xlink:href='http://www.simplecloud.info/specs/draft-scim-core-schema-01.html'
-  >SCIM schema 1.0 - draft</link>.</para>
+  >System for Cross-Domain Identity Management: Core Schema 1.1</link>.</para>
 
   <section xml:id="install-sample7">
    <title>Install the Sample</title>
@@ -1459,6 +1459,9 @@ $ ./startup.sh -p samples/sample8</screen>
 
   <para>When the request is approved by an administrator, the absent users are 
   created by an asynchronous reconciliation process.</para>
+  
+  <para>Prepare a fresh installation of OpenIDM before trying this
+  sample.</para>
   
   <section xml:id="install-sample9">
      <title>Install the Sample</title>

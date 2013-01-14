@@ -41,6 +41,8 @@ import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
+import org.identityconnectors.common.Version;
+import org.identityconnectors.common.VersionRange;
 import org.identityconnectors.common.event.ConnectorEvent;
 import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.common.event.ConnectorEventPublisher;
@@ -410,7 +412,35 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         ConnectorInfo connectorInfo = null;
         if (null != connectorInfoManager) {
             try {
-                connectorInfo = connectorInfoManager.findConnectorInfo(connectorReference.getConnectorKey());
+                // Check if the version is an interval.
+                if (connectorReference.getConnectorKey().getBundleVersion().indexOf(',') > 1) {
+                    VersionRange range =
+                            VersionRange.parse(connectorReference.getConnectorKey().getBundleVersion());
+                    Version latest = null;
+                    for (ConnectorInfo ci : connectorInfoManager.getConnectorInfos()) {
+                        if (connectorReference.getConnectorKey().getBundleName().equals(
+                                ci.getConnectorKey().getBundleName())
+                                && connectorReference.getConnectorKey().getConnectorName().equals(
+                                ci.getConnectorKey().getConnectorName())) {
+                            // Check id the version is in interval.
+                            Version current =
+                                    Version.parse(ci.getConnectorKey().getBundleVersion());
+                            if (range.isInRange(current)) {
+                                logger.trace("Version {} is in range of {}", ci.getConnectorKey()
+                                        .getBundleVersion(), connectorReference.getConnectorKey()
+                                        .getBundleVersion());
+                                if (null == latest || current.compareTo(latest) > 0) {
+                                    connectorInfo = ci;
+                                    latest = current;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    connectorInfo =
+                            connectorInfoManager.findConnectorInfo(connectorReference
+                                    .getConnectorKey());
+                }
             } catch (Exception e) {
                 logger.error("Can not find ConnectorInfo for {}", connectorReference, e);
             }

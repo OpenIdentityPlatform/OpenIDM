@@ -159,4 +159,150 @@
   <para>The default settings are intended for evaluation only. Adjust them
   according to your production requirements.</para>
  </section>
+ 
+ <section xml:id="registering-servlet-filters">
+  <title>Registering Additional Servlet Filters</title>
+
+  <para>You can register generic servlet filters in the embedded Jetty 
+  server to perform additional filtering tasks on requests to or responses 
+  from OpenIDM. For example, you might want to use a servlet filter to protect 
+  access to OpenIDM with an access management product such, as OpenAM. Servlet 
+  filters are configured in files named 
+  <filename>openidm/conf/servletfilter-<replaceable>name</replaceable>.json</filename>. 
+  These servlet filter configuration files define the filter class, required 
+  libraries, and other settings.</para>
+  
+  <para>A sample servlet filter configuration is provided in 
+  <filename>openidm/samples/openam</filename>. The sample configuration includes 
+  the servlet filter configuration file (<filename>conf/servletfilter-openam.json</filename>) 
+  and the extension script that implements the filter 
+  (<filename>script/security/populateContext.js</filename>).
+  </para>
+  
+  <para>The sample servlet filter configuration file is shown below:</para>
+  
+  <programlisting language="javascript">
+{
+    "classPathURLs" : [
+        "file:/jetty_v61_agent/lib/agent.jar",
+        "file:/jetty_v61_agent/lib/openssoclientsdk.jar",
+        "file:/jetty_v61_agent/lib/",
+        "file:/jetty_v61_agent/locale/"
+    ],
+    "systemProperties" : {
+        "openam.agents.bootstrap.dir" : "/jetty_v61_agent/Agent_001/config"
+    },
+    "requestAttributes" : {
+        "openidm.authinvoked" : "servletfilter-openam"
+    },
+    "scriptExtensions" : {
+        "augmentSecurityContext" : {
+            "type" : "text/javascript",
+            "file" : "script/security/populateContext.js"
+        }
+    },
+    "filterClass" : "com.sun.identity.agents.filter.AmAgentFilter"
+}  
+  </programlisting>
+  
+  <para>The sample configuration includes the following properties:</para>
+  
+  <variablelist>
+    <varlistentry>
+      <term><literal>"classPathURLs"</literal></term>
+      <listitem>
+        <para>The URLs to any required classes or libraries that should be 
+        added to the classpath used by the servlet filter class</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"systemProperties"</literal></term>
+      <listitem>
+        <para>Any additional Java system properties required by the filter</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"requestAttributes"</literal></term>
+      <listitem>
+        <para>The HTTP Servlet request attributes that will be set by OpenIDM 
+        when the filter is invoked. OpenIDM expects certain request attributes 
+        to be set by any module that protects access to it, so this helps in setting these expected settings.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"scriptExtensions"</literal></term>
+      <listitem>
+        <para>Optional script extensions to OpenIDM. Currently only 
+        <literal>"augmentSecurityContext"</literal> is supported. A script 
+        that is defined in <literal>augmentSecurityContext</literal> is 
+        executed by OpenIDM after a successful authentication request. The 
+        script helps to populate the expected security context in OpenIDM. 
+        For example, the login module (servlet filter) might select to supply 
+        only the authenticated user name, while the associated roles and user 
+        ID can be augmented by the script.</para>
+        <para>Only JavaScript is supported 
+        (<literal>"type":"text/javascript"</literal>). The script can be 
+        provided inline (<literal>"source":<replaceable>script source</replaceable></literal>) 
+        or in a file (<literal>"file":<replaceable>filename</replaceable></literal>). 
+        The sample filter extends the filter interface with the functionality in 
+        the script <filename>script/security/populateContext.js</filename>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"filterClass"</literal></term>
+      <listitem>
+        <para>The servlet filter that is being registered</para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+  <para>The following additional properties can be configured for the filter:
+  </para>
+  
+  <variablelist>
+    <varlistentry>
+      <term><literal>"httpContextId"</literal></term>
+      <listitem>
+        <para>The HTTP context under which the filter should be registered. 
+        The default is <literal>"openidm"</literal>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"servletNames"</literal></term>
+      <listitem>
+        <para>A list of servlet names to which the filter should apply. The 
+        default is <literal>"OpenIDM REST"</literal>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"urlPatterns"</literal></term>
+      <listitem>
+        <para>A list of URL patterns to which the filter applies. The default 
+        is <literal>["/openidm/*", "/openidmui/*"]</literal>.</para>
+      </listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><literal>"initParams"</literal></term>
+      <listitem>
+        <para>Filter configuration initialization parameters that are passed 
+        to the servlet filter <literal>init</literal> method. For more 
+        information, see 
+        <link xlink:href="http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html"
+        >http://docs.oracle.com/javaee/5/api/javax/servlet/FilterConfig.html</link>.
+        </para>
+      </listitem>
+    </varlistentry>
+  </variablelist>
+  
+  <para>When a servlet filter is used to integrate an access management 
+  product, the specific servlet filter that is used, and the configuration 
+  that is associated with that filter, is product-specific. The sample 
+  configuration in <filename>openidm/samples/openam</filename> is specific 
+  to OpenAM. For a detailed description of the OpenAM implementation, 
+  see <link xlink:href="integrators-guide#chap-openam" 
+  xlink:role="http://docbook.org/xlink/role/olink">
+  <citetitle>Protecting OpenIDM With OpenAM</citetitle></link>.</para>
+ 
+ </section>
+  
 </appendix>

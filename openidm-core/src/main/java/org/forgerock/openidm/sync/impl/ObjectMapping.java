@@ -593,9 +593,12 @@ class ObjectMapping implements SynchronizationListener {
      * @throws SynchronizationException
      */
     public void performAction(JsonValue params) throws SynchronizationException {
-        String reconId = params.get("reconId").required().asString();
+        // If reconId is set this action is part of a reconciliation run
+        String reconId = params.get("reconId").asString();
         JsonValue context = ObjectSetContext.get();
-        context.add("trigger", "recon");
+        if (reconId != null) {
+            context.add("trigger", "recon");
+        }
 
         try {
             JsonValue rootContext = JsonResourceContext.getRootContext(context);
@@ -653,7 +656,11 @@ class ObjectMapping implements SynchronizationListener {
             } catch (SynchronizationException se) {
                 if (op.action != Action.EXCEPTION) {
                     entry.status = Status.FAILURE; // exception was not intentional
-                    LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
+                    if (reconId != null) {
+                        LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
+                    } else {
+                        LOGGER.warn("Unexpected failure in performing action {}", params, se);
+                    }
                 }
                 Throwable throwable = se;
                 while (throwable.getCause() != null) { // want message associated with original cause
@@ -665,7 +672,7 @@ class ObjectMapping implements SynchronizationListener {
                     entry.message = throwable.getMessage();
                 }
             }
-            if (!Action.NOREPORT.equals(action) && (entry.status == Status.FAILURE || op.action != null)) {
+            if (reconId != null && !Action.NOREPORT.equals(action) && (entry.status == Status.FAILURE || op.action != null)) {
                 entry.timestamp = new Date();
                 if (op instanceof SourceSyncOperation) {
                     entry.reconciling = "source";
@@ -687,7 +694,9 @@ class ObjectMapping implements SynchronizationListener {
                 throw exception;
             }
         } finally {
-            context.remove("trigger");
+            if (reconId != null) {
+                context.remove("trigger");
+            }
         }
     }
 
@@ -863,8 +872,10 @@ class ObjectMapping implements SynchronizationListener {
         }
         String[] targetIds = op.getTargetIds();
         for (String handledId : targetIds) {
-            remainingTargetIds.remove(handledId);
-            LOGGER.trace("Removed target from remaining targets: {}", handledId);
+            // If target system has case insensitive IDs, remove without regard to case
+            String normalizedHandledId = linkType.normalizeTargetId(handledId);
+            remainingTargetIds.remove(normalizedHandledId);
+            LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
         }
 
         if (!Action.NOREPORT.equals(op.action) && (entry.status == Status.FAILURE || op.action != null)) {
@@ -1655,7 +1666,7 @@ class ObjectMapping implements SynchronizationListener {
         }
 
         public void fromJsonValue(JsonValue params) {
-            reconId = params.get("reconId").required().asString();
+            reconId = params.get("reconId").asString();
             sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, params.get("sourceId").required().asString());
             ignorePostAction = params.get("ignorePostAction").defaultTo(false).asBoolean();
         }
@@ -1918,7 +1929,7 @@ class ObjectMapping implements SynchronizationListener {
         }
 
         public void fromJsonValue(JsonValue params) {
-            reconId = params.get("reconId").required().asString();
+            reconId = params.get("reconId").asString();
             ignorePostAction = params.get("ignorePostAction").defaultTo(false).asBoolean();
         }
 
@@ -1943,15 +1954,19 @@ class ObjectMapping implements SynchronizationListener {
         private void assessSituation() throws SynchronizationException {
             situation = null;
             String targetId = getTargetObjectId();
+            
+            // May want to consider an optimization to not query 
+            // if we don't need the link for the TARGET_IGNORED action
+            if (targetId != null) {
+                linkObject.getLinkForTarget(targetId);
+            }
+            
             if (!isTargetValid()) { // target is not valid for this mapping; ignore it
                 situation = Situation.TARGET_IGNORED;
                 if (reconContext != null && targetId != null) {
                     reconContext.getStatistics().getTargetStat().addNotValid(targetId);
                 }
                 return;
-            }
-            if (targetId != null) {
-                linkObject.getLinkForTarget(targetId);
             }
             if (linkObject._id == null || linkObject.sourceId == null) {
                 situation = Situation.UNASSIGNED;

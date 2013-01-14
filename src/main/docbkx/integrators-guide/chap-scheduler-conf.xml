@@ -77,11 +77,14 @@
  <itemizedlist>
   <para>Schedules are configured through JSON objects. The schedule 
   configuration involves two types of files:</para>
-  <listitem><para>The <filename>openidm/conf/scheduler.json</filename> file, 
-  that configures the overall scheduler service</para></listitem>
-  <listitem><para>One <filename>openidm/conf/schedule-
- <replaceable>schedule-name</replaceable>.json</filename> file for each 
- configured schedule.</para></listitem>
+  <listitem>
+    <para>The <filename>openidm/conf/scheduler.json</filename> file, that 
+    configures the overall scheduler service</para>
+  </listitem>
+  <listitem>
+    <para>One <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename> 
+    file for each configured schedule.</para>
+  </listitem>
  </itemizedlist>
  
   <para>The scheduler service configuration file 
@@ -93,7 +96,8 @@
         "threadCount" : "10"
     },
     "scheduler" : {
-        "instanceId" : "scheduler-example"
+        "instanceId" : "scheduler-example",
+        "executePersistentSchedules" : "true"        
     },
     "advancedProperties" : {
         "org.quartz.scheduler.instanceName" : "OpenIDMScheduler"
@@ -104,15 +108,28 @@
   <itemizedlist>
    <para>The properties in the <filename>scheduler.json</filename> file relate 
    to the configuration of the Quartz Scheduler.</para>
-   <listitem><para><literal>threadCount</literal> specifies the maximum number 
-   of threads that are available for the concurrent execution of scheduled 
-   tasks.</para>
+   <listitem>
+     <para><literal>threadCount</literal> specifies the maximum number of 
+     threads that are available for the concurrent execution of scheduled 
+     tasks.</para>
    </listitem>
-   <listitem><para><literal>instanceID</literal> can be any string, but must be 
-   unique for all schedulers working as if they are the same 'logical' Scheduler 
-   within a cluster.</para></listitem>
-   <listitem><para><literal>advancedProperties</literal> (optional) enables you 
-   to configure additional properties for the Quartz Scheduler.</para></listitem>
+   <listitem>
+     <para><literal>instanceID</literal> can be any string, but must be unique 
+     for all schedulers working as if they are the same 'logical' Scheduler 
+     within a cluster.</para>
+   </listitem>
+   <listitem>
+     <para><literal>executePersistentSchedules</literal> allows you to disable 
+     persistent schedule execution for a specific node. If this parameter is 
+     set to <literal>false</literal>, the Scheduler Service will support the 
+     management of persistent schedules (CRUD operations) but it will not 
+     execute any persistent schedules. The value of this property can be a 
+     string or boolean and is <literal>true</literal> by default.</para>
+   </listitem>
+   <listitem>
+     <para><literal>advancedProperties</literal> (optional) enables you to 
+     configure additional properties for the Quartz Scheduler.</para>
+   </listitem>
   </itemizedlist>
   
   <para>For details of all the configurable properties for the Quartz Scheduler, 
