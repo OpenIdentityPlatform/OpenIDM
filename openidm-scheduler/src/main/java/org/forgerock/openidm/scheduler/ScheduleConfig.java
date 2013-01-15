@@ -53,6 +53,7 @@ public class ScheduleConfig {
     private String invokeService = null;
     private Object invokeContext = null;
     private String invokeLogLevel = null;
+    private Boolean concurrentExecution = null;
 
     public ScheduleConfig(JsonValue config) {
         JsonValue enabledValue = config.get(SchedulerService.SCHEDULE_ENABLED);
@@ -66,6 +67,12 @@ public class ScheduleConfig {
             persisted = Boolean.parseBoolean(persistedValue.defaultTo("false").asString());
         } else {
             persisted = persistedValue.defaultTo(Boolean.FALSE).asBoolean();
+        }
+        JsonValue concurrentExecutionValue = config.get(SchedulerService.SCHEDULE_CONCURRENT_EXECUTION);
+        if (concurrentExecutionValue.isString()) {
+            concurrentExecution = Boolean.parseBoolean(concurrentExecutionValue.defaultTo("false").asString());
+        } else {
+            concurrentExecution = concurrentExecutionValue.defaultTo(Boolean.FALSE).asBoolean();
         }
         misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY).defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
         if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) &&
@@ -119,8 +126,9 @@ public class ScheduleConfig {
         }
     }
 
-    public ScheduleConfig(CronTrigger trigger, JobDataMap map, boolean persisted) {
+    public ScheduleConfig(CronTrigger trigger, JobDataMap map, boolean persisted, boolean concurrentExecution) {
         this.persisted = persisted;
+        this.concurrentExecution = concurrentExecution;
         this.enabled = true;
         this.cronSchedule = trigger.getCronExpression();
         this.startTime = trigger.getStartTime();
@@ -151,41 +159,56 @@ public class ScheduleConfig {
         map.put(SchedulerService.SCHEDULE_TIME_ZONE, getTimeZone());
         map.put(SchedulerService.SCHEDULE_START_TIME, getStartTime());
         map.put(SchedulerService.SCHEDULE_END_TIME, getEndTime());
+        map.put(SchedulerService.SCHEDULE_CONCURRENT_EXECUTION, getConcurrentExecution());
         return new JsonValue(map);
     }
 
     public Boolean getEnabled() {
         return enabled;
     }
+    
     public Boolean getPersisted() {
         return persisted;
     }
+    
     public String getMisfirePolicy() {
         return misfirePolicy;
     }
+    
     public String getScheduleType() {
         return scheduleType;
     }
+    
     public Date getStartTime() {
         return startTime;
     }
+    
     public Date getEndTime() {
         return endTime;
     }
+    
     public String getCronSchedule() {
         return cronSchedule;
     }
+    
     public TimeZone getTimeZone() {
         return timeZone;
     }
+    
     public String getInvokeService() {
         return invokeService;
     }
+    
     public Object getInvokeContext() {
         return invokeContext;
     }
+    
     public String getInvokeLogLevel() {
         return invokeLogLevel;
+    }
+    
+    public Boolean getConcurrentExecution() {
+        return concurrentExecution;
     }
 
     public void setEnabled(Boolean enabled) {
@@ -230,5 +253,9 @@ public class ScheduleConfig {
 
     public void setInvokeLogLevel(String invokeLogLevel) {
         this.invokeLogLevel = invokeLogLevel;
+    }
+    
+    public void setConcurrentExecution(Boolean concurrentExecution) {
+        this.concurrentExecution = concurrentExecution;
     }
 }
