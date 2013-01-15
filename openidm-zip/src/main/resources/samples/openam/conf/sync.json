@@ -100,7 +100,7 @@
                     "target" : "__PASSWORD__",
                     "condition" : {
                         "type" : "text/javascript",
-                        "source" : "(object.password != null)"
+                        "source" : "(object.password !== undefined)"
                     }
                 },
                 {
