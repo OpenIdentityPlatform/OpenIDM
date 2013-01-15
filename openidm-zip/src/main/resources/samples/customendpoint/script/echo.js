@@ -1,1 +1,3 @@
-request
+(function () { 
+    return request; 
+}());

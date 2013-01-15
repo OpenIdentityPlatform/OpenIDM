@@ -426,6 +426,27 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jslint-maven-plugin</artifactId>
+                <configuration>
+                    <assumeRhino>true</assumeRhino>
+                    <predefinedVars>request,openidm,identityServer,java,logger</predefinedVars>
+                    <sourceJsFolder>src/main/resources</sourceJsFolder>
+                    <tolerateEval>true</tolerateEval>
+                    <excludes>
+                        <exclude>**/libs/*.js</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>jslint</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>   
         </plugins>
     </build>
     <profiles>

@@ -1,12 +1,17 @@
-var GN = source.firstName;
-var FN = source.lastName;
-var UID = source.name;
 
-var displayName = "";
-if (GN !== null) {displayName = GN + " "; }
-if (FN !== null) {displayName = displayName + FN; }
-if (GN === null && FN === null) {displayName = UID; }
+/*global source */
 
-displayName.replace(/(^\s*)|(\s*$)/g, "");
-
-displayName;
+(function () {
+    var GN = source.firstName,
+        FN = source.lastName,
+        UID = source.name,
+        displayName = "";
+    
+    if (GN !== null) { displayName = GN + " "; }
+    if (FN !== null) { displayName = displayName + FN; }
+    if (GN === null && FN === null) { displayName = UID; }
+    
+    displayName.replace(/(^\s*)|(\s*$)/g, "");
+    
+    return displayName;
+}());

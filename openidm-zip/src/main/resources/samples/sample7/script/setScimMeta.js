@@ -1,9 +1,12 @@
-var meta = target.meta;
-var currentDate = new Date();
+
+/*global target */
+
+var meta = target.meta,
+    currentDate = new Date(),
+    newMeta = {};
 
 if (typeof meta !== 'object') {
     java.lang.System.out.println("Need to create new object");
-    var newMeta = {};
     newMeta.lastModified = currentDate.toDateString();
     newMeta.created = currentDate.toDateString();
 } else {
@@ -11,8 +14,3 @@ if (typeof meta !== 'object') {
 }
 
 target.meta = newMeta;
-
-
-
-
-

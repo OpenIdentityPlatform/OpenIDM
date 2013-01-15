@@ -26,35 +26,39 @@
  Try to find running process started by the previous reconciliation.
  */
 
-var queryParams = {
-    "_queryId" : "filtered-query",
-    "processDefinitionKey": workflowName,
-    "_var-mapping":recon.actionParam.mapping,
-    "_var-situation":recon.actionParam.situation,
-    "_var-action":recon.actionParam.action,
-    "_var-sourceId":recon.actionParam.sourceId
-};
+/*global workflowName,recon */
 
-if (null != recon.actionParam.targetId) {
-    queryParams['_var-targetId'] = recon.actionParam.targetId;
-}
-
-var process = openidm.query('workflow/processinstance', queryParams);
-logger.trace("asynchronous reconciliation: process.result.length => {}", process.result.length)
-
-/*
- Check if the result of the search.
- */
-if (null == process.result || 0 == process.result.length) {
+(function () {
+    var queryParams = {
+            "_queryId" : "filtered-query",
+            "processDefinitionKey": workflowName,
+            "_var-mapping":recon.actionParam.mapping,
+            "_var-situation":recon.actionParam.situation,
+            "_var-action":recon.actionParam.action,
+            "_var-sourceId":recon.actionParam.sourceId
+        },
+        process = openidm.query('workflow/processinstance', queryParams);
+    
+    if (null !== recon.actionParam.targetId) {
+        queryParams["_var-targetId"] = recon.actionParam.targetId;
+    }
+    
+    logger.trace("asynchronous reconciliation: process.result.length => {}", process.result.length);
+    
     /*
-     There is no process instance found so we start one.
+     Check if the result of the search.
      */
-    recon.actionParam._key = workflowName;
-    logger.trace("asynchronous reconciliation: Start '{}' process", recon.actionParam._key)
-    openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, recon.actionParam);
-}
-
-/*
- Return "ASYNC" for the Reconciliation engine to finish processing the job.
- */
-"ASYNC";
+    if (!process.hasOwnProperty('result') || null === process.result || 0 === process.result.length) {
+        /*
+         There is no process instance found so we start one.
+         */
+        recon.actionParam._key = workflowName;
+        logger.trace("asynchronous reconciliation: Start '{}' process", recon.actionParam._key);
+        openidm.action('workflow/processinstance', {"_action" : "createProcessInstance"}, recon.actionParam);
+    }
+    
+    /*
+     Return "ASYNC" for the Reconciliation engine to finish processing the job.
+     */
+    return "ASYNC";
+}());
