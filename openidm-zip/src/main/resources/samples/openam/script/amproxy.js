@@ -13,4 +13,3 @@ var openamServer = "http://jake.forgerock.com:8081",
 openidm.action("external/rest", map);
 
 */
-1;
