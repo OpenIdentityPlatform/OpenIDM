@@ -1,5 +1,12 @@
-if (request.method != "read") {
-     throw "Unsupported operation on ping info service: " + request.method
+
+/*global healthinfo */
+
+if (request.method !== "read") {
+     throw "Unsupported operation on ping info service: " + request.method;
 }
-healthinfo.sampleprop="Example customization"
-healthinfo
+(function () {
+    
+    healthinfo.sampleprop="Example customization";
+    return healthinfo;
+    
+}());

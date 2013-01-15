@@ -22,15 +22,15 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-var params =  new Object();
+var params =  {},
+    result,
+    enforce;
 params._action = "validateObject";
 params._caller = "filterEnforcer";
 
-var result;
+enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
 
-var enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
-
-if (!(request.id.indexOf("policy/")==0) && enforce !== "false") {
+if (request.id.indexOf("policy/") !== 0 && enforce !== "false") {
     result = openidm.action("policy/" + request.id, params, request.value);
     
     if (!result.result) {
@@ -38,6 +38,6 @@ if (!(request.id.indexOf("policy/")==0) && enforce !== "false") {
             "openidmCode" : 403, 
             "message" : "Policy validation failed",
             "detail" : result 
-        }  
+        };
     }
 }

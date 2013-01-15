@@ -1,1 +1,5 @@
-object.password != null && object.adPassword != object.password
+/*global object */
+(function () {
+    return  object.hasOwnProperty('password') && object.password !== null &&
+            object.adPassword !== object.password;
+}());

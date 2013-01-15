@@ -22,24 +22,26 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/**
- * A configuration for allowed HTTP requests. Each entry in the configuration contains a pattern 
- * to match against the incoming request ID and, in the event of a match, the associated roles, 
- * methods, and actions that are allowed for requests on that particular pattern.
- *
- * pattern:  A pattern to match against an incoming request's resource ID
- * roles:  A comma separated list of allowed roles
- * methods:  A comma separated list of allowed methods
- * actions:  A comma separated list of allowed actions
- * customAuthz: A custom function for additional authorization logic/checks (optional)
- * excludePatterns: A comma separated list of patterns to exclude from the pattern match (optional)
- *
- * A single '*' character indicates all possible values.  With patterns ending in "/*", the "*"
- * acts as a wild card to indicate the pattern accepts all resource IDs "below" the specified
- * pattern (prefix).  For example the pattern "managed/*" would match "managed/user" or anything
- * starting with "managed/".  Note: it would not match "managed", which would need to have its 
- * own entry in the config.
- */
+
+// A configuration for allowed HTTP requests. Each entry in the configuration contains a pattern 
+// to match against the incoming request ID and, in the event of a match, the associated roles, 
+// methods, and actions that are allowed for requests on that particular pattern.
+//
+// pattern:  A pattern to match against an incoming request's resource ID
+// roles:  A comma separated list of allowed roles
+// methods:  A comma separated list of allowed methods
+// actions:  A comma separated list of allowed actions
+// customAuthz: A custom function for additional authorization logic/checks (optional)
+// excludePatterns: A comma separated list of patterns to exclude from the pattern match (optional)
+//
+// A single '*' character indicates all possible values.  With patterns ending in "/*", the "*"
+// acts as a wild card to indicate the pattern accepts all resource IDs "below" the specified
+// pattern (prefix).  For example the pattern "managed/*" would match "managed/user" or anything
+// starting with "managed/".  Note: it would not match "managed", which would need to have its 
+// own entry in the config.
+
+/*jslint vars:true*/ 
+
 var allowedPropertiesForManagedUser =   "userName,password,email,givenName,familyName,phoneNumber," + 
                                         "address1,address2,city,stateProvince,postalCode,country,siteImage," + 
                                         "passPhrase,securityAnswer,securityQuestion";
