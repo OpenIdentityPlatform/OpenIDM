@@ -10,10 +10,10 @@
             "tasks-manager" : "Tasks Manager"
         },
         "siteImages" : [
-            "mail.png",
-            "user.png",
-            "report.png",
-            "twitter.png"
+            "images/passphrase/mail.png",
+            "images/passphrase/user.png",
+            "images/passphrase/report.png",
+            "images/passphrase/twitter.png"
         ],
         "notificationTypes" : {
             "info" : {
