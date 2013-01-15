@@ -40,10 +40,12 @@
 // starting with "managed/".  Note: it would not match "managed", which would need to have its 
 // own entry in the config.
 
+/*jslint vars:true*/ 
+
 var allowedPropertiesForManagedUser =   "userName,password,email,givenName,familyName,phoneNumber," + 
                                         "address1,address2,city,stateProvince,postalCode,country,siteImage," + 
-                                        "passPhrase,securityAnswer,securityQuestion",
-httpAccessConfig = 
+                                        "passPhrase,securityAnswer,securityQuestion";
+var httpAccessConfig = 
 { 
     "configs" : [
         // Anyone can read from these endpoints
