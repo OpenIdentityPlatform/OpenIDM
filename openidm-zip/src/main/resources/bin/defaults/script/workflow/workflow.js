@@ -48,7 +48,7 @@
     /*
      Check if the result of the search.
      */
-    if (null === process.result || 0 === process.result.length) {
+    if (!process.hasOwnProperty('result') || null === process.result || 0 === process.result.length) {
         /*
          There is no process instance found so we start one.
          */

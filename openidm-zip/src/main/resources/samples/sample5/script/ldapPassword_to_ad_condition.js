@@ -1,4 +1,5 @@
 /*global object */
 (function () {
-    return object.password !== null && object.adPassword !== object.password;
+    return  object.hasOwnProperty('password') && object.password !== null &&
+            object.adPassword !== object.password;
 }());
