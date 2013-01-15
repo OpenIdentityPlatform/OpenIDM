@@ -1,0 +1,20 @@
+{
+    "filters" : [
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "script/router-authz.js"
+            }
+        },
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "bin/defaults/script/policyFilter.js"
+            },
+            "methods" : [
+                "create",
+                "update"
+            ]
+        }
+    ]
+}

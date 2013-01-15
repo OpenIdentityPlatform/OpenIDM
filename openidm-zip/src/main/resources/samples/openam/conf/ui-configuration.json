@@ -1,6 +1,6 @@
 {
     "configuration" : {
-        "openamBaseURL" : "/openam",
+        "openamBaseURL" : "/openidm/endpoint/amproxy/openam",
         "selfRegistration" : false,
         "securityQuestions" : false,
         "siteIdentification" : false,

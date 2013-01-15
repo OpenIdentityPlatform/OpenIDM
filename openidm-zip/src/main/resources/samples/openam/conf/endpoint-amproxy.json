@@ -1,0 +1,6 @@
+
+{
+    "context" : "endpoint/amproxy/*",
+    "type" : "text/javascript",
+    "file" : "script/amproxy.js"
+}

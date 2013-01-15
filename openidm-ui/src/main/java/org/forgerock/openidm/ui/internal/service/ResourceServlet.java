@@ -30,6 +30,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -83,7 +85,18 @@ public final class ResourceServlet
         httpService.registerServlet(alias, this,  props, httpContext);
         logger.debug("Registered UI servlet at {}", alias);
     }    
-    
+    @Deactivate
+    protected void deactivate(ComponentContext context) throws ServletException, NamespaceException {
+        String alias = "/openidmui";
+        httpService.unregister(alias);
+        logger.debug("Deregistered UI servlet at {}", alias);
+        this.context = null;
+    }    
+    @Modified
+    protected void modified(ComponentContext context) throws ServletException, NamespaceException {
+        deactivate(context);
+        activate(context);
+    }
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {

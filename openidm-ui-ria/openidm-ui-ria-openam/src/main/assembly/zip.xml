@@ -35,15 +35,15 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/classes</directory>
-            <outputDirectory>/openidm-ui-ria-openam</outputDirectory>
+            <outputDirectory>.</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/target/openidm-ui-ria-admin/openidm-ui-ria-admin</directory>
-            <outputDirectory>/openidm-ui-ria-openam</outputDirectory>
+            <outputDirectory>.</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/target/openam-ui-ria</directory>
-            <outputDirectory>/openidm-ui-ria-openam</outputDirectory>
+            <outputDirectory>.</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>

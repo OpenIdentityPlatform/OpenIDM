@@ -145,6 +145,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-ui-ria-openam</artifactId>
+            <version>${openidm.version}</version>
+            <type>zip</type>
+            <classifier>www</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${openidm.version}</version>
             <!-- To satisfy both maven unit tests and OSGi packaging
