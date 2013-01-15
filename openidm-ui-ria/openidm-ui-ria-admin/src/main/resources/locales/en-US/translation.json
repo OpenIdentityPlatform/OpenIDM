@@ -329,7 +329,7 @@
                         "perPage" : "per page"
                     },
                     "AdminUserProfileView" : {
-                        "profileOwnership" : "%s' profile",
+                        "profileOwnership" : "%s's profile",
                         "profileWillBeDeleted" : "%s account will be deleted."
                     },
                     "ChangeUserPasswordDialog" : {
