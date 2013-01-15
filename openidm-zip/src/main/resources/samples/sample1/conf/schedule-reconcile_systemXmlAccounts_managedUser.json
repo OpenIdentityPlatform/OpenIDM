@@ -3,6 +3,7 @@
     "type" : "cron",
     "schedule" : "0 0/1 * * * ?",
     "persisted" : true,
+    "concurrentExecution" : false,
     "misfirePolicy" : "fireAndProceed",
     "invokeService" : "sync",
     "invokeContext" : {
