@@ -2,6 +2,7 @@
     "enabled" : true,
     "type" : "cron",
     "schedule" : "0 0 * * * ?",
+    "concurrentExecution" : false,
     "invokeService" : "taskscanner",
     "invokeContext" : {
         "waitForCompletion" : false,

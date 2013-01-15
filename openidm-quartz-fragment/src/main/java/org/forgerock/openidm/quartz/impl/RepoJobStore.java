@@ -1453,7 +1453,7 @@ public class RepoJobStore implements JobStore {
                             tmpTw.block();
                         }
                         // update trigger in repo
-                        updateTriggerInRepo(t.getGroup(), tmpTw.getName(), tmpTw, tw.getRevision());
+                        updateTriggerInRepo(t.getGroup(), tmpTw.getName(), tmpTw, tmpTw.getRevision());
                         removeWaitingTrigger(t);
                     }
                 }
