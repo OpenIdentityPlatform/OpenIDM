@@ -1,4 +1,3 @@
-
 {
     "context" : "endpoint/amproxy/*",
     "type" : "text/javascript",

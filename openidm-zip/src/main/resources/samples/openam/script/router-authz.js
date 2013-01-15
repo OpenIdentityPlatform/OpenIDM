@@ -68,7 +68,6 @@ function matchesResourceIdPattern(id, pattern) {
         // Ends with "/*" or "/"
         // See if parent pattern matches
         var parentResource = pattern.substring(0, pattern.length - 1);
-        java.lang.System.out.println("id substring: [" + id.substring(0, parentResource.length) + "] parentResource: [" + parentResource + "]" );
         if (id.length >= parentResource.length && id.substring(0, parentResource.length) === parentResource) {
             return true;
         }
@@ -98,17 +97,12 @@ function containsIgnoreCase(a, o) {
 
 function containsItems(items, configItems) {
     var i;
-
-    java.lang.System.out.println("configItems: " + configItems);
-    
     if ((typeof configItems === "string" && configItems === '*') || 
         (typeof configItems === "object" && configItems.length === 1 && configItems[0] === '*')) {
         return true;
     }
 
     for (i = 0; i < items.length; i++) {
-        java.lang.System.out.println("   Checking items["+i+"]: " + items[i]);
-
         if (containsIgnoreCase(configItems, items[i])) {
             return true;
         }
@@ -334,13 +328,13 @@ function disallowQueryExpression() {
 
 function passesAccessConfig(id, roles, method, action) {
     var i,j,config,pattern,excluded,ex;
-
+    
     for (i = 0; i < httpAccessConfig.configs.length; i++) {
         config = httpAccessConfig.configs[i];
         pattern = config.pattern;
         // Check resource ID
         if (matchesResourceIdPattern(id, pattern)) {
-            java.lang.System.out.println("Found matching pattern: [" + pattern + "] for id: [" + id + "]"); 
+            
             // Check excludePatterns
             ex = false;
             if (typeof(config.excludePatterns) !== 'undefined' && config.excludePatterns !== null) {
@@ -353,23 +347,17 @@ function passesAccessConfig(id, roles, method, action) {
                 }
             }
             if (!ex) {
-                java.lang.System.out.println("Checking role:" + roles);
                 // Check roles
                 if (containsItems(roles, config.roles.split(','))) {
-                    java.lang.System.out.println("Checking method:" + method);
                     // Check method
                     if (method === 'undefined' || containsItem(method, config.methods)) {
-                        java.lang.System.out.println("Checking action: [" + action + "]");
-                        java.lang.System.out.println("Checking action:" + config.actions);
                         // Check action
                         if (action === 'undefined' || action === "" || containsItem(action, config.actions)) {
-                            java.lang.System.out.println("Checking customAuthz");
                             if (typeof(config.customAuthz) !== 'undefined' && config.customAuthz !== null) {
                                 if (eval(config.customAuthz)) {
                                     return true;
                                 }
                             } else {
-                                java.lang.System.out.println("Returning true!");
                                 return true;
                             }
                         }
@@ -408,9 +396,8 @@ function allow() {
 // Load the access configuration script (httpAccessConfig obj)
 load("samples/openam/script/access.js");
 
-java.lang.System.out.println(request);
 if (!allow()) {
-    java.lang.System.out.println("Failed!");
+//    java.lang.System.out.println(request);
     throw { 
         "openidmCode" : 403, 
         "message" : "Access denied"
