@@ -33,36 +33,7 @@ public final class QueryConstants {
     private QueryConstants() {}
 
     // Keys for the query input
-    
-    /**
-     * Query input key.
-     * 
-     * Query expression key for the query param map to supply a Query expression in-line. 
-     *
-     * The alternative is to specify a query identifier for a pre-configured query. 
-     * 
-     * The query can contain tokens in the form of ${<param-map-key>} which will 
-     * get substituted from the param map passed to the query.
-     * 
-     * When both an expression and ID are present, the query expression takes precedent
-     */
-    public final static String QUERY_EXPRESSION = "_queryExpression";
-    
-    /**
-     * Query input key.
-     * 
-     * Query identifier for the query param map. The query identifier must match a
-     * configured query. 
-     * 
-     * The alternative is to specify a query expression for an in-line query.
-     * 
-     * The configured query can contain tokens in the form of ${<param-map-key>} 
-     * which will get substituted from the param map passed to the query.
-     * 
-     * When both an expression and ID are present, the query expression takes precedent
-     */    
-    public final static String QUERY_ID = "_queryId";
-    
+
     /**
      * System populated query input key.
      * 
@@ -73,13 +44,7 @@ public final class QueryConstants {
     
     
     // Keys in the query output
-    
-    /**
-     * Query output key.
-     * 
-     * Key for record results in JSON object model format, value format List<Map<String, Object>>
-     */
-    public final static String QUERY_RESULT = "result";    
+
     
     /**
      * Query output key.

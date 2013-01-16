@@ -27,6 +27,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.core.ServerConstants;
@@ -176,7 +177,7 @@ public class ObjectClassInfoHelper {
         return result;
     }
 
-    public JsonValue build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
+    public Resource build(ConnectorObject source, CryptoService cryptoService) throws IOException, JsonCryptoException {
         if (null == source) {
             return null;
         }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,34 +20,27 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * $Id$
  */
 
-package org.forgerock.openidm.provisioner;
+package org.forgerock.openidm.config.crypto;
+
+import java.util.Dictionary;
+
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationPlugin;
 
 /**
- * SystemIdentifier is a composite key to identify the {@link ProvisionerService} instance.
- *
- * @author $author$
- * @version $Revision$ $Date$
+ * A NAME does ...
+ * 
+ * @author Laszlo Hordos
  */
-public interface SystemIdentifier {
-    /**
-     * Compare this and the {@code other} instance and returns true if both identifies the same
-     * {@link ProvisionerService} instance.
-     *
-     * @param other
-     * @return
-     */
-    public boolean is(SystemIdentifier other);
-
-    /**
-     * Checks the {@code uri} and return true if the {@link ProvisionerService} instance is responsible to handle
-     * the request.
-     *
-     * @param id
-     * @return
-     */
-    public boolean is(Id id);
+public class CryptoConfigurationPlugin implements ConfigurationPlugin  {
+    @Override
+    public void modifyConfiguration(ServiceReference reference, Dictionary properties) {
+        properties.put(JSONEnhancedConfig.class.getCanonicalName(), JSONEnhancedConfig
+                .newInstance().getConfiguration((Dictionary<String, Object>) properties, null,
+                        (String) reference.getProperty(Constants.SERVICE_PID), true));
+    }
 }

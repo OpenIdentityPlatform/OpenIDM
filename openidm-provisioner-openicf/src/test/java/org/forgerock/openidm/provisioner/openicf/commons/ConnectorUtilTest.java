@@ -36,7 +36,7 @@ import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
 import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperBuilder;
-import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperImpl;
+import org.forgerock.openidm.provisioner.openicf.internal.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.impl.SimpleSystemIdentifier;
 import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -53,7 +53,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -143,7 +142,7 @@ public class ConnectorUtilTest {
         Map<String, Map<Class<? extends APIOperation>, OperationOptionInfoHelper>> operationOptionHelpers = ConnectorUtil.getOperationOptionConfiguration(configuration);
         ObjectClassInfoHelper objectClassInfoHelper = org.mockito.Mockito.mock(ObjectClassInfoHelper.class);
         org.mockito.Mockito.when(objectClassInfoHelper.getObjectClass()).thenReturn(new ObjectClass("__ACCOUNT__"));
-        OperationHelper helper = new OperationHelperImpl(new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"), null);
+        OperationHelper helper = new OperationHelper(new Id("system/TEST/account"), objectClassInfoHelper, operationOptionHelpers.get("__ACCOUNT__"), null);
 
         Assert.assertTrue(helper.isOperationPermitted(CreateApiOp.class), "Create - ALLOWED");
         Assert.assertFalse(helper.isOperationPermitted(SyncApiOp.class), "Sync - DENIED");

@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.openidm.core.ServerConstants;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,14 +81,14 @@ import org.forgerock.openidm.objset.PreconditionFailedException;
  * @author aegloff
  */
 @Component(name = OrientDBRepoService.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
-@Service (value = {RepositoryService.class, JsonResource.class}) // Omit the RepoBootService interface from the managed service
+@Service
 @Properties({
-    @Property(name = "service.description", value = "Repository Service using OrientDB"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "repo"),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using OrientDB"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{type}"),
     @Property(name = "db.type", value = "OrientDB")
 })
-public class OrientDBRepoService extends ObjectSetJsonResource implements RepositoryService, RepoBootService {
+public class OrientDBRepoService implements CollectionResourceProvider{
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.orientdb";

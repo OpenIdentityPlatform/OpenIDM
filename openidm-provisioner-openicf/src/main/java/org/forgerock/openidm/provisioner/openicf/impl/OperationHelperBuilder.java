@@ -29,6 +29,8 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.RequestVisitor;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.Id;
@@ -36,10 +38,10 @@ import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
+import org.forgerock.openidm.provisioner.openicf.internal.OperationHelper;
 import org.identityconnectors.common.Assertions;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.operations.APIOperation;
-import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;
 
 import java.util.Map;
@@ -48,7 +50,7 @@ import java.util.Map;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class OperationHelperBuilder {
+public class OperationHelperBuilder extends RequestVisitor<OperationHelper,CryptoService> {
 
     private final APIConfigurationImpl runtimeAPIConfiguration;
     private Map<String, ObjectClassInfoHelper> supportedObjectTypes;
@@ -63,7 +65,7 @@ public class OperationHelperBuilder {
         this.systemName = Assertions.blankChecked(system, "systemName");
     }
 
-    public OperationHelper build(String objectType, JsonValue object, CryptoService cryptoService) throws JsonResourceException {
+    public OperationHelper build(String objectType, JsonValue object, CryptoService cryptoService) throws ResourceException {
         ObjectClassInfoHelper objectClassInfoHelper = supportedObjectTypes.get(objectType);
         if (null == objectClassInfoHelper) {
             throw new JsonResourceException(400, "Unsupported object type: " + objectType
@@ -77,7 +79,7 @@ public class OperationHelperBuilder {
 //        }
 
 
-        return new OperationHelperImpl(new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType), cryptoService);
+        return new OperationHelper(new Id(systemName, objectType), objectClassInfoHelper, operationOptionHelpers.get(objectType), cryptoService);
     }
 
 

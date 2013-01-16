@@ -24,11 +24,14 @@
  * $Id$
  */
 
-package org.forgerock.openidm.provisioner.openicf.impl;
+package org.forgerock.openidm.provisioner.openicf.internal;
 
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.Id;
@@ -56,7 +59,7 @@ import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class OperationHelperImpl implements OperationHelper {
+public class OperationHelper  {
 
     private final ObjectClassInfoHelper objectClassInfoHelper;
     private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
@@ -71,9 +74,9 @@ public class OperationHelperImpl implements OperationHelper {
      * @param cryptoService
      * @throws NullPointerException if any of the input values is null.
      */
-    public OperationHelperImpl(Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
-                               Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions,
-                               CryptoService cryptoService) {
+    public OperationHelper(Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
+                           Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions,
+                           CryptoService cryptoService) {
         this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
         this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");
         this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");
@@ -82,8 +85,17 @@ public class OperationHelperImpl implements OperationHelper {
 
 
 
-
-    public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws JsonResourceException {
+    /**
+     * Checks the {@code operation} permission before execution.
+     *
+     * @param operation
+     * @return if {@code denied} is true and the {@code onDeny} equals
+     *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#DO_NOTHING}
+     *         returns false else true
+     * @throws ResourceException if {@code denied} is true and the {@code onDeny} equals
+     *                            {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#THROW_EXCEPTION}
+     */
+    public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ResourceException {
         OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);
         String reason = "not supported.";
         if (null != operationOptionInfoHelper && (null == operationOptionInfoHelper.getSupportedObjectTypes() ||
@@ -96,20 +108,40 @@ public class OperationHelperImpl implements OperationHelper {
             }
             reason = "denied.";
         }
-        throw new JsonResourceException(403, "Operation " + operation.getCanonicalName() + " is " + reason);
+        throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is " + reason);
     }
 
 
-    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject, JsonValue source) throws Exception {
+    /**
+     * Gets a new instance of {@link OperationOptionsBuilder} filled with {@link OperationOptions}.
+     *
+     * @param operation
+     * @param connectorObject
+     * @param source
+     * @return
+     * @throws Exception
+     */
+    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject) throws Exception {
         return operations.get(operation).build(source, objectClassInfoHelper);
     }
 
-
+    /**
+     * Gets the {@link ObjectClass} value of this instance.
+     *
+     * @return
+     */
     public ObjectClass getObjectClass() {
         return objectClassInfoHelper.getObjectClass();
     }
 
-
+    /**
+     * Build new {@code Filter} instance form the {@code query} and {@code params} values.
+     *
+     * @param query
+     * @param params
+     * @return
+     * @throws Exception
+     */
     public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception {
         Operator operator = createOperator(query, params);
         return operator.createFilter();
@@ -126,9 +158,17 @@ public class OperationHelperImpl implements OperationHelper {
         return objectClassInfoHelper.build(operation, id, source, cryptoService);
     }
 
-
-    public JsonValue build(ConnectorObject source) throws Exception {
-        JsonValue result = objectClassInfoHelper.build(source, cryptoService);
+    /**
+     * Build a new Map object from the {@code source} object.
+     * <p/>
+     * This class uses the embedded schema to convert the {@code source}.
+     *
+     * @param source
+     * @return
+     * @throws Exception
+     */
+    public Resource build(ConnectorObject source) throws Exception {
+        Resource result = objectClassInfoHelper.build(source, cryptoService);
         resetUid(source.getUid(), result);
         if (null != source.getUid().getRevision()) {
             //System supports Revision
@@ -138,6 +178,12 @@ public class OperationHelperImpl implements OperationHelper {
     }
 
 
+    /**
+     * Resets the {@code _id} attribute in the {@code target} object to the new {@code uid} value.
+     *
+     * @param uid    new id value
+     * @param target
+     */
     public void resetUid(Uid uid, JsonValue target) {
         if (null != uid && null != target) {
             target.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(uid.getUidValue()));
@@ -146,6 +192,14 @@ public class OperationHelperImpl implements OperationHelper {
 
     /**
      * Generate the fully qualified id from unqualified object {@link org.identityconnectors.framework.common.objects.Uid}
+     * <p/>
+     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
+     *
+     * @param uid original un escaped unique identifier of the object
+     * @return
+     */
+    /**
+     * Generate the fully qualified id from unqualified object {@link Uid}
      * <p/>
      * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
      *
@@ -165,7 +219,9 @@ public class OperationHelperImpl implements OperationHelper {
         }
     }
 
-
+    /**
+     * @return new instance of {@link ResultsHandler}
+     */
     public ResultsHandler getResultsHandler() {
         resultList.clear();
         return new ConnectorObjectResultsHandler();

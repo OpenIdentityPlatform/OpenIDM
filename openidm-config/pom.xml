@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -102,10 +102,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
-                            !org.forgerock.openidm.config,org.forgerock.openidm.config.persistence;version=${openidm.osgi.import.openidm.version}
-                        </Export-Package>
-                        <Bundle-Activator>org.forgerock.openidm.config.persistence.Activator</Bundle-Activator>
+                        <Private-Package>org.forgerock.openidm.config.internal*</Private-Package>
+                        <Bundle-Activator>org.forgerock.openidm.config.internal.Activator</Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>

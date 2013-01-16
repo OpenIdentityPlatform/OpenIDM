@@ -27,6 +27,7 @@
 package org.forgerock.openidm.provisioner;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.JsonResource;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
@@ -37,16 +38,7 @@ import java.util.Map;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public interface ProvisionerService extends JsonResource {
-
-    /**
-     * Gets the unique {@link SystemIdentifier} of this instance.
-     * <p/>
-     * The service which refers to this service instance can distinguish between multiple instances by this value.
-     *
-     * @return
-     */
-    public SystemIdentifier getSystemIdentifier();
+public interface ProvisionerService extends CollectionResourceProvider {
 
     /**
      * Gets a brief stats report about the current status of this service instance.

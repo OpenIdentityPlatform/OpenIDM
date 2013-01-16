@@ -82,13 +82,19 @@ import org.slf4j.LoggerFactory;
  * 
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.audit", immediate=true, policy=ConfigurationPolicy.REQUIRE)
+@Component(name = AuditServiceImpl.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
     @Property(name = "service.description", value = "Audit Service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX) })
 public class AuditServiceImpl implements AuditService {
+
+    public static final String PID = "org.forgerock.openidm.audit";
+
+    /**
+     * Setup logging for the {@link AuditServiceImpl}.
+     */
     final static Logger logger = LoggerFactory.getLogger(AuditServiceImpl.class);
     private final static ObjectMapper mapper;
 

@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -29,9 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.JsonResourceContext;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
 import org.osgi.framework.BundleContext;
@@ -39,6 +38,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -57,6 +57,9 @@ import org.slf4j.LoggerFactory;
 
 public class SchedulerServiceJob implements Job {
 
+    /**
+     * Setup logging for the {@link SchedulerServiceJob}.
+     */
     final static Logger logger = LoggerFactory.getLogger(SchedulerServiceJob.class);
 
     // Default to INFO
@@ -74,83 +77,84 @@ public class SchedulerServiceJob implements Job {
      * incumbent on the invoked service to establish if necessary.
      */
     private JsonValue newSchedulerContext(Map<String, Object> ssc) {
-        JsonValue context = JsonResourceContext.newContext("scheduler", JsonResourceContext.newRootContext());
-        HashMap<String, Object> security = new HashMap<String, Object>();
-        security.put("username", ssc.get(ScheduledService.INVOKER_NAME));
-        context.put("security", security);
-        context.put("scheduled-time", ssc.get(ScheduledService.SCHEDULED_FIRE_TIME));
-        context.put("actual-time", ssc.get(ScheduledService.ACTUAL_FIRE_TIME));
-        context.put("next-time", ssc.get(ScheduledService.NEXT_FIRE_TIME));
-        context.put("invoke-service", ssc.get(ScheduledService.CONFIGURED_INVOKE_SERVICE));
-        context.put("invoke-context", ssc.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT));
-        context.put("invoke-log-level",  ssc.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL));
-        return context;
+//        JsonValue context = JsonResourceContext.newContext("scheduler", JsonResourceContext.newRootContext());
+//        HashMap<String, Object> security = new HashMap<String, Object>();
+//        security.put("username", ssc.get(ScheduledService.INVOKER_NAME));
+//        context.put("security", security);
+//        context.put("scheduled-time", ssc.get(ScheduledService.SCHEDULED_FIRE_TIME));
+//        context.put("actual-time", ssc.get(ScheduledService.ACTUAL_FIRE_TIME));
+//        context.put("next-time", ssc.get(ScheduledService.NEXT_FIRE_TIME));
+//        context.put("invoke-service", ssc.get(ScheduledService.CONFIGURED_INVOKE_SERVICE));
+//        context.put("invoke-context", ssc.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT));
+//        context.put("invoke-log-level",  ssc.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL));
+//        return context;
+        return null;
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getMergedJobDataMap();
 
-        String invokeLogLevel = (String) data.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL);
-        logLevel = LogUtil.asLogLevel(invokeLogLevel);
-
-        String invokeService = (String) data.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
-        Object invokeContext = data.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
-        //ServiceTracker scheduledServiceTracker = (ServiceTracker) data.get(SchedulerService.SERVICE_TRACKER);
-        ServiceTracker scheduledServiceTracker = (ServiceTracker) getServiceTracker(invokeService);
-
-
-
-        logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}",
-                new Object[] {invokeService, invokeContext, context});
-        logger.debug("Job to invoke service with PID {} with scheduler context {}", new Object[] {invokeService, context});
-
-        Map<String,Object> scheduledServiceContext = new HashMap<String,Object>();
-        scheduledServiceContext.putAll(data);
-        //scheduledServiceContext.remove(SchedulerService.SERVICE_TRACKER);
-        scheduledServiceContext.put(ScheduledService.INVOKER_NAME, "Scheduled " +
-                context.getJobDetail().getName() + "-" + context.getScheduledFireTime());
-        scheduledServiceContext.put(ScheduledService.SCHEDULED_FIRE_TIME, context.getScheduledFireTime());
-        scheduledServiceContext.put(ScheduledService.ACTUAL_FIRE_TIME, context.getFireTime());
-        scheduledServiceContext.put(ScheduledService.NEXT_FIRE_TIME, context.getNextFireTime());
-
-        ScheduledService scheduledService = (ScheduledService) scheduledServiceTracker.getService();
-        if (scheduledService == null) {
-            // TODO: consider guarding against too frequent logging
-            logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
-        } else {
-            try {
-                LogUtil.logAtLevel(logger, logLevel,
-                        "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
-                // TODO: Migrate calls to router; pass context in request.
-                ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
-                try {
-                    scheduledService.execute(scheduledServiceContext);
-                } finally {
-                    ObjectSetContext.pop();
-                }
-                LogUtil.logAtLevel(logger, logLevel,
-                        "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
-            } catch (Exception ex) {
-                logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
-                        new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
-            }
-        }
+//        String invokeLogLevel = (String) data.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL);
+//        logLevel = LogUtil.asLogLevel(invokeLogLevel);
+//
+//        String invokeService = (String) data.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
+//        Object invokeContext = data.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
+//        //ServiceTracker scheduledServiceTracker = (ServiceTracker) data.get(SchedulerService.SERVICE_TRACKER);
+//        ServiceTracker scheduledServiceTracker = (ServiceTracker) getServiceTracker(invokeService);
+//
+//
+//
+//        logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}",
+//                new Object[] {invokeService, invokeContext, context});
+//        logger.debug("Job to invoke service with PID {} with scheduler context {}", new Object[] {invokeService, context});
+//
+//        Map<String,Object> scheduledServiceContext = new HashMap<String,Object>();
+//        scheduledServiceContext.putAll(data);
+//        //scheduledServiceContext.remove(SchedulerService.SERVICE_TRACKER);
+//        scheduledServiceContext.put(ScheduledService.INVOKER_NAME, "Scheduled " +
+//                context.getJobDetail().getName() + "-" + context.getScheduledFireTime());
+//        scheduledServiceContext.put(ScheduledService.SCHEDULED_FIRE_TIME, context.getScheduledFireTime());
+//        scheduledServiceContext.put(ScheduledService.ACTUAL_FIRE_TIME, context.getFireTime());
+//        scheduledServiceContext.put(ScheduledService.NEXT_FIRE_TIME, context.getNextFireTime());
+//
+//        ScheduledService scheduledService = (ScheduledService) scheduledServiceTracker.getService();
+//        if (scheduledService == null) {
+//            // TODO: consider guarding against too frequent logging
+//            logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
+//        } else {
+//            try {
+//                LogUtil.logAtLevel(logger, logLevel,
+//                        "Scheduled service \"{}\" found, invoking.", context.getJobDetail().getFullName());
+//                // TODO: Migrate calls to router; pass context in request.
+//                ObjectSetContext.push(newSchedulerContext(scheduledServiceContext));
+//                try {
+//                    scheduledService.execute(scheduledServiceContext);
+//                } finally {
+//                    ObjectSetContext.pop();
+//                }
+//                LogUtil.logAtLevel(logger, logLevel,
+//                        "Scheduled service \"{}\" invoke completed successfully.", context.getJobDetail().getFullName());
+//            } catch (Exception ex) {
+//                logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
+//                        new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
+//            }
+//        }
     }
 
-    ServiceTracker getServiceTracker(String servicePID) throws InvalidException {
-        Filter filter = null;
-        BundleContext context = null;
-        try {
-            context = FrameworkUtil.getBundle(SchedulerServiceJob.class).getBundleContext();
-            filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + ScheduledService.class.getName() + ")"
-                    + "(service.pid=" + servicePID + "))");
-        } catch (InvalidSyntaxException ex) {
-            throw new InvalidException("Failure in setting up scheduler to find service to invoke. One possible cause is an invalid "
-                    + "invokeService property. :  " + ex.getMessage(), ex);
-        }
-        ServiceTracker serviceTracker = new ServiceTracker(context, filter, null);
-        serviceTracker.open();
+    ConnectionFactory getConnectionFactory() {
+        BundleContext context = FrameworkUtil.getBundle(SchedulerServiceJob.class).getBundleContext();
+        if (null != context) {
+            //TODO Do we need more sophisticated filtering
+            ServiceReference<ConnectionFactory> reference = context.getServiceReference(ConnectionFactory.class);
 
-        return serviceTracker;
+        }
+
+//        try {
+//            Filter filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + ConnectionFactory.class.getName() + ")" + "(service.pid=org.forgerock.openidm.router))");
+//        } catch (InvalidSyntaxException ex) {
+//            throw new InvalidException("Failure in setting up scheduler to find service to invoke. One possible cause is an invalid "
+//                    + "invokeService property. :  " + ex.getMessage(), ex);
+//        }
+        return null;
     }
 }

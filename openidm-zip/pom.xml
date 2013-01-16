@@ -58,6 +58,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-shell</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -66,7 +71,7 @@
             <artifactId>openidm-external-rest</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-email</artifactId>
@@ -78,7 +83,7 @@
             <artifactId>openidm-jetty-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-policy</artifactId>
             <version>${openidm.version}</version>
@@ -142,9 +147,9 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${project.version}</version>
-            <!-- To satisfy both maven unit tests and OSGi packaging
+            <!- - To satisfy both maven unit tests and OSGi packaging
                  this embedded jar is included as a dependency for maven
-                 purposes, but explicitly excluded for the OSGi packaging -->
+                 purposes, but explicitly excluded for the OSGi packaging - ->
             <exclusions>
                 <exclusion>  
                     <groupId>com.googlecode.disruptor</groupId>
@@ -168,7 +173,7 @@
             <artifactId>openidm-workflow-activiti</artifactId>
             <version>${project.version}</version>
             <classifier>jar-with-dependencies</classifier>
-        </dependency>
+        </dependency-->
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.apache.felix</groupId>

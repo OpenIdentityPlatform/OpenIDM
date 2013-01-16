@@ -1,17 +1,25 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
 package org.forgerock.openidm.filter;
@@ -19,18 +27,23 @@ package org.forgerock.openidm.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.security.Password;
 
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.RootContext;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.filter.AuthFilter.AuthData;
 import org.forgerock.openidm.http.ContextRegistrator;
-import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.repo.QueryConstants;
 
 import org.forgerock.json.fluent.JsonValue;
 
@@ -38,9 +51,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
-
-// Deprecated
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +102,6 @@ public class AuthModule {
      * Authenticate the given username and password
      * @param authData The current authentication data to validate and augment, with the username supplied
      * @param password The supplied password to validate
-     * @param resource
      * @return the authentication data augmented with role, id, status info. Whether authentication was successful is 
      * carried by the status property 
      */
@@ -137,23 +146,26 @@ public class AuthModule {
         Credential credential = null;
         List roleNames = new ArrayList();
 
-        Map props = new HashMap();
-        props.put(QueryConstants.QUERY_ID, repoQueryId);
-        props.put("username", username);
-        Map resultWrapper = getRepo().query(repoResource, props);
-        JsonValue jsonView = new JsonValue(resultWrapper);
-        if (jsonView.get(QueryConstants.QUERY_RESULT).size() > 1) {
+        QueryRequest request = Requests.newQueryRequest("repo/"+repoResource);
+        request.setQueryId(repoQueryId);
+        //TODO NPE check
+        request.getAdditionalQueryParameters().put("username", username);
+
+        Set<Resource> result = new HashSet<Resource>();
+        QueryResult queryResult = getRepo().query(new RootContext(),request,result);
+
+        if (result.size() > 1) {
             logger.warn("Query to match user credentials found more than one matching user for {}", username);
-            for (JsonValue entry : jsonView.get(QueryConstants.QUERY_RESULT)) {
-                logger.warn("Ambiguous matching username for {} found id: {}", username, entry.get("_id"));
+            for (Resource entry : result) {
+                logger.warn("Ambiguous matching username for {} found id: {}", username, entry.getId());
             }
-        } else if (jsonView.get(QueryConstants.QUERY_RESULT).size() > 0) {
+        } else if (result.size() > 0) {
             String retrId = null;
             String retrCred = null;
             String retrCredPropName = null;
             Object retrRoles = null;
             String retrRolesPropName = null;
-            JsonValue entry = jsonView.get(QueryConstants.QUERY_RESULT).get(0);
+            JsonValue entry = result.iterator().next().getContent();
 
             // If all of the required user parameters are defined
             // we can just fetch that info instead of iterating/requiring it in-order
@@ -270,11 +282,11 @@ public class AuthModule {
     }
 
 
-    JsonResourceObjectSet getRepo() {
+    Connection getRepo() {
         // TODO: switch to service trackers
         BundleContext ctx = ContextRegistrator.getBundleContext();
-        ServiceReference repoRef = ctx.getServiceReference(RepositoryService.class.getName());
-        return new JsonResourceObjectSet((RepositoryService)ctx.getService(repoRef));
+        ServiceReference<Connection> repoRef = ctx.getServiceReference(Connection.class);
+        return ctx.getService(repoRef);
     }
 
     CryptoService getCrypto() {

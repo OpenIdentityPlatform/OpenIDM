@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,7 +28,9 @@ import org.apache.felix.scr.annotations.Properties;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -77,7 +79,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -358,7 +359,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public JsonValue configure(JsonValue params) throws JsonResourceException {
+    public JsonValue configure(JsonValue params) throws ResourceException {
         JsonValue result = null;
         try {
             if (params.isNull() || params.size() == 0) {
@@ -369,7 +370,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
                 ConnectorInfo info = findConnectorInfo(ref);
                 if (null == info) {
-                    throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
+                    throw new NotFoundException( "Connector not found: " + ref.getConnectorKey());
                 }
                 result = params;
                 ConnectorUtil.createSystemConfigurationFromAPIConfiguration(info.createDefaultAPIConfiguration(), result);
@@ -378,14 +379,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 ConnectorReference ref = ConnectorUtil.getConnectorReference(params);
                 ConnectorInfo info = findConnectorInfo(ref);
                 if (null == info) {
-                    throw new JsonResourceException(JsonResourceException.NOT_FOUND, "Connector not found: " + ref.getConnectorKey());
+                    throw new NotFoundException( "Connector not found: " + ref.getConnectorKey());
                 }
                 APIConfiguration configuration = info.createDefaultAPIConfiguration();
                 ConnectorUtil.configureDefaultAPIConfiguration(params, configuration);
                 result = new JsonValue(createSystemConfiguration(configuration, false));
             }
         } catch (JsonValueException e) {
-            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, e.getMessage(), e);
+            throw new BadRequestException( e.getMessage(), e);
         }
         return result;
     }

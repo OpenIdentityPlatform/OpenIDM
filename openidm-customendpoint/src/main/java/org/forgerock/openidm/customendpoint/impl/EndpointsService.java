@@ -1,30 +1,32 @@
 /**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*/
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
 package org.forgerock.openidm.customendpoint.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import javax.script.ScriptException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -33,27 +35,40 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.script.engine.Utils;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A custom endpoints service to provide a scriptable way to
- * extend and customize the system
- *
+ * A custom endpoints service to provide a scriptable way to extend and
+ * customize the system
+ * 
  * @author Laszlo Hordos
  * @author aegloff
  */
@@ -61,14 +76,21 @@ import org.slf4j.LoggerFactory;
         description = "OpenIDM Custom Endpoints Service", immediate = true)
 @Service()
 @Properties({
-        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Custom Endpoints Service")})
-public class EndpointsService implements CollectionResourceProvider {
-    private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Custom Endpoints Service"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = { "endpoint/{pid}" }) })
+public class EndpointsService implements RequestHandler {
 
     public static final String PID = "org.forgerock.openidm.endpointservice";
-    
-    public static final String ROUTER_PREFIX = "endpoint";
+
+    /**
+     * Setup logging for the {@link EndpointsService}.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
+
+
+
+    // public static final String ROUTER_PREFIX = "endpoint";
 
     // Property names in configuration
     public static final String CONFIG_RESOURCE_CONTEXT = "context";
@@ -79,232 +101,102 @@ public class EndpointsService implements CollectionResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry;
 
-    /** Additional endpoint service(s) configurations */
-    @Reference(
-        name = "EndpointConfig",
-        cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-        referenceInterface = EndpointConfig.class,
-        policy = ReferencePolicy.DYNAMIC
-    )
-    // Maps from resource context to config
-    protected Map<String, EndpointConfig> endpointConfig = new HashMap<String, EndpointConfig>();
-    protected void bindEndpointConfig(EndpointConfig config, Map properties) {
-        logger.debug("Adding {}: {}", config.getName(), config);
-        String resourceContext = config.getConfig().get(CONFIG_RESOURCE_CONTEXT).asString();
-        // Check if we're replacing an existing
-        if (isRegistered(resourceContext)) {
-            EndpointConfig found = calculateEffectiveConfig().get(resourceContext);
-            if (found != null) {
-                unregister(found.getConfig());
-            }
-        }
-        endpointConfig.put(resourceContext, config);
-        EndpointConfig effective = calculateEffectiveConfig().get(resourceContext);
-        logger.debug("Effective {}: {}", effective.getName(), effective.getConfig());
+    private ScriptEntry scriptEntry = null;
 
-        //TODO This should be registerd on the Router
-
-        register(effective.getConfig(), effective.getName());
-    }
-    protected void unbindEndpointConfig(EndpointConfig config, Map properties) {
-        logger.debug("Removing {}: {}", config.getName(), config);
-        String resourceContext = config.getConfig().get(CONFIG_RESOURCE_CONTEXT).asString();
-        endpointConfig.remove(config);
-        unregister(config.getConfig());
-        EndpointConfig effective = calculateEffectiveConfig().get(resourceContext);
-        if (effective != null) {
-            // if a different config became effective, replace with new config
-            register(effective.getConfig(), effective.getName());
-        }
-    }
-
-    /**
-     * The default configuration
-     */
-    Map<String, EndpointConfig> defaultConfig;
-
-    /**
-     * The registered scripts, mapping from resource context to the script instance
-     */
-    Map<String, RegisteredScript> scripts = new HashMap<String, RegisteredScript>();
+    private ServiceRegistration<RequestHandler> selfService = null;
 
     @Activate
     protected void activate(ComponentContext context) {
         this.context = context;
 
-        //JsonValue scriptConfig = null;
-        //Script script = null;
-        
-        // Default config is a placeholder at this point
-        defaultConfig = new HashMap<String, EndpointConfig>();
-        Map<String, EndpointConfig> effectiveConfig = calculateEffectiveConfig();
+        //Do more programmatic registration on the Router
+        String root = "endpoint/" + context.getProperties().get("config.factory-pid");
+        Dictionary properties = new Hashtable();
+        properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
+        properties.put(Constants.SERVICE_DESCRIPTION, "OpenIDM Custom Endpoints Service");
+        properties.put(ServerConstants.ROUTER_PREFIX, new String[] { root });
+        selfService =
+                context.getBundleContext().registerService(RequestHandler.class, this, properties);
 
-        for (EndpointConfig cfg : effectiveConfig.values()) {
-            register(cfg.getConfig(), cfg.getName());
+        try {
+            scriptEntry =
+                    scriptRegistry.takeScript(JSONEnhancedConfig.newInstance()
+                            .getConfigurationAsJson(context));
+        } catch (ScriptException e) {
+            throw new ComponentException(e);
         }
 
         logger.info("OpenIDM Custom Endpoints Service component is activated.");
     }
 
-    /**
-     * Calculate the effective configuration, based on defaults 
-     * and explicit custom endpoint config overrides
-     * @return the effective set of configuration
-     */
-    private Map<String, EndpointConfig> calculateEffectiveConfig() {
-        Map<String, EndpointConfig> effectiveConfig = new HashMap<String, EndpointConfig>();
-        if (defaultConfig != null) {
-            effectiveConfig.putAll(defaultConfig);
-        }
-        effectiveConfig.putAll(endpointConfig);
-        return effectiveConfig;
-    }
-
-    /**
-     * Get the script parameters to pass to the script from the config
-     * @param val the full configuration
-     * @return the parameters
-     */
-    public JsonValue getParameters(JsonValue val) {
-        JsonValue filtered = new JsonValue(Utils.deepCopy(val.asMap()));
-        // Filter the script definition itself
-        filtered.remove("type");
-        filtered.remove("source");
-        filtered.remove("file");
-        return val;
-    }
-
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        // Remove all resource context registrations and script instances
-        scripts.clear();
-        this.context = null;
+        selfService.unregister();
         logger.info("OpenIDM Custom Endpoints Service component is deactivated.");
     }
 
-    /**
-     * Register a service implementation if this component is active
-     * If a service already exists at the resource context, this replaces it
-     * @param scriptConfig the configuration for the script as a service to 
-     * register the resource context
-     */
-    protected void register(JsonValue scriptConfig, String configName) {
-        // Only register once this is active
-        if (context != null) {
-            String resourceContext = scriptConfig.get(CONFIG_RESOURCE_CONTEXT).asString();
-            if (resourceContext != null) {
-                //Script script = Scripts.newInstance((String)context.getProperties().get(Constants.SERVICE_PID), scriptConfig);
-                scripts.put(resourceContext, new RegisteredScript(getParameters(scriptConfig), script, scriptConfig));
-                logger.info("Registered custom endpoint at : {} with {}", resourceContext, scriptConfig.get("file"));
-            } else {
-                logger.warn("Invalid configuration {} : {}", configName, scriptConfig);
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request,
+            ResultHandler<JsonValue> handler) {
+        try {
+            Script script = scriptEntry.getScript(context);
+            // TODO Wrap them
+            script.put("context", context);
+            script.put("request", request);
+            Object o = script.eval();
+            if (o instanceof JsonValue) {
+                handler.handleResult((JsonValue) o);
             }
-        } else {
-            logger.debug("Not registering custom endpoint at this time as the custom endpoint service is not active.");
+        } catch (Exception e) {
+            // TDOD better handling of script thrown exceptions
+            handler.handleError(new InternalServerErrorException(e));
         }
     }
 
-    /**
-     * Unregister a service implementation 
-     * @param scriptConfig the configuration for the script as a service to 
-     * unregister from resource context
-     */
-    protected void unregister(JsonValue scriptConfig) {
-        String resourceContext = scriptConfig.get(CONFIG_RESOURCE_CONTEXT).asString();
-        scripts.remove(resourceContext);
-        logger.info("Deregistered custom endpoint service at : {} with {}", resourceContext, scriptConfig.get("source"));
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Create are not supported for resource instances");
+        handler.handleError(e);
     }
 
-    /**
-     * Whether a service implementation is registered under a context
-     * @param the info context to check
-     * @return if a script is registered
-     */
-    protected boolean isRegistered(String resourceContext) {
-        return scripts.containsKey(resourceContext);
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Delete are not supported for resource instances");
+        handler.handleError(e);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public JsonValue handle(JsonValue request) throws ResourceException {
-        String id = request.get("id").asString();
-        
-        // TODO: support registering under any context on the router
-        // Currently only registering under endpoint context is supported
-        String qualifiedId = ROUTER_PREFIX + "/" + id;
-        
-        RegisteredScript foundRegisteredScript = scripts.get(qualifiedId);
-        if (foundRegisteredScript != null) {
-            Script foundScript = foundRegisteredScript.getScript();
-            Map<String, Object> scope = Utils.deepCopy(foundRegisteredScript.getParameters().asMap());
-            
-            ObjectSetContext.push(request);
-            try {            
-                scope.putAll(scopeFactory.newInstance(ObjectSetContext.get()));
-                scope.put("request", request.getObject());
-                Object ret = foundScript.exec(scope);
-                if (ret instanceof JsonValue) {
-                    return (JsonValue) ret;
-                } else {
-                    return new JsonValue(ret);
-                }
-            } catch (ScriptThrownException ste) {
-                throw ste.toResourceException(null);
-            } catch (ScriptException se) {
-                throw se.toResourceException("Failure in executing script for " 
-                        + qualifiedId + ": " + se.getMessage());
-            } finally {
-                ObjectSetContext.pop();
-            }
-        } else {
-            throw new ResourceException(ResourceException.NOT_FOUND, "No custom endpoint available for " + id);
-        }
+    @Override
+    public void handlePatch(ServerContext context, PatchRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Patch are not supported for resource instances");
+        handler.handleError(e);
     }
 
-    /**
-     * Hold the default config
-     * @author aegloff
-     */
-    private static class DefaultEndpointConfig implements EndpointConfig {
-        JsonValue config;
-        String name;
-        public DefaultEndpointConfig(JsonValue config, String name) {
-            this.config = config;
-            this.name = name;
-        }
-        @Override
-        public JsonValue getConfig() {
-            return this.config;
-        }
-        @Override
-        public String getName() {
-            return this.name;
-        }
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        final ResourceException e =
+                new NotSupportedException("Query are not supported for resource instances");
+        handler.handleError(e);
     }
 
-    /**
-     * Hold the registered script and info
-     * @author aegloff
-     */
-    private static class RegisteredScript {
-        JsonValue parameters;
-        ScriptEntry scriptEntry;
-        JsonValue scriptConfig;
-        public RegisteredScript(JsonValue parameters, ScriptEntry script, JsonValue scriptConfig) {
-            this.parameters = parameters;
-            this.scriptEntry = script;
-            this.scriptConfig = scriptConfig;
-        }
-        public JsonValue getParameters() {
-            return this.parameters;
-        }
-        public Script getScript(Context context1) {
-            return this.scriptEntry.getScript(context1);
-        }
-        public JsonValue getScriptConfig() {
-            return this.scriptConfig;
-        }
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Read are not supported for resource instances");
+        handler.handleError(e);
+    }
+
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request,
+            ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Update are not supported for resource instances");
+        handler.handleError(e);
     }
 }
-

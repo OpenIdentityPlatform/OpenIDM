@@ -31,6 +31,8 @@ import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,25 +43,23 @@ import org.slf4j.LoggerFactory;
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
 
-    CryptoServiceImpl cryptoSvc;
+    private ServiceRegistration<CryptoService> cryptoSvc;
     
     public void start(BundleContext context) throws Exception {
         logger.debug("Crypto bundle starting");
         
         // Force fragment to resolve
         ensureJettyFragmentResolved(context);
-        
-        cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
-        
+
         // Register crypto service 
         Hashtable<String, String> prop = new Hashtable<String, String>();
         prop.put("service.pid", "org.forgerock.openidm.crypto");
 // FIXME: Weird... CryptoServiceImpl is not a JsonResource (or legacy ObjectSet).
 // Why are we trying to register a router prefix then? Reserving for future use?
-        prop.put("openidm.router.prefix", "crypto");
-        prop.put("service.description", "OpenIDM cryptography service");
-        prop.put("service.vendor", "ForgeRock AS");
-        context.registerService(CryptoService.class.getName(), cryptoSvc, prop);
+        //prop.put("openidm.router.prefix", "crypto");
+        prop.put(Constants.SERVICE_DESCRIPTION, "OpenIDM cryptography service");
+        prop.put(Constants.SERVICE_VENDOR, "ForgeRock AS");
+        cryptoSvc = context.registerService(CryptoService.class, CryptoServiceFactory.getInstance(), prop);
         logger.info("Registered cryptography service");
         
         logger.debug("Crypto bundle started");
@@ -67,7 +67,9 @@ public class Activator implements BundleActivator {
 
      public void stop(BundleContext context) {
          if (cryptoSvc != null) {
-             cryptoSvc.deactivate(context);
+             cryptoSvc.unregister();
+             //TODO Fix me
+             // cryptoSvc.deactivate(context);
          }
          logger.debug("Crypto bundle stopped");
      }

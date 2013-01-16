@@ -1,3 +1,4 @@
+//TODO Use the InMemoryBackend()
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
@@ -21,7 +22,8 @@
 * your own identifying information:
 * "Portions Copyrighted [year] [name of copyright owner]"
 *
-*/
+*//*
+
 
 package org.forgerock.openidm.quartz.impl;
 
@@ -40,15 +42,17 @@ import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.repo.RepositoryService;
 
 public class MockRepositoryService implements RepositoryService {
-    
+
     private Map<String, Object> map;
     private boolean printMap = true;
-    
-    /** Standard JSON resource request methods. */
+
+    */
+/** Standard JSON resource request methods. *//*
+
     public enum Method {
         create, read, update, delete, patch, query, action
     }
-    
+
     public MockRepositoryService() {
         map = new HashMap<String, Object>();
     }
@@ -62,26 +66,26 @@ public class MockRepositoryService implements RepositoryService {
                 JsonValue value = request.get("value");
                 String rev = request.get("rev").asString();
                 switch (method) {
-                case create: 
+                case create:
                     return create(id, value.asMap());
-                case read: 
+                case read:
                     return new JsonValue(read(id));
-                case update: 
+                case update:
                     return update(id, rev, value.asMap());
-                case delete: 
+                case delete:
                     delete(id, rev);
                     return new JsonValue(null);
-                case patch: 
+                case patch:
                     patch(id, rev, null);
                     return new JsonValue(null);
-                default: 
+                default:
                     throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
                 }
             } catch (JsonValueException jve) {
                 throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
             }
     }
-    
+
     public JsonValue create(String id, Map<String, Object> object)
             throws ObjectSetException {
         printMap("create",object);
@@ -124,7 +128,7 @@ public class MockRepositoryService implements RepositoryService {
             throws ObjectSetException {
         return null;
     }
-    
+
     public void printMap(String method, Map<String, Object> map) {
         if (printMap) {
             if (map != null) {
@@ -139,3 +143,4 @@ public class MockRepositoryService implements RepositoryService {
     }
 
 }
+*/
