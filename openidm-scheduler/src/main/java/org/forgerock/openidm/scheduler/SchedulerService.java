@@ -58,6 +58,7 @@ import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
+import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.osgi.framework.Constants;
@@ -106,6 +107,7 @@ public class SchedulerService extends ObjectSetJsonResource {
     public final static String SCHEDULE_INVOKE_LOG_LEVEL = "invokeLogLevel";
     public final static String SCHEDULE_PERSISTED = "persisted";
     public final static String SCHEDULE_MISFIRE_POLICY = "misfirePolicy";
+    public final static String SCHEDULE_CONCURRENT_EXECUTION = "concurrentExecution";
 
     // Valid configuration values
     public final static String SCHEDULE_TYPE_CRON = "cron";
@@ -269,6 +271,14 @@ public class SchedulerService extends ObjectSetJsonResource {
             synchronized (LOCK) {
                 scheduler = getScheduler(scheduleConfig);
 
+                // Determine the schedule class based on whether the job has concurrent execution enabled/disabled
+                Class scheduleClass = null;
+                if (scheduleConfig.getConcurrentExecution()) {
+                    scheduleClass = SchedulerServiceJob.class;
+                } else {
+                    scheduleClass = StatefulSchedulerServiceJob.class;
+                }
+                
                 // If the schedule is disabled, remove from scheduler and return
                 if (!scheduleConfig.getEnabled()) {
                     logger.info("Schedule {} is disabled", jobName);
@@ -282,7 +292,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                 // Attempt to add the scheduler
                 if (scheduler != null && scheduleConfig.getCronSchedule() != null
                         && scheduleConfig.getCronSchedule().length() > 0) {
-                    JobDetail job = new JobDetail(jobName, GROUP_NAME, SchedulerServiceJob.class);
+                    JobDetail job = new JobDetail(jobName, GROUP_NAME, scheduleClass);
                     job.setVolatility(scheduleConfig.getPersisted());
                     job.setJobDataMap(createJobDataMap(scheduleConfig));
                     Trigger trigger = createTrigger(scheduleConfig, jobName);
@@ -459,7 +469,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             job = scheduler.getJobDetail(id, GROUP_NAME);
             CronTrigger trigger = (CronTrigger)scheduler.getTrigger("trigger-" + id, GROUP_NAME);
             JobDataMap dataMap = job.getJobDataMap();
-            ScheduleConfig config = new ScheduleConfig(trigger, dataMap, persisted);
+            ScheduleConfig config = new ScheduleConfig(trigger, dataMap, persisted, job.isStateful());
             resultMap = (Map<String, Object>)config.getConfig().getObject();
             resultMap.put("_id", id);
 
