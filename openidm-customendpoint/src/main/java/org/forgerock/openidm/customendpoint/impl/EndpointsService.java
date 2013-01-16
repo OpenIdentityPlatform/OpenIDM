@@ -235,7 +235,7 @@ public class EndpointsService implements JsonResource {
         // Currently only registering under endpoint context is supported
         String qualifiedId = ROUTER_PREFIX + "/" + id;
         
-        RegisteredScript foundRegisteredScript = scripts.get(qualifiedId);
+        RegisteredScript foundRegisteredScript = getRegisteredScript(qualifiedId);
         if (foundRegisteredScript != null) {
             Script foundScript = foundRegisteredScript.getScript();
             Map<String, Object> scope = Utils.deepCopy(foundRegisteredScript.getParameters().asMap());
@@ -263,6 +263,20 @@ public class EndpointsService implements JsonResource {
         }
     }
 
+    private RegisteredScript getRegisteredScript(String id) {
+        RegisteredScript script = scripts.get(id);
+        if (script == null && id != null) {
+            // Check for wildcards
+            for (String key : scripts.keySet()) {
+                if (key.endsWith("/*") && key.length() > 2 && id.startsWith(key.substring(0, key.length()-1))) {
+                    script = scripts.get(key);
+                    break;
+                }
+            }
+        }
+        return script;
+    }
+    
     /**
      * Hold the default config
      * @author aegloff
