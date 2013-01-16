@@ -66,7 +66,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CryptoServiceImpl implements CryptoService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CryptoServiceImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
     /** TODO: Description. */
     private BundleContext context;
@@ -102,7 +102,7 @@ public class CryptoServiceImpl implements CryptoService {
             if (configFile.exists()) {
                 result = new FileInputStream(configFile);
             } else {
-                LOGGER.error("ERROR - KeyStore not found under CryptoService#location {}",
+                logger.error("ERROR - KeyStore not found under CryptoService#location {}",
                         configFile.getAbsolutePath());
             }
         }
@@ -110,7 +110,7 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     public void activate(BundleContext context) {
-        LOGGER.debug("Activating cryptography service");
+        logger.debug("Activating cryptography service");
         this.context = context;
         try {
             int keyCount = 0;
@@ -125,9 +125,9 @@ public class CryptoServiceImpl implements CryptoService {
                         IdentityServer.getInstance().getProperty("openidm.keystore.location");
 
                 try {
-                    LOGGER.info(
+                    logger.info(
                             "Activating cryptography service of type: {} provider: {} location: {}",
-                            new Object[] { type, provider, location });
+                            new Object[]{type, provider, location});
                     KeyStore ks =
                             (provider == null || provider.trim().length() == 0 ? KeyStore
                                     .getInstance(type) : KeyStore.getInstance(type, provider));
@@ -138,18 +138,18 @@ public class CryptoServiceImpl implements CryptoService {
                         keySelector = new SimpleKeyStoreSelector(ks, new String(clearPassword));
                         Enumeration<String> aliases = ks.aliases();
                         while (aliases.hasMoreElements()) {
-                            LOGGER.info("Available cryptography key: {}", aliases.nextElement());
+                            logger.info("Available cryptography key: {}", aliases.nextElement());
                             keyCount++;
                         }
                     }
                 } catch (IOException ioe) {
-                    LOGGER.error("IOException when loading KeyStore file of type: " + type
+                    logger.error("IOException when loading KeyStore file of type: " + type
                             + " provider: " + provider + " location:" + location, ioe);
                     throw new RuntimeException("IOException when loading KeyStore file of type: "
                             + type + " provider: " + provider + " location:" + location
                             + " message: " + ioe.getMessage(), ioe);
                 } catch (GeneralSecurityException gse) {
-                    LOGGER.error("GeneralSecurityException when loading KeyStore file", gse);
+                    logger.error("GeneralSecurityException when loading KeyStore file", gse);
                     throw new RuntimeException(
                             "GeneralSecurityException when loading KeyStore file of type: " + type
                                     + " provider: " + provider + " location:" + location
@@ -158,9 +158,9 @@ public class CryptoServiceImpl implements CryptoService {
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(
                         keySelector)));
             }
-            LOGGER.info("CryptoService is initialized with {} keys.", keyCount);
+            logger.info("CryptoService is initialized with {} keys.", keyCount);
         } catch (JsonValueException jve) {
-            LOGGER.error("Exception when loading CryptoService configuration", jve);
+            logger.error("Exception when loading CryptoService configuration", jve);
             throw new ComponentException("Configuration error", jve);
         }
     }
@@ -169,7 +169,7 @@ public class CryptoServiceImpl implements CryptoService {
         decryptionTransformers.clear();
         keySelector = null;
         this.context = null;
-        LOGGER.info("CryptoService stopped.");
+        logger.info("CryptoService stopped.");
     }
 
     @Override
@@ -177,7 +177,7 @@ public class CryptoServiceImpl implements CryptoService {
         Key key = keySelector.select(alias);
         if (key == null) {
             String msg = "Encryption key " + alias + " not found";
-            LOGGER.error(msg);
+            logger.error(msg);
             throw new JsonCryptoException(msg);
         }
         return new SimpleEncryptor(cipher, key, alias);

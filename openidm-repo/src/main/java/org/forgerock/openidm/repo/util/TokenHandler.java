@@ -33,6 +33,7 @@ import org.forgerock.json.resource.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TODO: Create a new utility class with the code from JSONEnhancedConfig
 public class TokenHandler {
 
     final static Logger logger = LoggerFactory.getLogger(TokenHandler.class);

@@ -36,26 +36,44 @@ import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.json.resource.SimpleJsonResource;
-import org.forgerock.openidm.audit.util.ActivityLog;
-import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.RouterContext;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ServiceUnavailableException;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.provisioner.Id;
 import org.forgerock.openidm.provisioner.ProvisionerService;
-import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
-import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
+import org.forgerock.openidm.provisioner.openicf.internal.ConnectorQueryFilterVisitor;
+import org.forgerock.openidm.provisioner.openicf.internal.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.openidm.sync.SynchronizationListener;
+import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.event.ConnectorEvent;
 import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.common.security.GuardedString;
@@ -94,7 +112,7 @@ import java.util.*;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service")
 })
-public class OpenICFProvisionerService implements ProvisionerService, ConnectorEventHandler {
+public class OpenICFProvisionerService implements RequestHandler, ConnectorEventHandler {
 
     //Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
@@ -120,9 +138,9 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     @Reference
     private ConnectorInfoProvider connectorInfoProvider = null;
 
-    @Reference(referenceInterface = JsonResource.class,
+    @Reference(referenceInterface = RequestHandler.class,
             target = "(service.pid=org.forgerock.openidm.router)")
-    private JsonResource router;
+    private RequestHandler router;
 
     /**
      * Cryptographic service.
@@ -170,6 +188,11 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                 systemActions.put(action.getName(), action);
             }
         }
+        //TODO
+        //router.addRoute(RoutingMode.EQUALS, "/system/OpenDJ", this);
+        //router.addRoute(RoutingMode.EQUALS, "/system/OpenDJ/{type}", this);
+        //router.addRoute(RoutingMode.EQUALS, "/system/OpenDJ/{type}/{id}", this);
+
         logger.info("OpenICF Provisioner Service component {} is activated{}", systemIdentifier,
                 (serviceAvailable ? "." : " although the service is not available yet."));
     }
@@ -238,17 +261,6 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
     }
 
     /**
-     * Gets the unique {@link org.forgerock.openidm.provisioner.SystemIdentifier} of this instance.
-     * <p/>
-     * The service which refers to this service instance can distinguish between multiple instances by this value.
-     *
-     * @return
-     */
-    public SystemIdentifier getSystemIdentifier() {
-        return systemIdentifier;
-    }
-
-    /**
      * Gets a brief stats report about the current status of this service instance.
      * </p/>
      * {@code {
@@ -278,223 +290,300 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         return result;
     }
 
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        //If the remote system became unavailable
+        if (isServiceAvailable(handler)) {
+            if (context.containsContext(RouterContext.class)) {
+                RouterContext routerContext = context.asContext(RouterContext.class);
+                String type = routerContext.getUriTemplateVariables().get("type");
+                String id = routerContext.getUriTemplateVariables().get("type");
+                if (StringUtil.isNotBlank(type)) {
+                    try {
+                        OperationHelper helper = request.accept(operationHelperBuilder, cryptoService);
+                        if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
+                            ConnectorObject connectorObject = helper.build(CreateApiOp.class);
+                            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject);
+                            Uid uid = getConnectorFacade().create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
+                            handler.handleResult(new Resource(uid.getUidValue(),uid.getRevision(), null));
+                        } else {
+                            logger.debug("Operation create of {} is not permitted", request.getNewResourceId());
+                        }
+                    } catch (Exception e) {
+                        handleError(request,e, handler);
+                    }
+                } else {
+                    //The CollectionResourceProvider is not called via the Router
+                    handler.handleError(new ForbiddenException("Direct call of the service is forbidden"));
+                }
+            }
+        }
+    }
+
+    protected boolean isServiceAvailable(ResultHandler<?> handler) {
+        if (!serviceAvailable) {
+            //TODO: better error message
+            handler.handleError(new ServiceUnavailableException());
+        }
+        return serviceAvailable;
+    }
+
+    protected void handleError(Request request, Exception exception, ResultHandler<?> handler) {
+
+        if (exception instanceof AlreadyExistsException) {
+            if (logger.isDebugEnabled()) {
+                logger.error("System object {} already exists", request.getResourceName(),
+                        exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new ConflictException(exception));
+        } else if (exception instanceof ConfigurationException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with ConfigurationException on system object: {}",
+                // new Object[]{METHOD, id}, e);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        } else if (exception instanceof ConnectionBrokenException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with ConnectionBrokenException on system object: {}",
+                // new Object[]{METHOD, id}, e);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new ServiceUnavailableException(exception));
+        } else if (exception instanceof ConnectionFailedException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Connection failed during operation {} on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new ServiceUnavailableException(exception));
+        } else if (exception instanceof ConnectorIOException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with ConnectorIOException on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new ServiceUnavailableException(exception));
+        } else if (exception instanceof OperationTimeoutException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} Timeout on system object: {}", new
+                // Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new ServiceUnavailableException(exception));
+        } else if (exception instanceof PasswordExpiredException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with PasswordExpiredException on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        } else if (exception instanceof InvalidPasswordException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Invalid password has been provided to operation {} for system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        } else if (exception instanceof UnknownUidException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with UnknownUidException on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new NotFoundException(exception));
+        } else if (exception instanceof InvalidCredentialException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Invalid credential has been provided to operation {} for system object: {}",new
+                // Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        } else if (exception instanceof PermissionDeniedException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Permission was denied on {} operation for system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new ForbiddenException(exception));
+        } else if (exception instanceof ConnectorSecurityException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with ConnectorSecurityException on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        } else if (exception instanceof ConnectorException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with ConnectorException on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        } else if (exception instanceof ResourceException) {
+            // rethrow the the expected JsonResourceException
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError((ResourceException) exception);
+        } else if (exception instanceof JsonValueException) {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with Exception on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            //ActivityLog.log(router, request, "Bad Request", null, before, after, Status.FAILURE);
+            handler.handleError(new BadRequestException(exception));
+        }  else  {
+            if (logger.isDebugEnabled()) {
+                // logger.error("Operation {} failed with Exception on system object: {}",
+                // new Object[]{METHOD, id}, exception);
+            }
+            // ActivityLog.log(router, request, "Operation " + METHOD.name() +
+            // " failed with " + e.getClass().getSimpleName(), id.toString(),
+            // before, after, Status.FAILURE);
+            handler.handleError(new InternalServerErrorException(exception));
+        }
+    }
+
+//    /**
+//     * TODO: Description.
+//     * <p/>
+//     * This method catches any thrown {@code JsonValueException}, and rethrows it as a
+//     * {@link org.forgerock.json.resource.JsonResourceException#BAD_REQUEST}.
+//     */
+//    @Override
+//    public JsonValue handle(JsonValue request) throws JsonResourceException {
+//
+//        JsonValue before = null;
+//        JsonValue after = null;
+//        try {
+//            try {
+//                traceObject(METHOD, id, value);
+//                switch (METHOD) {
+//                    case create:
+//                        before = value;
+//                        after = create(id, value.required(), params);
+//                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+//                        return after;
+//                    case read:
+//                        after = read(id, params);
+//                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+//                        return after;
+//                    case update:
+//                        before = value;
+//                        after = update(id, rev, value.required(), params);
+//                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+//                        return after;
+//                    case delete:
+//                        try {
+//                            before = read(id, params);
+//                        } catch (Exception e) {
+//                            logger.info("Operation read of {} failed before delete", id, e);
+//                        }
+//                        after = delete(id, rev, params);
+//                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+//                        return after;
+//                    case query:
+//// FIXME: According to the JSON resource specification (now published), query parameters are
+//// required. There is a unit test that attempts to query all merely by executing query
+//// without any parameters. As a result, the commented-out line below—which conforms to the
+//// spec—breaks during unit testing.
+////                    return query(id, params.required());
+//                        before = params;
+//                        after = query(id, params.required());
+//                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+//                        return after;
+//                    case action:
+//                        before = new JsonValue(new HashMap());
+//                        before.put("value", value);
+//                        before.put("params", params);
+//                        ActionId actionId = params.get(ServerConstants.ACTION_NAME).required().asEnum(ActionId.class);
+//                        after = action(id, actionId, value, params.required());
+//                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
+//                        return after;
+//                    default:
+//                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
+//                }
+//            } catch (AlreadyExistsException e) {
+//    }
+
+
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        //If the remote system became unavailable
+        if (isServiceAvailable(handler)) {
+            if (context.containsContext(RouterContext.class)) {
+                RouterContext routerContext = context.asContext(RouterContext.class);
+                String type = routerContext.getUriTemplateVariables().get("type");
+                String resourceId = routerContext.getUriTemplateVariables().get("type");
+                if (StringUtil.isNotBlank(type) || StringUtil.isNotBlank(resourceId)) {
+                    try {
+                        OperationHelper helper = request.accept(operationHelperBuilder, cryptoService);
+                        if (helper.isOperationPermitted(GetApiOp.class)) {
+                            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null);
+                            ConnectorObject connectorObject = getConnectorFacade().getObject(helper.getObjectClass(), new Uid(resourceId), operationOptionsBuilder.build());
+                            if (null != connectorObject) {
+                                handler.handleResult(helper.build(connectorObject));
+                            } else {
+                                handler.handleError(new NotFoundException(request.getResourceName()));
+                            }
+                        } else {
+                            logger.debug("Operation read of {} is not permitted", request.getResourceName());
+                        }
+                    } catch (Exception e) {
+                        handleError(request,e, handler);
+                    }
+                } else {
+                    //The CollectionResourceProvider is not called via the Router
+                    handler.handleError(new ForbiddenException("Direct call of the service is forbidden"));
+                }
+            }
+        }
+    }
+
 
     /**
-     * TODO: Description.
-     * <p/>
-     * This method catches any thrown {@code JsonValueException}, and rethrows it as a
-     * {@link org.forgerock.json.resource.JsonResourceException#BAD_REQUEST}.
+     * {@inheritDoc}
      */
     @Override
-    public JsonValue handle(JsonValue request) throws JsonResourceException {
-        if (!serviceAvailable) {
-           //TODO: better error message
-           throw new JsonResourceException(JsonResourceException.UNAVAILABLE);
-        }
-        JsonValue before = null;
-        JsonValue after = null;
-        try {
-            SimpleJsonResource.Method METHOD = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
-            Id id = new Id(request.get("id").required().asString());
-            String rev = request.get("rev").asString();
-            JsonValue value = request.get("value");
-            JsonValue params = request.get("params");
-            try {
-                traceObject(METHOD, id, value);
-                switch (METHOD) {
-                    case create:
-                        before = value;
-                        after = create(id, value.required(), params);
-                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
-                        return after;
-                    case read:
-                        after = read(id, params);
-                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
-                        return after;
-                    case update:
-                        before = value;
-                        after = update(id, rev, value.required(), params);
-                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
-                        return after;
-                    case delete:
-                        try {
-                            before = read(id, params);
-                        } catch (Exception e) {
-                            logger.info("Operation read of {} failed before delete", id, e);
-                        }
-                        after = delete(id, rev, params);
-                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
-                        return after;
-                    case query:
-// FIXME: According to the JSON resource specification (now published), query parameters are
-// required. There is a unit test that attempts to query all merely by executing query
-// without any parameters. As a result, the commented-out line below—which conforms to the
-// spec—breaks during unit testing.
-//                    return query(id, params.required());
-                        before = params;
-                        after = query(id, params.required());
-                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
-                        return after;
-                    case action:
-                        before = new JsonValue(new HashMap());
-                        before.put("value", value);
-                        before.put("params", params);
-                        ActionId actionId = params.get(ServerConstants.ACTION_NAME).required().asEnum(ActionId.class);
-                        after = action(id, actionId, value, params.required());
-                        ActivityLog.log(router, request, "message", id.toString(), before, after, Status.SUCCESS);
-                        return after;
-                    default:
-                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST);
-                }
-            } catch (AlreadyExistsException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("System object {} already exists", id, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.CONFLICT, e.getClass().getSimpleName(), e);
-            } catch (ConfigurationException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with ConfigurationException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectionBrokenException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with ConnectionBrokenException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectionFailedException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Connection failed during operation {} on system object: {}", new Object[]{METHOD, id},
-                            e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (ConnectorIOException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with ConnectorIOException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (OperationTimeoutException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} Timeout on system object: {}", new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.UNAVAILABLE, e.getClass().getSimpleName(), e);
-            } catch (PasswordExpiredException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with PasswordExpiredException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (InvalidPasswordException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Invalid password has been provided to operation {} for system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (UnknownUidException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with UnknownUidException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.NOT_FOUND, e.getClass().getSimpleName(), e);
-            } catch (InvalidCredentialException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Invalid credential has been provided to operation {} for system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (PermissionDeniedException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Permission was denied on {} operation for system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.FORBIDDEN, e.getClass().getSimpleName(), e);
-            } catch (ConnectorSecurityException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with ConnectorSecurityException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (ConnectorException e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with ConnectorException on system object: {}",
-                            new Object[]{METHOD, id}, e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            } catch (JsonResourceException e) {
-                // rethrow the the expected JsonResourceException
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw e;
-            } catch (Exception e) {
-                if (logger.isDebugEnabled()) {
-                    logger.error("Operation {} failed with Exception on system object: {}", new Object[]{METHOD, id},
-                            e);
-                }
-                ActivityLog.log(router, request, "Operation " + METHOD.name() + " failed with " +
-                        e.getClass().getSimpleName(), id.toString(), before, after, Status.FAILURE);
-                throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, e.getClass().getSimpleName(), e);
-            }
-        } catch (JsonValueException jve) {
-            ActivityLog.log(router, request, "Bad Request", null, before, after, Status.FAILURE);
-            throw new JsonResourceException(JsonResourceException.BAD_REQUEST, jve);
-        }
+    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        final ResourceException e = new NotSupportedException("Patch operations are not supported");
+        handler.handleError(e);
     }
 
-    public JsonValue create(Id id, JsonValue object, JsonValue params) throws Exception {
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
-        if (allowModification && helper.isOperationPermitted(CreateApiOp.class)) {
-            ConnectorObject connectorObject = helper.build(CreateApiOp.class, object);
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(CreateApiOp.class, connectorObject, params);
-            Uid uid = getConnectorFacade().create(connectorObject.getObjectClass(), AttributeUtil.filterUid(connectorObject.getAttributes()), operationOptionsBuilder.build());
-            helper.resetUid(uid, object);
-            return object;
-        } else {
-            logger.debug("Operation create of {} is not permitted", id);
-        }
-        return null;
-    }
-
-    public JsonValue read(Id id, JsonValue params) throws Exception {
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
-        ConnectorFacade facade = getConnectorFacade();
-        if (helper.isOperationPermitted(GetApiOp.class)) {
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(GetApiOp.class, null, params);
-            ConnectorObject connectorObject = facade.getObject(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
-            if (null != connectorObject) {
-                return helper.build(connectorObject);
-            }
-        } else {
-            logger.debug("Operation read of {} is not permitted", id);
-        }
-        throw new JsonResourceException(JsonResourceException.NOT_FOUND, id.toString());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public JsonValue update(Id id, String rev, JsonValue object, JsonValue params) throws Exception {
@@ -529,56 +618,99 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         return null;
     }
 
-    public JsonValue delete(Id id, String rev, JsonValue params) throws Exception {
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
-        if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
-            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null, null);
-            getConnectorFacade().delete(helper.getObjectClass(), new Uid(id.getLocalId()), operationOptionsBuilder.build());
-        } else {
-            logger.debug("Operation DELETE of {} is not permitted", id);
-        }
-        return null;
-    }
-
-
-    public JsonValue query(Id id, JsonValue params) throws Exception {
-        OperationHelper helper = operationHelperBuilder.build(id.getObjectType(), params, cryptoService);
-        JsonValue result = new JsonValue(new HashMap<String, Object>());
-        if (helper.isOperationPermitted(SearchApiOp.class)) {
-            OperationOptionsBuilder operationOptionsBuilder = helper
-                    .getOperationOptionsBuilder(SearchApiOp.class, null, null);
-            JsonValue query = params.get("query");
-            JsonValue queryId = params.get(QueryConstants.QUERY_ID);
-            EventEntry measure = Publisher
-                    .start(getQueryEventName(id, params, query.asMap(), queryId.asString()), null, id);
-            try {
-                Filter filter = null;
-                if (!query.isNull()) {
-                    filter = helper.build(query.asMap(), params.get("params").asMap());
-                } else if (!queryId.isNull()) {
-                    if (QueryConstants.QUERY_ALL_IDS.equals(queryId.asString())) {
-                        // TODO: optimize query for ids, for now default to query all
-                        operationOptionsBuilder.setAttributesToGet(Uid.NAME);
-                    } else {
-                        // Unknown query id
-                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
-                                "Unknown query id: " + queryId);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
+        //If the remote system became unavailable
+        if (isServiceAvailable(handler)) {
+            if (context.containsContext(RouterContext.class)) {
+                RouterContext routerContext = context.asContext(RouterContext.class);
+                String type = routerContext.getUriTemplateVariables().get("type");
+                if (StringUtil.isNotBlank(type)) {
+                    try {
+                        OperationHelper helper = request.accept(operationHelperBuilder, cryptoService);
+                        if (allowModification && helper.isOperationPermitted(DeleteApiOp.class)) {
+                            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(DeleteApiOp.class, null);
+                            getConnectorFacade().delete(helper.getObjectClass(), new Uid(request.getResourceName()), operationOptionsBuilder.build());
+                            //TODO what's the expected response?
+                            handler.handleResult(new Resource(request.getResourceName(),null,null));
+                        } else {
+                            logger.debug("Operation delete of {} is not permitted", request.getResourceName());
+                        }
+                    } catch (Exception e) {
+                        handleError(request,e, handler);
                     }
                 } else {
-                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
-                            "Query request does not contain valid query");
+                    //The CollectionResourceProvider is not called via the Router
+                    handler.handleError(new ForbiddenException("Direct call of the service is forbidden"));
                 }
-                getConnectorFacade().search(helper.getObjectClass(), filter, helper.getResultsHandler(),
-                        operationOptionsBuilder.build());
-                result.put("result", helper.getQueryResult());
-                measure.setResult(result);
-            } finally {
-                measure.end();
             }
-        } else {
-            logger.debug("Operation QUERY of {} is not permitted", id);
         }
-        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request,final QueryResultHandler handler) {
+        QueryFilter queryFilter = request.getQueryFilter();
+
+        //If the remote system became unavailable
+        if (isServiceAvailable(handler)) {
+            if (context.containsContext(RouterContext.class)) {
+                RouterContext routerContext = context.asContext(RouterContext.class);
+                String type = routerContext.getUriTemplateVariables().get("type");
+                if (StringUtil.isNotBlank(type)) {
+                    EventEntry measure = null;//Publisher.start(getQueryEventName(id, params, query.asMap(), queryId.asString()), null, id);
+                    try {
+                        final OperationHelper helper = request.accept(operationHelperBuilder, cryptoService);
+                        if (helper.isOperationPermitted(SearchApiOp.class)) {
+                            OperationOptionsBuilder operationOptionsBuilder = helper.getOperationOptionsBuilder(SearchApiOp.class, null);
+
+                            Filter filter = request.getQueryFilter().accept(new ConnectorQueryFilterVisitor(),request);
+//                            if (!query.isNull()) {
+//                                filter = helper.build(query.asMap(), params.get("params").asMap());
+//                            } else if (!queryId.isNull()) {
+//                                if (QueryConstants.QUERY_ALL_IDS.equals(queryId.asString())) {
+//                                    // TODO: optimize query for ids, for now default to query all
+//                                    operationOptionsBuilder.setAttributesToGet(Uid.NAME);
+//                                } else {
+//                                    // Unknown query id
+//                                    throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+//                                            "Unknown query id: " + queryId);
+//                                }
+//                            } else {
+//                                throw new JsonResourceException(JsonResourceException.BAD_REQUEST,
+//                                        "Query request does not contain valid query");
+//                            }
+                            getConnectorFacade().search(helper.getObjectClass(), filter, new ResultsHandler() {
+                                @Override
+                                public boolean handle(ConnectorObject obj) {
+                                    try {
+                                        return handler.handleResource(helper.build(obj));
+                                    } catch (Exception e) {
+                                        handler.handleError(new InternalServerErrorException(e));
+                                        return false;
+                                    }
+                                }
+                            } , operationOptionsBuilder.build());
+                            //measure.setResult(result);
+                        } else {
+                            logger.debug("Operation query of {} is not permitted", request.getResourceName());
+                        }
+                    } catch (Exception e) {
+                        handleError(request,e, handler);
+                    } finally {
+                        measure.end();
+                    }
+                } else {
+                    //The CollectionResourceProvider is not called via the Router
+                    handler.handleError(new ForbiddenException("Direct call of the service is forbidden"));
+                }
+            }
+        }
     }
 
     /**
@@ -600,7 +732,12 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         script, authenticate;
     }
 
-    public JsonValue action(Id id, ActionId actionId, JsonValue entity, JsonValue params) throws Exception {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+
         JsonValue result = null;
         switch (actionId) {
             case script:
@@ -912,13 +1049,14 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
         return connectorFacade;
     }
 
-    private void traceObject(SimpleJsonResource.Method action, Id id, JsonValue source) {
+    private void traceObject(Request request) {
         if (logger.isTraceEnabled()) {
-            if (null != source) {
+            if (null != request) {
                 try {
                     StringWriter writer = new StringWriter();
-                    MAPPER.writeValue(writer, source.getObject());
-                    logger.info("Action: {}, Id: {}, Object: {}", new Object[]{action, id, writer});
+                    //TODO Change request.saveToJson()
+                    MAPPER.writeValue(writer, request.getResourceName());
+                    logger.info("Invoke action: ", writer);
                 } catch (IOException e) {
                     //Don't care
                 }

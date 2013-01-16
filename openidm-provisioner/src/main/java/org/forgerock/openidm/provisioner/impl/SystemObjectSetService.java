@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,105 +20,99 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.provisioner.impl;
 
 import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ServiceUnavailableException;
+import org.forgerock.json.resource.SingletonResourceProvider;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.ConfigurationService;
-import org.forgerock.openidm.provisioner.Id;
-import org.forgerock.openidm.provisioner.ProvisionerService;
-import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
-import org.forgerock.openidm.quartz.impl.ScheduledService;
-import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.openidm.sync.SynchronizationListener;
 import org.osgi.framework.Constants;
-import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-// JSON Resource
-
 
 /**
- * SystemObjectSetService implement the {@link JsonResource}.
+ * SystemObjectSetService implement the {@link SingletonResourceProvider}.
  *
  * @author $author$
  * @version $Revision$ $Date$
  */
 @Component(name = "org.forgerock.openidm.provisioner", immediate = true, policy = ConfigurationPolicy.IGNORE, description = "OpenIDM System Object Set Service")
-@Service(value = {JsonResource.class, ScheduledService.class})
+@Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "system")
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/system")
 })
-public class SystemObjectSetService implements CollectionResourceProvider,
-// TODO: Deprecate the following interfaces when the discovery-engine:
-        SynchronizationListener, ScheduledService {
+public class SystemObjectSetService implements SingletonResourceProvider {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
-
-    @Reference(referenceInterface = ProvisionerService.class,
-            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-            bind = "bind",
-            unbind = "unbind",
-            policy = ReferencePolicy.DYNAMIC,
-            strategy = ReferenceStrategy.EVENT)
-    private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
-
-    @Reference(referenceInterface = JsonResource.class,
-            cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            policy = ReferencePolicy.STATIC,
-            target = "(service.pid=org.forgerock.openidm.router)")
-    private JsonResource router;
-
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConfigurationService configurationService;
 
-    protected void bind(ProvisionerService service, Map properties) {
-        provisionerServices.put(service.getSystemIdentifier(), service);
-        TRACE.info("ProvisionerService {} is bound with system identifier {}.",
-                properties.get(ComponentConstants.COMPONENT_ID),
-                service.getSystemIdentifier());
-    }
 
-    protected void unbind(ProvisionerService service, Map properties) {
-        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
-            if (service.equals(entry.getValue())) {
-                provisionerServices.remove(entry.getKey());
-                break;
+    @Override
+    public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        if ("CREATECONFIGURATION".equalsIgnoreCase(request.getActionId())) {
+            if (null != configurationService) {
+            try {
+                handler.handleResult(configurationService.configure(request.getContent()));
+            } catch (ResourceException e) {
+                handler.handleError(e);
+            } catch (Exception e) {
+                handler.handleError(new InternalServerErrorException(e));
+            } } else {
+                handler.handleError(new ServiceUnavailableException("The required service is not available"));
             }
+        }   else {
+            handler.handleError(new BadRequestException("Unsupported actionId: " + request.getActionId()));
         }
-        TRACE.info("ProvisionerService {} is unbound.", properties.get(ComponentConstants.COMPONENT_ID));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public JsonValue handle(JsonValue request) throws JsonResourceException {
-        JsonValue params = request.get("params");
-        if ("action".equalsIgnoreCase(request.get("method").asString()) && !params.isNull() &&
-                "CREATECONFIGURATION".equalsIgnoreCase(params.get(ServerConstants.ACTION_NAME).asString())) {
-            return configurationService.configure(request.get("value"));
-        } else {
-            return locateService(request).handle(request);
-        }
+
+
+    @Override
+    public void readInstance(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Read are not supported for resource instances");
+        handler.handleError(e);
     }
+
+    @Override
+    public void patchInstance(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Patch are not supported for resource instances");
+        handler.handleError(e);
+    }
+
+    @Override
+    public void updateInstance(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        final ResourceException e =
+                new NotSupportedException("Update are not supported for resource instances");
+        handler.handleError(e);
+    }
+
 
     /**
      * Called when a source object has been created.
@@ -175,62 +169,48 @@ public class SystemObjectSetService implements CollectionResourceProvider,
      *          if execution of the scheduled work failed.
      *          Implementations can also throw RuntimeExceptions which will get logged.
      */
-    public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
-        try {
-            JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
-            String action = params.get("action").asString();
-            if ("liveSync".equals(action) || "activeSync".equals(action)) {
-                Id id = new Id(params.get("source").asString());
-                String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
-                try {
-                    JsonValue previousStage = null;
-                    try {
-                        JsonValue readRequest = new JsonValue(new HashMap());
-                        readRequest.put("type", "resource");
-                        readRequest.put("method", "read");
-                        readRequest.put("id", previousStageId);
-                        previousStage = router.handle(readRequest);
-
-                        JsonValue updateRequest = new JsonValue(new HashMap());
-                        updateRequest.put("type", "resource");
-                        updateRequest.put("method", "update");
-                        updateRequest.put("id", previousStageId);
-                        updateRequest.put("rev", previousStage.get("_rev"));
-                        updateRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? previousStage : null, this).asMap());
-                        router.handle(updateRequest);
-                    } catch (JsonResourceException e) {
-                        if (null == previousStage) {
-                            TRACE.info("PooledSyncStage object {} is not found. First execution.");
-                            JsonValue createRequest = new JsonValue(new HashMap());
-                            createRequest.put("type", "resource");
-                            createRequest.put("method", "create");
-                            createRequest.put("id", previousStageId);
-                            createRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
-                            router.handle(createRequest);
-                        }
-                    }
-                } catch (JsonResourceException e) {
-                    throw new ExecutionException(e);
-                }
-            }
-        } catch (JsonValueException jve) {
-            throw new ExecutionException(jve);
-        } catch (JsonResourceException e) {
-            throw new ExecutionException(e);
-        }
-    }
-
-    private ProvisionerService locateService(JsonValue request) throws JsonResourceException {
-        Id identifier = new Id(request.get("id").required().asString());
-        return locateService(identifier);
-    }
-
-    private ProvisionerService locateService(Id identifier) throws JsonResourceException {
-        for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
-            if (entry.getKey().is(identifier)) {
-                return entry.getValue();
-            }
-        }
-        throw new JsonResourceException(404, "System: " + identifier + " is not available.");
-    }
+//    public void execute(Map<String, Object> schedulerContext) throws ExecutionException {
+//        try {
+//            JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
+//            String action = params.get("action").asString();
+//            if ("liveSync".equals(action) || "activeSync".equals(action)) {
+//                Id id = new Id(params.get("source").asString());
+//                String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
+//                try {
+//                    JsonValue previousStage = null;
+//                    try {
+//                        JsonValue readRequest = new JsonValue(new HashMap());
+//                        readRequest.put("type", "resource");
+//                        readRequest.put("method", "read");
+//                        readRequest.put("id", previousStageId);
+//                        previousStage = router.handle(readRequest);
+//
+//                        JsonValue updateRequest = new JsonValue(new HashMap());
+//                        updateRequest.put("type", "resource");
+//                        updateRequest.put("method", "update");
+//                        updateRequest.put("id", previousStageId);
+//                        updateRequest.put("rev", previousStage.get("_rev"));
+//                        updateRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? previousStage : null, this).asMap());
+//                        router.handle(updateRequest);
+//                    } catch (JsonResourceException e) {
+//                        if (null == previousStage) {
+//                            TRACE.info("PooledSyncStage object {} is not found. First execution.");
+//                            JsonValue createRequest = new JsonValue(new HashMap());
+//                            createRequest.put("type", "resource");
+//                            createRequest.put("method", "create");
+//                            createRequest.put("id", previousStageId);
+//                            createRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
+//                            router.handle(createRequest);
+//                        }
+//                    }
+//                } catch (JsonResourceException e) {
+//                    throw new ExecutionException(e);
+//                }
+//            }
+//        } catch (JsonValueException jve) {
+//            throw new ExecutionException(jve);
+//        } catch (JsonResourceException e) {
+//            throw new ExecutionException(e);
+//        }
+//    }
 }

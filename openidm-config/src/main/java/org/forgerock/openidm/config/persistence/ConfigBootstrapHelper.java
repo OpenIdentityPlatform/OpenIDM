@@ -187,7 +187,7 @@ public class ConfigBootstrapHelper {
      * @throws java.io.IOException
      */
     public static void installAllConfig(ConfigurationAdmin configAdmin) throws IOException {
-        
+        //TODO Use IdentityServer or Context properties
         String enabled = System.getProperty(OPENIDM_FILEINSTALL_ENABLED, "true");
         String poll = System.getProperty(OPENIDM_FILEINSTALL_POLL, "2000");
         String dir = getConfigFileInstallDir();
@@ -195,6 +195,7 @@ public class ConfigBootstrapHelper {
         String start = System.getProperty(OPENIDM_FILEINSTALL_BUNDLES_NEW_START, "false");
         
         Configuration config = configAdmin.createFactoryConfiguration(FELIX_FILEINSTALL_PID, null);
+
         Dictionary props = config.getProperties();
         if (props == null) {
             props = new Hashtable();

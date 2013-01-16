@@ -34,9 +34,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 
 // OpenIDM
-import org.forgerock.openidm.objset.ObjectSet;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
+
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.sync.SynchronizationException;
 

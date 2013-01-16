@@ -50,10 +50,13 @@ import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -73,6 +76,7 @@ import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.pool.DataSourceFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -84,15 +88,15 @@ import org.slf4j.LoggerFactory;
  * @author aegloff
  */
 @Component(name = JDBCRepoService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
-@Service(value = {RepositoryService.class, JsonResource.class})
+@Service
 // Omit the RepoBootService interface from the managed service
 @Properties({
-        @Property(name = "service.description", value = "Repository Service using JDBC"),
-        @Property(name = "service.vendor", value = "ForgeRock AS"),
-        @Property(name = "openidm.router.prefix", value = "repo"),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using JDBC"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{type}"),
         @Property(name = "db.type", value = "JDBC")
 })
-public class JDBCRepoService extends ObjectSetJsonResource implements RepositoryService, RepoBootService {
+public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvider */ {
     final static Logger logger = LoggerFactory.getLogger(JDBCRepoService.class);
 
     public static final String PID = "org.forgerock.openidm.repo.jdbc";

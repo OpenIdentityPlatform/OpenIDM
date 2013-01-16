@@ -1,0 +1,3 @@
+{
+    "metaDataProvider" : "org.forgerock.openidm.customendpoint.impl.metadata.ConfigMeta"
+}

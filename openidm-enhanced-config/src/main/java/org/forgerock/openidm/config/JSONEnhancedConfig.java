@@ -52,10 +52,14 @@ import org.slf4j.LoggerFactory;
  */
 public class JSONEnhancedConfig implements EnhancedConfig {
 
-    // The key in the OSGi configuration dictionary holding the complete JSON
-    // configuration string
+    /**
+     * The key in the OSGi configuration dictionary holding the complete JSON configuration string
+     */
     public final static String JSON_CONFIG_PROPERTY = "jsonconfig";
 
+    /**
+     * Setup logging for the {@link JSONEnhancedConfig}.
+     */
     private final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
 
     private final ObjectMapper mapper = new ObjectMapper();

@@ -296,38 +296,36 @@
     <modules>
         <module>openidm-audit</module>
         <module>openidm-config</module>
-        <module>openidm-core</module>
+        <!--module>openidm-core</module-->
         <module>openidm-crypto</module>
         <module>openidm-enhanced-config</module>
         <module>openidm-external-email</module>
-        <module>openidm-external-rest</module>
+        <!--module>openidm-external-rest</module>
         <module>openidm-httpcontext</module>
         <module>openidm-infoservice</module>
-        <module>openidm-customendpoint</module>
-        <module>openidm-jaas-loginmodule-repo</module>
+        <module>openidm-customendpoint</module-->
         <module>openidm-jetty-fragment</module>
-        <module>openidm-policy</module>
+        <!--module>openidm-policy</module>
         <module>openidm-provisioner-openicf</module>
         <module>openidm-provisioner</module>
         <module>openidm-repo-jdbc</module>
-        <module>openidm-repo-orientdb</module>
+        <module>openidm-repo-orientdb</module-->
         <module>openidm-repo</module>
-        <module>openidm-restlet</module>
-        <module>openidm-filter</module>
-        <module>openidm-servletfilter-registrator</module>
+        <!--module>openidm-filter</module>
+        <module>openidm-servlet</module>
+        <module>openidm-servletfilter-registrator</module-->
         <module>openidm-quartz-fragment</module>
-        <module>openidm-scheduler</module>
+        <!--module>openidm-scheduler</module>
         <module>openidm-security-jetty</module>
-        <module>openidm-shell</module>
+        <module>openidm-shell</module-->
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
-        <module>openidm-ui</module>
-        <module>openidm-ui-ria</module>
+        <!--module>openidm-ui</module>
+        <module>openidm-ui-ria</module-->
         <module>openidm-util</module>
-        <module>openidm-workflow-activiti</module>
-        <module>openidm-workflow-remote</module>
+        <!--module>openidm-workflow-activiti</module>
+        <module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
-        <module>openidm-servlet</module>
     </modules>
 
     <profiles>
@@ -543,8 +541,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.configadmin</artifactId>
-                <version>1.4.0</version>
-                <!--<version>1.6.0</version>-->
+                <version>1.6.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -554,7 +551,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.fileinstall</artifactId>
-                <version>3.2.4</version>
+                <version>3.2.6</version>
                 <!--version>3.2.6</version>-->
             </dependency>
 
@@ -586,13 +583,13 @@
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-                <version>1.8.4_2</version>
+                <version>2.1.6_1</version>
             </dependency>
-            <dependency>
+            <!--dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
                 <version>1.7R2_3</version>
-            </dependency>
+            </dependency-->
             <!-- Use this instead of servicemix
             <dependency>
             <groupId>de.matrixweb.osgi.wrapped</groupId>
@@ -616,17 +613,17 @@
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-api</artifactId>
-                <version>1.1.10</version>
+                <version>2.1.2</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-extender-whiteboard</artifactId>
-                <version>1.1.10</version>
+                <version>2.1.2</version>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.web</groupId>
                 <artifactId>pax-web-jetty-bundle</artifactId>
-                <version>1.1.10</version>
+                <version>2.1.2</version>
             </dependency>
 
             <!-- Test Dependencies -->

@@ -58,7 +58,7 @@ public class SimpleJob implements Job {
 
         // This job simply prints out its job name and the
         // date and time that it is running
-        String jobName = context.getJobDetail().getFullName();
+        String jobName = context.getJobDetail().getDescription();
         _log.info("SimpleJob says: " + jobName + " executing at " + new Date());
     }
 
