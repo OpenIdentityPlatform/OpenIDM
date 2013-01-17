@@ -32,7 +32,7 @@
  */
 
 /*jslint regexp:false */
-/*global httpAccessConfig */
+/*global httpAccessConfig, allowedOrigins */
 
 
 //reinventing the wheel a bit, here; eventually move to underscore's isEqual method
@@ -369,6 +369,24 @@ function passesAccessConfig(id, roles, method, action) {
     return false;
 }
 
+
+function passesOriginVerification() {
+    var headers = request.parent.headers;
+
+    if (typeof (headers["X-Requested-With"]) !== "undefined" || 
+        typeof (headers.Authorization) !== "undefined" || 
+        typeof (headers["X-OpenIDM-Username"]) !== "undefined") {
+        
+        // CORS requests will have the Origin header included; verify that the origin given is allowed.
+        if (typeof (headers.Origin) !== "undefined" && !contains(allowedOrigins, headers.Origin) ) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    return false;
+}
+
 function allow() {
     var roles,
         action;
@@ -385,6 +403,10 @@ function allow() {
     
     // Check REST requests against the access configuration
     if (request.parent.type === 'http') {
+        if (!passesOriginVerification()) {
+            return false;
+        }
+        
         logger.debug("Access Check for HTTP request for resource id: " + request.id);
         if (passesAccessConfig(request.id, roles, request.method, action)) {
             logger.debug("Request allowed");
