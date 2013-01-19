@@ -23,36 +23,27 @@
  */
 package org.forgerock.openidm.external.rest;
 
+import java.net.HttpCookie;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Service;
 import org.codehaus.jackson.map.ObjectMapper;
-
 import org.forgerock.json.fluent.JsonValue;
-
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
-
-import org.osgi.service.component.ComponentContext;
-
-import org.restlet.Client;
-import org.restlet.Context;
-import org.restlet.Request;
-import org.restlet.Response;
-import org.restlet.data.*;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-// Deprecated
 import org.forgerock.openidm.objset.BadRequestException;
 import org.forgerock.openidm.objset.ConflictException;
 import org.forgerock.openidm.objset.ForbiddenException;
@@ -62,6 +53,41 @@ import org.forgerock.openidm.objset.ObjectSetException;
 import org.forgerock.openidm.objset.ObjectSetJsonResource;
 import org.forgerock.openidm.objset.Patch;
 import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.osgi.service.component.ComponentContext;
+import org.restlet.Client;
+import org.restlet.Context;
+import org.restlet.Request;
+import org.restlet.Response;
+import org.restlet.data.CacheDirective;
+import org.restlet.data.ChallengeRequest;
+import org.restlet.data.ChallengeResponse;
+import org.restlet.data.ChallengeScheme;
+import org.restlet.data.CharacterSet;
+import org.restlet.data.Cookie;
+import org.restlet.data.Digest;
+import org.restlet.data.Disposition;
+import org.restlet.data.Encoding;
+import org.restlet.data.Expectation;
+import org.restlet.data.Form;
+import org.restlet.data.Language;
+import org.restlet.data.MediaType;
+import org.restlet.data.Metadata;
+import org.restlet.data.Preference;
+import org.restlet.data.Protocol;
+import org.restlet.data.Range;
+import org.restlet.data.Reference;
+import org.restlet.data.Status;
+import org.restlet.data.Tag;
+import org.restlet.data.Warning;
+import org.restlet.engine.http.header.CookieReader;
+import org.restlet.engine.http.header.HeaderConstants;
+import org.restlet.engine.util.Base64;
+import org.restlet.representation.Representation;
+import org.restlet.representation.StringRepresentation;
+import org.restlet.resource.ClientResource;
+import org.restlet.util.Series;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * External REST connectivity
@@ -224,7 +250,15 @@ public class RestService extends ObjectSetJsonResource {
         String body = (String) params.get(ARG_BODY);
         String resultFormat = (String) params.get(ARG_RESULT_FORMAT);
         //int timeout = params.get("_timeout");
-
+        
+        MediaType mediaType;
+        if (contentType != null) {
+            mediaType = new MediaType(contentType);
+        } else {
+            // Default
+            mediaType = MediaType.APPLICATION_JSON;
+        }
+        
         // Whether the data type format to return to the caller should be inferred, or is explicitly defined
         boolean detectResultFormat = true;
         if (resultFormat != null && !resultFormat.equals("auto")) {
@@ -238,18 +272,9 @@ public class RestService extends ObjectSetJsonResource {
         try {
             ClientResource cr = new ClientResource(url);
             Map<String, Object> attrs = cr.getRequestAttributes();
+            Request request = cr.getRequest();
 
-            if (headers != null) {
-                org.restlet.data.Form reqHeaders = (org.restlet.data.Form) attrs.get("org.restlet.http.headers");
-                if (reqHeaders == null) {
-                    reqHeaders = new org.restlet.data.Form();
-                    attrs.put("org.restlet.http.headers", reqHeaders);
-                }
-                for (Map.Entry<String, String> entry : headers.entrySet()) {
-                    reqHeaders.add((String) entry.getKey(), (String) entry.getValue());
-                    logger.info("Added to header {}: {}", entry.getKey(), entry.getValue());
-                }
-            }
+            setAttributes(request, attrs, headers);
 
             if (auth != null) {
                 String type = auth.get("type");
@@ -270,13 +295,16 @@ public class RestService extends ObjectSetJsonResource {
                 method = "post";
             }
 
+            StringRepresentation rep = new StringRepresentation(body);
+            rep.setMediaType(mediaType);
+            
             Representation representation = null;
             if ("get".equalsIgnoreCase(method)) {
-                representation = cr.get(); //MediaType.APPLICATION_JSON);
+                representation = cr.get();
             } else if ("post".equalsIgnoreCase(method)) {
-                representation = cr.post(body);
+                representation = cr.post(rep);
             } else if ("put".equalsIgnoreCase(method)) {
-                representation = cr.put(body);
+                representation = cr.put(rep);
             } else if ("delete".equalsIgnoreCase(method)) {
                 representation = cr.delete();
             } else if ("head".equalsIgnoreCase(method)) {
@@ -287,7 +315,7 @@ public class RestService extends ObjectSetJsonResource {
             } else {
                 throw new BadRequestException("Unknown method " + method);
             }
-
+            
             String text = representation.getText();
             logger.debug("Response: {} Response Attributes: ", text, cr.getResponseAttributes());
 
@@ -407,5 +435,335 @@ public class RestService extends ObjectSetJsonResource {
         }
 
         return cr;
+    }
+
+    private void setAttributes(Request request, Map<String, Object> attributes, Map<String, String> headers) {
+        SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+        
+        if (headers != null) {
+            org.restlet.data.Form extraHeaders = (org.restlet.data.Form) attributes.get("org.restlet.http.headers");
+            if (extraHeaders == null) {
+                extraHeaders = new org.restlet.data.Form();
+                attributes.put("org.restlet.http.headers", extraHeaders);
+            }
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                String httpHeader = entry.getKey();
+                logger.info("Adding header {}: {}", entry.getKey(), entry.getValue());
+                if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT)) {
+                    List<Preference<MediaType>> mediaTypes = request.getClientInfo().getAcceptedMediaTypes();
+                    String [] types = entry.getValue().split(",");
+                    for (String type : types) {
+                        String [] parts = type.split(";");
+                        String name = parts[0];
+                        MediaType mediaType = MediaType.valueOf(name);
+                        Preference pref = new Preference(mediaType);
+                        addPreferences(pref, parts);
+                        mediaTypes.add(pref);
+                    }
+                    //attributes.put("request.clientInfo.acceptedMediaTypes", new Preference(new MediaType(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_CHARSET)) {
+                    List<Preference<CharacterSet>> characterSets = request.getClientInfo().getAcceptedCharacterSets();
+                    String [] sets = entry.getValue().split(",");
+                    for (String set : sets) {
+                        String [] parts = set.split(";");
+                        String name = parts[0];
+                        CharacterSet characterSet = CharacterSet.valueOf(name);
+                        Preference pref = new Preference(characterSet);
+                        addPreferences(pref, parts);
+                        characterSets.add(pref);
+                    }
+                    //attributes.put("request.clientInfo.acceptedCharacterSets", new Preference(new CharacterSet(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_ENCODING)) {
+                    List<Preference<Encoding>> encodingsList = request.getClientInfo().getAcceptedEncodings();
+                    String [] encodings = entry.getValue().split(",");
+                    for (String enc : encodings) {
+                        String [] parts = enc.split(";");
+                        String name = parts[0];
+                        Encoding encoding = Encoding.valueOf(name);
+                        Preference pref = new Preference(encoding);
+                        addPreferences(pref, parts);
+                        encodingsList.add(pref);
+                    }
+                    //attributes.put("request.clientInfo.acceptedEncodings", new Preference(new Encoding(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_LANGUAGE)) {
+                    List<Preference<Language>> languagesList = request.getClientInfo().getAcceptedLanguages();
+                    String [] languages = entry.getValue().split(",");
+                    for (String lang : languages) {
+                        String [] parts = lang.split(";");
+                        String name = parts[0];
+                        Language language = Language.valueOf(name);
+                        Preference pref = new Preference(language);
+                        addPreferences(pref, parts);
+                        languagesList.add(pref);
+                    }
+                    //attributes.put("request.clientInfo.acceptedLanguages", new Preference(new Language(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_ACCEPT_RANGES)) {
+                    attributes.put("response.serverInfo.acceptRanges", Boolean.parseBoolean(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_AGE)) {
+                    attributes.put("response.age", Integer.parseInt(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_AUTHORIZATION)) {
+                    attributes.put("request.challengeResponse", new ChallengeResponse(ChallengeScheme.valueOf(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CACHE_CONTROL)) {
+                    List<CacheDirective> cacheDirectives = new ArrayList<CacheDirective>();
+                    String [] cacheControls = entry.getValue().split(",");
+                    for (String str : cacheControls) {
+                        String name = null, value = null;
+                        int i = str.indexOf("=");
+                        if (i > -1) {
+                            name = str.substring(0, i).trim();
+                            value = str.substring(i + 1).trim();
+                        } else {
+                            name = str.trim();
+                        }
+                        if (name.equals(HeaderConstants.CACHE_MAX_AGE)) {
+                            cacheDirectives.add(CacheDirective.maxAge(Integer.parseInt(value)));
+                        } else if (name.equals(HeaderConstants.CACHE_MAX_STALE)) {
+                            if (value != null) {
+                                cacheDirectives.add(CacheDirective.maxStale(Integer.parseInt(value)));
+                            } else {
+                                cacheDirectives.add(CacheDirective.maxStale());
+                            }
+                        } else if (name.equals(HeaderConstants.CACHE_MIN_FRESH)) {
+                            cacheDirectives.add(CacheDirective.minFresh(Integer.parseInt(value)));
+                        } else if (name.equals(HeaderConstants.CACHE_MUST_REVALIDATE)) {
+                            cacheDirectives.add(CacheDirective.mustRevalidate());
+                        } else if (name.equals(HeaderConstants.CACHE_NO_CACHE)) {
+                            if (value != null) {
+                                cacheDirectives.add(CacheDirective.noCache(value));
+                            } else {
+                                cacheDirectives.add(CacheDirective.noCache());
+                            }
+                        } else if (name.equals(HeaderConstants.CACHE_NO_STORE)) {
+                            cacheDirectives.add(CacheDirective.noStore());
+                        } else if (name.equals(HeaderConstants.CACHE_NO_TRANSFORM)) {
+                            cacheDirectives.add(CacheDirective.noTransform());
+                        } else if (name.equals(HeaderConstants.CACHE_ONLY_IF_CACHED)) {
+                            cacheDirectives.add(CacheDirective.onlyIfCached());
+                        } else if (name.equals(HeaderConstants.CACHE_PRIVATE)) {
+                            if (value != null) {
+                                cacheDirectives.add(CacheDirective.privateInfo(value));
+                            } else {
+                                cacheDirectives.add(CacheDirective.privateInfo());
+                            }
+                        } else if (name.equals(HeaderConstants.CACHE_PROXY_MUST_REVALIDATE)) {
+                            cacheDirectives.add(CacheDirective.proxyMustRevalidate());
+                        } else if (name.equals(HeaderConstants.CACHE_PUBLIC)) {
+                            cacheDirectives.add(CacheDirective.publicInfo());
+                        } else if (name.equals(HeaderConstants.CACHE_SHARED_MAX_AGE)) {
+                            cacheDirectives.add(CacheDirective.sharedMaxAge(Integer.parseInt(value)));
+                        } else {
+                            logger.info("Unknown HTTP header Cache-Control entry: {}", str);
+                        }
+                    }
+                    attributes.put("message.cacheDirectives", cacheDirectives);
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONNECTION)) {
+                    // [HTTP Connectors]
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_DISPOSITION)) {
+                    attributes.put("message.entity.disposition", new Disposition(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_ENCODING)) {
+                    List<Encoding> contentEncodings = new ArrayList<Encoding>();
+                    String [] encodings = entry.getValue().split(",");
+                    for (String encoding : encodings) {
+                        contentEncodings.add(Encoding.valueOf(encoding.trim()));
+                    }
+                    attributes.put("message.entity.encodings", contentEncodings);
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_LANGUAGE)) {
+                    List<Language> contentLanguages = new ArrayList<Language>();
+                    String [] languages = entry.getValue().split(",");
+                    for (String language : languages) {
+                        contentLanguages.add(Language.valueOf(language.trim()));
+                    }
+                    attributes.put("message.entity.languages", contentLanguages);
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_LENGTH)) {
+                    attributes.put("message.entity.size", Long.parseLong(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_LOCATION)) {
+                    try {
+                        Reference ref = new Reference(new URI(entry.getValue()));
+                        attributes.put("message.entity.locationRef", ref);
+                    } catch (URISyntaxException e) {
+                        logger.info("Problem parsing HTTP Content-Location header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_MD5)) {
+                    attributes.put("message.entity.digest", new Digest(Base64.decode(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_RANGE)) {
+                    String rangeString = entry.getValue().split(" ")[1];
+                    rangeString = rangeString.substring(rangeString.indexOf("/"));
+                    Range range;
+                    if (rangeString.equals("*")) {
+                        range = new Range();
+                    } else {
+                        long index = Long.parseLong(rangeString.substring(0, rangeString.indexOf("-")));
+                        long size = Long.parseLong(rangeString.substring(rangeString.indexOf("-") + 1)) - index + 1;
+                        range = new Range(size, index);
+                    }
+                    attributes.put("message.entity.range", range);
+                } else if (httpHeader.equals(HeaderConstants.HEADER_CONTENT_TYPE)) {
+                    attributes.put("message.entity.mediaType", new MediaType(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_COOKIE)) {
+                    CookieReader cr = new CookieReader(entry.getValue());
+                    List<Cookie> cookies = cr.readValues();
+                    Series<Cookie> restletCookies = request.getCookies();
+                    for (Cookie cookie : cookies) {
+                        restletCookies.add(cookie);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_DATE)) {
+                    try {
+                        Date d = format.parse(entry.getValue());
+                        attributes.put("message.date", d);
+                    } catch (ParseException e) {
+                        logger.error("Error parsing HTTP Date header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_ETAG)) {
+                    attributes.put("message.entity.tag", Tag.parse(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_EXPECT)) {
+                    if (entry.getValue().equals("100-continue")) {
+                        request.getClientInfo().getExpectations().add(Expectation.continueResponse());
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_EXPIRES)) {
+                    try {
+                        Date d = format.parse(entry.getValue());
+                        attributes.put("message.entity.expirationDate", d);
+                    } catch (ParseException e) {
+                        logger.error("Error parsing HTTP Expires header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_FROM)) {
+                    attributes.put("request.clientInfo.from", entry.getValue());
+                } else if (httpHeader.equals(HeaderConstants.HEADER_HOST)) {
+                    try {
+                        Reference ref = new Reference(new URI(entry.getValue()));
+                        attributes.put("request.hostRef", ref);
+                    } catch (URISyntaxException e) {
+                        logger.error("Error parsing HTTP Host header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_IF_MATCH)) {
+                    String [] tags = entry.getValue().split(",");
+                    List<Tag> list = request.getConditions().getMatch();
+                    for (String tag : tags) {
+                        list.add(Tag.parse(tag));
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_IF_MODIFIED_SINCE)) {
+                    try {
+                        request.getConditions().setModifiedSince(format.parse(entry.getValue()));
+                    } catch (ParseException e) {
+                        logger.error("Error parsing HTTP Modified-Since header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_IF_NONE_MATCH)) {
+                    String [] tags = entry.getValue().split(",");
+                    List<Tag> list = request.getConditions().getNoneMatch();
+                    for (String tag : tags) {
+                        list.add(Tag.parse(tag));
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_IF_RANGE)) {
+                    Date rangeDate = null;
+                    Tag rangeTag = null;
+                    try {
+                        rangeDate = format.parse(entry.getValue());
+                        request.getConditions().setRangeDate(rangeDate);
+                    } catch (ParseException e) {
+                        rangeTag = Tag.parse(entry.getValue());
+                        request.getConditions().setRangeTag(rangeTag);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_IF_UNMODIFIED_SINCE)) {
+                    try {
+                        request.getConditions().setUnmodifiedSince(format.parse(entry.getValue()));
+                    } catch (ParseException e) {
+                        logger.error("Error parsing HTTP If-Unmodified-Since header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_LAST_MODIFIED)) {
+                    try {
+                        attributes.put("message.entity.modificationDate", format.parse(entry.getValue()));
+                    } catch (ParseException e) {
+                        logger.error("Error parsing HTTP Last-Modified header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_MAX_FORWARDS)) {
+                    request.setMaxForwards(Integer.parseInt(entry.getValue()));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_PROXY_AUTHORIZATION)) {
+                    request.setProxyChallengeResponse(new ChallengeResponse(ChallengeScheme.valueOf(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_RANGE)) {
+                    String rangeSection = entry.getValue().split("=")[1];
+                    String [] ranges = rangeSection.split(",");
+                    List<Range> rangeList = new ArrayList<Range>();
+                    for (String range : ranges) {
+                        Range r;
+                        if (range.startsWith("-")) { 
+                            r = new Range(-1, Integer.parseInt(range.substring(1)));
+                        } else if(range.indexOf("-") == -1) {
+                            r = new Range(Integer.parseInt(range));
+                        } else if (range.endsWith("-")) {
+                            r = new Range(-1, Integer.parseInt(range.substring(0, range.length()-1)));
+                        } else {
+                            long index = Long.parseLong(range.substring(0, range.indexOf("-")));
+                            long size = Long.parseLong(range.substring(range.indexOf("-") + 1)) - index + 1;
+                            r = new Range(size, index);
+                        }
+                        rangeList.add(r);
+                    }
+                    request.setRanges(rangeList);
+                } else if (httpHeader.equals(HeaderConstants.HEADER_REFERRER)) {
+                    try {
+                        Reference ref = new Reference(new URI(entry.getValue()));
+                        attributes.put("request.refererRef", ref);
+                    } catch (URISyntaxException e) {
+                        logger.error("Error parsing HTTP Referrer header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_TRANSFER_ENCODING)) {
+                    // [HTTP Connectors]
+                } else if (httpHeader.equals(HeaderConstants.HEADER_USER_AGENT)) {
+                    attributes.put("request.clientInfo.agent", entry.getValue());
+                } else if (httpHeader.equals(HeaderConstants.HEADER_VARY)) {
+                    attributes.put("response.dimensions", entry.getValue());
+                } else if (httpHeader.equals(HeaderConstants.HEADER_VIA)) {
+                    //return "message.recipientsInfo";
+                } else if (httpHeader.equals(HeaderConstants.HEADER_WARNING)) {
+                    try {
+                        List<Warning> warnings = (List<Warning>) attributes.get("message.warnings");
+                        if (warnings == null) {
+                            warnings = new ArrayList<Warning>();
+                            attributes.put("message.warnings", warnings);
+                        }
+                        Warning warning = new Warning();
+                        String [] strs = entry.getValue().split(" ");
+                        warning.setStatus(Status.valueOf(Integer.parseInt(strs[0])));
+                        warning.setAgent(strs[1]);
+                        warning.setText(strs[2]);
+                        if (strs.length > 3) {
+                            Date d = format.parse(strs[3]);
+                            warning.setDate(d);
+                        }
+                        warnings.add(warning);
+                    } catch (Exception e) {
+                        logger.error("Error parsing HTTP Warning header", e);
+                    }
+                } else if (httpHeader.equals(HeaderConstants.HEADER_WWW_AUTHENTICATE)) {
+                    attributes.put("response.challengeRequests", new ChallengeRequest(ChallengeScheme.valueOf(entry.getValue())));
+                } else if (httpHeader.equals(HeaderConstants.HEADER_X_FORWARDED_FOR)) {
+                    List<String> list = (List<String>) attributes.get("request.clientInfo.addresses");
+                    if (list == null) {
+                        list = new ArrayList<String>();
+                        attributes.put("request.clientInfo.addresses", list);
+                    }
+                    list.add(entry.getValue());
+                } else {
+                    // Unsupported Header
+                    logger.debug("Unsupported header");
+                    extraHeaders.add(entry.getKey(), entry.getValue());
+                } 
+            }
+        }
+    }
+
+    private <T extends Metadata> void addPreferences(Preference<T> pref, String [] parts) {
+        if (parts.length > 1) {
+            for (int i = 1; i < parts.length; i++) {
+                String [] strs = parts[i].split("=");
+                String n = strs[0].trim();
+                String v = strs[1].trim();
+                if (n.endsWith("q")) {
+                    pref.setQuality(Float.parseFloat(v));
+                } else {
+                    pref.getParameters().add(n, v);
+                }
+            }
+        }
     }
 }
