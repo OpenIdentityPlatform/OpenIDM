@@ -11,30 +11,44 @@
     },
     "queries" : {
         "genericTables" : {
-            "query-all-ids" : "SELECT obj.objectid FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "credential-query" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "find-by-id" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
+            "get-by-field-value" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey=CONCAT('/', ${field}) AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
+            "get-users-of-role" : "SELECT 'userName' as propkey, propvalue from ${_propTable} WHERE ${_mainTable}_id IN (SELECT prop.${_mainTable}_id from ${_propTable} prop WHERE prop.propkey='/roles' AND REGEXP_LIKE(prop.propvalue, CONCAT(CONCAT('^(.*,)?',${role}),'(,.*)?$'))) AND propkey = '/userName'",
+            "query-all-ids" : "SELECT obj.objectid FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all" : "SELECT obj.fullobject FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "for-userName" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
-            "find-by-id" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}"
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_propTable} credprop INNER JOIN ${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "scan-tasks" : "SELECT fullobject FROM ${_mainTable} obj INNER JOIN ${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_propTable} complete ON obj.id = complete.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propkey=${taskState.completed} AND complete.propvalue is NULL )"
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_table}",
+            "for-internalcredentials" : "SELECT * FROM internaluser WHERE objectid = ${uid}",
+            "get-notifications-for-user" : "SELECT * FROM ${_table} WHERE receiverId = ${userId} order by createDate desc",
+            "credential-query" : "SELECT * FROM ${_table} WHERE objectid = ${username}",
+            "credential-internaluser-query" : "SELECT * FROM ${_table} WHERE objectid = ${username}",
             "links-for-firstId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
             "links-for-secondId" : "SELECT * FROM ${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
             "links-for-linkType" : "SELECT * FROM ${_table} WHERE linkType = ${linkType}",
-            "credential-internaluser-query" : "SELECT * FROM ${_table} WHERE objectid = ${username}"
+            "scan-tasks" : "SELECT * FROM ${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL"
         }
     },
     "resourceMapping" : {
         "default" : {
-            "mainTable" : "genericobjects", 
+            "mainTable" : "genericobjects",
             "propertiesTable" : "genericobjectproperties",
             "searchableDefault" : true
         },
         "genericMapping" : {
             "managed/*" : {
-                "mainTable" : "managedobjects", 
+                "mainTable" : "managedobjects",
                 "propertiesTable" : "managedobjectproperties",
-                "searchableDefault" : true            
+                "searchableDefault" : true
+            },
+            "scheduler" : {
+                "mainTable" : "schedulerobjects",
+                "propertiesTable" : "schedobjectproperties",
+                "searchableDefault" : true
             }
         },
         "explicitMapping" : {
@@ -46,6 +60,20 @@
                     "linkType" : "linktype",
                     "firstId" : "firstid",
                     "secondId" : "secondid"
+                }
+            },
+            "ui/notification" : {
+                "table" : "uinotification",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "requester" : "requester",
+                    "requesterId" : "requesterId",
+                    "receiverId" : "receiverId",
+                    "createDate" : "createDate",
+                    "notificationType" : "notificationType",
+                    "notificationSubtype" : "notificationSubtype",
+                    "message" : "message"
                 }
             },
             "internal/user" : {
@@ -63,13 +91,13 @@
                     "_id" : "objectid",
                     "activityId" : "activityid",
                     "timestamp" : "activitydate",
-                    "action" : "activity",  
-                    "message" : "message", 
+                    "action" : "activity",
+                    "message" : "message",
                     "objectId" : "subjectid",
-                    "rev" : "subjectrev", 
-                    "rootActionId" : "rootactionid", 
-                    "parentActionId" : "parentactionid", 
-                    "requester" : "requester", 
+                    "rev" : "subjectrev",
+                    "rootActionId" : "rootactionid",
+                    "parentActionId" : "parentactionid",
+                    "requester" : "requester",
                     "approver" : "approver",
                     "before" : "subjectbefore",
                     "after" : "subjectafter",
@@ -84,8 +112,8 @@
                     "_id" : "objectid",
                     "entryType" : "entrytype",
                     "rootActionId" : "rootactionid",
-                    "action" : "activity",  
-                    "message" : "message", 
+                    "action" : "activity",
+                    "message" : "message",
                     "reconciling" : "reconciling",
                     "reconId" : "reconid",
                     "situation" : "situation",
