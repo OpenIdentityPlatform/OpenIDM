@@ -111,6 +111,12 @@ public class AuthFilter
     /** Attribute in request to indicate to openidm down stream that an authentication filter has secured the request */
     public static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
+    /** Authentication username header */
+    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
+
+    /** Authentication password header */
+    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
+
     /** Re-authentication password header */
     public static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
 
@@ -164,7 +170,7 @@ public class AuthFilter
         try {
             HttpSession session = req.getSession(false);
             String logout = req.getHeader("X-OpenIDM-Logout");
-            String headerLogin = req.getHeader("X-OpenIDM-Username");
+            String headerLogin = req.getHeader(HEADER_USERNAME);
             String basicAuth = req.getHeader("Authorization");
             if (logout != null) {
                 if (session != null) {
@@ -338,8 +344,8 @@ public class AuthFilter
 
         logger.debug("No session, authenticating user");
         AuthData ad = new AuthData();
-        String password = req.getHeader("X-OpenIDM-Password");
-        ad.username = req.getHeader("X-OpenIDM-Username");
+        String password = req.getHeader(HEADER_PASSWORD);
+        ad.username = req.getHeader(HEADER_USERNAME);
         if (ad.username == null || password == null || ad.username.equals("") || password.equals("")) {
             logger.debug("Failed authentication, missing or empty headers");
             throw new AuthException();
