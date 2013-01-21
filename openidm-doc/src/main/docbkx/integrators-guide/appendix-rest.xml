@@ -278,25 +278,6 @@ Content-Length: 89
 [<replaceable>JSON representation of error</replaceable>]</programlisting>
     </listitem>
    </varlistentry>
-   <varlistentry>
-    <term>X-HTTP-Method-Override</term>
-    <listitem>
-     <para>If an HTTP client or server container does not support a particular
-     method, a request can be submitted through POST with the
-     <literal>X-HTTP-Method-Override</literal> header set to the intended
-     method.</para>
-     <para>Example Request</para>
-     <programlisting language="http">
-POST /openidm/managed/user/5752c0fd9509 HTTP/1.1
-X-HTTP-Method-Override: PATCH
-Content-Type: application/patch+json
-Content-Length: 456
-If-Match: "0"
-...
-
-[<replaceable>JSON representation of patch document to apply</replaceable>]</programlisting>
-    </listitem>
-   </varlistentry>
   </variablelist>
  </section>
 </appendix>
