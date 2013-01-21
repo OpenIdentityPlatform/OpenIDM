@@ -139,7 +139,6 @@ public class ReconciliationContext {
             totalLinkEntriesStr = Integer.toString(totalLinkEntries);
         }
         
-        Map<String, Object> progress = new LinkedHashMap<String, Object>();
         Map<String, Object> progressDetail = new LinkedHashMap<String, Object>();
         Map<String, Object> sourceDetail = new LinkedHashMap<String, Object>();
         Map<String, Object> sourceExisting = new LinkedHashMap<String, Object>();
@@ -165,9 +164,7 @@ public class ReconciliationContext {
         linkDetail.put("created", getStatistics().getLinkCreated());
         progressDetail.put("links", linkDetail);
 
-        progress.put("progress", progressDetail);
-
-        return progress;
+        return progressDetail;
     }
     
     /**
