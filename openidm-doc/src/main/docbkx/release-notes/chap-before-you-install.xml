@@ -40,8 +40,16 @@
   <varlistentry>
    <term>Repository</term>
    <listitem>
-    <para>MySQL 5.1 or 5.5 with Connector/J 5.1.18 or later is supported for
-    use as a JDBC repository in production.</para>
+    <itemizedlist>
+        <para>The following JDBC repositories are supported for use in
+        production:</para>
+        <listitem>
+            <para>MySQL 5.1 or 5.5 with Connector/J 5.1.18 or later</para>
+        </listitem>
+        <listitem>
+            <para>Microsoft SQL Server 2008 Express</para>
+        </listitem>
+    </itemizedlist>
     <para>OrientDB is provided for evaluation only.</para>
    </listitem>
   </varlistentry>
