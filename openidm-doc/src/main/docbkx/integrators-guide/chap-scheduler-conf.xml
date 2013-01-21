@@ -83,7 +83,7 @@
   </listitem>
   <listitem>
     <para>One <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename> 
-    file for each configured schedule.</para>
+    file for each configured schedule</para>
   </listitem>
  </itemizedlist>
  
@@ -143,17 +143,18 @@
 
   <programlisting language="javascript">
 {
- "enabled"       : true,
- "persisted"     : false,
- "type"          : "cron",
- "startTime"     : "<replaceable>(optional) time</replaceable>",
- "endTime"       : "<replaceable>(optional) time</replaceable>",
- "schedule"      : "<replaceable>cron expression</replaceable>",
- "misfirePolicy" : "<replaceable>optional, string</replaceable>",
- "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
- "invokeService" : "<replaceable>service identifier</replaceable>",
- "invokeContext" : "<replaceable>service specific context info</replaceable>",
- "invokeLogLevel": "<replaceable>(optional) debug</replaceable>"
+ "enabled"             : true,
+ "persisted"           : false,
+ "concurrentExecution" : false,
+ "type"                : "cron",
+ "startTime"           : "<replaceable>(optional) time</replaceable>",
+ "endTime"             : "<replaceable>(optional) time</replaceable>",
+ "schedule"            : "<replaceable>cron expression</replaceable>",
+ "misfirePolicy"       : "<replaceable>optional, string</replaceable>",
+ "timeZone"            : "<replaceable>(optional) time zone</replaceable>",
+ "invokeService"       : "<replaceable>service identifier</replaceable>",
+ "invokeContext"       : "<replaceable>service specific context info</replaceable>",
+ "invokeLogLevel"      : "<replaceable>(optional) debug</replaceable>"
 }</programlisting>
 
  <variablelist>
@@ -179,6 +180,21 @@
     <literal>false</literal> by default. For more information, see 
     <xref linkend="persistent-schedules"/>.</para>
    </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>concurrentExecution</term>
+    <listitem>
+      <para>Specifies whether multiple instances of the same schedule can run
+      concurrently. Boolean (<literal>true</literal> or <literal>false</literal>),
+      <literal>false</literal> by default. Multiple instances of the same
+      schedule cannot run concurrently by default. This setting prevents a new
+      scheduled task from being launched before the same previously launched
+      task has completed. For example, under normal circumstances you would
+      want a liveSync operation to complete its execution before the same
+      operation was launched again. To enable concurrent execution of multiple
+      schedules, set this parameter to <literal>true</literal>. The behavior of
+      "missed" scheduled tasks is governed by the <xref linkend="misfire-policy" />.</para>
+    </listitem>
   </varlistentry>
   <varlistentry>
    <term>type</term>
@@ -216,10 +232,11 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term>misfirePolicy (optional)</term>
+   <term xml:id="misfire-policy">misfirePolicy</term>
    <listitem>
-    <para>For persistent schedules, specifies the behavior if the scheduled 
-    task is missed, for some reason. Possible values are as follows:
+    <para>For persistent schedules, this optional parameter specifies the
+    behavior if the scheduled task is missed, for some reason. Possible values
+    are as follows:
     </para>
     <itemizedlist>
      <listitem><para><literal>fireAndProceed</literal>. The first execution 
