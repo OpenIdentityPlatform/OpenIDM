@@ -607,7 +607,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                     obj = objects[i];
                     if ((obj.name === object) || resourceMatches(object, obj.name + "/*")) {
                         props = obj.properties;
-                        if (props !== null) {
+                        if (props !== undefined && props !== null) {
                             for (j = 0; j < props.length; j++) {
                                 prop = props[j];
                                 policies = prop.policies;
