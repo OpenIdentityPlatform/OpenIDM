@@ -29,8 +29,10 @@ import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,9 +85,11 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.http.ContextRegistrator;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.DateUtil;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -99,20 +103,20 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  */
 
-@Component(name = "org.forgerock.openidm.authentication", immediate = true,
-        policy = ConfigurationPolicy.REQUIRE)
-@Service(value = { HttpServletContextFactory.class, SingletonResourceProvider.class })
+@Component(name = AuthFilter.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Service({HttpServletContextFactory.class, SingletonResourceProvider.class})
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Filter Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "authentication"),
-    @Property(name = "httpContext.id", value = "openidm"),
-    @Property(name = "servletNames", value = "OpenIDM Authentication Filter Service"),
-    @Property(name = "urlPatterns", value = "/openidm/*")
-
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "authentication")
 })
 public class AuthFilter implements Filter, HttpServletContextFactory, SingletonResourceProvider {
 
+    public static final String PID = "org.forgerock.openidm.authentication";
+
+    /**
+     * Setup logging for the {@link AuthFilter}.
+     */
     private final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
 //    /** Attribute in session containing authenticated username. */
@@ -178,13 +182,13 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
                 requestContext = (Context) o;
             }
         }
-        if (null != requestContext) {
+        if (null == requestContext) {
             Object o = request.getAttribute(Context.class.getName());
             if (o instanceof Context) {
                 requestContext = (Context) o;
             }
         }
-        if (null != requestContext) {
+        if (null == requestContext) {
             //Anonymous context
             requestContext =  new SecurityContext(new RootContext(),"anonymous", null);
         }
@@ -309,8 +313,9 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
             entry.put("ip", ipAddress);
             if (repositoryRoute != null) {
                 // TODO We need Context!!!
-                CreateRequest request = Requests.newCreateRequest("audit/access", entry);
-                repositoryRoute.createServerContext().getConnection().create(null, request);
+                CreateRequest request = Requests.newCreateRequest("/audit/access", entry);
+                ServerContext ctx = repositoryRoute.createServerContext();
+                ctx.getConnection().create(ctx, request);
             } else {
                 // Filter should have rejected request if router is not
                 // available
@@ -450,9 +455,20 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
         // TODO make this configurable
         dateUtil = DateUtil.getDateUtil("UTC");
 
+        String urlPatterns[] = { "/openidm/*" };
+        String servletNames = "OpenIDM Authentication Filter Service";
+
+        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        props.put("urlPatterns", urlPatterns);
+        props.put("servletNames", servletNames);
+        props.put("httpContext.id", "openidm");
+        serviceRegistration =
+                FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext()
+                        .registerService(Filter.class, this, props);
+
         /*
          * String urlPatterns[] = {"/openidm/*"}; String servletNames[] = null;
-         * 
+         *
          * Dictionary<String, Object> props = new Hashtable<String, Object>();
          * props.put(ExtenderConstants.PROPERTY_URL_PATTERNS, urlPatterns);
          * props.put(ExtenderConstants.PROPERTY_SERVLET_NAMES, servletNames);

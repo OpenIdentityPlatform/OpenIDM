@@ -156,7 +156,7 @@ public class AuthModule {
         Credential credential = null;
         List<String> roleNames = new ArrayList<String>();
 
-        QueryRequest request = Requests.newQueryRequest("repo/"+repoResource);
+        QueryRequest request = Requests.newQueryRequest("/repo/"+repoResource);
         request.setQueryId(repoQueryId);
         //TODO NPE check
         request.getAdditionalQueryParameters().put("username", username);

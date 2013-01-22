@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.openidm.config.InvalidException;
@@ -230,9 +231,9 @@ public class DBHelper {
             throws InvalidException {
         
         // TODO: Creation/opening of db may be not be necessary if we require this managed externally
-        ODatabaseDocumentTx db = null;
+        OGraphDatabase db = null;
         try {
-            db = new ODatabaseDocumentTx(dbURL); 
+            db = new OGraphDatabase(dbURL);
             if (db.exists()) {
                 logger.info("Using DB at {}", dbURL);
                 db.open(user, password); 
@@ -253,7 +254,7 @@ public class DBHelper {
     }
 
     // TODO: Review the initialization mechanism
-    private static void populateSample(ODatabaseDocumentTx db, JsonValue completeConfig) 
+    private static void populateSample(OGraphDatabase db, JsonValue completeConfig)
             throws InvalidException {
         
         JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
@@ -272,32 +273,32 @@ public class DBHelper {
             orientDBClasses.put("config", cfgIndexes);
                             
             logger.info("Setting up database");
-            if (orientDBClasses != null) {
-                for (Object key : orientDBClasses.keys()) {
-                    String orientClassName = (String) key;
-                    JsonValue orientClassConfig = (JsonValue) orientDBClasses.get(orientClassName);
+
+                for (String orientClassName : orientDBClasses.keys()) {
+
                     if (schema.existsClass(orientClassName)) {
                         // TODO: update indexes too if changed
                         logger.trace("OrientDB class {} already exists, skipping", orientClassName);
                     } else {
-                        createOrientDBClass(db,schema, orientClassName, orientClassConfig);
+                        createOrientDBClass(db,schema, orientClassName, orientDBClasses.get(orientClassName));
                         if ("internal_user".equals(orientClassName)) {
                             populateDefaultUsers(orientClassName, db, completeConfig);
                         }
                     }
                 }
-            }
+
             schema.save(); 
             
         }
     }
     
-    private static void createOrientDBClass(ODatabaseDocumentTx db, OSchema schema,
+    private static void createOrientDBClass(OGraphDatabase graph, OSchema schema,
             String orientClassName, JsonValue orientClassConfig) {
         
         logger.info("Creating OrientDB class {}", orientClassName);
-        OClass orientClass = schema.createClass(orientClassName, 
-                db.addCluster(orientClassName, 
+
+        OClass orientClass = schema.createClass(orientClassName, graph.getVertexBaseClass(),
+                graph.addCluster(orientClassName,
                 OStorage.CLUSTER_TYPE.PHYSICAL));
         
         JsonValue indexes = orientClassConfig.get(OrientDBRepoService.CONFIG_INDEX);

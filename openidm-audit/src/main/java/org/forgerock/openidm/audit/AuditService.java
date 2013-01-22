@@ -30,5 +30,5 @@ import org.forgerock.json.resource.CollectionResourceProvider;
  * @author aegloff
  */
 public interface AuditService extends CollectionResourceProvider {
-    public final static String ROUTER_PREFIX = "audit";
+    public final static String ROUTER_PREFIX = "/audit/{type}";
 }

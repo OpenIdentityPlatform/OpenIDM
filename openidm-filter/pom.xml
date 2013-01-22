@@ -138,9 +138,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Export-Package>
+                        <!--Export-Package>
                             org.forgerock.openidm.filter;version="${openidm.version}"
-                        </Export-Package>
+                        </Export-Package-->
+                        <Private-Package>org.forgerock.openidm.filter.internal*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
