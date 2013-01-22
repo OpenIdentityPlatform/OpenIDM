@@ -34,9 +34,14 @@
     <packaging>bundle</packaging>
 
     <dependencies>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
+            <version>${project.version}</version>
+        </dependency-->
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-enhanced-config</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -51,14 +56,19 @@
         </dependency>
          -->
         <dependency>
-            <groupId>org.eclipse.jetty.aggregate</groupId>
-            <artifactId>jetty-all-server</artifactId>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource-servlet</artifactId>
             <scope>provided</scope>
-            <version>7.6.2.v20120308</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.framework</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all-server</artifactId>
+            <version>8.1.4.v20120524</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -76,7 +86,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -94,8 +104,8 @@
                     <configuration>
                         <author>false</author>
                         <links>
-                            <link>http://docs.oracle.com/javase/6/docs/api</link>
-                            <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
+                            <link>http://docs.oracle.com/javase/6/docs/api/</link>
+                            <link>http://download.eclipse.org/jetty/stable-8/apidocs/</link>
                         </links>
                     </configuration>
                     <executions>

@@ -36,7 +36,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
@@ -55,11 +54,13 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.router.RouteBuilder;
+import org.forgerock.openidm.router.RouteEntry;
+import org.forgerock.openidm.router.RouterRegistryService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -72,13 +73,11 @@ import org.slf4j.LoggerFactory;
  * @author Laszlo Hordos
  * @author aegloff
  */
-@Component(name = EndpointsService.PID, policy = ConfigurationPolicy.OPTIONAL,
+@Component(name = EndpointsService.PID, policy = ConfigurationPolicy.REQUIRE,
         description = "OpenIDM Custom Endpoints Service", immediate = true)
-@Service()
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Custom Endpoints Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = { "endpoint/{pid}" }) })
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Custom Endpoints Service") })
 public class EndpointsService implements RequestHandler {
 
     public static final String PID = "org.forgerock.openidm.endpointservice";
@@ -87,7 +86,6 @@ public class EndpointsService implements RequestHandler {
      * Setup logging for the {@link EndpointsService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
-
 
 
     // public static final String ROUTER_PREFIX = "endpoint";
@@ -101,27 +99,31 @@ public class EndpointsService implements RequestHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry;
 
-    private ScriptEntry scriptEntry = null;
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private RouterRegistryService routerRegistryService;
 
-    private ServiceRegistration<RequestHandler> selfService = null;
+    private RouteEntry routeEntry = null;
+    
+    private ScriptEntry scriptEntry = null;
 
     @Activate
     protected void activate(ComponentContext context) {
         this.context = context;
-
-        //Do more programmatic registration on the Router
-        String root = "endpoint/" + context.getProperties().get("config.factory-pid");
-        Dictionary properties = new Hashtable();
-        properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
-        properties.put(Constants.SERVICE_DESCRIPTION, "OpenIDM Custom Endpoints Service");
-        properties.put(ServerConstants.ROUTER_PREFIX, new String[] { root });
-        selfService =
-                context.getBundleContext().registerService(RequestHandler.class, this, properties);
-
         try {
+            // Do more programmatic registration on the Router
+            String root = "endpoint/" + context.getProperties().get("config.factory-pid");
+            RouteBuilder builder = RouteBuilder.instance().parseURITemplate(root)
+                    .bindRequestHandler(this).next();
+            //TODO add optional routes
+
+            //builder.bindRequestHandler(this).modeStartsWith().parseURITemplate("/test/").next();
+
             scriptEntry =
                     scriptRegistry.takeScript(JSONEnhancedConfig.newInstance()
                             .getConfigurationAsJson(context));
+            routeEntry =
+                    routerRegistryService.addRoute(builder.seal());
         } catch (ScriptException e) {
             throw new ComponentException(e);
         }
@@ -131,7 +133,7 @@ public class EndpointsService implements RequestHandler {
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        selfService.unregister();
+        routeEntry.removeRoute();
         logger.info("OpenIDM Custom Endpoints Service component is deactivated.");
     }
 

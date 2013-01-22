@@ -29,9 +29,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -235,6 +237,18 @@ public class IdentityServer implements PropertyAccessor {
      */
     public URI getServerRootURI() {
         return URI.create(getServerRoot());
+    }
+
+    public String getSiteName() {
+        return getProperty("openidm.system.site.name", "default");
+    }
+
+    public String getNodeName() {
+        try {
+            return getProperty("openidm.system.node.name", InetAddress.getLocalHost().getHostName());
+        } catch (UnknownHostException e) {
+            return getProperty("openidm.system.node.name", "default");
+        }
     }
 
     /**

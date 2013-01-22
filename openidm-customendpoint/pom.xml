@@ -38,8 +38,12 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
+            <artifactId>openidm-enhanced-config</artifactId>
             <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
         </dependency>
 
         <dependency>

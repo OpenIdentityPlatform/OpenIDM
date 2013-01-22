@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,37 +23,20 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
-import com.orientechnologies.orient.core.Orient;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
-import com.orientechnologies.orient.core.metadata.schema.OType;
-import com.orientechnologies.orient.core.record.impl.ODocument;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
 
+import org.forgerock.json.resource.BadRequestException;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.MapAssert.entry;
 
 public class TokenHandlerTest {
 
-    TokenHandler tokenHandler = null;
     
     @Test
-    public void initTokenHandler() {
-        tokenHandler = new TokenHandler();
-    }
-    
-    @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokensWithValues() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
         Map params = new HashMap();
@@ -61,11 +44,11 @@ public class TokenHandlerTest {
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
-        String result = tokenHandler.replaceTokensWithValues(queryString, params);
+        String result = TokenHandler.replaceTokensWithValues(queryString, params);
         assertEquals(result, "select * from managed/user where firstname = 'John' and lastname like 'D%'");
     }
     
-    @Test(dependsOnMethods = {"initTokenHandler"})
+    @Test
     public void replaceTokensWithListValues() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
 
@@ -76,11 +59,11 @@ public class TokenHandlerTest {
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
-        String result = tokenHandler.replaceTokensWithValues(queryString, params);
+        String result = TokenHandler.replaceTokensWithValues(queryString, params);
         assertEquals(result, "select firstname,lastname,email from managed/user where firstname = 'John' and lastname like 'D%'");
     }
 
-    @Test(dependsOnMethods = {"initTokenHandler"})
+    @Test
     public void replaceTokenWithDotNotationAbsolute() throws BadRequestException {
         String queryString = "select ${dotnotation:jsonpath} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
         Map params = new HashMap();
@@ -88,11 +71,11 @@ public class TokenHandlerTest {
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
-        String result = tokenHandler.replaceTokensWithValues(queryString, params);
+        String result = TokenHandler.replaceTokensWithValues(queryString, params);
         assertEquals(result, "select sunset.date from managed/user where firstname = 'John' and lastname like 'D%'");
     }
 
-    @Test(dependsOnMethods = {"initTokenHandler"})
+    @Test
     public void replaceTokenWithDotNotationRelative() throws BadRequestException {
         String queryString = "select ${dotnotation:jsonpath} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
         Map params = new HashMap();
@@ -100,11 +83,11 @@ public class TokenHandlerTest {
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
-        String result = tokenHandler.replaceTokensWithValues(queryString, params);
+        String result = TokenHandler.replaceTokensWithValues(queryString, params);
         assertEquals(result, "select sunset.date from managed/user where firstname = 'John' and lastname like 'D%'");
     }
 
-    @Test(dependsOnMethods = {"initTokenHandler"}, expectedExceptions = BadRequestException.class )
+    @Test(expectedExceptions = BadRequestException.class )
     public void valueReplaceMissingToken() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
         Map params = new HashMap();
@@ -112,14 +95,14 @@ public class TokenHandlerTest {
         params.put("_resource", "managed/user");
         // don't define firstname, should fail
         params.put("lastname", "D");
-        String result = tokenHandler.replaceTokensWithValues(queryString, params);
+        String result = TokenHandler.replaceTokensWithValues(queryString, params);
         assertEquals(result, "select * from managed/user where firstname = 'John' and lastname like 'D%'");
     }
     
-    @Test(dependsOnMethods = {"initTokenHandler"})
+    @Test
     public void replaceTokensWithOrientToken() throws PrepareNotSupported {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like ${lastname}";
-        String result = tokenHandler.replaceTokensWithOrientToken(queryString);
+        String result = TokenHandler.replaceTokensWithOrientToken(queryString);
         assertEquals(result, "select :_fields from :_resource where firstname = :firstname and lastname like :lastname");
     }
 }

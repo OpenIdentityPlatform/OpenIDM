@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,18 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.router;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.Route;
 
 /**
- * Interface for servlet filter registration services
- * @author aegloff
+ * A NAME does ...
+ *
+ * @author Laszlo Hordos
  */
-public interface ServletFilterRegistrator {
-    /**
-     * @return The registrator configuration
-     */
-    JsonValue getConfiguration();
-}
+public interface RouteEntry extends RouteService {
 
+    /**
+     * Removes this route from the router where it was registered. Routes may be removed while
+     * this router is processing requests.
+     *
+     * @return {@code true} if at least one of the routes was found and removed.
+     */
+    public boolean removeRoute();
+
+}

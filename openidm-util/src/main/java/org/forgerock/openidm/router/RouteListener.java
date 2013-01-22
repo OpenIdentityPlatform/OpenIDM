@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,18 +22,23 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.filterregistration;
+package org.forgerock.openidm.router;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.osgi.framework.ServiceEvent;
+
+import java.util.EventListener;
 
 /**
- * Interface for servlet filter registration services
- * @author aegloff
+ * A NAME does ...
+ *
+ * @ThreadSafe
+ * @author Laszlo Hordos
  */
-public interface ServletFilterRegistrator {
+public interface RouteListener extends EventListener {
     /**
-     * @return The registrator configuration
+     * Receives notification that a {@link org.forgerock.json.resource.Route} has had a lifecycle change.
+     *
+     * @param event The {@code ServiceEvent} object.
      */
-    JsonValue getConfiguration();
+    public void routeChanged(ServiceEvent event);
 }
-

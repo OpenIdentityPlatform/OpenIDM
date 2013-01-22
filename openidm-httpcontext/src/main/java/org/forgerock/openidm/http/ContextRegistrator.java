@@ -61,7 +61,6 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = "org.forgerock.openidm.http.context", immediate = true,
         policy = ConfigurationPolicy.IGNORE)
-@Service
 public final class ContextRegistrator {
     final static Logger logger = LoggerFactory.getLogger(ContextRegistrator.class);
     public static final String OPENIDM = "openidm";

@@ -279,7 +279,6 @@
         <docTargetVersion>2.1.0</docTargetVersion>
         <opendjPasswordPluginVersion>1.0.0</opendjPasswordPluginVersion>
         <adPasswordPluginVersion>2.0.1</adPasswordPluginVersion>
-        <commonsJsonCryptoVersion>${commons.json-crypto.version}</commonsJsonCryptoVersion>
         <openicfBundleVersion>1.1.1.0</openicfBundleVersion>
         <orientdbVersion>${orientdb.version}</orientdbVersion>
         <gaId>UA-23412190-9</gaId>
@@ -296,28 +295,28 @@
     <modules>
         <module>openidm-audit</module>
         <module>openidm-config</module>
-        <!--module>openidm-core</module-->
+        <!--<module>openidm-core</module>-->
         <module>openidm-crypto</module>
         <module>openidm-enhanced-config</module>
         <module>openidm-external-email</module>
-        <!--module>openidm-external-rest</module>
+        <module>openidm-external-rest</module>
         <module>openidm-httpcontext</module>
-        <module>openidm-infoservice</module>
-        <module>openidm-customendpoint</module-->
+        <!--module>openidm-infoservice</module-->
+        <module>openidm-customendpoint</module>
         <module>openidm-jetty-fragment</module>
-        <!--module>openidm-policy</module>
-        <module>openidm-provisioner-openicf</module>
+        <module>openidm-policy</module>
+        <!--module>openidm-provisioner-openicf</module>
         <module>openidm-provisioner</module>
-        <module>openidm-repo-jdbc</module>
-        <module>openidm-repo-orientdb</module-->
+        <module>openidm-repo-jdbc</module-->
+        <module>openidm-repo-orientdb</module>
         <module>openidm-repo</module>
-        <!--module>openidm-filter</module>
+        <module>openidm-filter</module>
         <module>openidm-servlet</module>
-        <module>openidm-servletfilter-registrator</module-->
-        <module>openidm-quartz-fragment</module>
-        <!--module>openidm-scheduler</module>
+        <module>openidm-servletfilter-registrator</module>
+        <!--module>openidm-quartz-fragment</module>
+        <module>openidm-scheduler</module-->
         <module>openidm-security-jetty</module>
-        <module>openidm-shell</module-->
+        <!--module>openidm-shell</module-->
         <module>openidm-smartevent</module>
         <module>openidm-system</module>
         <!--module>openidm-ui</module>
@@ -425,8 +424,9 @@
             <!-- Java EE -->
             <dependency>
                 <groupId>javax.servlet</groupId>
-                <artifactId>servlet-api</artifactId>
-                <version>2.5</version>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>3.0.1</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- Restlet -->
@@ -488,17 +488,19 @@
             </dependency>
 
             <!-- Core OSGi -->
-            <!--dependency>
+            <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>4.3.0</version>
+                <scope>provided</scope>
             </dependency>
-            Compendium is not compatible with org.apache.felix.scr
+            <!--Compendium is not compatible with org.apache.felix.scr-->
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
                 <version>4.3.0</version>
-            </dependency-->
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.osgi.compendium</artifactId>

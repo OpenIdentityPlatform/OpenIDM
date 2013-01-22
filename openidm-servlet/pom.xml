@@ -39,7 +39,7 @@
 
     <dependencies>
 
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-core</artifactId>
             <version>${openidm.version}</version>
@@ -48,7 +48,7 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servletfilter-registrator</artifactId>
             <version>${openidm.version}</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource-servlet</artifactId>
@@ -62,6 +62,11 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>

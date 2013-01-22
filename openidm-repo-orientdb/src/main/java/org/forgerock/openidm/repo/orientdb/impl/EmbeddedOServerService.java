@@ -27,6 +27,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.orientechnologies.orient.core.config.OGlobalConfiguration;
+import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
+import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool;
+import com.orientechnologies.orient.graph.gremlin.OGremlinHelper;
+import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +60,7 @@ public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
 
     OServer orientDBServer;
+    OGremlinHelper helper;
 
     void activate(JsonValue config) throws Exception {
         logger.trace("Activating Service with configuration {}", config);
@@ -70,6 +76,16 @@ public class EmbeddedOServerService {
                 OServerConfiguration serverConfig = getOrientDBConfig(config);
                 orientDBServer.startup(serverConfig);
                 orientDBServer.activate();
+
+                OGremlinHelper.global().create();
+                OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false);
+                OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
+                // Start JVM java -Dorientdb.storage.keepOpen=true ...
+                //OGremlinHelper.global().create();
+
+                OGraphDatabase db = new OGraphDatabase("local:/tmp/db");
+                db.open("admin", "admin");
+
                 logger.info("Embedded DB server started.");
             }
         } catch (Exception ex) {
@@ -77,6 +93,19 @@ public class EmbeddedOServerService {
             throw ex;
         }
     }
+
+    OrientGraph getGraph() {
+        return helper.acquireGraph(getOGraph());
+    }
+
+    OGraphDatabase getOGraph() {
+       return OGraphDatabasePool.global().acquire("local:/tmp/db", "admin", "admin");
+    }
+
+    void releaseGraph(OrientGraph graph) {
+        helper.releaseGraph(graph);
+    }
+
 
     void deactivate() {
         if (orientDBServer != null) {

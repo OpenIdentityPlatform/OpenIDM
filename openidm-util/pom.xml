@@ -149,6 +149,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Bundle-Activator>org.forgerock.openidm.router.Activator</Bundle-Activator>
                         <!--Export-Package>
                             org.forgerock.openidm.audit.util;version=${project.version},
                             org.forgerock.openidm.crypto;version=${project.version},

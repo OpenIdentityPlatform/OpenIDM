@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -28,10 +28,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.forgerock.json.resource.BadRequestException;
 
 // TODO: replace use of this class with TokenHandler in org.forgerock.openidm.repo.util
 public class TokenHandler {
@@ -40,10 +37,8 @@ public class TokenHandler {
 
     public static final String PREFIX_DOTNOTATION = "dotnotation";
 
-    final static Logger logger = LoggerFactory.getLogger(TokenHandler.class);
-    
     // The OpenIDM query token is of format ${token-name}
-    Pattern tokenPattern = Pattern.compile("\\$\\{(.+?)\\}");
+    private static final Pattern tokenPattern = Pattern.compile("\\$\\{(.+?)\\}");
 
     /**
      * Replaces a query string with tokens of format ${token-name} with the values from the
@@ -54,7 +49,7 @@ public class TokenHandler {
      * @return the query with all tokens replace with their found values
      * @throws BadRequestException if token in the query is not in the passed parameters
      */
-    String replaceTokensWithValues(String queryString, Map<String, Object> params) 
+    public static String replaceTokensWithValues(String queryString, Map<String, String> params)
             throws BadRequestException {
         java.util.regex.Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buffer = new StringBuffer();
@@ -131,7 +126,7 @@ public class TokenHandler {
      * @throws PrepareNotSupported if this method knows a given statement can not be converted into a prepared statement.
      * That a statement was not rejected here though does not mean it could not fail during the parsing phase later.
      */
-    String replaceTokensWithOrientToken(String queryString) throws PrepareNotSupported {
+    public static String replaceTokensWithOrientToken(String queryString) throws PrepareNotSupported {
         Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buf = new StringBuffer();
         while (matcher.find()) {

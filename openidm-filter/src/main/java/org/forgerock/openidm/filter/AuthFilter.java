@@ -28,10 +28,11 @@ import java.io.IOException;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -46,6 +47,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -54,15 +56,14 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -71,21 +72,22 @@ import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.servlet.HttpContext;
+import org.forgerock.json.resource.servlet.HttpServletContextFactory;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.http.ContextRegistrator;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.DateUtil;
-import org.ops4j.pax.web.extender.whiteboard.FilterMapping;
-import org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,35 +101,46 @@ import org.slf4j.LoggerFactory;
 
 @Component(name = "org.forgerock.openidm.authentication", immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
-@Service(value = { AuthFilterService.class, SingletonResourceProvider.class })
+@Service(value = { HttpServletContextFactory.class, SingletonResourceProvider.class })
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Filter Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "authentication") })
-public class AuthFilter implements Filter, AuthFilterService, SingletonResourceProvider {
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "authentication"),
+    @Property(name = "httpContext.id", value = "openidm"),
+    @Property(name = "servletNames", value = "OpenIDM Authentication Filter Service"),
+    @Property(name = "urlPatterns", value = "/openidm/*")
+
+})
+public class AuthFilter implements Filter, HttpServletContextFactory, SingletonResourceProvider {
 
     private final static Logger logger = LoggerFactory.getLogger(AuthFilter.class);
 
-    /** Attribute in session containing authenticated username. */
-    public static final String USERNAME_ATTRIBUTE = "openidm.username";
+//    /** Attribute in session containing authenticated username. */
+//    public static final String USERNAME_ATTRIBUTE = "openidm.username";
+//
+//    /** Attribute in session containing authenticated userid. */
+//    public static final String USERID_ATTRIBUTE = "openidm.userid";
+//
+//    /** Attribute in session and request containing assigned roles. */
+//    public static final String ROLES_ATTRIBUTE = "openidm.roles";
+//
+//    /**
+//     * Attribute in session containing user's resource (managed_user or
+//     * internal_user)
+//     */
+//    public static final String RESOURCE_ATTRIBUTE = "openidm.resource";
+//
+//    /**
+//     * Attribute in request to indicate to openidm down stream that an
+//     * authentication filter has secured the request
+//     */
+//    public static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
 
-    /** Attribute in session containing authenticated userid. */
-    public static final String USERID_ATTRIBUTE = "openidm.userid";
+    /** Authentication username header */
+    public static final String HEADER_USERNAME = "X-OpenIDM-Username";
 
-    /** Attribute in session and request containing assigned roles. */
-    public static final String ROLES_ATTRIBUTE = "openidm.roles";
-
-    /**
-     * Attribute in session containing user's resource (managed_user or
-     * internal_user)
-     */
-    public static final String RESOURCE_ATTRIBUTE = "openidm.resource";
-
-    /**
-     * Attribute in request to indicate to openidm down stream that an
-     * authentication filter has secured the request
-     */
-    public static final String OPENIDM_AUTHINVOKED = "openidm.authinvoked";
+    /** Authentication password header */
+    public static final String HEADER_PASSWORD = "X-OpenIDM-Password";
 
     /** Re-authentication password header */
     public static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
@@ -145,13 +158,6 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
         authenticate, logout
     }
 
-    static class AuthData {
-        String username;
-        String userId;
-        List<String> roles = new ArrayList<String>();
-        boolean status = false;
-        String resource = "default";
-    };
 
     // A list of ports that allow authentication purely based on client
     // certificates (SSL mutual auth)
@@ -159,10 +165,40 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
 
     private FilterConfig config = null;
 
+    // ----- Implementation of Filter interface
+
+    @Override
+    public Context createContext(HttpServletRequest request) throws ResourceException {
+        Context requestContext = null;
+        //Try the session first
+        HttpSession session = request.getSession(false);
+        if (null != session) {
+            Object o = session.getAttribute(Context.class.getName());
+            if (o instanceof Context) {
+                requestContext = (Context) o;
+            }
+        }
+        if (null != requestContext) {
+            Object o = request.getAttribute(Context.class.getName());
+            if (o instanceof Context) {
+                requestContext = (Context) o;
+            }
+        }
+        if (null != requestContext) {
+            //Anonymous context
+            requestContext =  new SecurityContext(new RootContext(),"anonymous", null);
+        }
+        return requestContext;
+    }
+
+
+    // ----- Implementation of Filter interface
+
+
     public void init(FilterConfig config) throws ServletException {
         this.config = config;
 
-        String clientAuthOnlyStr = System.getProperty("openidm.auth.clientauthonlyports");
+        String clientAuthOnlyStr = IdentityServer.getInstance().getProperty("openidm.auth.clientauthonlyports");
         if (clientAuthOnlyStr != null) {
             String[] split = clientAuthOnlyStr.split(",");
             for (String entry : split) {
@@ -174,18 +210,18 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        if (router == null) {
+        if (repositoryRoute == null) {
             throw new ServletException("Internal services not ready to process requests.");
         }
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        AuthData authData = new AuthData();
+        SecurityContext authData = null;
 
         try {
             HttpSession session = req.getSession(false);
             String logout = req.getHeader("X-OpenIDM-Logout");
-            String headerLogin = req.getHeader("X-OpenIDM-Username");
+            String headerLogin = req.getHeader(HEADER_USERNAME);
             String basicAuth = req.getHeader("Authorization");
             if (logout != null) {
                 if (session != null) {
@@ -197,40 +233,39 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
                 // only
             } else if (allowClientCertOnly(req)) {
                 authData = hasClientCert(req);
-                logAuth(req, authData.username, authData.userId, authData.roles,
+                logAuth(req, authData,
                         Action.authenticate, Status.SUCCESS);
             } else if (session == null && headerLogin != null) {
                 authData = authenticateUser(req);
-                logAuth(req, authData.username, authData.userId, authData.roles,
+                logAuth(req, authData,
                         Action.authenticate, Status.SUCCESS);
-                createSession(req, session, authData);
+                createSession(req, authData);
             } else if (session == null && basicAuth != null) {
                 authData = doBasicAuth(basicAuth);
-                logAuth(req, authData.username, authData.userId, authData.roles,
+                logAuth(req, authData,
                         Action.authenticate, Status.SUCCESS);
-                createSession(req, session, authData);
-            } else if (session != null) {
-                authData.username = (String) session.getAttribute(USERNAME_ATTRIBUTE);
-                authData.userId = (String) session.getAttribute(USERID_ATTRIBUTE);
-                authData.roles = (List<String>) session.getAttribute(ROLES_ATTRIBUTE);
-                authData.resource = (String) session.getAttribute(RESOURCE_ATTRIBUTE);
+                createSession(req, authData);
             } else {
-                authFailed(req, res, authData.username);
+                authFailed(req, res, authData.getAuthenticationId());
                 return;
             }
         } catch (AuthException s) {
             authFailed(req, res, s.getMessage());
             return;
         }
-        logger.debug("Found valid session for {} id {} with roles {}", new Object[] {
-            authData.username, authData.userId, authData.roles });
-        req.setAttribute(USERID_ATTRIBUTE, authData.userId);
-        req.setAttribute(ROLES_ATTRIBUTE, authData.roles);
-        req.setAttribute(RESOURCE_ATTRIBUTE, authData.resource);
-        req.setAttribute(OPENIDM_AUTHINVOKED, "openidmfilter");
 
-        chain.doFilter(new UserWrapper(req, authData.username, authData.userId, authData.roles),
-                res);
+        req.setAttribute(Context.class.getName(), authData);
+
+//        logger.debug("Found valid session for {} id {} with roles {}", new Object[] {
+//            authData.username, authData.userId, authData.roles });
+
+        //req.setAttribute(OPENIDM_AUTHINVOKED, "openidmfilter");
+
+        chain.doFilter(new UserWrapper(req, authData), res);
+    }
+
+    public void destroy() {
+        config = null;
     }
 
     private void authFailed(HttpServletRequest req, HttpServletResponse res, String username)
@@ -242,7 +277,16 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
         res.setStatus(401);
     }
 
-    private static void logAuth(HttpServletRequest req, String username, String userId,
+    private void logAuth(HttpServletRequest req, SecurityContext securityContext, Action action,
+            Status status) {
+        logAuth(req, securityContext.getAuthenticationId(), (String) securityContext
+                .getAuthorizationId().get(SecurityContext.AUTHZID_ID),
+                (List<String>) securityContext.getAuthorizationId().get(
+                        SecurityContext.AUTHZID_ROLES), action, status);
+    }
+
+
+    private void logAuth(HttpServletRequest req, String username, String userId,
             List<String> roles, Action action, Status status) {
         try {
             JsonValue entry = new JsonValue(new HashMap<String, Object>());
@@ -263,10 +307,10 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
                 }
             }
             entry.put("ip", ipAddress);
-            if (router != null) {
+            if (repositoryRoute != null) {
                 // TODO We need Context!!!
                 CreateRequest request = Requests.newCreateRequest("audit/access", entry);
-                router.create(new RootContext(), request);
+                repositoryRoute.createServerContext().getConnection().create(null, request);
             } else {
                 // Filter should have rejected request if router is not
                 // available
@@ -277,10 +321,10 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
         }
     }
 
-    private AuthData doBasicAuth(String data) throws AuthException {
+    private SecurityContext doBasicAuth(String data) throws AuthException {
 
         logger.debug("HTTP basic authentication request");
-        AuthData ad = new AuthData();
+        //SecurityContext ad = SecurityContext(new RootContext());
         StringTokenizer st = new StringTokenizer(data);
         String isBasic = st.nextToken();
         if (isBasic == null || !isBasic.equalsIgnoreCase("Basic")) {
@@ -295,104 +339,45 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
         if (t.length != 2) {
             throw new AuthException("");
         }
-        ad.username = t[0];
-        authModule.authenticate(ad, t[1]);
-        if (ad.status == false) {
-            throw new AuthException(ad.username);
-        }
-        return ad;
+        return authModule.authenticate(t[0], t[1], new HashMap<String, Object>(2));
     }
 
-    private void createSession(HttpServletRequest req, HttpSession sess, AuthData ad) {
+    private void createSession(HttpServletRequest req, SecurityContext sc) {
         if (req.getHeader("X-OpenIDM-NoSession") == null) {
-            sess = req.getSession();
-            sess.setAttribute(USERNAME_ATTRIBUTE, ad.username);
-            sess.setAttribute(USERID_ATTRIBUTE, ad.userId);
-            sess.setAttribute(ROLES_ATTRIBUTE, ad.roles);
-            sess.setAttribute(RESOURCE_ATTRIBUTE, ad.resource);
-
+            HttpSession session = req.getSession(true);
+            session.setAttribute(Context.class.getName(), sc);
             if (logger.isDebugEnabled()) {
                 logger.debug("Created session for: {} with id {}, roles {} and resource: {}",
-                        new Object[] { ad.username, ad.userId, ad.roles, ad.resource });
+                        new Object[] { sc.getAuthenticationId(),
+                            sc.getAuthorizationId().get(SecurityContext.AUTHZID_ID),
+                            sc.getAuthorizationId().get(SecurityContext.AUTHZID_ROLES),
+                            sc.getAuthorizationId().get(SecurityContext.AUTHZID_COMPONENT) });
+
             }
         }
     }
 
-    /**
-     * @param request
-     *            the full request
-     * @return the security context of the request, or null if does not exist
-     */
-    private JsonValue getSecurityContext(JsonValue request) {
-        JsonValue result = new JsonValue(null);
-        while (request != null && !request.isNull()) {
-            if ("http".equals(request.get("type").asString())) {
-                if (!request.get("security").isNull()) {
-                    result = request;
-                    break;
-                }
-            }
-            request = request.get("parent");
-        }
-        return result;
-    }
 
-    /**
-     * Re-authenticate based on the context associated with the request
-     * 
-     * @param request
-     *            the full request
-     * @return authenticated user if success
-     * @throws AuthException
-     *             if reauthentication failed
-     */
-    public AuthData reauthenticate(JsonValue request) throws AuthException {
-        JsonValue secCtx = getSecurityContext(request);
-        JsonValue headers = secCtx.get("headers");
-        String reauthPassword = null;
-        for (Entry<String, Object> entry : headers.asMap().entrySet()) {
-            if (entry.getKey().equalsIgnoreCase(HEADER_REAUTH_PASSWORD)) {
-                reauthPassword = (String) entry.getValue();
-                break;
-            }
-        }
-        AuthData ad = new AuthData();
-        ad.username = secCtx.get("security").get("username").asString();
-        if (ad.username == null || reauthPassword == null || ad.username.equals("")
-                || reauthPassword.equals("")) {
-            logger.debug("Failed authentication, missing or empty headers");
-            throw new AuthException("Failed authentication, missing or empty headers");
-        }
-        ad = authModule.authenticate(ad, reauthPassword);
-        if (ad.status == false) {
-            throw new AuthException(ad.username);
-        }
-        return ad;
-    }
 
-    private AuthData authenticateUser(HttpServletRequest req) throws AuthException {
+    private SecurityContext authenticateUser(HttpServletRequest req) throws AuthException {
 
         logger.debug("No session, authenticating user");
-        AuthData ad = new AuthData();
-        String password = req.getHeader("X-OpenIDM-Password");
-        ad.username = req.getHeader("X-OpenIDM-Username");
-        if (ad.username == null || password == null || ad.username.equals("")
-                || password.equals("")) {
+        Map<String, Object> authzid = new HashMap<String, Object>(2);
+        String authcid = req.getHeader(HEADER_USERNAME);
+        String password = req.getHeader(HEADER_PASSWORD);
+
+        if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
             logger.debug("Failed authentication, missing or empty headers");
             throw new AuthException();
         }
-        ad = authModule.authenticate(ad, password);
-        if (ad.status == false) {
-            throw new AuthException(ad.username);
-        }
-        return ad;
+        return  authModule.authenticate(authcid, password, authzid);
     }
 
     // This is currently Jetty specific
-    private AuthData hasClientCert(ServletRequest request) throws AuthException {
+    private SecurityContext hasClientCert(ServletRequest request) throws AuthException {
 
         logger.debug("Client certificate authentication request");
-        AuthData ad = new AuthData();
+        Map<String, Object> authzid = new HashMap<String, Object>(2);
         X509Certificate[] certs = getClientCerts(request);
 
         if (certs != null) {
@@ -406,15 +391,16 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
                         .getSubjectDN());
             }
         }
-        ad.status = (certs != null && certs.length > 0 && certs[0] != null);
-        if (ad.status == false) {
-            throw new AuthException(ad.username);
+        String authcid = certs[0].getSubjectDN().getName();
+        if (certs == null || certs.length < 1 || certs[0] != null) {
+            throw new AuthException(authcid);
         }
-        ad.username = certs[0].getSubjectDN().getName();
-        ad.userId = ad.username;
-        ad.roles.add("openidm-cert");
-        logger.debug("Authentication client certificate subject {}", ad.username);
-        return ad;
+        List<String> roles = new ArrayList<String>(1);
+        authzid.put(SecurityContext.AUTHZID_ROLES, Collections.unmodifiableList(roles));
+
+        roles.add("openidm-cert");
+        logger.debug("Authentication client certificate subject {}", authcid);
+        return new SecurityContext(new RootContext(), authcid, authzid);
     }
 
     // This is currently Jetty specific
@@ -440,22 +426,15 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
         return clientAuthOnly.contains(Integer.valueOf(request.getLocalPort()));
     }
 
-    public void destroy() {
-        config = null;
-    }
 
-    @Reference(referenceInterface = ConnectionFactory.class, bind = "bindRouter",
-            unbind = "unbindRouter", cardinality = ReferenceCardinality.MANDATORY_UNARY,
-            target = "(service.pid=org.forgerock.openidm.router)")
-    private static Connection router;
+    // ----- Declarative Service Implementation
 
-    private void bindRouter(ConnectionFactory router) {
-        this.router = null;
-    }
+    @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
+    RouteService repositoryRoute;
 
-    private void unbindRouter(ConnectionFactory router) {
-        this.router = null;
-    }
+
+    @Reference
+    CryptoService cryptoService;
 
     /** TODO: Description. */
     private ComponentContext context;
@@ -464,8 +443,7 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
     private ServiceRegistration serviceRegistration;
 
     @Activate
-    protected synchronized void activate(ComponentContext context) throws ServletException,
-            NamespaceException {
+    protected synchronized void activate(ComponentContext context) throws Exception {
         this.context = context;
         logger.info("Activating Auth Filter with configuration {}", context.getProperties());
         setConfig(context);
@@ -484,27 +462,23 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
          * this, props);
          */
 
-        DefaultFilterMapping filterMapping = new DefaultFilterMapping();
+/*        org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping filterMapping =
+                new org.ops4j.pax.web.extender.whiteboard.runtime.DefaultFilterMapping();
         filterMapping.setFilter(this);
         filterMapping.setHttpContextId("openidm");
         filterMapping.setServletNames("OpenIDM REST");// , "OpenIDM Web");
-        filterMapping.setUrlPatterns("/openidm/*");// , "/openidmui/*");
+        filterMapping.setUrlPatterns("/openidm*//*");// , "/openidmui*//*");
         // filterMapping.setInitParams(null);
         serviceRegistration =
                 FrameworkUtil.getBundle(ContextRegistrator.class).getBundleContext()
-                        .registerService(FilterMapping.class.getName(), filterMapping, null);
+                        .registerService(org.ops4j.pax.web.extender.whiteboard.FilterMapping.class,
+                                filterMapping, null);*/
     }
 
     @Modified
     void modified(ComponentContext context) throws Exception {
         logger.info("Modified auth Filter with configuration {}", context.getProperties());
         setConfig(context);
-    }
-
-    private void setConfig(ComponentContext context) {
-        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-        logClientIPHeader = (String) config.get("clientIPHeader").asString();
-        authModule = new AuthModule(config);
     }
 
     @Deactivate
@@ -520,23 +494,38 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
         }
     }
 
+    private void setConfig(ComponentContext context) throws ResourceException {
+        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
+        logClientIPHeader = config.get("clientIPHeader").asString();
+        authModule = new AuthModule(cryptoService, repositoryRoute.createServerContext(),  config);
+    }
+
+    // ----- Implementation of SingletonResourceProvider interface
+
     /**
      * Action support, including reauthenticate action {@inheritDoc}
      */
     @Override
     public void actionInstance(ServerContext context, ActionRequest request,
             ResultHandler<JsonValue> handler) {
-        // TODO This is never null!?
-        if (request.getResourceName() == null) {
-            // operation on collection
+        try {
             if ("reauthenticate".equalsIgnoreCase(request.getActionId())) {
                 try {
-                    AuthData reauthenticated =
-                            reauthenticate(new JsonValue(request.getAdditionalActionParameters()));
-                    JsonValue response = new JsonValue(new HashMap());
-                    response.put("reauthenticated", Boolean.TRUE);
-                    response.put("username", reauthenticated.username);
-                    handler.handleResult(response);
+                    if (context.containsContext(HttpContext.class)
+                            && context.containsContext(SecurityContext.class)) {
+                        String authcid =
+                                context.asContext(SecurityContext.class).getAuthenticationId();
+                        HttpContext httpContext = context.asContext(HttpContext.class);
+                        String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
+                        if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
+                            logger.debug("Failed authentication, missing or empty headers");
+                            handler.handleError(new ForbiddenException(
+                                    "Failed authentication, missing or empty headers"));
+                            return;
+                        }
+                        authModule.authenticate(authcid, password, null);
+                    }
+                    //TODO Handle message
                 } catch (AuthException ex) {
                     handler.handleError(new ForbiddenException("Reauthentication failed", ex));
                 }
@@ -544,9 +533,8 @@ public class AuthFilter implements Filter, AuthFilterService, SingletonResourceP
                 handler.handleError(new BadRequestException("Action " + request.getActionId()
                         + " on authentication service not supported"));
             }
-        } else {
-            handler.handleError(new BadRequestException(
-                    "Actions not supported on child resource of authentication service"));
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e));
         }
     }
 

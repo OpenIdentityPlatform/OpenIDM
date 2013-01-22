@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConflictException;
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.objset.ConflictException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +45,6 @@ import com.orientechnologies.orient.core.metadata.schema.OSchema;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
-import com.orientechnologies.orient.core.storage.OStorage.CLUSTER_TYPE;
-import com.orientechnologies.orient.core.storage.impl.local.OClusterLocal;
 
 /**
  * A Helper to interact with the OrientDB
@@ -391,7 +389,7 @@ public class DBHelper {
         defaultAdmin.put("roles", roles);
         
         try {
-            ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);
+            ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, defaultTableName);
             newDoc.save();
         } catch (ConflictException ex) {
             throw new InvalidException("Unexpected failure during DB set-up of default user", ex);

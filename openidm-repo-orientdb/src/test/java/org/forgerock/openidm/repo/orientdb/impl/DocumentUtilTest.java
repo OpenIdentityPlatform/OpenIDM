@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,7 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import com.orientechnologies.orient.core.Orient;
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -31,26 +31,31 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.openidm.core.ServerConstants;
 
 import org.testng.annotations.*;
+
+import static org.fest.assertions.api.Assertions.fail;
 import static org.testng.Assert.*;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.MapAssert.entry;
+import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.data.MapEntry.entry;
 
 public class DocumentUtilTest {
 
     String dbURL = "local:./target/docutiltestdb";
-    ODatabaseDocumentTx db = null; 
+    ODatabaseDocumentTx db = null;
     String orientDocClass = "Sample";
 
     @BeforeClass 
     public void init() {
         db = new ODatabaseDocumentTx(dbURL);
+        //ODatabaseRecordThreadLocal.INSTANCE.set( db );
         if (!db.exists()) {
             db.create();
         } else {
@@ -61,13 +66,14 @@ public class DocumentUtilTest {
     @AfterClass 
     public void cleanup() {
         if (db != null) {
+            //ODatabaseRecordThreadLocal.INSTANCE.remove();
             db.close();
         }
     }
     
     @Test
     public void docToMapNullTest() {
-        assertNull(DocumentUtil.toMap(null));
+        assertNull(DocumentUtil.toMap(null, null));
     }
 
     @Test
@@ -84,13 +90,13 @@ public class DocumentUtilTest {
         doc.field("present", Boolean.FALSE);
         doc.field("somedate", new Date());
 
-        Map result = DocumentUtil.toMap(doc);
+        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
-                entry(DocumentUtil.TAG_REV, "0"),      // Doc version starts at 0
-                entry("firstname", "Sam"), 
-                entry("lastname", "Iam"), 
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "0"),      // Doc version starts at 0
+                entry("firstname", "Sam"),
+                entry("lastname", "Iam"),
                 entry("telephone", "(555) 123-4567"),
                 entry("age", 20),
                 entry("longnumber", Long.MAX_VALUE),
@@ -117,12 +123,12 @@ public class DocumentUtilTest {
         doc.field("city", new ODocument().field("name","Paris").field("country", "France"));
         doc.field("phonenumbers", new ODocument().field("home","555-666-7777").field("mobile", "555-111-2222"), OType.EMBEDDED);
         
-        Map result = DocumentUtil.toMap(doc);
+        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
-                entry(DocumentUtil.TAG_REV, "0"), // Doc version starts at 0
-                entry("firstname", "John"), 
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "0"), // Doc version starts at 0
+                entry("firstname", "John"),
                 entry("lastname", "Doe"));
 
         Object city = result.get("city");
@@ -130,14 +136,14 @@ public class DocumentUtilTest {
         assertThat(city).isInstanceOf(Map.class);
         assertThat((Map)city)
                 .hasSize(2)
-                .includes(entry("name", "Paris"), entry("country", "France"));
+                .contains(entry("name", "Paris"), entry("country", "France"));
         
         Object phonenumbers = result.get("phonenumbers");
         assertNotNull(phonenumbers, "phonenumbers map entry null");
         assertThat(phonenumbers).isInstanceOf(Map.class);
         assertThat((Map)phonenumbers)
                 .hasSize(2)
-                .includes(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
+                .contains(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
     }
     
     @Test
@@ -153,12 +159,12 @@ public class DocumentUtilTest {
         addresses.add(new ODocument().field("type", "business").field("street", "Wall st.").field("city", "New York") );
         doc.field("addresses",  addresses, OType.EMBEDDED); 
         
-        Map result = DocumentUtil.toMap(doc);
+        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
-                entry(DocumentUtil.TAG_REV, "0"), // Doc version starts at 0
-                entry("firstname", "John"), 
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "0"), // Doc version starts at 0
+                entry("firstname", "John"),
                 entry("lastname", "Doe"));
 
         Object addrResult = result.get("addresses");
@@ -170,12 +176,12 @@ public class DocumentUtilTest {
 
         assertThat(addr.get(0)).isInstanceOf(Map.class);
         Map firstEntry = (Map) addr.get(0); 
-        assertThat(firstEntry).includes(
+        assertThat(firstEntry).contains(
                 entry("type", "home"),
                 entry("street", "Main st."),
                 entry("city", "San Franciso"));
         Map secondEntry = (Map) addr.get(1); 
-        assertThat(secondEntry).includes(
+        assertThat(secondEntry).contains(
                 entry("type", "business"),
                 entry("street", "Wall st."),
                 entry("city", "New York")); 
@@ -196,13 +202,13 @@ public class DocumentUtilTest {
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
         
-        Map result = DocumentUtil.toMap(doc);
+        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"),
-                entry(DocumentUtil.TAG_REV, "0"));
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"),
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "0"));
 
-        Map resultWidgets = (Map) result;
+        Map resultWidgets = result;
         
         Map resultWidget = (Map) resultWidgets.get("widget");
         List resultDetails = (List) resultWidget.get("detail");
@@ -229,13 +235,13 @@ public class DocumentUtilTest {
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
         
-        Map result = DocumentUtil.toMap(doc);
+        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"),
-                entry(DocumentUtil.TAG_REV, "0"));
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"),
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "0"));
 
-        Map resultWidgets = (Map) result;
+        Map resultWidgets = result;
         
         Map resultWidget = (Map) resultWidgets.get("widget");
         List resultDetails = (List) resultWidget.get("detail");
@@ -265,13 +271,13 @@ public class DocumentUtilTest {
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
         
-        Map result = DocumentUtil.toMap(doc);
+        Map result = DocumentUtil.toMap(doc, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"),
-                entry(DocumentUtil.TAG_REV, "0"));
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"),
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "0"));
 
-        Map resultWidgets = (Map) result;
+        Map resultWidgets = result;
         
         Map resultWidget = (Map) resultWidgets.get("widget");
         List resultDetails = (List) resultWidget.get("detail");
@@ -286,15 +292,15 @@ public class DocumentUtilTest {
     
     @Test
     public void mapToDocNullTest() throws ConflictException {
-        assertNull(DocumentUtil.toDocument(null, null, db, orientDocClass, false, true));
+        assertNull(DocumentUtil.toDocument(null, null, orientDocClass, false, true));
     }
     
     @Test
-    public void mapToNewFlatDoc() throws ConflictException{
+    public void mapToNewFlatDoc() throws ConflictException {
         
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
-        map.put(DocumentUtil.TAG_REV, "1");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_REV, "1");
         map.put("firstname", "Sam");
         map.put("lastname", "Iam");
         map.put("telephone", "(555) 123-4567");
@@ -304,7 +310,7 @@ public class DocumentUtilTest {
         map.put("present", Boolean.FALSE);
         map.put("somedate", new Date());
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "Sam", "unexpected firstname");
@@ -323,8 +329,8 @@ public class DocumentUtilTest {
     @Test
     public void mapToExistingFlatDoc() throws ConflictException {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
-        map.put(DocumentUtil.TAG_REV, "1");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_REV, "1");
         map.put("firstname", "Sam");
         map.put("lastname", "Iam");
         map.put("telephone", "(555) 123-4567");
@@ -347,7 +353,7 @@ public class DocumentUtilTest {
         existingDoc.field("somedate", new Date());
         existingDoc.field("AnotherFieldToBeRemoved", new Date());
         
-        ODocument result = DocumentUtil.toDocument(map, existingDoc, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, existingDoc, orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "Sam", "unexpected firstname");
@@ -369,10 +375,10 @@ public class DocumentUtilTest {
     @Test
     public void mapToNewDocExistingRevision() throws ConflictException {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
-        map.put(DocumentUtil.TAG_REV, "100");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_REV, "100");
         map.put("firstname", "John");
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "John", "unexpected firstname");
@@ -383,7 +389,7 @@ public class DocumentUtilTest {
     public void mapToNewEmbeddedDoc() throws ConflictException {
         
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
         map.put("firstname", "John");
         map.put("lastname", "Doe");
         
@@ -397,7 +403,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "John", "unexpected firstname");
@@ -408,14 +414,17 @@ public class DocumentUtilTest {
         assertNotNull(phonenumbers, "phonenumbers map entry null");
         assertEquals(phonenumbers.field("home"), "555-666-7777", "unexpected home phone");
         assertEquals(phonenumbers.field("mobile"), "555-111-2222", "unexpected mobile phone");
-        assertThat((ODocument)phonenumbers)
-                .hasSize(2);
+        Iterator i = phonenumbers.iterator();
+        i.next();
+        assertTrue(i.hasNext());
+        //https://github.com/alexruiz/fest-assert-2.x/issues/142
+        //assertThat(phonenumbers).hasSize(2);
     }
     
     @Test
     public void mapToExistingEmbeddedDoc() throws ConflictException {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
         // deliberately remove the firstname
         map.put("lastname", "Doe");
         // deliberately remove the city 
@@ -432,7 +441,7 @@ public class DocumentUtilTest {
         existingDoc.field("city", new ODocument().field("name","Paris").field("country", "France"));
         existingDoc.field("phonenumbers", new ODocument().field("home","555-666-7777").field("mobile", "555-111-2222"), OType.EMBEDDED);
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertFalse(result.containsField("firstname"), "Firstname should have been removed but is present");
@@ -446,15 +455,18 @@ public class DocumentUtilTest {
         assertEquals(phonenumbers.field("work"), "666-777-8888", "unexpected work phone");
         assertEquals(phonenumbers.field("mobile"), "555-111-2229", "unexpected mobile phone");
         assertFalse(phonenumbers.containsField("home"), "Home phone should have been removed but is present.");
-        assertThat((ODocument)phonenumbers)
-                .hasSize(2);
+        Iterator i = phonenumbers.iterator();
+        i.next();
+        assertTrue(i.hasNext());
+        //https://github.com/alexruiz/fest-assert-2.x/issues/142
+        //assertThat(phonenumbers).hasSize(2);
     }    
     
     @Test
     public void listToEmbeddedList() throws ConflictException {
     
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
         map.put("firstname", "John");
         map.put("lastname", "Doe");
         
@@ -468,7 +480,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "John", "unexpected firstname");
@@ -483,26 +495,29 @@ public class DocumentUtilTest {
         assertNotNull(phonenumbers, "phonenumbers map entry null");
         assertEquals(phonenumbers.field("home"), "555-666-7777", "unexpected home phone");
         assertEquals(phonenumbers.field("mobile"), "555-111-2222", "unexpected mobile phone");
-        assertThat((ODocument)phonenumbers)
-                .hasSize(2);
+        Iterator i = phonenumbers.iterator();
+        i.next();
+        assertTrue(i.hasNext());
+        //https://github.com/alexruiz/fest-assert-2.x/issues/142
+        //assertThat(phonenumbers).hasSize(2);
     }
     
     @Test(expectedExceptions = ConflictException.class)
     public void mapToDocInvalidRevision() throws ConflictException {
         // Check ConflictException is thrown for invalid versions
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
-        map.put(DocumentUtil.TAG_REV, "invalid-version"); // OrientDB revisions are ints
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_REV, "invalid-version"); // OrientDB revisions are ints
         map.put("firstname", "John");
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, orientDocClass);
         assertTrue(false, "Invalid Revision must trigger failure");
     }
     
     @Test
     public void mapToDocToMap() throws ConflictException {
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put(DocumentUtil.TAG_ID, "client-assigned-id");
-        map.put(DocumentUtil.TAG_REV, "2");
+        map.put(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id");
+        map.put(ServerConstants.OBJECT_PROPERTY_REV, "2");
         map.put("firstname", "John");
         map.put("lastname", "Doe");
         
@@ -516,14 +531,14 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
         
-        ODocument intermediateResult = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument intermediateResult = DocumentUtil.toDocument(map, null, orientDocClass);
         
-        Map result = DocumentUtil.toMap(intermediateResult);
+        Map result = DocumentUtil.toMap(intermediateResult, null).getContent().asMap();
         
-        assertThat(result).includes(
-                entry(DocumentUtil.TAG_ID, "client-assigned-id"), 
-                entry(DocumentUtil.TAG_REV, "2"), 
-                entry("firstname", "John"), 
+        assertThat(result).contains(
+                entry(ServerConstants.OBJECT_PROPERTY_ID, "client-assigned-id"),
+                entry(ServerConstants.OBJECT_PROPERTY_REV, "2"),
+                entry("firstname", "John"),
                 entry("lastname", "Doe"));
 
         Object checkCity = result.get("city");
@@ -531,14 +546,14 @@ public class DocumentUtilTest {
         assertThat(checkCity).isInstanceOf(Map.class);
         assertThat((Map)checkCity)
                 .hasSize(2)
-                .includes(entry("name", "Paris"), entry("country", "France"));
+                .contains(entry("name", "Paris"), entry("country", "France"));
         
         Object phonenumbers = result.get("phonenumbers");
         assertNotNull(phonenumbers, "phonenumbers map entry null");
         assertThat(phonenumbers).isInstanceOf(Map.class);
         assertThat((Map)phonenumbers)
                 .hasSize(2)
-                .includes(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
+                .contains(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
     }
     
     @Test
@@ -550,6 +565,6 @@ public class DocumentUtilTest {
     @Test(expectedExceptions = ConflictException.class) 
     public void parseInvalidRevision() throws ConflictException {
         int ver = DocumentUtil.parseVersion("some-text-98765");
-        assertTrue(false, "Parsing of invalid revision must fail, but did not.");
+        fail("Parsing of invalid revision must fail, but did not.");
     }
 }

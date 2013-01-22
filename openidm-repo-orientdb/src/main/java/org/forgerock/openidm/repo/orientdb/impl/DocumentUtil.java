@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -21,21 +21,24 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+
 package org.forgerock.openidm.repo.orientdb.impl;
 
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-import org.forgerock.openidm.objset.ConflictException;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.openidm.core.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +48,12 @@ import org.slf4j.LoggerFactory;
  * @author aegloff
  */
 public class DocumentUtil  {
+
+    /**
+     * Setup logging for the {@link DocumentUtil}.
+     */
     final static Logger logger = LoggerFactory.getLogger(DocumentUtil.class);
-    
-    // Identifiers in the object model. 
-    // TDOO: replace with common definitions of these global variables 
-    public final static String TAG_ID = "_id";
-    public final static String TAG_REV = "_rev";
+
     
     // Identifier in the DB representation
     public final static String ORIENTDB_PRIMARY_KEY = "_openidm_id"; 
@@ -61,8 +64,13 @@ public class DocumentUtil  {
      * @param doc the OrientDB document to convert
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
-    public static Map<String, Object> toMap(ODocument doc) {
-        return toMap(doc, true);
+    public static Resource toMap(ODocument doc, List<JsonPointer> fieldFilters) {
+        Map<String, Object> result = toMap(doc, fieldFilters, true);
+        if (null != result) {
+            return new Resource((String) result.get(ServerConstants.OBJECT_PROPERTY_ID),
+                    (String) result.get(ServerConstants.OBJECT_PROPERTY_REV), new JsonValue(result));
+        }
+        return null;
     }
 
     /**
@@ -74,7 +82,7 @@ public class DocumentUtil  {
      * @param topLevel if the passed in document represents a top level orientdb class, or false if it is an embedded document
      * @return the doc converted into maps, lists, java types; or null if the doc was null
      */
-    private static Map<String, Object> toMap(ODocument doc, boolean topLevel) {    	
+    private static Map toMap(ODocument doc, List<JsonPointer> fieldFilters, boolean topLevel) {
         Map<String, Object> result = null;
         if (doc != null) {
             result = new LinkedHashMap<String, Object>(); // TODO: As JSON doesn't, do we really want to maintain order?   
@@ -83,10 +91,12 @@ public class DocumentUtil  {
                 String key = entry.getKey();
                 if (key.equals(ORIENTDB_PRIMARY_KEY)) {
                     logger.trace("Setting primary key to value {}", value);
-                    result.put(TAG_ID, value);
+                    String id = String.valueOf(value);
+                    result.put(ServerConstants.OBJECT_PROPERTY_ID, id);
+
                     String revision = Integer.toString(doc.getVersion());
                     logger.trace("Setting revision to {}", revision);
-                    result.put(TAG_REV, revision);
+                    result.put(ServerConstants.OBJECT_PROPERTY_REV, revision);
                 } else {
                     // TODO: optimization switch: if we know that no embedded ODocuments are used 
                     // (i.e. only embedded Maps, Lists) then we would not need to traverse the whole graph
@@ -115,7 +125,7 @@ public class DocumentUtil  {
     private static Object asSimpleBinding(Object objToClean) {
         if (objToClean instanceof ODocument) {
             logger.trace("Converting embedded ODocument {} to map ", objToClean);
-            return DocumentUtil.toMap((ODocument) objToClean, false); 
+            return DocumentUtil.toMap((ODocument) objToClean, null, false);
         } else if (objToClean instanceof List) {
             logger.trace("Checking embedded list {} ", objToClean);
             return toSimpleModel((List) objToClean);
@@ -186,14 +196,13 @@ public class DocumentUtil  {
      * to OrientDB document
      * @param objModel the JSON object structure to convert
      * @param docToPopulate an optional existing ODocument to update with new values from {@code objModel}
-     * @param db the database to associate with the ODocument
      * @param orientDocClass the OrientDB class of the ODocument to create
      * @return the converted orientdb document, or null if objModel was null
      * @throws ConflictException when the revision in the Object model is invalid
      */
-    public static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, ODatabaseDocumentTx db, String orientDocClass)
+    public static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, String orientDocClass)
             throws ConflictException {
-        return toDocument(objModel, docToPopulate, db, orientDocClass, false, true);
+        return toDocument(objModel, docToPopulate, orientDocClass, false, true);
     }
     
     /**
@@ -202,7 +211,6 @@ public class DocumentUtil  {
      * to OrientDB document
      * @param objModel the JSON object structure to convert
      * @param docToPopulate an optional existing ODocument to update with new values from {@code objModel}
-     * @param db the database to associate with the ODocument
      * @param orientDocClass the OrientDB class of the ODocument to create
      * @param patch whether the objModel passed in is only partial values (replacing and adding values), 
      * or if false replaces the whole document with the given {@code objModel}
@@ -210,13 +218,13 @@ public class DocumentUtil  {
      * @return the converted orientdb document, or null if objModel was null
      * @throws ConflictException when the revision in the Object model is invalid
      */
-    protected static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, ODatabaseDocumentTx db, String orientDocClass, boolean patch, 
+    protected static ODocument toDocument(Map<String, Object> objModel, ODocument docToPopulate, String orientDocClass, boolean patch,
             boolean topLevel) throws ConflictException {
         
         ODocument result = null;
         if (objModel != null) {
             if (docToPopulate == null) {
-                result = new ODocument(db, orientDocClass); 
+                result = new ODocument(orientDocClass);
             } else {
                 result = docToPopulate;
                 if (!patch) {
@@ -238,7 +246,7 @@ public class DocumentUtil  {
             for (Map.Entry<String, Object> entry : objModel.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
-                if (entry.getKey().equals(TAG_ID)) {
+                if (entry.getKey().equals(ServerConstants.OBJECT_PROPERTY_ID)) {
                     // OpenIDM ID mapping
                     if (topLevel) {
                         if (!result.containsField(ORIENTDB_PRIMARY_KEY) 
@@ -247,10 +255,10 @@ public class DocumentUtil  {
                             result.field(ORIENTDB_PRIMARY_KEY, value);
                         }
                     }
-                } else if (key.equals(TAG_REV)) {
+                } else if (key.equals(ServerConstants.OBJECT_PROPERTY_REV)) {
                     // OpenIDM revision to document version mapping
                     if (topLevel) {
-                        String revString = (String) objModel.get(TAG_REV);
+                        String revString = (String) objModel.get(ServerConstants.OBJECT_PROPERTY_REV);
                         if (revString != null) {
                             int rev = parseVersion(revString);
                             logger.trace("Setting version to {}", rev);
@@ -278,7 +286,7 @@ public class DocumentUtil  {
                     logger.trace("Instantiate new ODocument to represent embedded map for {}.", key);
                     existingDoc = new ODocument(); 
                     //} 
-                    ODocument converted = toDocument((Map<String, Object>) value, existingDoc, db, null, patch, false);
+                    ODocument converted = toDocument((Map<String, Object>) value, existingDoc, null, patch, false);
                     result.field(entry.getKey(), converted, OType.EMBEDDED);
                 } else {
                     logger.trace("Setting field {} to value {}", key, value);
