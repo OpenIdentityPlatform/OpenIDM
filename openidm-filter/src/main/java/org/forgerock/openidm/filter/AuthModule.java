@@ -27,6 +27,7 @@ package org.forgerock.openidm.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,20 +36,17 @@ import java.util.Set;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.security.Password;
 
-import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.filter.AuthFilter.AuthData;
-import org.forgerock.openidm.http.ContextRegistrator;
+
 
 import org.forgerock.json.fluent.JsonValue;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import org.eclipse.jetty.plus.jaas.spi.UserInfo;
 
@@ -60,18 +58,22 @@ public class AuthModule {
     final static Logger logger = LoggerFactory.getLogger(AuthModule.class);
 
     // default properties set in config/system.properties
-    String queryId;
-    String queryOnResource;
-    String internalUserQueryId;
-    String queryOnInternalUserResource;
-    String userIdProperty;
-    String userCredentialProperty;
-    String userRolesProperty;
-    List<String> defaultRoles;
+    private final String queryId;
+    private final String queryOnResource;
+    private final String internalUserQueryId;
+    private final String queryOnInternalUserResource;
+    private final String userIdProperty;
+    private final String userCredentialProperty;
+    private final String userRolesProperty;
+    private final List<String> defaultRoles;
 
+    private final CryptoService cryptoService;
+    private final ServerContext context;
     // configuration conf/authentication.json
 
-    public AuthModule(JsonValue config) {
+    public AuthModule(CryptoService cryptoService, ServerContext context, JsonValue config) {
+        this.cryptoService = cryptoService;
+        this.context = context;
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = config.get("queryId").defaultTo("credential-query").asString();
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
@@ -100,35 +102,43 @@ public class AuthModule {
 
     /**
      * Authenticate the given username and password
-     * @param authData The current authentication data to validate and augment, with the username supplied
-     * @param password The supplied password to validate
-     * @return the authentication data augmented with role, id, status info. Whether authentication was successful is 
-     * carried by the status property 
+     * 
+     * @param authcid
+     *            the principal that the client used during authentication. This
+     *            might be a user name, an email address, etc. The
+     *            authentication ID may be used for logging or auditing but
+     *            SHOULD NOT be used for authorization decisions.
+     * @param password
+     *            The supplied password to validate
+     * @param authzid
+     * @return the authentication data augmented with role, id, status info.
+     *         Whether authentication was successful is carried by the status
+     *         property
      */
-    public AuthData authenticate(AuthData authData, String password) {
+    public SecurityContext authenticate(String authcid, String password,final  Map<String, Object> authzid) throws AuthException {
 
-        boolean authenticated = authPass(queryId, queryOnResource, authData.username, password, authData);
+        boolean authenticated = authPass(queryId, queryOnResource, authcid, password, authzid);
         if (!authenticated) {
             // Authenticate against the internal user table if authentication against managed users failed
-            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authData.username, password, authData);
-            authData.resource = queryOnInternalUserResource;
+            authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authcid, password, authzid);
+            authzid.put(SecurityContext.AUTHZID_COMPONENT, queryOnInternalUserResource);
         } else {
-            authData.resource = queryOnResource;
+            authzid.put(SecurityContext.AUTHZID_COMPONENT, queryOnResource);
         }
-        authData.status = authenticated;
-        
-        return authData;
+
+        if (!authenticated) {
+            throw new AuthException(authcid);
+        }
+
+        return new SecurityContext(new RootContext(), authcid, authzid);
     }
 
     private boolean authPass(String passQueryId, String passQueryOnResource,
-            String login, String password, AuthData authData) {
-        UserInfo userInfo = null;
+            String login, String password, final  Map<String, Object> authzid) {
         try {
-            userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login, authData);
+            UserInfo userInfo = getRepoUserInfo(passQueryId, passQueryOnResource, login, authzid);
             if (userInfo != null && userInfo.checkCredential(password)) {
-                List<String> roles = authData.roles;
-                roles.clear();
-                roles.addAll(userInfo.getRoleNames());
+                authzid.put(SecurityContext.AUTHZID_ROLES, Collections.unmodifiableList(userInfo.getRoleNames()));
                 return true;
             } else {
                 logger.debug("Authentication failed for {} due to invalid credentials", login);
@@ -141,10 +151,10 @@ public class AuthModule {
     }
 
     private UserInfo getRepoUserInfo (String repoQueryId, String repoResource, String username,
-            AuthData authData) throws Exception {
+                                      final  Map<String, Object> authzid) throws Exception {
         UserInfo user = null;
         Credential credential = null;
-        List roleNames = new ArrayList();
+        List<String> roleNames = new ArrayList<String>();
 
         QueryRequest request = Requests.newQueryRequest("repo/"+repoResource);
         request.setQueryId(repoQueryId);
@@ -152,7 +162,7 @@ public class AuthModule {
         request.getAdditionalQueryParameters().put("username", username);
 
         Set<Resource> result = new HashSet<Resource>();
-        QueryResult queryResult = getRepo().query(new RootContext(),request,result);
+        context.getConnection().query(context,request,result);
 
         if (result.size() > 1) {
             logger.warn("Query to match user credentials found more than one matching user for {}", username);
@@ -174,7 +184,7 @@ public class AuthModule {
                 retrId = entry.get(userIdProperty).asString();
 
                 retrCredPropName = userCredentialProperty;
-                retrCred = getCrypto().decryptIfNecessary(entry.get(userCredentialProperty)).asString();
+                retrCred = cryptoService.decryptIfNecessary(entry.get(userCredentialProperty)).asString();
 
                 // Since userRoles are optional, check before we go to retrieve it
                 if (userRolesProperty != null && entry.isDefined(userRolesProperty)) {
@@ -195,7 +205,7 @@ public class AuthModule {
                         if (nonInternalCount == 1) {
                             // By convention the first property is the cred
                             //decrypt if necessary
-                            retrCred = getCrypto().decryptIfNecessary(entry.get(key)).asString();
+                            retrCred = cryptoService.decryptIfNecessary(entry.get(key)).asString();
                             retrCredPropName = key;
                         } else if (nonInternalCount == 2) {
                             // By convention the second property can define roles
@@ -206,7 +216,7 @@ public class AuthModule {
                 }
             }
 
-            authData.userId = retrId; // The internal user id can be different than the login user name
+            authzid.put(SecurityContext.AUTHZID_ID, retrId); // The internal user id can be different than the login user name
             if (retrId == null) {
                 logger.warn("Query for credentials did not contain expected result property defining the user id");
             } else if (retrCred == null && retrCredPropName == null) {
@@ -230,8 +240,8 @@ public class AuthModule {
         Credential credential = null;
         if (retrCred instanceof String) {
             if (allowStringifiedEncryption) {
-                if (getCrypto().isEncrypted((String)retrCred)) {
-                    JsonValue jsonRetrCred = getCrypto().decrypt((String)retrCred);
+                if (cryptoService.isEncrypted((String) retrCred)) {
+                    JsonValue jsonRetrCred = cryptoService.decrypt((String) retrCred);
                     retrCred = jsonRetrCred == null ? null : jsonRetrCred.asString();
                 }
             }
@@ -239,8 +249,8 @@ public class AuthModule {
         } else if (retrCred != null) {
             if (retrCred instanceof Map) {
                 JsonValue jsonRetrCred = new JsonValue(retrCred);
-                if (getCrypto().isEncrypted(jsonRetrCred)) {
-                    retrCred = getCrypto().decrypt(jsonRetrCred);
+                if (cryptoService.isEncrypted(jsonRetrCred)) {
+                    retrCred = cryptoService.decrypt(jsonRetrCred);
                     credential = new Password((String) retrCred);
                 } else {
                     logger.warn("Unknown credential type in id: {} for: {} credential used from: {}. "
@@ -256,11 +266,11 @@ public class AuthModule {
         return credential;
     }
 
-    List addRoles(List existingRoleNames, Object retrRoles, String retrRolesPropName, List defaultRoles) {
+    List<String> addRoles(List<String> existingRoleNames, Object retrRoles, String retrRolesPropName, List<String> defaultRoles) {
         if (retrRoles instanceof Collection) {
             existingRoleNames.addAll((Collection) retrRoles);
         } else if (retrRoles instanceof String) {
-            List parsedRoles = parseCommaDelimitedRoles((String)retrRoles);
+            List<String> parsedRoles = parseCommaDelimitedRoles((String)retrRoles);
             existingRoleNames.addAll(parsedRoles);
         } else if (retrRolesPropName != null) {
             logger.warn("Unknown roles type retrieved from query in property, expected Collection: {} type: {}",
@@ -272,29 +282,13 @@ public class AuthModule {
         return existingRoleNames;
     }
 
-    private List parseCommaDelimitedRoles(String rawRoles) {
-        List result = new ArrayList();
-        if (rawRoles != null) {
+    private List<String> parseCommaDelimitedRoles(String rawRoles) {
+        List<String> result = new ArrayList<String>();
+        if (rawRoles instanceof String) {
             String[] split = rawRoles.split(",");
             result = Arrays.asList(split);
         }
         return result;
-    }
-
-
-    Connection getRepo() {
-        // TODO: switch to service trackers
-        BundleContext ctx = ContextRegistrator.getBundleContext();
-        ServiceReference<Connection> repoRef = ctx.getServiceReference(Connection.class);
-        return ctx.getService(repoRef);
-    }
-
-    CryptoService getCrypto() {
-        // TODO: switch to service trackers
-        BundleContext ctx = ContextRegistrator.getBundleContext();
-        ServiceReference cryptoRef = ctx.getServiceReference(CryptoService.class.getName());
-        CryptoService crypto = (CryptoService) ctx.getService(cryptoRef);
-        return crypto;
     }
 }
 

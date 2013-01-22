@@ -65,13 +65,13 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-shell</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-rest</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-external-email</artifactId>
@@ -83,26 +83,26 @@
             <artifactId>openidm-jetty-fragment</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-policy</artifactId>
             <version>${openidm.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner-openicf</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-orientdb</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-jdbc</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-servlet</artifactId>
@@ -118,7 +118,7 @@
             <artifactId>openidm-servletfilter-registrator</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-scheduler</artifactId>
             <version>${openidm.version}</version>
@@ -127,7 +127,7 @@
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-infoservice</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-customendpoint</artifactId>
@@ -138,18 +138,18 @@
             <artifactId>openidm-security-jetty</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-ui</artifactId>
             <version>${project.version}</version>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-smartevent</artifactId>
             <version>${project.version}</version>
-            <!- - To satisfy both maven unit tests and OSGi packaging
+            <!-- To satisfy both maven unit tests and OSGi packaging
                  this embedded jar is included as a dependency for maven
-                 purposes, but explicitly excluded for the OSGi packaging - ->
+                 purposes, but explicitly excluded for the OSGi packaging -->
             <exclusions>
                 <exclusion>  
                     <groupId>com.googlecode.disruptor</groupId>
@@ -157,7 +157,7 @@
                 </exclusion>
             </exclusions> 
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-workflow-activiti</artifactId>
             <version>${project.version}</version>

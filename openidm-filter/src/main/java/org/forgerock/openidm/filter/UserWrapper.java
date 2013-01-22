@@ -1,22 +1,32 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
 package org.forgerock.openidm.filter;
 
-// Java SE
+import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.ServerContext;
+
 import java.security.Principal;
 import java.util.ArrayList;  
 import java.util.Collections;
@@ -24,13 +34,9 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-// Servlet  
 import javax.servlet.http.HttpServletRequest;  
 import javax.servlet.http.HttpServletRequestWrapper;
 
-// SLF4J
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Adapts the servlet request to implement OpenIDM's default authentication.
@@ -42,36 +48,47 @@ class UserWrapper extends HttpServletRequestWrapper {
 
     /** The user principal name, as provided by the authentication filter. */
     private final String username;
-    
+
     /** The internal user id, as provided by the authentication filter. */
-    private final String userId;
+    //private final String userId;
 
     /** A (case-sensitive) list of roles, as provided by the authentication filter. */
     private final List<String> roles;
+
+    private final SecurityContext securityContext;
 
     /**
      * Contructs a new user wrapper.
      *
      * @param request the HTTP servlet request being adapted.
-     * @param username the name of the authenticated user.
-     * @param roles the roles assigned to the authenticated user.
+     * @param securityContext the authenticated context.
      */
-    public UserWrapper(HttpServletRequest request, String username, 
-            String userId, List<String> roles) {
+    public UserWrapper(HttpServletRequest request, final SecurityContext securityContext) {
         super(request);
-        this.username = username;
-        this.userId = userId;
-        this.roles = roles;
+        this.securityContext = securityContext;
+            username = securityContext.getAuthenticationId();
+            if (securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_GROUPS) instanceof List) {
+                roles = (List<String>) securityContext.getAuthorizationId().get(SecurityContext.AUTHZID_GROUPS);
+            } else {
+                roles = null;
+            }
+
+    }
+
+    public SecurityContext getServerContext() {
+        return securityContext;
     }
 
     /**
      * Returns {@code true} if the header should be suppressed by this filter.
      */
     private static boolean suppress(String header) {
-        // optimiziation: avoid lowercasing every header string
-        return (header.length() >= 10 && header.charAt(1) == '-' &&
+        // optimization: avoid lowercasing every header string
+        // For now, only suppress the password header (but not user name or re-auth)
+        boolean suppress = (header.length() >= 10 && header.charAt(1) == '-' &&
                 header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-") && 
-                !header.equalsIgnoreCase(AuthFilter.HEADER_REAUTH_PASSWORD));
+                header.equalsIgnoreCase(AuthFilter.HEADER_PASSWORD));
+        return suppress;
     }
 
     private static Enumeration<String> emptyEnumeration() {
@@ -116,12 +133,12 @@ class UserWrapper extends HttpServletRequestWrapper {
     }
 
     @Override
-    public Enumeration getHeaders(String name) {
+    public Enumeration<String> getHeaders(String name) {
         return (suppress(name) ? emptyEnumeration() : super.getHeaders(name));
     }
 
     @Override
-    public Enumeration getHeaderNames() {
+    public Enumeration<String> getHeaderNames() {
         ArrayList<String> names = new ArrayList<String>();
         Enumeration<String> e = super.getHeaderNames();
         while (e.hasMoreElements()) {

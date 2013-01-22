@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2012 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-core</artifactId>
+            <artifactId>openidm-enhanced-config</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
@@ -46,7 +46,7 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -64,7 +64,7 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
+            <artifactId>fest-assert-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -82,8 +82,8 @@
                     <configuration>
                         <author>false</author>
                         <links>
-                            <link>http://docs.oracle.com/javase/6/docs/api</link>
-                            <link>http://java.sun.com/products/servlet/2.5/docs/servlet-2_5-mr2/</link>
+                            <link>http://docs.oracle.com/javase/6/docs/api/</link>
+                            <link>http://download.eclipse.org/jetty/stable-8/apidocs/</link>
                         </links>
                     </configuration>
                     <executions>
@@ -118,7 +118,7 @@
                     <instructions>
                         <!-- allow for dynamic discovery of bundles --> 
                         <DynamicImport-Package>*</DynamicImport-Package>
-                        <Export-Package>org.forgerock.openidm.filterregistration;version=${openidm.version}</Export-Package>
+                        <!--Export-Package>org.forgerock.openidm.filterregistration;version=${openidm.version}</Export-Package-->
                         <Private-Package>org.forgerock.openidm.filterregistration.impl</Private-Package>
                     </instructions>
                 </configuration>

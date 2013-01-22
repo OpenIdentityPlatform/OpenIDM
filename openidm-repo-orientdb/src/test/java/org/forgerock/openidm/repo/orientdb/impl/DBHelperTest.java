@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -35,8 +35,6 @@ import com.orientechnologies.orient.server.OServerMain;
 import org.forgerock.json.fluent.JsonValue;
 import org.testng.annotations.*;
 import static org.testng.Assert.*;
-import static org.fest.assertions.Assertions.assertThat;
-import static org.fest.assertions.MapAssert.entry;
 
 public class DBHelperTest {
 
