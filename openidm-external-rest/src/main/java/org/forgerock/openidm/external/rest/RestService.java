@@ -88,7 +88,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "ForgeRock AS"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "external/rest")
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/external/rest")
 })
 public class RestService implements SingletonResourceProvider {
 

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import com.orientechnologies.orient.core.config.OGlobalConfiguration;
+import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
 import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
 import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool;
 import com.orientechnologies.orient.graph.gremlin.OGremlinHelper;
@@ -60,7 +61,6 @@ public class EmbeddedOServerService {
     final static Logger logger = LoggerFactory.getLogger(EmbeddedOServerService.class);
 
     OServer orientDBServer;
-    OGremlinHelper helper;
 
     void activate(JsonValue config) throws Exception {
         logger.trace("Activating Service with configuration {}", config);
@@ -78,13 +78,9 @@ public class EmbeddedOServerService {
                 orientDBServer.activate();
 
                 OGremlinHelper.global().create();
-                OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false);
-                OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
-                // Start JVM java -Dorientdb.storage.keepOpen=true ...
+                //OGlobalConfiguration.CACHE_LEVEL1_ENABLED.setValue(false);
+                //OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
                 //OGremlinHelper.global().create();
-
-                OGraphDatabase db = new OGraphDatabase("local:/tmp/db");
-                db.open("admin", "admin");
 
                 logger.info("Embedded DB server started.");
             }
@@ -94,24 +90,12 @@ public class EmbeddedOServerService {
         }
     }
 
-    OrientGraph getGraph() {
-        return helper.acquireGraph(getOGraph());
-    }
-
-    OGraphDatabase getOGraph() {
-       return OGraphDatabasePool.global().acquire("local:/tmp/db", "admin", "admin");
-    }
-
-    void releaseGraph(OrientGraph graph) {
-        helper.releaseGraph(graph);
-    }
-
-
     void deactivate() {
         if (orientDBServer != null) {
             orientDBServer.shutdown();
             logger.debug("Embedded DB server stopped.");
         }
+        OGremlinHelper.global().destroy();
     }
 
     // TODO: make configurable

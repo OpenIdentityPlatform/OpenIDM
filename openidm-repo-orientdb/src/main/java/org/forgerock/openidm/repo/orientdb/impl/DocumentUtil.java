@@ -67,6 +67,7 @@ public class DocumentUtil  {
     public static Resource toMap(ODocument doc, List<JsonPointer> fieldFilters) {
         Map<String, Object> result = toMap(doc, fieldFilters, true);
         if (null != result) {
+            result.put("_vertex", doc.getIdentity().toString());
             return new Resource((String) result.get(ServerConstants.OBJECT_PROPERTY_ID),
                     (String) result.get(ServerConstants.OBJECT_PROPERTY_REV), new JsonValue(result));
         }

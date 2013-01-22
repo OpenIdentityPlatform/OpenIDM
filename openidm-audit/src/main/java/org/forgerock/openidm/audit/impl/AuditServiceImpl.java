@@ -48,10 +48,12 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
@@ -73,6 +75,7 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.JsonUtil;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,13 +85,13 @@ import org.slf4j.LoggerFactory;
  * 
  * @author aegloff
  */
-@Component(name = AuditServiceImpl.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE)
+@Component(name = AuditServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
-    @Property(name = "service.description", value = "Audit Service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = AuditService.ROUTER_PREFIX) })
-public class AuditServiceImpl implements AuditService {
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Audit Service"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "/audit/{type}") })
+public class AuditServiceImpl implements CollectionResourceProvider {
 
     public static final String PID = "org.forgerock.openidm.audit";
 
@@ -170,7 +173,7 @@ public class AuditServiceImpl implements AuditService {
      * @see org.forgerock.json.resource.CreateRequest#getNewResourceId()
      */
     public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
-
+        try {
         if (logger.isDebugEnabled()){
             StringBuilder sb = new StringBuilder(request.getResourceName());
             if (null != request.getNewResourceId()){
@@ -247,6 +250,10 @@ public class AuditServiceImpl implements AuditService {
                     auditLogger.toString(), ex.getMessage() });
                 throw ex;
             }
+        }
+            handler.handleResult(null);
+        } catch (Exception e) {
+           handler.handleError(new InternalServerErrorException(e));
         }
     }
 

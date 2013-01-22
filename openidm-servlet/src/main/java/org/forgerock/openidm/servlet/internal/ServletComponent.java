@@ -31,6 +31,7 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -80,16 +81,14 @@ public class ServletComponent implements EventHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)//, target = "(org.forgerock.openidm.servlet=true)")
     protected Router router;
 
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected HttpServletContextFactory servletContextFactory;
+
     @Activate
     protected void activate(ComponentContext context) {
         HttpServlet servlet =
                 new HttpServlet(Resources.newInternalConnectionFactory(router),
-                        new HttpServletContextFactory() {
-                            @Override
-                            public Context createContext(HttpServletRequest request) throws ResourceException {
-                                return new RootContext();
-                            }
-                        });
+                        servletContextFactory);
         // TODO Read these from configuraton
         Dictionary<String,Object> properties = new Hashtable<String,Object>();
         properties.put("alias", "/openidm");
