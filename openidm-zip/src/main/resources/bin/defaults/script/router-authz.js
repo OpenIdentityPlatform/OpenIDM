@@ -31,7 +31,7 @@
  * authentication (assigned an "openidm-cert" role).
  */
 
-/*jslint regexp:false */
+/*jslint regexp:false sub:true */
 /*global httpAccessConfig, allowedOrigins */
 
 
@@ -374,11 +374,12 @@ function passesOriginVerification() {
     var headers = request.parent.headers;
 
     if (typeof (headers["X-Requested-With"]) !== "undefined" || 
-        typeof (headers.Authorization) !== "undefined" || 
+        typeof (headers["Authorization"]) !== "undefined" || 
         typeof (headers["X-OpenIDM-Username"]) !== "undefined") {
         
         // CORS requests will have the Origin header included; verify that the origin given is allowed.
-        if (typeof (headers.Origin) !== "undefined" && !contains(allowedOrigins, headers.Origin) ) {
+        if (typeof (headers["Origin"]) !== "undefined" && typeof allowedOrigins !== "undefined" &&
+                !contains(allowedOrigins, headers.Origin) ) {
             return false;
         } else {
             return true;
