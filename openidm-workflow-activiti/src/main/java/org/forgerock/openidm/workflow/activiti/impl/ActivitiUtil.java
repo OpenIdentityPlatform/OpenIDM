@@ -23,11 +23,17 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.activiti.engine.impl.context.Context;
+import org.activiti.engine.impl.identity.Authentication;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.JsonResourceContext;
+import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.util.DateUtil;
 import org.joda.time.DateTime;
 
@@ -97,7 +103,7 @@ public class ActivitiUtil {
     public static String getParamFromRequest(JsonValue request, String paramName) {
         return request.get(ActivitiConstants.REQUEST_PARAMS).get(paramName).asString();
     }
-    
+
     private static class DatePropertyTransformer implements JsonTransformer {
         @Override
         public void transform(JsonValue value) throws JsonException {
@@ -106,6 +112,33 @@ public class ActivitiUtil {
                 if (d != null){
                     value.setObject(d.toDate());
                 }
+            }
+        }
+    }
+    
+    public static JsonValue updateActivitiContext(String userName) {
+        JsonValue context = JsonResourceContext.newContext("activiti", JsonResourceContext.newRootContext());
+        HashMap<String, Object> security = new HashMap<String, Object>();
+        security.put("username", userName);
+        context.put("security", security);
+        return context;
+    }
+    
+    static void checkAndSetContext() {
+        String userName = Authentication.getAuthenticatedUserId();
+        JsonValue objectSetContext = ObjectSetContext.get();
+                
+        if (objectSetContext == null){  //async call
+            JsonValue savedContext = (JsonValue) Context.getExecutionContext().getExecution().getVariable("openidmcontext");
+            if (savedContext != null) {
+                ObjectSetContext.push(savedContext);
+                if (userName != null && !userName.equals(ActivityLog.getRequester(savedContext))){
+                    ObjectSetContext.push(ActivitiUtil.updateActivitiContext(userName));
+                }
+            }
+        } else {
+            if (userName != null && !userName.equals(ActivityLog.getRequester(objectSetContext))){
+                ObjectSetContext.push(ActivitiUtil.updateActivitiContext(userName));
             }
         }
     }
