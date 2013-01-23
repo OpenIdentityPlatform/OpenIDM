@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.filter;
@@ -68,10 +68,12 @@ class UserWrapper extends HttpServletRequestWrapper {
      * Returns {@code true} if the header should be suppressed by this filter.
      */
     private static boolean suppress(String header) {
-        // optimiziation: avoid lowercasing every header string
-        return (header.length() >= 10 && header.charAt(1) == '-' &&
+        // optimization: avoid lowercasing every header string
+        // For now, only suppress the password header (but not user name or re-auth)
+        boolean suppress = (header.length() >= 10 && header.charAt(1) == '-' &&
                 header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-") && 
-                !header.equalsIgnoreCase(AuthFilter.HEADER_REAUTH_PASSWORD));
+                header.equalsIgnoreCase(AuthFilter.HEADER_PASSWORD));
+        return suppress;
     }
 
     private static Enumeration<String> emptyEnumeration() {

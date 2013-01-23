@@ -55,6 +55,7 @@ import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.objset.JsonResourceObjectSet;
+import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.objset.ServiceUnavailableException;
 import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
@@ -245,6 +246,7 @@ public class ActivitiServiceImpl implements JsonResource {
                         List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
                         resolverFactories.add(new OpenIDMResolverFactory());
                         configuration.setResolverFactories(resolverFactories);
+                        configuration.getVariableTypes().addType(new JsonValueType());
                         configuration.setScriptingEngines(new OsgiScriptingEngines(new ScriptBindingsFactory(resolverFactories)));
 
                         //We are done!!
@@ -387,7 +389,12 @@ public class ActivitiServiceImpl implements JsonResource {
     @Override
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         if (activitiResource != null) {
-            return activitiResource.handle(request);
+            try{
+                ObjectSetContext.push(request);
+                return activitiResource.handle(request);
+            } finally {
+                ObjectSetContext.pop();
+            }
         } else {
             throw new ServiceUnavailableException("No workflow resource is available");
         }

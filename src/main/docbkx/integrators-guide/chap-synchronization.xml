@@ -220,28 +220,26 @@
  "stage":"COMPLETED_SUCCESS",
  "stageDescription":"reconciliation completed.",
  "progress":{
-    "progress":{
-       "source":{
-          "existing":{
-             "processed":1001,
-             "total":"1001"
-          }
-       },
-       "target":{
-          "existing":{
-             "processed":1001,
-             "total":"1001"
-          },
-          "created":0
-       },
-       "links":{
-          "existing":{
-             "processed":1001,
-             "total":"1001"
-          },
-          "created":0
-       }
-    }
+   "source":{
+      "existing":{
+         "processed":1001,
+         "total":"1001"
+      }
+   },
+   "target":{
+      "existing":{
+         "processed":1001,
+         "total":"1001"
+      },
+      "created":0
+   },
+   "links":{
+      "existing":{
+         "processed":1001,
+         "total":"1001"
+      },
+      "created":0
+   }
  },
  "started":"2012-11-18T08:48:00.031Z",
  "ended":"2012-11-18T08:48:00.160Z"},
@@ -352,11 +350,10 @@
      <varlistentry>
       <term><literal>progress</literal></term>
       <listitem>
-       <para>The progress object has the following structure (anotated here
+       <para>The progress object has the following structure (annotated here
        with comments):</para>
        <screen width="96">
 "progress":{
-   "progress":{
       "source":{             // Progress on the set of existing entries in the mapping source
          "existing":{
             "processed":1001,
@@ -377,7 +374,6 @@
          },
          "created":0         // Denotes new links that were created
       }
-   }
 },
        </screen>
       </listitem>
@@ -967,7 +963,7 @@
 </section>
 
  <section xml:id="handling-sync">
-  <title>Synchronization Situations &amp; Actions</title>
+  <title>Synchronization Situations and Actions</title>
    <indexterm>
     <primary>Synchronization</primary>
     <secondary>Situations</secondary>
@@ -1025,7 +1021,7 @@
   takes the default action for the situation.</para>
 
   <para>The situations and their corresponding actions are described in the
-  sections below.</para>
+  following sections.</para>
 
   <section xml:id="sync-situations">
    <title>Synchronization Situations</title>
@@ -1057,7 +1053,7 @@
     <listitem>
      <para>All valid objects on the target system</para>
 
-     <para>Object found in the target system get <literal>target=1</literal>.
+     <para>Objects found in the target system get <literal>target=1</literal>.
      Objects not found in the target system get
      <literal>target=0</literal>.</para>
     </listitem>
@@ -1104,7 +1100,7 @@
     <varlistentry>
      <term>"MISSING" (qualifies=1, link=1, target=0)</term>
      <listitem>
-      <para>The mapping is qualified for a target object, and there is a
+      <para>The mapping qualifies for a target object, and there is a
       qualified link to a target object, but the target object is missing.
       Only detected during reconciliation and source object changes in
       synchronous mappings. Default action: "EXCEPTION".</para>
@@ -1119,13 +1115,29 @@
      </listitem>
     </varlistentry>
     <varlistentry>
-     <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
-     <listitem>
-      <para>The source object is unqualified (by validSource), no link, no
-      target is found. Detected during source object changes and
-      reconciliation. Default action: "IGNORE".</para>
-     </listitem>
-    </varlistentry>
+       <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
+       <listitem>
+           <para>The source object is unqualified (by validSource), no link, no
+               target is found. Detected during source object changes and
+               reconciliation. Default action: "IGNORE".</para>
+       </listitem>
+   </varlistentry>
+   <varlistentry>
+       <term>"LINK_ONLY" (qualifies=0, link=1, target=0)</term>
+       <listitem>
+           <para>The source object is unqualified (by validSource), a link is
+           found, but no target object is found. Detected during source object
+           changes and reconciliation. Default action: "IGNORE".</para>
+       </listitem>
+   </varlistentry>
+   <varlistentry>
+       <term>"ALL_GONE" (qualifies=0, link=0, no previous object available)</term>
+       <listitem>
+           <para>The source object is unqualified (by validSource), no link is
+               found, and the server is unable to correlate, as the source cannot
+               supply the deleted object. Default action: "IGNORE".</para>
+       </listitem>
+   </varlistentry>
    </variablelist>
 
     <para>Based on the values assigned to objects during target reconciliation,
@@ -1510,6 +1522,36 @@
      </listitem>
     </varlistentry>
    </variablelist>
+  </section>
+
+  <section xml:id="script-actions">
+      <title>Providing a Script as an Action</title>
+
+      <para>In addition to the static synchronization actions described in the
+      previous section, you can provide a script that is run in specific
+      synchronization situations. The following extract of a sample
+      <filename>sync.json</filename> file specifies that when a synchronization
+      operation assesses an entry as <literal>ABSENT</literal>, the workflow
+      named <literal>managedUserApproval</literal> is invoked. The parameters
+      for the workflow are passed in as properties of the <literal>action</literal>
+      parameter.</para>
+
+      <programlisting language="javascript">
+{
+    "situation" : "ABSENT",
+    "action" : {
+        "workflowName" : "managedUserApproval",
+        "type" : "text/javascript",
+        "file" : "bin/defaults/script/workflow/workflow.js"
+    }
+}
+      </programlisting>
+
+      <para>The variables available to these scripts are described in
+      <link xlink:href="admin-guide#appendix-scripting"
+      xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Variables Available in Scripts</citetitle></link> in the
+      <citetitle>Scripting Appendix</citetitle>.</para>
   </section>
  </section>
 
