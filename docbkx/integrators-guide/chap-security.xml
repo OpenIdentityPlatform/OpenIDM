@@ -106,7 +106,9 @@
   that lets you use either an HTTP Basic like mechanism or OpenIDM-specific 
   headers, setting a cookie in the response that you can use for subsequent 
   authentication. If you attempt to access OpenIDM URLs without the appropriate 
-  headers or session cookie, OpenIDM returns HTTP 401 Unauthorized.</para>
+  headers or session cookie, OpenIDM returns HTTP 401 Unauthorized. If you
+  use a session cookie, you must include an additional header that indicates
+  the origin of the request.</para>
 
   <para>The following examples show successful authentications.</para>
 
@@ -146,6 +148,7 @@ Transfer-Encoding: chunked
 $ curl
  --dump-header /dev/stdout
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
+ --header "X-Requested-With: OpenIDM Plugin"
  "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
 
 HTTP/1.1 200 OK
@@ -158,8 +161,14 @@ Transfer-Encoding: chunked
 {"query-time-ms":1,"result":[{"_id":"ajensen"},{"_id":"bjensen"}]}</screen>
 
   <para>Notice that the last example uses the cookie OpenIDM set in the
-  response to the penultimate request. You can also request one-time
-  authentication without a session.</para>
+  response to the previous request, and includes the
+  <literal>X-Requested-With</literal> header to indicate the origin of the
+  request. The value of the header can be any string, but should be informative
+  for logging purposes. If you do not include the
+  <literal>X-Requested-With</literal> header, OpenIDM returns HTTP 403
+  Forbidden.</para>
+
+  <para>You can also request one-time authentication without a session.</para>
 
   <screen>$ curl
  --dump-header /dev/stdout
@@ -183,6 +192,7 @@ Transfer-Encoding: chunked
   <screen>$ curl
  --dump-header /dev/stdout
  --header "Cookie: JSESSIONID=ixnekr105coj11ji67xcluux8"
+ --header "X-Requested-With: OpenIDM Plugin"
  --header "X-OpenIDM-Logout: true"
  "http://localhost:8080/openidm/"
 
