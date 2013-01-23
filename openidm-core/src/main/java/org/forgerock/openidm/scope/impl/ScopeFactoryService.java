@@ -126,6 +126,18 @@ public class ScopeFactoryService implements ScopeFactory {
         }
     }
     
+    private String getWorkingLocation() {
+        return identityServer.getWorkingLocation().getPath();
+    }
+    
+    private String getProjectLocation() {
+        return identityServer.getProjectLocation().getPath();
+    }
+    
+    private String getInstallLocation() {
+        return identityServer.getInstallLocation().getPath();
+    }
+    
     @Override
     public Map<String, Object> newInstance(final JsonValue context) {
         Map<String, Object> scope = new HashMap<String, Object>();
@@ -142,6 +154,27 @@ public class ScopeFactoryService implements ScopeFactory {
                         String def = p.get(1).asString();
                         boolean useCache = p.get(2).defaultTo(false).asBoolean();
                         return getProperty(key, def, useCache);
+                    }
+                });
+                identityServer.put("getWorkingLocation", new Function() {
+                    @Override
+                    public Object call(Map<String, Object> scope,
+                     Map<String, Object> _this, List<Object> params) throws Throwable {
+                        return getWorkingLocation();
+                    }
+                });
+                identityServer.put("getProjectLocation", new Function() {
+                    @Override
+                    public Object call(Map<String, Object> scope,
+                     Map<String, Object> _this, List<Object> params) throws Throwable {
+                        return getProjectLocation();
+                    }
+                });
+                identityServer.put("getInstallLocation", new Function() {
+                    @Override
+                    public Object call(Map<String, Object> scope,
+                     Map<String, Object> _this, List<Object> params) throws Throwable {
+                        return getInstallLocation();
                     }
                 });
                 return identityServer;
