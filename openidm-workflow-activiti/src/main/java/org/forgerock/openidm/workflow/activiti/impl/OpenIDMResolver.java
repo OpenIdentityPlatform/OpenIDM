@@ -41,6 +41,7 @@ public class OpenIDMResolver implements Resolver {
     @Override
     public Object get(Object key) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
+        ActivitiUtil.checkAndSetContext();
         return session.getOpenIDM();
     }
 }

@@ -23,10 +23,14 @@
  */
 package org.forgerock.openidm.workflow.remote;
 
+import java.io.IOException;
 import java.util.logging.Level;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;
+import org.activiti.engine.impl.ProcessEngineImpl;
+import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.restlet.JsonResourceRestlet;
+import org.forgerock.openidm.objset.ObjectSetContext;
 import org.forgerock.openidm.workflow.activiti.impl.ActivitiResource;
 import org.restlet.Application;
 import org.restlet.Request;
@@ -35,6 +39,9 @@ import org.restlet.Restlet;
 import org.restlet.data.ChallengeScheme;
 import org.restlet.data.Form;
 import org.restlet.data.Parameter;
+import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.openidm.workflow.activiti.impl.JsonValueType;
 import org.restlet.security.ChallengeAuthenticator;
 import org.restlet.security.SecretVerifier;
 import org.restlet.security.Verifier;
@@ -60,6 +67,7 @@ public class ActivitiIntegrationApplication extends Application {
     public synchronized Restlet createInboundRoot() {
         try {
             engine = ProcessEngines.getDefaultProcessEngine();
+            ((ProcessEngineImpl)engine).getProcessEngineConfiguration().getVariableTypes().addType(new JsonValueType());
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(ActivitiIntegrationApplication.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -82,10 +90,22 @@ public class ActivitiIntegrationApplication extends Application {
                 } else {
                     boolean authenticated = super.authenticate(request, response);
                     if (authenticated) {
-                        Parameter user = ((Form) request.getAttributes().get("org.restlet.http.headers")).getFirst("X-OpenIDM-Username", true);
+                        Parameter user = ((Form) request.getAttributes().get("org.restlet.http.headers")).getFirst("X-OpenIDM-ActivitiUsername", true);
                         if (user != null) {
                             engine.getIdentityService().setAuthenticatedUserId(user.getValue());
                         }
+                    }
+                    ObjectMapper mapper = new ObjectMapper();
+                    Parameter idmContext = ((Form) request.getAttributes().get("org.restlet.http.headers")).getFirst("X-OpenIDM-Context", true);
+                    JsonValue objectSetContext = null;
+                    ObjectSetContext.clear();
+                    if (idmContext != null){
+                        try {
+                            objectSetContext = new JsonValue(mapper.readValue(new String(Base64.decodeBase64(idmContext.getValue())), Object.class));
+                        } catch (IOException ex) {
+                            java.util.logging.Logger.getLogger(ActivitiIntegrationApplication.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        ObjectSetContext.push(objectSetContext);
                     }
                     return authenticated;
                 }
