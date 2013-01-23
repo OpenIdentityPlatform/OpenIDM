@@ -62,6 +62,7 @@ import org.forgerock.json.resource.SimpleJsonResource;
 import org.forgerock.json.resource.SimpleJsonResource.Method;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.objset.ObjectSetContext;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -84,7 +85,7 @@ public class ActivitiResource implements JsonResource {
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         try {
             ActivitiConstants.WorkflowPath path = getPath(request);
-            Authentication.setAuthenticatedUserId(ActivityLog.getRequester(request));
+            Authentication.setAuthenticatedUserId(ActivityLog.getRequester(ObjectSetContext.get()));
             Method method = request.get("method").required().asEnum(SimpleJsonResource.Method.class);
             switch (path) {
                 case processdefinition:     //workflow/processdefinition
@@ -523,9 +524,8 @@ public class ActivitiResource implements JsonResource {
         String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
         String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
         Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
+        variables.put("openidmcontext", ObjectSetContext.get().get("parent"));
 
-        //TODO consider to put only the parent into the params. parent/security may contain confidential access token
-        //variables.put("openidm-context", new HashMap(params.get("parent").asMap()));
         ProcessInstance instance;
         if (processDefinitionId == null) {
             instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, businessKey, variables);

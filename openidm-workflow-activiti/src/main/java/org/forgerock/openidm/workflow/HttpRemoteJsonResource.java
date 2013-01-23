@@ -35,12 +35,18 @@ import org.restlet.representation.EmptyRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
 import org.restlet.resource.ResourceException;
+import org.apache.commons.codec.binary.Base64;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.openidm.audit.util.ActivityLog;
+import org.forgerock.openidm.objset.ObjectSetContext;
+import org.restlet.engine.http.header.HeaderConstants;
 
 /**
  *
@@ -59,10 +65,6 @@ public class HttpRemoteJsonResource implements JsonResource {
      */
     public static final Method PATCH = new Method("PATCH");
     private final ClientResource remoteClient;
-
-    public HttpRemoteJsonResource() {
-        this("http://localhost:8080/openidm/", "openidm-admin", "openidm-admin");
-    }
 
     public HttpRemoteJsonResource(String url, String user, String pw) {
         Context context = new Context();
@@ -114,6 +116,7 @@ public class HttpRemoteJsonResource implements JsonResource {
         try {
             String id = jsonValues.get("id").isNull() ? "" : jsonValues.get("id").asString();
             Reference remoteRef = new Reference(remoteClient.getReference().getPath() + id);
+            SimpleJsonResource.Method method = jsonValues.get("method").required().asEnum(SimpleJsonResource.Method.class);
 
             // Prepare query params
             JsonValue params = jsonValues.get("params");
@@ -124,7 +127,24 @@ public class HttpRemoteJsonResource implements JsonResource {
                     }
                 }
             }
+            if (SimpleJsonResource.Method.create.equals(method)
+                    && id.endsWith("/")) {
+                 remoteRef.addQueryParameter("_action", "create");
+            }
+            
             clientResource = remoteClient.getChild(remoteRef);
+            
+            ObjectMapper mapper = new ObjectMapper();
+            org.restlet.data.Form additionalHeaders = (org.restlet.data.Form) remoteClient.getRequest().getAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+            if (additionalHeaders == null) {
+                additionalHeaders = new org.restlet.data.Form();
+                remoteClient.getRequest().getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS,
+                        additionalHeaders);
+            }
+
+            String idmcontext = mapper.writeValueAsString(ObjectSetContext.get().asMap());
+            additionalHeaders.set("X-OpenIDM-Context", Base64.encodeBase64String(idmcontext.getBytes()));
+            additionalHeaders.set("X-OpenIDM-ActivitiUsername", ActivityLog.getRequester(jsonValues));
 
             // Prepare payload
             Representation request = null;
@@ -137,12 +157,16 @@ public class HttpRemoteJsonResource implements JsonResource {
             Conditions conditions = new Conditions();
             JsonValue rev = jsonValues.get("rev");
 
-            switch (jsonValues.get("method").required().asEnum(SimpleJsonResource.Method.class)) {
+            switch (method) {
                 case create:
                     //TODO Use condition when org.forgerock.json.resource.restlet.JsonServerResource#doHandle() is fixed
-                    //conditions.setNoneMatch(Arrays.asList(Tag.ALL));
                     clientResource.getRequest().setConditions(conditions);
-                    response = clientResource.put(request);
+                    if (id.endsWith("/")) {
+                        response = clientResource.post(request);
+                    } else {
+                        conditions.setNoneMatch(Arrays.asList(Tag.ALL));
+                        response = clientResource.put(request);
+                    }
                     break;
                 case read:
                     if (!rev.isNull()) {
