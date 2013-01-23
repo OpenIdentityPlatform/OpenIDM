@@ -118,6 +118,7 @@ public class OpenIDMELResolver extends ELResolver {
             OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
             router = session.getOpenIDM();
             context.setPropertyResolved(true);
+            ActivitiUtil.checkAndSetContext();
             try {
                 switch (SimpleJsonResource.Method.valueOf((String) method)) {
                     case read:
