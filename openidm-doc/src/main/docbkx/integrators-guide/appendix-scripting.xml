@@ -869,7 +869,6 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
         </variablelist>
     </section>
 
-    <!-- Fix for OPENIDM-857 - still in progress
     <section xml:id="script-variables">
         <title>Variables Available in Scripts</title>
         <para>The variables that are available to scripts depend on the triggers
@@ -956,6 +955,20 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
                 </listitem>
             </varlistentry>
             <varlistentry>
+                <term>synchronization situation scripts</term>
+                <listitem>
+                    <para><literal>recon.actionParam</literal> - the details of
+                    the synchronization operation in progress. This variable can
+                    be used for asynchronous callbacks to execute the action at
+                    a later stage.</para>
+                    <para><literal>sourceAction</literal> - a boolean that
+                    indicates whether the situation was assessed during the source phase</para>
+                    <para><literal>source</literal> (if found)</para>
+                    <para><literal>target</literal> (if found)</para>
+                    <para>The properties from the configured script object.</para>
+                </listitem>
+            </varlistentry>
+            <varlistentry>
                 <term>taskScanner</term>
                 <listitem>
                     <para>input, objectID</para>
@@ -981,7 +994,7 @@ openidm['delete']('managed/user/'+ user._id, user._rev)
             </varlistentry>
         </variablelist>
     </section>
-    -->
+
     <section xml:id="debugging-scripts">
         <title>Debugging OpenIDM Scripts</title>
 
