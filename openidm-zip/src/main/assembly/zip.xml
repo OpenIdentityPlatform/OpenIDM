@@ -58,9 +58,9 @@
         </fileSet>
         <!-- Create empty logs directory  -->
         <fileSet>
-        	<directory>${project.build.directory}</directory>
+            <directory>${project.build.directory}</directory>
             <excludes>
-             <exclude>**/*</exclude>
+                <exclude>**/*</exclude>
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
@@ -391,6 +391,7 @@
                 <exclude>org.forgerock.openicf.connectors:*</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
+                <exclude>org.forgerock.openidm:openidm-ui</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
@@ -405,12 +406,14 @@
                 <exclude>xmlpull:xmlpull</exclude-->
             </excludes>
         </dependencySet>
-        <!-- Include UI in distribution for use in various web servers -->
+        <!-- Explode UI for easy modification -->
         <dependencySet>
-        	<unpack>true</unpack>
-            <outputDirectory>/openidm/ui</outputDirectory>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/ui/default/bundle-dir</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-ui-ria-admin</include>
+                <include>org.forgerock.openidm:openidm-ui</include>
             </includes>
         </dependencySet>
         <dependencySet>
