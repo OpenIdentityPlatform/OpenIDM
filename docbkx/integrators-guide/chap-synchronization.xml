@@ -2052,7 +2052,14 @@ repoUser = openidm.read("managed/user/ddoe);</programlisting>
   resource.</para>
 
   <programlisting language="javascript">
-externalAccount = openidm.read("system/ldap/account/ddoe");</programlisting>
+externalAccount = openidm.read("system/ldap/account/uid=ddoe,ou=People,dc=example,dc=com");</programlisting>
+  <para>Note that the query targets a DN rather than a UID, as it did in the
+  previous example. The attribute that is used for the <literal>_id</literal>
+  is defined in the connector configuration file and, in this example, is set
+  to <literal>"uidAttribute" : "dn"</literal>. Although it is possible to use
+  a DN (or any unique attribute) for the <literal>_id</literal>, as a best
+  practice, you should use an attribute that is both unique and immutable.
+  </para>
  </section>
 
  <section xml:id="scheduling-synchronization">
