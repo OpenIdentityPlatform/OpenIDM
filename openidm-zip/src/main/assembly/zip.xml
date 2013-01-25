@@ -30,7 +30,6 @@
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
-                <exclude>**/ui-diff/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -59,14 +58,14 @@
         </fileSet>
         <!-- Create empty logs directory  -->
         <fileSet>
-        	<directory>${project.build.directory}</directory>
+            <directory>${project.build.directory}</directory>
             <excludes>
-    			<exclude>**/*</exclude>
-  			</excludes>
+                <exclude>**/*</exclude>
+            </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
         <!-- Setup Sample1  -->
-        <fileSet>
+        <!--fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
             <includes>
                 <include>**</include>
@@ -76,7 +75,7 @@
                 <exclude>data/Example.ldif</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/sample1</outputDirectory>
-        </fileSet>
+        </fileSet-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -438,7 +437,7 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/bundle-dir</outputDirectory>
+            <outputDirectory>/openidm/ui/default/bundle-dir</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui</include>
             </includes>
