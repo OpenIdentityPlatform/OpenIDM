@@ -132,7 +132,7 @@ public class InfoService implements JsonResource {
     Map<String, InfoConfig> defaultConfig;
 
     /**
-     * The registered scripts, mapping from infocontext to the script instance
+     * The registered scripts, mapping from infocontext to the script newBuilder
      */
     Map<String, RegisteredScript> scripts = new HashMap<String, RegisteredScript>();
 

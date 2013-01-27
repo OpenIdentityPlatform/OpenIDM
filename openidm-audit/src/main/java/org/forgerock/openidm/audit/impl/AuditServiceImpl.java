@@ -156,7 +156,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
     /**
      * {@link org.forgerock.json.resource.RequestHandler#handleCreate(org.forgerock.json.resource.ServerContext,
      * org.forgerock.json.resource.CreateRequest, org.forgerock.json.resource.ResultHandler) Adds} a new resource
-     * instance to the collection.
+     * newBuilder to the collection.
      * <p/>
      * Create requests are targeted at the collection itself and may include a user-provided resource ID for the new
      * resource as part of the request itself. The user-provider resource ID may be accessed using the method {@link
@@ -412,7 +412,7 @@ public class AuditServiceImpl implements CollectionResourceProvider {
      * Audit service currently does not support deleting audit entries.
      * <p/>
      *  {@link org.forgerock.json.resource.RequestHandler#handleDelete(org.forgerock.json.resource.ServerContext,
-     * org.forgerock.json.resource.DeleteRequest, org.forgerock.json.resource.ResultHandler) Removes} a resource instance
+     * org.forgerock.json.resource.DeleteRequest, org.forgerock.json.resource.ResultHandler) Removes} a resource newBuilder
      * from the collection.
      *
      * @param context

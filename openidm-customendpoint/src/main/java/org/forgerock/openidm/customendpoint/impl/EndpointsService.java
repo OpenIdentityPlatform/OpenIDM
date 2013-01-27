@@ -23,9 +23,6 @@
  */
 package org.forgerock.openidm.customendpoint.impl;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-
 import javax.script.ScriptException;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -113,11 +110,11 @@ public class EndpointsService implements RequestHandler {
         try {
             // Do more programmatic registration on the Router
             String root = "endpoint/" + context.getProperties().get("config.factory-pid");
-            RouteBuilder builder = RouteBuilder.instance().parseURITemplate(root)
-                    .bindRequestHandler(this).next();
+            RouteBuilder builder = RouteBuilder.newBuilder().withTemplate(root)
+                    .withRequestHandler(this).buildNext();
             //TODO add optional routes
 
-            //builder.bindRequestHandler(this).modeStartsWith().parseURITemplate("/test/").next();
+            //builder.withRequestHandler(this).withModeStartsWith().withTemplate("/test/").buildNext();
 
             scriptEntry =
                     scriptRegistry.takeScript(JSONEnhancedConfig.newInstance()

@@ -29,6 +29,7 @@ package org.forgerock.openidm.provisioner.openicf.impl;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
+import org.forgerock.openidm.provisioner.openicf.internal.OperationHelperBuilder;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.impl.api.APIConfigurationImpl;

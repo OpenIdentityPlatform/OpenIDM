@@ -294,17 +294,17 @@ public class ActivitiResource implements CollectionResourceProvider {
         String id = ActivitiUtil.getIdFromRequest(request);
         JsonValue result = new JsonValue(new HashMap<String, Object>());
         switch (m) {
-            case read:  //detailed information of a running process instance
+            case read:  //detailed information of a running process newBuilder
                 HistoricProcessInstance instance =
                         processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(id).singleResult();
                 if (instance == null) {
                     throw new JsonResourceException(JsonResourceException.NOT_FOUND);
                 }
                 return convertHistoricProcessInstance(result, instance);
-            case delete:    //stop process instance
+            case delete:    //stop process newBuilder
                 if (processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(id).singleResult() != null) {
                     processEngine.getRuntimeService().deleteProcessInstance(id, "Deleted by Openidm");
-                    result.add("Process instance deleted", id);
+                    result.add("Process newBuilder deleted", id);
                     return result;
                 } else {
                     throw new JsonResourceException(JsonResourceException.NOT_FOUND);
@@ -526,10 +526,10 @@ public class ActivitiResource implements CollectionResourceProvider {
     }
     
     /**
-     * Start a workflow process instance
+     * Start a workflow process newBuilder
      *
      * @param request incoming request
-     * @return description of the started process instance
+     * @return description of the started process newBuilder
      * @throws JsonResourceException
      */
     public JsonValue startProcessInstance(JsonValue request) throws JsonResourceException {

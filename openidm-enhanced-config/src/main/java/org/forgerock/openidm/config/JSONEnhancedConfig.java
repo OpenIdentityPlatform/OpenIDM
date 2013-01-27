@@ -71,9 +71,9 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     private static ServiceTracker cryptoTracker;
 
     /**
-     * Creates a new instance of {@code JSONEnhancedConfig}.
+     * Creates a new newBuilder of {@code JSONEnhancedConfig}.
      *
-     * @return new instance of this class.
+     * @return new newBuilder of this class.
      */
     public static JSONEnhancedConfig newInstance() {
         return new JSONEnhancedConfig();
@@ -82,12 +82,12 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     /**
      * Sets the escaping mode.
      * <p/>
-     * If {@code true} then this instance processes the escapes {@code \} character in the sting values otherwise it
+     * If {@code true} then this newBuilder processes the escapes {@code \} character in the sting values otherwise it
      * does not handle specially the {@code \} character.
      *
      * @param escape
      *         {@code true} to enable or {@code false} to disable.
-     * @return this instance.
+     * @return this newBuilder.
      */
     public JSONEnhancedConfig setEscaping(boolean escape) {
         doEscape = escape;

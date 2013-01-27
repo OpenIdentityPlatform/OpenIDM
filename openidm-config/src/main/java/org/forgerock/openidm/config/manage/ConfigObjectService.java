@@ -127,7 +127,7 @@
 //                        Map<String, Object> configEntry = new LinkedHashMap<String, Object>();
 //
 //                        String alias = null;
-//                        Dictionary properties = conf.getProperties();
+//                        Dictionary properties = conf.buildServiceProperties();
 //                        if (properties != null) {
 //                            alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
 //                        }
@@ -154,7 +154,7 @@
 //                if (config == null) {
 //                    throw new NotFoundException("No configuration exists for id " + fullId);
 //                }
-//                Dictionary props = config.getProperties();
+//                Dictionary props = config.buildServiceProperties();
 //                JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 //                JsonValue value = enhancedConfig.getConfiguration(props, this.context.getBundleContext(), fullId, false);
 //                result = value.asMap();
@@ -203,7 +203,7 @@
 //                String qualifiedPid = ParsedId.qualifyPid(parsedId.pid);
 //                config = configAdmin.getConfiguration(qualifiedPid, null);
 //            }
-//            if (config.getProperties() != null) {
+//            if (config.buildServiceProperties() != null) {
 //                handler.handleError( new PreconditionFailedException("Can not create a new configuration with ID "
 //                        + parsedId + ", configuration for this ID already exists."));
 //            }
@@ -258,7 +258,7 @@
 //            ParsedId parsedId = new ParsedId(fullId);
 //            Configuration config = findExistingConfiguration(fullId);
 //
-//            Dictionary existingConfig = (config == null ? null : config.getProperties());
+//            Dictionary existingConfig = (config == null ? null : config.buildServiceProperties());
 //            if (existingConfig == null) {
 //                throw new NotFoundException("No existing configuration found for " + fullId + ", can not update the configuration.");
 //            }
@@ -312,7 +312,7 @@
 //        try {
 //            Configuration config = findExistingConfiguration(fullId);
 //
-//            Dictionary existingConfig = config.getProperties();
+//            Dictionary existingConfig = config.buildServiceProperties();
 //            if (existingConfig == null) {
 //                throw new NotFoundException("No existing configuration found for " + fullId + ", can not delete the configuration.");
 //            }
@@ -407,7 +407,7 @@
 //            }
 //        }
 //        if (null != factoryPid) {
-//            logger.trace("Factory configuration pid: {} instance alias: {}", factoryPid, instanceAlias);
+//            logger.trace("Factory configuration pid: {} newBuilder alias: {}", factoryPid, instanceAlias);
 //        } else {
 //            logger.trace("Managed service configuration pid: {}", pid);
 //        }

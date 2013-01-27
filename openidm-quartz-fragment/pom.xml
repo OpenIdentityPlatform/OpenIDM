@@ -35,14 +35,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-enhanced-config</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-repo</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
@@ -53,6 +51,22 @@
                     <groupId>javax.transaction</groupId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <!-- Commons -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <optional>true</optional>
         </dependency>
         
         <!-- Test Dependencies -->
@@ -76,6 +90,10 @@
                 <configuration>
                     <instructions>
                         <Fragment-Host>org.apache.servicemix.bundles.quartz</Fragment-Host>
+                        <Private-Package>
+                            org.forgerock.openidm.quartz.internal,
+                            org.forgerock.openidm.quartz.impl
+                        </Private-Package>
                         <!--Export-Package>org.forgerock.openidm.quartz.impl;version="${project.version}"</Export-Package-->
                     </instructions>
                 </configuration>

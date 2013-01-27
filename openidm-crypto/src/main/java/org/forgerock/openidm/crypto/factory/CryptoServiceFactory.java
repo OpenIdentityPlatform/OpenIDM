@@ -33,16 +33,16 @@ public class CryptoServiceFactory {
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceFactory.class);
 
     /**
-     * A cryptography service instance
+     * A cryptography service newBuilder
      */
     private static CryptoServiceImpl instance;
     
     /**
-     * Get a cryptography service instance
+     * Get a cryptography service newBuilder
      * The cryptography service can be obtained either through this factory, 
      * or preferrably the OSGi service registry. 
      * This avoids bootstrap order issues with decrypting configuration.
-     * @return a cryptography service instance
+     * @return a cryptography service newBuilder
      */
     public static synchronized CryptoService getInstance() {
         if (instance == null) {

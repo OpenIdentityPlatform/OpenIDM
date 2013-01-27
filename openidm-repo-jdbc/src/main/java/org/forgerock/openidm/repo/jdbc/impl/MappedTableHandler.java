@@ -261,7 +261,7 @@ public class MappedTableHandler implements TableHandler {
      * For update the final objectid is not part of the declarative mapping and needs to be populated separately.
      * @param prepStatement the update or create prepared statement
      * @param tokenPointers the token replacement pointers pointing into the object set to extract the relevant values
-     * @return the next column position if further populating is desired
+     * @return the buildNext column position if further populating is desired
      */
     int populatePrepStatementColumns(PreparedStatement prepStatement, JsonValue objVal, List<JsonPointer> tokenPointers) 
             throws SQLException{

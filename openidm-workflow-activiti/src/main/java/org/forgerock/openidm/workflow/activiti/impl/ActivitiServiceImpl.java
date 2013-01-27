@@ -83,7 +83,7 @@ import org.slf4j.LoggerFactory;
 @References({
     @Reference(name = "JavaDelegateServiceReference",
     referenceInterface = JavaDelegate.class,
-    bind = "bindService",
+    bind = "withService",
     unbind = "unbindService",
     cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
     policy = ReferencePolicy.DYNAMIC),

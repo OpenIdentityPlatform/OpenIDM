@@ -74,7 +74,7 @@
 //     * @param type the relative/local resource name, which needs to be converted to match the OrientDB document class name
 //     * @param params the parameters which include the query id, or the query expression, as well as the
 //     *        token key/value pairs to replace in the query
-//     * @param database a handle to a database connection instance for exclusive use by the query method whilst it is executing.
+//     * @param database a handle to a database connection newBuilder for exclusive use by the query method whilst it is executing.
 //     * @return The query result, which includes meta-data about the query, and the result set itself.
 //     * @throws BadRequestException if the passed request parameters are invalid, e.g. missing query id or query expression or tokens.
 //     */

@@ -28,6 +28,8 @@ package org.forgerock.openidm.quartz.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.SerializationUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.quartz.Calendar;
 import org.quartz.JobPersistenceException;
@@ -49,7 +51,7 @@ public class CalendarWrapper {
      */
     public CalendarWrapper(Calendar cal, String name) throws JobPersistenceException {
         this.name = name;
-        this.serialized = RepoJobStoreUtils.serialize(cal);
+        this.serialized = Base64.encodeBase64String(SerializationUtils.serialize(cal));
     }
     
     /**

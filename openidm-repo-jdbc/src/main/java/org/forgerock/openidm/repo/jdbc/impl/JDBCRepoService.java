@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
 @Properties({
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Repository Service using JDBC"),
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{type}"),
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = "repo/{partition}*"),
         @Property(name = "db.type", value = "JDBC")
 })
 public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvider */ {
@@ -581,7 +581,7 @@ public class JDBCRepoService extends RequestHandler /*, CollectionResourceProvid
      *
      * @param repoConfig the bootstrap configuration
      * @param context
-     * @return the boot repository service. This instance is not managed by SCR and needs to be manually registered.
+     * @return the boot repository service. This newBuilder is not managed by SCR and needs to be manually registered.
      */
     static RepoBootService getRepoBootService(JsonValue repoConfig, BundleContext context) {
         JDBCRepoService bootRepo = new JDBCRepoService();

@@ -56,10 +56,10 @@
             <artifactId>jstestrunner-junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-        </dependency>
+        </dependency-->
     </dependencies>
 
     <build>

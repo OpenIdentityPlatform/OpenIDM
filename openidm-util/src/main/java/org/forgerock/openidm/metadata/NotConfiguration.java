@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,41 +23,44 @@
  */
 package org.forgerock.openidm.metadata;
 
+import java.io.Serializable;
+
 /**
  * An exception that indicates that a meta data provider knows meta-data is
- * necessary for a given configuration, but the meta-data is not yet available.
+ * necessary for a given configuration, but it's not a Configuration.
  * 
- * @author aegloff
+ * @author Laszlo Hordos
  */
-public class WaitForMetaData extends Exception {
+public class NotConfiguration extends Exception implements Serializable {
 
     /** Serializable class a version number. */
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public WaitForMetaData() {
+    public NotConfiguration() {
     }
 
     /**
      * Constructs a new exception with the specified detail message.
      */
-    public WaitForMetaData(String message) {
+    public NotConfiguration(String message) {
         super(message);
     }
 
     /**
      * Constructs a new exception with the specified cause.
      */
-    public WaitForMetaData(Throwable cause) {
+    public NotConfiguration(Throwable cause) {
         super(cause);
     }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
      */
-    public WaitForMetaData(String message, Throwable cause) {
+    public NotConfiguration(String message, Throwable cause) {
         super(message, cause);
     }
 }

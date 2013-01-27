@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -25,57 +25,51 @@
 
 package org.forgerock.openidm.quartz.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.SerializationUtils;
 import org.quartz.JobPersistenceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+//TODO Move this to org.forgerock.openidm.util
 public class RepoJobStoreUtils {
 
     /**
+     * Setup logging for the {@link RepoJobStoreUtils}.
+     */
+    final static Logger logger = LoggerFactory.getLogger(RepoJobStoreUtils.class);
+
+    /**
      * Converts a serializable object into a String.
-     * 
+     *
      * @param object the object to serialize.
      * @return a string representation of the serialized object.
      * @throws Exception
      */
     public static String serialize(Serializable object) throws JobPersistenceException {
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(object);
-            oos.flush();
-            oos.close();
-            //return new String(Base64Coder.encode(baos.toByteArray()));
-            return new String(Base64.encodeBase64(baos.toByteArray()));
+            return Base64.encodeBase64String(SerializationUtils.serialize(object));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to serialize object",e);
             throw new JobPersistenceException(e.getMessage());
         }
     }
-    
+
     /**
      * Converts a String representation of a serialized object back
      * into an object.
-     * 
+     *
      * @param str the representation of the serialized object
      * @return the deserialized object
      * @throws Exception
      */
     public static Object deserialize(String str) throws JobPersistenceException {
         try {
-            //byte [] bytes = Base64Coder.decode(str.toCharArray());
-            byte [] bytes = Base64.decodeBase64(str);
-            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
-            Object o  = ois.readObject();
-            ois.close();
-            return o;
+            return SerializationUtils.deserialize(Base64.decodeBase64(str));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Failed to deserialize string",e);
             throw new JobPersistenceException(e.getMessage());
         }
     }

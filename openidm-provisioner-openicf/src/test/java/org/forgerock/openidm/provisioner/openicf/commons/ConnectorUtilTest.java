@@ -35,7 +35,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
-import org.forgerock.openidm.provisioner.openicf.impl.OperationHelperBuilder;
+import org.forgerock.openidm.provisioner.openicf.internal.OperationHelperBuilder;
 import org.forgerock.openidm.provisioner.openicf.internal.OperationHelper;
 import org.forgerock.openidm.provisioner.openicf.impl.SimpleSystemIdentifier;
 import org.identityconnectors.common.Assertions;

@@ -39,7 +39,7 @@ public abstract class AbstractRemoteCommandScope extends CustomCommandScope {
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * @return HttpRemoteJsonResource instance
+     * @return HttpRemoteJsonResource newBuilder
      */
     protected JsonResource getRouter() {
         return router;

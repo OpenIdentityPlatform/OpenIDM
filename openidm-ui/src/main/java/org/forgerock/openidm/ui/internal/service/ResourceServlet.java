@@ -16,12 +16,8 @@
  */
 package org.forgerock.openidm.ui.internal.service;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -29,66 +25,71 @@ import java.net.URLConnection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
-
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Servlet to handle the REST interface
- *
- * Based on apache felix org/apache/felix/http/base/internal/service/ResourceServlet.java
- *
+ * 
+ * Based on apache felix
+ * org/apache/felix/http/base/internal/service/ResourceServlet.java
+ * 
  * Changes and additions by
+ * 
  * @author laszlo
  * @author aegloff
  */
-@Component(name = "org.forgerock.openidm.ui.simple", 
-        immediate = true,
+@Component(name = "org.forgerock.openidm.ui.simple", immediate = true,
         policy = ConfigurationPolicy.IGNORE)
-public final class ResourceServlet
-        extends HttpServlet {
+public final class ResourceServlet extends HttpServlet {
     final static Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
-    
-    //TODO Decide where to put the web and the java resources. Now both are in root
+
+    // TODO Decide where to put the web and the java resources. Now both are in
+    // root
     private final String path = "/ui";
-    
+
     @Reference
     HttpService httpService;
-    
-    @Reference(target="(openidm.contextid=shared)")
+
+    @Reference(target = "(openidm.contextid=shared)")
     HttpContext httpContext;
 
     ComponentContext context;
-    
+
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
         String alias = "/openidmui";
         Dictionary<String, Object> props = new Hashtable<String, Object>();
-        httpService.registerServlet(alias, this,  props, httpContext);
+        httpService.registerServlet(alias, this, props, httpContext);
         logger.debug("Registered UI servlet at {}", alias);
-    }    
-    
+    }
+
+    @Deactivate
+    protected void deactivate(ComponentContext context){
+        httpService.unregister("/openidmui");
+        logger.debug("Unregistered UI servlet at /openidmui");
+    }
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException,
+            IOException {
         logger.debug("GET call on {}", req);
-        
+
         String target = req.getPathInfo();
         if (target == null || "/".equals(target)) {
             res.sendRedirect(req.getServletPath() + "/index.html");
@@ -99,7 +100,8 @@ public final class ResourceServlet
 
             String resName = this.path + target;
 
-            // Look in the bundle rather than the servlet context, as we're using shared servlet contexts
+            // Look in the bundle rather than the servlet context, as we're
+            // using shared servlet contexts
             URL url = context.getBundleContext().getBundle().getResource(resName);
 
             if (url == null) {
@@ -116,7 +118,7 @@ public final class ResourceServlet
         if (contentType != null) {
             res.setContentType(contentType);
         } else {
-        	res.setContentType(getMimeType(resName));
+            res.setContentType(getMimeType(resName));
         }
 
         long lastModified = getLastModified(url);
@@ -153,19 +155,19 @@ public final class ResourceServlet
 
         return lastModified;
     }
-    
+
     private String getMimeType(String fileName) {
-    	if (fileName.endsWith(".css")) {
-    		return "text/css";
-    	} else if (fileName.endsWith(".js")) {
-    		return "application/javascript";
-    	} else if (fileName.endsWith(".png")) {
-    		return "image/png";
-    	} else if (fileName.endsWith(".html")) {
-    		return "text/html";
-    	}
-    	
-    	return null;
+        if (fileName.endsWith(".css")) {
+            return "text/css";
+        } else if (fileName.endsWith(".js")) {
+            return "application/javascript";
+        } else if (fileName.endsWith(".png")) {
+            return "image/png";
+        } else if (fileName.endsWith(".html")) {
+            return "text/html";
+        }
+
+        return null;
     }
 
     private boolean resourceModified(long resTimestamp, long modSince) {
@@ -175,8 +177,7 @@ public final class ResourceServlet
         return resTimestamp == 0 || modSince == -1 || resTimestamp > modSince;
     }
 
-    private void copyResource(URL url, HttpServletResponse res)
-            throws IOException {
+    private void copyResource(URL url, HttpServletResponse res) throws IOException {
         OutputStream os = null;
         InputStream is = null;
 

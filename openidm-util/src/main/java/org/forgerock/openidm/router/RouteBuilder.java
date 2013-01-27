@@ -64,19 +64,27 @@ public class RouteBuilder {
         this.routes = initial;
     }
 
-    public static RouteBuilder instance() {
+    public static RouteBuilder newBuilder() {
         return new RouteBuilder();
     }
 
-    public RouteBuilder bindService(Object service) {
+    public RouteBuilder withService(Object service) {
         if (service instanceof CollectionResourceProvider) {
-            return bindCollectionResourceProvider((CollectionResourceProvider) service);
+            return withCollectionResourceProvider((CollectionResourceProvider) service);
         } else if (service instanceof SingletonResourceProvider) {
-            return bindSingletonResourceProvider((SingletonResourceProvider) service);
+            return withSingletonResourceProvider((SingletonResourceProvider) service);
         } else if (service instanceof RequestHandler) {
-            return bindRequestHandler((RequestHandler) service);
+            return withRequestHandler((RequestHandler) service);
         }
         return this;
+    }
+
+    public RouteBuilder withServiceAndTemplate(Object service, String uriTemplate) {
+        return bind(service, uriTemplate);
+    }
+
+    public RouteBuilder withServiceAndTemplate(Object service, String[] uriTemplate) {
+        return bind(service, uriTemplate);
     }
 
     public RouteBuilder bind(Object service, Object routerPrefix) {
@@ -86,19 +94,19 @@ public class RouteBuilder {
         if (routerPrefix.getClass().isArray()) {
             if (routerPrefix.getClass().getComponentType() == String.class) {
                 for (String pattern : (String[]) routerPrefix) {
-                    bindService(service).parseURITemplate(pattern).next();
+                    withService(service).withTemplate(pattern).buildNext();
                 }
             }
         } else if (routerPrefix instanceof String) {
-            bindService(service).parseURITemplate((String) routerPrefix).next();
+            withService(service).withTemplate((String) routerPrefix).buildNext();
         }
         return this;
     }
 
-    public RouteBuilder parseURITemplate(String uriTemplate) {
+    public RouteBuilder withTemplate(String uriTemplate) {
         if (StringUtils.isNotBlank(uriTemplate)) {
             if ('*' == uriTemplate.charAt(uriTemplate.length() - 1)) {
-                modeStartsWith().parseURITemplate(
+                withModeStartsWith().withTemplate(
                         uriTemplate.substring(0, uriTemplate.length() - 1));
             } else {
                 this.uriTemplate = uriTemplate;
@@ -117,7 +125,7 @@ public class RouteBuilder {
         return this;
     }
 
-    public RouteBuilder next() {
+    public RouteBuilder buildNext() {
         try {
             verify();
             routes.add(new RouteItem(collection, singleton, handler, mode, uriTemplate));
@@ -128,61 +136,66 @@ public class RouteBuilder {
         this.singleton = null;
         this.handler = null;
         this.uriTemplate = null;
-        return modeEquals();
+        return withModeEquals();
     }
 
     public boolean isNotEmpty() {
         return !routes.isEmpty();
     }
 
-    public RouteBuilder modeEquals() {
+    public RouteBuilder withModeEquals() {
         this.mode = RoutingMode.EQUALS;
         return this;
     }
 
-    public RouteBuilder modeStartsWith() {
+    public RouteBuilder withModeStartsWith() {
         this.mode = RoutingMode.STARTS_WITH;
         return this;
     }
 
     public RouteBuilder seal() {
-        return new RouteBuilder(Collections.unmodifiableSet(routes));
+        return new RouteBuilder(Collections.unmodifiableSet(buildNext().routes));
     }
 
-    public Dictionary<String, Object> getProperties() {
+    public Dictionary<String, Object> buildServiceProperties() {
         if (routes.isEmpty()) {
             return null;
         }
+        StringBuilder sb = new StringBuilder("Route group of {");
         Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
-        properties.put(Constants.SERVICE_DESCRIPTION, "Router route group service");
         properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
         if (routes.size() == 1) {
-            properties.put(ServerConstants.ROUTER_PREFIX, routes.iterator().next().uriTemplate);
+            String template = routes.iterator().next().uriTemplate;
+            sb.append(template);
+            properties.put(ServerConstants.ROUTER_PREFIX, template);
         } else if (routes.size() > 1) {
             Object[] params = routes.toArray();
             for (int i = 0; i < params.length; i++) {
                 params[i] = ((RouteItem) params[i]).uriTemplate;
+                if (i > 0) sb.append(", ");
+                sb.append(params[i]);
             }
             properties.put(ServerConstants.ROUTER_PREFIX, params);
         }
+        properties.put(Constants.SERVICE_DESCRIPTION, sb.append("}").toString());
         return properties;
     }
 
-    public RouteBuilder bindCollectionResourceProvider(CollectionResourceProvider service) {
+    public RouteBuilder withCollectionResourceProvider(CollectionResourceProvider service) {
         this.collection = service;
         this.singleton = null;
         this.handler = null;
         return this;
     }
 
-    public RouteBuilder bindSingletonResourceProvider(SingletonResourceProvider service) {
+    public RouteBuilder withSingletonResourceProvider(SingletonResourceProvider service) {
         this.collection = null;
         this.singleton = service;
         this.handler = null;
         return this;
     }
 
-    public RouteBuilder bindRequestHandler(RequestHandler service) {
+    public RouteBuilder withRequestHandler(RequestHandler service) {
         this.collection = null;
         this.singleton = null;
         this.handler = service;

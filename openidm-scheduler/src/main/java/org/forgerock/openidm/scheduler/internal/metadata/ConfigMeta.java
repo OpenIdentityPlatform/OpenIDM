@@ -21,21 +21,41 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+package org.forgerock.openidm.scheduler.internal.metadata;
 
-package org.forgerock.openidm.router;
+import java.util.Collections;
+import java.util.List;
 
+import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.openidm.metadata.MetaDataProvider;
+import org.forgerock.openidm.metadata.MetaDataProviderCallback;
+import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.scheduler.SchedulerService;
 
 /**
- * A NAME does ...
- *
+ * A ConfigMeta
+ * 
  * @author Laszlo Hordos
- * @see <a href="https://bugster.forgerock.org/jira/browse/CREST-7">CREST-7</a>
  */
-public interface Filter {
+public class ConfigMeta implements MetaDataProvider {
 
+    /**
+     * @inheritDoc
+     */
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
+            JsonValue config) throws WaitForMetaData {
+        if (SchedulerService.PID.equalsIgnoreCase(pidOrFactory)) {
+            return Collections.emptyList();
+        }
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setCallback(MetaDataProviderCallback callback) {
+        // This newBuilder won't be updated
+    }
 }

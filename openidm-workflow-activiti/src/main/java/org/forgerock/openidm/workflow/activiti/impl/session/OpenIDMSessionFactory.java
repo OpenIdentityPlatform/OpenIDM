@@ -75,7 +75,7 @@ public class OpenIDMSessionFactory implements SessionFactory {
     
     /**
      * Creates new OpenIDMSessionFactory
-     * @param router Router instance of the OpenIDM
+     * @param router Router newBuilder of the OpenIDM
      */
     public OpenIDMSessionFactory(Router router) {
         this.router = router;

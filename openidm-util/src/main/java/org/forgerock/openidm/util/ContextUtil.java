@@ -53,7 +53,7 @@ public class ContextUtil {
      * 
      * <p>
      * This constructor is public to permit tools that require a JavaBean
-     * instance to operate.
+     * newBuilder to operate.
      * </p>
      */
     public ContextUtil() {
@@ -61,7 +61,7 @@ public class ContextUtil {
     }
 
     /**
-     * Create a default internal {@link SecurityContext} instance used for
+     * Create a default internal {@link SecurityContext} newBuilder used for
      * internal trusted calls.
      * <p/>
      * 
@@ -72,7 +72,7 @@ public class ContextUtil {
      * 
      * @param bundleContext
      *            the context of the OSGi Bundle.
-     * @return new {@code SecurityContext} instance.
+     * @return new {@code SecurityContext} newBuilder.
      */
     public static SecurityContext createInternalSecurityContext(final BundleContext bundleContext) {
 
