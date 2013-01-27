@@ -49,6 +49,7 @@ import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -63,6 +64,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
+import org.forgerock.openidm.metadata.NotConfiguration;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -326,41 +328,47 @@ public class ConfigurationManagerImpl
                 DelayedConfig sourceConfig = new DelayedConfig(pid, factoryPid, configuration);
                 DelayedConfig targetConfig = null;
 
-                // Process the config with the providers
-                for (MetaDataProviderHelper helper : bundleProviderTracker.getTracked().values()) {
-                    try {
-                        targetConfig = helper.process(sourceConfig);
-                        if (null != targetConfig) {
-                            // The provider could process the config
-                            break;
+                try {
+                    // Process the config with the providers
+                    for (MetaDataProviderHelper helper : bundleProviderTracker.getTracked()
+                            .values()) {
+                        try {
+                            targetConfig = helper.process(sourceConfig);
+                            if (null != targetConfig) {
+                                // The provider could process the config
+                                break;
+                            }
+                        } catch (WaitForMetaData e) {
+                            // TODO should we stop and delay the config or
+                            // continue
+                            // the processing
                         }
-                    } catch (WaitForMetaData e) {
-                        // TODO should we stop and delay the config or
-                        // continue
-                        // the processing
                     }
-                }
-                if (targetConfig == null) {
-                    Object[] service = serviceProviderTracker.getServices();
-                    if (null != service && service.length > 0) {
-                        for (Object helper : service) {
-                            try {
-                                if (helper instanceof MetaDataProviderHelper) {
-                                    targetConfig =
-                                            ((MetaDataProviderHelper) helper).process(sourceConfig);
-                                    if (null != targetConfig) {
-                                        // The provider could process the
-                                        // config
-                                        break;
+                    if (targetConfig == null) {
+                        Object[] service = serviceProviderTracker.getServices();
+                        if (null != service && service.length > 0) {
+                            for (Object helper : service) {
+                                try {
+                                    if (helper instanceof MetaDataProviderHelper) {
+                                        targetConfig =
+                                                ((MetaDataProviderHelper) helper)
+                                                        .process(sourceConfig);
+                                        if (null != targetConfig) {
+                                            // The provider could process the
+                                            // config
+                                            break;
+                                        }
                                     }
+                                } catch (WaitForMetaData e) {
+                                    // TODO should we stop and delay the config
+                                    // or
+                                    // continue the processing
                                 }
-                            } catch (WaitForMetaData e) {
-                                // TODO should we stop and delay the config
-                                // or
-                                // continue the processing
                             }
                         }
                     }
+                } catch (NotConfiguration e) {
+                    return null;
                 }
 
                 // Encrypt, Install the config or put it into the cache
@@ -406,7 +414,6 @@ public class ConfigurationManagerImpl
                 throw new InternalServerErrorException(e);
             }
         }
-
         return result;
     }
 
@@ -459,7 +466,7 @@ public class ConfigurationManagerImpl
 
     /**
      * Update the DelayedConfig in the input cache if the {@code helper} can get
-     * the {@code PropertiesToEncrypt} and moves these configs to the next
+     * the {@code PropertiesToEncrypt} and moves these configs to the buildNext
      * encryption cache.
      * 
      * @param helper
@@ -484,13 +491,16 @@ public class ConfigurationManagerImpl
                 }
             } catch (WaitForMetaData ex) {
                 // provider is not yet ready to handle this configuration
+            } catch (NotConfiguration e) {
+                delayedConfigs.remove(key);
+                break;
             }
         }
     }
 
     /**
      * Update the DelayedConfig in the encryption cache and moves these configs
-     * to the next install cache.
+     * to the buildNext install cache.
      * 
      * @param service
      * @throws InternalServerErrorException
@@ -696,7 +706,7 @@ public class ConfigurationManagerImpl
      * @param pidOrFactory
      *            the pid or factory pid
      * @param factoryAlias
-     *            the alias of the factory configuration instance
+     *            the alias of the factory configuration newBuilder
      * @return the list of properties to encrypt
      */
     // public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory,
@@ -733,7 +743,7 @@ public class ConfigurationManagerImpl
      *            configuration the PID of the Managed Service Factory
      * @param instanceAlias
      *            null for plain managed service, or the subname (alias) for the
-     *            managed factory configuration instance
+     *            managed factory configuration newBuilder
      * @param config
      *            The OSGi configuration
      * @return The configuration with any properties encrypted that a
@@ -1019,7 +1029,7 @@ public class ConfigurationManagerImpl
     }
 
     /**
-     * Wraps a {@link MetaDataProvider} instance and handles its lifecycle
+     * Wraps a {@link MetaDataProvider} newBuilder and handles its lifecycle
      * inside {@link ConfigurationManager}.
      */
     static class MetaDataProviderHelper {
@@ -1074,7 +1084,7 @@ public class ConfigurationManagerImpl
 
         /**
          * Get the properties to encrypt from the wrapped
-         * {@code MetaDataProvider} and create a new instance of
+         * {@code MetaDataProvider} and create a new newBuilder of
          * {@link DelayedConfig} if it can handle it with the updated
          * {@link DelayedConfig#sensitiveAttributes}
          * 
@@ -1085,7 +1095,7 @@ public class ConfigurationManagerImpl
          *             when this {@code MetaDataProvider} can handle this config
          *             later.
          */
-        public DelayedConfig process(DelayedConfig config) throws WaitForMetaData {
+        public DelayedConfig process(DelayedConfig config) throws WaitForMetaData, NotConfiguration {
             List<JsonPointer> result =
                     provider.getPropertiesToEncrypt(config.pid, config.factoryPid,
                             config.configuration);

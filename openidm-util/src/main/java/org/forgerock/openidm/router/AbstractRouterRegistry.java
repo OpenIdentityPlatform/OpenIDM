@@ -125,7 +125,7 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
 
     /*
      * protected RouteEntry
-     * bindCollectionResourceProvider(CollectionResourceProvider service, Object
+     * withCollectionResourceProvider(CollectionResourceProvider service, Object
      * uriTemplate){ return null;};
      * 
      * protected RouteEntry
@@ -137,7 +137,7 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
      * Object uriTemplate){ return null;};
      * 
      * protected RouteEntry
-     * bindSingletonResourceProvider(SingletonResourceProvider service, Object
+     * withSingletonResourceProvider(SingletonResourceProvider service, Object
      * uriTemplate){ return null;};
      * 
      * protected RouteEntry
@@ -148,7 +148,7 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
      * unbindSingletonResourceProvider(SingletonResourceProvider service, Object
      * uriTemplate){ return null;};
      * 
-     * protected RouteEntry bindRequestHandler(RequestHandler service, Object
+     * protected RouteEntry withRequestHandler(RequestHandler service, Object
      * uriTemplate){ return null;};
      * 
      * protected RouteEntry updatedRequestHandler(RequestHandler service, Object
@@ -178,7 +178,7 @@ public abstract class AbstractRouterRegistry implements ServiceFactory<RouterReg
     public RouteEntryImpl addRoute(ServiceReference<Object> reference, Object service) {
         try {
             RouteBuilder newRoutes =
-                    RouteBuilder.instance().bind(service,
+                    RouteBuilder.newBuilder().bind(service,
                             reference.getProperty(ServerConstants.ROUTER_PREFIX)).seal();
             if (newRoutes.isNotEmpty()) {
                 return addRoute(reference.getBundle(), newRoutes);
@@ -438,7 +438,7 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
         registeredRoutes = builder.register(r);
 
         if (registeredRoutes.length > 0) {
-            Dictionary<String, Object> props = builder.getProperties();
+            Dictionary<String, Object> props = builder.buildServiceProperties();
             props.put(Constants.SERVICE_PID, RouteService.class.getName());
             factoryServiceRegistration =
                     parent.registerService(RouteService.class.getName(), new RouteServiceFactory(

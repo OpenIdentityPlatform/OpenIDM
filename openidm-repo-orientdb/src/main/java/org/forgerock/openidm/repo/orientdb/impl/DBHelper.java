@@ -57,7 +57,7 @@ public class DBHelper {
     private static Map<String, ODatabaseDocumentPool> pools = new HashMap<String, ODatabaseDocumentPool>();
 
     /**
-     * Get the DB pool for the given URL. May return an existing pool instance.
+     * Get the DB pool for the given URL. May return an existing pool newBuilder.
      * Also can initialize/create/update the DB to meet the passed
      * configuration if setupDB is enabled
      * 

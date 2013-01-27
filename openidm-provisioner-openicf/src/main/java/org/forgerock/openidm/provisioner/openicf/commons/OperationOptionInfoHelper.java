@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,8 +20,6 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * $Id$
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -29,53 +27,48 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
-import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.identityconnectors.framework.common.objects.OperationOptionInfo;
-import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
- * @author $author$
- * @version $Revision$ $Date$
+ *
+ * @author Laszlo Hordos
  */
 public class OperationOptionInfoHelper {
 
 
     public static final String OPERATION_OPTION_DENIED = "denied";
-    public static final String OPERATION_OPTION_ON_DENY = "onDeny";
     public static final String OPERATION_OPTION_SUPPORTEDOBJECTTYPES = "supportedObjectTypes";
     public static final String OPERATION_OPTION_OPERATION_OPTION_INFO = "operationOptionInfo";
 
 
-    public static enum OnDenyAction {
+    public enum OnActionPolicy {
         THROW_EXCEPTION,
-        DO_NOTHING
+        ALLOW;
     }
 
-    private boolean denied;
-    private OnDenyAction onDeny;
-    private Set<String> supportedObjectTypes = null;
+    private OnActionPolicy onActionPolicy;
+    private final Set<String> supportedObjectTypes;
     private final Set<AttributeInfoHelper> attributes;
 
     public OperationOptionInfoHelper() {
-        denied = false;
-        onDeny = OnDenyAction.DO_NOTHING;
+        onActionPolicy = OnActionPolicy.ALLOW;
         attributes = Collections.emptySet();
+        supportedObjectTypes = null;
     }
 
-    public OperationOptionInfoHelper(JsonValue configuration) throws JsonValueException, SchemaException {
-        denied = configuration.get(OPERATION_OPTION_DENIED).defaultTo(false).asBoolean();
-        JsonValue onDenyValue = configuration.get(OPERATION_OPTION_ON_DENY);
-        onDeny = onDenyValue.isNull() ? OperationOptionInfoHelper.OnDenyAction.DO_NOTHING : onDenyValue.asEnum(OnDenyAction.class);
+    public OperationOptionInfoHelper(JsonValue configuration) throws JsonValueException {
+        onActionPolicy =  configuration.get(OPERATION_OPTION_DENIED).defaultTo(false).asBoolean() ? OnActionPolicy.THROW_EXCEPTION : OnActionPolicy.ALLOW;
+
         JsonValue operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
-            attributes = new HashSet<AttributeInfoHelper>();
-            for (Map.Entry<String, Object> entry : operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class).asMap().entrySet()) {
-                attributes.add(new AttributeInfoHelper(entry.getKey(), true, (Map<String, Object>) entry.getValue()));
+            JsonValue properties = operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class);
+            attributes = new HashSet<AttributeInfoHelper>(properties.size());
+            for (String entry : properties.keys()) {
+                attributes.add(new AttributeInfoHelper(entry, true, properties.get(entry)));
             }
         } else {
             attributes = Collections.emptySet();
@@ -83,47 +76,46 @@ public class OperationOptionInfoHelper {
         JsonValue supportedObjectTypesValue = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
         if (supportedObjectTypesValue.isList()) {
             List<Object> source = supportedObjectTypesValue.asList();
-            this.supportedObjectTypes = new HashSet<String>(source.size());
+            Set<String> objectTypes = new HashSet<String>(source.size());
             for (Object o : source) {
                 if (o instanceof String) {
-                    this.supportedObjectTypes.add((String) o);
+                    objectTypes.add((String) o);
                 }
             }
+            this.supportedObjectTypes = Collections.unmodifiableSet(objectTypes);
+        } else {
+            //Support all object types
+            this.supportedObjectTypes = null;
         }
-
     }
 
-    public OperationOptionInfoHelper(JsonValue configuration, OperationOptionInfoHelper globalOption) throws JsonValueException, SchemaException {
-        denied = configuration.get(OPERATION_OPTION_DENIED).defaultTo(globalOption.isDenied()).asBoolean();
-        JsonValue onDenyValue = configuration.get(OPERATION_OPTION_ON_DENY);
-        onDeny = onDenyValue.isNull() ? globalOption.getOnDeny() : onDenyValue.asEnum(OnDenyAction.class);
+    public OperationOptionInfoHelper(JsonValue configuration, OperationOptionInfoHelper globalOption) throws JsonValueException {
+        onActionPolicy =  configuration.get(OPERATION_OPTION_DENIED).defaultTo(globalOption.getOnActionPolicy().equals(OnActionPolicy.THROW_EXCEPTION)).asBoolean() ? OnActionPolicy.THROW_EXCEPTION : OnActionPolicy.ALLOW;
         attributes = new HashSet<AttributeInfoHelper>(globalOption.getAttributes());
         JsonValue operationOptionInfo = configuration.get(OPERATION_OPTION_OPERATION_OPTION_INFO);
         if (operationOptionInfo.isMap()) {
-            for (Map.Entry<String, Object> entry : operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class).asMap().entrySet()) {
-                attributes.add(new AttributeInfoHelper(entry.getKey(), true, (Map<String, Object>) entry.getValue()));
+            JsonValue properties = operationOptionInfo.get(Constants.PROPERTIES).expect(Map.class);
+            for (String entry : properties.keys()) {
+                attributes.add(new AttributeInfoHelper(entry, true, properties.get(entry)));
             }
         }
         JsonValue supportedObjectTypesValue = configuration.get(OPERATION_OPTION_SUPPORTEDOBJECTTYPES);
         if (supportedObjectTypesValue.isList()) {
             List<Object> source = supportedObjectTypesValue.asList();
-            this.supportedObjectTypes = new HashSet<String>(source.size());
+            Set<String> objectTypes = new HashSet<String>(source.size());
             for (Object o : source) {
                 if (o instanceof String) {
-                    this.supportedObjectTypes.add((String) o);
+                    objectTypes.add((String) o);
                 }
             }
+            this.supportedObjectTypes = Collections.unmodifiableSet(objectTypes);
         } else {
             this.supportedObjectTypes = globalOption.getSupportedObjectTypes();
         }
     }
 
-    public boolean isDenied() {
-        return denied;
-    }
-
-    public OnDenyAction getOnDeny() {
-        return onDeny;
+    public OnActionPolicy getOnActionPolicy() {
+        return onActionPolicy;
     }
 
     Set<AttributeInfoHelper> getAttributes() {
@@ -134,9 +126,9 @@ public class OperationOptionInfoHelper {
         return null != supportedObjectTypes ? Collections.unmodifiableSet(supportedObjectTypes) : null;
     }
 
-    public OperationOptionsBuilder build(JsonValue source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
+/*    public OperationOptionsBuilder build(Map<String, String> additionalParameters, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
         OperationOptionsBuilder builder = new OperationOptionsBuilder();
-        if (null != source && !source.isNull()) {
+        if (null != additionalParameters) {
             //Get the explicit options object if defied.
             Object o = source.get("_options");
             Map<String, Object> options = null;
@@ -152,16 +144,17 @@ public class OperationOptionInfoHelper {
             builder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
         }
         return builder;
-    }
+    }*/
 
     public static Map<String, Object> build(Set<OperationOptionInfo> operationOptionInfoSet) {
-        return build(operationOptionInfoSet, false, OnDenyAction.DO_NOTHING);
+        return build(operationOptionInfoSet, null);
     }
 
-    public static Map<String, Object> build(Set<OperationOptionInfo> operationOptionInfoSet, boolean denied, OnDenyAction onDeny) {
+    public static Map<String, Object> build(Set<OperationOptionInfo> operationOptionInfoSet, OnActionPolicy onActionPolicy) {
         Map<String, Object> operationOptionInfoHelper = new LinkedHashMap<String, Object>(12);
-        operationOptionInfoHelper.put(OPERATION_OPTION_DENIED, denied);
-        operationOptionInfoHelper.put(OPERATION_OPTION_ON_DENY, onDeny.name());
+        if (null != onActionPolicy && OnActionPolicy.THROW_EXCEPTION.equals(onActionPolicy)){
+        operationOptionInfoHelper.put(OPERATION_OPTION_DENIED, true);
+        }
         if (null != operationOptionInfoSet) {
             Map<String, Object> schema = new LinkedHashMap<String, Object>();
             operationOptionInfoHelper.put(OPERATION_OPTION_OPERATION_OPTION_INFO, schema);

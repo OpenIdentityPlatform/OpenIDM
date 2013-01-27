@@ -39,7 +39,7 @@ import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.ConfigurationService;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
-import org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService;
+import org.forgerock.openidm.provisioner.openicf.internal.OpenICFProvisionerService;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
@@ -179,8 +179,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     /*
-     * If this instance was instantiated for MetaDataProvider by Class#newInstance then this is false.
-     * If this instance was activated by OSGi SCR then this is true.
+     * If this newBuilder was instantiated for MetaDataProvider by Class#newInstance then this is false.
+     * If this newBuilder was activated by OSGi SCR then this is true.
      */
     private boolean isOSGiServiceInstance = false;
 
@@ -205,14 +205,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * ConnectorEventPublisher service.
      */
-    public synchronized void bindConnectorEventPublisher(ConnectorEventPublisher service, Map properties) {
+    public synchronized void bindConnectorEventPublisher(ConnectorEventPublisher service) {
         if (null  == osgiConnectorEventHandler){
             osgiConnectorEventHandler = new ConnectorEventHandlerImpl();
         }
         service.addConnectorEventHandler(osgiConnectorEventHandler);
     }
 
-    public void unbindConnectorEventPublisher(ConnectorEventPublisher service, Map properties) {
+    public void unbindConnectorEventPublisher(ConnectorEventPublisher service) {
         service.deleteConnectorEventHandler(osgiConnectorEventHandler);
     }
 
@@ -305,7 +305,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             } else {
                 try {
                     logger.debug("Looking for connectors in {} directory.", dir.getAbsoluteFile().toURI().toURL());
-                    // Create a single instance of ConnectorInfoManagerFactory
+                    // Create a single newBuilder of ConnectorInfoManagerFactory
                     ((ConnectorInfoManagerFactoryImpl) ConnectorInfoManagerFactory.getInstance())
                             .getLocalManager(getConnectorURLs(dir.getAbsoluteFile().toURI().toURL()),
                                     getBundleParentClassLoader());
@@ -649,7 +649,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                         throw new WaitForMetaData(pidOrFactory);
                     }
                 } else {
-                    throw new WaitForMetaData("Wait for the MetaDataProvider service instance");
+                    throw new WaitForMetaData("Wait for the MetaDataProvider service newBuilder");
                 }
             }
         }
@@ -744,7 +744,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     //TODO Add Message
                     logger.error("XXX", ex);
                 } catch (URISyntaxException e) {
-                    logger.error("URL instance does not comply with RFC 2396", e);
+                    logger.error("URL newBuilder does not comply with RFC 2396", e);
                 }
             }
             if (logger.isDebugEnabled()) {

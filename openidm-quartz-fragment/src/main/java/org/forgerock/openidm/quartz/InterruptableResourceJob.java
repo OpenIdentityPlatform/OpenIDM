@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,27 +20,22 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * $Id$
  */
 
-package org.forgerock.openidm.provisioner.openicf.query.operators;
+package org.forgerock.openidm.quartz;
 
-import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeBuilder;
-import org.identityconnectors.framework.common.objects.filter.Filter;
-import org.identityconnectors.framework.common.objects.filter.GreaterThanOrEqualFilter;
+import org.quartz.InterruptableJob;
+import org.quartz.UnableToInterruptJobException;
 
-public class GreaterThanOrEqualOperator extends FunctionalOperator {
-
-    public GreaterThanOrEqualOperator(Attribute attribute) {
-        super(attribute);
-    }
+/**
+ * A NAME does ...
+ *
+ * @author Laszlo Hordos
+ */
+public class InterruptableResourceJob extends ResourceJob implements InterruptableJob {
 
     @Override
-    public Filter createFilter() {
-        AttributeBuilder builder = new AttributeBuilder();
-        return new GreaterThanOrEqualFilter(attribute);
+    public void interrupt() throws UnableToInterruptJobException {
+        //TODO What?
     }
-
 }

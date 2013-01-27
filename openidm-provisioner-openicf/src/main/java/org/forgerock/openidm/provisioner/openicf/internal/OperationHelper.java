@@ -1,319 +1,169 @@
-/*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
- *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
- *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * $Id$
- */
-
-package org.forgerock.openidm.provisioner.openicf.internal;
-
-import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.ForbiddenException;
-import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.provisioner.Id;
-import org.forgerock.openidm.provisioner.openicf.OperationHelper;
-import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
-import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
-import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
-import org.forgerock.openidm.provisioner.openicf.query.operators.BooleanOperator;
-import org.forgerock.openidm.provisioner.openicf.query.operators.Operator;
-import org.identityconnectors.common.Assertions;
-import org.identityconnectors.framework.api.operations.APIOperation;
-import org.identityconnectors.framework.common.objects.*;
-import org.identityconnectors.framework.common.objects.filter.Filter;
-
-import java.io.IOException;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
-
-/**
- * @author $author$
- * @version $Revision$ $Date$
- */
-public class OperationHelper  {
-
-    private final ObjectClassInfoHelper objectClassInfoHelper;
-    private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
-    private final List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-    private final Id systemObjectSetId;
-    private final CryptoService cryptoService;
-
-    /**
-     * @param systemObjectSetId
-     * @param objectClassInfoHelper
-     * @param connectorObjectOptions
-     * @param cryptoService
-     * @throws NullPointerException if any of the input values is null.
-     */
-    public OperationHelper(Id systemObjectSetId, ObjectClassInfoHelper objectClassInfoHelper,
-                           Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions,
-                           CryptoService cryptoService) {
-        this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
-        this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");
-        this.systemObjectSetId = Assertions.nullChecked(systemObjectSetId, "systemObjectSetId");
-        this.cryptoService = cryptoService;
-    }
-
-
-
-    /**
-     * Checks the {@code operation} permission before execution.
-     *
-     * @param operation
-     * @return if {@code denied} is true and the {@code onDeny} equals
-     *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#DO_NOTHING}
-     *         returns false else true
-     * @throws ResourceException if {@code denied} is true and the {@code onDeny} equals
-     *                            {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnDenyAction#THROW_EXCEPTION}
-     */
-    public boolean isOperationPermitted(Class<? extends APIOperation> operation) throws ResourceException {
-        OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);
-        String reason = "not supported.";
-        if (null != operationOptionInfoHelper && (null == operationOptionInfoHelper.getSupportedObjectTypes() ||
-                operationOptionInfoHelper.getSupportedObjectTypes().contains(objectClassInfoHelper.getObjectClass().getObjectClassValue()))) {
-
-            if (!operationOptionInfoHelper.isDenied()) {
-                return true;
-            } else if (OperationOptionInfoHelper.OnDenyAction.DO_NOTHING.equals(operationOptionInfoHelper.getOnDeny())) {
-                return false;
-            }
-            reason = "denied.";
-        }
-        throw new ForbiddenException("Operation " + operation.getCanonicalName() + " is " + reason);
-    }
-
-
-    /**
-     * Gets a new instance of {@link OperationOptionsBuilder} filled with {@link OperationOptions}.
-     *
-     * @param operation
-     * @param connectorObject
-     * @param source
-     * @return
-     * @throws Exception
-     */
-    public OperationOptionsBuilder getOperationOptionsBuilder(Class<? extends APIOperation> operation, ConnectorObject connectorObject) throws Exception {
-        return operations.get(operation).build(source, objectClassInfoHelper);
-    }
-
-    /**
-     * Gets the {@link ObjectClass} value of this instance.
-     *
-     * @return
-     */
-    public ObjectClass getObjectClass() {
-        return objectClassInfoHelper.getObjectClass();
-    }
-
-    /**
-     * Build new {@code Filter} instance form the {@code query} and {@code params} values.
-     *
-     * @param query
-     * @param params
-     * @return
-     * @throws Exception
-     */
-    public Filter build(Map<String, Object> query, Map<String, Object> params) throws Exception {
-        Operator operator = createOperator(query, params);
-        return operator.createFilter();
-    }
-
-
-    public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
-        return objectClassInfoHelper.build(operation, null, source, cryptoService);
-    }
-
-
-    public ConnectorObject build(Class<? extends APIOperation> operation, String id, JsonValue source) throws Exception {
-        //TODO do something with ID
-        return objectClassInfoHelper.build(operation, id, source, cryptoService);
-    }
-
-    /**
-     * Build a new Map object from the {@code source} object.
-     * <p/>
-     * This class uses the embedded schema to convert the {@code source}.
-     *
-     * @param source
-     * @return
-     * @throws Exception
-     */
-    public Resource build(ConnectorObject source) throws Exception {
-        Resource result = objectClassInfoHelper.build(source, cryptoService);
-        resetUid(source.getUid(), result);
-        if (null != source.getUid().getRevision()) {
-            //System supports Revision
-            result.put(ServerConstants.OBJECT_PROPERTY_REV, source.getUid().getRevision());
-        }
-        return result;
-    }
-
-
-    /**
-     * Resets the {@code _id} attribute in the {@code target} object to the new {@code uid} value.
-     *
-     * @param uid    new id value
-     * @param target
-     */
-    public void resetUid(Uid uid, JsonValue target) {
-        if (null != uid && null != target) {
-            target.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(uid.getUidValue()));
-        }
-    }
-
-    /**
-     * Generate the fully qualified id from unqualified object {@link org.identityconnectors.framework.common.objects.Uid}
-     * <p/>
-     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
-     *
-     * @param uid original un escaped unique identifier of the object
-     * @return
-     */
-    /**
-     * Generate the fully qualified id from unqualified object {@link Uid}
-     * <p/>
-     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
-     *
-     * @param uid original un escaped unique identifier of the object
-     * @return
-     */
-    public URI resolveQualifiedId(Uid uid) {
-        if (null != uid) {
-            try {
-                return systemObjectSetId.resolveLocalId(uid.getUidValue()).getQualifiedId();
-            } catch (JsonResourceException e) {
-                // Should never happen in a copy constructor.
-                throw new UndeclaredThrowableException(e);
-            }
-        } else {
-            return systemObjectSetId.getQualifiedId();
-        }
-    }
-
-    /**
-     * @return new instance of {@link ResultsHandler}
-     */
-    public ResultsHandler getResultsHandler() {
-        resultList.clear();
-        return new ConnectorObjectResultsHandler();
-    }
-
-
-    public List<Map<String, Object>> getQueryResult() {
-        return resultList;
-    }
-
-
-    private class ConnectorObjectResultsHandler implements ResultsHandler {
-        /**
-         * Call-back method to do whatever it is the caller wants to do with
-         * each {@link org.identityconnectors.framework.common.objects.ConnectorObject} that is returned in the result of
-         * {@link org.identityconnectors.framework.api.operations.SearchApiOp}.
-         *
-         * @param obj each object return from the search.
-         * @return true if we should keep processing else false to cancel.
-         * @throws RuntimeException the implementor should throw a {@link RuntimeException}
-         *                          that wraps any native exception (or that describes any other problem
-         *                          during execution) that is serious enough to stop the iteration.
-         */
-        public boolean handle(ConnectorObject obj) {
-            try {
-                return resultList.add(objectClassInfoHelper.build(obj, cryptoService).asMap());
-            } catch (IOException e) {
-                throw new IllegalArgumentException(e);
-            } catch (JsonCryptoException e) {
-                //TODO: This is a configuaration exception. Improve it later.
-                throw new IllegalArgumentException(e);
-            }
-        }
-    }
-
-    private Operator createOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
-
-        String nodeName = getKey(node);
-
-        if (isBooleanOperator(nodeName)) {
-
-            BooleanOperator booleanOperator = OperatorFactory.createBooleanOperator(nodeName);
-
-            List<Object> parts = (List<Object>) node.get(nodeName);
-
-            if (parts.size() < 2) {
-                throw new IllegalArgumentException("To few elements in the 'BooleanOperator'-object (" + parts.size() + "). Must be 2 or more");
-            }
-
-            for (Object part : parts) {
-                Operator op = createOperator((Map<String, Object>) part, params);
-                booleanOperator.addOperator(op);
-            }
-
-            return booleanOperator;
-
-        } else {
-            return createFunctionalOperator(node, params);
-        }
-    }
-
-    private Operator createFunctionalOperator(Map<String, Object> node, final Map<String, Object> params) throws Exception {
-
-        String operatorName = getKey(node);
-
-        Map<String, Object> nodeValueMap = (Map<String, Object>) node.get(operatorName);
-
-        String field = (String) nodeValueMap.get("field");
-        List<String> values = (List<String>) nodeValueMap.get("values");
-
-        if (values == null) {
-            List<String> providedValues = (List<String>) params.get(field);
-
-            if (providedValues == null) {
-                throw new IllegalArgumentException("No predefined or provided values for property: " + field);
-            }
-
-            values = (List<String>) params.get(field);
-        }
-
-        return OperatorFactory.createFunctionalOperator(operatorName, objectClassInfoHelper.build(field, values, cryptoService));
-    }
-
-    private boolean isBooleanOperator(String key) {
-        return key.equals(OPERATOR_AND)
-                || key.equals(OPERATOR_OR)
-                || key.equals(OPERATOR_NOR)
-                || key.equals(OPERATOR_NAND);
-
-    }
-
-    private String getKey(Map<String, Object> node) {
-        return node.keySet().isEmpty() ? null : node.keySet().iterator().next();
-    }
-}
+///*
+// * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+// *
+// * Copyright © 2011 ForgeRock AS. All rights reserved.
+// *
+// * The contents of this file are subject to the terms
+// * of the Common Development and Distribution License
+// * (the License). You may not use this file except in
+// * compliance with the License.
+// *
+// * You can obtain a copy of the License at
+// * http://forgerock.org/license/CDDLv1.0.html
+// * See the License for the specific language governing
+// * permission and limitations under the License.
+// *
+// * When distributing Covered Code, include this CDDL
+// * Header Notice in each file and include the License file
+// * at http://forgerock.org/license/CDDLv1.0.html
+// * If applicable, add the following below the CDDL Header,
+// * with the fields enclosed by brackets [] replaced by
+// * your own identifying information:
+// * "Portions Copyrighted [year] [name of copyright owner]"
+// *
+// * $Id$
+// */
+//
+//package org.forgerock.openidm.provisioner.openicf.internal;
+//
+//import org.forgerock.json.crypto.JsonCryptoException;
+//import org.forgerock.json.fluent.JsonValue;
+//import org.forgerock.json.resource.ForbiddenException;
+//import org.forgerock.json.resource.JsonResourceException;
+//import org.forgerock.json.resource.Resource;
+//import org.forgerock.json.resource.ResourceException;
+//import org.forgerock.openidm.core.ServerConstants;
+//import org.forgerock.openidm.crypto.CryptoService;
+//import org.forgerock.openidm.provisioner.Id;
+//import org.forgerock.openidm.provisioner.openicf.OperationHelper;
+//import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
+//import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
+//import org.forgerock.openidm.provisioner.openicf.query.OperatorFactory;
+//import org.forgerock.openidm.provisioner.openicf.query.operators.BooleanOperator;
+//import org.forgerock.openidm.provisioner.openicf.query.operators.Operator;
+//import org.identityconnectors.common.Assertions;
+//import org.identityconnectors.framework.api.operations.APIOperation;
+//import org.identityconnectors.framework.common.objects.*;
+//import org.identityconnectors.framework.common.objects.filter.Filter;
+//
+//import java.io.IOException;
+//import java.lang.reflect.UndeclaredThrowableException;
+//import java.net.URI;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.Map;
+//
+//import static org.forgerock.openidm.provisioner.openicf.query.QueryUtil.*;
+//
+///**
+// * @author $author$
+// * @version $Revision$ $Date$
+// */
+//public class OperationHelper  {
+//
+//    private final ObjectClassInfoHelper objectClassInfoHelper;
+//    private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
+//
+//
+//    /**
+//     * @param objectClassInfoHelper
+//     * @param connectorObjectOptions
+//     * @throws NullPointerException if any of the input values is null.
+//     */
+//    public OperationHelper(final ObjectClassInfoHelper objectClassInfoHelper,
+//                           final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> connectorObjectOptions) {
+//        this.objectClassInfoHelper = Assertions.nullChecked(objectClassInfoHelper, "objectClassInfoHelper");
+//        this.operations = Assertions.nullChecked(connectorObjectOptions, "connectorObjectOptions");
+//    }
+//
+//
+//
+//
+//
+//    /**
+//     * Gets the {@link ObjectClass} value of this newBuilder.
+//     *
+//     * @return
+//     */
+//    public ObjectClass getObjectClass() {
+//        return objectClassInfoHelper.getObjectClass();
+//    }
+//
+//
+//
+//
+//    public ConnectorObject build(Class<? extends APIOperation> operation, JsonValue source) throws Exception {
+//        return objectClassInfoHelper.build(operation, null, source, cryptoService);
+//    }
+//
+//
+//    public ConnectorObject build(Class<? extends APIOperation> operation, String id, JsonValue source) throws Exception {
+//        //TODO do something with ID
+//        return objectClassInfoHelper.build(operation, id, source, cryptoService);
+//    }
+//
+//    /**
+//     * Build a new Map object from the {@code source} object.
+//     * <p/>
+//     * This class uses the embedded schema to convert the {@code source}.
+//     *
+//     * @param source
+//     * @return
+//     * @throws Exception
+//     */
+//    public Resource build(ConnectorObject source) throws Exception {
+//        Resource result = objectClassInfoHelper.build(source, cryptoService);
+//        resetUid(source.getUid(), result);
+//        if (null != source.getUid().getRevision()) {
+//            //System supports Revision
+//            result.put(ServerConstants.OBJECT_PROPERTY_REV, source.getUid().getRevision());
+//        }
+//        return result;
+//    }
+//
+//
+//    /**
+//     * Resets the {@code _id} attribute in the {@code target} object to the new {@code uid} value.
+//     *
+//     * @param uid    new id value
+//     * @param target
+//     */
+//    public void resetUid(Uid uid, JsonValue target) {
+//        if (null != uid && null != target) {
+//            target.put(ServerConstants.OBJECT_PROPERTY_ID, Id.escapeUid(uid.getUidValue()));
+//        }
+//    }
+//
+//    /**
+//     * Generate the fully qualified id from unqualified object {@link org.identityconnectors.framework.common.objects.Uid}
+//     * <p/>
+//     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
+//     *
+//     * @param uid original un escaped unique identifier of the object
+//     * @return
+//     */
+//    /**
+//     * Generate the fully qualified id from unqualified object {@link Uid}
+//     * <p/>
+//     * The result id will be system/{@code [endSystemName]}/{@code [objectType]}/{@code [escapedObjectId]}
+//     *
+//     * @param uid original un escaped unique identifier of the object
+//     * @return
+//     */
+//    public URI resolveQualifiedId(Uid uid) {
+//        if (null != uid) {
+//            try {
+//                return systemObjectSetId.resolveLocalId(uid.getUidValue()).getQualifiedId();
+//            } catch (JsonResourceException e) {
+//                // Should never happen in a copy constructor.
+//                throw new UndeclaredThrowableException(e);
+//            }
+//        } else {
+//            return systemObjectSetId.getQualifiedId();
+//        }
+//    }
+//
+//    private String getKey(Map<String, Object> node) {
+//        return node.keySet().isEmpty() ? null : node.keySet().iterator().next();
+//    }
+//}

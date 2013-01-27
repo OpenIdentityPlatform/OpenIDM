@@ -34,6 +34,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConfiguration;
 import org.forgerock.openidm.provisioner.openicf.connector.TestConnector;
+import org.forgerock.openidm.provisioner.openicf.internal.OpenICFProvisionerService;
 import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.identityconnectors.common.event.ConnectorEventHandler;
 import org.identityconnectors.framework.api.APIConfiguration;

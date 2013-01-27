@@ -89,7 +89,7 @@ public class Activator implements BundleActivator {
     /**
      * Validate Command method
      *
-     * @param service     service instance
+     * @param service     service newBuilder
      * @param commandName command method name
      * @return <code>true</code> if method is peresent in service, <code>public</code> and
      *         has params <code>PrintStream</code> and <code>String[]</code>, otherwise - <code>false</code>

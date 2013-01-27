@@ -212,13 +212,13 @@ public class ServerConstants {
     public static final String ACTION_NAME = "_action";
 
     /**
-     * Entity property name
-     * <p/>
-     * TODO: Description.
-     * <p/>
-     * {@code _entity}
+     * Query input value for the QUERY_ID input key.
+     *
+     * Querying with this query id results in querying all object IDs for a given ObjectSet.
+     *
+     * All ObjectSets supporting query must support the query corresponding to this ID
      */
-    public static final String ACTION_ENTITY = "_entity";
+    public final static String QUERY_ALL_IDS = "query-all-ids";
 
     public static final String LAUNCHER_INSTALL_LOCATION = "launcher.install.location";
     public static final String LAUNCHER_INSTALL_URL = "launcher.install.url";

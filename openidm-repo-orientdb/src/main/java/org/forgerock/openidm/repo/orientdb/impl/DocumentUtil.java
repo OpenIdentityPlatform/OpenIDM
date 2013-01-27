@@ -282,7 +282,7 @@ public class DocumentUtil  {
                         }
                     }
                     // TODO: below is temporary work-around for OrientDB update not saving embedded ODocument,
-                    // unless it is a new instance
+                    // unless it is a new newBuilder
                     //if (existingDoc == null) {
                     logger.trace("Instantiate new ODocument to represent embedded map for {}.", key);
                     existingDoc = new ODocument(); 

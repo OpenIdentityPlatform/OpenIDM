@@ -67,7 +67,7 @@
 //    final static Logger logger = LoggerFactory.getLogger(ConfigCrypto.class);
 //
 //    static ServiceTracker cryptoTracker;
-//    static ConfigCrypto instance;
+//    static ConfigCrypto newBuilder;
 //
 //    BundleContext context;
 //    ObjectMapper mapper = new ObjectMapper();
@@ -92,10 +92,10 @@
 //    }
 //
 //    public synchronized static ConfigCrypto getInstance(BundleContext context, ProviderListener providerListener) {
-//        if (instance == null) {
-//            instance = new ConfigCrypto(context, providerListener);
+//        if (newBuilder == null) {
+//            newBuilder = new ConfigCrypto(context, providerListener);
 //        }
-//        return instance;
+//        return newBuilder;
 //    }
 //
 //    /**
@@ -103,7 +103,7 @@
 //     * Requested each time configuration is changed so that meta data providers can handle additional plug-ins
 //     *
 //     * @param pidOrFactory the pid or factory pid
-//     * @param factoryAlias the alias of the factory configuration instance
+//     * @param factoryAlias the alias of the factory configuration newBuilder
 //     * @return the list of properties to encrypt
 //     */
 //    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String factoryAlias, JsonValue parsed)
@@ -133,7 +133,7 @@
 //     * Also results in pretty print formatting of the JSON configuration.
 //     *
 //     * @param pidOrFactory the PID of either the managed service; or for factory configuration the PID of the Managed Service Factory
-//     * @param instanceAlias null for plain managed service, or the subname (alias) for the managed factory configuration instance
+//     * @param instanceAlias null for plain managed service, or the subname (alias) for the managed factory configuration newBuilder
 //     * @param config The OSGi configuration
 //     * @return The configuration with any properties encrypted that a component's meta data marks as encrypted
 //     * @throws InvalidException if the configuration was not valid JSON and could not be parsed

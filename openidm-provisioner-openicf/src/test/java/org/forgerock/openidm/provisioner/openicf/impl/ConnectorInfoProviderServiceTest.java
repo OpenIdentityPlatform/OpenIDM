@@ -35,6 +35,7 @@ import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelperTest;
+import org.forgerock.openidm.provisioner.openicf.internal.OpenICFProvisionerService;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
@@ -115,10 +116,10 @@ public class ConnectorInfoProviderServiceTest {
 //    public void testActivateNoConfiguration() throws Exception {
 //        ComponentContext context = mock(ComponentContext.class);
 //        //stubbing
-//        when(context.getProperties()).thenReturn(new Hashtable<String, String>());
+//        when(context.buildServiceProperties()).thenReturn(new Hashtable<String, String>());
 //        when(context.getBundleContext()).thenReturn(new BundleContextStub());
-//        InnerConnectorInfoProviderService instance = new InnerConnectorInfoProviderService();
-//        instance.activate(context);
+//        InnerConnectorInfoProviderService newBuilder = new InnerConnectorInfoProviderService();
+//        newBuilder.activate(context);
 //    }
 
     @Test

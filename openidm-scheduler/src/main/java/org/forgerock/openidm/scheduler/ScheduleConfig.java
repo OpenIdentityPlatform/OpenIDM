@@ -1,7 +1,7 @@
 /**
 * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 *
-* Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
 *
 * The contents of this file are subject to the terms
 * of the Common Development and Distribution License
@@ -28,7 +28,6 @@ package org.forgerock.openidm.scheduler;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 
 import javax.xml.bind.DatatypeConverter;
@@ -36,7 +35,6 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 
@@ -82,10 +80,10 @@ public class ScheduleConfig {
                     + "Complete config:" + config);
         } else {
             // service PIDs fragments are prefixed with openidm qualifier
-            if (!invokeService.contains(".")) {
-                String fragment = invokeService;
-                invokeService = SchedulerService.SERVICE_RDN_PREFIX + fragment;
-            }
+//            if (!invokeService.contains(".")) {
+//                String fragment = invokeService;
+//                invokeService = SchedulerService.SERVICE_RDN_PREFIX + fragment;
+//            }
         }
         invokeContext = config.get(SchedulerService.SCHEDULE_INVOKE_CONTEXT).getObject();
         invokeLogLevel = config.get(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL).defaultTo("info").asString();
@@ -126,9 +124,9 @@ public class ScheduleConfig {
         this.startTime = trigger.getStartTime();
         this.endTime = trigger.getEndTime();
         this.timeZone = trigger.getTimeZone();
-        this.invokeService = (String)map.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
-        this.invokeLogLevel = (String)map.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL);
-        this.invokeContext = map.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
+        this.invokeService = (String)map.get(SchedulerService.CONFIGURED_INVOKE_REQUEST);
+        this.invokeLogLevel = (String)map.get(SchedulerService.CONFIGURED_INVOKE_LOG_LEVEL);
+        this.invokeContext = map.get(SchedulerService.CONFIGURED_INVOKE_CONTEXT);
         this.scheduleType = SchedulerService.SCHEDULE_TYPE_CRON;
         int mp = trigger.getMisfireInstruction();
         if (mp == CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING) {

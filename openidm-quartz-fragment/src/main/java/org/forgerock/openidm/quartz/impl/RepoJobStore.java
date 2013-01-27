@@ -61,7 +61,6 @@
 //import org.quartz.ObjectAlreadyExistsException;
 //import org.quartz.SchedulerException;
 //import org.quartz.Trigger;
-//import org.quartz.core.SchedulingContext;
 //import org.quartz.impl.jdbcjobstore.JobStoreSupport;
 //import org.quartz.spi.ClassLoadHelper;
 //import org.quartz.spi.JobStore;
@@ -76,7 +75,7 @@
 //* @author ckienle
 //*
 //*/
-//public class RepoJobStore extends JobStoreSupport {
+//public class RepoJobStore extends JobStore {
 //
 //    private final static Logger logger = LoggerFactory.getLogger(RepoJobStore.class);
 //
@@ -203,7 +202,7 @@
 //     *
 //     * @param router the router to set
 //     */
-//    public void setRepositoryService(Router service) {
+//    void setRepositoryService(Router service) {
 //        //TODO Fix the context and the router
 //        accessor = Resources.newInternalConnection(service);
 //    }

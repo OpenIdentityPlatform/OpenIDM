@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,15 +24,14 @@
 package org.forgerock.openidm.metadata;
 
 import java.util.List;
-import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
 
 /**
- * Meta data provider interface to describe configuration 
- * requirements of a bundle. Use a meta-data.json file to declare 
- * a meta data provider for a bundle*
+ * Meta data provider interface to describe configuration requirements of a
+ * bundle. Use a meta-data.json file to declare a meta data provider for a
+ * bundle*
  * 
  * @author aegloff
  * @author ckienle
@@ -43,23 +42,34 @@ public interface MetaDataProvider {
      * Meta-data describing which configuration properties need to be encrypted
      * for a given configuration.
      * 
-     * @param pidOrFactory the PID of either the managed service; or for factory configuration the PID of the Managed Service Factory
-     * @param instanceAlias null for plain managed service, or the subname (alias) for the managed factory configuration instance
-     * @param config the new configuration that is being set. May or may not already have encrypted values.
+     * @param pidOrFactory
+     *            the PID of either the managed service; or for factory
+     *            configuration the PID of the Managed Service Factory
+     * @param instanceAlias
+     *            null for plain managed service, or the subname (alias) for the
+     *            managed factory configuration newBuilder
+     * @param config
+     *            the new configuration that is being set. May or may not
+     *            already have encrypted values.
      * 
      * @return a list of configuration properties (identified by JSON pointers)
-     * that need to be encrypted if this MetaDataProvider is responsible for this configuration. 
-     * Empty list if none should be encrypted.
-     * Null if this provider is not responsible for this configuration.
-     * @throws WaitForMetaData thrown if this provider knows that the given configuration 
-     * has associated meta-data, but the meta-data is not yet available. 
+     *         that need to be encrypted if this MetaDataProvider is responsible
+     *         for this configuration. Empty list if none should be encrypted.
+     *         Null if this provider is not responsible for this configuration.
+     * @throws WaitForMetaData
+     *             thrown if this provider knows that the given configuration
+     *             has associated meta-data, but the meta-data is not yet
+     *             available.
      */
-    List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) throws WaitForMetaData;
+    List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
+            JsonValue config) throws WaitForMetaData, NotConfiguration;
 
     /**
-     * Sets a callback to be used to refresh/update the configuration requirements/properties 
+     * Sets a callback to be used to refresh/update the configuration
+     * requirements/properties
      * 
-     * @param callback a MetaDataProviderCallback implementation
+     * @param callback
+     *            a MetaDataProviderCallback implementation
      */
     public void setCallback(MetaDataProviderCallback callback);
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,16 +24,15 @@
 package org.forgerock.openidm.metadata;
 
 /**
- * Meta data provider callback interface to explicitly update/refresh 
- * the configuration requirements/properties for a bundle.
+ * Meta data provider callback interface to explicitly update/refresh the
+ * configuration requirements/properties for a bundle.
  * 
  * @author ckienle
  */
 public interface MetaDataProviderCallback {
 
-	/**
-	 * Updates/refreshes the configuration requirements/properties for
-	 * a bundle 
-	 */
-	public void refresh();
+    /**
+     * Updates/refreshes the configuration requirements/properties for a bundle
+     */
+    public void refresh();
 }

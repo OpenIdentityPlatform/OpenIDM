@@ -293,9 +293,9 @@
 //            public Object nextElement() {
 //                try {
 //                    if (memIter.hasNext()) {
-//                        return memIter.next();
+//                        return memIter.buildNext();
 //                    } else {
-//                        Resource entry = dbIter.next();
+//                        Resource entry = dbIter.buildNext();
 //                        return load(entry.getId());
 //                    }
 //                } catch (RuntimeException ex) {

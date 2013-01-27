@@ -161,7 +161,7 @@ public class OpenICFProvisionerServiceXMLConnectorTest extends OpenICFProvisione
         if (resultObject instanceof List) {
             assertThat((List) resultObject).isNotEmpty();
         } else {
-            Assert.fail("Result must be instance of List");
+            Assert.fail("Result must be newBuilder of List");
         }
     }
 }

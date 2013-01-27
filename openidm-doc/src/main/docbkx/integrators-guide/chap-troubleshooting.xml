@@ -220,7 +220,7 @@ Jan 20, 2012 1:59:58 PM
  org.forgerock.openidm.provisioner.openicf.commons.AttributeInfoHelper build
 SEVERE: Failed to build name attribute out of [null]
 Jan 20, 2012 1:59:58 PM
- org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerService query
+ org.forgerock.openidm.provisioner.openicf.internal.OpenICFProvisionerService query
 SEVERE: Operation [query, system/ad/account] failed with Exception on system
  object: java.lang.IllegalArgumentException: Attribute value must be an
  instance of String.

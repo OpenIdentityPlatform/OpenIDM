@@ -32,7 +32,7 @@ import org.identityconnectors.framework.api.ConnectorKey;
 /**
  * ConnectorReference holds the required {@ConnectorKey} value to find the correct connector in the
  * {@link org.identityconnectors.framework.api.ConnectorInfoManager}. The {@code getConnectorHost} is the key
- * for the ConnectorInfoManager instance.
+ * for the ConnectorInfoManager newBuilder.
  *
  * @author $author$
  * @version $Revision$ $Date$

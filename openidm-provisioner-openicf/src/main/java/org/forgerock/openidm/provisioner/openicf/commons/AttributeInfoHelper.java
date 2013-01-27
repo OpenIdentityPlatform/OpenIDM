@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,9 +20,18 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
  */
+
 package org.forgerock.openidm.provisioner.openicf.commons;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
@@ -32,81 +41,93 @@ import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.identityconnectors.common.security.GuardedString;
-import org.identityconnectors.framework.common.objects.*;
+import org.identityconnectors.framework.common.objects.Attribute;
+import org.identityconnectors.framework.common.objects.AttributeBuilder;
+import org.identityconnectors.framework.common.objects.AttributeInfo;
+import org.identityconnectors.framework.common.objects.AttributeInfoBuilder;
+import org.identityconnectors.framework.common.objects.AttributeUtil;
+import org.identityconnectors.framework.common.objects.OperationOptions;
+import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
+import org.identityconnectors.framework.common.objects.QualifiedUid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
-
-
 public class AttributeInfoHelper {
+
+    /**
+     * Setup logging for the {@link AttributeInfoHelper}.
+     */
     private final static Logger logger = LoggerFactory.getLogger(AttributeInfoHelper.class);
-    private final Class<?> type;
+
+    // Name of OpenIDM attribute
     private final String name;
-    private final Set<AttributeFlag> flags;
-    private final AttributeInfo attributeInfo;
-    private final Object defaultValue;
+    // Type of OpenIDM attribute
+    private final Class<?> type;
+
+    // OpenIDM sensitive attribute definition
     private final String cipher;
     private final String key;
 
+    // OpenICF attribute info
+    private final Object defaultValue;
+    private final AttributeInfo attributeInfo;
 
-    public AttributeInfoHelper(String name, boolean isOperationalOption, Map<String, Object> schema) throws SchemaException {
+    // TODO Revisit function of this property
+    private final Set<AttributeFlag> flags;
+
+    public AttributeInfoHelper(String name, boolean isOperationalOption, JsonValue schema)
+            throws SchemaException {
         this.name = name;
 
-        //type
-        Object typeString = schema.get(Constants.TYPE);
-        if (typeString instanceof String) {
-            //TODO fix the multivalue support
-//            if (Constants.TYPE_ARRAY.equals(typeString)) {
-//                Object items = schema.get(Constants.ITEMS);
-//                if (items instanceof Map) {
-//                    typeString = ((Map) items).get(Constants.TYPE);
-//                }
-//            }
-            type = ConnectorUtil.findClassForName((String) typeString);
-        } else {
-            throw new SchemaException(new JsonValue(typeString, new JsonPointer(Constants.TYPE)), "Type of [" + name + "] attribute MUST be non empty String or List<String> value");
-        }
+        // type
+        String typeString = schema.get(Constants.TYPE).required().asString();
+        // TODO fix the multivalue support
+        // if (Constants.TYPE_ARRAY.equals(typeString)) {
+        // Object items = schema.get(Constants.ITEMS);
+        // if (items instanceof Map) {
+        // typeString = ((Map) items).get(Constants.TYPE);
+        // }
+        // }
+        type = ConnectorUtil.findClassForName(typeString);
 
-        //nativeType
-        Object nativeTypeString = schema.get(ConnectorUtil.OPENICF_NATIVE_TYPE);
+        // nativeType
+        JsonValue nativeTypeString = schema.get(ConnectorUtil.OPENICF_NATIVE_TYPE);
         Class<?> nativeType = null;
-        if (nativeTypeString instanceof String) {
-            nativeType = ConnectorUtil.findClassForName((String) nativeTypeString);
-        } else {
+        if (nativeTypeString.isNull()) {
             nativeType = type;
-        }
-
-        //nativeName
-        Object nativeNameString = schema.get(ConnectorUtil.OPENICF_NATIVE_NAME);
-        String nativeName = null;
-        if (nativeNameString instanceof String) {
-            nativeName = (String) nativeNameString;
         } else {
-            nativeName = name;
+            nativeType = ConnectorUtil.findClassForName(nativeTypeString.asString());
         }
 
-        //default
-        Object def = schema.get(Constants.DEFAULT);
-        if (null == def) {
+        // nativeName
+        JsonValue nativeNameString = schema.get(ConnectorUtil.OPENICF_NATIVE_NAME);
+        String nativeName = null;
+        if (nativeNameString.isNull()) {
+            nativeName = name;
+        } else {
+            nativeName = nativeNameString.asString();
+        }
+
+        // defaultValue
+        JsonValue def = schema.get(Constants.DEFAULT);
+        if (def.isNull()) {
             defaultValue = null;
         } else {
-            defaultValue = def;
+            defaultValue = def.getObject();
         }
 
         if (!isOperationalOption) {
 
-            //Encrypted attribute
-            Object k = schema.get("key");
-            if (k instanceof String) {
-                key = (String) k;
+            // Encrypted attribute
+            JsonValue k = schema.get("key");
+            if (k.isString()) {
+                key = k.asString();
             } else {
                 key = null;
             }
-            Object c = schema.get("cipher");
-            if (c instanceof String) {
-                cipher = (String) c;
+            JsonValue c = schema.get("cipher");
+            if (c.isString()) {
+                cipher = c.asString();
             } else {
                 cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
             }
@@ -114,12 +135,12 @@ public class AttributeInfoHelper {
             AttributeInfoBuilder builder = new AttributeInfoBuilder(nativeName, nativeType);
             builder.setMultiValued(Collection.class.isAssignableFrom(type));
 
-            //flags
-            Object flagsObject = schema.get(ConnectorUtil.OPENICF_FLAGS);
-            if (flagsObject instanceof List) {
-                flags = new HashSet<AttributeFlag>(((List) flagsObject).size());
-                for (String flagString : (List<String>) flagsObject) {
-                    AttributeFlag flag = AttributeFlag.findByKey(flagString);
+            // flags
+            JsonValue flagsObject = schema.get(ConnectorUtil.OPENICF_FLAGS);
+            if (flagsObject.isList()) {
+                Set<AttributeFlag> flags0 = new HashSet<AttributeFlag>(flagsObject.size());
+                for (JsonValue flagString : flagsObject) {
+                    AttributeFlag flag = AttributeFlag.findByKey(flagString.asString());
                     if (null != flag) {
                         if (AttributeFlag.NOT_CREATABLE.equals(flag)) {
                             builder.setCreateable(false);
@@ -130,22 +151,25 @@ public class AttributeInfoHelper {
                         } else if (AttributeFlag.NOT_RETURNED_BY_DEFAULT.equals(flag)) {
                             builder.setReturnedByDefault(false);
                         } else {
-                            flags.add(flag);
+                            flags0.add(flag);
                         }
                     }
                 }
+                flags = Collections.unmodifiableSet(flags0);
             } else {
                 flags = Collections.emptySet();
             }
 
-            //required
-            builder.setRequired((null != schema.get(Constants.REQUIRED)) ? (Boolean) schema.get(Constants.REQUIRED) : false);
+            // required
+            if (schema.isDefined(Constants.REQUIRED)) {
+                builder.setRequired(schema.get(Constants.REQUIRED).asBoolean());
+            }
             attributeInfo = builder.build();
         } else {
-            flags = null;
-            attributeInfo = null;
             key = null;
             cipher = null;
+            flags = null;
+            attributeInfo = null;
         }
     }
 
@@ -187,12 +211,27 @@ public class AttributeInfoHelper {
 
     public Attribute build(Object source, CryptoService cryptoService) throws Exception {
         try {
-            JsonValue decryptedValue = new JsonValue(source, new JsonPointer(), null != cryptoService ? cryptoService.getDecryptionTransformers() : null);
+            JsonValue decryptedValue =
+                    new JsonValue(source, new JsonPointer(), null != cryptoService ? cryptoService
+                            .getDecryptionTransformers() : null);
             return build(attributeInfo, decryptedValue.getObject());
         } catch (Exception e) {
             logger.error("Failed to build {} attribute out of {}", name, source);
             throw e;
         }
+    }
+
+    /**
+     * The {@link org.forgerock.json.resource.QueryFilterVisitor} use this
+     * method to convert the string value to {@link Attribute} use in
+     * {@link org.identityconnectors.framework.common.objects.filter.Filter}
+     * 
+     * @param source
+     * @return
+     * @throws Exception
+     */
+    public Attribute build(Object source) throws Exception {
+        return build(attributeInfo, source);
     }
 
     public Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
@@ -201,9 +240,13 @@ public class AttributeInfoHelper {
             attribute = AttributeBuilder.build(attributeInfo.getName());
         } else {
             if (attributeInfo.isMultiValued()) {
-                attribute = AttributeBuilder.build(attributeInfo.getName(), getMultiValue(source, attributeInfo.getType()));
+                attribute =
+                        AttributeBuilder.build(attributeInfo.getName(), getMultiValue(source,
+                                attributeInfo.getType()));
             } else {
-                attribute = AttributeBuilder.build(attributeInfo.getName(), getSingleValue(source, attributeInfo.getType()));
+                attribute =
+                        AttributeBuilder.build(attributeInfo.getName(), getSingleValue(source,
+                                attributeInfo.getType()));
             }
         }
         return attribute;
@@ -221,7 +264,9 @@ public class AttributeInfoHelper {
             }
         } else {
             try {
-                resultValue = ConnectorUtil.coercedTypeCasting(AttributeUtil.getSingleValue(source), type);
+                resultValue =
+                        ConnectorUtil
+                                .coercedTypeCasting(AttributeUtil.getSingleValue(source), type);
             } catch (IllegalArgumentException e) {
                 logger.warn(
                         "Incorrect schema configuration. Expecting {} attribute to be single but it has multi value.",
@@ -231,7 +276,8 @@ public class AttributeInfoHelper {
         }
         if (isConfidential()) {
             if (null == cryptoService) {
-                throw new JsonCryptoException("Confidential attribute can not be encrypted. Reason: CryptoService is null");
+                throw new JsonCryptoException(
+                        "Confidential attribute can not be encrypted. Reason: CryptoService is null");
             } else {
                 return cryptoService.encrypt(new JsonValue(resultValue), cipher, key).getObject();
             }
@@ -244,7 +290,8 @@ public class AttributeInfoHelper {
      * @param builder
      * @param value
      * @throws IOException
-     * @throws IllegalArgumentException if the type is not on the supported list.
+     * @throws IllegalArgumentException
+     *             if the type is not on the supported list.
      * @see {@link org.identityconnectors.framework.common.FrameworkUtil#checkOperationOptionType(Class)}
      */
     public void build(OperationOptionsBuilder builder, Object value) throws IOException {
@@ -259,7 +306,8 @@ public class AttributeInfoHelper {
         } else if (OperationOptions.OP_SCOPE.equals(name)) {
             builder.setScope(getSingleValue(value, String.class));
         } else {
-            builder.setOption(name, getNewValue(value == null ? defaultValue : value, attributeInfo.isMultiValued(), attributeInfo.getType()));
+            builder.setOption(name, getNewValue(value == null ? defaultValue : value, attributeInfo
+                    .isMultiValued(), attributeInfo.getType()));
         }
     }
 
@@ -270,7 +318,6 @@ public class AttributeInfoHelper {
             return getSingleValue(source, type);
         }
     }
-
 
     private <T> T getSingleValue(Object source, Class<T> clazz) {
         if (null == source) {
@@ -285,10 +332,12 @@ public class AttributeInfoHelper {
                 }
             }
             logger.error("Non multivalued [{}] argument has collection value", name);
-            throw new IllegalArgumentException("Non multivalued argument [" + name + "] has collection value");
+            throw new IllegalArgumentException("Non multivalued argument [" + name
+                    + "] has collection value");
         } else if (source.getClass().isArray()) {
             logger.error("Non multivalued [{}] argument has array value", name);
-            throw new IllegalArgumentException("Non multivalued argument [" + name + "] has array value");
+            throw new IllegalArgumentException("Non multivalued argument [" + name
+                    + "] has array value");
         } else {
             return ConnectorUtil.coercedTypeCasting(source, clazz);
         }

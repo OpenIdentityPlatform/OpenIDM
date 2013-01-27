@@ -62,12 +62,12 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
     private static StubClassLoader classLoader = new StubClassLoader();
 
     /**
-     * Generate CommandProvider class and instance for this class based on parameters
+     * Generate CommandProvider class and newBuilder for this class based on parameters
      *
      * @param service  commands service
      * @param commands commands map (name=help)
      * @param suffix   unique class suffix
-     * @return generated CommandProvider instance
+     * @return generated CommandProvider newBuilder
      * @throws Exception if something went wrong
      */
     public static Object generate(CustomCommandScope service, Map<String, String> commands, String suffix) throws Exception {
@@ -169,7 +169,7 @@ public class FelixGogoCommandsServiceGenerator extends ClassLoader {
             }
 
             cw.visitEnd();
-            // create new instance
+            // create new newBuilder
             /*Class<?> aClass = ctClass.toClass(FelixGogoCommandsServiceGenerator.class.getClassLoader(), null);
             */
             Class<?> aClass = classLoader.defineClass(className, cw.toByteArray());

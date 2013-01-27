@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -20,15 +20,15 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * $Id$
  */
 
-package org.forgerock.openidm.provisioner.openicf.query.operators;
-
-import org.identityconnectors.framework.common.objects.filter.Filter;
-
-public interface Operator {
-
-    Filter createFilter();
-}
+/**
+ * <h1>Package org.forgerock.openidm.scheduler</h1>
+ * 
+ * This package contains a custom Job implementation that
+ * uses the OpenIDM Repository Service for persistence, a custom 
+ * Job implementation, wrapper classes to serialize and contain 
+ * meta-data for Quartz scheduling objects, and other utility
+ * classes.
+ */
+package org.forgerock.openidm.quartz;

@@ -308,7 +308,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
 
         return  null != configurationManager.installConfiguration(pid[0], pid[1], new JsonValue(configuration));
 
-//        Dictionary props = config.getProperties();
+//        Dictionary props = config.buildServiceProperties();
 //        if (!isConfigSame(ht, props)) {
 //            try {
 //                ht = configCrypto.encrypt(pid[0], pid[1], ht);
