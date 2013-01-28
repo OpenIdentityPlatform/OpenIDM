@@ -23,13 +23,13 @@
  */
 package org.forgerock.openidm.external.rest;
 
-import java.net.HttpCookie;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +72,7 @@ import org.restlet.data.Form;
 import org.restlet.data.Language;
 import org.restlet.data.MediaType;
 import org.restlet.data.Metadata;
+import org.restlet.data.Parameter;
 import org.restlet.data.Preference;
 import org.restlet.data.Protocol;
 import org.restlet.data.Range;
@@ -316,8 +317,10 @@ public class RestService extends ObjectSetJsonResource {
                 throw new BadRequestException("Unknown method " + method);
             }
             
+            Map<String, Object> responseAttributes = cr.getResponseAttributes();
+            
             String text = representation.getText();
-            logger.debug("Response: {} Response Attributes: ", text, cr.getResponseAttributes());
+            logger.debug("Response: {} Response Attributes: {}", text, responseAttributes);
 
             if ((!detectResultFormat && resultFormat.equals(MediaType.APPLICATION_JSON))
                     || (detectResultFormat && representation.getMediaType().isCompatible(MediaType.APPLICATION_JSON))) {
@@ -327,6 +330,25 @@ public class RestService extends ObjectSetJsonResource {
                     }
                 } catch (Exception ex) {
                     throw new InternalServerErrorException("Failure in parsing the response as JSON: " + text
+                            + " Reported failure: " + ex.getMessage(), ex);
+                }
+            } else {
+                try {
+                    Map<String, Object> resultHeaders = new HashMap<String, Object>();
+                    Form respHeaders = (Form)responseAttributes.get("org.restlet.http.headers");
+                    if (respHeaders != null) {
+                        for (Parameter param : respHeaders) {
+                            String name = param.getName();
+                            String value = param.getValue();
+                            resultHeaders.put(name, value);
+                            logger.debug("Adding Response Attribute: {} : {}", name, value);
+                        }
+                    }
+                    result = new HashMap<String, Object>();
+                    result.put("_headers", resultHeaders);
+                    result.put("_body", text);
+                } catch (Exception ex) {
+                    throw new InternalServerErrorException("Failure in parsing the response: " + text
                             + " Reported failure: " + ex.getMessage(), ex);
                 }
             }
