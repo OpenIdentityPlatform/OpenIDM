@@ -24,12 +24,12 @@
   !    
 -->
 <chapter xml:id='chap-security'
- xmlns='http://docbook.org/ns/docbook'
- version='5.0' xml:lang='en'
- xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
- xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
- xmlns:xlink='http://www.w3.org/1999/xlink'
- xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+         xmlns='http://docbook.org/ns/docbook'
+         version='5.0' xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'
+         xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>Securing &amp; Hardening OpenIDM</title>
  <indexterm>
   <primary>Best practices</primary>
@@ -67,6 +67,161 @@
 
   <para>Augment this protection with message level security where
   appropriate.</para>
+ </section>
+
+ <section xml:id="rest-over-https">
+     <title>Restrict REST Access to the HTTPS Port</title>
+     <para>Use certificates to secure REST access, over HTTPS. The following
+     procedure shows how to generate a self-signed certificate to secure REST
+     calls, over HTTPS. Note that in production systems, it is recommended that
+     you use a key that has been signed by a certificate authority.</para>
+     <procedure>
+         <step>
+             <para>Extract the certificate that is installed with OpenIDM.</para>
+             <screen>$ openssl s_client -showcerts -connect localhost:8443 &lt;/dev/null</screen>
+             <para>This command outputs the entire certificate to the terminal.</para>
+         </step>
+         <step>
+             <para>Using any text editor, create a file named <filename>server.crt</filename>.
+             Copy the portion of the certificate from <literal>­­­­­BEGIN CERTIFICATE­­­­­</literal>
+             to <literal>­­­­­END CERTIFICATE­­­­­</literal> and paste it into the
+             <filename>server.crt</filename> file. Your <filename>server.crt</filename>
+             file should now contain something like the following:</para>
+             <screen>$ more server.crt
+-----BEGIN CERTIFICATE-----
+MIIB8zCCAVygAwIBAgIETkvDjjANBgkqhkiG9w0BAQUFADA+MSgwJgYDVQQKEx9P
+cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
+c3QwHhcNMTEwODE3MTMzNTEwWhcNMjEwODE3MTMzNTEwWjA+MSgwJgYDVQQKEx9P
+cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
+c3QwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKwMkyvHS5yHAnI7+tXUIbfI
+nQfhcTChpWNPTHc/cli/+Ta1InTpN8vRScPoBG0BjCaIKnVVl2zZ5ya74UKgwAVe
+oJQ0xDZvIyeC9PlvGoqsdtH/Ihi+T+zzZ14oVxn74qWoxZcvkG6rWEOd42QzpVhg
+wMBzX98slxkOZhG9IdRxAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEASo4qMI0axEKZ
+m0jU4yJejLBHydWoZVZ8fKcHVlD/rTirtVgWsVgvdr3yUr0Idk1rH1nEF47Tzn+V
+UCq7qJZ75HnIIeVrZqmfTx8169paAKAaNF/KRhTE6ZII8+awst02L86shSSWqWz3
+s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
+-----END CERTIFICATE-----
+             </screen>
+         </step>
+         <step>
+             <para>Generate a private, self-signed key as follows:</para>
+             <substeps>
+                 <step>
+                     <para>Generate an encrypted 1024-bit RSA key, and save it
+                     to a file named <filename>localhost.key</filename>. Enter
+                     a pass phrase for the key as requested.</para>
+                     <screen>$ openssl genrsa ­des3 ­out localhost.key 1024
+Generating RSA private key, 1024 bit long modulus
+.........++++++
+.........................++++++
+e is 65537 (0x10001)
+Enter pass phrase for localhost.key:
+Verifying - Enter pass phrase for localhost.key:</screen>
+                 </step>
+                 <step>
+                     <para>Generate a certificate request using the key you
+                     created in the previous step, and save it to a file named
+                     <filename>localhost.csr</filename>. Enter any required
+                     information to create the DN for the request.</para>
+                     <screen>$ openssl req ­new ­key localhost.key ­out localhost.csr</screen>
+                     <para>This step creates a file, <filename>localhost.csr</filename>,
+                     that contains the details of the certificate request.</para>
+                 </step>
+                 <step>
+                     <para>Sign the certificate with the key you created in the
+                     previous step, and generate a certificate that is valid
+                     for one year in a file named <filename>localhost.crt</filename>.
+                     The <literal>x509</literal> subcommand enables you to
+                     retrieve the information that is stored in the SSL certificate.
+                     Output will depend on the details that you entered in the
+                     certificate request.</para>
+                     <screen width="90">
+$ openssl x509 ­req ­days 365 ­in localhost.csr ­signkey localhost.key ­out localhost.crt
+Signature ok
+subject=/C=FR/ST=Il-DE-FRANCE/L=Paris/O=example.com
+Getting Private key
+Enter pass phrase for localhost.key:
+                     </screen>
+                     <para>The contents of <filename>localhost.crt</filename> should
+                     now be something like this:</para>
+                     <screen>$ more localhost.crt
+-----BEGIN CERTIFICATE-----
+MIIB/zCCAWgCCQD6VdiF6rX2czANBgkqhkiG9w0BAQUFADBEMQswCQYDVQQGEwJa
+QTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UEChMLZXhh
+bXBsZS5jb20wHhcNMTMwMTI1MTIzNzIyWhcNMTQwMTI1MTIzNzIyWjBEMQswCQYD
+VQQGEwJaQTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UE
+ChMLZXhhbXBsZS5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAONLO82s
+wKA0tWkbR66DajwQKNO9QlYwZvcK4X7MFOcwex+8j2vvG5HCB0BW2Gm72mFTWei8
+gVgQDP1oe/yTWDZRaiJ8rGWdvpgH1Cmxcd3N1AhhRya1I2j5wxrc9ZsyyTYCg2fd
+pFfULrUXSd9QlB2qQZz7kb4ksT/mSwPiGqvFAgMBAAEwDQYJKoZIhvcNAQEFBQAD
+gYEA3WrP8NKjXwQzE0vabYmdUhPHt3PF8EMMwVJ+h8G9Dwmtll0P/kLybXdHF1P/
+SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
+63WQPzvAeriO51JC0ysMVe5vf+lO0t+J8W6SfPTKwoXDQhY=
+-----END CERTIFICATE-----
+                     </screen>
+                 </step>
+             </substeps>
+         </step>
+         <step>
+             <para>Combine the contents of <filename>server.crt</filename> and
+             <filename>localhost.crt</filename> to create a Privacy Enhanced
+             Mail Certificate (<literal>.pem</literal>) file named
+             <filename>CA.pem</filename>.</para>
+             <screen>$ cat server.crt localhost.crt &gt; CA.pem</screen>
+             <para>The contents of <filename>CA.pem</filename> should be
+             something like the following (a concatenation of
+             <filename>server.crt</filename> and <filename>localhost.crt</filename>).</para>
+             <screen>$ more CA.pem
+-----BEGIN CERTIFICATE-----
+MIIB8zCCAVygAwIBAgIETkvDjjANBgkqhkiG9w0BAQUFADA+MSgwJgYDVQQKEx9P
+cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
+c3QwHhcNMTEwODE3MTMzNTEwWhcNMjEwODE3MTMzNTEwWjA+MSgwJgYDVQQKEx9P
+cGVuSURNIFNlbGYtU2lnbmVkIENlcnRpZmljYXRlMRIwEAYDVQQDEwlsb2NhbGhv
+c3QwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKwMkyvHS5yHAnI7+tXUIbfI
+nQfhcTChpWNPTHc/cli/+Ta1InTpN8vRScPoBG0BjCaIKnVVl2zZ5ya74UKgwAVe
+oJQ0xDZvIyeC9PlvGoqsdtH/Ihi+T+zzZ14oVxn74qWoxZcvkG6rWEOd42QzpVhg
+wMBzX98slxkOZhG9IdRxAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEASo4qMI0axEKZ
+m0jU4yJejLBHydWoZVZ8fKcHVlD/rTirtVgWsVgvdr3yUr0Idk1rH1nEF47Tzn+V
+UCq7qJZ75HnIIeVrZqmfTx8169paAKAaNF/KRhTE6ZII8+awst02L86shSSWqWz3
+s5xPB2YTaZHWWdzrPVv90gL8JL/N7/Q=
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+MIIB/zCCAWgCCQD6VdiF6rX2czANBgkqhkiG9w0BAQUFADBEMQswCQYDVQQGEwJa
+QTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UEChMLZXhh
+bXBsZS5jb20wHhcNMTMwMTI1MTIzNzIyWhcNMTQwMTI1MTIzNzIyWjBEMQswCQYD
+VQQGEwJaQTELMAkGA1UECBMCV0MxEjAQBgNVBAcTCUNhcGUgVG93bjEUMBIGA1UE
+ChMLZXhhbXBsZS5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAONLO82s
+wKA0tWkbR66DajwQKNO9QlYwZvcK4X7MFOcwex+8j2vvG5HCB0BW2Gm72mFTWei8
+gVgQDP1oe/yTWDZRaiJ8rGWdvpgH1Cmxcd3N1AhhRya1I2j5wxrc9ZsyyTYCg2fd
+pFfULrUXSd9QlB2qQZz7kb4ksT/mSwPiGqvFAgMBAAEwDQYJKoZIhvcNAQEFBQAD
+gYEA3WrP8NKjXwQzE0vabYmdUhPHt3PF8EMMwVJ+h8G9Dwmtll0P/kLybXdHF1P/
+SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
+63WQPzvAeriO51JC0ysMVe5vf+lO0t+J8W6SfPTKwoXDQhY=
+-----END CERTIFICATE-----
+             </screen>
+         </step>
+         <step>
+             <para>Test REST access on the HTTPS port, using the certificate
+             that you created in the previous step. For example:</para>
+             <screen>$ curl
+ --header "X-OpenIDM-Username:openidm-admin"
+ --header "X-OpenIDM-Password:openidm-admin"
+ --cacert CA.pem
+ --request GET
+ "https://localhost:8443/openidm/managed/user/?_queryId=query-all-ids
+{
+    "conversion-time-ms": 0,
+    "result": [
+        {
+            "_rev": "0",
+            "_id": "8afd44a7-13be-449e-9c47-7a310e675c00"
+        }
+    ],
+    "query-time-ms": 1
+}
+             </screen>
+         </step>
+     </procedure>
  </section>
 
  <section xml:id="security-encrypt-data">
