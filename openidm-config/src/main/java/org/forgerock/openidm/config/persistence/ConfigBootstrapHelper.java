@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
@@ -99,7 +100,7 @@ public class ConfigBootstrapHelper {
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
     public static JsonValue getRepoBootConfig(String repoType, BundleContext bundleContext) {
-        JsonValue result = new JsonValue(new HashMap<String,Object>());
+        JsonValue result = new JsonValue(new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER));
         result.put(OPENIDM_REPO_TYPE, repoType);
         
         // System properties take precedence over configuration files
