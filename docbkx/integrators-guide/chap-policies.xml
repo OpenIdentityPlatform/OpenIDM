@@ -135,7 +135,7 @@ function atLeastXCapitalLetters(fullObject, value, params, property) {
       required number of capital letters is defined in the policy configuration 
       file, as described in <xref linkend="policy-config-file" />.</para>
       
-      <section xml:i="policy-config-object">
+      <section xml:id="policy-config-object">
         <title>Policy Configuration Object</title>
         
         <para>Each element of the policy is defined in a policy configuration 
@@ -218,7 +218,7 @@ function required(fullObject, value, params, propName) {
       the <literal>at-least-X-capitals</literal> policy is applied to user 
       passwords, with a default value of <literal>1</literal>.</para>
       
-      <programlisting type="javascript">
+      <programlisting language="javascript">
 {
     "type" : "text/javascript",
     "file" : "bin/defaults/script/policy.js",
@@ -287,7 +287,7 @@ function required(fullObject, value, params, propName) {
       <literal>openidm-admin</literal>, or <literal>opendim-reg</literal>.
       </para>      
       
-      <programlisting type="javascript">
+      <programlisting language="javascript">
 ...      
     {
         "policyId" : "re-auth-required",
