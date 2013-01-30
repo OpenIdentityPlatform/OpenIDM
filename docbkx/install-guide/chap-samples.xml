@@ -900,13 +900,13 @@ $ curl
 
    <screen>$ cd /path/to/openidm
 $ ./startup.sh -p samples/sample5</screen>
-  </section>
-  
-  <para>The XML files used are located in the
+
+   <para>The XML files that are used are located in the
    <filename>openidm/samples/sample5/data/</filename> folder. When you start
    OpenIDM with the sample 5 configuration, it creates
    <filename>xml_AD_Data.xml</filename>, which does not contain users until
    you run reconciliation.</para>
+  </section>
 
   <section xml:id="run-sample5">
    <title>Run the Sample</title>
