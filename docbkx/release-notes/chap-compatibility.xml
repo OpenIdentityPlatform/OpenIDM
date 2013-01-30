@@ -76,10 +76,8 @@
       <term>Audit log changes</term>
       <listitem>
         <para>Timestamps now have milliseconds and are in UTC timezone.
-      </para>
-      </listitem>
-      <listitem>
-        <para>The access log now has an additional field, <literal>userid</literal>, 
+        </para>
+        <para>The access log now has an additional field, <literal>userid</literal>,
         which is the OpenIDM ID for a managed or internal user who is logged in. 
         For authentication via SSL mutual auth only, the 
         <literal>userid</literal> is currently <literal>null</literal> because 
@@ -91,15 +89,11 @@
       <listitem>
         <para>The <literal>reconID</literal> column has been removed from the 
         <literal>links</literal> table.</para>
-      </listitem>
-      <listitem>
-        <para>The size of the <literal>linkType</literal> column in the 
+        <para>The size of the <literal>linkType</literal> column in the
         <literal>links</literal> table has been reduced to 255 characters. This 
         is because MySQL can only create unique indexes on that size for UTF-8 
         encoding.</para>
-      </listitem>
-      <listitem>
-        <para>The <literal>links</literal> table indexes have been changed to 
+        <para>The <literal>links</literal> table indexes have been changed to
         unique indexes to prevent duplication.</para>
       </listitem>            
     </varlistentry>
@@ -110,9 +104,7 @@
         with tokens like <literal>${mytoken}</literal> must be reviewed and 
         adjusted to match the new definition which aligns declarations for 
         regular and prepared statement uses.</para>
-      </listitem>
-      <listitem>
-        <para>Existing <literal>${token}</literal> tokens are now suitable for 
+        <para>Existing <literal>${token}</literal> tokens are now suitable for
         quoted strings by default. Prefixes such as <literal>unquoted:</literal> 
         and <literal>dotnotation:</literal> allow you to use queries in contexts 
         where the unquoted value or the JSON pointer converted to OrientDB dot 
