@@ -67,6 +67,11 @@
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-system</artifactId>
+            <version>${openidm.version}</version>
+        </dependency>
     </dependencies>
 
 	<build>
