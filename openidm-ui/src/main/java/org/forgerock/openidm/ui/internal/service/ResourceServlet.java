@@ -16,35 +16,31 @@
  */
 package org.forgerock.openidm.ui.internal.service;
 
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
-
+import org.forgerock.openidm.core.IdentityServer;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +63,8 @@ public final class ResourceServlet
     //TODO Decide where to put the web and the java resources. Now both are in root
     private final String path = "/ui";
     
+    private List<String> extFolders;
+    
     @Reference
     HttpService httpService;
     
@@ -78,6 +76,13 @@ public final class ResourceServlet
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         this.context = context;
+        
+        extFolders = new ArrayList<String>();
+        extFolders.add("/css/");
+        extFolders.add("/images/");
+        extFolders.add("/locales/");
+        extFolders.add("/templates/");
+        
         String alias = "/openidmui";
         Dictionary<String, Object> props = new Hashtable<String, Object>();
         httpService.registerServlet(alias, this,  props, httpContext);
@@ -97,10 +102,31 @@ public final class ResourceServlet
                 target += "/" + target;
             }
 
+            File extFile = null;
+            String extFileCanonical = null;
             String resName = this.path + target;
-
+            String extDir = IdentityServer.getInstance().getProperty("openidm.ui.extension.dir", 
+                    "&{launcher.install.location}/ui/extension", true);
+            for (String ext : extFolders) {
+                if (target.startsWith(ext)) {
+                    // Try to find in extensions folder
+                    extFile = new File(extDir + target);
+                    File extDirFile = new File(extDir);
+                    extFileCanonical = extFile.getCanonicalPath();
+                    if (!extFileCanonical.startsWith(extDirFile.getCanonicalPath())) {
+                        extFile = null;
+                    }
+                    break;
+                }
+            }
+            
             // Look in the bundle rather than the servlet context, as we're using shared servlet contexts
-            URL url = context.getBundleContext().getBundle().getResource(resName);
+            URL url = null;
+            if (extFile != null && extFile.exists()) {
+                url = extFile.getCanonicalFile().toURI().toURL();
+            } else {
+                url = context.getBundleContext().getBundle().getResource(resName);
+            }
 
             if (url == null) {
                 res.sendError(HttpServletResponse.SC_NOT_FOUND);

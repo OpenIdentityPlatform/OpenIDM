@@ -165,6 +165,29 @@ public class IdentityServer implements PropertyAccessor {
      *            The name of the property to retrieve.
      * @param defaultValue
      *            the default value to return if the property is not set
+     * @param withPropertySubstitution
+     *            whether to use boot and system property substitution
+     * @return The property with the specified name, or {@code defaultValue} if
+     *         no such property is defined.
+     */
+    public String getProperty(String name, String defaultValue, boolean withPropertySubstitution) {
+        String result = getProperty(name, defaultValue, String.class);
+        if (withPropertySubstitution) {
+            result = (String)PropertyUtil.substVars(result, identityServer.get(), false);
+        }
+        return result;
+    }
+    
+    /**
+     * Retrieves the property with the specified name (case insensitvie). The
+     * check will first be made in the boot properties file, the local config
+     * properties, but if no value is found then the JVM system properties will
+     * be checked.
+     * 
+     * @param name
+     *            The name of the property to retrieve.
+     * @param defaultValue
+     *            the default value to return if the property is not set
      * @return The property with the specified name, or {@code defaultValue} if
      *         no such property is defined.
      */
