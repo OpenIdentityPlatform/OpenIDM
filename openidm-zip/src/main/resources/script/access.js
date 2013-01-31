@@ -120,11 +120,12 @@ var httpAccessConfig =
             "actions"   : "",
             "customAuthz" : "disallowQueryExpression()"
         },
+        // Note that these actions are available directly on system as well
         {  
             "pattern"   : "system/*",
             "roles"     : "openidm-admin",
             "methods"   : "action",
-            "actions"   : "createconfiguration"
+            "actions"   : "createconfiguration,liveSync"
         },
         
         // Additional checks for authenticated users

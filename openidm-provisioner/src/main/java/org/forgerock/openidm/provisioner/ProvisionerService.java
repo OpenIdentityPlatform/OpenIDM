@@ -28,6 +28,7 @@ package org.forgerock.openidm.provisioner;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
+import org.forgerock.json.resource.JsonResourceException;
 import org.forgerock.openidm.sync.SynchronizationListener;
 
 import java.util.Map;
@@ -73,6 +74,8 @@ public interface ProvisionerService extends JsonResource {
      * @param previousStage           The previously returned object. If null then it's the first execution.
      * @param synchronizationListener The listener to send the changes to.
      * @return The new updated stage object. This will be the {@code previousStage} at next call.
+     * @throws JsonResourceException if a failure occurred during live sync
      */
-    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener);
+    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener)
+            throws JsonResourceException;
 }
