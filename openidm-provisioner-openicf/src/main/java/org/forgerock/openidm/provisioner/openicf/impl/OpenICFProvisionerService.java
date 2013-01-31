@@ -796,7 +796,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
      *                                       if the  {@code previousStage} is not Map.
      * @see {@link ConnectorUtil#convertToSyncToken(org.forgerock.json.fluent.JsonValue)} or any exception happed inside the connector.
      */
-    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener) {
+    public JsonValue liveSynchronize(String objectType, JsonValue previousStage, final SynchronizationListener synchronizationListener) 
+            throws JsonResourceException {
         if (!serviceAvailable) return previousStage;
         JsonValue stage = previousStage != null ? previousStage.copy() : new JsonValue(new LinkedHashMap<String, Object>());
         JsonValue connectorData = stage.get("connectorData");
@@ -864,7 +865,8 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
                                     if (logger.isDebugEnabled()) {
                                         logger.error("Failed synchronise {} object", syncDelta.getUid(), e);
                                     }
-                                    throw new ConnectorException("Failed synchronise " + syncDelta.getUid() + " object", e);
+                                    throw new ConnectorException("Failed synchronise " + syncDelta.getUid() + " object. "
+                                            + e.getMessage(), e);
                                 }
                                 return true;
                             }
@@ -891,15 +893,16 @@ public class OpenICFProvisionerService implements ProvisionerService, ConnectorE
             }
         } catch (JsonResourceException e) {
             if (logger.isDebugEnabled()) {
-                logger.error("Failed to get OperationHelper", e);
+                logger.debug("Failed to get OperationHelper", e);
             }
-            throw new RuntimeException(e);
+            throw e;
         } catch (Exception e) {
             // catch helper.getOperationOptionsBuilder(
             if (logger.isDebugEnabled()) {
-                logger.error("Failed to get OperationOptionsBuilder", e);
+                logger.debug("Failed to get OperationOptionsBuilder", e);
             }
-            throw new RuntimeException(e);
+            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR, 
+                    "Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
         }
         return stage;
     }

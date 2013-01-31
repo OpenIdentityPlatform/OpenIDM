@@ -60,12 +60,14 @@ import java.util.Map;
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = "system")
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = SystemObjectSetService.ROUTER_PREFIX)
 })
 public class SystemObjectSetService implements JsonResource,
 // TODO: Deprecate the following interfaces when the discovery-engine:
         SynchronizationListener, ScheduledService {
     private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
+    
+    public final static String ROUTER_PREFIX = "system";
 
     @Reference(referenceInterface = ProvisionerService.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -107,9 +109,32 @@ public class SystemObjectSetService implements JsonResource,
      */
     public JsonValue handle(JsonValue request) throws JsonResourceException {
         JsonValue params = request.get("params");
-        if ("action".equalsIgnoreCase(request.get("method").asString()) && !params.isNull() &&
-                "CREATECONFIGURATION".equalsIgnoreCase(params.get(ServerConstants.ACTION_NAME).asString())) {
-            return configurationService.configure(request.get("value"));
+        if ("action".equalsIgnoreCase(request.get("method").asString()) && !params.isNull()) {
+            String action = params.get(ServerConstants.ACTION_NAME).asString();
+            if ("CREATECONFIGURATION".equalsIgnoreCase(action)) {
+                return configurationService.configure(request.get("value"));
+            } else if(isLiveSyncAction(action)){
+                // Expose liveSync as callable in two ways
+                // Directly on system, taking a source param; matches the scheduler contract
+                // On the resource directly, e.g. system/ldap/account; RESTful contract
+                String source = params.get("source").asString();
+                boolean detailedFailure = booleanValue(params.get("detailedFailure"));
+                if (source == null) {
+                    String id = request.get("id").asString();
+                    if (id == null) {
+                        throw new JsonResourceException(JsonResourceException.BAD_REQUEST, 
+                                "liveSync action requires either an explicit source parameter, "
+                                + "or needs to be called on a specific provisioner URI");
+                    }
+                    source = ROUTER_PREFIX + "/" + id;
+                    TRACE.debug("liveSync called without explicit source parameter, assume it is targeted at the request URI {}", source);
+                } else {
+                    TRACE.debug("liveSync called with explicit source parameter {}", source);
+                }
+                return liveSync(source, detailedFailure);
+            } else {
+                return locateService(request).handle(request);
+            }
         } else {
             return locateService(request).handle(request);
         }
@@ -202,44 +227,83 @@ public class SystemObjectSetService implements JsonResource,
         try {
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
             String action = params.get("action").asString();
-            if ("liveSync".equals(action) || "activeSync".equals(action)) {
-                Id id = new Id(params.get("source").asString());
-                String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
-                try {
-                    JsonValue previousStage = null;
-                    try {
-                        JsonValue readRequest = new JsonValue(new HashMap());
-                        readRequest.put("type", "resource");
-                        readRequest.put("method", "read");
-                        readRequest.put("id", previousStageId);
-                        previousStage = router.handle(readRequest);
-
-                        JsonValue updateRequest = new JsonValue(new HashMap());
-                        updateRequest.put("type", "resource");
-                        updateRequest.put("method", "update");
-                        updateRequest.put("id", previousStageId);
-                        updateRequest.put("rev", previousStage.get("_rev"));
-                        updateRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? previousStage : null, this).asMap());
-                        router.handle(updateRequest);
-                    } catch (JsonResourceException e) {
-                        if (null == previousStage) {
-                            TRACE.info("PooledSyncStage object {} is not found. First execution.");
-                            JsonValue createRequest = new JsonValue(new HashMap());
-                            createRequest.put("type", "resource");
-                            createRequest.put("method", "create");
-                            createRequest.put("id", previousStageId);
-                            createRequest.put("value", locateService(id).liveSynchronize(id.getObjectType(), null, this).asMap());
-                            router.handle(createRequest);
-                        }
-                    }
-                } catch (JsonResourceException e) {
-                    throw new ExecutionException(e);
-                }
+            if (isLiveSyncAction(action)) {
+                String source = params.get("source").required().asString();
+                liveSync(source, true);
             }
         } catch (JsonValueException jve) {
             throw new ExecutionException(jve);
         } catch (JsonResourceException e) {
             throw new ExecutionException(e);
+        }
+    }
+    
+    /**
+     * @param action the requested action
+     * @return true if the action string is to live sync
+     */
+    private boolean isLiveSyncAction(String action) {
+        return ("liveSync".equalsIgnoreCase(action) || "activeSync".equalsIgnoreCase(action));
+    }
+
+    /**
+     * Live sync the specified provisioner resource
+     * @param source the URI of the provisioner instance to live sync
+     * @param detailedFailure whether in the case of failures additional details such as the 
+     * record content of where it failed should be included in the response
+     */
+    private JsonValue liveSync(String source, boolean detailedFailure) throws JsonResourceException {
+        JsonValue response = null;
+        Id id = new Id(source);
+        String previousStageId = "repo/synchronisation/pooledSyncStage/" + id.toString().replace("/", "").toUpperCase();
+
+        JsonValue previousStage = null;
+        try {
+            JsonValue readRequest = new JsonValue(new HashMap());
+            readRequest.put("type", "resource");
+            readRequest.put("method", "read");
+            readRequest.put("id", previousStageId);
+            previousStage = router.handle(readRequest);
+
+            JsonValue updateRequest = new JsonValue(new HashMap());
+            updateRequest.put("type", "resource");
+            updateRequest.put("method", "update");
+            updateRequest.put("id", previousStageId);
+            updateRequest.put("rev", previousStage.get("_rev"));
+            response = locateService(id).liveSynchronize(id.getObjectType(), previousStage != null ? previousStage : null, this);
+            updateRequest.put("value", response.asMap());
+            router.handle(updateRequest);
+        } catch (JsonResourceException e) {
+            if (null == previousStage) {
+                TRACE.info("PooledSyncStage object {} is not found. First execution.");
+                JsonValue createRequest = new JsonValue(new HashMap());
+                createRequest.put("type", "resource");
+                createRequest.put("method", "create");
+                createRequest.put("id", previousStageId);
+                response = locateService(id).liveSynchronize(id.getObjectType(), null, this);
+                createRequest.put("value", response.asMap());
+                router.handle(createRequest);
+            } else {
+                throw e;
+            }
+        }
+        if (response != null && !detailedFailure) {
+            // The detailedFailure option handling ideally should move into provisioners
+            response.get("lastException").remove("syncDelta");
+        }
+        return response;
+    }
+
+    /** 
+     * @param value to convert to boolean
+     * Allows boolean values both as Boolean or in String-ified form. 
+     * Non-boolean or null argument returns false.
+     */
+    private boolean booleanValue(JsonValue value) {
+        if (value.isBoolean()) {
+            return value.asBoolean().booleanValue();
+        } else {
+            return Boolean.parseBoolean(value.asString());
         }
     }
 
