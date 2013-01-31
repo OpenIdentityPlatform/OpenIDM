@@ -753,9 +753,8 @@ policyProcessor = (function (policyConfig,policyImpl){
 
 additionalPolicyLoader = (function (config,impl) { 
     
-    var obj = {};
-    
-    obj.addPolicy = function(policy) {
+    var obj = {},
+    addPolicy = function(policy) {
         config.policies.push(policy);
     };
     
