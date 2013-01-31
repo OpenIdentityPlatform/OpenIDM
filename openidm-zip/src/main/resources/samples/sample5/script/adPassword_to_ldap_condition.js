@@ -1,5 +1,5 @@
 /*global object */
 (function () {
-    return  object.hasOwnProperty('password') && object.password !== null &&
+    return  typeof object.password !== "undefined" && object.password !== null &&
             object.ldapPassword !== object.password;
 }());
