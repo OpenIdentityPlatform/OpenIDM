@@ -117,8 +117,8 @@
   <link xlink:href="integrators-guide#chap-scheduler-conf"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Scheduling
   Tasks and Events</citetitle></link>. Alternatively, you can manage
-  reconciliations over the REST interface, as described in the following
-  section.</para>
+  reconciliation and LiveSync over the REST interface, as described in the
+  following sections.</para>
 
   </section>
 
@@ -381,6 +381,81 @@
     </variablelist>
    </section>
   </section>
+
+  <section xml:id="livesync-over-rest">
+      <title>Triggering LiveSync Over REST</title>
+
+      <itemizedlist>
+          <para>There are two ways in which to trigger a LiveSync operation
+              over REST.</para>
+          <listitem>
+              <para>Use the <literal>_action=liveSync</literal> parameter
+                  directly on the resource. This is the recommended method.
+                  The following example calls a LiveSync operation on the user
+                  accounts in an external LDAP system.
+              </para>
+              <screen>$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/ldap/account?_action=liveSync"
+              </screen>
+            </listitem>
+            <listitem>
+                <para>Target the <literal>system</literal> endpoint and supply
+                    a <literal>source</literal> parameter to identify the object
+                    that should be synchronized. This method matches the scheduler
+                    configuration and can therefore be used to test schedules
+                    before they are implemented.</para>
+                <para>The following example calls the same LiveSync operation
+                    as the previous example.</para>
+                <screen width="84">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system?_action=liveSync&amp;source=system/ldap/account"
+                </screen>
+            </listitem>
+        </itemizedlist>
+
+        <para>A successful LiveSync operation returns the following response:</para>
+        <screen>{
+    "_id": "SYSTEMLDAPACCOUNT",
+    "_rev": "0",
+    "connectorData": {
+        "syncToken": 1,
+        "nativeType": "integer"
+    }
+}
+        </screen>
+
+        <para>To troubleshoot a LiveSync operation that has not succeeded, you
+            can include an optional parameter (<literal>detailedFailure</literal>)
+            to return additional information. For example:</para>
+
+        <screen width="95">$ curl
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ --request POST
+ "http://localhost:8080/openidm/system/ldap/account?_action=liveSync&amp;detailedFailure=true"
+        </screen>
+
+        <note>
+            <para>The first time that a LiveSync operation is called, no
+            synchronization token exists in the database to establish which
+            changes have already been processed. The default LiveSync behavior
+            is to locate the last existing entry in the change log, and to
+            store that entry in the database as the current starting position
+            from which changes should be applied. This behavior prevents
+            LiveSync from processing changes that might already have been
+            processed during an initial data load. Subsequent LiveSync operations
+            will pick up and process any new changes.</para>
+            <para>Typically, in setting up LiveSync on a new system, you would
+            load the data initially (by using reconciliation, for example) and
+            then enable LiveSync, starting from that base point.</para>
+        </note>
+    </section>
+
 
  <section xml:id="sync-flexible-data">
   <title>Flexible Data Model</title>
