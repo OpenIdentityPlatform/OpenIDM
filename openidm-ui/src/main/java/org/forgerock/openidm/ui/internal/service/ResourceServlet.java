@@ -61,7 +61,7 @@ public final class ResourceServlet
     final static Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
     
     //TODO Decide where to put the web and the java resources. Now both are in root
-    private final String path = "/ui";
+    private final String path = "/public";
     
     private List<String> extFolders;
     

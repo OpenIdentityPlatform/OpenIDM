@@ -34,24 +34,12 @@
 	</formats>
 	<fileSets>
 		<fileSet>
-			<directory>${basedir}/target/classes</directory>
-			<outputDirectory>/openidm-ui-ria-admin-apache</outputDirectory>
-		</fileSet>
-		<fileSet>
             <directory>${basedir}/target/classes</directory>
             <outputDirectory>/openidm-ui-ria-admin</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/target/dependency</directory>
             <outputDirectory>/openidm-ui-ria-admin</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/target/dependency</directory>
-            <outputDirectory>/openidm-ui-ria-admin-apache</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/customized/apache</directory>
-            <outputDirectory>/openidm-ui-ria-admin-apache</outputDirectory>
         </fileSet>
 	</fileSets>
 </assembly>

@@ -119,7 +119,7 @@
 							<relocations>
 								<relocation>
 									<pattern>openidm-ui-ria-admin</pattern>
-									<shadedPattern>ui</shadedPattern>
+									<shadedPattern>public</shadedPattern>
 									<includes>
 										<include>openidm-ui-ria-admin.**</include>
 									</includes>
