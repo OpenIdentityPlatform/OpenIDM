@@ -167,9 +167,12 @@ If-Match: "0"
 [<replaceable>JSON representation of managed object to update</replaceable>]</programlisting>
      <para>Example Response: Updating an existing object (success)</para>
      <programlisting language="http">
-HTTP/1.1 204 No Content
-ETag: "1"
-...</programlisting>
+HTTP/1.1 201 Created
+Content-Type: application/json
+Content-Length: 45
+ETag: "0"
+....</programlisting>
+     <para>This return code may change in a future release.</para>
      <para>Example Response: Updating an existing object (version conflict)</para>
      <programlisting language="http">
 HTTP/1.1 409 Conflict
