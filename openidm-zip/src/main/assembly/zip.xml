@@ -411,7 +411,7 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/default/bundle-dir</outputDirectory>
+            <outputDirectory>/openidm/ui/default/admin</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui</include>
             </includes>
