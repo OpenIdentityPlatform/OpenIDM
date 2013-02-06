@@ -1141,10 +1141,9 @@
      <para>Complete the wizard.
      </para>
     </step>
-    <para>Once the wizard is done, the Connector Server will be installed as a Windows
-    service.
-    </para>
    </procedure>
+   <para>When the wizard has run, the Connector Server is installed as a
+   Windows Service.</para>
 
    <procedure>
     <title>Running the .NET Connector Server</title>
@@ -1154,9 +1153,8 @@
      <para>In the Microsoft Service Console, go to <literal>Start</literal>, type 
      <literal>Services</literal>, <literal>Services</literal>.
      </para>
+     <para>or</para>
     </step>
-
-    <para>Or</para>
     <step>
      <para>In the command prompt, go to <literal>Start</literal>, type <literal>cmd</literal>,
      then <literal>cmd</literal> again.
@@ -1185,19 +1183,21 @@
      </para>
      <step>
       <para>Check to see if the Connector Server is currently running. If so, stop it. 
-      All configuration changes will require the Connector Server be stopped and restarted
-      after the changes are saved.
+      All configuration changes require that the Connector Server be stopped and
+      restarted after the changes are saved.
       </para>
      </step>
-      <para>In the command prompt (<literal>Start</literal>, then type <literal>cmd</literal>,
-      set the key for the connector Server by changing to the directory where the 
-      connector server was installed and executing the following command  using the 
-      string value for <literal>newkey</literal>:
+     <step>
+      <para>At the command prompt (click <literal>Start</literal>, <literal>Run</literal>,
+      then type <literal>cmd</literal>, set the key for the Connector Server by changing
+      to the directory where the Connector Server was installed and executing the
+      following command, using a string value for <literal>newkey</literal>:
       </para>
       <screen>ConnectorServer.exe /setkey &lt;newkey&gt;</screen>
       <para>This key is used by clients connecting to the Connector Server.</para>
+     </step>
      <step>
-      <para>Review the <filename>ConnectorServer.exe.config</filename> to verify 
+      <para>Review the <filename>ConnectorServer.exe.config</filename> file to verify
       additional configuration. This includes the port, address, and SSL settings in
       the <filename>AppSettings</filename>.
      
@@ -1208,12 +1208,13 @@
 &lt;add key="connectorserver.ifaddress" value="0.0.0.0" /&gt;
 </screen>
       </para>
-      <para>The port can be set by changing the value of connectorserver.port. The 
-      listening socket can be bound to a particular address, or can be left as 0.0.0.0. 
+      <para>The port can be set by changing the value of <literal>connectorserver.port</literal>.
+      The listening socket can be bound to a particular address, or can be left as 0.0.0.0.
       </para>
-      <para>To setup to use SSL, you must set the value of connectorserver.usessl to 
-      true, and then set the value of <filename>connectorserver.certifacatestorename</filename>  
-      to the certificate store name.
+      <para>To configure the server to use SSL, set the value of
+      <literal>connectorserver.usessl</literal> to <literal>true</literal> and set
+      the value of <filename>connectorserver.certifacatestorename</filename> to
+      the certificate store name.
       </para>
      </step>
      <step>
@@ -1233,7 +1234,7 @@ initializeData="c:\connectorserver2.log" traceOutputOptions="DateTime"&gt;
       </screen>
       <para>The Connector Server uses the standard .NET trace mechanism. 
       For more information about the tracing options, see <link xlink:show="new"
-      xlink:ref="http://msdn.microsoft.com/en-us/library/15t15zda(v=vs.71).aspx"
+      xlink:href="http://msdn.microsoft.com/en-us/library/15t15zda(v=vs.71).aspx"
       >Microsoft's .NET documentation</link> for <literal>System.Diagnostics</literal>.
       </para>
       <note>
@@ -1541,12 +1542,13 @@ org.identityconnectors.framework.server.Main -run -properties
        <screen>.\ConnectorServer.bat /run</screen>
       </step>
       <step>
-       <para>If necessary, you can stop the JCS by pressing <literal>^C</literal>.
+       <para>If necessary, stop the JCS by pressing <literal>^C</literal>.
        </para>
       </step>
-      <para>To view the log files, go to the <literal>openicf/logs</literal> directory.
-      </para>
+
      </procedure>
+       <para>You can view the log files in the <literal>openicf/logs</literal> directory.
+       </para>
 
     <section xml:id="example-mysql-jcs-reconciliation">
      <title>MySQL Database Example to Reconcile JCS Users</title>
@@ -1798,10 +1800,9 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
 	}</screen>
          </step>
          <step>
-          <para>Verify the following settings are correct.
+          <para>Verify that the following settings are correct.
           </para>
-          <variablelist>
-           <varlistentry>
+          <itemizedlist>
             <listitem>
              <para>The value of <literal>connectorHostRef : mysql</literal> points
              to the property <literal>name</literal> of 
@@ -1809,8 +1810,6 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
              indicates which connectorinfoprovider to use.
              </para>
            </listitem>
-           </varlistentry>
-           <varlistentry>
             <listitem>
              <para>The <filename>bundleVersion : 1.1.0.0-SNAPSHOT</filename> must be
              exactly the same as <filename>openicf-scriptedsql-connector-1.1.0.0-SNAPSHOT.jar</filename>.
@@ -1820,8 +1819,6 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
              <literal>Bundle-Version</literal> property.
              </para>
            </listitem>
-           </varlistentry>
-           <varlistentry>
             <listitem>
              <para>The path to groovy scripts should be <literal>createScriptFileName : 
              /home/tester/openicf/tools/CreateScript.groovy ...</literal>.
@@ -1832,15 +1829,12 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
              <literal>C:\Program Files (x86)\openicf\tools\CreateScript.groovy</literal>.
              </para>
            </listitem>
-           </varlistentry>
-           <varlistentry>
             <listitem>
-             <para>Make sure all instances of the connection setting are properly set, 
+             <para>All instances of the connection setting must be properly set,
              for example, <literal>jdbcConnectionUrl : jdbc:mysql://10.0.0.2:3306/HRDB</literal>.
              </para>
            </listitem>
-           </varlistentry>
-          </variablelist>
+          </itemizedlist>
          </step>
          <step>
           <para>Restart OpenIDM to verify that all of the configuration changes have
@@ -1854,8 +1848,8 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
            <note>
             <para>The number may differ. Make sure to note the number returned.</para>
            </note>
-          <para>When you have installed more connectors, then there will be more OpenICF
-          modules. If the state of the module is active, then the module is installed properly. 
+          <para>When you have installed more connectors, there will be more OpenICF
+          modules. If the state of the module is active, the module is installed properly.
           If the state is unsatisfied, then you have not configured it correctly and you
           must check your configuration. You can also check the content of installed module 
           (which could be handy if you have unsatisfied state and you want to see if the 
@@ -1870,7 +1864,7 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
           </note> 
          </step>
          <step>
-          <para>Run the reconciliation with the following command. 
+          <para>Run reconciliation with the following command:
           </para>
           <screen>$ curl --header "X-OpenIDM-Username: openidm-admin"  
 --header "X-OpenIDM-Password: openidm-admin"  --request POST 
@@ -1880,8 +1874,9 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
           <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
          </step>
          <step>
-          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the users 
-          were reconciled. To connect to repo go to <link xlink:show="new"
+          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) that the users
+          were reconciled. For information about connecting to the repository, see
+          <link xlink:show="new"
           xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
           >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
           or <link xlink:show="new"
@@ -1915,18 +1910,18 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
          <step>
           <para>Start OpenIDM. You can ignore errors like <literal>cannot
           connect to database</literal> and <literal>cannot find jdbc driver</literal>.
-          These errors will be fixed once OpenIDM is configured and restarted.
+          These errors will be fixed once OpenIDM has been configured and restarted.
           </para>
          </step>
          <step>
           <para>Copy the <literal>openidm/samples/sample1/conf</literal> directory
           to <literal>openidm/conf</literal>. Overwrite any existing files.
           </para>
-          <para>For Unix/Linux, enter the following in Terminal.
+          <para>For Unix/Linux, enter the following in a terminal window.
           </para>
           <screen>$ cd path/to/openidm
 $ cp -r ./samples/sample1/conf ./conf</screen>
-          <para>For Window, enter the following on the command line.
+          <para>For Windows, enter the following on the command line.
           </para>
           <screen>c:\> cd path\to\openidm
 .\> copy .\samples\sample1\conf .\conf</screen>
@@ -2056,10 +2051,9 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
 }</screen>
          </step>
          <step>
-          <para>Verify the following settings are correct.
+          <para>Verify that the following settings are correct.
           </para>
-          <variablelist>
-           <varlistentry>
+          <itemizedlist>
             <listitem>
              <para>The value of <literal>connectorHostRef : xml</literal> points
              to the property <literal>name</literal> of 
@@ -2067,8 +2061,6 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
              indicates which connectorinfoprovider to use.
              </para>
            </listitem>
-           </varlistentry>
-           <varlistentry>
             <listitem>
              <para>The <filename>bundleVersion : 1.1.0.0-SNAPSHOT</filename> must be
              exactly the same as <filename>openicf-scriptedsql-connector-1.1.0.0-SNAPSHOT.jar</filename>.
@@ -2076,20 +2068,16 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
              versions, e.g., <literal>1.1.0.1</literal>).
              </para>
            </listitem>
-           </varlistentry>
-           <varlistentry>
             <listitem>
              <para>The path to <literal>xsdIcfFilePath : /Program files (x86)/openicf/data/resource-schema-1.xs</literal>
              </para>
            </listitem>
-           </varlistentry>
-          </variablelist>
+          </itemizedlist>
          </step>
          <step>
           <para>Restart OpenIDM to verify that all of the configuration changes have
-          occurred. There should be no error message when OpenIDM is restarted. To check
-          run the following.
-          </para>
+          occurred. There should be no error message when OpenIDM is restarted.
+          To check, run the following command:</para>
           <screen>src list</screen>
           <para>This returns a list of installed modules, including the following:
           </para>
@@ -2097,14 +2085,15 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
            <note>
             <para>The number may differ. Make sure to note the number returned.</para>
            </note>
-          <para>When you have installed more connectors, then there will be more OpenIFC
-          modules. If the state of the module is active, then the module is installed properly. 
+          <para>When you have installed more connectors, there will be more OpenIFC
+          modules. If the state of the module is active, the module is installed properly.
           If the state is unsatisfied, then you have not configured it correctly and you
-          must check your configuration. You can also check the content of installed module 
-          (which could be handy if you have unsatisfied state and you want to see if the 
-          content is the same as in <filename>*.json</filename> – to verify that the 
-          configuration you just set was picked up). To list the content of the module 
-          use the following with the number returned from the previous step:
+          must check your configuration. You can also check the content of installed
+          modules. This can be useful if you have an unsatisfied state and you want to
+          check that the content is the same as in the <filename>*.json</filename>
+          file, to verify that the configuration change you made was picked up. To
+          list the content of the module run the following command, with the number
+          returned from the previous step:
           </para>
           <screen>scr info 17 &lt;your number&gt;</screen>
           <note>
@@ -2113,7 +2102,7 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
           </note> 
          </step>
          <step>
-          <para>Run the reconciliation with the following command. 
+          <para>Run reconciliation with the following command.
           </para>
           <screen>$ curl --header "X-OpenIDM-Username: openidm-admin" 
 --header "X-OpenIDM-Password: openidm-admin" --request POST 
@@ -2123,8 +2112,9 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
           <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
          </step>
          <step>
-          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the users 
-          were reconciled. To connect to the repository go to <link xlink:show="new"
+          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the
+          users were reconciled. For information about connecting to the repository,
+          see <link xlink:show="new"
           xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
           >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
           (for OrientDB) or <link xlink:show="new"
@@ -2348,8 +2338,10 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
     production, a CSV file serves as a change log, often containing only user
     records that changed.</para>
 
-   <para>The following example shows an excerpt of the provisioner
-   configuration. The default connector-jar location is <filename>openidm/connectors</filename>. Therefore the  <literal>connectorHostRef</literal> must point to <literal>"#LOCAL"</literal>.</para>
+   <para>The following example shows an excerpt of the provisioner configuration.
+   The default connector-jar location is <filename>openidm/connectors</filename>.
+   Therefore the <literal>connectorHostRef</literal> must point to
+   <literal>"#LOCAL"</literal>.</para>
 
    <programlisting language="javascript">
 {
