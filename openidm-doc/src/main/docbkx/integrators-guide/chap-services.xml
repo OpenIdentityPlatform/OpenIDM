@@ -76,8 +76,8 @@
    time</emphasis>.</para>
    <listitem>
     <para>If you have already started OpenIDM, then shut down OpenIDM and
-    remove Felix cache files under
-    <filename>openidm/felix-cache/</filename>.</para>
+    remove the Felix cache files under <filename>openidm/felix-cache/</filename>.
+    </para>
 
     <screen>-&gt; shutdown
 ...
@@ -107,15 +107,7 @@ java.util.logging.ConsoleHandler.level = OFF
    <listitem>
     <para>Start OpenIDM in the background.</para>
     <screen>$ ./startup.sh &amp;
-[3] 454
-$ ./startup.sh
-Using OPENIDM_HOME:   /path/to/openidm
-Using OPENIDM_OPTS:   -Xmx1024m
-Using LOGGING_CONFIG:
- -Djava.util.logging.config.file=/path/to/openidm/conf/logging.properties
-Using boot properties at /path/to/openidm/conf/boot/boot.properties
-
-$</screen>
+</screen>
     <para>Alternatively, use the <command>nohup</command> command to keep
     OpenIDM running after you log out.</para>
 
