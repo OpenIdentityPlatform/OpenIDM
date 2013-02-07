@@ -139,6 +139,15 @@
     <citetitle>Using Property Value Substitution in the Configuration</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
+  <listitem>
+      <para>Support for calling LiveSync operations over REST, or using the
+      resource API.</para>
+      <para>For more information, see
+      <link xlink:href="integrators-guide#livesync-over-rest"
+            xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Triggering LiveSync Over REST</citetitle></link>
+      in the <citetitle>Integrator's Guide</citetitle>.</para>
+  </listitem>
       
  </itemizedlist>
 
