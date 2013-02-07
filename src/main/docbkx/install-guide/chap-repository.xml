@@ -56,9 +56,8 @@
       starting OpenIDM for the first time</emphasis>, set up OpenIDM to use the
       new repository, as described in the following sections.</para>
   <step>
-   <para>Download <link xlink:show="new"
-   xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL
-   Connector/J</link>, unpack the delivery, and copy the .jar into the
+   <para>Download MySQL Connector/J, version 5.1 or later from the MySQL website.
+   Unpack the delivery, and copy the .jar into the
    <filename>openidm/bundle</filename> directory.</para>
    <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
   </step>
