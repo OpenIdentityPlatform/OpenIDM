@@ -693,10 +693,9 @@ $ </screen>
      <listitem><para>Prepare OpenIDM as described in <xref 
      linkend="preparing-openidm"/>.</para></listitem>
      <listitem>
-     <para>OpenIDM requires a MySQL driver, the MySQL Connector/J. Download 
-     <link xlink:show="new" xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL Connector/J</link>, 
-     unpack the delivery, and copy the .jar into the <filename>openidm/bundle</filename> 
-     directory.</para>
+     <para>OpenIDM requires a MySQL driver, the MySQL Connector/J. Download
+         MySQL Connector/J, version 5.1 or later. Unpack the delivery and
+         copy the .jar into the <filename>openidm/bundle</filename> directory.</para>
      <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
      </listitem>
      <listitem>
