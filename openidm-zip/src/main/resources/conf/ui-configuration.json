@@ -4,6 +4,7 @@
         "securityQuestions" : false,
         "siteIdentification" : false,
         "language" : "en-US",
+        "passwordResetLink": "",
         "roles" : {
             "openidm-admin" : "Administrator",
             "openidm-authorized" : "User",
