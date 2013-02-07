@@ -697,7 +697,7 @@ $ </screen>
      <link xlink:show="new" xlink:href="http://www.mysql.com/downloads/connector/j/">MySQL Connector/J</link>, 
      unpack the delivery, and copy the .jar into the <filename>openidm/bundle</filename> 
      directory.</para>
-     <screen>$ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/</screen>
+     <screen>$ cp mysql-connector-java-<replaceable>version</replaceable>-bin.jar /path/to/openidm/bundle/</screen>
      </listitem>
      <listitem>
      <para>In <filename>openidm/samples/sample3/conf/provisioner.openicf-scriptedsql.json</filename>, 
