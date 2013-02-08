@@ -33,21 +33,17 @@
  
   <important>
     <para>OpenIDM <?eval ${docTargetVersion}?> is a milestone release from the 
-    main development branch of the product. The release contains selected key
-    features and all current fixed issues. Generally, an odd minor version
-    numbered release undergoes important functional testing but not the complete
-    testing cycle that is done for a full (even minor version numbered) release.</para>
+    main development branch of the product. This release contains selected key
+    features and all current fixed issues. The release has undergone important
+    functional testing but not the complete testing cycle that is done for a
+    full (even minor version numbered) release.</para>
 
-    <para>This release is supported through a ForgeRock subscription and
-    is upgradeable to the next even minor version number release, which has
-    long term support.</para>
-    
-    <para>The goal of an odd minor version release is to enable you to start
-    build phases earlier, with the most recent features, instead of having to
-    wait for the full release date. Fixes to issues that are discovered in this
-    release will be delivered as patches to ForgeRock customers, and are
-    guaranteed to be delivered in the full release that follows. Odd minor
-    version releases are supported for a grace period after the full version has
+    <para>This release is supported through a ForgeRock subscription. Its goal
+    is to enable you to start build phases earlier, with the most recent features,
+    instead of having to wait for the full release date. Fixes to issues that are
+    discovered in this release will be delivered as patches to ForgeRock customers,
+    and are guaranteed to be delivered in the full release that follows. This
+    release will be supported for a grace period after the full version has
     been released.</para>
     
     <para>With the exception of these Release Notes, the official 
