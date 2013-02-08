@@ -58,7 +58,7 @@
  
  <para>You can configure OpenIDM to pick up changes to scheduled tasks and 
  events dynamically, during initialization and also at runtime. For more 
- information, see <link xlink:href="integrators-guide#when-configuring-notes" 
+ information, see <link xlink:href="integrators-guide#changing-configuration"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Changing the 
  Configuration</citetitle></link>.</para>
  
