@@ -827,7 +827,7 @@ public class RepoJobStore implements JobStore {
             logger.warn("Error getting trigger names", e);
             throw new JobPersistenceException("Error getting trigger names", e);
         }
-        return null;
+        return new String[0];
     }
 
     @Override
@@ -1125,28 +1125,29 @@ public class RepoJobStore implements JobStore {
     public boolean replaceTrigger(SchedulingContext context, String triggerName, String groupName, 
             Trigger newTrigger)  throws JobPersistenceException {
         synchronized (lock) {
+            boolean deleted = false;
+            Trigger oldTrigger = null;
             TriggerWrapper tw = getTriggerWrapper(groupName, triggerName);
-            if (tw == null) {
-                logger.debug("Cannot resume trigger {} in group {}, trigger does not exist",
-                        new Object[]{triggerName, groupName});
-                return false;
+            if (tw != null) {
+                oldTrigger = tw.getTrigger();
+                if (!oldTrigger.getJobName().equals(newTrigger.getJobName())
+                        || !oldTrigger.getJobGroup().equals(newTrigger.getJobGroup())) {
+                    throw new JobPersistenceException("Error replacing trigger, new trigger references a different job");
+                }
+                logger.debug("Replacing trigger {} in group {} with trigger {} in group {}",
+                        new Object[]{triggerName, groupName, newTrigger.getName(), groupName});
+                deleted = removeTrigger(context, triggerName, groupName);
             }
-            Trigger trigger = tw.getTrigger();
-            if (!trigger.getJobName().equals(newTrigger.getJobName())
-                    || !trigger.getJobGroup().equals(newTrigger.getJobGroup())) {
-                throw new JobPersistenceException("Error replacing trigger, new trigger references a different job");
-            }
-            logger.debug("Replacing trigger {} in group {} with trigger {} in group {}",
-                    new Object[]{triggerName, groupName, newTrigger.getName(), groupName});
-            removeTrigger(context, triggerName, groupName);
             try {
                 storeTrigger(context, newTrigger, false);
             } catch (JobPersistenceException e) {
                 logger.warn("Error replacing trigger {}, restoring old trigger", triggerName, e);
-                storeTrigger(context, trigger, false);
+                if (oldTrigger != null) {
+                    storeTrigger(context, oldTrigger, false);
+                }
                 throw e;
             }
-            return true;
+            return deleted;
         }
         
     }
