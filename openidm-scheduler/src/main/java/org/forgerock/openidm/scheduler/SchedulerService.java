@@ -25,6 +25,7 @@
 
 package org.forgerock.openidm.scheduler;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,6 +44,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.JsonResource;
@@ -124,6 +126,8 @@ public class SchedulerService extends ObjectSetJsonResource {
     final static String SERVICE_PID = "scheduler.service-pid";
 
     final static String GROUP_NAME = "scheduler-service-group";
+    
+    final static String CONFIG = "schedule.config";
 
     private static Scheduler inMemoryScheduler;
     private static Scheduler persistentScheduler = null;
@@ -138,6 +142,8 @@ public class SchedulerService extends ObjectSetJsonResource {
     private boolean started = false;
 
     EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     // Optional user defined name for this instance, derived from the file install name
     String configFactoryPID;
@@ -270,6 +276,8 @@ public class SchedulerService extends ObjectSetJsonResource {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
                 scheduler = getScheduler(scheduleConfig);
+                JobDetail existingJob = scheduler.getJobDetail(jobName, GROUP_NAME);
+                boolean exists = existingJob != null;
 
                 // Determine the schedule class based on whether the job has concurrent execution enabled/disabled
                 Class scheduleClass = null;
@@ -279,15 +287,15 @@ public class SchedulerService extends ObjectSetJsonResource {
                     scheduleClass = StatefulSchedulerServiceJob.class;
                 }
                 
-                // If the schedule is disabled, remove from scheduler and return
-                if (!scheduleConfig.getEnabled()) {
+                // Check if the new or updated job is disabled
+                /*if (!scheduleConfig.getEnabled()) {
                     logger.info("Schedule {} is disabled", jobName);
                     if (jobExists(jobName, scheduleConfig.getPersisted()) &&
                             scheduler.deleteJob(jobName, GROUP_NAME)) {
                         logger.debug("Schedule was deleted from scheduler");
                     }
                     return false;
-                }
+                }*/
 
                 // Attempt to add the scheduler
                 if (scheduler != null && scheduleConfig.getCronSchedule() != null
@@ -296,17 +304,33 @@ public class SchedulerService extends ObjectSetJsonResource {
                     job.setVolatility(scheduleConfig.getPersisted());
                     job.setJobDataMap(createJobDataMap(scheduleConfig));
                     Trigger trigger = createTrigger(scheduleConfig, jobName);
+                    
                     if (update) {
-                        if (jobExists(jobName, scheduleConfig.getPersisted())) {
+                        if (exists) {
                             // Update the job by first deleting it, then scheduling the new version
                             scheduler.deleteJob(jobName, GROUP_NAME);
                         }
                     }
-                    // Schedule the Job
-                    scheduler.scheduleJob(job, trigger);
-                    logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.",
-                            new Object[] { jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
-                                    scheduleConfig.getStartTime(), scheduleConfig.getEndTime() });
+
+                    // check if it is enabled
+                    if (scheduleConfig.getEnabled()) {
+                        // Set to non-durable so that jobs won't persist after last firing
+                        job.setDurability(false);
+                        // Schedule the Job (with trigger)
+                        scheduler.scheduleJob(job, trigger);
+                        logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.",
+                                new Object[] { jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime() });
+                    } else {
+                        // Set the job to durable so that it can exist without a trigger (since the job is "disabled")
+                        job.setDurability(true);
+                        // Add the job (no trigger)
+                        scheduler.addJob(job, false);
+                        logger.info("Job {} added with schedule {}, timezone {}, start time {}, end time {}.",
+                                new Object[] { jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime() });
+                    }
+
                 }
             }
         } catch (ParseException ex) {
@@ -331,7 +355,7 @@ public class SchedulerService extends ObjectSetJsonResource {
      * @return                  The created Trigger
      * @throws ParseException
      */
-    private Trigger createTrigger(ScheduleConfig scheduleConfig, String jobName) throws ParseException {
+    private CronTrigger createTrigger(ScheduleConfig scheduleConfig, String jobName) throws ParseException {
         String cronSchedule = scheduleConfig.getCronSchedule();
         Date startTime = scheduleConfig.getStartTime();
         Date endTime = scheduleConfig.getEndTime();
@@ -339,7 +363,9 @@ public class SchedulerService extends ObjectSetJsonResource {
         TimeZone timeZone = scheduleConfig.getTimeZone();
 
         CronTrigger trigger = new CronTrigger("trigger-" + jobName, GROUP_NAME, cronSchedule);
-
+        trigger.setJobName(jobName);
+        trigger.setJobGroup(GROUP_NAME);
+        
         if (startTime != null) {
             trigger.setStartTime(startTime); // TODO: review time zone consistency with cron trigger timezone
         }
@@ -374,6 +400,7 @@ public class SchedulerService extends ObjectSetJsonResource {
         map.put(ScheduledService.CONFIGURED_INVOKE_SERVICE, invokeService);
         map.put(ScheduledService.CONFIGURED_INVOKE_CONTEXT, invokeContext);
         map.put(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL, invokeLogLevel);
+        map.put(CONFIG, scheduleConfig.getConfig().toString());
         return map;
     }
 
@@ -469,13 +496,21 @@ public class SchedulerService extends ObjectSetJsonResource {
             job = scheduler.getJobDetail(id, GROUP_NAME);
             CronTrigger trigger = (CronTrigger)scheduler.getTrigger("trigger-" + id, GROUP_NAME);
             JobDataMap dataMap = job.getJobDataMap();
+            if (trigger == null) {
+                ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
+                trigger = createTrigger(config, job.getName());
+            }
             ScheduleConfig config = new ScheduleConfig(trigger, dataMap, persisted, job.isStateful());
             resultMap = (Map<String, Object>)config.getConfig().getObject();
             resultMap.put("_id", id);
 
         } catch (SchedulerException e) {
+            e.printStackTrace();
             throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        
         return resultMap;
     }
 
@@ -680,5 +715,16 @@ public class SchedulerService extends ObjectSetJsonResource {
             throw ex;
         }
         logger.info("Scheduler facility started");
+    }
+    
+    private JsonValue parseStringified(String stringified) {
+        JsonValue jsonValue = null;
+        try {
+            Map parsedValue = (Map) mapper.readValue(stringified, Map.class);
+            jsonValue = new JsonValue(parsedValue);
+        } catch (IOException ex) {
+            throw new JsonException("String passed into parsing is not valid JSON", ex);
+        }
+        return jsonValue;
     }
 }
