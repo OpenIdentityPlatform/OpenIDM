@@ -36,7 +36,7 @@
     main development branch of the product. This release contains selected key
     features and all current fixed issues. The release has undergone important
     functional testing but not the complete testing cycle that is done for a
-    full (even minor version numbered) release.</para>
+    full enterprise release.</para>
 
     <para>This release is supported through a ForgeRock subscription. Its goal
     is to enable you to start build phases earlier, with the most recent features,
@@ -60,69 +60,62 @@
     <para>Browser-based user interface</para>
     <para>Includes self service capabilities, a generic platform to expose and 
     invoke workflows, and a notification service for tasks.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-ui" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <para>For more information, see <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide/#chap-ui">
     <citetitle>OpenIDM User Interface</citetitle></link> in the 
     <citetitle>Integrator's Guide</citetitle>.</para>
   </listitem>
   <listitem>
     <para>BPMN 2.0 workflow engine, embedded as an OSGi bundle and accessible 
     over REST.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-workflow" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <para>For more information, see <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#chap-workflow">
     <citetitle>Integrating Business Processes and Workflows</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>
   </listitem>
   <listitem>
     <para>Configurable task scheduling service, including support for 
     clustered schedules and scanning tasks.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-scheduler-conf" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <para>For more information, see <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#chap-scheduler-conf">
     <citetitle>Scheduling Tasks and Events</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
     <para>Configurable policy service.</para>
-    <para>For more information, see <link xlink:href="integrators-guide#chap-policies" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <para>For more information, see <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#chap-policies">
     <citetitle>Using Policies to Validate Data</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
     <para>Ability to perform batch scans to execute tasks</para>
-    <para>For more information, see <link xlink:href="integrators-guide#task-scanner" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <para>For more information, see <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#task-scanner">
     <citetitle>Scanning Data to Trigger Tasks</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
     <para>Ability to create custom RESTful endpoints.</para>
     <para>For more information, see 
-    <link xlink:href="integrators-guide#adding-custom-endpoints" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#adding-custom-endpoints">
     <citetitle>Adding Custom Endpoints</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
   <listitem>
     <para>Support for MS SQL JDBC as an internal repository.</para>
+    <para>For more information, see
+    <link xlink:href="http://openidm.forgerock.org/doc/install-guide#repository-mssql">
+    <citetitle>To Set Up OpenIDM With MS SQL</citetitle></link>
+    in the <citetitle>Installation Guide</citetitle>.</para>
   </listitem>  
   <listitem>
-    <para>Enhanced reconciliation service, accessible over REST.</para>
+    <para>Enhanced, multi-threaded reconciliation service, accessible over REST.</para>
     <para>For more information, see 
-    <link xlink:href="integrators-guide#chap-synchronization" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#chap-synchronization">
     <citetitle>Configuring Synchronization</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
-  </listitem>
-  <listitem>
-    <para>Support for native query expressions on the JDBC repository.</para>
   </listitem>
   <listitem>
     <para>Support for Powershell scripts on the Active Directory connector.
     </para>
     <para>For more information, see 
-    <link xlink:href="integrators-guide#ad-powershell" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#ad-powershell">
     <citetitle>Using PowerShell Scripts With the Active Directory Connector</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>     
   </listitem>
@@ -130,8 +123,7 @@
     <para>Reusable server configuration and property value substitution in the 
     configuration.</para>
     <para>For more information, see 
-    <link xlink:href="integrators-guide#using-property-substitution" 
-    xlink:role="http://docbook.org/xlink/role/olink">
+    <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#using-property-substitution">
     <citetitle>Using Property Value Substitution in the Configuration</citetitle></link> 
     in the <citetitle>Integrator's Guide</citetitle>.</para>    
   </listitem>
@@ -139,8 +131,7 @@
       <para>Support for calling LiveSync operations over REST, or using the
       resource API.</para>
       <para>For more information, see
-      <link xlink:href="integrators-guide#livesync-over-rest"
-            xlink:role="http://docbook.org/xlink/role/olink">
+      <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#livesync-over-rest">
       <citetitle>Triggering LiveSync Over REST</citetitle></link>
       in the <citetitle>Integrator's Guide</citetitle>.</para>
   </listitem>
@@ -148,13 +139,11 @@
  </itemizedlist>
 
  <para>For installation instructions and several samples to familiarize you 
- with the features, see the <link xlink:href="install-guide#chap-install"
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+ with the features, see the <link xlink:href="http://openidm.forgerock.org/doc/install-guide#chap-install"><citetitle>Installation
  Guide</citetitle></link>.</para>
 
  <para>For an architectural overview and high-level presentation of OpenIDM,
- see the <link xlink:href="integrators-guide#chap-overview"
- xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
+ see the <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#chap-overview"><citetitle>Architectural
  Overview</citetitle></link> chapter in the <citetitle>Integrator's
  Guide</citetitle>.</para>
 </chapter>
