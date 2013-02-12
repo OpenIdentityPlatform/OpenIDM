@@ -33,6 +33,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.i18n.slf4j.LocalizedLogger;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -71,7 +72,8 @@ import org.slf4j.LoggerFactory;
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/system")
 })
 public class SystemObjectSetService implements SingletonResourceProvider {
-    private final static Logger TRACE = LoggerFactory.getLogger(SystemObjectSetService.class);
+
+    private final static LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(SystemObjectSetService.class);
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConfigurationService configurationService;
@@ -199,7 +201,7 @@ public class SystemObjectSetService implements SingletonResourceProvider {
 //                        router.handle(updateRequest);
 //                    } catch (JsonResourceException e) {
 //                        if (null == previousStage) {
-//                            TRACE.info("PooledSyncStage object {} is not found. First execution.");
+//                            logger.info("PooledSyncStage object {} is not found. First execution.");
 //                            JsonValue createRequest = new JsonValue(new HashMap());
 //                            createRequest.put("type", "resource");
 //                            createRequest.put("method", "create");

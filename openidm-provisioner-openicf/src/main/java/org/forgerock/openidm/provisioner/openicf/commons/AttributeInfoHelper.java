@@ -230,11 +230,11 @@ public class AttributeInfoHelper {
      * @return
      * @throws Exception
      */
-    public Attribute build(Object source) throws Exception {
+    public Attribute build(Object source) {
         return build(attributeInfo, source);
     }
 
-    public Attribute build(AttributeInfo attributeInfo, Object source) throws Exception {
+    public Attribute build(AttributeInfo attributeInfo, Object source) {
         Attribute attribute;
         if (null == source) {
             attribute = AttributeBuilder.build(attributeInfo.getName());

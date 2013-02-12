@@ -24,19 +24,17 @@
 
 package org.forgerock.openidm.router;
 
-import org.forgerock.json.resource.Route;
-
 /**
  * A NAME does ...
- *
+ * 
  * @author Laszlo Hordos
  */
 public interface RouteEntry extends RouteService {
 
     /**
-     * Removes this route from the router where it was registered. Routes may be removed while
-     * this router is processing requests.
-     *
+     * Removes this route from the router where it was registered. Routes may be
+     * removed while this router is processing requests.
+     * 
      * @return {@code true} if at least one of the routes was found and removed.
      */
     public boolean removeRoute();

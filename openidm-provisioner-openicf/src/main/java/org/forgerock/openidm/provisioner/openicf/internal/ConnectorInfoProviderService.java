@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.provisioner.openicf;
+package org.forgerock.openidm.provisioner.openicf.internal;
 
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
@@ -38,8 +38,10 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.ConfigurationService;
+import org.forgerock.openidm.provisioner.openicf.ConnectorFacadeCallback;
+import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
+import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
-import org.forgerock.openidm.provisioner.openicf.internal.OpenICFProvisionerService;
 import org.identityconnectors.common.CollectionUtil;
 import org.identityconnectors.common.Pair;
 import org.identityconnectors.common.StringUtil;
@@ -115,6 +117,10 @@ import java.util.jar.JarInputStream;
                 cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
                 policy = ReferencePolicy.DYNAMIC)})
 public class ConnectorInfoProviderService implements ConnectorInfoProvider, MetaDataProvider, ConfigurationService {
+
+    /**
+     * Setup logging for the {@link OpenICFProvisionerService}.
+     */
     private final static Logger logger = LoggerFactory.getLogger(ConnectorInfoProviderService.class);
 
 
@@ -130,7 +136,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     private ClassLoader bundleParentClassLoader = null;
     private final MetaDataProviderCallback[] callback = new MetaDataProviderCallback[1];
 
-    private ConcurrentMap<ConnectorReference, Set<ConnectorEventHandler>> ConnectorEventHandler = new ConcurrentHashMap<ConnectorReference, Set<ConnectorEventHandler>>();
+    private ConcurrentMap<ConnectorReference, Set<ConnectorFacadeCallback>> connectorEventHandler = new ConcurrentHashMap<ConnectorReference, Set<ConnectorFacadeCallback>>();
     private ConnectorEventHandler osgiConnectorEventHandler = null;
 
 
@@ -150,26 +156,48 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         }
 
         public void handleEvent(ConnectorEvent connectorEvent) {
-            if (null == connectorEvent) return;
-            logger.trace("ConnectorEvent received. Topic: {}, Source: {}", connectorEvent.getTopic(),
-                    connectorEvent.getSource());
-            if (null != callback[0]) {
+            if (null == connectorEvent)
+                return;
+            logger.trace("ConnectorEvent received. Topic: {}, Source: {}", connectorEvent
+                    .getTopic(), connectorEvent.getSource());
+
+            MetaDataProviderCallback cb = callback[0];
+            if (null != cb && ConnectorEvent.CONNECTOR_REGISTERED.equals(connectorEvent.getTopic())) {
                 callback[0].refresh();
             }
 
             Object source = connectorEvent.getSource();
             if (source instanceof ConnectorKey) {
-                for (Map.Entry<ConnectorReference, Set<ConnectorEventHandler>> entry : ConnectorEventHandler
-                        .entrySet()) {
-                    if (entry.getKey().getConnectorLocation().equals(connectorLocation) && (connectorLocation
-                            .equals(ConnectorReference.ConnectorLocation.OSGI) ^ entry.getKey().getConnectorHost()
-                            .equals(connectorHost)) && ((ConnectorKey) source)
-                            .equals(entry.getKey().getConnectorKey())) {
-                        for (ConnectorEventHandler listener : entry.getValue()) {
-                            try {
-                                listener.handleEvent(connectorEvent);
-                            } catch (Throwable t) {
-                                /* ignore */
+                synchronized (this) {
+                    for (Map.Entry<ConnectorReference, Set<ConnectorFacadeCallback>> entry : connectorEventHandler
+                            .entrySet()) {
+                        if (entry.getKey().getConnectorLocation().equals(connectorLocation)
+                                && (connectorLocation
+                                        .equals(ConnectorReference.ConnectorLocation.OSGI) ^ entry
+                                        .getKey().getConnectorHost().equals(connectorHost))
+                                && ((ConnectorKey) source).equals(entry.getKey().getConnectorKey())) {
+
+                            // TODO What to do if it's null? Throw NPE now
+                            ConnectorInfo ci = findConnectorInfo(entry.getKey());
+
+                            for (ConnectorFacadeCallback listener : entry.getValue()) {
+                                try {
+                                    if (ConnectorEvent.CONNECTOR_REGISTERED.equals(connectorEvent
+                                            .getTopic())) {
+                                        if (connectorLocation
+                                                .equals(ConnectorReference.ConnectorLocation.OSGI)) {
+                                            listener.addingConnectorInfo(ci,
+                                                    osgiConnectorFacadeFactory);
+                                        } else {
+                                            listener.addingConnectorInfo(ci, ConnectorFacadeFactory
+                                                    .getInstance());
+                                        }
+                                    } else {
+                                        listener.removedConnectorInfo(ci);
+                                    }
+                                } catch (Throwable t) {
+                                    /* ignore */
+                                }
                             }
                         }
                     }
@@ -330,7 +358,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             scheduledExecutorService.shutdown();
             scheduledExecutorService = null;
         }
-        ConnectorEventHandler.clear();
+        connectorEventHandler.clear();
         ConnectorInfoManagerFactory factory = ConnectorInfoManagerFactory.getInstance();
 
         for (Pair<RemoteFrameworkConnectionInfo, ConnectorEventHandler> pair : remoteFrameworkConnectionInfo.values()) {
@@ -449,27 +477,47 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         return connectorInfo;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void addConnectorEventHandler(ConnectorReference connectorReference, ConnectorEventHandler hook) {
-        if (null != connectorReference && null != hook) {
-            CopyOnWriteArraySet<ConnectorEventHandler> tmp = new CopyOnWriteArraySet<ConnectorEventHandler>();
-            Set<ConnectorEventHandler> listeners = ConnectorEventHandler.putIfAbsent(connectorReference, tmp);
-            if (null == listeners) {
-                listeners = tmp;
-            }
-            listeners.add(hook);
-        }
-    }
 
     /**
      * {@inheritDoc}
      */
-    public void deleteConnectorEventHandler(ConnectorEventHandler hook) {
-        if (null != hook) {
-            for (Set<ConnectorEventHandler> listeners : ConnectorEventHandler.values()) {
-                listeners.remove(hook);
+    public void addConnectorFacadeCallback(ConnectorReference connectorReference,
+            ConnectorFacadeCallback handler) {
+        /*
+         * This implementation is not safe. An other thread can register or
+         * remove ConnectorInfo meanwhile findConnectorInfo and putIfAbsent.
+         * This will be fixed with ConnectorFacadeFactory#getConnectorFacadeAsync()
+         */
+        if (null != connectorReference && null != handler) {
+            CopyOnWriteArraySet<ConnectorFacadeCallback> tmp =
+                    new CopyOnWriteArraySet<ConnectorFacadeCallback>();
+            ConnectorInfo ci = findConnectorInfo(connectorReference);
+            Set<ConnectorFacadeCallback> listeners =
+                    connectorEventHandler.putIfAbsent(connectorReference, tmp);
+
+            if (null == listeners) {
+                listeners = tmp;
+            }
+            listeners.add(handler);
+
+            if (null != ci) {
+                if (connectorReference.equals(ConnectorReference.ConnectorLocation.OSGI)) {
+                    handler.addingConnectorInfo(ci, osgiConnectorFacadeFactory);
+                } else {
+                    handler.addingConnectorInfo(ci, ConnectorFacadeFactory.getInstance());
+                }
+            }
+        }
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public void deleteConnectorFacadeCallback(ConnectorFacadeCallback handler) {
+        if (null != handler) {
+            for (Set<ConnectorFacadeCallback> listeners : connectorEventHandler.values()) {
+                listeners.remove(handler);
             }
         }
     }
