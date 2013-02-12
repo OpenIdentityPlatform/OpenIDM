@@ -94,8 +94,13 @@
         encoding.</para>
         <para>The <literal>links</literal> table indexes have been changed to
         unique indexes to prevent duplication.</para>
-        <para>Additional tables have been added for the scheduler configuration and
-        for User Interface notifications.</para>
+        <para>The <literal>auditactivity</literal> table contains two new
+        columns - <literal>changedfields</literal> and <literal>passwordchanged</literal>,
+        for additional auditing functionality.</para>
+        <para>Tables have been added for the scheduler configuration and for User
+        Interface notifications.</para>
+        <para>The <literal>openidm</literal> user is created with all the required
+        privileges to update the <literal>openidm</literal> database by default.</para>
       </listitem>            
     </varlistentry>
     <varlistentry>
