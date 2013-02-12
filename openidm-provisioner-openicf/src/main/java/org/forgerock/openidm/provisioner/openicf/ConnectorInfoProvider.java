@@ -51,13 +51,13 @@ public interface ConnectorInfoProvider {
      * @param connectorReference
      * @param handler
      */
-    public void addConnectorEventHandler(ConnectorReference connectorReference, ConnectorEventHandler handler);
+    public void addConnectorFacadeCallback(ConnectorReference connectorReference, ConnectorFacadeCallback handler);
 
     /**
      *
      * @param handler
      */
-    public void deleteConnectorEventHandler(ConnectorEventHandler handler);
+    public void deleteConnectorFacadeCallback(ConnectorFacadeCallback handler);
 
     /**
      * Get all available {@link ConnectorInfo} from the local and the remote

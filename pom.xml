@@ -314,7 +314,7 @@
         <module>openidm-servlet</module>
         <module>openidm-servletfilter-registrator</module>
         <module>openidm-quartz-fragment</module>
-        <module>openidm-scheduler</module>
+        <!--<module>openidm-scheduler</module>-->
         <module>openidm-security-jetty</module>
         <!--module>openidm-shell</module-->
         <module>openidm-smartevent</module>
@@ -401,6 +401,12 @@
                 <artifactId>script-javascript</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>i18n-slf4j</artifactId>
+                <version>1.4.0</version>
+            </dependency>
+
 
             <!-- Commons -->
             <dependency>
@@ -672,6 +678,24 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.forgerock.commons</groupId>
+                    <artifactId>i18n-maven-plugin</artifactId>
+                    <version>1.4.0</version>
+                    <executions>
+                        <execution>
+                            <phase>generate-sources</phase>
+                            <goals>
+                                <goal>generate-messages</goal>
+                            </goals>
+                            <configuration>
+                                <messageFiles>
+                                    <messageFile>com/example/my_tool.properties</messageFile>
+                                </messageFiles>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>

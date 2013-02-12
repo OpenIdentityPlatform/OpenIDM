@@ -236,9 +236,9 @@ public class RouteBuilder {
         private Route register(Router router) {
             if (null != router) {
                 if (null != collection) {
-                    return router.addRoute(mode, uriTemplate, collection);
+                    return router.addRoute(uriTemplate, collection);
                 } else if (null != singleton) {
-                    return router.addRoute(mode, uriTemplate, singleton);
+                    return router.addRoute(uriTemplate, singleton);
                 } else if (null != handler) {
                     return router.addRoute(mode, uriTemplate, handler);
                 }

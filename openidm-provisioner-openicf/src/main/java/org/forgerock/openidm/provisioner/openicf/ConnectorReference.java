@@ -37,7 +37,7 @@ import org.identityconnectors.framework.api.ConnectorKey;
  * @author $author$
  * @version $Revision$ $Date$
  */
-public class ConnectorReference {
+public final class ConnectorReference {
     public static final String SINGLE_LOCAL_CONNECTOR_MANAGER = "#LOCAL";
     public static final String OSGI_SERVICE_CONNECTOR_MANAGER = "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager";
     public static final String OSGI_SERVICE_CONNECTOR_MANAGER_11 = "osgi:service/org.identityconnectors.framework.api.ConnectorInfoManager/(ConnectorBundle-FrameworkVersion=1.1)";
