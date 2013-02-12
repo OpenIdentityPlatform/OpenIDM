@@ -70,7 +70,7 @@
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1068" xlink:show="new">OPENIDM-1068</link>: Typo on individual user's profile page</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1063" xlink:show="new">OPENIDM-1063</link>: Remove unnecessary jquery-amd dependency listed for IDM http://openidm.forgerock.org/dependency-management.html</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1061" xlink:show="new">OPENIDM-1061</link>: HttpRemoteJsonResource class expects the request to be a Map when patch is a List</para></listitem>
-         <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1060" xlink:show="new">OPENIDM-1060</link>: "Daffy Duck" is shy and not found</para></listitem>
+         <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1060" xlink:show="new">OPENIDM-1060</link>: JSON Resource should decode URI (normalize)</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1055" xlink:show="new">OPENIDM-1055</link>: Add base type check to OpenIDMELResolver to resolve only openidm router operations</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1054" xlink:show="new">OPENIDM-1054</link>: Validating repo/internal/user/openidm-admin fails</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1052" xlink:show="new">OPENIDM-1052</link>: getting NPE? when staring IDM with -p option</para></listitem>
@@ -225,17 +225,9 @@
  <section xml:id="limitations">
   <title>Limitations</title>
 
-  <para>OpenIDM <?eval ${docTargetVersion}?> does not come packaged with a
-  wrapper out of the box to run as a Windows service.</para>
-  
   <para>A conditional GET request, with the <literal>If-None-Match</literal> 
   request header, is not currently supported.</para>
-  
-  <para>The DELETE action currently does not support ambiguous matches. In a 
-  situation with multiple or ambiguous targets, objects are not deleted as 
-  expected.
-  </para>
-  
+
  </section>
 
  <section xml:id="known-issues">
@@ -245,7 +237,7 @@
    <para>OpenIDM <?eval ${docTargetVersion}?> has the following known
    issues.</para>
 
-     <!-- List generated at 22:19:30 20130207 using http://bugster.forgerock.org/jira/rest/api/2/search?jql=project+%3D+OPENIDM+AND+affectedVersion+%3D+%22OpenIDM+2.1.0+Xpress%22+AND+resolution+%3D+Unresolved+AND+type+%3D+Bug+AND+%28component+%21%3D+documentation+OR+component+is+EMPTY%29+and+priority+in+%28Blocker%2C+Critical%2C+Major%29&startAt=0&maxResults=500&fields=summary-->
+         <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1176" xlink:show="new">OPENIDM-1176</link>: Disabled schedules via dynamic scheduler API disappear</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1170" xlink:show="new">OPENIDM-1170</link>: Linux startup script generator is not working correctly</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1162" xlink:show="new">OPENIDM-1162</link>: With OrientDB, for a MISSING/CREATE situation/action, reconciliation creates a new link instead of using an existing link</para></listitem>
          <listitem><para><link xlink:href="https://bugster.forgerock.org/jira/browse/OPENIDM-1142" xlink:show="new">OPENIDM-1142</link>: Harmless error message may appear when starting OpenIDM</para></listitem>
