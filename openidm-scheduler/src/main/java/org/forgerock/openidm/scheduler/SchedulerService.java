@@ -484,9 +484,7 @@ public class SchedulerService extends ObjectSetJsonResource {
         try {
             Scheduler scheduler = null;
             JobDetail job = null;
-            boolean persisted = false;
             if (jobExists(id, true)) {
-                persisted = true;
                 scheduler = persistentScheduler;
             } else if (jobExists(id, false)) {
                 scheduler = inMemoryScheduler;
@@ -494,13 +492,8 @@ public class SchedulerService extends ObjectSetJsonResource {
                 throw new ObjectSetException(ObjectSetException.NOT_FOUND, "Schedule does not exist");
             }
             job = scheduler.getJobDetail(id, GROUP_NAME);
-            CronTrigger trigger = (CronTrigger)scheduler.getTrigger("trigger-" + id, GROUP_NAME);
             JobDataMap dataMap = job.getJobDataMap();
-            if (trigger == null) {
-                ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
-                trigger = createTrigger(config, job.getName());
-            }
-            ScheduleConfig config = new ScheduleConfig(trigger, dataMap, persisted, job.isStateful());
+            ScheduleConfig config = new ScheduleConfig(parseStringified((String)dataMap.get(CONFIG)));
             resultMap = (Map<String, Object>)config.getConfig().getObject();
             resultMap.put("_id", id);
 
