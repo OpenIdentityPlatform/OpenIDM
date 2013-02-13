@@ -151,9 +151,9 @@
             the REST interface:</para>
 
         <screen>$ curl
-            --header "X-OpenIDM-Username: openidm-admin"
-            --header "X-OpenIDM-Password: openidm-admin"
-            "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
         </screen>
 
         <para>For JDBC repositories, OpenIDM supports native query expressions
@@ -162,9 +162,9 @@
             the <literal>_queryExpression</literal> keyword. For example:</para>
 
         <screen width="92">$ curl
-            --header "X-OpenIDM-Username: openidm-admin"
-            --header "X-OpenIDM-Password: openidm-admin"
-            "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
+ --header "X-OpenIDM-Username: openidm-admin"
+ --header "X-OpenIDM-Password: openidm-admin"
+ "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
         </screen>
 
         <para>Direct HTTP access to native queries is disallowed by default. For
