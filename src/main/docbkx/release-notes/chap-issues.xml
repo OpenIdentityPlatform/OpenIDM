@@ -34,7 +34,7 @@
  <!-- TODO: Update for the release. -->
  <note>
   <para>The current list of fixes and issues reflects OpenIDM
-  <?eval ${docTargetVersion}?> in progress as of February 7, 2013.</para>
+  <?eval ${docTargetVersion}?> in progress as of February 13, 2013.</para>
  </note>
 
  <para>OpenIDM issues are tracked at <link
