@@ -220,6 +220,12 @@ SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
     "query-time-ms": 1
 }
              </screen>
+             <note>
+                 <para>If you receive the response
+                 <literal>curl: (52) Empty reply from server</literal>, check
+                 that you have, in fact, used <literal>https</literal> and not
+                 <literal>http</literal> in the URL.</para>
+             </note>
          </step>
      </procedure>
  </section>
