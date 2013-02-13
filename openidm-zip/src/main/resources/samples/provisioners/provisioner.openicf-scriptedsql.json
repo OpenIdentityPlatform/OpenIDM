@@ -49,12 +49,12 @@
         "jdbcUrlTemplate" : "jdbc:mysql://%h:%p/%d",
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
-        "createScriptFileName" : "/opt/openidm/samples/scriptedsql/CreateScript.groovy",
-        "testScriptFileName" : "/opt/openidm/samples/scriptedsql/TestScript.groovy",
-        "searchScriptFileName" : "/opt/openidm/samples/scriptedsql/SearchScript.groovy",
-        "deleteScriptFileName" : "/opt/openidm/samples/scriptedsql/DeleteScript.groovy",
-        "updateScriptFileName" : "/opt/openidm/samples/scriptedsql/UpdateScript.groovy",
-        "syncScriptFileName" : "/opt/openidm/samples/scriptedsql/SyncScript.groovy"
+        "createScriptFileName" : "&{launcher.project.location}/tools/CreateScript.groovy",
+        "testScriptFileName" : "&{launcher.project.location}/tools/TestScript.groovy",
+        "searchScriptFileName" : "&{launcher.project.location}/tools/SearchScript.groovy",
+        "deleteScriptFileName" : "&{launcher.project.location}/tools/DeleteScript.groovy",
+        "updateScriptFileName" : "&{launcher.project.location}/tools/UpdateScript.groovy",
+        "syncScriptFileName" : "&{launcher.project.location}/tools/SyncScript.groovy"
     },
     "objectTypes" :
     {
