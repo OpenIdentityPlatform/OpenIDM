@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !    
 -->
 <chapter xml:id='chap-issues'
@@ -34,7 +34,7 @@
  <!-- TODO: Update for the release. -->
  <note>
   <para>The current list of fixes and issues reflects OpenIDM
-  <?eval ${docTargetVersion}?> in progress as of February 13, 2013.</para>
+  <?eval ${docTargetVersion}?> in progress as of February 15, 2013.</para>
  </note>
 
  <para>OpenIDM issues are tracked at <link
