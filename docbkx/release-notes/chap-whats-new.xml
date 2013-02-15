@@ -36,7 +36,9 @@
     main development branch of the product. This release contains selected key
     features and all current fixed issues. The release has undergone important
     functional testing but not the complete testing cycle that is done for a
-    full enterprise release.</para>
+    full enterprise release. Many of the interfaces provided in this release
+    are still evolving and are not guaranteed to be supported in the enterprise
+    release.</para>
 
     <para>This release is supported through a ForgeRock subscription. Its goal
     is to enable you to start build phases earlier, with the most recent features,
