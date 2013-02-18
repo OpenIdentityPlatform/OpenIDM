@@ -56,7 +56,7 @@
   also as an update resulting from reconciliation with another resource.</para>
 
   <variablelist>
-   <para>OpenIDM discovers changes on external resources through reconciliation,
+   <para>OpenIDM discovers changes on external resources through reconciliation
    and through LiveSync.</para>
 
    <varlistentry>
@@ -182,7 +182,7 @@
     </screen>
 
     <para>The output for a reconciliation cancelation request is similar to the
-    following, but on a single line:</para>
+    following:</para>
 
     <screen width="91">
     {"_id":"0890ad62-4738-4a3f-8b8e-f3c83bbf212e",
@@ -384,6 +384,10 @@
 
   <section xml:id="livesync-over-rest">
       <title>Triggering LiveSync Over REST</title>
+      <para>The ability to trigger LiveSync operations over REST, or by using
+      the resource API, enables you to use an external scheduler to trigger a
+      LiveSync operation, rather than using the OpenIDM scheduling mechanism.
+      </para>
 
       <itemizedlist>
           <para>There are two ways in which to trigger a LiveSync operation
@@ -428,6 +432,10 @@
     }
 }
         </screen>
+
+      <para>You should not run two identical LiveSync operations simultaneously -
+          you must ensure that the first operation has completed before a second
+          similar operation is launched.</para>
 
         <para>To troubleshoot a LiveSync operation that has not succeeded, you
             can include an optional parameter (<literal>detailedFailure</literal>)
@@ -598,10 +606,8 @@
       <primary>Mappings</primary>
      </indexterm>
 
-     <para>
-         The synchronization mappings file
-         (<filename>openidm/conf/sync.json</filename>) represents the core
-         configuration for OpenIDM synchronization.
+     <para>The synchronization mappings file (<filename>openidm/conf/sync.json</filename>)
+         represents the core configuration for OpenIDM synchronization.
      </para>
 
      <para>The <filename>sync.json</filename> file describes a set of mappings.
@@ -847,16 +853,16 @@
    </indexterm>
 
    <para>OpenIDM supports reversible encryption of attribute values for
-   managed objects. Attribute values to encrypt include passwords (if passwords
-   are not already encrypted on the external resource, which would usually
-   exclude them from the synchronization process, see the chapter about <link
-  xlink:href="integrators-guide#chap-passwords"
-  xlink:role="http://docbook.org/xlink/role/olink">
-  <citetitle>Passwords</citetitle></link>), and also authentication questions,
-  credit card numbers, and social security numbers.</para>
+   managed objects. Attribute values to encrypt include passwords,
+   authentication questions, credit card numbers, and social security numbers.
+   If passwords are already encrypted on the external resource, they are
+   generally excluded from the synchronization process. For more information,
+   see <link xlink:href="integrators-guide#chap-passwords"
+             xlink:role="http://docbook.org/xlink/role/olink">
+           <citetitle>Managing Passwords</citetitle></link>.</para>
 
-   <para>You configure encryption in the managed object configuration. The file
-   to edit is <filename>openidm/conf/managed.json</filename>. The following
+   <para>You configure encryption in the managed object configuration (in the
+   <filename>openidm/conf/managed.json</filename> file). The following
    example shows a managed object configuration that encrypts and decrypts
    <literal>securityAnswer</literal>, <literal>ssn</literal>, and
    <literal>password</literal> attributes using the default symmetric
@@ -903,7 +909,7 @@
    <literal>openidm-sym-default</literal>, in production. See the chapter on
    <link xlink:href="integrators-guide#chap-security"
    xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Securing
-   &amp; Hardening OpenIDM</citetitle></link> for instructions on adding your
+   and Hardening OpenIDM</citetitle></link> for instructions on adding your
    own symmetric key.</para>
   </section>
 
@@ -974,16 +980,16 @@
   </section>
 
   <section xml:id="constructing-attributes">
-   <title>Constructing &amp; Manipulating Attributes</title>
+   <title>Constructing and Manipulating Attributes</title>
    <indexterm>
     <primary>Synchronization</primary>
     <secondary>Creating attributes</secondary>
    </indexterm>
 
-   <para>OpenIDM lets you construct and manipulate attributes using scripts
-   triggered when an object is created (onCreate), updated (onUpdate), or
-   deleted (onDelete), or when a link is created (onLink), or removed
-   (onUnlink).</para>
+   <para>OpenIDM enables you to construct and manipulate attributes using
+       scripts that are triggered when an object is created (onCreate), updated
+       (onUpdate), or deleted (onDelete), or when a link is created (onLink),
+       or removed (onUnlink).</para>
 
    <para>The following example derives a DN for an LDAP entry when the entry
    is created in the internal repository.</para>
@@ -1005,7 +1011,7 @@
     <secondary>Reusing links</secondary>
    </indexterm>
 
-   <para>When two mappings exist to sync the same objects bidirectionally,
+   <para>When two mappings exist to synchronize the same objects bidirectionally,
    you can use the <literal>links</literal> property in one mapping to have
    OpenIDM use the same internally managed link for both mappings. Otherwise,
    if no <literal>links</literal> property is specified, OpenIDM maintains a
@@ -1101,11 +1107,17 @@
   <section xml:id="sync-situations">
    <title>Synchronization Situations</title>
 
-   <para>OpenIDM performs synchronization action in two phases. First, OpenIDM
-   performs the source reconciliation, where OpenIDM accounts for source
-   objects and associated links based on the mapping configured. Second, OpenIDM
-   runs the target reconciliation, where OpenIDM iterates over the target objects
-   not processed in the first phase.</para>
+   <orderedlist>
+       <para>OpenIDM performs a reconciliation action in two phases:</para>
+       <listitem>
+           <para>Source reconciliation, where OpenIDM accounts for source
+           objects and associated links based on the configured mapping.</para>
+       </listitem>
+       <listitem>
+           <para>Target reconciliation, where OpenIDM iterates over the target
+           objects that were not processed in the first phase.</para>
+       </listitem>
+   </orderedlist>
 
    <orderedlist>
     <para>During reconciliation OpenIDM builds three lists, assigning values
@@ -1122,14 +1134,14 @@
      <para>All records from the appropriate link table</para>
 
      <para>Objects with corresponding links in the link table of the repository
-     get <literal>link=1</literal>. Objects without corresponding links get
-     <literal>link=0</literal>.</para>
+     are assigned <literal>link=1</literal>. Objects without corresponding links
+     are assigned <literal>link=0</literal>.</para>
     </listitem>
     <listitem>
      <para>All valid objects on the target system</para>
 
-     <para>Objects found in the target system get <literal>target=1</literal>.
-     Objects not found in the target system get
+     <para>Objects found in the target system are assigned <literal>target=1</literal>.
+     Objects that are not found in the target system are assigned
      <literal>target=0</literal>.</para>
     </listitem>
    </orderedlist>
@@ -1190,6 +1202,14 @@
      </listitem>
     </varlistentry>
     <varlistentry>
+        <term>"TARGET_IGNORED" (qualifies=0, link=0 or 1, target=1)</term>
+        <listitem>
+            <para>The mapping is not qualified for a source object. One or more
+                targets are found through the correlation logic. Detected only
+                during source object changes. Default action: "IGNORE".</para>
+        </listitem>
+    </varlistentry>
+    <varlistentry>
        <term>"SOURCE_IGNORED" (qualifies=0, link=0, target=0)</term>
        <listitem>
            <para>The source object is unqualified (by validSource), no link, no
@@ -1198,19 +1218,20 @@
        </listitem>
    </varlistentry>
    <varlistentry>
-       <term>"LINK_ONLY" (qualifies=0, link=1, target=0)</term>
+       <term>"LINK_ONLY" (qualifies=n/a, link=1, target=0)</term>
        <listitem>
-           <para>The source object is unqualified (by validSource), a link is
-           found, but no target object is found. Detected during source object
-           changes and reconciliation. Default action: "IGNORE".</para>
+           <para>The source may or may not be qualified, a link is found, but
+           no target object is found. Detected only during source object
+           changes. Default action: "EXCEPTION".</para>
        </listitem>
    </varlistentry>
    <varlistentry>
-       <term>"ALL_GONE" (qualifies=0, link=0, no previous object available)</term>
+       <term>"ALL_GONE" (qualifies=n/a, link=0, no previous object available)</term>
        <listitem>
-           <para>The source object is unqualified (by validSource), no link is
-               found, and the server is unable to correlate, as the source cannot
-               supply the deleted object. Default action: "IGNORE".</para>
+           <para>The source may or may not be qualified, no link is found, and
+               the server is unable to correlate, as the source cannot
+               supply the deleted object. Detected only during source object
+               changes. Default action: "IGNORE".</para>
        </listitem>
    </varlistentry>
    </variablelist>
@@ -1255,7 +1276,7 @@
      <term>SOURCE_MISSING (qualifies=1, link=1, source=0)</term>
      <listitem>
       <para>The target qualifies and a link is found. But the source object is
-      missing. Only detected during reconciliation. Default action:
+      missing. Detected during change events and reconciliation. Default action:
       "DELETE".</para>
      </listitem>
     </varlistentry>
@@ -1304,7 +1325,8 @@
        <entry namest="c3" nameend="c4" align="left">Link Exists?</entry>
        <entry namest="c5" nameend="c7" align="left">Target Objects
        Found<footnote><para>If no link exists for the source object, then
-       OpenIDM executes a correlation query.</para></footnote></entry>
+       OpenIDM executes a correlation query. If no previous object is available,
+       OpenIDM cannot correlate.</para></footnote></entry>
        <entry morerows="1" valign="top" align="left">Situation</entry>
       </row>
       <row>
@@ -1319,14 +1341,14 @@
      </thead>
      <tbody>
       <row>
-       <entry>&#160;</entry>
-       <entry>X</entry>
-       <entry>&#160;</entry>
-       <entry>X</entry>
-       <entry>X</entry>
-       <entry>&#160;</entry>
-       <entry>&#160;</entry>
-       <entry>SOURCE_IGNORED</entry>
+          <entry>&#160;</entry>
+          <entry>X</entry>
+          <entry>&#160;</entry>
+          <entry>&#160;</entry>
+          <entry>&#160;</entry>
+          <entry>X</entry>
+          <entry>&#160;</entry>
+          <entry>TARGET_IGNORED</entry>
       </row>
       <row>
        <entry>&#160;</entry>
@@ -1336,7 +1358,7 @@
        <entry>&#160;</entry>
        <entry>X</entry>
        <entry>&#160;</entry>
-       <entry>UNQUALIFIED</entry>
+       <entry>SOURCE_MISSING</entry>
       </row>
       <row>
        <entry>&#160;</entry>
@@ -1366,7 +1388,7 @@
        <entry>&#160;</entry>
        <entry>X</entry>
        <entry>&#160;</entry>
-       <entry>UNQUALIFIED</entry>
+       <entry>TARGET_IGNORED</entry>
       </row>
       <row>
        <entry>&#160;</entry>
@@ -1545,6 +1567,94 @@
    </table>
   </section>
 
+  <section xml:id="autosync-and-livesync">
+      <title>Situations Specific to Automatic Synchronization and LiveSync</title>
+      <para>Certain situations occur only during automatic synchronization
+      (when OpenIDM pushes changes made in the repository out to external
+      systems) and LiveSync (when OpenIDM polls external system change logs
+      for changes and updates the repository).</para>
+
+      <para>The following table shows the situations that pertain only
+      to automatic sync and LiveSync, when records are
+      <emphasis>deleted</emphasis> from the source or target resource.</para>
+
+      <table pgwide="1" rules="none">
+          <title>Resolving Automatic Sync and LiveSync Delete Situations</title>
+          <tgroup cols="8">
+              <colspec colnum="1" colname="c1" colwidth="1*" />
+              <colspec colnum="2" colname="c2" colwidth="1*" />
+              <colspec colnum="3" colname="c3" colwidth="1*" />
+              <colspec colnum="4" colname="c4" colwidth="1*" />
+              <colspec colnum="5" colname="c5" colwidth="1*" />
+              <colspec colnum="6" colname="c6" colwidth="1*" />
+              <colspec colnum="7" colname="c7" colwidth="1*" />
+              <colspec colnum="8" colname="c8" colwidth="2*" />
+              <thead>
+                  <row>
+                      <entry namest="c1" nameend="c2" align="left">Source Qualifies?</entry>
+                      <entry namest="c3" nameend="c4" align="left">Link Exists?</entry>
+                      <entry namest="c5" nameend="c7" align="left">Target Objects
+                          Found<footnote><para>If no link exists for the source object, then
+                              OpenIDM executes a correlation query. If no previous object is available,
+                              OpenIDM cannot correlate.</para></footnote></entry>
+                      <entry morerows="1" valign="top" align="left">Situation</entry>
+                  </row>
+                  <row>
+                      <entry>Yes</entry>
+                      <entry>No</entry>
+                      <entry>Yes</entry>
+                      <entry>No</entry>
+                      <entry>0</entry>
+                      <entry>1</entry>
+                      <entry>&gt; 1</entry>
+                  </row>
+              </thead>
+              <tbody>
+                  <row>
+                      <entry>N/A</entry>
+                      <entry>N/A</entry>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>&#160;</entry>
+                      <entry>LINK_ONLY</entry>
+                  </row>
+                  <row>
+                      <entry>N/A</entry>
+                      <entry>N/A</entry>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>&#160;</entry>
+                      <entry>ALL_GONE</entry>
+                  </row>
+                  <row>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>AMBIGUOUS</entry>
+                  </row>
+                  <row>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>&#160;</entry>
+                      <entry>&#160;</entry>
+                      <entry>X</entry>
+                      <entry>UNQUALIFIED</entry>
+                  </row>
+              </tbody>
+          </tgroup>
+      </table>
+  </section>
+
   <section xml:id="sync-actions">
    <title>Synchronization Actions</title>
 
@@ -1588,6 +1698,7 @@
      <term>"EXCEPTION"</term>
      <listitem>
       <para>Flag the link situation as an exception.</para>
+      <para>Do <emphasis>not</emphasis> use this action for LiveSync mappings.</para>
      </listitem>
     </varlistentry>
     <varlistentry>
