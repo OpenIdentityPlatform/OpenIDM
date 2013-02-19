@@ -344,7 +344,7 @@ function notNull(fullObject, value, params, property) {
 {
     "type" : "text/javascript",
     "file" : "bin/defaults/script/policy.js",
-    "additionalFiles" : "script/mypolicy.js"
+    "additionalFiles" : ["script/mypolicy.js"],
     "resources" : [
         {
 ...
