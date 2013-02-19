@@ -162,28 +162,45 @@
     to be picked up by the UI.</para>    
     
     <para>A default list of four images is presented for site identification.
-    </para>
-    <!-- Not supported for Xpress 
-    You can change these images, and include additional images, by modifying 
-    the <literal>siteImages</literal> property in the 
-    <filename>ui-configuration.json</filename> file:</para>
+    The images are defined in the <literal>siteImages</literal> property in the
+    <filename>conf/ui-configuration.json</filename> file:</para>
     
     <programlisting language="javascript">
-            "siteImages" : [
-            "mail.png",
-            "user.png",
-            "report.png",
-            "twitter.png"
-        ],
+"siteImages" : [
+"images/passphrase/mail.png",
+"images/passphrase/user.png",
+"images/passphrase/report.png",
+"images/passphrase/twitter.png"
+],
 ...    
     </programlisting> 
-    -->
     <para>
     The user selects one of these images, which is displayed on login. In 
     addition, the user enters a Site Phrase, which is displayed beneath the 
     site image on login. If either the site image, or site phrase is incorrect 
     or absent when the user logs in, the user is aware that he is not logging 
     in to the correct site.</para>
+
+    <para>You can change the default images, and include additional images, by
+    placing image files in the <filename>ui/extension/images</filename> folder
+    and modifying the <literal>siteImages</literal> property in the
+    <filename>ui-configuration.json</filename> file to point to the new images.
+    The following example assumes a file named <filename>my-new-image.jpg</filename>,
+    located in <filename>ui/extension/images</filename>.
+    </para>
+      <programlisting language="javascript">
+"siteImages" : [
+"images/passphrase/mail.png",
+"images/passphrase/user.png",
+"images/passphrase/report.png",
+"images/passphrase/twitter.png",
+"images/my-new-image.jpg"
+],
+...
+      </programlisting>
+      <para>Note that the default image files are located in
+      <filename>ui/default/admin/public/images/passphrase</filename>.</para>
+
   </section>
   
   <section xml:id="ui-country-list">
