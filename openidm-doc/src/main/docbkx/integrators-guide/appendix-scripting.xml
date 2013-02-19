@@ -201,7 +201,7 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
             <itemizedlist>
                 <title>Returns</title>
                 <listitem>
-                    <para>A <literal>null</literal> value if successful.
+                    <para>The created OpenIDM resource object.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -210,6 +210,59 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
                 <title>Throws</title>
                 <listitem>
                     <para>An exception is thrown if the object could not be created.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="function-patch">
+            <title>openidm.patch(id, rev, value)</title>
+
+            <para>This function performs a partial modification of a managed
+            object. Unlike the <literal>update</literal> function, only the
+            modified attributes are provided, not the entire object.</para>
+
+            <variablelist>
+                <title>Parameters</title>
+                <varlistentry>
+                    <term>id</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>The identifier of the object to be updated.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>rev</term>
+                    <listitem>
+                        <para>string</para>
+                        <para>The revision of the object to be updated, or
+                        <literal>null</literal> if the object is not subject
+                        to revision control.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term>value</term>
+                    <listitem>
+                        <para>object</para>
+                        <para>The value of the modifications to be applied to
+                        the object.</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+            <itemizedlist>
+                <title>Returns</title>
+                <listitem>
+                    <para>The modified OpenIDM resource object.
+                    </para>
+                </listitem>
+            </itemizedlist>
+
+            <itemizedlist>
+                <title>Throws</title>
+                <listitem>
+                    <para>An exception is thrown if the object could not be updated.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -276,9 +329,7 @@ logger.info("Parameters passed in: {} {} {}", param1, param2, param3);
             <itemizedlist>
                 <title>Returns</title>
                 <listitem>
-                    <para>A
-                        <literal>null</literal>
-                        value if successful.
+                    <para>The modified OpenIDM resource object.
                     </para>
                 </listitem>
             </itemizedlist>
