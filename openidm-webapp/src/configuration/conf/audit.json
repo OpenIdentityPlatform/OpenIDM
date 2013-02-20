@@ -1,6 +1,0 @@
-{
-    "logTo" : [
-        { "logType" : "csv", "location" : "${java.io.tmpdir}/openidm/audit/csv/", "recordDelimiter" : ";"},
-        { "logType" : "repository" }
-    ]
-}

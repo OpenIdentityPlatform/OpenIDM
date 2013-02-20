@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2012 ForgeRock AS
+  !    
+-->
+<chapter xml:id='chap-whats-new'
+ xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+ xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+ xsi:schemaLocation='http://docbook.org/ns/docbook http://docbook.org/xml/5.0/xsd/docbook.xsd'
+ xmlns:xlink='http://www.w3.org/1999/xlink'
+ xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>What's New in OpenIDM <?eval ${docTargetVersion}?></title>
+ 
+  <important>
+    <para>OpenIDM <?eval ${docTargetVersion}?> is a milestone release from the 
+    main development branch of the product. This release contains selected key
+    features and all current fixed issues. The release has undergone important
+    functional testing but not the complete testing cycle that is done for a
+    full enterprise release. Many of the interfaces provided in this release
+    are still evolving and are not guaranteed to be supported in the enterprise
+    release.</para>
+
+    <para>This release is supported through a ForgeRock subscription. Its goal
+    is to enable you to start build phases earlier, with the most recent features,
+    instead of having to wait for the full release date. Fixes to issues that are
+    discovered in this release will be delivered as patches to ForgeRock customers,
+    and are guaranteed to be delivered in the full release that follows. This
+    release will be supported for a grace period after the full version has
+    been released.</para>
+    
+    <para>With the exception of these Release Notes, the official 
+    documentation for this release is still in progress, and is accessible at 
+    <link xlink:href="http://openidm.forgerock.org/docs.html">http://openidm.forgerock.org/docs.html</link>. 
+    The complete, validated documentation set will be available with the 
+    full release.</para>
+  </important> 
+
+ <itemizedlist>
+  <para>OpenIDM <?eval ${docTargetVersion}?> provides many new features,
+  including the following:</para>
+  <listitem>
+    <para>Browser-based user interface</para>
+    <para>Includes self service capabilities, a generic platform to expose and 
+    invoke workflows, and a notification service for tasks.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-ui"
+    xlink:role="http://docbook.org/xlink/role/olink">
+    <citetitle>OpenIDM User Interface</citetitle></link> in the
+    <citetitle>Integrator's Guide</citetitle>.</para>
+  </listitem>
+  <listitem>
+    <para>BPMN 2.0 workflow engine, embedded as an OSGi bundle and accessible 
+    over REST.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-workflow"
+                                          xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>Integrating Business Processes and Workflows</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>
+  </listitem>
+  <listitem>
+    <para>Configurable task scheduling service, including support for 
+    clustered schedules and scanning tasks.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-scheduler-conf"
+                                          xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>Scheduling Tasks and Events</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
+  </listitem>
+  <listitem>
+    <para>Configurable policy service.</para>
+    <para>For more information, see <link xlink:href="integrators-guide#chap-policies"
+                                          xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>Using Policies to Validate Data</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
+  </listitem>
+  <listitem>
+    <para>Ability to perform batch scans to execute tasks</para>
+    <para>For more information, see <link xlink:href="integrators-guide#task-scanner"
+                                          xlink:role="http://docbook.org/xlink/role/olink">
+        <citetitle>Scanning Data to Trigger Tasks</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
+  </listitem>
+  <listitem>
+    <para>Ability to create custom RESTful endpoints.</para>
+    <para>For more information, see
+        <link xlink:href="integrators-guide#adding-custom-endpoints"
+              xlink:role="http://docbook.org/xlink/role/olink">
+            <citetitle>Adding Custom Endpoints</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
+  </listitem>
+  <listitem>
+    <para>Support for MS SQL JDBC as an internal repository.</para>
+    <para>For more information, see
+    <link xlink:href="http://openidm.forgerock.org/doc/install-guide#repository-mssql">
+    <citetitle>To Set Up OpenIDM With MS SQL</citetitle></link>
+    in the <citetitle>Installation Guide</citetitle>.</para>
+  </listitem>  
+  <listitem>
+    <para>Enhanced, multi-threaded reconciliation service, accessible over REST.</para>
+    <para>For more information, see
+        <link xlink:href="integrators-guide#chap-synchronization"
+              xlink:role="http://docbook.org/xlink/role/olink">
+            <citetitle>Configuring Synchronization</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
+  </listitem>
+  <listitem>
+    <para>Support for Powershell scripts on the Active Directory connector.
+    </para>
+    <para>For more information, see
+        <link xlink:href="integrators-guide#ad-powershell"
+              xlink:role="http://docbook.org/xlink/role/olink">
+            <citetitle>Using PowerShell Scripts With the Active Directory Connector</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>     
+  </listitem>
+  <listitem>
+    <para>Reusable server configuration and property value substitution in the 
+    configuration.</para>
+    <para>For more information, see
+        <link xlink:href="integrators-guide#using-property-substitution"
+              xlink:role="http://docbook.org/xlink/role/olink">
+            <citetitle>Using Property Value Substitution in the Configuration</citetitle></link>
+    in the <citetitle>Integrator's Guide</citetitle>.</para>    
+  </listitem>
+  <listitem>
+      <para>Support for calling LiveSync operations over REST, or using the
+      resource API.</para>
+      <para>For more information, see
+          <link xlink:href="integrators-guide#livesync-over-rest"
+                xlink:role="http://docbook.org/xlink/role/olink">
+              <citetitle>Triggering LiveSync Over REST</citetitle></link>
+      in the <citetitle>Integrator's Guide</citetitle>.</para>
+  </listitem>
+      
+ </itemizedlist>
+
+ <para>For installation instructions and several samples to familiarize you 
+ with the features, see the <link xlink:href="install-guide#chap-install"
+                                  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Installation
+         Guide</citetitle></link>.</para>
+
+ <para>For an architectural overview and high-level presentation of OpenIDM,
+ see the <link xlink:href="integrators-guide#chap-overview"
+               xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Architectural
+         Overview</citetitle></link> chapter in the <citetitle>Integrator's
+ Guide</citetitle>.</para>
+</chapter>

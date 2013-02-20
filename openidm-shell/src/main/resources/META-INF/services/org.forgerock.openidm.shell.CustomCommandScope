@@ -1,3 +1,0 @@
-org.forgerock.openidm.shell.impl.LocalCommandScope
-org.forgerock.openidm.shell.impl.BasicCommandScope
-org.forgerock.openidm.shell.impl.RemoteCommandScope
