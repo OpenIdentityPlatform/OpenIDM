@@ -134,44 +134,95 @@
 
     <section xml:id="queries">
         <title>Defining and Calling Queries</title>
-        <para>OpenIDM supports a parameterized query model that enables you to
+        <para>OpenIDM supports an advanced query model that enables you to
             define queries, and to call them over the REST or Resource API.</para>
 
-        <para>Queries are defined in the repository configuration
-            (<filename>repo.*.json</filename>) and are called by their
-            <literal>_queryId</literal>. A typical query definition is as follows:</para>
+        <section xml:id="parameterized-queries">
+            <title>Parameterized Queries</title>
 
-        <screen>"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"</screen>
+            <para>Managed objects in the supported OpenIDM repositories can be
+                accessed using a parameterized query mechanism. Parameterized
+                queries on repositories are defined in the repository
+                configuration (<filename>repo.*.json</filename>) and are called
+                by their <literal>_queryId</literal>.</para>
 
-        <para>To call this query, you would reference its ID, as follows:</para>
+            <para>Parameterized queries provide security and portability for
+            the query call signature, regardless of the back-end implementation.
+            Queries that are exposed over the REST interface <emphasis>must</emphasis>
+            be parameterized queries to guard against injection attacks and other
+            misuse. Queries on the officially supported repositories have been
+            reviewed and hardened against injection attacks.</para>
 
-        <screen>?_queryId=query-all-ids</screen>
+            <para>For system objects, support for parameterized queries is
+            restricted to <literal>_queryId=query-all-ids</literal>. There is
+            currently no support for user-defined parameterized queries on
+            system objects. Typically, parameterized queries on system objects
+            are not called directly over the REST interface, but are issued
+            from internal calls, such as correlation queries.</para>
 
-        <para>The following example calls <literal>query-all-ids</literal> over
-            the REST interface:</para>
+            <para> A typical query definition is as follows:</para>
 
-        <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
-        </screen>
+            <screen>"query-all-ids" : "select _openidm_id from ${unquoted:_resource}"</screen>
 
-        <para>For JDBC repositories, OpenIDM supports native query expressions
-            that can be called directly over REST, without defining the query in the
-            repository configuration. Native queries on the repository are made using
-            the <literal>_queryExpression</literal> keyword. For example:</para>
+            <para>To call this query, you would reference its ID, as follows:</para>
 
-        <screen width="92">$ curl
- --header "X-OpenIDM-Username: openidm-admin"
- --header "X-OpenIDM-Password: openidm-admin"
- "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
-        </screen>
+            <screen>?_queryId=query-all-ids</screen>
 
-        <para>Direct HTTP access to native queries is disallowed by default. For
-            more information, see the section on
-            <link xlink:href="integrators-guide#security-urls"
-                  xlink:role="http://docbook.org/xlink/role/olink">
-                <citetitle>Protecting Sensitive REST Interface URLs</citetitle></link>.</para>
+            <para>The following example calls <literal>query-all-ids</literal> over
+                the REST interface:</para>
+
+            <screen>$ curl
+                --header "X-OpenIDM-Username: openidm-admin"
+                --header "X-OpenIDM-Password: openidm-admin"
+                "http://localhost:8080/openidm/managed/user/?_queryId=query-all-ids"
+            </screen>
+
+        </section>
+
+        <section xml:id="native-queries">
+            <title>Native Query Expressions</title>
+
+            <para>Native query expressions are supported for all managed
+            objects and system objects, and can be called directly over
+            the REST interface, rather than being defined in the
+            repository configuration.</para>
+
+            <para>Native queries are intended specifically for internal
+            callers, such as custom scripts, in situations where the
+            parameterized query facility is insufficient. For example,
+            native queries are useful if the query needs to be generated
+            dynamically.</para>
+
+            <para>The query expression is specific to the target resource.
+            For repositories, queries use the native language of the underlying
+            data store. For system objects that are backed by OpenICF connectors,
+            queries use the applicable query language of the system resource.</para>
+
+            <para>Native queries on the repository are made using the
+                <literal>_queryExpression</literal> keyword. For example:</para>
+
+            <screen width="92">$ curl
+                --header "X-OpenIDM-Username: openidm-admin"
+                --header "X-OpenIDM-Password: openidm-admin"
+                "http://localhost:8080/openidm/managed/user?_queryExpression=select+*+from+managedobjects"
+            </screen>
+
+            <para>Unlike parameterized queries, native queries are not portable
+            and do not guard against injection attacks. Such query expressions
+            should therefore not be used or made accessible over the REST interface
+            or over HTTP, other than for development, and should be used only via
+            the internal Resource API. For more information, see the section on
+                <link xlink:href="integrators-guide#security-urls"
+                      xlink:role="http://docbook.org/xlink/role/olink">
+                    <citetitle>Protecting Sensitive REST Interface URLs</citetitle></link>.
+            </para>
+
+            <para>If you really need to expose native queries over HTTP, in a
+                selective manner, you can design a custom endpoint to wrap
+                such access.</para>
+
+        </section>
+
 
         <!-- OPENIDM-761 Query filters should be documented - Fix for 2.2
         <section xml:id="constructing-queries">
