@@ -29,6 +29,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.openidm.quartz.impl.RepoJobStore;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,10 @@ public class SchedulerConfig {
     
     // Scheduler objects
     private final static String INSTANCE_ID = "instanceId";
+    private final static String INSTANCE_TIMEOUT = "instanceTimeout";
+    private final static String INSTANCE_RECOVERY_TIMEOUT = "instanceRecoveryTimeout";
+    private final static String INSTANCE_CHECK_IN_INTERVAL = "instanceCheckInInterval";
+    private final static String INSTANCE_CHECK_IN_OFFSET = "instanceCheckInOffset";
     private final static String EXECUTE_PERSISTENT_SCHEDULES = "executePersistentSchedules";
     
     private String threadCount = null;
@@ -92,6 +97,22 @@ public class SchedulerConfig {
                 } else {
                     executePersistentSchedules = value.asBoolean();
                 }
+            }
+            value = config.get(INSTANCE_TIMEOUT);
+            if (!value.isNull()) {
+                RepoJobStore.setInstanceTimeout(Long.parseLong(value.asString()));
+            }
+            value = config.get(INSTANCE_RECOVERY_TIMEOUT);
+            if (!value.isNull()) {
+                RepoJobStore.setInstanceRecoveryTimeout(Long.parseLong(value.asString()));
+            }
+            value = config.get(INSTANCE_CHECK_IN_INTERVAL);
+            if (!value.isNull()) {
+                RepoJobStore.setInstanceCheckInInterval(Long.parseLong(value.asString()));
+            }
+            value = config.get(INSTANCE_CHECK_IN_OFFSET);
+            if (!value.isNull()) {
+                RepoJobStore.setInstanceCheckInOffset(Long.parseLong(value.asString()));
             }
         }
     }
