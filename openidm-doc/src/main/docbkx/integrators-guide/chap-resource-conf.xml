@@ -1407,14 +1407,16 @@ _action=recon&amp;mapping=systemADAccounts_managedUser"</screen>
       <screen>{"_id":"0629d920-e29f-4650-889f-4423632481ad"}</screen>
      </step>
      <step>
-      <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the users 
-      were reconciled. To connect the repository go to <link xlink:show="new"
-      xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
-      >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
-      (for OrientDB) or <link xlink:show="new"
-      xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository"
-      >http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository</link>
-      (for MySQL).
+      <para>Check the internal repository (OrientDB or MySQL) to make sure that
+      the users were reconciled. For information about connecting to OrientDB,
+      see <link xlink:href="install-guide#before-you-begin-sample"
+      xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Before You Begin</citetitle></link> in the
+      <citetitle>Installation Guide</citetitle>. For information about using
+      MySQL as a repository, see <link xlink:href="install-guide#chap-repository"
+      xlink:role="http://docbook.org/xlink/role/olink">
+      <citetitle>Installing a Repository For Production</citetitle></link> in the
+      <citetitle>Installation Guide</citetitle>.
       </para>
      </step>
     </procedure>
@@ -1874,15 +1876,17 @@ $ cp samples/provisioners/provisioner.openicf.connectorinfoprovider.json ./conf<
           <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
          </step>
          <step>
-          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) that the users
-          were reconciled. For information about connecting to the repository, see
-          <link xlink:show="new"
-          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
-          >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
-          or <link xlink:show="new"
-          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository"
-          >http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository</link>.
-          </para>
+             <para>Check the internal repository (OrientDB or MySQL) to make sure that
+             the users were reconciled. For information about connecting to OrientDB,
+             see <link xlink:href="install-guide#before-you-begin-sample"
+             xlink:role="http://docbook.org/xlink/role/olink">
+             <citetitle>Before You Begin</citetitle></link> in the
+             <citetitle>Installation Guide</citetitle>. For information about using
+             MySQL as a repository, see <link xlink:href="install-guide#chap-repository"
+             xlink:role="http://docbook.org/xlink/role/olink">
+             <citetitle>Installing a Repository For Production</citetitle></link> in the
+             <citetitle>Installation Guide</citetitle>.
+             </para>
          </step>
        </procedure>
     
@@ -2112,16 +2116,17 @@ $ cp -r ./samples/sample1/conf ./conf</screen>
           <screen>{"_id":"a5346543-db9a-4f8b-ba25-af2a1b576a54"}</screen>
          </step>
          <step>
-          <para>Check in the OpenIDM internal repository (OrientDB or MySQL) if the
-          users were reconciled. For information about connecting to the repository,
-          see <link xlink:show="new"
-          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample"
-          >http://openidm.forgerock.org/doc/install-guide/index.html#before-you-begin-sample</link>
-          (for OrientDB) or <link xlink:show="new"
-          xlink:href="http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository"
-          >http://openidm.forgerock.org/doc/install-guide/index.html#chap-repository</link>
-          (for MySQL).
-          </para>
+             <para>Check the internal repository (OrientDB or MySQL) to make sure that
+             the users were reconciled. For information about connecting to OrientDB,
+             see <link xlink:href="install-guide#before-you-begin-sample"
+             xlink:role="http://docbook.org/xlink/role/olink">
+             <citetitle>Before You Begin</citetitle></link> in the
+             <citetitle>Installation Guide</citetitle>. For information about using
+             MySQL as a repository, see <link xlink:href="install-guide#chap-repository"
+             xlink:role="http://docbook.org/xlink/role/olink">
+             <citetitle>Installing a Repository For Production</citetitle></link> in the
+             <citetitle>Installation Guide</citetitle>.
+             </para>
          </step>
        </procedure>
 
