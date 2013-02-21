@@ -46,8 +46,9 @@
       <term>Changes to the scheduler configuration</term>
       <listitem>
         <para>The way in which scheduled tasks is configured has changed, as 
-        described in <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#chap-scheduler-conf">
-        <citetitle>Scheduling Tasks and Events</citetitle></link>.</para>    
+        described in <link xlink:href="integrators-guide#chap-scheduler-conf"
+                           xlink:role="http://docbook.org/xlink/role/olink">
+                <citetitle>Scheduling Tasks and Events</citetitle></link>.</para>
         <para>Schedules are now defined in files named 
         <literal>openidm/conf/schedule-*.json</literal>. If you use the 
         previous naming convention (scheduler-*.json), the schedules will not 
@@ -166,7 +167,9 @@
        <listitem>
          <para>All links are now queried at the start of a correlation and the 
          results of that query are used.</para>
-         <para>For more information, see <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#prefetching-links"><citetitle>Prefetching Links</citetitle></link>
+         <para>For more information, see
+             <link xlink:href="integrators-guide#prefetching-links"
+             xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Prefetching Links</citetitle></link>
          in the <citetitle>Integrator's Guide</citetitle>.</para>
        </listitem>
      </varlistentry>
@@ -207,8 +210,10 @@
   <para>These capabilities are expected to change in upcoming releases:</para>
   <listitem>
    <para>The way you generate connector configurations for access to external
-   resources, described in <link xlink:href="http://openidm.forgerock.org/doc/integrators-guide#connector-wiz"><citetitle>Creating Default
-   Connector Configurations</citetitle></link>.</para>
+   resources, described in
+   <link xlink:href="integrators-guide#connector-wiz"
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
+           Connector Configurations</citetitle></link>.</para>
   </listitem>
  </itemizedlist> 
  </section>

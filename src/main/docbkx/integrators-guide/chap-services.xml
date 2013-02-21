@@ -209,7 +209,7 @@ Stopping OpenIDM (454)</screen>
          </listitem>
          <listitem>
            <para><literal>"start-level" : 1</literal> - specifies a start level 
-           for the jar files identified previuosly.</para>
+           for the jar files identified previously.</para>
          </listitem>
          <listitem>
            <para><literal>"action" : "install.start"</literal> - a 
