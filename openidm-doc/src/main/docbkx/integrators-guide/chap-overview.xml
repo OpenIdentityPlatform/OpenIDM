@@ -133,7 +133,7 @@
       </listitem>
      </varlistentry>
      <varlistentry>
-      <term>Polic Service</term>
+      <term>Policy Service</term>
       <listitem>
        <para>OpenIDM provides an extensible policy service that enables you to 
        apply specific validation requirements to various components and 
