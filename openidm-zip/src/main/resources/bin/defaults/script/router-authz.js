@@ -371,15 +371,19 @@ function passesAccessConfig(id, roles, method, action) {
 
 
 function passesOriginVerification() {
-    var headers = request.parent.headers;
+    var headers = request.parent.headers,
+        origin = headers["Origin"] || headers["origin"];
 
     if (typeof (headers["X-Requested-With"]) !== "undefined" || 
+        typeof (headers["x-requested-with"]) !== "undefined" || 
         typeof (headers["Authorization"]) !== "undefined" || 
-        typeof (headers["X-OpenIDM-Username"]) !== "undefined") {
+        typeof (headers["authorization"]) !== "undefined" || 
+        typeof (headers["X-OpenIDM-Username"]) !== "undefined" || 
+        typeof (headers["x-openidm-username"]) !== "undefined") {
         
         // CORS requests will have the Origin header included; verify that the origin given is allowed.
-        if (typeof (headers["Origin"]) !== "undefined" && typeof allowedOrigins !== "undefined" &&
-                !contains(allowedOrigins, headers.Origin) ) {
+        if (typeof (origin) !== "undefined" && typeof allowedOrigins !== "undefined" &&
+                !contains(allowedOrigins, origin) ) {
             return false;
         } else {
             return true;
