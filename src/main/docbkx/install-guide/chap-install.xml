@@ -111,8 +111,10 @@ Java HotSpot(TM) 64-Bit Server VM (build 19.1-b02-334, mixed mode)</screen>
               environment.</para>
           </listitem>
           <listitem>
-              <para><link xlink:show="new" xlink:href="http://forgerock.org/openidm-archive.html">
-              Archives</link> the stable build for all previous releases of OpenIDM.</para>
+              <para>
+              <link xlink:show="new" xlink:href="http://forgerock.org/openidm-archive.html">
+              Archives</link> includes the stable builds for all previous releases
+              of OpenIDM.</para>
           </listitem>
         </itemizedlist>
     </step>
