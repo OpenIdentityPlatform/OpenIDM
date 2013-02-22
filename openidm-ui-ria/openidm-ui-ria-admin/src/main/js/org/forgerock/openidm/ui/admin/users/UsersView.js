@@ -49,7 +49,7 @@ define("org/forgerock/openidm/ui/admin/users/UsersView", [
         },
         
         showProfile: function(event) {
-            var userName = $(event.target).parent().find(".userName").text();
+            var userName = $(event.target).closest("tr").find(".userName").text();
             
             if(userName) {
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminUserProfile", args: [userName]});

@@ -70,17 +70,24 @@ input:disabled, select:disabled {
     }
     h3 {
         &.ui-accordion-header {
-        font-size: 14px;
-        outline: 0;
-        line-height: 18px;
-        font-weight: normal;
-        padding: 10px;
-      }
-      &.ui-state-active {
-        background-color: #ffffff;
-        border: 1px solid #E6E6E6;
-        font-weight: bold;
-      }
+            font-size: 14px;
+            outline: 0;
+            line-height: 18px;
+            font-weight: normal;
+            padding: 10px;
+        }
+        &.ui-state-active {
+            background-color: #ffffff;
+            border: 1px solid #E6E6E6;
+            font-weight: bold;
+        }
+        &.ui-state-default {
+            text-decoration: underline;
+        }
+        &:hover {
+            cursor: pointer;
+        }
+
     }
     div.action-buttons {
         background-color: #ffffff;
