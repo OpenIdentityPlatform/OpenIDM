@@ -2454,7 +2454,7 @@ public class RepoJobStore implements JobStore {
      */
     private boolean recoverFailedInstance(String instanceId, InstanceState state) {
         
-        // first attempt to update the status of the instance
+        // first attempt to update the recovery timestamp and status of the instance
         state.setRecoveringTimestamp(System.currentTimeMillis());
         state.setState(InstanceState.STATE_PROCESSING_DOWN);
         try {
@@ -2500,6 +2500,22 @@ public class RepoJobStore implements JobStore {
                             retry++;
                         }
                     }
+                }
+                logger.info("Recovered trigger {} from failed instance {}", trigger.getName(), instanceId);
+                try {
+                    // Update the recovery timestamp
+                    state = getInstanceState(instanceId);
+                    state.updateRecoveringTimestamp();
+                    updateInstanceState(instanceId, state);
+                    logger.debug("Updated recovery timestamp of instance {}", instanceId);
+                } catch (JsonResourceException e) {
+                    if (e.getCode() != JsonResourceException.CONFLICT) {
+                        logger.warn("Failed to update recovery timestamp of instance {}: {}", instanceId, e.getMessage());
+                    }
+                    return false;
+                } catch (JobPersistenceException e) {
+                    logger.warn("Failed to update recovery timestamp of instance {}: {}", instanceId, e.getMessage());
+                    return false;
                 }
             }
 
