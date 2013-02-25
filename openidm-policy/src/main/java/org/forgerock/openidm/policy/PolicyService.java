@@ -89,6 +89,14 @@ public class PolicyService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry;
 
+    private void bindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = service;
+    }
+
+    private void unbindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = null;
+    }
+
     private ScriptEntry scriptEntry;
 
     @Activate

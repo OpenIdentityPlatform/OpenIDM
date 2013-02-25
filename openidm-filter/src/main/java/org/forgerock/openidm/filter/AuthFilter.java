@@ -58,6 +58,7 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -250,7 +251,7 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
                         Action.authenticate, Status.SUCCESS);
                 createSession(req, authData);
             } else {
-                authFailed(req, res, authData.getAuthenticationId());
+                authFailed(req, res, null != authData ? authData.getAuthenticationId() : null);
                 return;
             }
         } catch (AuthException s) {
@@ -275,7 +276,7 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
     private void authFailed(HttpServletRequest req, HttpServletResponse res, String username)
             throws IOException {
         logAuth(req, username, null, null, Action.authenticate, Status.FAILURE);
-        ResourceException jre = ResourceException.getException(401, "Access denied", "", null);
+        ResourceException jre = ResourceException.getException(401, "", null);
         res.getWriter().write(jre.toJsonValue().toString());
         res.setContentType("application/json");
         res.setStatus(401);
@@ -437,9 +438,25 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
     @Reference(target = "("+ServerConstants.ROUTER_PREFIX+"=/repo/*)")
     RouteService repositoryRoute;
 
+    private void bindRouteService(final RouteService service) {
+        repositoryRoute = service;
+    }
 
-    @Reference
+    private void unbindRouteService(final RouteService service) {
+        repositoryRoute = null;
+    }
+
+
+    @Reference(policy = ReferencePolicy.DYNAMIC)
     CryptoService cryptoService;
+
+    private void bindCryptoService(final CryptoService service) {
+        cryptoService = service;
+    }
+
+    private void unbindCryptoService(final CryptoService service) {
+        cryptoService = null;
+    }
 
     /** TODO: Description. */
     private ComponentContext context;

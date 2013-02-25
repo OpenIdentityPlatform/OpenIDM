@@ -38,6 +38,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.IdentityServer;
 
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -208,7 +209,7 @@ public class ConfigBootstrapHelper {
             props.put("felix.fileinstall.dir", dir);
             props.put("felix.fileinstall.filter", filter);
             props.put("felix.fileinstall.bundles.new.start", start);
-            props.put("config.factory-pid","openidm");
+            props.put(ServerConstants.CONFIG_FACTORY_PID,"openidm");
             config.update(props);
             logger.info("Configuration from file enabled");
         } else {

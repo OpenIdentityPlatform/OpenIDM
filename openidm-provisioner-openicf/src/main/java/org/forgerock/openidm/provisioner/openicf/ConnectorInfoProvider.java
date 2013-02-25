@@ -25,7 +25,7 @@
 package org.forgerock.openidm.provisioner.openicf;
 
 import org.forgerock.json.fluent.JsonValue;
-import org.identityconnectors.common.event.ConnectorEventHandler;
+import org.forgerock.openidm.provisioner.openicf.internal.ConnectorFacadeCallback;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 

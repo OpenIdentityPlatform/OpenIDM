@@ -78,6 +78,13 @@ public class SystemObjectSetService implements SingletonResourceProvider {
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private ConfigurationService configurationService;
 
+    private void bindConfigurationService(final ConfigurationService service) {
+        configurationService = service;
+    }
+
+    private void unbindConfigurationService(final ConfigurationService service) {
+        configurationService = null;
+    }
 
     @Override
     public void actionInstance(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {

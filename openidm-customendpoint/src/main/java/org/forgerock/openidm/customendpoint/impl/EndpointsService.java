@@ -96,9 +96,25 @@ public class EndpointsService implements RequestHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry;
 
+    private void bindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = service;
+    }
+
+    private void unbindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = null;
+    }
+
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private RouterRegistryService routerRegistryService;
+
+    private void bindRouterRegistryService(final RouterRegistryService service) {
+        routerRegistryService = service;
+    }
+
+    private void unbindRouterRegistryService(final RouterRegistryService service) {
+        routerRegistryService = null;
+    }
 
     private RouteEntry routeEntry = null;
     

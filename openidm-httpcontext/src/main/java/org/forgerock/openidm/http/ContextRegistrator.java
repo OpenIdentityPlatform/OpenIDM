@@ -66,7 +66,15 @@ public final class ContextRegistrator {
     public static final String OPENIDM = "openidm";
 
     @Reference
-    WebContainer httpService;
+    private WebContainer httpService;
+
+    private void bindWebContainer(final WebContainer service) {
+       httpService = service;
+    }
+
+    private void unbindWebContainer(final WebContainer service) {
+        httpService = null;
+    }
 
     HttpContext httpContext;
 

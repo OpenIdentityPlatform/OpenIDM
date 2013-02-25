@@ -28,14 +28,18 @@ import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -49,7 +53,6 @@ import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -615,25 +618,40 @@ public class ConfigurationManagerImpl
     private Configuration installConfiguration(ConfigurationAdmin service, DelayedConfig config)
             throws InternalServerErrorException {
         Configuration configuration = null;
-        try {
-            configuration = service.getConfiguration(config.pid, config.factoryPid);
-        } catch (IOException e) {
-            logger.error("ConfigurationAdmin can not get the Configuration: {}-{}", config.pid,
-                    config.factoryPid, e);
-            throw new InternalServerErrorException(
-                    "ConfigurationAdmin can not get the Configuration: " + config.pid + "-"
-                            + config.factoryPid, e);
+                StringBuilder sb = new StringBuilder(config.pid);
+        if (null != config.factoryPid) {
+            sb.append('-').append(config.factoryPid);
         }
-        Dictionary existingConfig = configuration.getProperties();
-        Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig);
+        String configKey = sb.toString();
 
-        String value = null;
+        try {
+            configuration = getConfiguration(service, config.pid, config.factoryPid);
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to get the configuration " + configKey,
+                    e);
+        }
+
+        Dictionary props = configuration.getProperties();
+        Hashtable existingConfig = props != null ? new Hashtable(new DictionaryAsMap(props)) : null;
+        if (existingConfig != null) {
+            existingConfig.remove( "felix.fileinstall.filename" );
+            existingConfig.remove( Constants.SERVICE_PID );
+            existingConfig.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+        }
+        Dictionary encrypted =  existingConfig == null ? new Hashtable() : existingConfig;
+
         try {
             ObjectWriter writer = prettyPrint.getWriter();
-            value = writer.writeValueAsString(config.configuration.asMap());
+            String value = writer.writeValueAsString(config.configuration.asMap());
 
             encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
-
+            if (config.factoryPid instanceof String) {
+                encrypted.put(ServerConstants.CONFIG_FACTORY_PID, config.factoryPid);
+            }
+            if (configuration.getBundleLocation() != null)
+            {
+                configuration.setBundleLocation(null);
+            }
             if (logger.isDebugEnabled()) {
                 logger.debug("Config with sensitive data encrypted {} {} : {}", new Object[] {
                     config.pid, config.factoryPid, encrypted });
@@ -646,6 +664,50 @@ public class ConfigurationManagerImpl
             throw new InternalServerErrorException(
                     "Failure to update formatted and encrypted configuration: " + config.pid + "-"
                             + config.factoryPid + " : " + e.getMessage(), e);
+        }
+    }
+
+
+    protected Configuration getConfiguration(ConfigurationAdmin service, String pid, String factoryPid) throws Exception {
+        Configuration oldConfiguration = findExistingConfiguration(service, pid, factoryPid);
+        if (oldConfiguration != null) {
+            if (factoryPid == null) {
+                logger.info("Updating configuration from {}", pid);
+            } else {
+                logger.info("Updating configuration from {}-{}", pid, factoryPid);
+            }
+            return oldConfiguration;
+        } else {
+            Configuration newConfiguration;
+            if (factoryPid != null) {
+                /*if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
+                    throw new ConfigurationException(factoryPid,
+                            "router config can not be factory config");
+                }*/
+                newConfiguration = getConfigurationAdmin().createFactoryConfiguration(pid, null);
+            } else {
+                newConfiguration = getConfigurationAdmin().getConfiguration(pid, null);
+            }
+            return newConfiguration;
+        }
+    }
+
+    Configuration findExistingConfiguration(ConfigurationAdmin service, String pid,
+                                              String factoryPid) throws Exception {
+        String filter = null;
+        if (null == factoryPid) {
+            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
+        } else {
+            filter =
+                    "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + pid
+                            + ")(config.factory-pid=" + factoryPid + "))";
+        }
+
+        Configuration[] configurations = service.listConfigurations(filter);
+        if (configurations != null && configurations.length > 0) {
+            return configurations[0];
+        } else {
+            return null;
         }
     }
 
@@ -688,7 +750,7 @@ public class ConfigurationManagerImpl
             props.put("felix.fileinstall.dir", dir);
             props.put("felix.fileinstall.filter", filter);
             props.put("felix.fileinstall.bundles.new.start", start);
-            props.put("config.factory-pid", "openidm");
+            props.put(ServerConstants.CONFIG_FACTORY_PID, "openidm");
             config.update(props);
             logger.info("Configuration from file enabled");
             return config;
@@ -873,55 +935,6 @@ public class ConfigurationManagerImpl
         logger.debug("Parsed configuration for {}", serviceName);
 
         return jv;
-    }
-
-    // Configuration getConfiguration(String fileName, String pid, String
-    // factoryPid, boolean addIfNew) throws Exception {
-    //
-    // Configuration oldConfiguration = findExistingConfiguration(fileName, pid,
-    // factoryPid);
-    // if (oldConfiguration != null) {
-    // logger.debug("Updating configuration from {}", fileName);
-    // return oldConfiguration;
-    // }
-    // else {
-    // Configuration newConfiguration;
-    // if (factoryPid != null) {
-    //
-    // if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
-    // throw new ConfigurationException(factoryPid,
-    // "router config can not be factory config");
-    // }
-    // newConfiguration = configurationAdmin.createFactoryConfiguration(pid,
-    // null);
-    // }
-    // else {
-    // newConfiguration = configurationAdmin.getConfiguration(pid, null);
-    // }
-    // if (addIfNew) {
-    // pidToFile.put(newConfiguration.getPid(), fileName);
-    // }
-    // return newConfiguration;
-    // }
-    // }
-
-    Configuration[] findExistingConfiguration(ConfigurationAdmin service, String pid,
-            String factoryPid) throws Exception {
-        String filter = null;
-        if (null == factoryPid) {
-            filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
-        } else {
-            filter =
-                    "(&(" + ConfigurationAdmin.SERVICE_FACTORYPID + "=" + pid
-                            + ")(config.factory-pid=" + factoryPid + "))";
-        }
-
-        Configuration[] configurations = service.listConfigurations(filter);
-        if (configurations != null && configurations.length > 0) {
-            return configurations;
-        } else {
-            return null;
-        }
     }
 
     // ----- Inner Classes
@@ -1127,5 +1140,86 @@ public class ConfigurationManagerImpl
         public int hashCode() {
             return provider.hashCode();
         }
+    }
+
+    /**
+     * A wrapper around a dictionary access it as a Map
+     */
+    static class DictionaryAsMap<U, V> extends AbstractMap<U, V> {
+
+        private Dictionary<U, V> dict;
+
+        public DictionaryAsMap(Dictionary<U, V> dict) {
+            this.dict = dict;
+        }
+
+        @Override
+        public Set<Entry<U, V>> entrySet() {
+
+            return new AbstractSet<Entry<U, V>>() {
+
+                @Override
+                public Iterator<Entry<U, V>> iterator() {
+
+                    final Enumeration<U> e = dict.keys();
+
+                    return new Iterator<Entry<U, V>>() {
+
+                        private U key;
+
+                        public boolean hasNext() {
+                            return e.hasMoreElements();
+                        }
+
+                        public Entry<U, V> next() {
+
+                            key = e.nextElement();
+                            return new KeyEntry(key);
+                        }
+
+                        public void remove() {
+
+                            if (key == null) {
+
+                                throw new IllegalStateException();
+                            }
+                            dict.remove(key);
+                        }
+                    };
+                }
+
+                @Override
+                public int size() {
+                    return dict.size();
+                }
+            };
+        }
+
+        @Override
+        public V put(U key, V value) {
+            return dict.put(key, value);
+        }
+
+        class KeyEntry implements Map.Entry<U,V> {
+
+            private final U key;
+
+            KeyEntry(U key) {
+                this.key = key;
+            }
+
+            public U getKey() {
+                return key;
+            }
+
+            public V getValue() {
+                return dict.get(key);
+            }
+
+            public V setValue(V value) {
+                return DictionaryAsMap.this.put(key, value);
+            }
+        }
+
     }
 }

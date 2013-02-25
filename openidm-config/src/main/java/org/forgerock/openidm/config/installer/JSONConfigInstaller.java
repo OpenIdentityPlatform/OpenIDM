@@ -49,6 +49,7 @@ import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 
 
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.Configuration;
@@ -67,8 +68,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * The key in the OSGi configuration dictionary holding the complete JSON configuration string
      */
     public final static String JSON_CONFIG_PROPERTY = JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
-
-    public final static String SERVICE_FACTORY_PID_ALIAS = "config.factory-pid";
 
     /**
      * Setup logging for the {@link JSONConfigInstaller}.
@@ -150,7 +149,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                         if (factoryPid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
                             unqualifiedFactoryPid = factoryPid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
                         }
-                        String alias = (String) dict.get(SERVICE_FACTORY_PID_ALIAS);
+                        String alias = (String) dict.get(ServerConstants.CONFIG_FACTORY_PID);
                         if (alias == null) {
                             logger.warn("Could not write out factory configuration file, as no friendly alias is set in the configuration."
                                     + " factory pid: {} assigned pid {}", factoryPid, pid);
@@ -402,13 +401,13 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         newCompare.remove( DirectoryWatcher.FILENAME );
         newCompare.remove( Constants.SERVICE_PID );
         newCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        newCompare.remove( SERVICE_FACTORY_PID_ALIAS );
+        newCompare.remove( ServerConstants.CONFIG_FACTORY_PID );
 
         Dictionary oldCompare = new Hashtable(new DictionaryAsMap(oldCfg));
         oldCompare.remove( DirectoryWatcher.FILENAME );
         oldCompare.remove( Constants.SERVICE_PID );
         oldCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        oldCompare.remove( SERVICE_FACTORY_PID_ALIAS );
+        oldCompare.remove( ServerConstants.CONFIG_FACTORY_PID );
 
         return newCompare.equals(oldCompare);
     }

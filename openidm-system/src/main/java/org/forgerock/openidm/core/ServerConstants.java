@@ -131,6 +131,16 @@ public class ServerConstants {
      */
     public static final String DEFAULT_BOOT_FILE_LOCATION = "conf/boot/boot.properties";
 
+
+    /**
+     * Configuration property naming the Factory PID in the configuration
+     * dictionary. The property's value is of type <code>String</code>.
+     *
+     * @since 1.1
+     */
+    public static final String CONFIG_FACTORY_PID = "config.factory-pid";
+
+
     /**
      * The default location relative to the openidm root of the boot properties
      * file. Override by setting system property
