@@ -210,7 +210,8 @@ Content-Length: 89
      query parameter to specify the identifier to give the newly created
      object. If an <literal>_id</literal> is not provided, the server selects
      its own identifier.</para>
-     <para>The <literal>patch</literal> action updates a managed object</para>
+     <para>The <literal>patch</literal> action is used to update one or more
+     attributes of a managed object, without replacing the entire object.</para>
 
      <para>Example Create Request</para>
      <programlisting language="http">
@@ -237,15 +238,12 @@ Content-Length: 123
 ...
 
 [<replaceable>JSON representation of the managed object to create</replaceable>]</programlisting>
-      <para>Example Response (success, with data)</para>
+      <para>Example Response (success)</para>
       <programlisting language="http">
-HTTP/1.1 200 OK
-Set-Cookie: JSESSIONID=1kke440cyv1vivbrid6ljso7b;Path=/
-Expires: Thu, 01 Jan 1970 00:00:00 GMT
-Content-Type: application/json; charset=UTF-8
+HTTP/1.1 204 No Content
 ETag: "1"
-{"_id":"5752c0fd9509","_rev":"2"}
-        </programlisting>
+...</programlisting>
+
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -300,9 +298,14 @@ If-Match: "0"
 [<replaceable>JSON representation of patch document to apply</replaceable>]</programlisting>
      <para>Example Response (success)</para>
      <programlisting language="http">
-HTTP/1.1 204 No Content
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=1kke440cyv1vivbrid6ljso7b;Path=/
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Content-Type: application/json; charset=UTF-8
 ETag: "1"
-...</programlisting>
+...
+{"_id":"5752c0fd9509","_rev":"2"}
+     </programlisting>
 
      <para>Updating an existing object when no version is supplied (version
      conflict)</para>
