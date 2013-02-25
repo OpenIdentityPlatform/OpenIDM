@@ -27,12 +27,18 @@ package org.forgerock.openidm.router;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionProvider;
 import org.forgerock.json.resource.InMemoryBackend;
+import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -49,6 +55,7 @@ public class Activator implements BundleActivator {
 
     private ServiceRegistration factoryServiceRegistration = null;
     private ServiceRegistration<Router> routerServiceRegistration = null;
+    private ServiceRegistration<PersistenceConfig> persistenceConfigRegistration = null;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -67,6 +74,21 @@ public class Activator implements BundleActivator {
 
         routerServiceRegistration = context.registerService(Router.class,a.getInternalRouter(),properties);
 
+        final Connection connection = Resources.newInternalConnection(a.getInternalRouter());
+
+        //TODO move this to core when it's cleaned
+        persistenceConfigRegistration = context.registerService(PersistenceConfig.class, PersistenceConfig.builder().connectionProvider(new ConnectionProvider() {
+            @Override
+            public Connection getConnection(String connectionId) throws ResourceException {
+                return connection;
+            }
+
+            @Override
+            public String getConnectionId(Connection connection) throws ResourceException {
+                return "DEFAULT";
+            }
+        }).classLoader(this.getClass().getClassLoader()).build(),properties);
+        //TODO Use BundleDelegatingClassLoader or WireAdmin from OSGi 4.3
     }
 
     @Override
@@ -74,11 +96,17 @@ public class Activator implements BundleActivator {
         if (null != a) {
             a.deactivate();
         }
+        if (null != persistenceConfigRegistration) {
+            persistenceConfigRegistration.unregister();
+            persistenceConfigRegistration = null;
+        }
         if (null != factoryServiceRegistration) {
             factoryServiceRegistration.unregister();
+            factoryServiceRegistration = null;
         }
         if (null != routerServiceRegistration) {
             routerServiceRegistration.unregister();
+            routerServiceRegistration = null;
         }
     }
 

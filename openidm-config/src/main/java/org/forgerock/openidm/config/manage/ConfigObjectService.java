@@ -1,95 +1,106 @@
-///*
-// * The contents of this file are subject to the terms of the Common Development and
-// * Distribution License (the License). You may not use this file except in compliance with the
-// * License.
-// *
-// * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
-// * specific language governing permission and limitations under the License.
-// *
-// * When distributing Covered Software, include this CDDL Header Notice in each file and include
-// * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
-// * Header, with the fields enclosed by brackets [] replaced by your own identifying
-// * information: "Portions Copyrighted [year] [name of copyright owner]".
-// *
-// * Copyright © 2011 ForgeRock AS. All rights reserved.
-// */
-//
-//package org.forgerock.openidm.config.manage;
-//
-//import java.io.IOException;
-//import java.util.ArrayList;
-//import java.util.Dictionary;
-//import java.util.HashMap;
-//import java.util.LinkedHashMap;
-//import java.util.List;
-//import java.util.Map;
-//
-//import org.apache.felix.scr.annotations.Activate;
-//import org.apache.felix.scr.annotations.Component;
-//import org.apache.felix.scr.annotations.ConfigurationPolicy;
-//import org.apache.felix.scr.annotations.Deactivate;
-//import org.apache.felix.scr.annotations.Properties;
-//import org.apache.felix.scr.annotations.Property;
-//import org.apache.felix.scr.annotations.Reference;
-//import org.apache.felix.scr.annotations.Service;
-//
-//import org.forgerock.json.fluent.JsonValue;
-//import org.forgerock.json.resource.ActionRequest;
-//import org.forgerock.json.resource.BadRequestException;
-//import org.forgerock.json.resource.CreateRequest;
-//import org.forgerock.json.resource.DeleteRequest;
-//import org.forgerock.json.resource.ForbiddenException;
-//import org.forgerock.json.resource.InternalServerErrorException;
-//import org.forgerock.json.resource.NotFoundException;
-//import org.forgerock.json.resource.NotSupportedException;
-//import org.forgerock.json.resource.PatchRequest;
-//import org.forgerock.json.resource.PreconditionFailedException;
-//import org.forgerock.json.resource.QueryRequest;
-//import org.forgerock.json.resource.QueryResultHandler;
-//import org.forgerock.json.resource.ReadRequest;
-//import org.forgerock.json.resource.RequestHandler;
-//import org.forgerock.json.resource.Resource;
-//import org.forgerock.json.resource.ResourceException;
-//import org.forgerock.json.resource.ResultHandler;
-//import org.forgerock.json.resource.ServerContext;
-//import org.forgerock.json.resource.UpdateRequest;
-//import org.forgerock.openidm.config.ConfigurationManager;
-//import org.forgerock.openidm.core.ServerConstants;
-//import org.forgerock.openidm.config.JSONEnhancedConfig;
-//import org.forgerock.openidm.config.installer.JSONConfigInstaller;
-//import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
-//import org.forgerock.openidm.metadata.WaitForMetaData;
-//
-//import org.osgi.framework.Constants;
-//import org.osgi.framework.InvalidSyntaxException;
-//import org.osgi.service.cm.Configuration;
-//import org.osgi.service.cm.ConfigurationAdmin;
-//import org.osgi.service.component.ComponentContext;
-//
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//
-//
-///**
-// * Provides access to OSGi configuration
-// *
-// * @author aegloff
-// */
-//@Component(
-//        name = "org.forgerock.openidm.config",
-//        immediate = true,
-//        policy = ConfigurationPolicy.OPTIONAL
-//)
-//@Properties({
-//        @Property(name = "service.description", value = "OpenIDM configuration service"),
-//        @Property(name = "service.vendor", value = "ForgeRock AS"),
-//        @Property(name = ServerConstants.ROUTER_PREFIX, value = {"config/{pid}","config/{pid}/{factoryPid}"})
-//})
-//@Service
-//public class ConfigObjectService implements RequestHandler {
-//
-//    final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
-//
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+package org.forgerock.openidm.config.manage;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.config.ConfigurationManager;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.installer.JSONConfigInstaller;
+import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
+import org.forgerock.openidm.metadata.WaitForMetaData;
+
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+* Provides access to OSGi configuration
+*
+* @author aegloff
+*/
+/*@Component(
+        name = "org.forgerock.openidm.config",
+        immediate = true,
+        policy = ConfigurationPolicy.OPTIONAL
+)
+@Properties({
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM configuration service"),
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = {"config", "config/{pid}","config/{pid}/{factoryPid}"})
+})
+@Service*/
+public class ConfigObjectService /*implements RequestHandler*/ {
+
+    /**
+     * Setup logging for the {@link ConfigObjectService}.
+     */
+    final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
+
 //    @Reference
 //    ConfigurationManager configAdmin;
 //
@@ -449,4 +460,4 @@
 //            return pid;
 //        }
 //    }
-//}
+}

@@ -35,6 +35,7 @@ import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.osgi.framework.BundleContext;
@@ -92,6 +93,14 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     public JSONEnhancedConfig setEscaping(boolean escape) {
         doEscape = escape;
         return this;
+    }
+
+    public String getConfigurationFactoryPid(ComponentContext compContext) {
+        Object o = compContext.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
+        if (o instanceof String) {
+            return (String) o;
+        }
+        return null;
     }
 
     /**

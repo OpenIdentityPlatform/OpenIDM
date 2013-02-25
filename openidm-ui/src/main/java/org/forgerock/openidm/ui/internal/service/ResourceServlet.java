@@ -65,8 +65,24 @@ public final class ResourceServlet extends HttpServlet {
     @Reference
     HttpService httpService;
 
+    private void bindHttpService(final HttpService service) {
+        httpService = service;
+    }
+
+    private void unbindHttpService(final HttpService service) {
+        httpService = null;
+    }
+
     @Reference(target = "(openidm.contextid=shared)")
     HttpContext httpContext;
+
+    private void bindHttpContext(final HttpContext service) {
+        httpContext = service;
+    }
+
+    private void unbindHttpContext(final HttpContext service) {
+        httpContext = null;
+    }
 
     ComponentContext context;
 

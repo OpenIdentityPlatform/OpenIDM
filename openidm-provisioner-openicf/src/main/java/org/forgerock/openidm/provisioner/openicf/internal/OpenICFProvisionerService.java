@@ -47,7 +47,6 @@ import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -86,7 +85,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.provisioner.openicf.ConnectorFacadeCallback;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -180,17 +178,41 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ConnectorInfoProvider connectorInfoProvider = null;
 
+    private void bindConnectorInfoProvider(final ConnectorInfoProvider service) {
+        connectorInfoProvider = service;
+    }
+
+    private void unbindConnectorInfoProvider(final ConnectorInfoProvider service) {
+        connectorInfoProvider = null;
+    }
+
     /**
      * RouterRegistryService service.
      */
     @Reference(policy = ReferencePolicy.STATIC)
     protected RouterRegistryService routerRegistryService;
 
+    private void bindRouterRegistryService(final RouterRegistryService service) {
+        routerRegistryService = service;
+    }
+
+    private void unbindRouterRegistryService(final RouterRegistryService service) {
+        routerRegistryService = null;
+    }
+
     /**
      * Cryptographic service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected CryptoService cryptoService = null;
+
+    private void bindCryptoService(final CryptoService service) {
+        cryptoService = service;
+    }
+
+    private void unbindCryptoService(final CryptoService service) {
+        cryptoService = null;
+    }
 
     /**
      * Reference to the ThreadSafe  {@code ConnectorFacade} instance.
@@ -328,7 +350,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         if (configuration.isDefined("name")) {
             name = configuration.get("name").required().asString();
         } else {
-            name = (String) context.getProperties().get("config.factory-pid");
+            name = (String) context.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
         }
         if (StringUtil.isBlank(name)) {
             throw new ComponentException(
@@ -412,7 +434,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
      * catch (Throwable e) { result.put("error", e.getMessage()); } return
      * result; }
      */
-
+    //TODO include e.getMessage() both in the audit log and the propagated exception
     protected void handleError(Request request, Exception exception, ResultHandler<?> handler) {
 
         if (exception instanceof AlreadyExistsException) {

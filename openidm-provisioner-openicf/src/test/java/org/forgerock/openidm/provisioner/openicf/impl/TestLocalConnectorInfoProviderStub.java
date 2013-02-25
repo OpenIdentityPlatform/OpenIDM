@@ -26,8 +26,7 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProviderService;
-import org.identityconnectors.framework.api.ConnectorInfoManagerFactory;
+import org.forgerock.openidm.provisioner.openicf.internal.ConnectorInfoProviderService;
 
 import java.net.URL;
 

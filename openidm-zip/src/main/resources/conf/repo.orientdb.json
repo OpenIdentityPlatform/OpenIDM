@@ -34,7 +34,43 @@
                     }
                 ]
             },
+            "managed_organization" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_role" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "managed_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_system" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_account" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",
@@ -49,35 +85,6 @@
                         "propertyName" : "_openidm_id",
                         "propertyType" : "string",
                         "indexType" : "unique"
-                    }
-                ]
-            },
-            "link" : {
-                "index" : [
-                    {
-                        "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    },
-                    {
-                        "propertyName" : "linkType",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyName" : "firstId",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyName" : "secondId",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyName" : "reconId",
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
                     }
                 ]
             },

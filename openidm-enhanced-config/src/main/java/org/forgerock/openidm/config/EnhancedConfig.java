@@ -79,4 +79,8 @@ public interface EnhancedConfig {
     public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context,
             String servicePid) throws InvalidException, InternalErrorException;
 
+
+    public String getConfigurationFactoryPid(ComponentContext compContext);
+
+
 }

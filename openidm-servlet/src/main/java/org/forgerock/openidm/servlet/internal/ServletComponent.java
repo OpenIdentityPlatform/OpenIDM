@@ -81,8 +81,24 @@ public class ServletComponent implements EventHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)//, target = "(org.forgerock.openidm.servlet=true)")
     protected Router router;
 
+    private void bindRouter(final Router service) {
+        router = service;
+    }
+
+    private void unbindRouter(final Router service) {
+        router = null;
+    }
+
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected HttpServletContextFactory servletContextFactory;
+
+    private void bindHttpServletContextFactory(final HttpServletContextFactory service) {
+        servletContextFactory = service;
+    }
+
+    private void unbindHttpServletContextFactory(final HttpServletContextFactory service) {
+        servletContextFactory = null;
+    }
 
     @Activate
     protected void activate(ComponentContext context) {

@@ -38,7 +38,6 @@ import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.provisioner.ConfigurationService;
-import org.forgerock.openidm.provisioner.openicf.ConnectorFacadeCallback;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
@@ -221,6 +220,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             policy = ReferencePolicy.STATIC)
     private ConnectorInfoManager osgiConnectorInfoManager = null;
 
+    private void bindConnectorInfoManager(final ConnectorInfoManager service) {
+        osgiConnectorInfoManager = service;
+    }
+
+    private void unbindConnectorInfoManager(final ConnectorInfoManager service) {
+        osgiConnectorInfoManager = null;
+    }
+
     /**
      * ConnectorFacadeFactory service.
      */
@@ -229,6 +236,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.STATIC)
     private ConnectorFacadeFactory osgiConnectorFacadeFactory = null;
+
+    private void bindConnectorFacadeFactory(final ConnectorFacadeFactory service) {
+        osgiConnectorFacadeFactory = service;
+    }
+
+    private void unbindConnectorFacadeFactory(final ConnectorFacadeFactory service) {
+        osgiConnectorFacadeFactory = null;
+    }
 
     /**
      * ConnectorEventPublisher service.
