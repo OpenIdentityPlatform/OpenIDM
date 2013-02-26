@@ -80,8 +80,7 @@ import org.slf4j.LoggerFactory;
         description = "OpenIDM Info Service", immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Info Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/info/{service}") })
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Info Service")})
 public class InfoService implements ScriptCustomizer, ScriptListener {
 
     public static final String PID = "org.forgerock.openidm.info";

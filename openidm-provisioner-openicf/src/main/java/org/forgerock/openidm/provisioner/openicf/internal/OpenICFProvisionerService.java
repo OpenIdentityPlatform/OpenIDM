@@ -52,6 +52,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
@@ -517,7 +518,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             // ActivityLog.log(router, request, "Operation " + METHOD.name() +
             // " failed with " + e.getClass().getSimpleName(), id.toString(),
             // before, after, Status.FAILURE);
-            handler.handleError(new NotFoundException(exception));
+            handler.handleError(new NotFoundException("Not found " + request.getResourceName(),exception).setDetail(new JsonValue(new HashMap<String, Object>())));
         } else if (exception instanceof InvalidCredentialException) {
             if (logger.isDebugEnabled()) {
                 // logger.error("Invalid credential has been provided to operation {} for system object: {}",new
@@ -1352,37 +1353,49 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         public void createInstance(ServerContext context, CreateRequest request,
                 ResultHandler<Resource> handler) {
             try {
-                final ConnectorFacade facade = getConnectorFacade0(handler, CreateApiOp.class);
-                if (null != facade) {
+                if (objectClassInfoHelper.isCreateable()) {
+                    if (null == request.getNewResourceId()) {
+                        final ConnectorFacade facade =
+                                getConnectorFacade0(handler, CreateApiOp.class);
+                        if (null != facade) {
+                            final Set<Attribute> createAttributes =
+                                    objectClassInfoHelper.getCreateAttributes(request,
+                                            cryptoService);
+                            OperationOptionInfoHelper helper = operations.get(CreateApiOp.class);
+                            OperationOptions operationOptions = null;
+                            if (null != helper) {
+                                operationOptions = null; // helper.
+                            }
 
-                    final Set<Attribute> createAttributes = null;
+                            Uid uid =
+                                    facade.create(objectClassInfoHelper.getObjectClass(),
+                                            AttributeUtil.filterUid(createAttributes),
+                                            operationOptions);
 
-                    OperationOptionInfoHelper helper = operations.get(CreateApiOp.class);
-                    OperationOptions operationOptions = null;
-                    if (null != helper) {
-                        operationOptions = null; // helper.
+                            returnResource(request, handler, facade, uid);
+                        }
+                    } else {
+                        // If the __NAME__ attribute is not mapped then fail
+                        final ResourceException e =
+                                new NotSupportedException(
+                                        "Create operations are not supported with client assigned id");
+                        handler.handleError(e);
                     }
-
-                    Uid uid =
-                            facade.create(objectClassInfoHelper.getObjectClass(), AttributeUtil
-                                    .filterUid(createAttributes), operationOptions);
-
-                    JsonValue result = new JsonValue(new HashMap<String, Object>());
-                    result.put(ServerConstants.OBJECT_PROPERTY_ID, uid.getUidValue());
-                    if (null != uid.getRevision()) {
-                        result.put(ServerConstants.OBJECT_PROPERTY_REV, uid.getRevision());
-                    }
-
-                    handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
+                } else {
+                    // If the __NAME__ attribute is not mapped then fail
+                    final ResourceException e =
+                            new NotSupportedException("Create operations are not supported on "
+                                    + objectClassInfoHelper.getObjectClass());
+                    handler.handleError(e);
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
-                handleError(request,e, handler);
+                handleError(request, e, handler);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e));
+                handler.handleError(new BadRequestException(e.getMessage()));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage()));
             }
         }
 
@@ -1398,7 +1411,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                     if (null != helper) {
                         operationOptions = null; // helper.
                     }
-                    Uid uid = new Uid(resourceId, request.getRevision());
+                    Uid uid = null != request.getRevision() ? new Uid(resourceId, request.getRevision()) :new Uid(resourceId);
                     facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
 
                     JsonValue result = new JsonValue(new HashMap<String, Object>());
@@ -1414,9 +1427,9 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             } catch (ConnectorException e) {
                 handleError(request,e, handler);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e));
+                handler.handleError(new BadRequestException(e.getMessage()));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage()));
             }
         }
 
@@ -1517,14 +1530,16 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
                 if (null != facade) {
 
                     OperationOptionInfoHelper helper = operations.get(GetApiOp.class);
-                    OperationOptions operationOptions = null;
-                    if (null != helper) {
-                        operationOptions = null; // helper.
+                    OperationOptionsBuilder OOBuilder = new OperationOptionsBuilder();
+                    if (null == request.getFieldFilters() || request.getFieldFilters().isEmpty()) {
+                        OOBuilder.setAttributesToGet(objectClassInfoHelper.getAttributesReturnedByDefault());
+                    } else {
+                        objectClassInfoHelper.setAttributesToGet(OOBuilder, request.getFieldFilters());
                     }
                     Uid uid = new Uid(resourceId);
                     ConnectorObject connectorObject =
                             facade.getObject(objectClassInfoHelper.getObjectClass(), uid,
-                                    operationOptions);
+                                    OOBuilder.build());
 
                     if (null != connectorObject) {
                         handler.handleResult(objectClassInfoHelper.build(connectorObject,
@@ -1550,36 +1565,59 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(handler, UpdateApiOp.class);
                 if (null != facade) {
-
+                    //TODO Fix for http://bugster.forgerock.org/jira/browse/CREST-29
                     final Name newName = null;
-                    final Set<Attribute> replaceAttributes = null;
+                    final Set<Attribute> replaceAttributes = objectClassInfoHelper.getUpdateAttributes(request, newName, cryptoService);
 
                     OperationOptionInfoHelper helper = operations.get(UpdateApiOp.class);
                     OperationOptions operationOptions = null;
                     if (null != helper) {
                         operationOptions = null; // helper.
                     }
-                    Uid _uid = new Uid(resourceId, request.getRevision());
+                    Uid _uid = null != request.getRevision() ? new Uid(resourceId, request.getRevision()) :new Uid(resourceId);
                     Uid uid =
                             facade.update(objectClassInfoHelper.getObjectClass(), _uid,
                                     AttributeUtil.filterUid(replaceAttributes), operationOptions);
 
-                    JsonValue result = new JsonValue(new HashMap<String, Object>());
-                    result.put(ServerConstants.OBJECT_PROPERTY_ID, uid.getUidValue());
-                    if (null != uid.getRevision()) {
-                        result.put(ServerConstants.OBJECT_PROPERTY_REV, uid.getRevision());
-                    }
-
-                    handler.handleResult(new Resource(uid.getUidValue(), uid.getRevision(), result));
+                    returnResource(request, handler, facade, uid);
                 }
             } catch (ResourceException e) {
                 handler.handleError(e);
             } catch (ConnectorException e) {
                 handleError(request,e, handler);
             } catch (JsonValueException e) {
-                handler.handleError(new BadRequestException(e));
+                handler.handleError(new BadRequestException(e.getMessage(), e));
             } catch (Exception e) {
-                handler.handleError(new InternalServerErrorException(e));
+                handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+            }
+        }
+
+        private void returnResource(final Request request, final ResultHandler<Resource> handler,final  ConnectorFacade facade, final Uid uid) throws IOException, JsonCryptoException {
+            OperationOptionsBuilder _getOOBuilder = new OperationOptionsBuilder();
+            ConnectorObject co = null;
+            if (objectClassInfoHelper.setAttributesToGet(_getOOBuilder, request
+                    .getFieldFilters())) {
+                try {
+                    co =
+                            facade.getObject(
+                                    objectClassInfoHelper.getObjectClass(), uid,
+                                    _getOOBuilder.build());
+                } catch (Exception e) {
+                    logger.error("Failed to read back the user", e);
+                }
+            }
+            if (null != co) {
+                handler.handleResult(objectClassInfoHelper.build(co, cryptoService));
+            } else {
+                JsonValue result = new JsonValue(new HashMap<String, Object>());
+                result.put(ServerConstants.OBJECT_PROPERTY_ID, uid.getUidValue());
+                if (null != uid.getRevision()) {
+                    result.put(ServerConstants.OBJECT_PROPERTY_REV, uid
+                            .getRevision());
+                }
+
+                handler.handleResult(new Resource(uid.getUidValue(), uid
+                        .getRevision(), result));
             }
         }
 

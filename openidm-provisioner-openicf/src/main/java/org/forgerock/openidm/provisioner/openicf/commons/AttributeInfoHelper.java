@@ -36,10 +36,13 @@ import java.util.Set;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.identityconnectors.common.security.GuardedByteArray;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
@@ -209,15 +212,23 @@ public class AttributeInfoHelper {
         return null != key;
     }
 
-    public Attribute build(Object source, CryptoService cryptoService) throws Exception {
+    public Attribute build(Object source, final CryptoService cryptoService)
+            throws ResourceException {
         try {
-            JsonValue decryptedValue =
-                    new JsonValue(source, new JsonPointer(), null != cryptoService ? cryptoService
-                            .getDecryptionTransformers() : null);
-            return build(attributeInfo, decryptedValue.getObject());
+            if (null != cryptoService
+                    && (GuardedString.class.isAssignableFrom(getAttributeInfo().getType()) || GuardedByteArray.class
+                            .isAssignableFrom(getAttributeInfo().getType()))) {
+                JsonValue decryptedValue =
+                        new JsonValue(source, new JsonPointer(),
+                                null != cryptoService ? cryptoService.getDecryptionTransformers()
+                                        : null);
+                return build(attributeInfo, decryptedValue.getObject());
+            } else {
+                return build(attributeInfo, source);
+            }
         } catch (Exception e) {
             logger.error("Failed to build {} attribute out of {}", name, source);
-            throw e;
+            throw new InternalServerErrorException("Failed build " + name + " attribute.");
         }
     }
 

@@ -38,12 +38,8 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-enhanced-config</artifactId>
+            <artifactId>openidm-script</artifactId>
             <version>${openidm.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>script-common</artifactId>
         </dependency>
 
         <dependency>
@@ -89,7 +85,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Private-Package>org.forgerock.openidm.customendpoint.impl*</Private-Package>
+                        <Private-Package>org.forgerock.openidm.customendpoint.internal*</Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

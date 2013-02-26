@@ -1,1 +1,1 @@
-request
+request.getResourceName()

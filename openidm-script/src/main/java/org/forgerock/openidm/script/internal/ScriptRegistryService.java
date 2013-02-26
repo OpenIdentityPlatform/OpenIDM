@@ -271,6 +271,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         // encrypt(any value, string cipher, string alias)
         openidm.put("encrypt", new Function<JsonValue>() {
 
+            static final long serialVersionUID = 1L;
+
             public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length != 3) {
@@ -314,6 +316,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         // decrypt(any value)
         openidm.put("decrypt", new Function<JsonValue>() {
 
+            static final long serialVersionUID = 1L;
+
             public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
                 if (arguments.length == 1
@@ -329,6 +333,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         });
         // isEncrypted(any value)
         openidm.put("isEncrypted", new Function<Boolean>() {
+
+            static final long serialVersionUID = 1L;
 
             public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
                     throws ResourceException, NoSuchMethodException {
@@ -431,6 +437,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 return IdentityServer.getInstance().getInstallLocation().getAbsolutePath();
             }
         };
+        static final long serialVersionUID = 1L;
     }
 
     // ----- Implementation of RequestHandler interface

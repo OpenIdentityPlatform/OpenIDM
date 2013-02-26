@@ -19,11 +19,27 @@ import org.forgerock.json.resource.UpdateRequest;
  */
 public interface ScriptCustomizer {
 
-    void handleAction(ServerContext context, ActionRequest request, Bindings handler)
-            throws ResourceException;
+    public static final int CREATE = 1;
+    public static final int READ = 2;
+    public static final int UPDATE = 4;
+    public static final int PATCH = 8;
+    public static final int QUERY = 16;
+    public static final int DELETE = 32;
+    public static final int ACTION = 64;
 
     void handleCreate(ServerContext context, CreateRequest request, Bindings handler)
             throws ResourceException;
+
+    void handleRead(ServerContext context, ReadRequest request, Bindings handler)
+            throws ResourceException;
+
+    void handleUpdate(ServerContext context, UpdateRequest request, Bindings handler)
+            throws ResourceException;
+
+    void handleAction(ServerContext context, ActionRequest request, Bindings handler)
+            throws ResourceException;
+
+
 
     void handleDelete(ServerContext context, DeleteRequest request, Bindings handler)
             throws ResourceException;
@@ -34,9 +50,7 @@ public interface ScriptCustomizer {
     void handleQuery(ServerContext context, QueryRequest request, Bindings handler)
             throws ResourceException;
 
-    void handleRead(ServerContext context, ReadRequest request, Bindings handler)
-            throws ResourceException;
 
-    void handleUpdate(ServerContext context, UpdateRequest request, Bindings handler)
-            throws ResourceException;
+
+
 }
