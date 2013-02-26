@@ -22,15 +22,16 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.customendpoint.impl.metadata;
+package org.forgerock.openidm.customendpoint.internal.metadata;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.openidm.customendpoint.impl.EndpointsService;
+import org.forgerock.openidm.customendpoint.internal.EndpointsService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.metadata.WaitForMetaData;
@@ -67,6 +68,7 @@ public class ConfigMeta implements MetaDataProvider {
                 }
                 return result;
             }
+            return Collections.EMPTY_LIST;
         }
         return null;
     }

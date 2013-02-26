@@ -1,5 +1,4 @@
 {
-    "context" : "endpoint/echo",
-    "type" : "text/javascript",
-    "file" : "script/echo.js"
+    "name" : "echo.groovy",
+    "type" : "text/javascript"
 }
