@@ -195,41 +195,42 @@ OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
      command.</para>
      <screen>-&gt; scr list
    Id   State          Name
-scr list 
-   Id   State          Name
-   Id   State          Name
-[  27] [active       ] org.forgerock.openidm.endpoint
-...
-[  18] [unsatisfied  ] org.forgerock.openidm.info
-[  22] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
-[  31] [active       ] org.forgerock.openidm.ui.simple
+[  12] [active       ] org.forgerock.openidm.endpoint
+[  13] [active       ] org.forgerock.openidm.endpoint
+[  14] [active       ] org.forgerock.openidm.endpoint
+[  15] [active       ] org.forgerock.openidm.endpoint
+[  16] [active       ] org.forgerock.openidm.endpoint
+[  17] [active       ] org.forgerock.openidm.endpoint
+[  23] [unsatisfied  ] org.forgerock.openidm.info
+[  27] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  35] [active       ] org.forgerock.openidm.ui.simple
 [  29] [active       ] org.forgerock.openidm.restlet
 [   3] [active       ] org.forgerock.openidm.repo.orientdb
 [   7] [active       ] org.forgerock.openidm.scope
 [   5] [active       ] org.forgerock.openidm.audit
-[  33] [unsatisfied  ] org.forgerock.openidm.schedule
+[  32] [active       ] org.forgerock.openidm.schedule
 [   2] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
-[  32] [active       ] org.forgerock.openidm.workflow
+[  31] [active       ] org.forgerock.openidm.workflow
 [   9] [active       ] org.forgerock.openidm.managed
-[  28] [unsatisfied  ] org.forgerock.openidm.provisioner.openicf
-[  17] [active       ] org.forgerock.openidm.health
-[  21] [active       ] org.forgerock.openidm.provisioner
+[  28] [active       ] org.forgerock.openidm.provisioner.openicf
+[  22] [active       ] org.forgerock.openidm.health
+[  26] [active       ] org.forgerock.openidm.provisioner
 [   0] [active       ] org.forgerock.openidm.config.starter
-[  35] [active       ] org.forgerock.openidm.taskscanner
-[  15] [active       ] org.forgerock.openidm.external.rest
+[  34] [active       ] org.forgerock.openidm.taskscanner
+[  20] [active       ] org.forgerock.openidm.external.rest
 [   6] [active       ] org.forgerock.openidm.router
-[  34] [active       ] org.forgerock.openidm.scheduler
-[  14] [unsatisfied  ] org.forgerock.openidm.external.email
-[  11] [unsatisfied  ] org.forgerock.openidm.sync
-[  20] [active       ] org.forgerock.openidm.policy
+[  33] [active       ] org.forgerock.openidm.scheduler
+[  19] [unsatisfied  ] org.forgerock.openidm.external.email
+[  11] [active       ] org.forgerock.openidm.sync
+[  25] [active       ] org.forgerock.openidm.policy
 [   8] [active       ] org.forgerock.openidm.script
 [  10] [active       ] org.forgerock.openidm.recon
 [   4] [active       ] org.forgerock.openidm.http.contextregistrator
 [   1] [active       ] org.forgerock.openidm.config
-[  13] [active       ] org.forgerock.openidm.endpointservice
+[  18] [active       ] org.forgerock.openidm.endpointservice
 [  30] [unsatisfied  ] org.forgerock.openidm.servletfilter
-[  19] [active       ] org.forgerock.openidm.infoservice
-[  16] [active       ] org.forgerock.openidm.authentication
+[  24] [active       ] org.forgerock.openidm.infoservice
+[  21] [active       ] org.forgerock.openidm.authentication
 -&gt;</screen>
      <para>A default startup does not include certain configurable services, 
      which will indicate an <literal>unsatisfied</literal> state until they 
