@@ -513,4 +513,110 @@ Stopping OpenIDM (454)</screen>
   
  </section>
 
+ <section xml:id="installed-modules">
+     <title>Displaying Information About Installed Modules</title>
+
+     <para>On a running OpenIDM instance, you can list the installed modules
+     and their states by typing the following command in the Felix
+     administration console:</para>
+     <screen>-&gt; scr list
+   Id   State          Name
+[  12] [active       ] org.forgerock.openidm.endpoint
+[  13] [active       ] org.forgerock.openidm.endpoint
+[  14] [active       ] org.forgerock.openidm.endpoint
+[  15] [active       ] org.forgerock.openidm.endpoint
+[  16] [active       ] org.forgerock.openidm.endpoint
+[  17] [active       ] org.forgerock.openidm.endpoint
+[  23] [unsatisfied  ] org.forgerock.openidm.info
+[  27] [active       ] org.forgerock.openidm.provisioner.openicf.connectorinfoprovider
+[  35] [active       ] org.forgerock.openidm.ui.simple
+[  29] [active       ] org.forgerock.openidm.restlet
+[   3] [active       ] org.forgerock.openidm.repo.orientdb
+[   7] [active       ] org.forgerock.openidm.scope
+[   5] [active       ] org.forgerock.openidm.audit
+[  32] [active       ] org.forgerock.openidm.schedule
+[   2] [unsatisfied  ] org.forgerock.openidm.repo.jdbc
+[  31] [active       ] org.forgerock.openidm.workflow
+[   9] [active       ] org.forgerock.openidm.managed
+[  28] [active       ] org.forgerock.openidm.provisioner.openicf
+[  22] [active       ] org.forgerock.openidm.health
+[  26] [active       ] org.forgerock.openidm.provisioner
+[   0] [active       ] org.forgerock.openidm.config.starter
+[  34] [active       ] org.forgerock.openidm.taskscanner
+[  20] [active       ] org.forgerock.openidm.external.rest
+[   6] [active       ] org.forgerock.openidm.router
+[  33] [active       ] org.forgerock.openidm.scheduler
+[  19] [unsatisfied  ] org.forgerock.openidm.external.email
+[  11] [active       ] org.forgerock.openidm.sync
+[  25] [active       ] org.forgerock.openidm.policy
+[   8] [active       ] org.forgerock.openidm.script
+[  10] [active       ] org.forgerock.openidm.recon
+[   4] [active       ] org.forgerock.openidm.http.contextregistrator
+[   1] [active       ] org.forgerock.openidm.config
+[  18] [active       ] org.forgerock.openidm.endpointservice
+[  30] [unsatisfied  ] org.forgerock.openidm.servletfilter
+[  24] [active       ] org.forgerock.openidm.infoservice
+[  21] [active       ] org.forgerock.openidm.authentication
+-&gt;</screen>
+
+     <para>To display additional information about a particular module or
+     service, run the following command, substituting the <literal>Id</literal>
+     of that module from the preceding list.</para>
+
+     <screen>-&gt; scr info <replaceable>Id</replaceable></screen>
+
+     <para>The following example displays additional information about the
+     router service:</para>
+
+     <screen>-&gt; scr info 6
+ID: 6
+Name: org.forgerock.openidm.router
+Bundle: org.forgerock.openidm.core (41)
+State: active
+Default State: enabled
+Activation: immediate
+Configuration Policy: optional
+Activate Method: activate (declared in the descriptor)
+Deactivate Method: deactivate (declared in the descriptor)
+Modified Method: modified
+Services: org.forgerock.json.resource.JsonResource
+Service Type: service
+Reference: ref_JsonResourceRouterService_ScopeFactory
+    Satisfied: satisfied
+    Service Name: org.forgerock.openidm.scope.ScopeFactory
+    Multiple: single
+    Optional: mandatory
+    Policy: dynamic
+Properties:
+    component.id = 6
+    component.name = org.forgerock.openidm.router
+    felix.fileinstall.filename = file:/openidm/samples/sample1/conf/router.json
+    jsonconfig = {
+    "filters" : [
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "bin/defaults/script/router-authz.js"
+            }
+        },
+        {
+            "onRequest" : {
+                "type" : "text/javascript",
+                "file" : "bin/defaults/script/policyFilter.js"
+            },
+            "methods" : [
+                "create",
+                "update"
+            ]
+        }
+    ]
+}
+    openidm.restlet.path = /
+    service.description = OpenIDM internal JSON resource router
+    service.pid = org.forgerock.openidm.router
+    service.vendor = ForgeRock AS
+-&gt;</screen>
+
+ </section>
+
 </chapter>
