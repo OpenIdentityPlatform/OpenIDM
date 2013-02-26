@@ -74,7 +74,8 @@ define("org/forgerock/openidm/ui/admin/workflow/tasks/TaskDetailsView", [
         
         render: function(task, definition, category, callback) { 
             this.data = _.extend(this.data, {category: category});
-            
+            this.data.showRequeue = (definition.taskCandidateGroup.length || definition.taskCandidateUser.length);
+           
             this.parentRender(function() {
                 this.task = task;
 
