@@ -814,7 +814,7 @@
 {
     "onUpdate": {
         "type": "text/javascript",
-        "source": "if ((source.email != null) {target.mail = source.email;}"
+        "source": "if (source.email != null) {target.mail = source.email;}"
     }
 }</programlisting>
 
