@@ -409,7 +409,6 @@
 
 </section>
 
-<!-- Not supported for Xpress
 <section xml:id="ui-customizing">
   <title>Changing the UI Theme</title>
   
@@ -417,15 +416,104 @@
   own branding. Note that at this stage, the default user interface is still 
   evolving. Customizations that you make to the <emphasis>functionality</emphasis> 
   of the UI, are therefore not guaranteed to work in the next OpenIDM release.</para>
-  
-  <para>By default, the UI runs in the embedded Jetty engine, on port 8080. </para>
-  
-  <para>The scripts and stylesheets relating to the UI are provided in the 
-  <literal>openidm/ui</literal> directory, under <literal>openidm-ui-ria-admin-apache</literal> 
-  and <literal>openidm-ui-ria-admin</literal>. Set your webserver DocumentRoot 
-  to one of these locations, and customize the stylesheets and images as 
-  required.</para>
+
+  <para>By default the user interface reads the stylesheets and images from the
+  <filename>openidm/ui/default</filename> directory. Modifications to the
+  default theme should be made in the <filename>openidm/ui/extension</filename>
+  directory. If you modify the files in the default directory, there is no
+  guarantee that your changes will not be overwritten in the next OpenIDM
+  release. The UI searches the <literal>extension</literal> directory first
+  and applies any styles or images located in this directory.
+  </para>
+
+  <section xml:id="ui-style">
+      <title>Changing the Default Stylesheet</title>
+      <para>The default stylesheets are located in the
+          <filename>openidm/ui/default/admin/public/css</filename> directory.
+          To customize the stylesheets, copy them to
+          <filename>openidm/ui/extension/css</filename>, and edit them according
+          to your requirements.</para>
+      <para>The following example changes the background color of the input
+          forms to green.</para>
+      <orderedlist>
+          <listitem>
+              <para>Copy the default stylesheets to <filename>openidm/ui/extension/css</filename>:</para>
+              <screen>$ cd /path/to/openidm/ui/default/admin/public/
+$ cp -r css ../../../extension/</screen>
+          </listitem>
+          <listitem>
+              <para>Edit the <filename>openidm/ui/extension/css/user/config.less</filename>
+              file as follows:</para>
+              <screen>@content-background: #99CC66;</screen>
+          </listitem>
+          <listitem>
+              <para>Refresh your browser window for the change to appear.</para>
+          </listitem>
+      </orderedlist>
+  </section>
+
+    <section xml:id="ui-logo">
+        <title>Changing the Default Logo</title>
+        <para>The default logo is located in the
+            <filename>openidm/ui/default/admin/public/images</filename> directory.
+            To customize the logo:</para>
+
+        <orderedlist>
+            <listitem>
+                <para>Add your own logo image file, named <filename>logo.png</filename>,
+                to the directory <filename>openidm/ui/extension/images</filename>.
+                </para>
+            </listitem>
+            <listitem>
+                <para>Refresh your browser window for the new logo to appear.</para>
+            </listitem>
+        </orderedlist>
+    </section>
+
+    <section xml:id="ui-locale">
+        <title>Changing the Language of the UI</title>
+        <para>Currently, the UI is provided only in US English. You can
+        translate the UI and specify that your own locale is used. The
+        following example shows how to translate the UI into French.</para>
+        <orderedlist>
+            <listitem>
+                <para>Copy the default locale to <filename>openidm/ui/extension/locales</filename>:</para>
+                <screen>$ cd /path/to/openidm/ui/default/admin/public/
+$ cp -r locales ../../../extension/</screen>
+                <para>The <filename>extension/locales</filename> folder now
+                contains one locale, <literal>en-US</literal>.</para>
+            </listitem>
+            <listitem>
+                <para>Create a copy of the <literal>en-US</literal> locale, in
+                a new folder named <literal>fr-FR</literal>.</para>
+                <screen>$ cd /path/to/openidm/ui/extension/locales
+$ cp -r en-US fr-FR </screen>
+            </listitem>
+            <listitem>
+                <para>Translate the values of the properties in the
+                <filename>fr-FR/translate.json</filename> file. Do not translate
+                the property names. For example:</para>
+                <screen>...
+"user" : {
+    "user" : "Utilisateur"
+    "login" : "Login",
+    "profile" : "Profil",
+....</screen>
+            </listitem>
+            <listitem>
+                <para>Change the UI configuration to use the new locale by
+                setting the value of the <literal>language</literal> property
+                in the <filename>openidm/conf/ui-configuration.json</filename>
+                file, as follows:</para>
+                <screen>"language" : "fr-FR",
+                </screen>
+            </listitem>
+            <listitem>
+                <para>Refresh your browser window for the modification to be
+                applied.</para>
+            </listitem>
+        </orderedlist>
+    </section>
 </section>
--->
 
 </chapter>
