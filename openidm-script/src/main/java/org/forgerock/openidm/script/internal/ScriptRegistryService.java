@@ -209,7 +209,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         setConfiguration(configuration.required().asMap());
         propertiesCache.clear();
         Set<String> keys =
-                null != getBindings() ? getBindings().keySet() : Collections.<String> emptySet();
+                null != getBindings() ? new HashSet<String>(getBindings().keySet()) : Collections.<String> emptySet();
         keys.remove(PROP_OPENIDM);
         keys.remove(PROP_IDENTITY_SERVER);
         JsonValue properties = configuration.get("properties");
@@ -220,7 +220,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     continue;
                 }
                 put(entry.getKey(), entry.getValue());
-                properties.remove(entry.getKey());
+                keys.remove(entry.getKey());
             }
         }
         if (!keys.isEmpty()) {
@@ -482,7 +482,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         } catch (final ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
 

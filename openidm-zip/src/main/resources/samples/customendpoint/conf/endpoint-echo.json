@@ -1,4 +1,6 @@
 {
     "name" : "echo.groovy",
-    "type" : "text/javascript"
+    "type" : "groovy",
+    "_name" : "echo.js",
+    "_type" : "text/javascript"
 }

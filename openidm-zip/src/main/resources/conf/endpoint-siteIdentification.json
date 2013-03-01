@@ -1,5 +1,4 @@
 {
-    "context" : "endpoint/siteIdentification",
     "type" : "text/javascript",
-    "file" : "bin/defaults/script/ui/getSiteIdentificationForLogin.js"
+    "name" : "ui/getSiteIdentificationForLogin.js"
 }

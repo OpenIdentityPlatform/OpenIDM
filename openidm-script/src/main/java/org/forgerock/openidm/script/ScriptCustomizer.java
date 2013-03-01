@@ -39,8 +39,6 @@ public interface ScriptCustomizer {
     void handleAction(ServerContext context, ActionRequest request, Bindings handler)
             throws ResourceException;
 
-
-
     void handleDelete(ServerContext context, DeleteRequest request, Bindings handler)
             throws ResourceException;
 
@@ -49,8 +47,5 @@ public interface ScriptCustomizer {
 
     void handleQuery(ServerContext context, QueryRequest request, Bindings handler)
             throws ResourceException;
-
-
-
 
 }

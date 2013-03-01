@@ -21,23 +21,16 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.orientdb.impl;
+package org.forgerock.openidm.repo.orientdb.internal;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Map;
 
-import com.orientechnologies.orient.core.config.OGlobalConfiguration;
-import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
-import com.orientechnologies.orient.core.db.graph.OGraphDatabase;
-import com.orientechnologies.orient.core.db.graph.OGraphDatabasePool;
 import com.orientechnologies.orient.graph.gremlin.OGremlinHelper;
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import org.forgerock.openidm.core.IdentityServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.repo.RepositoryService;
 
 import com.orientechnologies.orient.server.OServer;
 import com.orientechnologies.orient.server.OServerMain;

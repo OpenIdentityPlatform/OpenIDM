@@ -250,7 +250,13 @@ public class AuthFilter implements Filter, HttpServletContextFactory, SingletonR
                 logAuth(req, authData,
                         Action.authenticate, Status.SUCCESS);
                 createSession(req, authData);
-            } else {
+            } else if (null != session) {
+               Object ctx = session.getAttribute(Context.class.getName());
+               if (ctx instanceof SecurityContext) {
+                   authData = (SecurityContext) ctx;
+               }
+            }
+            else {
                 authFailed(req, res, null != authData ? authData.getAuthenticationId() : null);
                 return;
             }

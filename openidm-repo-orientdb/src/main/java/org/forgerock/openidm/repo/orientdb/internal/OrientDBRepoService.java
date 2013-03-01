@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.repo.orientdb.impl;
+package org.forgerock.openidm.repo.orientdb.internal;
 
 import java.io.File;
 import java.util.Collections;
@@ -70,8 +70,8 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.orientdb.impl.query.PrepareNotSupported;
-import org.forgerock.openidm.repo.orientdb.impl.query.TokenHandler;
+import org.forgerock.openidm.repo.orientdb.internal.query.PrepareNotSupported;
+import org.forgerock.openidm.repo.orientdb.internal.query.TokenHandler;
 import org.forgerock.openidm.util.ContextUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -786,6 +786,10 @@ public class OrientDBRepoService implements RequestHandler {
                                 lastRecord.set((OIdentifiable) iRecord);
                             }
                             return accepted;
+                        }
+
+                        public void end() {
+                            /* there is nothing to clean up */
                         }
                     });
                     OCommandManager.instance().registerExecutor(query.getClass(),

@@ -21,7 +21,7 @@
 // * your own identifying information:
 // * "Portions Copyrighted [year] [name of copyright owner]"
 // */
-//package org.forgerock.openidm.repo.orientdb.impl.query;
+//package org.forgerock.openidm.repo.orientdb.internal.query;
 //
 //import com.orientechnologies.orient.core.Orient;
 //import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;

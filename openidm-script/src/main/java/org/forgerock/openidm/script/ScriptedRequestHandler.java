@@ -12,8 +12,10 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
@@ -23,6 +25,11 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.scope.Function;
+import org.forgerock.script.scope.FunctionFactory;
+import org.forgerock.script.scope.Parameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A ScriptedRequestHandler //TODO implement more later
@@ -30,6 +37,11 @@ import org.forgerock.script.ScriptEntry;
  * @author Laszlo Hordos
  */
 public class ScriptedRequestHandler implements RequestHandler {
+
+    /**
+     * Setup logging for the {@link ScriptedRequestHandler}.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(ScriptedRequestHandler.class);
 
     private final ScriptEntry scriptEntry;
 
@@ -64,35 +76,168 @@ public class ScriptedRequestHandler implements RequestHandler {
                         + scriptEntry.getName()));
             }
         } catch (ScriptException e) {
-            handler.handleError(new InternalServerErrorException(e));
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
 
     public void handleCreate(ServerContext context, CreateRequest request,
             ResultHandler<Resource> handler) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
+        try {
+            if (scriptEntry.isActive()) {
+                final Script script = scriptEntry.getScript(context);
+                script.setBindings(script.createBindings());
+                customizer.handleCreate(context, request, script.getBindings());
+                evaluate(request, handler, script);
+            } else {
+                handler.handleError(new ServiceUnavailableException("Inactive script: "
+                        + scriptEntry.getName()));
+            }
+        } catch (ScriptException e) {
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        }
     }
 
     public void handleDelete(ServerContext context, DeleteRequest request,
             ResultHandler<Resource> handler) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
+        try {
+            if (scriptEntry.isActive()) {
+                final Script script = scriptEntry.getScript(context);
+                script.setBindings(script.createBindings());
+                customizer.handleDelete(context, request, script.getBindings());
+                evaluate(request, handler, script);
+            } else {
+                handler.handleError(new ServiceUnavailableException("Inactive script: "
+                        + scriptEntry.getName()));
+            }
+        } catch (ScriptException e) {
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        }
     }
 
     public void handlePatch(ServerContext context, PatchRequest request,
             ResultHandler<Resource> handler) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
+        try {
+            if (scriptEntry.isActive()) {
+                final Script script = scriptEntry.getScript(context);
+                script.setBindings(script.createBindings());
+                customizer.handlePatch(context, request, script.getBindings());
+                evaluate(request, handler, script);
+            } else {
+                handler.handleError(new ServiceUnavailableException("Inactive script: "
+                        + scriptEntry.getName()));
+            }
+        } catch (ScriptException e) {
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        }
     }
 
-    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
+    public void handleQuery(final ServerContext context, final QueryRequest request,
+            final QueryResultHandler handler) {
+        try {
+            if (scriptEntry.isActive()) {
+                final Script script = scriptEntry.getScript(context);
+                script.setBindings(script.createBindings());
+                customizer.handleQuery(context, request, script.getBindings());
+
+                final Function<Void> queryCallback = new Function<Void>() {
+                    @Override
+                    public Void call(Parameter scope, Function<?> callback, Object... arguments)
+                            throws ResourceException, NoSuchMethodException {
+                        if (arguments.length == 3 && null != arguments[2]) {
+                            if (arguments[2] instanceof Map) {
+
+                            }
+                            if (arguments[2] instanceof JsonValue) {
+
+                            } else {
+                                throw new NoSuchMethodException(FunctionFactory
+                                        .getNoSuchMethodMessage("callback", arguments));
+                            }
+                        } else if (arguments.length >= 2 && null != arguments[1]) {
+                            if (arguments[1] instanceof Map) {
+
+                            }
+                            if (arguments[1] instanceof JsonValue) {
+
+                            } else {
+                                throw new NoSuchMethodException(FunctionFactory
+                                        .getNoSuchMethodMessage("callback", arguments));
+                            }
+                        } else if (arguments.length >= 1 && null != arguments[0]) {
+                            if (arguments[0] instanceof Map) {
+
+                            }
+                            if (arguments[0] instanceof JsonValue) {
+
+                            } else {
+                                throw new NoSuchMethodException(FunctionFactory
+                                        .getNoSuchMethodMessage("callback", arguments));
+                            }
+                        } else {
+                            throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
+                                    "callback", arguments));
+                        }
+                        return null;
+                    }
+                };
+                QueryResult queryResult = new QueryResult();
+                script.putSafe("callback", queryCallback);
+                Object result = script.eval();
+                if (null != queryResult) {
+                    handler.handleResult(queryResult);
+                }
+            } else {
+                handler.handleError(new ServiceUnavailableException("Inactive script: "
+                        + scriptEntry.getName()));
+            }
+        } catch (ScriptException e) {
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        }
     }
 
     public void handleRead(ServerContext context, ReadRequest request,
@@ -102,34 +247,65 @@ public class ScriptedRequestHandler implements RequestHandler {
                 final Script script = scriptEntry.getScript(context);
                 script.setBindings(script.createBindings());
                 customizer.handleRead(context, request, script.getBindings());
-                Object result = script.eval();
-                if (null == result) {
-                    handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
-                } else if (result instanceof JsonValue) {
-                    handler.handleResult(new Resource(request.getResourceName(), null, (JsonValue) result));
-                } else if (result instanceof Map) {
-                    handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue((result))));
-                } else {
-                    JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
-                    resource.put("result", result);
-                    handler.handleResult(new Resource(request.getResourceName(), null, resource));
-                }
+                evaluate(request, handler, script);
             } else {
                 handler.handleError(new ServiceUnavailableException("Inactive script: "
                         + scriptEntry.getName()));
             }
         } catch (ScriptException e) {
-            handler.handleError(new InternalServerErrorException(e));
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
         } catch (ResourceException e) {
             handler.handleError(e);
         } catch (Exception e) {
-            handler.handleError(new InternalServerErrorException(e));
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
         }
     }
 
     public void handleUpdate(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
+        try {
+            if (scriptEntry.isActive()) {
+                final Script script = scriptEntry.getScript(context);
+                script.setBindings(script.createBindings());
+                customizer.handleUpdate(context, request, script.getBindings());
+                evaluate(request, handler, script);
+            } else {
+                handler.handleError(new ServiceUnavailableException("Inactive script: "
+                        + scriptEntry.getName()));
+            }
+        } catch (ScriptException e) {
+            JsonValue details = new JsonValue(new HashMap<String, Object>());
+            details.put("fileName", e.getFileName());
+            details.put("lineNumber", e.getLineNumber());
+            details.put("columnNumber", e.getColumnNumber());
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e)
+                    .setDetail(details));
+        } catch (ResourceException e) {
+            handler.handleError(e);
+        } catch (Exception e) {
+            handler.handleError(new InternalServerErrorException(e.getMessage(), e));
+        }
+    }
+
+    private void evaluate(final Request request, final ResultHandler<Resource> handler,
+            final Script script) throws ScriptException {
+        Object result = script.eval();
+        if (null == result) {
+            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(null)));
+        } else if (result instanceof JsonValue) {
+            handler.handleResult(new Resource(request.getResourceName(), null, (JsonValue) result));
+        } else if (result instanceof Map) {
+            handler.handleResult(new Resource(request.getResourceName(), null, new JsonValue(
+                    (result))));
+        } else {
+            JsonValue resource = new JsonValue(new HashMap<String, Object>(1));
+            resource.put("result", result);
+            handler.handleResult(new Resource(request.getResourceName(), null, resource));
+        }
     }
 }

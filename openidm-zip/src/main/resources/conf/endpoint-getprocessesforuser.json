@@ -1,5 +1,4 @@
 {
-    "context" : "endpoint/getprocessesforuser",
     "type" : "text/javascript",
-    "file" : "bin/defaults/script/workflow/getprocessesforuser.js"
+    "name" : "workflow/getprocessesforuser.js"
 }
