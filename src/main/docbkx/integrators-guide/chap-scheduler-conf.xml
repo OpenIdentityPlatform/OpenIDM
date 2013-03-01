@@ -58,7 +58,7 @@
  
  <para>You can configure OpenIDM to pick up changes to scheduled tasks and 
  events dynamically, during initialization and also at runtime. For more 
- information, see <link xlink:href="integrators-guide#when-configuring-notes" 
+ information, see <link xlink:href="integrators-guide#changing-configuration"
  xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Changing the 
  Configuration</citetitle></link>.</para>
  
@@ -83,27 +83,36 @@
   </listitem>
   <listitem>
     <para>One <filename>openidm/conf/schedule-<replaceable>schedule-name</replaceable>.json</filename> 
-    file for each configured schedule.</para>
+    file for each configured schedule</para>
   </listitem>
  </itemizedlist>
  
   <para>The scheduler service configuration file 
-  (<filename>openidm/conf/scheduler.json</filename>) has the following format:</para>
+  (<filename>openidm/conf/scheduler.json</filename>) governs the configuration
+  for a specific scheduler instance, and has the following format:
+  </para>
   
   <programlisting language='javascript'>
-  {
-    "threadPool" : {
-        "threadCount" : "10"
-    },
-    "scheduler" : {
-        "instanceId" : "scheduler-example",
-        "executePersistentSchedules" : "true"        
-    },
-    "advancedProperties" : {
-        "org.quartz.scheduler.instanceName" : "OpenIDMScheduler"
-    }
-  }
+{
+ "threadPool" : {
+     "threadCount" : "10"
+ },
+ "scheduler" : {
+     "instanceId" : "scheduler-example",
+     "executePersistentSchedules" : "true",
+     "instanceTimeout" : "60000",
+     "instanceRecoveryTimeout" : "60000",
+     "instanceCheckInInterval" : "10000",
+     "instanceCheckInOffset" : "0"
+ },
+ "advancedProperties" : {
+     "org.quartz.scheduler.instanceName" : "OpenIDMScheduler"
+ }
+}
   </programlisting>
+  <para>Some of the optional properties are not in the default configuration
+  file and are used specifically in the context of clustered OpenIDM instances.
+  </para>
   
   <itemizedlist>
    <para>The properties in the <filename>scheduler.json</filename> file relate 
@@ -117,6 +126,33 @@
      <para><literal>instanceID</literal> can be any string, but must be unique 
      for all schedulers working as if they are the same 'logical' Scheduler 
      within a cluster.</para>
+   </listitem>
+   <listitem>
+     <para><literal>instanceTimeout</literal> specifies the number of
+     milliseconds that must elapse with no check-ins from a scheduler instance
+     before it is considered to have timed out or failed. Default: 60000 (60
+     seconds). When this timeout is reached, the instance is considered to be
+     in a "recovery" state.</para>
+   </listitem>
+   <listitem>
+     <para><literal>instanceRecoveryTimeout</literal> specifies the number of
+     milliseconds that must elapse while an instance is in the "recovery" state
+     (meaning that it has failed and another instance is now attempting to
+     recover its acquired triggers) before the scheduler instance recovery is
+     considered to have failed. Default: 60000 (60 seconds).</para>
+   </listitem>
+   <listitem>
+     <para><literal>instanceCheckInInterval</literal> Specifies the period
+     (in milliseconds) after which an instance checks in to indicate that it
+     has not timed out or failed. Default: 10000 (10 seconds).</para>
+   </listitem>
+   <listitem>
+     <para><literal>instanceCheckInOffset</literal> An offset (in milliseconds)
+     that can be used to shift the checkin events of instances to prevent all
+     instances from accessing the repository simultaneously (if the instances
+     are started simultaneously and have the same check-in intervals). This
+     offset can help to minimize MVCC warnings from multiple instances
+     simultaneously trying to recover the same failed instance. Default: 0.</para>
    </listitem>
    <listitem>
      <para><literal>executePersistentSchedules</literal> allows you to disable 
@@ -143,17 +179,18 @@
 
   <programlisting language="javascript">
 {
- "enabled"       : true,
- "persisted"     : false,
- "type"          : "cron",
- "startTime"     : "<replaceable>(optional) time</replaceable>",
- "endTime"       : "<replaceable>(optional) time</replaceable>",
- "schedule"      : "<replaceable>cron expression</replaceable>",
- "misfirePolicy" : "<replaceable>optional, string</replaceable>",
- "timeZone"      : "<replaceable>(optional) time zone</replaceable>",
- "invokeService" : "<replaceable>service identifier</replaceable>",
- "invokeContext" : "<replaceable>service specific context info</replaceable>",
- "invokeLogLevel": "<replaceable>(optional) debug</replaceable>"
+ "enabled"             : true,
+ "persisted"           : false,
+ "concurrentExecution" : false,
+ "type"                : "cron",
+ "startTime"           : "<replaceable>(optional) time</replaceable>",
+ "endTime"             : "<replaceable>(optional) time</replaceable>",
+ "schedule"            : "<replaceable>cron expression</replaceable>",
+ "misfirePolicy"       : "<replaceable>optional, string</replaceable>",
+ "timeZone"            : "<replaceable>(optional) time zone</replaceable>",
+ "invokeService"       : "<replaceable>service identifier</replaceable>",
+ "invokeContext"       : "<replaceable>service specific context info</replaceable>",
+ "invokeLogLevel"      : "<replaceable>(optional) debug</replaceable>"
 }</programlisting>
 
  <variablelist>
@@ -179,6 +216,21 @@
     <literal>false</literal> by default. For more information, see 
     <xref linkend="persistent-schedules"/>.</para>
    </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term>concurrentExecution</term>
+    <listitem>
+      <para>Specifies whether multiple instances of the same schedule can run
+      concurrently. Boolean (<literal>true</literal> or <literal>false</literal>),
+      <literal>false</literal> by default. Multiple instances of the same
+      schedule cannot run concurrently by default. This setting prevents a new
+      scheduled task from being launched before the same previously launched
+      task has completed. For example, under normal circumstances you would
+      want a liveSync operation to complete its execution before the same
+      operation was launched again. To enable concurrent execution of multiple
+      schedules, set this parameter to <literal>true</literal>. The behavior of
+      "missed" scheduled tasks is governed by the <xref linkend="misfire-policy" />.</para>
+    </listitem>
   </varlistentry>
   <varlistentry>
    <term>type</term>
@@ -216,10 +268,11 @@
    </listitem>
   </varlistentry>
   <varlistentry>
-   <term>misfirePolicy (optional)</term>
+   <term xml:id="misfire-policy">misfirePolicy</term>
    <listitem>
-    <para>For persistent schedules, specifies the behavior if the scheduled 
-    task is missed, for some reason. Possible values are as follows:
+    <para>For persistent schedules, this optional parameter specifies the
+    behavior if the scheduled task is missed, for some reason. Possible values
+    are as follows:
     </para>
     <itemizedlist>
      <listitem><para><literal>fireAndProceed</literal>. The first execution 
@@ -436,18 +489,6 @@
     }
 }</programlisting>
 
- </section>
- 
- <section xml:id="check-quartz-updates">
-  <title>Checking For Quartz Updates</title>
-
-  <para>The Quartz Scheduler can check for updates over the Internet on the
-  Quartz project website, and report available updates in the OpenIDM log.
-  The option is set in <filename>openidm/conf/system.properties</filename>
-  By default, this option is turned off, and should remain off in
-  production.</para>
-
-  <literallayout class="monospaced">system.properties:org.quartz.scheduler.skipUpdateCheck = true</literallayout>
  </section>
  
  <section xml:id="scheduler-service-implementations">

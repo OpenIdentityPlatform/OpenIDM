@@ -341,14 +341,15 @@ $ cp samples/misc/workflow.json conf/
       <para>Ensure that the url, username, and password fields contain the values 
       that correspond to your remote Activiti engine.</para>
       <programlisting language="javascript">
-      {
-       "enabled"   : "true",
-       "location"  : "remote",
-       "engine"    : {
-        "url"      : "http://localhost:9090/openidm-workflow-remote-2.1.0-SNAPSHOT",
-        "username" : "kermit",
-        "password" : "kermit"
-       },
+{
+   "enabled" : true,
+   "location" : "remote",
+   "engine" : {
+       "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0/",
+       "username" : "youractivitiuser",
+       "password" : "youractivitipassword"
+   }
+}
       </programlisting>
      </listitem>
     </orderedlist>   
@@ -800,12 +801,12 @@ filtered-query&amp;category=Examples"
      <varlistentry>
        <term><literal>openidm/workflow/processinstance</literal></term>
        <listitem>
-             <para>Obtain the list of running workflows (process instances). 
+             <para>Obtain the list of running workflows (process instances).
              The query returns a list of IDs. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
+ --request GET
  "http://localhost:8080/openidm/workflow/processinstance?_queryId=query-all-ids"
 
 {
@@ -815,31 +816,29 @@ filtered-query&amp;category=Examples"
       "_id": "4"
     }
   ]
-}       
+}
              </screen>
-       </listitem>
-       <listitem>
-             <para>Obtain the list of running workflows based on specific 
+
+             <para>Obtain the list of running workflows based on specific
              filter criteria. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
+ --request GET
  "http://localhost:8080/openidm/workflow/processinstance?_queryId=
-filtered-query&amp;businessKey=myBusinessKey"   
+filtered-query&amp;businessKey=myBusinessKey"
              </screen>
-       </listitem>
-       <listitem>
+
              <para>Start a workflow process instance. For example:</para>
              <screen>$ curl
- --header "X-OpenIDM-Username: openidm-admin" 
+ --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --data {"_key":"contractorOnboarding"}
- --request POST 
+ --request POST
  "http://localhost:8080/openidm/workflow/processinstance?_action=createProcessInstance"
              </screen>
-       </listitem>                
-     </varlistentry>       
+       </listitem>
+     </varlistentry>
      <varlistentry>
        <term><literal>openidm/workflow/processinstance/{id}</literal></term>
        <listitem>
@@ -847,7 +846,7 @@ filtered-query&amp;businessKey=myBusinessKey"
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request GET       
+ --request GET
  "http://localhost:8080/openidm/workflow/processinstance/4"
 
 {
@@ -861,18 +860,17 @@ filtered-query&amp;businessKey=myBusinessKey"
   "durationInMillis": null,
   "endTime": null,
   "superProcessInstanceId": null
-}      
+}
              </screen>
-       </listitem>
-       <listitem>
+
              <para>Stop the specified process instance. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
- --request DELETE       
- "http://localhost:8080/openidm/workflow/processinstance/4"    
+ --request DELETE
+ "http://localhost:8080/openidm/workflow/processinstance/4"
              </screen>
-       </listitem>       
+       </listitem>
      </varlistentry>
      <varlistentry>
        <term><literal>openidm/workflow/taskdefinition</literal></term>
@@ -921,9 +919,8 @@ filtered-query&amp;businessKey=myBusinessKey"
   ]
 }
              </screen>
-       </listitem>
-       <listitem>
-             <para>Query task instances based on candidate users or candidate 
+
+             <para>Query task instances based on candidate users or candidate
              groups. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -961,9 +958,8 @@ filtered-query&amp;businessKey=myBusinessKey"
   "name": "Contractor Approval",
 ...
              </screen>
-       </listitem>
-       <listitem>
-             <para>Update task-related data stored in the Activiti workflow 
+
+             <para>Update task-related data stored in the Activiti workflow
              engine. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -973,9 +969,8 @@ filtered-query&amp;businessKey=myBusinessKey"
  --data '{"description":"updated description"}'
  "http://localhost:8080/openidm/workflow/taskinstance/70"
              </screen>
-       </listitem>
-       <listitem>
-             <para>Complete the specified task. The variables required by the 
+
+             <para>Complete the specified task. The variables required by the
              task are provided in the request body. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -984,9 +979,8 @@ filtered-query&amp;businessKey=myBusinessKey"
  --data '{"requestApproved":"true"}'
  "http://localhost:8080/openidm/workflow/taskinstance/70?_action=complete"
              </screen>
-       </listitem>
-       <listitem>
-             <para>Claim the specified task. The ID of the user who claims the 
+
+             <para>Claim the specified task. The ID of the user who claims the
              task is provided in the request body. For example:</para>
              <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"

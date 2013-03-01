@@ -16,6 +16,9 @@
 // Author: Gael.Allioux@forgerock.com
 // Date: 11/30/2011
 
+/*global global,source,target */
+/*jslint vars:true*/ 
+
 var globalSummary = "<h2>Global Statistics</h2><p>\n"+
 "<b>Mapping Name:</b>" + global.reconName+"<br>\n"+
 "<b>Recon Id:</b>" + global.reconId +"<br>\n"+
@@ -58,7 +61,9 @@ var targetSummary = "<h2>Target System Statistics</h2><p>\n"+
 " <b>Invalid entries:</b>" + target.NOTVALID.count+
 " <br><br>\n";
 
-var sourceIds = "<hr><h2>Detailed Source Statistics</h2><p>\n";
+var sourceIds = "<hr><h2>Detailed Source Statistics</h2><p>\n",
+    targetIds = "<hr><h2>Detailed Target Statistics</h2><p>\n",
+    params = {},i;
 
 if (source.CONFIRMED.ids.length > 0){
     sourceIds+= "<b><u>Confirmed ids:</b></u><br>\n";
@@ -100,8 +105,6 @@ if (source.UNASSIGNED.ids.length > 0){
     }
 }
 
-var targetIds = "<hr><h2>Detailed Target Statistics</h2><p>\n";
-
 if (target.CONFIRMED.ids.length > 0){
     targetIds+= "<b><u>Confirmed ids:</b></u><br>\n";
     for(i=0;i<target.CONFIRMED.ids.length;i++) {
@@ -115,7 +118,6 @@ if (target.UNQUALIFIED.ids.length > 0){
     }
 }
 
-var params =  new Object();
 params._from = "openidm@example.com";
 params._to = "idmadmin1@example.com";
 params._cc = "idmadmin2@example.com,idmadmin3@example.com";
@@ -123,4 +125,4 @@ params._subject = "Recon stats for "+global.reconName;
 params._type = "text/html";
 params._body = globalSummary+sourceSummary+targetSummary+sourceIds+targetIds;
 
-openidm.action("external/email", params) 
+openidm.action("external/email", params);

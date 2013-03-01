@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2013 ForgeRock AS
   !
 -->
  <section xml:id="accessing-doc-online"
@@ -38,7 +38,7 @@
  >three-phase review process</link> designed to eliminate errors. The
  review process should slow authors down enough that documentation you get
  with a stable release has had time to bake fully.</para>
- 
+
  <para>Fully baked core documentation is available at <link
  xlink:href='http://docs.forgerock.org'>docs.forgerock.org</link>.</para>
 

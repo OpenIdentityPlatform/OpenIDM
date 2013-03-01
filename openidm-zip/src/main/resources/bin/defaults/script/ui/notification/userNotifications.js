@@ -28,38 +28,42 @@
  * Endpoint for managing user notifications
  * 
  */
+(function () {
+    var userId, res, ret, params, notification;
 
-if (request.method == "read") {
-
-    var userId = request.parent.security.userid.id, res = {};
-
-    var params = {
-        "_queryId": "get-notifications-for-user",
-        "userId": userId
-    };
-      
-    var ret = openidm.query("repo/ui/notification", params);
-    
-    if(ret && ret.result) {
-        res = ret.result
-    }
-    
-    res
-} else if (request.method == "delete"){
-    var notification = openidm.read("repo/ui/notification/"+request.parent.query.notificationId);
-    
-    if(notification.receiverId === request.parent.security.userid.id) {
-        openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
+    if (request.method === "read") {
+        userId = request.parent.security.userid.id; 
+        res = {};
+        params = {
+            "_queryId": "get-notifications-for-user",
+            "userId": userId
+        };
+        ret = openidm.query("repo/ui/notification", params);
+        
+        if(ret && ret.result) {
+            res = ret.result;
+        }
+        
+        return res;
+        
+    } else if (request.method === "delete"){
+        
+        notification = openidm.read("repo/ui/notification/"+request.parent.query.notificationId);
+        
+        if(notification.receiverId === request.parent.security.userid.id) {
+            openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
+        } else {
+            throw { 
+                "openidmCode" : 403, 
+                "message" : "Access denied"
+            };
+        }
+        
     } else {
         throw { 
             "openidmCode" : 403, 
             "message" : "Access denied"
-        } 
-    }    
-} else {
-    throw { 
-        "openidmCode" : 403, 
-        "message" : "Access denied"
-    } 
-}
+        };
+    }
 
+}());

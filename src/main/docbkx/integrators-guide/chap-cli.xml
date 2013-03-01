@@ -396,8 +396,8 @@ INFO: CryptoService is initialized with 3 keys.
 
   <para>Usage is as follows:</para>
   
-  <command>./cli.sh keytool [--export, --import] <replaceable>alias</replaceable>
-  </command>
+  <screen>./cli.sh keytool [--export, --import] <replaceable>alias</replaceable>
+  </screen>
   
   <para>For example, to export the default OpenIDM symmetric key, run the 
   following command:</para>

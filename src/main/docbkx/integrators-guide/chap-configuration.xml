@@ -55,9 +55,9 @@
    <secondary>Objects</secondary>
   </indexterm>
 
-  <para>OpenIDM exposes internal configuration objects in JSON. Configuration
-  elements can be either single instance or multiple instance for
-  an OpenIDM installation.</para>
+  <para>OpenIDM exposes internal configuration objects in JSON format.
+      Configuration elements can be either single instance or multiple
+      instance for an OpenIDM installation.</para>
 
   <itemizedlist xml:id="single-instance-configuration-objects">
    <title>Single Instance Configuration Objects</title>
@@ -74,8 +74,20 @@
     REST access.</para>
    </listitem>
    <listitem>
-    <para>The <literal>managed</literal> configuration defines managed
-    objects and their schemas.</para>
+    <para>The <literal>endpoint</literal> configuration controls any custom
+    REST endpoints.</para>
+   </listitem>
+   <listitem>
+      <para>The <literal>managed</literal> configuration defines managed
+          objects and their schemas.</para>
+   </listitem>
+   <listitem>
+      <para>The <literal>policy</literal> configuration defines the policy
+      validation service.</para>
+   </listitem>
+   <listitem>
+      <para>The <literal>process access</literal> configuration defines access
+      to any configured workflows.</para>
    </listitem>
    <listitem>
     <para>The <literal>repo.<replaceable>repo-type</replaceable></literal>
@@ -87,18 +99,25 @@
     apply for specific operations.</para>
    </listitem>
    <listitem>
-    <para>The <literal>sync</literal> configuration defines all the mappings
+    <para>The <literal>sync</literal> configuration defines the mappings that
     OpenIDM uses when synchronizing and reconciling managed objects.</para>
+   </listitem>
+   <listitem>
+       <para>The <literal>ui</literal> configuration defines the configurable
+       aspects of the default user interface.</para>
+   </listitem>
+   <listitem>
+       <para>The <literal>workflow</literal> configuration defines the
+       configuration of the workflow engine.</para>
    </listitem>
   </itemizedlist>
 
   <itemizedlist xml:id="multiple-instance-configuration-objects">
    <title>Multiple Instance Configuration Objects</title>
    <para>Multiple instance configuration objects correspond to services that
-   can have many instances per installation.</para>
-   <para><emphasis>Configuration objects</emphasis> are named
-   <literal><replaceable>objectname</replaceable>/<replaceable
-   >instancename</replaceable></literal>. For example, <filename>provisioner.openicf/xml</filename>.</para>
+   can have many instances per installation. Configuration objects are named
+   <literal><replaceable>objectname</replaceable>/<replaceable>instancename
+   </replaceable></literal>. For example, <filename>provisioner.openicf/xml</filename>.</para>
    <para><emphasis>JSON file</emphasis> views of these configuration objects 
    are named <filename><replaceable>objectname</replaceable>-<replaceable
    >instancename</replaceable>.json</filename>. For example, 
@@ -114,62 +133,107 @@
   </itemizedlist>
  </section>
 
- <section xml:id="when-configuring-notes">
-  <title>Changing the Configuration</title>
+ <section xml:id="changing-configuration">
+     <title>Changing the Default Configuration</title>
 
-  <itemizedlist>
-   <para>When you change OpenIDM's configuration objects, take the following
-   points into account.</para>
-   <listitem>
-    <para>OpenIDM's authoritative configuration source is the internal
-    repository. JSON files provide a view of the configuration objects, but
-    do not represent the authoritative source.</para>
-    <para>OpenIDM updates JSON files after making configuration changes,
-    whether those changes are made through REST access to configuration
-    objects, or through edits to the JSON files.</para>
-   </listitem>
-   <listitem>
-    <para>OpenIDM recognizes changes to JSON files when it is running. OpenIDM
-    must be running when you delete configuration objects, even if you do so by 
-    editing the JSON files.</para>
-   </listitem>
-   <listitem>
-    <para>OpenIDM polls the JSON files in the <literal>conf</literal> directory
-    periodically for any changes to the configuration. To disable this 
-    automatic polling for changes, edit the <filename>conf/system.properties</filename> 
-    file by uncommenting the following line:</para>
-    <programlisting>
-    # openidm.fileinstall.enabled=false
-    </programlisting>
-    <para>Before you disable automatic polling, you must have started up the 
-    OpenIDM instance at least once to ensure that the configuration has been 
-    loaded into the database.</para>
-    <para>Scripts are loaded when the configuration calls the script. 
-    Modifications to scripts are therefore not applied dynamically. If you 
-    modify a script, you must either modify the configuration that calls the 
-    script, or restart the component that uses the modified script. It is not 
-    necessary to restart OpenIDM for script modifications to take effect.</para>
-   </listitem>
-   <listitem>
-    <para>OpenIDM stores its configuration in the internal database by default. 
-    This means that even if you remove an OpenIDM instance, the configuration 
-    remains in the repository. You can disable this <emphasis>persistent 
-    configuration</emphasis> in the <filename>conf/system.properties</filename> 
-    file by uncommenting the following line:</para>
-    <programlisting>
-      # openidm.config.repo.enabled=false
-    </programlisting>
-    <para>Disabling persistent configuration means that OpenIDM will store its 
-    configuration in memory only. You should not disable persistent 
-    configuration in a production environment.</para>
-   </listitem>
-   <listitem>
-    <para>Avoid directly editing configuration objects in the internal
-    repository. Use either REST access or JSON files to ensure consistent
-    behavior and that operations are logged.</para>
-   </listitem>
-  </itemizedlist>
+     <itemizedlist>
+       <para>When you change OpenIDM's configuration objects, take the following
+         points into account.</para>
+       <listitem>
+         <para>OpenIDM's authoritative configuration source is the internal
+             repository. JSON files provide a view of the configuration objects,
+             but do not represent the authoritative source.</para>
+         <para>OpenIDM updates JSON files after making configuration changes,
+             whether those changes are made through REST access to configuration
+             objects, or through edits to the JSON files.</para>
+       </listitem>
+       <listitem>
+         <para>OpenIDM recognizes changes to JSON files when it is running. OpenIDM
+             <emphasis>must</emphasis> be running when you delete configuration
+             objects, even if you do so by editing the JSON files.</para>
+       </listitem>
+       <listitem>
+           <para>Avoid editing configuration objects directly in the internal
+               repository. Rather edit the configuration over the REST API, or
+               in the configuration JSON files to ensure consistent behavior
+               and that operations are logged.</para>
+       </listitem>
+       <listitem>
+           <para>OpenIDM stores its configuration in the internal database by
+               default. If you remove an OpenIDM instance and do not specifically
+               drop the repository, the configuration remains in effect for a
+               new OpenIDM instance that uses that repository. For testing or
+               evaluation purposes, you can disable this <emphasis>persistent
+               configuration</emphasis> in the <filename>conf/system.properties</filename>
+               file by uncommenting the following line:</para>
+             <programlisting>
+# openidm.config.repo.enabled=false
+             </programlisting>
+             <para>Disabling persistent configuration means that OpenIDM will
+                 store its configuration in memory only. You should not disable
+                 persistent configuration in a production environment.</para>
+         </listitem>
+     </itemizedlist>
  </section>
+
+    <section xml:id="configuring-for-production">
+        <title>Configuring an OpenIDM System for Production</title>
+
+        <para>Out of the box, OpenIDM is configured to make it easy to install and
+            evaluate. Specific configuration changes are required before you deploy
+            OpenIDM in a production environment.</para>
+
+        <section xml:id="configuring-production-repo">
+            <title>Configuring a Production Repository</title>
+
+            <para>By default, OpenIDM uses OrientDB for its internal repository
+                so that you do not have to install a database in order to evaluate
+                OpenIDM. Before you use OpenIDM in production, you must replace
+                OrientDB with a supported repository.</para>
+            <para>For more information, see <link
+                    xlink:href="install-guide#chap-repository"
+                    xlink:role="http://docbook.org/xlink/role/olink"><citetitle
+                    >Installing a Repository for Production</citetitle></link> in
+                the <citetitle>Installation Guide</citetitle>.</para>
+        </section>
+
+        <section xml:id="disabling-auto-config-updates">
+            <title>Disabling Automatic Configuration Updates</title>
+
+            <para>By default, OpenIDM polls the JSON files in the
+                <literal>conf</literal> directory periodically for any changes to
+                the configuration. In a production system, it is recommended that
+                you disable automatic polling for updates to prevent untested
+                configuration changes from disrupting your identity service.</para>
+            <para>To disable automatic polling for configuration changes, edit the
+                <filename>conf/system.properties</filename> file by uncommenting the
+                following line:</para>
+            <programlisting>
+                # openidm.fileinstall.enabled=false
+            </programlisting>
+            <para>Before you disable automatic polling, you must have started the
+                OpenIDM instance at least once to ensure that the configuration has
+                been loaded into the database.
+            </para>
+            <para>Note that scripts are loaded each time the configuration calls the
+                script. Modifications to scripts are therefore not applied
+                dynamically. If you modify a script, you must either modify the
+                configuration that calls the script, or restart the component that
+                uses the modified script. You do not need to restart OpenIDM for
+                script modifications to take effect.
+            </para>
+        </section>
+
+        <section xml:id="disabling-file-based-config">
+            <title>Disabling the File-Based Configuration View</title>
+            <para>To control configuration changes to the OpenIDM system, you
+            disable the file-based configuration view and have OpenIDM read its
+            configuration only from the repository. To disable the file-based
+            configuration view, edit the <filename>conf/system.properties</filename>
+            file to uncomment the following line:
+            <literal># openidm.fileinstall.enabled=false</literal>. </para>
+        </section>
+    </section>
 
  <section xml:id="configuring-over-rest">
   <title>Configuring OpenIDM Over REST</title>
@@ -189,7 +253,9 @@
   <secondary>Listing configuration objects</secondary>
   </indexterm>
   <para>You can list the configuration on the local host by performing a GET
-  <literal>http://localhost:8080/openidm/config</literal>.</para>
+  <literal>http://localhost:8080/openidm/config</literal>. The following
+  example shows the default configuration for an OpenIDM instance started
+  with Sample 1.</para>
   <screen>$ curl --request GET 
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
@@ -198,29 +264,83 @@
 {
     "configurations": [
         {
+            "_id": "endpoint/getprocessesforuser",
+            "pid": "endpoint.788f364e-d870-4f46-982a-793525fff6f0",
+            "factoryPid": "endpoint"
+        },
+        {
+            "_id": "provisioner.openicf/xml",
+            "pid": "provisioner.openicf.90b18af9-fe27-45a2-a4ae-1056c04a4d31",
+            "factoryPid": "provisioner.openicf"
+        },
+        {
+            "_id": "ui/configuration",
+            "pid": "ui.36bb2bf4-8e19-43d2-9df2-a0553ffac590",
+            "factoryPid": "ui"
+        },
+        {
             "_id": "managed",
             "pid": "managed",
             "factoryPid": null
         },
         {
-            "_id": "repo.orientdb",
-            "pid": "repo.orientdb",
+            "_id": "sync",
+            "pid": "sync",
             "factoryPid": null
         },
         {
-            "_id": "scheduler/reconcile_systemXmlAccounts_managedUser",
-            "pid": "scheduler.adc5cd2f-7086-4e30-9d80-b36077861868",
-            "factoryPid": "scheduler"
+            "_id": "router",
+            "pid": "router",
+            "factoryPid": null
+        },
+        {
+            "_id": "process/access",
+            "pid": "process.44743c97-a01b-4562-85ad-8a2c9b89155a",
+            "factoryPid": "process"
+        },
+        {
+            "_id": "endpoint/siteIdentification",
+            "pid": "endpoint.ef05a7f3-a420-4fbb-998c-02d283cae4d1",
+            "factoryPid": "endpoint"
+        },
+        {
+            "_id": "endpoint/securityQA",
+            "pid": "endpoint.e2d87637-c918-4056-99a1-20f25c897066",
+            "factoryPid": "endpoint"
+        },
+        {
+            "_id": "scheduler",
+            "pid": "scheduler",
+            "factoryPid": null
+        },
+        {
+            "_id": "ui/countries",
+            "pid": "ui.acde0f4c-808f-45fb-9627-d7d2ca702e7c",
+            "factoryPid": "ui"
         },
         {
             "_id": "org.apache.felix.fileinstall/openidm",
-            "pid":
-            "org.apache.felix.fileinstall.abb696a2-95c6-4432-ae74-ba60a319d1bb",
+            "pid": "org.apache.felix.fileinstall.2dedea63-4592-4074-a709-ffa70f1e841d",
             "factoryPid": "org.apache.felix.fileinstall"
         },
         {
-            "_id": "sync",
-            "pid": "sync",
+            "_id": "schedule/reconcile_systemXmlAccounts_managedUser",
+            "pid": "schedule.f53b235a-862e-4e18-a3cf-10ae3cbabc1e",
+            "factoryPid": "schedule"
+        },
+        {
+            "_id": "workflow",
+            "pid": "workflow",
+            "factoryPid": null
+        },
+        {
+            "_id": "endpoint/getavailableuserstoassign",
+            "pid": "endpoint.d19da94f-bae3-4101-922c-fe47ea8616d2",
+            "factoryPid": "endpoint"
+        },
+        {
+            "_id": "repo.orientdb",
+            "pid": "repo.orientdb",
             "factoryPid": null
         },
         {
@@ -229,14 +349,34 @@
             "factoryPid": null
         },
         {
-            "_id": "provisioner.openicf/xml",
-            "pid": "provisioner.openicf.10e2dd6d-442d-466c-a077-643bb53e2006",
-            "factoryPid": "provisioner.openicf"
+            "_id": "endpoint/gettasksview",
+            "pid": "endpoint.edcc1ff8-a7ba-4c46-8258-bf5216e85192",
+            "factoryPid": "endpoint"
         },
         {
-            "_id": "router",
-            "pid": "router",
+            "_id": "ui/secquestions",
+            "pid": "ui.649e2c65-0cc7-4a0d-a6b1-95f4c5168bdc",
+            "factoryPid": "ui"
+        },
+        {
+            "_id": "org.apache.felix.fileinstall/activiti",
+            "pid": "org.apache.felix.fileinstall.a0ba2f7d-bdb9-43b5-b84e-0e8feee6be72",
+            "factoryPid": "org.apache.felix.fileinstall"
+        },
+        {
+            "_id": "policy",
+            "pid": "policy",
             "factoryPid": null
+        },
+        {
+            "_id": "endpoint/usernotifications",
+            "pid": "endpoint.e96d5319-6260-41db-af76-bd4e692b792d",
+            "factoryPid": "endpoint"
+        },
+        {
+            "_id": "org.apache.felix.fileinstall/ui",
+            "pid": "org.apache.felix.fileinstall.89f8c6dd-f54e-46a4-bfda-1e76ac044c33",
+            "factoryPid": "org.apache.felix.fileinstall"
         },
         {
             "_id": "authentication",
@@ -285,9 +425,8 @@
 
   <para>Multiple instance configuration objects are found under
   <literal>openidm/config/<replaceable>object-name</replaceable>/<replaceable
-  >instance-name</replaceable></literal>.
-  The following example shows the configuration for the XML connector
-  provisioner.</para>
+  >instance-name</replaceable></literal>. The following example shows the
+  configuration for the XML connector provisioner.</para>
 
   <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
@@ -348,11 +487,7 @@
                     "nativeType": "string"
                 },
                 "email": {
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "nativeType": "string"
-                    },
+                    "type": "string",
                     "nativeName": "email",
                     "nativeType": "string"
                 },

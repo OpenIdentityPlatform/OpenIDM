@@ -8,25 +8,31 @@ http://creativecommons.org/licenses/by-nc-nd/3.0/
 The documentation at http://openidm.forgerock.org/doc/install-guide/index.html#chap-sample
 describes how to get started with this sample.
 
-The sample shows you reconciliation between the OpenIDM internal
+The sample demonstrates reconciliation between the OpenIDM internal
 repository and an external XML file, with data flowing from the XML
 file into the internal repository.
 
-The sample includes these configuration files also installed in the conf/
-directory when you unpack OpenIDM.
+The configuration files used in this sample are as follows:
 
-*   conf/provisioner.openicf-xml.json shows the XML connector configuration.
-*   conf/schedule-reconcile_systemXmlAccounts_managedUser.json includes a
+*   samples/sample1/conf/provisioner.openicf-xml.json shows the XML connector configuration.
+*   samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json includes a
     schedule configuration you can use to run reconciliation periodically.
-*   conf/sync.json describes how identities in the XML file source map to
+*   samples/sample1/conf/sync.json describes how identities in the XML file source map to
     identities in the internal repository target.
 
-Data for this sample is stored in data/xmlConnectorData.xml. The initial
+Data for this sample is stored in samples/sample1/data/xmlConnectorData.xml. The initial
 XML file contains two identities.
+
+To run the sample, start OpenIDM with the configuration for sample 1:
+
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/sample1
+
+Initiate a reconciliation operation over the REST interface, as follows:
 
 $ curl --header "X-OpenIDM-Username: openidm-admin" --header "X-OpenIDM-Password: openidm-admin" --request POST "http://localhost:8080/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
 
-Alternatively, edit conf/scheduler-reconcile_systemXmlAccounts_managedUser.json
+Alternatively, edit samples/sample1/conf/schedule-reconcile_systemXmlAccounts_managedUser.json
 to enable scheduled reconciliation:
 
     "enabled" : true,

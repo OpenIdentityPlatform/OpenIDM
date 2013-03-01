@@ -276,9 +276,10 @@
       <listitem>
        <para>script object, optional</para>
        <para>A script to determine whether the mapping should be executed or 
-       not. The root scope contains the value of the source in the
-        <literal>"source"</literal> property (if specified). The script is 
-        considered to return a boolean value.</para>
+       not. The condition has an <literal>"object"</literal> property available
+       in root scope, which (if specified) contains the full source object. For
+       example <literal>"source": "(object.email != null)"</literal>. The
+       script is considered to return a boolean value.</para>
       </listitem>
      </varlistentry>
      <varlistentry>

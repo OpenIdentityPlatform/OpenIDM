@@ -1,5 +1,11 @@
-var UrlPrefix = "https://login.example.com/"
-var PersonUrl = source.name
 
-profileUrl = UrlPrefix + PersonUrl;
-profileUrl;
+/*global source */
+
+(function () {
+        
+    var UrlPrefix = "https://login.example.com/",
+        PersonUrl = source.name;
+    
+    return UrlPrefix + PersonUrl;
+
+}());
