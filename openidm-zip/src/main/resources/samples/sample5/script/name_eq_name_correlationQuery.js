@@ -1,4 +1,9 @@
-var value = source.userName;
-var myarray = [value];
-var map = {"query": { "Equals": {"field" : "name","values" : myarray}}};
-map;
+
+/*global source */
+
+(function () {
+    var myArray = [ source.userName ],
+        map = {"query": { "Equals": {"field" : "name","values" : myArray}}};
+    
+    return map;
+}());

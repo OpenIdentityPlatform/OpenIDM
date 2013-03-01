@@ -1,14 +1,14 @@
 Sample 2b - Bi-directional LDAP <-> Internal Repository
 -------------------------------------------------------
-Copyright (c) 2012 ForgeRock AS
+Copyright (c) 2012-2013 ForgeRock AS
 This work is licensed under a Creative Commons Attribution-
 NonCommercial-NoDerivs 3.0 Unported License. See
 http://creativecommons.org/licenses/by-nc-nd/3.0/
 
 The sample shows you reconciliation between the OpenIDM internal repository
 and a local LDAP directory server, such as OpenDJ, with data flowing from
-OpenDJ into the internal repository, and from OpenDJ into the internal
-repository.
+OpenDJ into the internal repository, and from the internal repository into
+OpenDJ.
 
 To run this sample, launch OpenIDM with the sample configuration as follows:
 $ /path/to/openidm/startup.sh -p samples/sample2b

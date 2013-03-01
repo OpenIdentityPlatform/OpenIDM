@@ -22,17 +22,20 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-var userId = object._id;
+/*global object */
 
-var findUserNotificationsParams = {
-    "_queryId": "get-notifications-for-user",
-    "userId": userId
-};
+var userId = object._id,
+    notificationPointer,
+    findUserNotificationsParams = {
+        "_queryId": "get-notifications-for-user",
+        "userId": userId
+    },
+    notificationQueryResult;
 
 notificationQueryResult = openidm.query("repo/ui/notification", findUserNotificationsParams);
-if (notificationQueryResult.result && notificationQueryResult.result.length!=0) {
+if (notificationQueryResult.result && notificationQueryResult.result.length!==0) {
         
-    for (notificationPointer in notificationQueryResult.result) {
+    for (notificationPointer=0;notificationPointer<notificationQueryResult.result.length;notificationPointer++) {
         var notification = notificationQueryResult.result[notificationPointer];
         openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
     }

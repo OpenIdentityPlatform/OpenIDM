@@ -1,1 +1,5 @@
-object.password != null && object.adPassword != object.password
+/*global object */
+(function () {
+    return  typeof object.password !== "undefined" && object.password !== null &&
+            object.adPassword !== object.password;
+}());

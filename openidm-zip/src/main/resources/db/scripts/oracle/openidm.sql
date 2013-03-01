@@ -19,6 +19,13 @@ PROMPT Creating Sequence managedobjects_id_SEQ ...
 CREATE SEQUENCE  managedobjects_id_SEQ  
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
+-- DROP SEQUENCE schedulerobjects_id_SEQ;
+
+
+PROMPT Creating Sequence schedulerobjects_id_SEQ ...
+CREATE SEQUENCE  schedulerobjects_id_SEQ  
+  MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
+
 -- DROP SEQUENCE objecttypes_id_SEQ;
 
 
@@ -136,7 +143,7 @@ CREATE TABLE configobjectproperties (
   configobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue CLOB
+  propvalue VARCHAR2(4000 CHAR)
 );
 
 
@@ -151,7 +158,7 @@ CREATE INDEX idx_configobjectpropert_1 ON configobjectproperties
 (
   propkey,
   propvalue
-)  INDEXTYPE is ctxsys.ctxcat
+)
 ;
 
 -- DROP TABLE configobjects CASCADE CONSTRAINTS;
@@ -197,7 +204,7 @@ CREATE TABLE genericobjectproperties (
   genericobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue CLOB
+  propvalue VARCHAR2(4000 CHAR)
 );
 
 
@@ -212,7 +219,7 @@ CREATE INDEX idx_genericobjectproper_2 ON genericobjectproperties
 (
   propkey,
   propvalue
-)  INDEXTYPE is ctxsys.ctxcat
+)
 ;
 
 -- DROP TABLE genericobjects CASCADE CONSTRAINTS;
@@ -315,7 +322,7 @@ CREATE TABLE managedobjectproperties (
   managedobjects_id NUMBER(24,0) NOT NULL,
   propkey VARCHAR2(255 CHAR) NOT NULL,
   proptype VARCHAR2(32 CHAR),
-  propvalue CLOB
+  propvalue VARCHAR2(4000 CHAR)
 );
 
 
@@ -330,7 +337,7 @@ CREATE INDEX idx_managedobjectproper_3 ON managedobjectproperties
 (
   propkey,
   propvalue
-)  INDEXTYPE is ctxsys.ctxcat
+)
 ;
 
 -- DROP TABLE managedobjects CASCADE CONSTRAINTS;
@@ -363,6 +370,67 @@ CREATE UNIQUE INDEX idx_managedobjects_object ON managedobjects
 ;
 PROMPT Creating Index fk_managedobjects_objectypes on managedobjects ...
 CREATE INDEX fk_managedobjects_objectypes ON managedobjects
+(
+  objecttypes_id
+) 
+;
+
+-- DROP TABLE schedobjectproperties CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table schedobjectproperties ...
+CREATE TABLE schedobjectproperties (
+  schedulerobjects_id NUMBER(24,0) NOT NULL,
+  propkey VARCHAR2(255 CHAR) NOT NULL,
+  proptype VARCHAR2(32 CHAR),
+  propvalue VARCHAR2(4000 CHAR)
+);
+
+
+PROMPT Creating Index fk_schedobjectproperties_man on schedobjectproperties ...
+CREATE INDEX fk_schedobjectproperties_man ON schedobjectproperties
+(
+  schedulerobjects_id
+) 
+;
+PROMPT Creating Index idx_schedobjectproperties_3 on schedobjectproperties ...
+CREATE INDEX idx_schedobjectproperties_3 ON schedobjectproperties
+(
+  propkey,
+  propvalue
+)
+;
+
+-- DROP TABLE schedulerobjects CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table schedulerobjects ...
+CREATE TABLE schedulerobjects (
+  id NUMBER(24,0) NOT NULL,
+  objecttypes_id NUMBER(24,0) NOT NULL,
+  objectid VARCHAR2(255 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  fullobject CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_9 on table schedulerobjects ... 
+ALTER TABLE schedulerobjects
+ADD CONSTRAINT PRIMARY_9 PRIMARY KEY
+(
+  id
+)
+ENABLE
+;
+PROMPT Creating Unique Index idx_schedulerobjects_object on schedulerobjects...
+CREATE UNIQUE INDEX idx_schedulerobjects_object ON schedulerobjects
+(
+  objecttypes_id,
+  objectid
+) 
+;
+PROMPT Creating Index fk_schedulerobjects_objectypes on schedulerobjects ...
+CREATE INDEX fk_schedulerobjects_objectypes ON schedulerobjects
 (
   objecttypes_id
 ) 
@@ -471,6 +539,7 @@ REFERENCES genericobjects
 ENABLE
 ;
 
+
 CREATE OR REPLACE TRIGGER genericobjects_id_TRG BEFORE INSERT ON genericobjects
 FOR EACH ROW
 DECLARE 
@@ -497,7 +566,8 @@ BEGIN
   END IF;
 END;
 
--- /
+/
+
 
 CREATE OR REPLACE TRIGGER configobjects_id_TRG BEFORE INSERT ON configobjects
 FOR EACH ROW
@@ -525,7 +595,7 @@ BEGIN
   END IF;
 END;
 
--- /
+/
 
 CREATE OR REPLACE TRIGGER managedobjects_id_TRG BEFORE INSERT ON managedobjects
 FOR EACH ROW
@@ -553,7 +623,35 @@ BEGIN
   END IF;
 END;
 
--- /
+/
+
+CREATE OR REPLACE TRIGGER schedulerobjects_id_TRG BEFORE INSERT ON schedulerobjects
+FOR EACH ROW
+DECLARE 
+v_newVal NUMBER(12) := 0;
+v_incval NUMBER(12) := 0;
+BEGIN
+  IF INSERTING AND :new.id IS NULL THEN
+    SELECT  schedulerobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
+    -- If this is the first time this table have been inserted into (sequence == 1)
+    IF v_newVal = 1 THEN 
+      --get the max indentity value from the table
+      SELECT NVL(max(id),0) INTO v_newVal FROM schedulerobjects;
+      v_newVal := v_newVal + 1;
+      --set the sequence to that value
+      LOOP
+           EXIT WHEN v_incval>=v_newVal;
+           SELECT schedulerobjects_id_SEQ.nextval INTO v_incval FROM dual;
+      END LOOP;
+    END IF;
+    --used to emulate LAST_INSERT_ID()
+    --mysql_utilities.identity := v_newVal; 
+   -- assign the value from the sequence to emulate the identity column
+   :new.id := v_newVal;
+  END IF;
+END;
+
+/
 
 CREATE OR REPLACE TRIGGER objecttypes_id_TRG BEFORE INSERT ON objecttypes
 FOR EACH ROW
@@ -581,4 +679,10 @@ BEGIN
   END IF;
 END;
 
--- /
+/
+
+INSERT INTO internaluser (objectid, rev, pwd, roles) VALUES ('openidm-admin', '0', 'openidm-admin', 'openidm-admin,openidm-authorized');
+
+INSERT INTO internaluser (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', 'openidm-reg');
+
+COMMIT;

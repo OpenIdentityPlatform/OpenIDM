@@ -48,24 +48,5 @@
                 <exclude>*.jar</exclude>
             </excludes>
         </fileSet>
-        <fileSet>
-            <directory>${basedir}/target/minified</directory>
-            <outputDirectory>/openidm-ui-ria-admin-apache</outputDirectory>
-            <includes>
-                <include>main.js</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/target/classes</directory>
-            <outputDirectory>/openidm-ui-ria-admin-apache</outputDirectory>
-            <excludes>
-                <exclude>org/**</exclude>
-                <exclude>*.jar</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/customized/apache</directory>
-            <outputDirectory>/openidm-ui-ria-admin-apache</outputDirectory>
-        </fileSet>
     </fileSets>
 </assembly>

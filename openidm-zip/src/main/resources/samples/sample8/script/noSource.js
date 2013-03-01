@@ -1,2 +1,7 @@
-logger.warn("Case no Source: the source object contains: = {} ", source);
-source;
+
+/*global source */
+
+(function () {
+    logger.warn("Case no Source: the source object contains: = {} ", source);
+    return source;
+}());

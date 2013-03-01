@@ -28,6 +28,8 @@
  * This script validates if notification is valid.
  */
 
+/*global object */
+
 var errors = [];
 
 function requiredValidator(toValidate, fieldName) {
@@ -50,8 +52,8 @@ function isNotificationValid() {
     requiredValidator(notification.message, "Notification Message");
     
     if(errors.length > 0) {
-    	throw errors;
+        throw errors;
     }
-};
+}
 
 isNotificationValid();

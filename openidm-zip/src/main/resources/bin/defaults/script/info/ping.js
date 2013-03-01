@@ -21,7 +21,13 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-if (request.method != "read") {
-     throw "Unsupported operation on ping info service: " + request.method
-}
-healthinfo
+
+/*global healthinfo */
+
+(function () {
+    if (request.method !== "read") {
+         throw "Unsupported operation on ping info service: " + request.method;
+    }
+    
+    return healthinfo;
+}());

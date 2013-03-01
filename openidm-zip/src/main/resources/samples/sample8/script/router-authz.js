@@ -8,11 +8,12 @@
  */
 
 // If true, then allows HTTP requests from "openidm-cert" role.
-const allowCert = false;
+var allowCert = false;
 
 function contains(a, o) {
-    if (typeof(a) != 'undefined' && a != null) {
-        for (var i = 0; i <= a.length; i++) {
+    var i;
+    if (typeof(a) !== 'undefined' && a !== null) {
+        for (i = 0; i <= a.length; i++) {
             if (a[i] === o) {
                 return true;
             }
@@ -22,10 +23,12 @@ function contains(a, o) {
 }
 
 function allow() {
-    if (typeof(request.parent) === 'undefined' || request.parent.type != 'http') {
+    var roles;
+    
+    if (typeof(request.parent) === 'undefined' || request.parent.type !== 'http') {
         return true;
     }
-    var roles = request.parent.security['openidm-roles'];
+    roles = request.parent.security['openidm-roles'];
     if (contains(roles, 'openidm-admin')) {
         return true;
     } else if (allowCert && contains(roles, 'openidm-cert')) {

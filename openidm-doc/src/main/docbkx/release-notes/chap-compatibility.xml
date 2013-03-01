@@ -46,9 +46,9 @@
       <term>Changes to the scheduler configuration</term>
       <listitem>
         <para>The way in which scheduled tasks is configured has changed, as 
-        described in <link xlink:href="integrators-guide#chap-scheduler-conf" 
-        xlink:role="http://docbook.org/xlink/role/olink">
-        <citetitle>Scheduling Tasks and Events</citetitle></link>.</para>    
+        described in <link xlink:href="integrators-guide#chap-scheduler-conf"
+                           xlink:role="http://docbook.org/xlink/role/olink">
+                <citetitle>Scheduling Tasks and Events</citetitle></link>.</para>
         <para>Schedules are now defined in files named 
         <literal>openidm/conf/schedule-*.json</literal>. If you use the 
         previous naming convention (scheduler-*.json), the schedules will not 
@@ -76,10 +76,8 @@
       <term>Audit log changes</term>
       <listitem>
         <para>Timestamps now have milliseconds and are in UTC timezone.
-      </para>
-      </listitem>
-      <listitem>
-        <para>The access log now has an additional field, <literal>userid</literal>, 
+        </para>
+        <para>The access log now has an additional field, <literal>userid</literal>,
         which is the OpenIDM ID for a managed or internal user who is logged in. 
         For authentication via SSL mutual auth only, the 
         <literal>userid</literal> is currently <literal>null</literal> because 
@@ -91,16 +89,19 @@
       <listitem>
         <para>The <literal>reconID</literal> column has been removed from the 
         <literal>links</literal> table.</para>
-      </listitem>
-      <listitem>
-        <para>The size of the <literal>linkType</literal> column in the 
+        <para>The size of the <literal>linkType</literal> column in the
         <literal>links</literal> table has been reduced to 255 characters. This 
         is because MySQL can only create unique indexes on that size for UTF-8 
         encoding.</para>
-      </listitem>
-      <listitem>
-        <para>The <literal>links</literal> table indexes have been changed to 
+        <para>The <literal>links</literal> table indexes have been changed to
         unique indexes to prevent duplication.</para>
+        <para>The <literal>auditactivity</literal> table contains two new
+        columns - <literal>changedfields</literal> and <literal>passwordchanged</literal>,
+        for additional auditing functionality.</para>
+        <para>Tables have been added for the scheduler configuration and for User
+        Interface notifications.</para>
+        <para>The <literal>openidm</literal> user is created with all the required
+        privileges to update the <literal>openidm</literal> database by default.</para>
       </listitem>            
     </varlistentry>
     <varlistentry>
@@ -110,9 +111,7 @@
         with tokens like <literal>${mytoken}</literal> must be reviewed and 
         adjusted to match the new definition which aligns declarations for 
         regular and prepared statement uses.</para>
-      </listitem>
-      <listitem>
-        <para>Existing <literal>${token}</literal> tokens are now suitable for 
+        <para>Existing <literal>${token}</literal> tokens are now suitable for
         quoted strings by default. Prefixes such as <literal>unquoted:</literal> 
         and <literal>dotnotation:</literal> allow you to use queries in contexts 
         where the unquoted value or the JSON pointer converted to OrientDB dot 
@@ -168,17 +167,15 @@
        <listitem>
          <para>All links are now queried at the start of a correlation and the 
          results of that query are used.</para>
-         <para>For more information, see <link xlink:href="integrators-guide#prefetching-links" 
-         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Prefetching Links</citetitle></link> 
+         <para>For more information, see
+             <link xlink:href="integrators-guide#prefetching-links"
+             xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Prefetching Links</citetitle></link>
          in the <citetitle>Integrator's Guide</citetitle>.</para>
        </listitem>
      </varlistentry>
    </variablelist>
 
- 
-   
-    
-   
+
     
  </section>
  
@@ -213,9 +210,10 @@
   <para>These capabilities are expected to change in upcoming releases:</para>
   <listitem>
    <para>The way you generate connector configurations for access to external
-   resources, described in <link xlink:href="integrators-guide#connector-wiz"
-   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
-   Connector Configurations</citetitle></link>.</para>
+   resources, described in
+   <link xlink:href="integrators-guide#connector-wiz"
+         xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Creating Default
+           Connector Configurations</citetitle></link>.</para>
   </listitem>
  </itemizedlist> 
  </section>
