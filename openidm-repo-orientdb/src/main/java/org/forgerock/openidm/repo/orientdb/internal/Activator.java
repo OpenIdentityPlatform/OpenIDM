@@ -21,18 +21,8 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.orientdb.impl;
+package org.forgerock.openidm.repo.orientdb.internal;
 
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-
-import org.apache.felix.scr.annotations.Property;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
-import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;

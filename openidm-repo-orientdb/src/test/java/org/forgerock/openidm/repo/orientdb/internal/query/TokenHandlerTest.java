@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.orientdb.impl.query;
+package org.forgerock.openidm.repo.orientdb.internal.query;
 
 import java.util.Arrays;
 import java.util.HashMap;

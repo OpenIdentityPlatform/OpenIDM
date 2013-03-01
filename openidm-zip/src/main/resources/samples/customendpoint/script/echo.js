@@ -1,1 +1,1 @@
-request.getResourceName()
+request.content.getObject()

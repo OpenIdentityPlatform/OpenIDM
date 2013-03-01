@@ -1,5 +1,4 @@
 {
-    "context" : "endpoint/gettasksview",
     "type" : "text/javascript",
-    "file" : "bin/defaults/script/workflow/gettasksview.js"
+    "name" : "workflow/gettasksview.js"
 }

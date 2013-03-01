@@ -24,7 +24,9 @@
 
 package org.forgerock.openidm.script;
 
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.Map;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -40,6 +42,7 @@ import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
@@ -50,6 +53,8 @@ import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptName;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.util.Factory;
+import org.forgerock.util.LazyMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentException;
@@ -194,64 +199,44 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     // ----- Implementation of ScriptCustomizer interface
 
-    public void handleAction(ServerContext context, ActionRequest request, Bindings handler)
-            throws ResourceException {
+    public void handleAction(final ServerContext context, final ActionRequest request,
+            final Bindings handler) throws ResourceException {
         if ((ACTION & mask) == 0) {
             throw new NotSupportedException("Actions are not supported for resource instances");
         }
-        handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handleRequest(context, request, handler);
     }
 
-    public void handleCreate(ServerContext context, CreateRequest request, Bindings handler)
-            throws ResourceException {
+    public void handleCreate(final ServerContext context, final CreateRequest request,
+            final Bindings handler) throws ResourceException {
         if ((CREATE & mask) == 0) {
             throw new NotSupportedException("Create operations are not supported");
         }
-        handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handleRequest(context, request, handler);
     }
 
-    public void handleDelete(ServerContext context, DeleteRequest request, Bindings handler)
-            throws ResourceException {
+    public void handleDelete(final ServerContext context, final DeleteRequest request,
+            final Bindings handler) throws ResourceException {
         if ((DELETE & mask) == 0) {
             throw new NotSupportedException("Delete operations are not supported");
         }
-        handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handleRequest(context, request, handler);
     }
 
-    public void handlePatch(ServerContext context, PatchRequest request, Bindings handler)
-            throws ResourceException {
+    public void handlePatch(final ServerContext context, final PatchRequest request,
+            final Bindings handler) throws ResourceException {
         if ((PATCH & mask) == 0) {
             throw new NotSupportedException("Patch operations are not supported");
         }
-        handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handleRequest(context, request, handler);
     }
 
-    public void handleQuery(ServerContext context, QueryRequest request, Bindings handler)
-            throws ResourceException {
+    public void handleQuery(final ServerContext context, final QueryRequest request,
+            final Bindings handler) throws ResourceException {
         if ((QUERY & mask) == 0) {
             throw new NotSupportedException("Query operations are not supported");
         }
-        handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handleRequest(context, request, handler);
     }
 
     public void handleRead(final ServerContext context, final ReadRequest request,
@@ -260,23 +245,37 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         if ((READ & mask) == 0) {
             throw new NotSupportedException("Read operations are not supported");
         }
-
-        handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handleRequest(context, request, handler);
     }
 
-    public void handleUpdate(ServerContext context, UpdateRequest request, Bindings handler)
-            throws ResourceException {
+    public void handleUpdate(final ServerContext context, final UpdateRequest request,
+            final Bindings handler) throws ResourceException {
         if ((UPDATE & mask) == 0) {
             throw new NotSupportedException("Update operations are not supported");
         }
+        handleRequest(context, request, handler);
+    }
+
+    protected void handleRequest(final ServerContext context, final Request request,
+            final Bindings handler) {
         handler.put("request", request);
-        JsonValue serverContext = serialiseServerContext(context);
-        if (null != serverContext) {
-            handler.put("context", serverContext.required().asMap());
-        }
+        handler.put("context", request);
+
+        handler.put("_context", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> newInstance() {
+                final JsonValue serverContext;
+                try {
+                    serverContext = serialiseServerContext(context);
+                    if (null != serverContext) {
+                        return serverContext.required().asMap();
+                    }
+                } catch (ResourceException e) {
+                    logger.error("Failed to serialise the ServerContext", e);
+                    /* ignore */
+                }
+                return Collections.emptyMap();
+            }
+        }));
     }
 }

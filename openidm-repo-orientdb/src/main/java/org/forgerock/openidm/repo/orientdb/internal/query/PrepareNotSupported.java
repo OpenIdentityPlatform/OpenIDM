@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.orientdb.impl.query;
+package org.forgerock.openidm.repo.orientdb.internal.query;
 
 /**
  * An exception to indicate that a statement can not be converted into 

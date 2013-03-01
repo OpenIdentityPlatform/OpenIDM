@@ -21,7 +21,7 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
-package org.forgerock.openidm.repo.orientdb.metadata;
+package org.forgerock.openidm.repo.orientdb.internal.metadata;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
-import org.forgerock.openidm.repo.orientdb.impl.OrientDBRepoService;
+import org.forgerock.openidm.repo.orientdb.internal.OrientDBRepoService;
 
 
 /**
