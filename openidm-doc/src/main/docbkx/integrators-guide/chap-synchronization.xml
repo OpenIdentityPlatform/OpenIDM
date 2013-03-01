@@ -663,10 +663,10 @@
                 },
                 {
                     "target": "displayName",
-                    "source": "";
+                    "source": "",
                     "transform": {
                         "type": "text/javascript",
-                        "source": "(source.lastName +', ' + source.firstName;)"
+                        "source": "source.lastName +', ' + source.firstName;"
                     }
                 }
             ]
