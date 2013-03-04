@@ -73,6 +73,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
@@ -693,7 +694,7 @@ public class ConfigurationManagerImpl
     }
 
     Configuration findExistingConfiguration(ConfigurationAdmin service, String pid,
-                                              String factoryPid) throws Exception {
+                                              String factoryPid) throws IOException {
         String filter = null;
         if (null == factoryPid) {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
@@ -703,12 +704,15 @@ public class ConfigurationManagerImpl
                             + ")(config.factory-pid=" + factoryPid + "))";
         }
 
-        Configuration[] configurations = service.listConfigurations(filter);
-        if (configurations != null && configurations.length > 0) {
-            return configurations[0];
-        } else {
-            return null;
+        try {
+            Configuration[] configurations = service.listConfigurations(filter);
+            if (configurations != null && configurations.length > 0) {
+                return configurations[0];
+            }
+        } catch (InvalidSyntaxException e) {
+            logger.error("Failed to find existing configuration {}-{}", pid, factoryPid, e);
         }
+        return null;
     }
 
     /**
@@ -737,7 +741,11 @@ public class ConfigurationManagerImpl
             String start = system.getProperty(OPENIDM_FILEINSTALL_BUNDLES_NEW_START, "false");
 
             Configuration config =
-                    configAdmin.createFactoryConfiguration(FELIX_FILEINSTALL_PID, null);
+                    findExistingConfiguration(configAdmin, FELIX_FILEINSTALL_PID, "openidm");
+
+            if (null == config) {
+                config = configAdmin.createFactoryConfiguration(FELIX_FILEINSTALL_PID, null);
+            }
 
             Dictionary props = config.getProperties();
             if (props == null) {
@@ -973,7 +981,7 @@ public class ConfigurationManagerImpl
                 try {
                     jsonFileInstaller.delete();
                 } catch (IOException e) {
-                    logger.error("Failed to stop Json file monitoring.", e);
+                    logger.debug("Failed to stop Json file monitoring.", e);
                 }
             }
             bundleContext.ungetService(reference);

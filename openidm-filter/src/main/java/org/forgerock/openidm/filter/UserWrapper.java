@@ -86,7 +86,7 @@ class UserWrapper extends HttpServletRequestWrapper {
         // optimization: avoid lowercasing every header string
         // For now, only suppress the password header (but not user name or re-auth)
         boolean suppress = (header.length() >= 10 && header.charAt(1) == '-' &&
-                header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-") && 
+                header.charAt(9) == '-' && header.toLowerCase().startsWith("x-openidm-") &&
                 header.equalsIgnoreCase(AuthFilter.HEADER_PASSWORD));
         return suppress;
     }

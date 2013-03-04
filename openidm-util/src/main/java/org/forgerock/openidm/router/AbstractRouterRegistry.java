@@ -455,12 +455,20 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
 
     public boolean removeRoute() {
         boolean isModified = false;
-        if (null != factoryServiceRegistration) {
-            factoryServiceRegistration.unregister();
-        }
-        final Router r = internalRouter.get();
-        if (r != null) {
-            isModified = r.removeRoute(registeredRoutes);
+        try {
+            if (null != factoryServiceRegistration) {
+                factoryServiceRegistration.unregister();
+                factoryServiceRegistration = null;
+            }
+        } catch (IllegalStateException e) {
+            /* Catch if the service was already removed */
+            factoryServiceRegistration = null;
+        } finally {
+
+            final Router r = internalRouter.get();
+            if (r != null) {
+                isModified = r.removeRoute(registeredRoutes);
+            }
         }
         return isModified;
     }

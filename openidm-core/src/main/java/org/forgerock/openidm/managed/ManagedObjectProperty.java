@@ -100,9 +100,21 @@ class ManagedObjectProperty {
             final CryptoService cryptoService, JsonValue config) throws JsonValueException,
             ScriptException {
         name = config.get("name").required().asString();
-        onRetrieve = scriptRegistry.takeScript(config.get("onRetrieve"));
-        onStore = scriptRegistry.takeScript(config.get("onStore"));
-        onValidate = scriptRegistry.takeScript(config.get("onValidate"));
+        if (config.isDefined("onRetrieve")) {
+            onRetrieve = scriptRegistry.takeScript(config.get("onRetrieve"));
+        } else {
+            onRetrieve = null;
+        }
+        if (config.isDefined("onStore")) {
+            onStore = scriptRegistry.takeScript(config.get("onStore"));
+        } else {
+            onStore = null;
+        }
+        if (config.isDefined("onValidate")) {
+            onValidate = scriptRegistry.takeScript(config.get("onValidate"));
+        } else {
+            onValidate = null;
+        }
         JsonValue encryptionValue = config.get("encryption");
         if (!encryptionValue.isNull()) {
             try {

@@ -29,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,8 +67,9 @@ import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
 import org.restlet.data.*;
-import org.restlet.engine.http.header.CookieReader;
-import org.restlet.engine.http.header.HeaderConstants;
+import org.restlet.engine.header.CookieReader;
+import org.restlet.engine.header.Header;
+import org.restlet.engine.header.HeaderConstants;
 import org.restlet.engine.util.Base64;
 import org.restlet.representation.Representation;
 import org.restlet.representation.StringRepresentation;
@@ -252,7 +254,28 @@ public class RestService implements SingletonResourceProvider {
                                 "Failure in parsing the response as JSON: " + text
                                         + " Reported failure: " + ex.getMessage(), ex));
                     }
+                } else {
+                    try {
+                        Map<String, Object> resultHeaders = new HashMap<String, Object>();
+                        Series<Header> respHeaders = (Series<Header>) cr.getResponseAttributes().get(HeaderConstants.ATTRIBUTE_HEADERS);
+                        if (respHeaders != null) {
+                            for (Header param : respHeaders) {
+                                String name = param.getName();
+                                String value = param.getValue();
+                                resultHeaders.put(name, value);
+                                logger.debug("Adding Response Attribute: {} : {}", name, value);
+                            }
+                        }
+                        JsonValue result = new JsonValue(new HashMap<String, Object>());
+                        result.put("_headers", resultHeaders);
+                        result.put("_body", text);
+                        handler.handleResult(result);
+                    } catch (Exception ex) {
+                        throw new InternalServerErrorException("Failure in parsing the response: " + text
+                                + " Reported failure: " + ex.getMessage(), ex);
+                    }
                 }
+
             } catch (java.io.IOException ex) {
                 handler.handleError(new InternalServerErrorException("Failed to invoke " + params,
                         ex));

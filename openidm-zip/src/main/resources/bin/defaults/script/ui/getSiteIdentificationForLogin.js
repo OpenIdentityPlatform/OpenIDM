@@ -56,7 +56,7 @@ if (request.method !== "query") {
        ],
        res, ret, code;
           
-    ret = openidm.query("managed/user", params);
+    ret = openidm.query("/managed/user", params);
     
     if(ret && ret.result && ret.result[0] && ret.result[0].passPhrase && ret.result[0].siteImage) {
         res = {
@@ -67,7 +67,7 @@ if (request.method !== "query") {
         code = new java.lang.String(request.params.login).hashCode();
         code = java.lang.Math.abs(code);        
     
-        ret = openidm.read("config/ui/configuration");
+        ret = openidm.read("/config/ui/configuration");
     
         res = {
             "siteImage": ret.configuration.siteImages[code % ret.configuration.siteImages.length],

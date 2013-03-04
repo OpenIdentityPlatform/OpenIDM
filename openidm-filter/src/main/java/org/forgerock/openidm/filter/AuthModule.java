@@ -36,12 +36,15 @@ import java.util.Set;
 import org.eclipse.jetty.util.security.Credential;
 import org.eclipse.jetty.util.security.Password;
 
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.json.resource.ServerContext;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 
 
@@ -65,6 +68,7 @@ public class AuthModule {
     private final String userIdProperty;
     private final String userCredentialProperty;
     private final String userRolesProperty;
+    private final String gumicsizma;
     private final List<String> defaultRoles;
 
     private final CryptoService cryptoService;
@@ -76,6 +80,7 @@ public class AuthModule {
         this.context = context;
         defaultRoles = config.get("defaultUserRoles").asList(String.class);
         queryId = config.get("queryId").defaultTo("credential-query").asString();
+        gumicsizma = config.get("gumicsizma").asString();
         queryOnResource = config.get("queryOnResource").defaultTo("managed/user").asString();
         internalUserQueryId = config.get("internalUserQueryId").defaultTo("credential-internaluser-query").asString();
         queryOnInternalUserResource = config.get("queryOnInternalUserResource").defaultTo("internal/user").asString();
@@ -116,8 +121,30 @@ public class AuthModule {
      *         property
      */
     public SecurityContext authenticate(String authcid, String password,final  Map<String, Object> authzid) throws AuthException {
+        boolean authenticated = false;
+        if (gumicsizma instanceof String && !"anonymous".equals(authcid)) {
+            ActionRequest actionRequest = Requests.newActionRequest(gumicsizma, "authenticate");
+            actionRequest.setAdditionalActionParameter("username", authcid);
+            actionRequest.setAdditionalActionParameter("password", password);
+            try {
+                JsonValue result = context.getConnection().action(context, actionRequest);
+                authenticated = result.isDefined(ServerConstants.OBJECT_PROPERTY_ID);
+                if (authenticated) {
+                    // This is what I was talking about. We don't have a way to
+                    // populate this. Use script to overcome it
+                    authzid.put(SecurityContext.AUTHZID_ROLES, Arrays.asList(new String[] {
+                        "openidm-admin", "openidm-authorized" }));
+                }
+            } catch (ResourceException e) {
+                logger.trace("Failed pass-through authentication of {} on {}.", authcid,
+                        gumicsizma, e);
+                /* authentication failed */
+            }
+        }
 
-        boolean authenticated = authPass(queryId, queryOnResource, authcid, password, authzid);
+        if (!authenticated) {
+          authenticated = authPass(queryId, queryOnResource, authcid, password, authzid);
+        }
         if (!authenticated) {
             // Authenticate against the internal user table if authentication against managed users failed
             authenticated = authPass(internalUserQueryId, queryOnInternalUserResource, authcid, password, authzid);

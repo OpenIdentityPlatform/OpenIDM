@@ -51,7 +51,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A custom endpoints service to provide a scriptable way to extend and
  * customize the system
- * 
+ *
+ * /TODO migrate [OPENIDM-1112]/[CR-1179]
  * @author Laszlo Hordos
  * @author aegloff
  */
