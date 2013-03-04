@@ -32,18 +32,19 @@
     </parent>
     <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-policy</artifactId>
-    <name>OpenIDM Policy Service</name>
+    <name>OpenIDM policy service</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-enhanced-config</artifactId>
+            <artifactId>openidm-script</artifactId>
             <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>script-common</artifactId>
+            <artifactId>json-resource-servlet</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -83,7 +84,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+            <!--<plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -94,7 +95,7 @@
                         </Export-Package>
                     </instructions>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 </project>

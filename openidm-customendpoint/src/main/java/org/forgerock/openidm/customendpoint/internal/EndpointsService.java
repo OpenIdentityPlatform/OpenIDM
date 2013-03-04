@@ -70,18 +70,6 @@ public class EndpointsService extends AbstractScriptedService {
      */
     private static final Logger logger = LoggerFactory.getLogger(EndpointsService.class);
 
-    /** PersistenceConfig service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private PersistenceConfig persistenceConfig;
-
-    private void bindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = service;
-    }
-
-    private void unbindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = null;
-    }
-
     private ComponentContext context;
 
     @Activate
@@ -115,13 +103,6 @@ public class EndpointsService extends AbstractScriptedService {
 
     protected String[] getRouterPrefixes(String factoryPid, JsonValue configuration) {
         return new String[] { "/endpoint/" + String.valueOf(factoryPid) + "*" };
-    }
-
-    protected JsonValue serialiseServerContext(ServerContext context) throws ResourceException {
-        if (null != context && null != persistenceConfig) {
-            return ServerContext.saveToJson(context, persistenceConfig);
-        }
-        return null;
     }
 
     protected BundleContext getBundleContext() {

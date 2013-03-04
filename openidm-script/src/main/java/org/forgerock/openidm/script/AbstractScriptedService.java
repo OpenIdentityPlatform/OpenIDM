@@ -33,6 +33,7 @@ import javax.script.ScriptException;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -40,6 +41,7 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PersistenceConfig;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
@@ -48,11 +50,13 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.script.Scope;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptName;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.script.source.SourceUnit;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 import org.osgi.framework.BundleContext;
@@ -87,6 +91,20 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         scriptRegistry = null;
     }
 
+    /** PersistenceConfig service. */
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private PersistenceConfig persistenceConfig;
+
+    protected void bindPersistenceConfig(final PersistenceConfig service) {
+        persistenceConfig = service;
+    }
+
+    protected void unbindPersistenceConfig(final PersistenceConfig service) {
+        persistenceConfig = null;
+    }
+
+    private ScriptedRequestHandler embeddedHandler = null;
+
     private ServiceRegistration<RequestHandler> selfRegistration = null;
 
     private Dictionary<String, Object> properties = null;
@@ -108,10 +126,17 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         this.mask = mask;
     }
 
+    /**
+     * Get the {@link ServerConstants#ROUTER_PREFIX} value.
+     * <p/>
+     * If it return null then the {@link ServerConstants#ROUTER_PREFIX} won't be
+     * changed in the service registration properties.
+     * 
+     * @param factoryPid
+     * @param configuration
+     * @return null or String or String[]
+     */
     protected abstract Object getRouterPrefixes(String factoryPid, JsonValue configuration);
-
-    protected abstract JsonValue serialiseServerContext(final ServerContext context)
-            throws ResourceException;
 
     protected abstract BundleContext getBundleContext();
 
@@ -127,24 +152,63 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         this.properties = properties;
     }
 
-    protected void activate(final BundleContext context, final String factoryPid,
+    protected JsonValue serialiseServerContext(final ServerContext context)
+            throws ResourceException {
+        if (null != context && null != persistenceConfig) {
+            return ServerContext.saveToJson(context, persistenceConfig);
+        }
+        return null;
+    }
+
+    protected Scope activate(final BundleContext context, final String factoryPid,
             final JsonValue configuration) {
 
         Dictionary<String, Object> prop = getProperties();
         if (null != prop) {
-            prop.put(ServerConstants.ROUTER_PREFIX, getRouterPrefixes(factoryPid, configuration));
+            Object o = getRouterPrefixes(factoryPid, configuration);
+            if (null != o) {
+                prop.put(ServerConstants.ROUTER_PREFIX, o);
+            }
         }
 
         try {
             ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
+            if (null == scriptEntry) {
+                logger.error("Failed to get the script {}:{}", configuration
+                        .get(SourceUnit.ATTR_NAME), configuration.get(SourceUnit.ATTR_TYPE));
+                throw new NullPointerException();
+            }
             scriptEntry.addScriptListener(this);
             scriptName = scriptEntry.getName();
 
-            selfRegistration =
-                    context.registerService(RequestHandler.class, new ScriptedRequestHandler(
-                            scriptEntry, getScriptCustomizer()), prop);
+            embeddedHandler = new ScriptedRequestHandler(scriptEntry, getScriptCustomizer());
 
+            selfRegistration = context.registerService(RequestHandler.class, embeddedHandler, prop);
+
+            return embeddedHandler;
         } catch (ScriptException e) {
+            throw new ComponentException("Failed to take script: " + factoryPid, e);
+        }
+    }
+
+    protected Scope modified(final String factoryPid, final JsonValue configuration) {
+        try {
+            ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
+            if (null == scriptEntry) {
+                logger.error("Failed to get the script {}:{}", configuration
+                        .get(SourceUnit.ATTR_NAME), configuration.get(SourceUnit.ATTR_TYPE));
+                throw new NullPointerException();
+            }
+            if (null != scriptName) {
+                scriptRegistry.deleteScriptListener(scriptName, this);
+            }
+            scriptEntry.addScriptListener(this);
+            scriptName = scriptEntry.getName();
+
+            embeddedHandler.setScriptEntry(scriptEntry);
+            return embeddedHandler;
+        } catch (ScriptException e) {
+            logger.error("Failed to modify the ScriptedService", e);
             throw new ComponentException("Failed to take script: " + factoryPid, e);
         }
     }
@@ -156,7 +220,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
                 selfRegistration = null;
             }
         } catch (IllegalStateException e) {
-             /* Catch if the service was already removed */
+            /* Catch if the service was already removed */
             selfRegistration = null;
         } finally {
             if (null != scriptName) {
