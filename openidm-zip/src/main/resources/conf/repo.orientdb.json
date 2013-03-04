@@ -1,5 +1,5 @@
 {
-    "DEFAULT-dbUrl" : "local:./db/openidm",
+    "dbUrl" : "local:&{launcher.working.location}/db/openidm",
     "user" : "admin",
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
