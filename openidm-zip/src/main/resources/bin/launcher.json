@@ -4,8 +4,7 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/openidm-system-*.jar",
-                    "**/javax.transaction-*.jar"
+                    "**/openidm-system-*.jar"
                 ],
                 "start-level":1,
                 "action":"install.start"
@@ -13,49 +12,13 @@
             {
                 "location":"bundle",
                 "includes":[
-                    "**/org.apache.servicemix.transaction-*.jar"
-                ],
-                "start-level":2,
-                "action":"install.start"
-            },
-            {
-                "location":"bundle",
-                "includes":[
+                    "**/org.apache.servicemix.transaction-*.jar",
                     "**/openidm-security-jetty*.jar",
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",
-                    "**/openidm-config*.jar",
-                    "**/openidm-crypto*.jar"
-                ],
-                "start-level":3,
-                "action":"install.start"
-            },
-            {
-                "location":"bundle",
-                "includes":[
-                    "**/openidm-repo-jdbc*.jar",
-                    "**/openidm-repo-orientdb*.jar",
-                    "**/org.apache.felix.scr-*.jar"
-                ],
-                "start-level":4,
-                "action":"install.start"
-            },
-            {
-                "location":"bundle",
-                "includes":[
-                    "**/org.apache.felix.configadmin*.jar",
-                    "**/org.apache.felix.fileinstall*.jar"
-                ],
-                "start-level":5,
-                "action":"install.start"
-            },
-            {
-                "location":"bundle",
-                "includes":[
-                    "**/openidm-httpcontext-*.jar",
                     "**/groovy-all*.jar"
                 ],
-                "start-level":9,
+                "start-level":2,
                 "action":"install.start"
             },
             {
@@ -63,40 +26,23 @@
                 "includes":["*.jar"],
                 "excludes":[
                     "**/openidm-system-*.jar",
+                    "**/javax.transaction-*.jar",
+                    "**/org.apache.servicemix.transaction-*.jar",
                     "**/openidm-security-jetty*.jar",
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",
-                    "**/openidm-config*.jar",
-                    "**/openidm-crypto*.jar",
-                    "**/openidm-repo-jdbc*.jar",
-                    "**/openidm-repo-orientdb*.jar",
-                    "**/org.apache.felix.scr-*.jar",
-                    "**/org.apache.felix.configadmin*.jar",
-                    "**/org.apache.felix.fileinstall*.jar",
-                    "**/javax.transaction-*.jar",
-                    "**/org.apache.servicemix.transaction-*.jar",
-                    "**/openidm-httpcontext-*.jar",
-                    "**/pax-web-jetty-bundle*.jar",
-                    "**/pax-web-extender-whiteboard*.jar",
+                    "**/groovy-all*.jar",
                     "**/openidm-scheduler*.jar",
-                    "**/groovy-all*.jar"
+                    "**/org.apache.felix.scr*.jar"
                 ]
             },
             {
                 "location":"bundle",
                 "includes":[
-                    "**/pax-web-jetty-bundle*.jar"
+                    "**/openidm-scheduler*.jar",
+                    "**/org.apache.felix.scr*.jar"
                 ],
                 "start-level":11,
-                "action":"install.start"
-            },
-            {
-                "location":"bundle",
-                "includes":[
-                    "**/pax-web-extender-whiteboard*.jar",
-                    "**/openidm-scheduler*.jar"
-                ],
-                "start-level":12,
                 "action":"install.start"
             }
         ],

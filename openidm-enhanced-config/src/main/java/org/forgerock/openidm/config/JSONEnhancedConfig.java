@@ -203,6 +203,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         public void transform(JsonValue value) throws JsonException {
             if (null != value && value.isString()) {
                 value.setObject(substVars(value.asString(), IdentityServer.getInstance()));
+                //value.setObject(PropertyUtil.substVars(value.asString(), IdentityServer.getInstance(), doEscape));
             }
         }
     }

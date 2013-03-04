@@ -150,11 +150,18 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     }
 
     protected void deactivate() {
-        if (null != selfRegistration) {
-            selfRegistration.unregister();
-        }
-        if (null != scriptName) {
-            scriptRegistry.deleteScriptListener(scriptName, this);
+        try {
+            if (null != selfRegistration) {
+                selfRegistration.unregister();
+                selfRegistration = null;
+            }
+        } catch (IllegalStateException e) {
+             /* Catch if the service was already removed */
+            selfRegistration = null;
+        } finally {
+            if (null != scriptName) {
+                scriptRegistry.deleteScriptListener(scriptName, this);
+            }
         }
         logger.info("OpenIDM Info Service component is deactivated.");
     }
@@ -259,7 +266,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     protected void handleRequest(final ServerContext context, final Request request,
             final Bindings handler) {
         handler.put("request", request);
-        handler.put("context", request);
+        handler.put("context", context);
 
         handler.put("_context", new LazyMap<String, Object>(new Factory<Map<String, Object>>() {
             @Override

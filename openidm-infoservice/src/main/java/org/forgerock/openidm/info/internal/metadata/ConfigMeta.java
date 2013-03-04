@@ -71,6 +71,6 @@ public class ConfigMeta implements MetaDataProvider {
      */
     @Override
     public void setCallback(MetaDataProviderCallback callback) {
-        // This newBuilder won't be updated
+        // This metadata won't be updated
     }
 }

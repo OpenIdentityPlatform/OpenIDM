@@ -296,50 +296,6 @@ public class OrientDBRepoService implements RequestHandler {
                     edge.save();
 
                     handler.handleResult(getResource(edge.getIdentity().toString(), edge));
-
-
-                    OrientGraph bluegdb = new OrientGraph(gdb);
-
-                    String label =  bluegdb.getEdge(edge.getIdentity()).getLabel();
-
-                    /*
-                     * Random r = new Random();
-                     * 
-                     * if (gdb.getVertexType("MyV") == null) { OClass c1 =
-                     * gdb.createVertexType("MyV"); c1.createProperty("id",
-                     * OType.LONG).createIndex(OClass.INDEX_TYPE.UNIQUE);
-                     * 
-                     * OClass c2 = gdb.createEdgeType("MyE");
-                     * c2.createProperty("label", OType.STRING); }
-                     * 
-                     * ODocument v1 = gdb.createVertex("MyV"); v1.field("id",
-                     * System.currentTimeMillis()); v1.field("name", "parent");
-                     * 
-                     * ODocument v2 = gdb.createVertex("MyV"); int id =
-                     * r.nextInt(); v2.field("id", id); v2.field("name",
-                     * "child");
-                     * 
-                     * ODocument e1 = gdb.createEdge(v1, v2, "MyE");
-                     * e1.field("label", "edge");
-                     * 
-                     * v1.save();
-                     * 
-                     * OrientGraph g2 = new OrientGraph(gdb);
-                     * 
-                     * String vid = String.format("%d:%d", v2
-                     * .getRecord().getIdentity().getClusterId(), v2.getRecord()
-                     * .getIdentity().getClusterPosition().intValue());
-                     * 
-                     * 
-                     * ObjectNode node = (new
-                     * GraphSONUtility(GraphSONMode.EXTENDED, null, null,
-                     * null)).objectNodeFromElement(g2.getVertex(vid));
-                     * 
-                     * 
-                     * JsonValue target = new JsonValue(node);
-                     * 
-                     * handler.handleResult(new Resource(vid,null, target));
-                     */
                 } catch (OException e) {
                     logger.error("OrientDB Exception: " + e.toString());
                 } finally {
@@ -382,7 +338,7 @@ public class OrientDBRepoService implements RequestHandler {
             request.setNewResourceId(UUID.randomUUID().toString());
         }
         // The ResourceName may be "/" only
-        String orientClassName = typeToOrientClassName(partition, request.getResourceName());
+        String orientClassName = typeToOrientClassName(partition, request.getResourceName().substring(1));
 
         // if (fullId == null || localId == null) {
         // throw new
@@ -742,7 +698,7 @@ public class OrientDBRepoService implements RequestHandler {
                 Map<String, String> params =
                         new HashMap<String, String>(request.getAdditionalQueryParameters());
                 params.put(QueryConstants.RESOURCE_NAME, typeToOrientClassName(partition, request
-                        .getResourceName()));
+                        .getResourceName().substring(1)));
 
                 ODatabaseDocumentTx database = getConnection();
                 try {
@@ -870,7 +826,7 @@ public class OrientDBRepoService implements RequestHandler {
 
     public String typeToOrientClassName(String partition, String resourceName) {
         String localType =
-                (null == resourceName || "/".equals(resourceName.trim())) ? partition : partition
+                (null == resourceName || "/".equals(resourceName.trim())) ? partition : partition + '_'
                         + resourceName;
         // TODO remove the trailing "/"
         return localType.replace("/", "_");

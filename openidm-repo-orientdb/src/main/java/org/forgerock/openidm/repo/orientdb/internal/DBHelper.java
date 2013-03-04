@@ -76,22 +76,31 @@ public class DBHelper {
      * @return the pool
      * @throws org.forgerock.openidm.config.InvalidException
      */
-    public synchronized static ODatabaseDocumentPool getPool(String dbURL, String user, String password, 
-            int minSize, int maxSize, JsonValue completeConfig, boolean setupDB) throws InvalidException {
+    public synchronized static ODatabaseDocumentPool getPool(String dbURL, String user,
+            String password, int minSize, int maxSize, JsonValue completeConfig, boolean setupDB)
+            throws InvalidException {
 
-        if (setupDB) {
-            logger.debug("Check DB exists in expected state for pool {}", dbURL);
-            checkDB(dbURL, user, password, completeConfig);
-        }
-        logger.debug("Getting pool {}", dbURL);
-        ODatabaseDocumentPool pool = pools.get(dbURL);
-        if (pool == null) {
-            pool = initPool(dbURL, user, password, minSize, maxSize, completeConfig);
-            pools.put(dbURL, pool);
+        ODatabaseDocumentTx setupDbConn = null;
+        ODatabaseDocumentPool pool = null;
+        try {
+            if (setupDB) {
+                logger.debug("Check DB exists in expected state for pool {}", dbURL);
+                setupDbConn = checkDB(dbURL, user, password, completeConfig);
+            }
+            logger.debug("Getting pool {}", dbURL);
+            pool = pools.get(dbURL);
+            if (pool == null) {
+                pool = initPool(dbURL, user, password, minSize, maxSize, completeConfig);
+                pools.put(dbURL, pool);
+            }
+        } finally {
+            if (setupDbConn != null) {
+                setupDbConn.close();
+            }
         }
         return pool;
     }
-    
+
     /**
      * Closes all pools managed by this helper
      * Call at application shut-down to cleanly shut down the pools.
@@ -223,34 +232,28 @@ public class DBHelper {
             }
         }
     }
-    
+
     /**
      * Ensures the DB is present in the expected form.
      */
-    private static void checkDB(String dbURL, String user, String password, JsonValue completeConfig) 
+    private static ODatabaseDocumentTx checkDB(String dbURL, String user, String password, JsonValue completeConfig)
             throws InvalidException {
-        
-        // TODO: Creation/opening of db may be not be necessary if we require this managed externally
-        OGraphDatabase db = null;
-        try {
-            db = new OGraphDatabase(dbURL);
-            if (db.exists()) {
-                logger.info("Using DB at {}", dbURL);
-                db.open(user, password); 
-                // Check if structure changed
-                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
-                populateSample(db, completeConfig);
-            } else { 
-                JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
-                logger.info("DB does not exist, creating {}", dbURL);
-                db.create(); 	       
-                populateSample(db, completeConfig);
-            } 
-        } finally {
-            if (db != null) {
-                db.close();
-            }
+        // TODO: Creation/opening of db may be not be necessary if we require
+        // this managed externally
+        OGraphDatabase db = new OGraphDatabase(dbURL);
+        if (db.exists()) {
+            logger.info("Using DB at {}", dbURL);
+            db.open(user, password);
+            // Check if structure changed
+            JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+            populateSample(db, completeConfig);
+        } else {
+            JsonValue dbStructure = completeConfig.get(OrientDBRepoService.CONFIG_DB_STRUCTURE);
+            logger.info("DB does not exist, creating {}", dbURL);
+            db.create();
+            populateSample(db, completeConfig);
         }
+        return db;
     }
 
     // TODO: Review the initialization mechanism

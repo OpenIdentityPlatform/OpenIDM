@@ -801,7 +801,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     // logger.error("Failed synchronise {} object", syncDelta.getUid(), e);
     // }
     // throw new ConnectorException("Failed synchronise " + syncDelta.getUid() +
-    // " object", e);
+    // " object" + e.getMessage(), e);
     // }
     // return true;
     // }
@@ -829,15 +829,16 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     // }
     // } catch (ResourceException e) {
     // if (logger.isDebugEnabled()) {
-    // logger.error("Failed to get OperationHelper", e);
+    // logger.debug("Failed to get OperationHelper", e);
     // }
     // throw new RuntimeException(e);
     // } catch (Exception e) {
     // // catch helper.getOperationOptionsBuilder(
     // if (logger.isDebugEnabled()) {
-    // logger.error("Failed to get OperationOptionsBuilder", e);
-    // }
-    // throw new RuntimeException(e);
+    // logger.debug("Failed to get OperationOptionsBuilder", e);
+    // }            throw new JsonResourceException(JsonResourceException.INTERNAL_ERROR,
+    //"Failed to get OperationOptionsBuilder: " + e.getMessage(), e);
+    //
     // }
     // return stage;
     // }

@@ -24,18 +24,26 @@
 
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.resource.RoutingMode.EQUALS;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
+import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.References;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
@@ -47,12 +55,14 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResultHandler;
+import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -66,13 +76,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Paul C. Bryan
  */
-@Component(name = "org.forgerock.openidm.managed", immediate = true,
+@Component(name = ManagedObjectService.PID, immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
+@Service
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM managed objects service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "managed") })
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/managed*") })
 public class ManagedObjectService implements RequestHandler {
+
+    public static final String PID = "org.forgerock.openidm.managed";
 
     /**
      * Setup logging for the {@link ManagedObjectService}.
@@ -83,11 +96,42 @@ public class ManagedObjectService implements RequestHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected CryptoService cryptoService;
 
+    private void bindCryptoService(final CryptoService service) {
+        cryptoService = service;
+    }
+
+    private void unbindCryptoService(final CryptoService service) {
+        cryptoService = null;
+    }
+
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected ScriptRegistry scriptRegistry;
 
-    private Router managedRouter = new Router();
+    private void bindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = service;
+    }
+
+    private void unbindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = null;
+    }
+
+    @Reference(referenceInterface = RouteService.class, policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+            target = "(" + ServerConstants.ROUTER_PREFIX + "=/sync*)")
+    private final AtomicReference<RouteService> syncRoute = new AtomicReference<RouteService>();
+
+    private void bindRouteService(final RouteService service) {
+        syncRoute.set(service);
+    }
+
+    private void unbindRouteService(final RouteService service) {
+        syncRoute.set(null);
+    }
+
+    private final ConcurrentMap<String, Route> managedRoutes = new ConcurrentHashMap<String, Route>();
+
+    private final Router managedRouter = new Router();
+
 
     /**
      * TODO: Description.
@@ -96,22 +140,40 @@ public class ManagedObjectService implements RequestHandler {
      *            TODO.
      */
     @Activate
-    protected void activate(ComponentContext context) {
-        JsonValue config = new JsonValue(new JSONEnhancedConfig().getConfiguration(context));
-        try {
-            for (JsonValue value : config.get("objects").expect(List.class)) {
-                ManagedObjectSet objectSet =
-                        new ManagedObjectSet(scriptRegistry, cryptoService, value);
-                String name = objectSet.getName();
-                // TODO Fix this check
-                // if (routes.containsKey(name)) {
-                // throw new JsonValueException(value, "object " + name +
-                // " already defined");
-                // }
-                managedRouter.addRoute(EQUALS, name, objectSet);
+    protected void activate(ComponentContext context) throws Exception {
+        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+        for (JsonValue value : configuration.get("objects").expect(List.class)) {
+            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService,syncRoute, value);
+            if (managedRoutes.containsKey(objectSet.getName())) {
+                throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }
-        } catch (Exception jve) {
-            throw new ComponentException("Configuration error", jve);
+            managedRoutes.put(objectSet.getName(),managedRouter.addRoute(objectSet.getTemplate(), objectSet));
+        }
+    }
+
+    @Modified
+    protected void modified(ComponentContext context) throws Exception {
+        JsonValue configuration = JSONEnhancedConfig.newInstance().getConfigurationAsJson(context);
+
+        Set<String> tempRoutes = new HashSet<String>();
+        for (JsonValue value : configuration.get("objects").expect(List.class)) {
+            ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService,syncRoute, value);
+            if (tempRoutes.contains(objectSet.getName())) {
+                throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
+            }
+            Route oldRoute = managedRoutes.get(objectSet.getName());
+            if (null != oldRoute) {
+                managedRouter.removeRoute(oldRoute);
+            }
+            managedRoutes.put(objectSet.getName(),managedRouter.addRoute(objectSet.getTemplate(), objectSet));
+            tempRoutes.add(objectSet.getName());
+        }
+        for (Map.Entry<String, Route> entry : managedRoutes.entrySet()){
+           //Use ConcurrentMap to avoid ConcurrentModificationException with this iteration
+            if (tempRoutes.contains(entry.getKey())) {
+                continue;
+            }
+            managedRouter.removeRoute(managedRoutes.remove(entry.getKey()));
         }
     }
 
@@ -124,6 +186,7 @@ public class ManagedObjectService implements RequestHandler {
     @Deactivate
     protected void deactivate(ComponentContext context) {
         managedRouter.removeAllRoutes();
+        managedRoutes.clear();
     }
 
     @Override

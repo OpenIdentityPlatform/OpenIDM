@@ -2,13 +2,13 @@
     "objects" : [
         {
             "name" : "user",
-            "onCreate" : {
+            "onCreateFIXME" : {
                 "type" : "text/javascript",
-                "file" : "bin/defaults/script/ui/onCreate-user-set-default-fields.js"
+                "name" : "ui/onCreate-user-set-default-fields.js"
             },
             "onDelete" : {
                 "type" : "text/javascript",
-                "file" : "bin/defaults/script/ui/onDelete-user-cleanup.js"
+                "name" : "ui/onDelete-user-cleanup.js"
             },
             "properties" : [
                 {

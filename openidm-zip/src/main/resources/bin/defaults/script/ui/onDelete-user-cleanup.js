@@ -32,7 +32,7 @@ var userId = object._id,
     },
     notificationQueryResult;
 
-notificationQueryResult = openidm.query("repo/ui/notification", findUserNotificationsParams);
+notificationQueryResult = openidm.query("/repo/ui/notification", findUserNotificationsParams);
 if (notificationQueryResult.result && notificationQueryResult.result.length!==0) {
         
     for (notificationPointer=0;notificationPointer<notificationQueryResult.result.length;notificationPointer++) {
