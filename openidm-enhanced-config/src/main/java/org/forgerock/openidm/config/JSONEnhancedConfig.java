@@ -35,6 +35,7 @@ import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
@@ -202,8 +203,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         @Override
         public void transform(JsonValue value) throws JsonException {
             if (null != value && value.isString()) {
-                value.setObject(substVars(value.asString(), IdentityServer.getInstance()));
-                //value.setObject(PropertyUtil.substVars(value.asString(), IdentityServer.getInstance(), doEscape));
+                value.setObject(PropertyUtil.substVars(value.asString(), IdentityServer.getInstance(), doEscape));
             }
         }
     }

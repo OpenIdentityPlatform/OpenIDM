@@ -84,18 +84,6 @@ public class InfoService extends AbstractScriptedService {
         healthInfoSvc = null;
     }
 
-    /** PersistenceConfig service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private PersistenceConfig persistenceConfig;
-
-    private void bindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = service;
-    }
-
-    private void unbindPersistenceConfig(final PersistenceConfig service) {
-        persistenceConfig = null;
-    }
-
     private ComponentContext context;
 
     public InfoService() {
@@ -132,13 +120,6 @@ public class InfoService extends AbstractScriptedService {
 
     protected Object getRouterPrefixes(String factoryPid, JsonValue configuration) {
         return "/info/" + String.valueOf(factoryPid) + "*";
-    }
-
-    protected JsonValue serialiseServerContext(ServerContext context) throws ResourceException {
-        if (null != context && null != persistenceConfig) {
-            return ServerContext.saveToJson(context, persistenceConfig);
-        }
-        return null;
     }
 
     protected BundleContext getBundleContext() {
