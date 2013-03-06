@@ -492,12 +492,6 @@ public class OrientDBRepoService implements RequestHandler {
                 typeToOrientClassName(partition, resourceName.length > 1 ? resourceName[0] : null);
         String localId = resourceName.length > 1 ? resourceName[1] : resourceName[0];
 
-        if (StringUtils.isBlank(request.getRevision())) {
-            throw new ConflictException(
-                    "Object passed into update does not have revision it expects set.");
-        } else {
-            request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV, request.getRevision());
-        }
         // TODO http://code.google.com/p/orient/wiki/JavaMultiThreading
         ODatabaseDocumentTx db = getConnection();
         try {
@@ -510,6 +504,11 @@ public class OrientDBRepoService implements RequestHandler {
             ODocument updatedDoc =
                     DocumentUtil.toDocument(request.getNewContent().asMap(), existingDoc,
                             orientClassName);
+
+            if (!StringUtils.isBlank(request.getRevision())) {
+                updatedDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
+                //request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV, request.getRevision());
+            }
             logger.trace("Updated doc for partition: {}, resourceName: {}, to save {}",
                     new Object[] { partition, request.getResourceName(), updatedDoc });
 
@@ -599,11 +598,6 @@ public class OrientDBRepoService implements RequestHandler {
                 typeToOrientClassName(partition, resourceName.length > 1 ? resourceName[0] : null);
         String localId = resourceName.length > 1 ? resourceName[1] : resourceName[0];
 
-        if (StringUtils.isBlank(request.getRevision())) {
-            throw new ConflictException(
-                    "Object passed into delete does not have revision it expects set.");
-        }
-
         // This throws ConflictException if parse fails
         int ver = DocumentUtil.parseVersion(request.getRevision());
 
@@ -616,8 +610,11 @@ public class OrientDBRepoService implements RequestHandler {
                         + orientClassName + "/" + localId);
             }
 
-            existingDoc.setVersion(ver); // State the version we expect to
-                                         // delete for MVCC check
+            if (!StringUtils.isBlank(request.getRevision())) {
+                // State the version we expect to delete for MVCC check
+                existingDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
+                //request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV, request.getRevision());
+            }
 
             db.delete(existingDoc);
             db.commit();
