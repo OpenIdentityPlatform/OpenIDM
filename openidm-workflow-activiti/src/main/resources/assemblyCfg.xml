@@ -13,14 +13,13 @@
                 <include>org.forgerock.openidm:openidm-util</include>
                 <include>org.forgerock.openidm:openidm-workflow-activiti</include>
                 <include>org.forgerock.commons:json-fluent</include>
-                <include>org.forgerock.commons:org.forgerock.json.resource</include>
                 <include>org.codehaus.jackson:*</include>
                 <include>org.slf4j:*</include>
                 <include>org.apache.*:*</include>
-                <include>org.restlet.jee:org.restlet.ext.httpclient</include>
-                <include>org.restlet.jee:org.restlet.ext.jackson</include>
-                <include>org.restlet.jee:org.restlet.ext.servlet</include>
-                <include>org.restlet.jee:org.restlet</include>
+                <include>org.restlet.osgi:org.restlet.ext.httpclient</include>
+                <include>org.restlet.osgi:org.restlet.ext.jackson</include>
+                <include>org.restlet.osgi:org.restlet.ext.servlet</include>
+                <include>org.restlet.osgi:org.restlet</include>
             </includes>
             <outputDirectory>/</outputDirectory>
             <useProjectArtifact>true</useProjectArtifact>

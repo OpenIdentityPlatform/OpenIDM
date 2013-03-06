@@ -37,7 +37,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import org.activiti.engine.impl.context.Context;
-import org.forgerock.script.scope.ConnectionFunction;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
 
 /**
@@ -116,8 +115,8 @@ public class OpenIDMELResolver extends ELResolver {
             OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
             router = session.getOpenIDM();
             context.setPropertyResolved(true);
-            try {
-                ConnectionFunction.valueOf((String) method).call(null, params);
+//            try {
+//                ConnectionFunction.valueOf((String) method).call(null, params);
 //                switch (SimpleJsonResource.Method.valueOf((String) method)) {
 //                    case read:
 //                        return router.read((String) params[0]);
@@ -141,11 +140,11 @@ public class OpenIDMELResolver extends ELResolver {
 //                        throw new BadRequestException("The requested method is not available: " + method);
 //                }
 
-            } catch (ResourceException ex) {
-                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
-            } catch (Exception ex) {
-                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
-            }
+//            } catch (ResourceException ex) {
+//                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+//            } catch (Exception ex) {
+//                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
+//            }
         }
         return null;
     }

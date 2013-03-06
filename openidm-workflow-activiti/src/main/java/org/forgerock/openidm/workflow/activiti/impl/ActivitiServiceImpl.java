@@ -44,22 +44,16 @@ import org.activiti.engine.impl.scripting.ResolverFactory;
 import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
 import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
+import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.*;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.JsonResource;
-import org.forgerock.json.resource.JsonResourceException;
-import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.*;
 import org.forgerock.openidm.config.EnhancedConfig;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.objset.JsonResourceObjectSet;
-import org.forgerock.openidm.objset.ServiceUnavailableException;
-import org.forgerock.openidm.workflow.HttpRemoteJsonResource;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
@@ -76,29 +70,38 @@ import org.slf4j.LoggerFactory;
  * @version $Revision$ $Date$
  */
 @Component(name = ActivitiServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
+@Service
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Workflow Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = ActivitiServiceImpl.ROUTER_PREFIX)})
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = {
+        ActivitiServiceImpl.ROUTER_PREFIX_OBJ, 
+        ActivitiServiceImpl.ROUTER_PREFIX_OBJID,
+        ActivitiServiceImpl.ROUTER_PREFIX_OBJID_SUBOBJ,
+        ActivitiServiceImpl.ROUTER_PREFIX_OBJID_SUBOBJID})})
 @References({
     @Reference(name = "JavaDelegateServiceReference",
     referenceInterface = JavaDelegate.class,
-    bind = "withService",
+    bind = "bindService",
     unbind = "unbindService",
     cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-    policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
-    referenceInterface = JsonResource.class,
-    bind = "bindRouter",
-    unbind = "unbindRouter",
-    cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    policy = ReferencePolicy.DYNAMIC,
-    target = "(service.pid=org.forgerock.openidm.router)")})
-public class ActivitiServiceImpl {
+    policy = ReferencePolicy.DYNAMIC)//,
+//    @Reference(name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
+//    referenceInterface = JsonResource.class,
+//    bind = "bindRouter",
+//    unbind = "unbindRouter",
+//    cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+//    policy = ReferencePolicy.DYNAMIC,
+//    target = "(service.pid=org.forgerock.openidm.router)")})
+})
+public class ActivitiServiceImpl implements RequestHandler {
 
     final static Logger logger = LoggerFactory.getLogger(ActivitiServiceImpl.class);
     public final static String PID = "org.forgerock.openidm.workflow";
-    public final static String ROUTER_PREFIX = "workflow";
+    public final static String ROUTER_PREFIX_OBJ = "/workflow/{activitiobj}";
+    public final static String ROUTER_PREFIX_OBJID = "/workflow/{activitiobj}/{objid}";
+    public final static String ROUTER_PREFIX_OBJID_SUBOBJ = "/workflow/{activitiobj}/{objid}/{subobj}";
+    public final static String ROUTER_PREFIX_OBJID_SUBOBJID = "/workflow/{activitiobj}/{objid}/{subobj}/{subobjid}";
     // Keys in the JSON configuration
     public static final String CONFIG_ENABLED = "enabled";
     public static final String CONFIG_LOCATION = "location";
@@ -127,21 +130,27 @@ public class ActivitiServiceImpl {
     target = "(!openidm.activiti.engine=true)" //avoid register the self made service
     )
     private ProcessEngine processEngine;
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+    bind = "bindConfigAdmin",
+    unbind = "unbindConfigAdmin")
     private ConfigurationAdmin configurationAdmin = null;
     /**
      * Some need to register a TransactionManager or we need to create one.
      */
-    @Reference
+    @Reference(bind = "bindTransactionManager",
+    unbind = "unbindTransactionManager")
     private TransactionManager transactionManager;
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, target = "(osgi.jndi.service.name=jdbc/openidm)")
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+    bind = "bindDataSource",
+    unbind = "unbindDataSource",
+    target = "(osgi.jndi.service.name=jdbc/openidm)")
     private DataSource dataSource;
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
     private final SharedIdentityService identityService = new SharedIdentityService();
     private final OpenIDMSessionFactory idmSessionFactory = new OpenIDMSessionFactory();
     private ProcessEngineFactory processEngineFactory;
     private Configuration barInstallerConfiguration;
-    private CollectionResourceProvider activitiResource;
+    private RequestHandler activitiResource;
     //Configuration variables
     private boolean enabled;
     private EngineLocation location = EngineLocation.embedded;
@@ -155,6 +164,41 @@ public class ActivitiServiceImpl {
     private boolean starttls;
     private String historyLevel;
     private String workflowDir;
+
+    @Override
+    public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
+        activitiResource.handleAction(context, request, handler);
+    }
+
+    @Override
+    public void handleCreate(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        activitiResource.handleCreate(context, request, handler);
+    }
+
+    @Override
+    public void handleDelete(ServerContext context, DeleteRequest request, ResultHandler<Resource> handler) {
+        activitiResource.handleDelete(context, request, handler);
+    }
+
+    @Override
+    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
+        handler.handleError(new NotSupportedException("Patch on ActivitiService not supported."));
+    }
+
+    @Override
+    public void handleQuery(ServerContext context, QueryRequest request, QueryResultHandler handler) {
+        activitiResource.handleQuery(context, request, handler);
+    }
+
+    @Override
+    public void handleRead(ServerContext context, ReadRequest request, ResultHandler<Resource> handler) {
+        activitiResource.handleRead(context, request, handler);
+    }
+
+    @Override
+    public void handleUpdate(ServerContext context, UpdateRequest request, ResultHandler<Resource> handler) {
+        activitiResource.handleUpdate(context, request, handler);
+    }
 
     public enum EngineLocation {
 
@@ -206,7 +250,7 @@ public class ActivitiServiceImpl {
                             configuration.setDataSource(jdbcDataSource);
                         } else {
                             configuration.setDataSource(dataSource);
-                            configuration.setIdentityService(identityService);
+                            //configuration.setIdentityService(identityService);
                         }
 
                         configuration.setTransactionManager(transactionManager);
@@ -217,7 +261,7 @@ public class ActivitiServiceImpl {
                         if (customSessionFactories == null) {
                             customSessionFactories = new ArrayList<SessionFactory>();
                         }
-                        customSessionFactories.add(idmSessionFactory);
+                        //customSessionFactories.add(idmSessionFactory);
                         configuration.setCustomSessionFactories(customSessionFactories);
                         configuration.setExpressionManager(new OpenIDMExpressionManager());
 
@@ -282,9 +326,9 @@ public class ActivitiServiceImpl {
                     case local: //ProcessEngine is connected by @Reference
                         activitiResource = new ActivitiResource(processEngine);
                         break;
-                    case remote: //fetch remote connection parameters
-                        activitiResource = new HttpRemoteJsonResource(url, username, password);
-                        break;
+//                    case remote: //fetch remote connection parameters
+//                        activitiResource = new HttpRemoteJsonResource(url, username, password);
+//                        break;
                     default:
                         throw new InvalidException(CONFIG_LOCATION + " invalid, can not start workflow service.");
                 }
@@ -368,21 +412,44 @@ public class ActivitiServiceImpl {
         logger.info("ProcessEngine stopped.");
     }
 
-    protected void bindRouter(Router router) {
-        this.idmSessionFactory.setRouter(new JsonResourceObjectSet(router));
-        this.identityService.setRouter(router);
-    }
-
-    protected void unbindRouter(Router router) {
-        this.idmSessionFactory.setRouter(null);
-        this.identityService.setRouter(null);
-    }
-
+//    protected void bindRouter(Router router) {
+//        this.idmSessionFactory.setRouter(new JsonResourceObjectSet(router));
+//        this.identityService.setRouter(router);
+//    }
+//
+//    protected void unbindRouter(Router router) {
+//        this.idmSessionFactory.setRouter(null);
+//        this.identityService.setRouter(null);
+//    }
     public void bindService(JavaDelegate delegate, Map props) {
         openIDMELResolver.bindService(delegate, props);
     }
 
     public void unbindService(JavaDelegate delegate, Map props) {
         openIDMELResolver.unbindService(delegate, props);
+    }
+
+    public void bindTransactionManager(TransactionManager manager) {
+        transactionManager = manager;
+    }
+
+    public void unbindTransactionManager(TransactionManager manager) {
+        transactionManager = null;
+    }
+
+    public void bindConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configurationAdmin = configAdmin;
+    }
+
+    public void unbindConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configurationAdmin = null;
+    }
+
+    public void bindDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    public void unbindDataSource(DataSource dataSource) {
+        this.dataSource = null;
     }
 }
