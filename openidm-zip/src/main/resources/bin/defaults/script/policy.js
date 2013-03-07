@@ -728,10 +728,12 @@ policyProcessor = (function (policyConfig,policyImpl){
                     props = request.value;
                     for (propName in props) {
                         prop = getPropertyConfig(resource, propName);
-                        policies = prop.policies;
-                        // Validate
-                        policyRequirements = validate(policies, fullObject, propName, 
-                                props[propName], failedPolicyRequirements);
+                        if (prop !== null) {
+                            policies = prop.policies;
+                            // Validate
+                            policyRequirements = validate(policies, fullObject, propName, 
+                                    props[propName], failedPolicyRequirements);
+                        }
                     }
                 } else {
                     throw "Unsupported action: " + action;
