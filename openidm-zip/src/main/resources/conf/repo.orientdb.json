@@ -16,7 +16,7 @@
         "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}",
         "get-notifications-for-user" : "select * FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
         "scan-tasks" : "SELECT * FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${unquoted:taskState.completed} is NULL",
-        "query-scheduler-instances" : "SELECT * FROM scheduler_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')"
+        "query-cluster-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')"
     },
     "dbStructure" : {
         "orientdbClass" : {
@@ -118,7 +118,7 @@
                     }
                 ]
             },
-            "scheduler_states" : {
+            "cluster_states" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",
