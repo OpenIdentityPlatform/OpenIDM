@@ -52,6 +52,7 @@
             {
                 "location":"bundle",
                 "includes":[
+                    "**/openidm-cluster*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/groovy-all*.jar"
                 ],

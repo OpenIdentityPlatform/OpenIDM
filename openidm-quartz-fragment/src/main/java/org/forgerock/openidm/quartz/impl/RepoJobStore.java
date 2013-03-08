@@ -36,16 +36,16 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.JsonResourceAccessor;
 import org.forgerock.json.resource.JsonResourceException;
+import org.forgerock.openidm.cluster.ClusterEvent;
+import org.forgerock.openidm.cluster.ClusterEventListener;
+import org.forgerock.openidm.cluster.ClusterEventType;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.objset.NotFoundException;
 import org.forgerock.openidm.objset.ObjectSetException;
@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * @author ckienle
  *
  */
-public class RepoJobStore implements JobStore {
+public class RepoJobStore implements JobStore, ClusterEventListener {
 
     private final static Logger logger = LoggerFactory.getLogger(RepoJobStore.class);
     
@@ -85,6 +85,11 @@ public class RepoJobStore implements JobStore {
      * An identifier used to create unique keys for Jobs and Triggers.
      */
     private final static String UNIQUE_ID_SEPARATOR = "_$x$x$_"; 
+    
+    /**
+     * Cluster Management Service
+     */
+    private ClusterManagementService clusterManager;
 
     /**
      * The SchedulerSignaler to send notification to
@@ -100,27 +105,11 @@ public class RepoJobStore implements JobStore {
      * The instance ID
      */
     private String instanceId;
-    
+
     /**
-     * The timeout period used to determine if an instance has failed.
+     * The listener ID used for registration with the Cluster Management Service
      */
-    private static long instanceTimeout = 60000;
-    
-    /**
-     * The timeout period used to determine if an instance (that is recovering another
-     * failed instance) has failed during the recovery attempt.
-     */
-    private static long instanceRecoveryTimeout = 60000;
-    
-    /**
-     * The interval at which an instance will check-in
-     */
-    private static long instanceCheckInInterval = 10000;
-    
-    /**
-     * The interval at which an instance will check-in
-     */
-    private static long instanceCheckInOffset = 0;
+    private String listenerId = "scheduler";
     
     /**
      * The instance Name (currently unused)
@@ -153,11 +142,6 @@ public class RepoJobStore implements JobStore {
     private static JsonResourceAccessor accessor = null;
     
     /**
-     * Manages check-ins and failed instance recovery
-     */
-    private ClusterManager manager;
-    
-    /**
      * Creates a new <code>RepoJobStore</code>.
      */
     public RepoJobStore() {
@@ -177,18 +161,8 @@ public class RepoJobStore implements JobStore {
         // Set the number of retries for failed writes to the repository
         this.writeRetries = Integer.parseInt(IdentityServer.getInstance().getProperty("openidm.scheduler.repo.retry", "-1"));
         synchronized (lock) {
-            InstanceState state = null;
-            int stateValue = -1;
-            if (isClustered()) {
-                // Do initial Checkin
-                state = checkIn();
-                if (state != null) {
-                    stateValue = state.getState();
-                }
-                logger.debug("Initial Checkin state: " + stateValue);
-            }
             // If it is not clustered, or if clustered and not recovering, do cleanup
-            if (!isClustered() || stateValue == InstanceState.STATE_RUNNING) {
+            if (!isClustered()) {
                 try {
                     // Make sure all available triggers are "waiting"
                     logger.trace("Getting Acquired Triggers");
@@ -236,6 +210,16 @@ public class RepoJobStore implements JobStore {
         return true;
     }
     
+    public boolean setClusterService() {
+        if (clusterManager == null) {
+            BundleContext ctx = FrameworkUtil.getBundle(RepoJobStore.class).getBundleContext();
+            ServiceReference serviceReference = ctx.getServiceReference(ClusterManagementService.class.getName());
+            clusterManager = ClusterManagementService.class.cast(ctx.getService(serviceReference));
+            return !(clusterManager == null);
+        }
+        return true;
+    }
+    
     /**
      * An external method for setting the router (used in test cases).
      * 
@@ -258,8 +242,14 @@ public class RepoJobStore implements JobStore {
     public void schedulerStarted() throws SchedulerException {
         logger.debug("Job Scheduler Started");
         if (isClustered()) {
-            manager = new ClusterManager(instanceCheckInInterval, instanceCheckInOffset);
-            manager.startup();
+            if (isClustered()) {
+                if (setClusterService()) {
+                    logger.info("Registering with ClusterManagementService");
+                    clusterManager.register(listenerId, this);
+                } else {
+                    logger.error("ClusterManagementService not available");
+                }   
+            }
         }
     }
     
@@ -400,19 +390,6 @@ public class RepoJobStore implements JobStore {
         StringBuilder sb = new StringBuilder();
         return sb.append(getIdPrefix()).append("acquiredTriggers").toString();
     }
-    
-    /**
-     * Gets the Instance State repository ID.
-     */
-    private String getInstanceStateRepoId(String instanceId) {
-        StringBuilder sb = new StringBuilder();
-        return sb.append(getIdPrefix()).append("states/").append(instanceId).toString();
-    }
-    
-    private String getInstanceStateRepoResource() {
-        StringBuilder sb = new StringBuilder();
-        return sb.append(getIdPrefix()).append("states").toString();
-    }
 
     /**
      * Gets the Trigger ID.
@@ -456,9 +433,6 @@ public class RepoJobStore implements JobStore {
     @Override
     public void shutdown() {
         logger.debug("Job Scheduler Stopped");
-        if (isClustered()) {
-            manager.shutdown();
-        }
     }
     
     @Override
@@ -2044,35 +2018,7 @@ public class RepoJobStore implements JobStore {
         }
 
     }
-    
-    /**
-     * Updates an instance's state.
-     * 
-     * @param instanceId the id of the instance to update
-     * @param instanceState the updated InstanceState object
-     * @throws JobPersistenceException
-     * @throws JsonResourceException
-     */
-    private void updateInstanceState(String instanceId, InstanceState instanceState) 
-            throws JobPersistenceException, JsonResourceException {
-        synchronized (lock) {
-            if (!setAccessor()) {
-                throw new JobPersistenceException("Repo router is null");
-            }
-            String repoId = getInstanceStateRepoId(instanceId);
-            
-            accessor.update(repoId, instanceState.getRevision(), new JsonValue(instanceState.toMap()));
-        }
-    }
-    
-    private InstanceState getInstanceState(String instanceId) throws JobPersistenceException, JsonResourceException {
-        synchronized (lock) {
-            if (!setAccessor()) {
-                throw new JobPersistenceException("Repo router is null");
-            }
-            return new InstanceState(instanceId, getOrCreateRepo(getInstanceStateRepoId(instanceId)));
-        }
-    }
+
      
     private Map<String, Object> getOrCreateRepo(String repoId) 
             throws JobPersistenceException, JsonResourceException {
@@ -2353,363 +2299,58 @@ public class RepoJobStore implements JobStore {
     public void setSchedulerSignaler(SchedulerSignaler schedulerSignaler) {
         this.schedulerSignaler = schedulerSignaler;
     }
-    
-    ////////////////////////////
-    //                        //  
-    //   Cluster Management   //
-    //                        //
-    ////////////////////////////
-    
-    /**
-     * Updates the timestamp for this instance in the instance check-in map.
-     * 
-     * @ return the InstanceState object, or null if an expected failure (MVCC) was encountered
-     */
-    private InstanceState checkIn() {
-        InstanceState state = null;
-        try {
-            state = getInstanceState(instanceId);
-            switch (state.getState()) {
-            case InstanceState.STATE_RUNNING:
-                // just update the timestamp
-                state.updateTimestamp();
-                break;
-            case InstanceState.STATE_DOWN:
-                // instance has been recovered, so switch to "normal" state and update timestamp
-                state.setState(InstanceState.STATE_RUNNING);
-                logger.debug("Instance {} state changing from {} to {}", new Object[]{instanceId, 
-                        InstanceState.STATE_DOWN, InstanceState.STATE_RUNNING});
-                state.updateTimestamp();
-                break;
-            case InstanceState.STATE_PROCESSING_DOWN:
-                // rare case, do not update state or timestamp
-                // system may attempt to recover itself if recovery timeout has elapsed
-                return state;
-            }
-            updateInstanceState(instanceId, state);
-            logger.debug("Instance {} state updated successfully");
-        } catch (JobPersistenceException e) {
-            logger.error("Error updating instance timestamp", e);
-        } catch (JsonResourceException e) {
-            if (e.getCode() != JsonResourceException.CONFLICT) {
-                logger.warn("Error updating instance timestamp", e);
-            } else {
-                // MVCC failure, return null
-                logger.info("Failed to set this instance state to {}", state.getState());
-                return null;
-            }
-        }
-        return state;
-    }
-    
-    /**
-     * Returns a list of all instances who have timed out.  Reads in and loops through 
-     * the instance check-in map and compares the time elapse since each instances last
-     * check-in against the instance timeout.
-     * 
-     * @return a map of all instances who have timed out (failed).
-     */
-    private Map<String, InstanceState> findFailedInstances() {
-        Map<String, InstanceState> failedInstances = new HashMap<String, InstanceState>();
-        try {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("_queryId", "query-scheduler-instances");
-            map.put("timestamp", pad(System.currentTimeMillis() - instanceTimeout));
-            JsonValue jv = accessor.query(getInstanceStateRepoResource(), new JsonValue(map));
-            JsonValue result = jv.get("result");
-            if (!result.isNull()) {
-                for (JsonValue value : result) {
-                    Map<String, Object> valueMap = value.asMap();
-                    String id = (String)valueMap.get("instanceId");
-                    InstanceState state = new InstanceState(id, valueMap);
-                    switch (state.getState()) {
-                    case InstanceState.STATE_RUNNING:
-                        failedInstances.put(id, state);
-                        break;
-                    case InstanceState.STATE_PROCESSING_DOWN:
-                        // Check if recovering has failed
-                        if (state.hasRecoveringFailed()) {
-                            failedInstances.put(id, state);
-                        }
-                        break;
-                    case InstanceState.STATE_DOWN:
-                        // allready recovered, do nothing
-                        break;
-                    }
-                }
-            }
-        } catch (JsonResourceException e) {
-            logger.error("Error reading instance check in map", e);
-        }
-        
-        return failedInstances;
-    }
-    
-    /**
-     * Recovers a failed instance by "freeing" all their acquired triggers (adding back
-     * to the waiting pool) and notifying the scheduler.
-     * 
-     * @param instanceId the id of the instance to recover
-     * @return true if any triggers were "freed", false otherwise
-     */
-    private boolean recoverFailedInstance(String instanceId, InstanceState state) {
-        
-        // first attempt to update the recovery timestamp and status of the instance
-        state.setRecoveringTimestamp(System.currentTimeMillis());
-        state.setState(InstanceState.STATE_PROCESSING_DOWN);
-        try {
-            updateInstanceState(instanceId, state);
-        } catch (JobPersistenceException e) {
-            logger.warn("Failed to update instance state", e);
-            return false;
-        } catch (JsonResourceException e) {
-            if (e.getCode() != JsonResourceException.CONFLICT) {
-                logger.warn("Failed to update instance state", e);
-            }
-            logger.info("Failed to set state of {} to {}", new Object[]{instanceId, InstanceState.STATE_PROCESSING_DOWN});
-            return false;
-        }
-        logger.info("Successfully set state of {} to {}", new Object[]{instanceId, InstanceState.STATE_PROCESSING_DOWN});
-        
-        try {
-            // Free acquired triggers
-            AcquiredTriggers triggers = getAcquiredTriggers(instanceId);
-            for (Trigger trigger : triggers.getTriggers()) {
-                boolean removed = false;
-                int retry = 0;
-                // Remove the acquired trigger
-                while (writeRetries == -1 || retry <= writeRetries) {
-                    try {
-                        removed = removeAcquiredTrigger(trigger, instanceId);
-                        break;
-                    } catch (JobPersistenceException e) {
-                        logger.debug("Failed to remove acquired trigger", e);
-                        retry++;
-                    }
-                }
-                // Check if trigger was removed
-                if (removed) {
-                    // Attempt to add to the trigger to the waiting trigger pool
-                    retry = 0;
+
+    @Override
+    public boolean handleEvent(ClusterEvent event) {
+        switch (event.getType()) {
+        case RECOVERY_INITIATED:
+            try {
+                // Free acquired triggers
+                AcquiredTriggers triggers = getAcquiredTriggers(instanceId);
+                for (Trigger trigger : triggers.getTriggers()) {
+                    boolean removed = false;
+                    int retry = 0;
+                    // Remove the acquired trigger
                     while (writeRetries == -1 || retry <= writeRetries) {
                         try {
-                            addWaitingTrigger(trigger);
+                            removed = removeAcquiredTrigger(trigger, instanceId);
                             break;
                         } catch (JobPersistenceException e) {
-                            logger.debug("Failed to add waiting trigger", e);
+                            logger.debug("Failed to remove acquired trigger", e);
                             retry++;
                         }
                     }
-                }
-                logger.info("Recovered trigger {} from failed instance {}", trigger.getName(), instanceId);
-                try {
-                    // Update the recovery timestamp
-                    state = getInstanceState(instanceId);
-                    state.updateRecoveringTimestamp();
-                    updateInstanceState(instanceId, state);
-                    logger.debug("Updated recovery timestamp of instance {}", instanceId);
-                } catch (JsonResourceException e) {
-                    if (e.getCode() != JsonResourceException.CONFLICT) {
-                        logger.warn("Failed to update recovery timestamp of instance {}: {}", instanceId, e.getMessage());
-                    }
-                    return false;
-                } catch (JobPersistenceException e) {
-                    logger.warn("Failed to update recovery timestamp of instance {}: {}", instanceId, e.getMessage());
-                    return false;
-                }
-            }
-
-            // send notification
-            sendRecoveredInstanceNotification(instanceId);
-        } catch (JobPersistenceException e) {
-            logger.warn("Error freeing acquired triggers of instance {}:  {}", instanceId, e.getMessage());
-        }
-        
-        try {
-            // Update the instance state to recovered
-            state = getInstanceState(instanceId);
-            state.setState(InstanceState.STATE_DOWN);
-            updateInstanceState(instanceId, state);
-        } catch (JsonResourceException e) {
-            if (e.getCode() != JsonResourceException.CONFLICT) {
-                logger.warn("Failed to update instance state", e);
-            }
-            return false;
-        } catch (JobPersistenceException e) {
-            logger.warn("Failed to set instance state to recovered", e);
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Sends notification of the successful recovery of a failed instance to the
-     * scheduler and any other interested parties.
-     * 
-     * @param instanceId the id of the recovered instance
-     */
-    private void sendRecoveredInstanceNotification(String instanceId) {
-        // Send a signal to the scheduler to indicate a scheduling change
-        schedulerSignaler.signalSchedulingChange(0L);
-        
-        //
-        // Other potential notifications can be sent here
-        //
-    }
-    
-    public String pad(long l) {
-        return String.format("%019d", l);
-    }
-    
-    class ClusterManager {
-        
-        private long checkinInterval;
-        private long checkinOffset;
-        private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        private ScheduledFuture handler;
-        
-        public ClusterManager(long checkinInterval, long checkinOffset) {
-            this.checkinInterval = checkinInterval;
-        }
-        
-        public void startup() {
-            handler = scheduler.scheduleAtFixedRate(new Runnable() {
-                public void run() {
-                    // Check in this instance
-                    logger.debug("Instance check-in");
-                    checkIn();
-
-                    // Find failed instances
-                    Map<String, InstanceState> failedInstances = findFailedInstances();
-
-                    if (failedInstances.size() > 0) {
-                        logger.info("{} failed instances found, attempting recovery", failedInstances.size());
-                        // Recover failed instance's triggers
-                        for (String id : failedInstances.keySet()) {
-                            recoverFailedInstance(id, failedInstances.get(id));
+                    // Check if trigger was removed
+                    if (removed) {
+                        // Attempt to add to the trigger to the waiting trigger pool
+                        retry = 0;
+                        while (writeRetries == -1 || retry <= writeRetries) {
+                            try {
+                                addWaitingTrigger(trigger);
+                                break;
+                            } catch (JobPersistenceException e) {
+                                logger.debug("Failed to add waiting trigger", e);
+                                retry++;
+                            }
                         }
                     }
+                    logger.info("Recovered trigger {} from failed instance {}", trigger.getName(), instanceId);
+
+                    // Update the recovery timestamp
+                    clusterManager.renewRecoveryLease(instanceId);
                 }
-            }, checkinOffset, checkinInterval + checkinOffset, TimeUnit.MILLISECONDS);
-        }
-        
-        public void shutdown() {
-            handler.cancel(true);
-        }
-    }
 
-    class InstanceState {
-        
-        public final static int STATE_RUNNING = 1;
-        public final static int STATE_PROCESSING_DOWN = 2;
-        public final static int STATE_DOWN = 3;
-        
-        private String instanceId;
-        private int state;
-        private long timestamp;
-        private long recoveringTimestamp;
-        private String rev;
-        private String id;
-        
-        public InstanceState(String instanceId, Map<String, Object> map) {
-            this.setInstanceId(instanceId);
-            this.state = ((map.get("state") == null) ? STATE_RUNNING : (Integer)map.get("state"));
-            this.timestamp = ((map.get("timestamp") == null) ? System.currentTimeMillis() : Long.parseLong((String)map.get("timestamp")));
-            this.recoveringTimestamp = ((map.get("recoveringTimestamp") == null) ? 0L : Long.parseLong((String)map.get("recoveringTimestamp")));
-            this.rev = (String)map.get("_rev");
-            this.id = (String)map.get("_id");
-        }
-        
-        public InstanceState(String instanceId) {
-            this.setInstanceId(instanceId);
-            this.state = STATE_RUNNING;
-            this.timestamp = System.currentTimeMillis();
-            this.recoveringTimestamp = 0L;
-        }
-
-        public void updateTimestamp() {
-            timestamp = System.currentTimeMillis();
-        }
-        
-        public void updateRecoveringTimestamp() {
-            recoveringTimestamp = System.currentTimeMillis();
-        }
-        
-        public int getState() {
-            return state;
-        }
-
-        public void setState(int state) {
-            this.state = state;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        public long getRecoveringTimestamp() {
-            return recoveringTimestamp;
-        }
-
-        public void setRecoveringTimestamp(long recoveringTimestamp) {
-            this.recoveringTimestamp = recoveringTimestamp;
-        }
-        
-        public String getRevision() {
-            return rev;
-        }
-        
-        public boolean hasFailed() {
-            if (System.currentTimeMillis() - timestamp > instanceTimeout) {
-                return true;
+                // send notification
+                schedulerSignaler.signalSchedulingChange(0L);
+            } catch (JobPersistenceException e) {
+                logger.warn("Error freeing acquired triggers of instance {}:  {}", instanceId, e.getMessage());
+                return false;
             }
-            return false;
+            break;
+        case INSTANCE_FAILED:
+            break;
         }
-        
-        public boolean hasRecoveringFailed() {
-            if (state == STATE_PROCESSING_DOWN && (System.currentTimeMillis() - recoveringTimestamp > instanceRecoveryTimeout)) {
-                return true;
-            }
-            return false;
-        }
-        
-        public Map<String, Object> toMap() {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("instanceId", getInstanceId());
-            map.put("state", getState());
-            map.put("timestamp", pad(new Long(getTimestamp())));
-            map.put("recoveringTimestamp", pad(new Long(getRecoveringTimestamp())));
-            map.put("_rev", getRevision());
-            map.put("_id", id);
-            return map;
-        }
-
-        public String getInstanceId() {
-            return instanceId;
-        }
-
-        public void setInstanceId(String instanceId) {
-            this.instanceId = instanceId;
-        }
-        
-        
-    }
-
-    public static void setInstanceTimeout(long instanceTimeout) {
-        RepoJobStore.instanceTimeout = instanceTimeout;
-    }
-
-    public static void setInstanceRecoveryTimeout(long instanceRecoveryTimeout) {
-        RepoJobStore.instanceRecoveryTimeout = instanceRecoveryTimeout;
-    }
-
-    public static void setInstanceCheckInInterval(long instanceCheckInInterval) {
-        RepoJobStore.instanceCheckInInterval = instanceCheckInInterval;
-    }
-
-    public static void setInstanceCheckInOffset(long instanceCheckInOffset) {
-        RepoJobStore.instanceCheckInOffset = instanceCheckInOffset;
+        return true;
     }
 }
 
