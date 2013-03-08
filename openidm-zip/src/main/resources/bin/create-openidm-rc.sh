@@ -39,12 +39,14 @@ if [ -z "\$LOGGING_CONFIG" ]; then
   fi
 fi
 
-CLASSPATH="\$OPENIDM_HOME"/bin/felix.jar:"\$OPENIDM_HOME"/bin/openidm.jar
+CLASSPATH="\$OPENIDM_HOME"/bin/*
 
-START_CMD="nohup \$JAVA_BIN \$LOGGING_CONFIG \$JAVA_OPTS \$OPENIDM_OPTS -Djava.endorsed.dirs=\$JAVA_ENDORSED_DIRS \\
-		-Djava.security.auth.login.config=security/jaas-repo.conf  -classpath \$CLASSPATH \\
-		-Dopenidm.system.server.root=\$OPENIDM_HOME -Dignore.openidm.system.server.environment=\"dev|test|qa|prod\" \\
-		-Dfelix.startup.daemon=true org.apache.felix.main.Main > logs/server.out 2>&1 &"
+
+START_CMD="nohup \$JAVA_BIN \$LOGGING_CONFIG \$JAVA_OPTS \$OPENIDM_OPTS \\
+		-Djava.endorsed.dirs=\$JAVA_ENDORSED_DIRS \\
+		-classpath \\"\$CLASSPATH\\" \\
+		-Djava.awt.headless=true \\
+		org.forgerock.commons.launcher.Main -c bin/launcher.json > logs/server.out 2>&1 &"
 
 case "\${1}" in
 start)

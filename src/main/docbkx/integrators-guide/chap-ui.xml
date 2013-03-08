@@ -514,6 +514,89 @@ $ cp -r en-US fr-FR </screen>
             </listitem>
         </orderedlist>
     </section>
+
+    <section xml:id="ui-project-config">
+        <title>Creating a Project-Specific UI Theme</title>
+        <para>You can create specific UI themes for different projects and
+        then point a particular UI instance to use a defined theme on startup.
+        To create a complete custom theme, follow these steps:</para>
+        <orderedlist>
+            <listitem>
+                <para>Shut down the OpenIDM instance, if it is running. In the
+                Felix administration console, type:</para>
+                <screen>shutdown
+-&gt;</screen>
+            </listitem>
+            <listitem>
+                <para>Clear the <literal>felix-cache</literal> directory.</para>
+                <screen>$ rm -rf felix-cache</screen>
+            </listitem>
+            <listitem>
+                <para>Copy the entire default UI theme to an accessible
+                location. For example:</para>
+                <screen>$ cd /path/to/openidm/ui
+$ cp -r default ../new-project-theme</screen>
+            </listitem>
+            <listitem>
+                <para>In the copied theme, modify the required elements, as
+                described in the previous sections. Note that nothing is copied
+                to the extension folder in this case - changes are made in the
+                copied theme.</para>
+            </listitem>
+            <listitem>
+                <para>In the <literal>openidm/conf/boot/boot.properties</literal>
+                file, add the following line, specifying the location of the new
+                theme. The path is relative to the installation root of the
+                OpenIDM instance.</para>
+                <screen>openidm.ui.fileinstall.dir=new-project-theme</screen>
+            </listitem>
+            <listitem>
+                <para>Restart OpenIDM.</para>
+                <screen>$ cd /path/to/openidm
+$ ./startup.sh</screen>
+            </listitem>
+            <listitem>
+                <para>Relaunch the UI in your browser. The UI is displayed with
+                the new custom theme.</para>
+            </listitem>
+        </orderedlist>
+    </section>
 </section>
 
+<section xml:id="ui-external-password-reset">
+    <title>Using an External System for Password Reset</title>
+    <para>By default, the password reset mechanism is handled
+    internally, in OpenIDM. You can reroute password reset in the event that
+    a user has forgotten his password, by specifying an external URL to which
+    password reset requests are sent. Note that this URL applies to the
+    password reset link on the login page only, not to the security data change
+    facility that is available after a user has logged in.</para>
+    <para>To set an external URL to handle password reset, set the
+    <literal>passwordResetLink</literal> parameter in the
+    <filename>conf/ui-configuration.json</filename> file. The following example
+    sets the <literal>passwordResetLink</literal> to
+    <literal>https://accounts.example.com/account/reset-password</literal>.</para>
+    <screen>passwordResetLink: "https://accounts.example.com/reset-password"</screen>
+    <para>The <literal>passwordResetLink</literal> parameter takes either an
+    empty string as a value (which indicates that no external link is used) or
+    a full URL to the external system that handles password reset requests.</para>
+    <note><para>External password reset and security questions for internal
+    password reset are mutually exclusive. Therefore, if you set a value for the
+    <literal>passwordResetLink</literal> parameter, users will not be prompted
+    with any security questions, regardless of the setting of the
+    <literal>securityQuestions</literal> parameter.</para></note>
+</section>
+
+<section xml:id="ui-external-logout">
+    <title>Providing a Logout URL to External Applications</title>
+    <para>By default, a UI session is invalidated when a user clicks on the
+    Log out link. In certain situations your external applications might
+    require a distinct logout URL to which users can be routed, to terminate
+    their UI session.</para>
+    <para>The logout URL is <literal>#logout</literal>, appended to the UI URL,
+    for example, <literal>http://localhost:8080/openidmui/index.html#logout/</literal>.
+    </para>
+    <para>The logout URL effectively performs the same action as clicking on
+    the Log out link of the UI.</para>
+</section>
 </chapter>
