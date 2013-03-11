@@ -44,7 +44,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -54,14 +53,18 @@ import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.fluent.JsonValueException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
 import org.forgerock.openidm.config.ConfigurationManager;
 import org.forgerock.openidm.config.InternalErrorException;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.installer.JSONPrettyPrint;
+import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -102,6 +105,12 @@ public class ConfigurationManagerImpl
      */
     final static Logger logger = LoggerFactory.getLogger(ConfigurationManagerImpl.class);
 
+    private static final String LOCATION = "_location";
+
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private static final JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
+
     private final BundleContext bundleContext;
 
     private final ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> configurationAdminTracker;
@@ -112,13 +121,7 @@ public class ConfigurationManagerImpl
 
     private final BundleTracker<MetaDataProviderHelper> bundleProviderTracker;
 
-    private ServiceRegistration selfServiceRegistration = null;
-
-    private ObjectMapper mapper = new ObjectMapper();
-
-    private JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
-
-    String alias = "openidm-config-default";
+    private ServiceRegistration<ConfigurationManager> selfServiceRegistration = null;
 
     // Three phase storage of DelayedConfigs
 
@@ -134,15 +137,15 @@ public class ConfigurationManagerImpl
     private final ConcurrentMap<String, DelayedConfig> delayedConfigsToInstall =
             new ConcurrentHashMap<String, DelayedConfig>();
 
+    String alias = "openidm-config-default";
+
     ServiceRegistration jsonFileInstallerService = null;
 
     Configuration jsonFileInstaller = null;
 
     public ConfigurationManagerImpl(BundleContext context) {
         this.bundleContext = context;
-        alias =
-                IdentityServer.getInstance().getProperty("openidm.config.crypto.alias",
-                        "openidm-config-default");
+        alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias", alias);
         logger.info("Using keystore alias {} to handle config encryption", alias);
 
         configurationAdminTracker =
@@ -278,8 +281,6 @@ public class ConfigurationManagerImpl
 
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent event, MetaDataProviderHelper object) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
     }
 
     @Override
@@ -315,21 +316,19 @@ public class ConfigurationManagerImpl
     // ----- Implementation of ConfigurationManager interface
 
     @Override
-    public Resource installConfiguration(final String pid, final String factoryPid,
-            final JsonValue configuration) throws ResourceException {
-
+    public Resource createConfiguration(PID persistentIdentifier, JsonValue configuration)
+            throws ResourceException {
         Resource result = null;
-
         synchronized (this) {
             try {
-                String key = getFullCanonicalName(pid, factoryPid);
+                String key = persistentIdentifier.getLongCanonicalName();
                 // Remove the previous versions from the delayed caches
                 delayedConfigs.remove(key);
                 delayedConfigsToInstall.remove(key);
                 delayedConfigsToEncrypt.remove(key);
 
-                JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-                DelayedConfig sourceConfig = new DelayedConfig(pid, factoryPid, configuration);
+                DelayedConfig sourceConfig = new DelayedConfig(persistentIdentifier, configuration);
+                result = sourceConfig.getResource();
                 DelayedConfig targetConfig = null;
 
                 try {
@@ -385,7 +384,7 @@ public class ConfigurationManagerImpl
                             installConfiguration(configurationAdmin, targetConfig);
                         } else {
                             delayedConfigsToInstall.put(key, targetConfig);
-                            content.put("location", "delayedInstall");
+                            result.getContent().put(LOCATION, "delayedInstall");
                         }
                     } else {
                         CryptoService cryptoService = getCryptoService();
@@ -400,18 +399,17 @@ public class ConfigurationManagerImpl
                                 installConfiguration(configurationAdmin, targetConfig);
                             } else {
                                 delayedConfigsToInstall.put(key, targetConfig);
-                                content.put("location", "delayedInstall");
+                                result.getContent().put(LOCATION, "delayedInstall");
                             }
                         } else {
                             delayedConfigsToEncrypt.put(key, targetConfig);
-                            content.put("location", "delayedEncryption");
+                            result.getContent().put(LOCATION, "delayedEncryption");
                         }
                     }
                 } else {
                     delayedConfigs.put(key, sourceConfig);
-                    content.put("location", "delayed");
+                    result.getContent().put(LOCATION, "delayed");
                 }
-                result = new Resource(getCanonicalName(pid, factoryPid), null, content);
             } catch (ResourceException e) {
                 throw e;
             } catch (ExecutionException e) {
@@ -422,48 +420,151 @@ public class ConfigurationManagerImpl
     }
 
     @Override
-    public Configuration getConfiguration(String pid, String factoryPid) {
-        return null; // To change body of implemented methods use File |
-                     // Settings | File Templates.
+    public Resource readConfiguration(PID persistentIdentifier) throws ResourceException {
+        String key = persistentIdentifier.getLongCanonicalName();
+        DelayedConfig config = delayedConfigs.get(key);
+        if (null == config) {
+            config = delayedConfigsToEncrypt.get(key);
+        }
+        if (null == config) {
+            config = delayedConfigsToInstall.get(key);
+        }
+        Resource resource = null;
+        if (null != config) {
+            resource = config.getResource();
+        } else {
+            ConfigurationAdmin service = getConfigurationAdmin();
+            if (null != service) {
+                try {
+                    Configuration configuration =
+                            findExistingConfiguration(service, persistentIdentifier
+                                    .getQualifiedServiceName(), persistentIdentifier
+                                    .getInstanceAlias());
+                    if (null != configuration) {
+                        PID pid = getConfigurationPID(configuration);
+                        resource = DelayedConfig.convert(pid, configuration);
+                        resource.getContent().put(LOCATION, "installed");
+                    }
+                } catch (IOException e) {
+                    throw new InternalServerErrorException("Failed to get the configuration: "
+                            + e.getMessage(), e);
+                }
+            }
+        }
+        if (null != resource) {
+            return resource;
+        }
+        throw new NotFoundException();
     }
 
     @Override
-    public void deleteConfiguration(String pid, String factoryPid) {
-        // To change body of implemented methods use File | Settings | File
-        // Templates.
+    public Resource updateConfiguration(final PID persistentIdentifier, final String revision,
+            final JsonValue configuration) throws ResourceException {
+        return createConfiguration(persistentIdentifier, configuration);
     }
 
     @Override
-    public void listConfigurations(ResultHandler<Resource> handler) {
+    public Resource deleteConfiguration(PID persistentIdentifier, String revision)
+            throws ResourceException {
+        String key = persistentIdentifier.getLongCanonicalName();
+        boolean modified = false;
+
+        // Remove the previous versions from the delayed caches
+        modified = modified || null != delayedConfigs.remove(key);
+        modified = modified || null != delayedConfigsToInstall.remove(key);
+        modified = modified || null != delayedConfigsToEncrypt.remove(key);
+
+        ConfigurationAdmin service = getConfigurationAdmin();
+        if (null != service) {
+            try {
+                Configuration configuration =
+                        findExistingConfiguration(service, persistentIdentifier
+                                .getQualifiedServiceName(), persistentIdentifier.getInstanceAlias());
+                if (null != configuration) {
+                    configuration.delete();
+                    modified = true;
+                }
+            } catch (IOException e) {
+                throw new InternalServerErrorException("Failed to get the configuration: "
+                        + e.getMessage(), e);
+            }
+        }
+        if (modified) {
+            return new Resource(persistentIdentifier.getShortCanonicalName(), revision,
+                    new JsonValue(null));
+        }
+        throw new NotFoundException();
+    }
+
+    @Override
+    public void queryConfigurations(QueryFilter filter, QueryResultHandler handler)
+            throws ResourceException {
         for (Map.Entry<String, DelayedConfig> entry : delayedConfigs.entrySet()) {
-            JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-            content.put("location", "delayed");
-            handler.handleResult(new Resource(entry.getKey(), null, content));
+            if (true) {
+                JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
+                content.put(ServerConstants.OBJECT_PROPERTY_ID, entry.getValue().getPID()
+                        .getShortCanonicalName());
+                content.put(LOCATION, "delayed");
+                handler.handleResource(new Resource(entry.getValue().getPID()
+                        .getShortCanonicalName(), null, content));
+            } else {
+                Resource resource = entry.getValue().getResource();
+                resource.getContent().put(LOCATION, "delayed");
+                handler.handleResource(resource);
+            }
         }
         for (Map.Entry<String, DelayedConfig> entry : delayedConfigsToEncrypt.entrySet()) {
-            JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-            content.put("location", "delayedEncryption");
-            handler.handleResult(new Resource(entry.getKey(), null, content));
+            if (true) {
+                JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
+                content.put(ServerConstants.OBJECT_PROPERTY_ID, entry.getValue().getPID()
+                        .getShortCanonicalName());
+                content.put(LOCATION, "delayedEncryption");
+                handler.handleResource(new Resource(entry.getValue().getPID()
+                        .getShortCanonicalName(), null, content));
+            } else {
+                Resource resource = entry.getValue().getResource();
+                resource.getContent().put(LOCATION, "delayedEncryption");
+                handler.handleResource(resource);
+            }
         }
         for (Map.Entry<String, DelayedConfig> entry : delayedConfigsToInstall.entrySet()) {
-            JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-            content.put("location", "delayedInstall");
-            handler.handleResult(new Resource(entry.getKey(), null, content));
+            if (true) {
+                JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
+                content.put(ServerConstants.OBJECT_PROPERTY_ID, entry.getValue().getPID()
+                        .getShortCanonicalName());
+                content.put(LOCATION, "delayedInstall");
+                handler.handleResource(new Resource(entry.getValue().getPID()
+                        .getShortCanonicalName(), null, content));
+            } else {
+                Resource resource = entry.getValue().getResource();
+                resource.getContent().put(LOCATION, "delayedInstall");
+                handler.handleResource(resource);
+            }
         }
         // Local reference to ConfigurationAdmin
         final ConfigurationAdmin service = getConfigurationAdmin();
         if (null != service) {
             try {
                 for (Configuration configuration : service.listConfigurations(null)) {
-                    JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-                    content.put("location", "installed");
-                    handler.handleResult(new Resource(getCanonicalName(configuration.getPid(),
-                            configuration.getFactoryPid()), null, content));
+                    PID pid = getConfigurationPID(configuration);
+                    if (true) {
+                        JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
+                        content.put(ServerConstants.OBJECT_PROPERTY_ID, pid.getShortCanonicalName());
+                        content.put(LOCATION, "installed");
+                        handler.handleResource(new Resource(pid.getShortCanonicalName(), null,
+                                content));
+
+                    } else {
+                        Resource resource = DelayedConfig.convert(pid, configuration);
+                        resource.getContent().put(LOCATION, "installed");
+                        handler.handleResource(resource);
+                    }
                 }
             } catch (Exception e) {
                 handler.handleError(new InternalServerErrorException(e));
             }
         }
+        handler.handleResult(new QueryResult());
     }
 
     // ----- Non ThreadSafe methods called from CompletionService
@@ -482,8 +583,8 @@ public class ConfigurationManagerImpl
                 DelayedConfig result = helper.process(config);
                 if (result != null) {
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Properties to encrypt for {} {}: {}", new Object[] {
-                            config.pid, config.factoryPid, result });
+                        logger.trace("Properties to encrypt for {} {}: {}",
+                                config.persistentIdentifier.getShortCanonicalName(), result);
                     }
                     // Handle this config
                     delayedConfigs.remove(key);
@@ -553,39 +654,6 @@ public class ConfigurationManagerImpl
         return null;
     }
 
-    private String getCanonicalName(String pid, String factoryPid) {
-        if (pid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {
-            if (StringUtils.isNotBlank(factoryPid)) {
-                return (pid.substring(DEFAULT_SERVICE_RDN_PREFIX.length()) + "/" + factoryPid)
-                        .toLowerCase();
-            } else {
-                return pid.substring(DEFAULT_SERVICE_RDN_PREFIX.length()).toLowerCase();
-            }
-        } else {
-            if (StringUtils.isNotBlank(factoryPid)) {
-                return (DEFAULT_SERVICE_RDN_PREFIX + pid + "/" + factoryPid).toLowerCase();
-            } else {
-                return (DEFAULT_SERVICE_RDN_PREFIX + pid).toLowerCase();
-            }
-        }
-    }
-
-    private String getFullCanonicalName(String pid, String factoryPid) {
-        if (pid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {
-            if (StringUtils.isNotBlank(factoryPid)) {
-                return (pid + "/" + factoryPid).toLowerCase();
-            } else {
-                return pid.toLowerCase();
-            }
-        } else {
-            if (StringUtils.isNotBlank(factoryPid)) {
-                return (DEFAULT_SERVICE_RDN_PREFIX + pid + "/" + factoryPid).toLowerCase();
-            } else {
-                return (DEFAULT_SERVICE_RDN_PREFIX + pid).toLowerCase();
-            }
-        }
-    }
-
     private void encryptConfiguration(CryptoService service, DelayedConfig config)
             throws InternalServerErrorException {
         for (JsonPointer pointer : config.sensitiveAttributes) {
@@ -608,93 +676,107 @@ public class ConfigurationManagerImpl
                     config.configuration.put(pointer, encryptedValue.getObject());
                 } catch (JsonCryptoException ex) {
                     throw new InternalServerErrorException(
-                            "Failure during encryption of configuration " + config.pid + "-"
-                                    + config.factoryPid + " for property " + pointer.toString()
-                                    + " : " + ex.getMessage(), ex);
+                            "Failure during encryption of configuration "
+                                    + config.persistentIdentifier.getShortCanonicalName()
+                                    + " for property " + pointer.toString() + " : "
+                                    + ex.getMessage(), ex);
                 }
             }
         }
     }
 
-    private Configuration installConfiguration(ConfigurationAdmin service, DelayedConfig config)
-            throws InternalServerErrorException {
+    private Configuration installConfiguration(final ConfigurationAdmin service,
+            final DelayedConfig config) throws InternalServerErrorException {
         Configuration configuration = null;
-                StringBuilder sb = new StringBuilder(config.pid);
-        if (null != config.factoryPid) {
-            sb.append('-').append(config.factoryPid);
-        }
-        String configKey = sb.toString();
 
         try {
-            configuration = getConfiguration(service, config.pid, config.factoryPid);
+            configuration = getConfiguration(service, config.getPID());
         } catch (Exception e) {
-            throw new InternalServerErrorException("Failed to get the configuration " + configKey,
-                    e);
+            throw new InternalServerErrorException("Failed to get the configuration "
+                    + config.persistentIdentifier.getShortCanonicalName(), e);
         }
 
         Dictionary props = configuration.getProperties();
         Hashtable existingConfig = props != null ? new Hashtable(new DictionaryAsMap(props)) : null;
         if (existingConfig != null) {
-            existingConfig.remove( "felix.fileinstall.filename" );
-            existingConfig.remove( Constants.SERVICE_PID );
-            existingConfig.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
+            existingConfig.remove("felix.fileinstall.filename");
+            existingConfig.remove(Constants.SERVICE_PID);
+            existingConfig.remove(ConfigurationAdmin.SERVICE_FACTORYPID);
         }
-        Dictionary encrypted =  existingConfig == null ? new Hashtable() : existingConfig;
+        Dictionary encrypted = existingConfig == null ? new Hashtable() : existingConfig;
 
         try {
             ObjectWriter writer = prettyPrint.getWriter();
             String value = writer.writeValueAsString(config.configuration.asMap());
 
             encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
-            if (config.factoryPid instanceof String) {
-                encrypted.put(ServerConstants.CONFIG_FACTORY_PID, config.factoryPid);
+            if (null != config.getPID().getInstanceAlias()) {
+                encrypted.put(ServerConstants.CONFIG_FACTORY_PID, config.getPID()
+                        .getInstanceAlias());
             }
-            if (configuration.getBundleLocation() != null)
-            {
+            if (configuration.getBundleLocation() != null) {
                 configuration.setBundleLocation(null);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Config with sensitive data encrypted {} {} : {}", new Object[] {
-                    config.pid, config.factoryPid, encrypted });
+                logger.debug("Config with sensitive data encrypted {}  : {}",
+                        config.persistentIdentifier.getShortCanonicalName(), encrypted);
             }
             configuration.update(encrypted);
             return configuration;
         } catch (Exception e) {
             logger.error("Failure to update formatted and encrypted configuration: {}-{}",
-                    config.pid, config.factoryPid, e);
+                    config.persistentIdentifier.getShortCanonicalName(), e);
             throw new InternalServerErrorException(
-                    "Failure to update formatted and encrypted configuration: " + config.pid + "-"
-                            + config.factoryPid + " : " + e.getMessage(), e);
+                    "Failure to update formatted and encrypted configuration: "
+                            + config.persistentIdentifier.getShortCanonicalName() + " : "
+                            + e.getMessage(), e);
         }
     }
 
-
-    protected Configuration getConfiguration(ConfigurationAdmin service, String pid, String factoryPid) throws Exception {
-        Configuration oldConfiguration = findExistingConfiguration(service, pid, factoryPid);
+    protected Configuration getConfiguration(ConfigurationAdmin service, PID pid) throws Exception {
+        Configuration oldConfiguration =
+                findExistingConfiguration(service, pid.getQualifiedServiceName(), pid
+                        .getInstanceAlias());
         if (oldConfiguration != null) {
-            if (factoryPid == null) {
-                logger.info("Updating configuration from {}", pid);
-            } else {
-                logger.info("Updating configuration from {}-{}", pid, factoryPid);
-            }
+            logger.trace("Configuration found: {}", pid);
             return oldConfiguration;
         } else {
             Configuration newConfiguration;
-            if (factoryPid != null) {
-                /*if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
-                    throw new ConfigurationException(factoryPid,
-                            "router config can not be factory config");
-                }*/
-                newConfiguration = getConfigurationAdmin().createFactoryConfiguration(pid, null);
+            if (pid.getInstanceAlias() != null) {
+                /*
+                 * if ("org.forgerock.openidm.router".equalsIgnoreCase(pid)) {
+                 * throw new ConfigurationException(factoryPid,
+                 * "router config can not be factory config"); }
+                 */
+                newConfiguration =
+                        getConfigurationAdmin().createFactoryConfiguration(
+                                pid.getQualifiedServiceName(), null);
             } else {
-                newConfiguration = getConfigurationAdmin().getConfiguration(pid, null);
+                newConfiguration =
+                        getConfigurationAdmin().getConfiguration(pid.getQualifiedServiceName(),
+                                null);
             }
             return newConfiguration;
         }
     }
 
-    Configuration findExistingConfiguration(ConfigurationAdmin service, String pid,
-                                              String factoryPid) throws IOException {
+    PID getConfigurationPID(Configuration configuration) {
+        if (null != configuration.getFactoryPid()) {
+            Object instanceAlias =
+                    configuration.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
+            if (instanceAlias instanceof String) {
+                return PID.serviceName(configuration.getFactoryPid(), (String) instanceAlias);
+            } else {
+                return PID.serviceName(configuration.getFactoryPid(), configuration.getFactoryPid()
+                        .substring(configuration.getPid().length() + 1));
+            }
+        } else {
+            return PID.serviceName(configuration.getPid());
+        }
+    }
+
+    public static Configuration findExistingConfiguration(final ConfigurationAdmin service,
+            String pid, String factoryPid) throws IOException {
         String filter = null;
         if (null == factoryPid) {
             filter = "(" + Constants.SERVICE_PID + "=" + pid + ")";
@@ -710,7 +792,7 @@ public class ConfigurationManagerImpl
                 return configurations[0];
             }
         } catch (InvalidSyntaxException e) {
-            logger.error("Failed to find existing configuration {}-{}", pid, factoryPid, e);
+            logger.error("Failed to find existing configuration {}/{}", pid, factoryPid, e);
         }
         return null;
     }
@@ -730,8 +812,7 @@ public class ConfigurationManagerImpl
         if ("true".equalsIgnoreCase(enabled)) {
 
             // Setup the config directory
-            // TODO Share this method with JsonConfigInstaller
-            String dir = system.getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
+            String dir = ConfigBootstrapHelper.getConfigFileInstallDir();
             dir = IdentityServer.getFileForProjectPath(dir).getAbsolutePath();
             logger.debug("Configuration file directory {}", dir);
 
@@ -1022,30 +1103,62 @@ public class ConfigurationManagerImpl
      * {@link ConfigurationAdmin}
      */
     private static class DelayedConfig {
-        final String pid;
-        final String factoryPid;
+        final PID persistentIdentifier;
         final JsonValue configuration;
         final List<JsonPointer> sensitiveAttributes;
 
-        private DelayedConfig(String pid, String factoryPid, JsonValue configuration) {
-            this.pid = pid;
-            this.factoryPid = factoryPid;
+        private DelayedConfig(PID persistentIdentifier, JsonValue configuration) {
+            this.persistentIdentifier = persistentIdentifier;
             this.configuration = configuration;
             this.sensitiveAttributes = null;
+            configuration.put(ServerConstants.OBJECT_PROPERTY_ID, persistentIdentifier
+                    .getShortCanonicalName());
         }
 
         /**
          * Copy constructor
          */
         private DelayedConfig(DelayedConfig delayedConfig, List<JsonPointer> sensitiveAttributes) {
-            this.pid = delayedConfig.pid;
-            this.factoryPid = delayedConfig.factoryPid;
+            this.persistentIdentifier = delayedConfig.persistentIdentifier;
             this.configuration = delayedConfig.configuration;
             List<JsonPointer> attribute =
                     null != sensitiveAttributes ? sensitiveAttributes
                             : delayedConfig.sensitiveAttributes;
             this.sensitiveAttributes =
                     null != attribute ? attribute : Collections.<JsonPointer> emptyList();
+        }
+
+        public PID getPID() {
+            return persistentIdentifier;
+        }
+
+        public Resource getResource() {
+            return convert(persistentIdentifier, configuration);
+        }
+
+        public static Resource convert(final PID persistentIdentifier,
+                final Configuration configuration) throws IOException {
+            Object json =
+                    configuration.getProperties().get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
+            if (json instanceof String) {
+                Map config = ConfigurationManagerImpl.mapper.readValue((String) json, Map.class);
+                return convert(persistentIdentifier, new JsonValue(config));
+            }
+            return convert(persistentIdentifier, new JsonValue(new DictionaryAsMap(configuration
+                    .getProperties())));
+        }
+
+        public static Resource convert(final PID persistentIdentifier, final JsonValue configuration) {
+            JsonValue config = configuration.copy();
+            config.put(ServerConstants.OBJECT_PROPERTY_ID, persistentIdentifier
+                    .getShortCanonicalName());
+            String revision = null;
+            config.put(ServerConstants.OBJECT_PROPERTY_REV, revision);
+
+            if (null != persistentIdentifier.getRoles()) {
+                config.put(PID.OBJECT_PROPERTY_ROLES, persistentIdentifier.getRoles());
+            }
+            return new Resource(persistentIdentifier.getShortCanonicalName(), revision, config);
         }
     }
 
@@ -1118,11 +1231,11 @@ public class ConfigurationManagerImpl
          */
         public DelayedConfig process(DelayedConfig config) throws WaitForMetaData, NotConfiguration {
             List<JsonPointer> result =
-                    provider.getPropertiesToEncrypt(config.pid, config.factoryPid,
-                            config.configuration);
+                    provider.getPropertiesToEncrypt(config.getPID().getQualifiedServiceName(),
+                            config.getPID().getInstanceAlias(), config.configuration);
             if (result != null && logger.isTraceEnabled()) {
-                logger.trace("Properties to encrypt for {} {}: {}", new Object[] { config.pid,
-                    config.factoryPid, result });
+                logger.trace("Properties to encrypt for {}: {}", config.persistentIdentifier
+                        .getShortCanonicalName(), result);
             }
             return null == result ? null : new DelayedConfig(config, result);
         }
@@ -1208,7 +1321,7 @@ public class ConfigurationManagerImpl
             return dict.put(key, value);
         }
 
-        class KeyEntry implements Map.Entry<U,V> {
+        class KeyEntry implements Map.Entry<U, V> {
 
             private final U key;
 

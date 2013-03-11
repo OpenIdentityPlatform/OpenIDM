@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
@@ -44,7 +43,9 @@ import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.openidm.config.ConfigurationManager;
+import org.forgerock.openidm.config.ConfigurationManager.PID;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
+import org.forgerock.openidm.config.internal.ConfigurationManagerImpl;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 
@@ -83,9 +84,9 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     private BundleContext context;
 
-    private final ConfigurationManager configurationManager;
+    private final ConfigurationManagerImpl configurationManager;
 
-    public JSONConfigInstaller(BundleContext context, ConfigurationManager configurationManager) {
+    public JSONConfigInstaller(BundleContext context, ConfigurationManagerImpl configurationManager) {
         this.context = context;
         this.configurationManager = configurationManager;
     }
@@ -106,13 +107,13 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
 
     public void uninstall(File artifact) throws Exception {
         logger.debug("Artifact uninstall {}", artifact);
-        String pid[] = parsePid(artifact.getName());
-        configurationManager.deleteConfiguration(pid[0], pid[1]);
+        PID pid = parsePid(artifact.getName());
+        configurationManager.deleteConfiguration(pid, null);
 //        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], false);
 //        deleteConfig(artifact);
     }
 
-    public void configurationEvent(ConfigurationEvent configurationEvent) {    
+    public void configurationEvent(ConfigurationEvent configurationEvent) {
         logger.debug("ConfigurationEvent {}, pid: {}, factoryPid: {}, type: {}", 
                 new Object[] {configurationEvent, configurationEvent.getPid(), 
                 configurationEvent.getFactoryPid(), configurationEvent.getType()});
@@ -126,17 +127,24 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
 
         String factoryPid = configurationEvent.getFactoryPid();
+        //TODO do we still need this in 2.2?
         if ("org.forgerock.openidm.router".equalsIgnoreCase(factoryPid)) {
             logger.warn("Factory router config is detected. OpenIDM prevents further processing of this config!");
             return;
         }
         String pid = configurationEvent.getPid();
         if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED) {
+            ConfigurationAdmin configurationAdmin = null;
             try {
-                Configuration config = configurationManager.getConfiguration(pid, factoryPid);
+                configurationAdmin = (ConfigurationAdmin) context.getService(configurationEvent.getReference()); 
+
+                Configuration config =
+                        configurationAdmin.getConfiguration(configurationEvent.getPid(),
+                                configurationEvent.getFactoryPid()); 
                 Dictionary dict = null != config ? config.getProperties() : null;
                 if (dict == null) {
-                    dict = new Properties();
+                    //It never happen because the config must exist
+                    return;
                 }
                 String fileName = (String) dict.get( DirectoryWatcher.FILENAME );
                 String confDir = ConfigBootstrapHelper.getConfigFileInstallDir();
@@ -199,6 +207,11 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 }
             } catch (Exception e) {
                 logger.info("Unable to save configuration", e);
+            } finally {
+                if (null != configurationAdmin){
+                    //Release the ConfigurationAdmin
+                    context.ungetService(configurationEvent.getReference());
+                }
             }
         } else if (configurationEvent.getType() == ConfigurationEvent.CM_DELETED) {
             String fileName = pidToFile.get(pid);
@@ -293,7 +306,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         boolean updated = false;
         try {
             Map configuration = mapper.readValue(f,Map.class);
-            String pid[] = parsePid(f.getName());
+            PID pid = parsePid(f.getName());
             updated = setConfig(configuration, pid, f);
         } catch (Exception ex) {
             logger.warn("Loading configuration file {} failed ", f, ex);
@@ -301,11 +314,11 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         return updated;
     }
 
-    synchronized boolean setConfig(Map configuration, final String[] pid, final File f) throws Exception {
+    synchronized boolean setConfig(Map configuration, final PID pid, final File f) throws Exception {
 //        boolean updated = false;
 //        Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], true);
 
-        return  null != configurationManager.installConfiguration(pid[0], pid[1], new JsonValue(configuration));
+        return  null != configurationManager.createConfiguration(pid, new JsonValue(configuration));
 
 //        Dictionary props = config.buildServiceProperties();
 //        if (!isConfigSame(ht, props)) {
@@ -369,19 +382,17 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         return new File(URI.create(key));
     }
 
-    String[] parsePid(String path) {
+    ConfigurationManager.PID parsePid(String path) {
         String pid = path.substring(0, path.lastIndexOf('.'));
         int n = pid.indexOf('-');
         if (n > 0) {
             String factoryPid = pid.substring(n + 1);
             pid = pid.substring(0, n);
-            pid = ConfigBootstrapHelper.qualifyPid(pid);
             logger.info("Configuring service PID {} factory PID {}", pid, factoryPid);
-            return new String[] { pid, factoryPid };
+            return PID.serviceName( pid, factoryPid );
         }
         else {
-            pid = ConfigBootstrapHelper.qualifyPid(pid);
-            return new String[] { pid, null };
+            return PID.serviceName(pid);
         }
     }
 

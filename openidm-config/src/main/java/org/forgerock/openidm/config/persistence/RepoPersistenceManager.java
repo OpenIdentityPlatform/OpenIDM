@@ -53,8 +53,6 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.json.resource.Context;
 
 import org.osgi.framework.BundleContext;

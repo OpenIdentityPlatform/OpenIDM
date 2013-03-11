@@ -178,7 +178,7 @@ public class ConfigBootstrapHelper {
      */
     public static String getConfigFileInstallDir() {
         // Default the configuration directory if not declared
-        String dir = System.getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
+        String dir = IdentityServer.getInstance().getProperty(OPENIDM_FILEINSTALL_DIR, "conf");
         dir =  IdentityServer.getFileForProjectPath(dir).getAbsolutePath();
         logger.debug("Configuration file directory {}", dir);
         return dir;

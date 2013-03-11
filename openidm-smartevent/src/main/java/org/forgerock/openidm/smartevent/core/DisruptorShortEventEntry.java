@@ -18,30 +18,24 @@ package org.forgerock.openidm.smartevent.core;
 
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.SingleThreadedClaimStrategy;
-import com.lmax.disruptor.SleepingWaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.EventFactory;
 
 /**
  * @author aegloff
  */
-import com.lmax.disruptor.EventFactory;
 
 /**
- * Event entries that currently doubles as both
- * - To (pre) populate the ring buffer
- * - The implementation of EventEntry exposed to the user 
- * This though makes it not suitable for many long time measurements,
- * althogh for short measurement it means less object creation/collection
+ * Event entries that currently doubles as both - To (pre) populate the ring
+ * buffer - The implementation of EventEntry exposed to the user This though
+ * makes it not suitable for many long time measurements, althogh for short
+ * measurement it means less object creation/collection
  * 
- * @deprecated Considering removal as it limits the number of open start events to the ring buffer size.
- * Plus it is highly sensitive to requiring end() to be called on the EventEntry
+ * @deprecated Considering removal as it limits the number of open start events
+ *             to the ring buffer size. Plus it is highly sensitive to requiring
+ *             end() to be called on the EventEntry
  * @author aegloff
- *
+ * 
  */
 public class DisruptorShortEventEntry implements EventEntry {
 
@@ -51,14 +45,15 @@ public class DisruptorShortEventEntry implements EventEntry {
     Object payload;
     Object context;
     Object result;
-    
+
     PluggablePublisher publisher;
-    
-    public final static EventFactory<DisruptorShortEventEntry> EVENT_FACTORY = new EventFactory<DisruptorShortEventEntry>() {
-        public DisruptorShortEventEntry newInstance(){
-            return new DisruptorShortEventEntry();
-        }
-    };
+
+    public final static EventFactory<DisruptorShortEventEntry> EVENT_FACTORY =
+            new EventFactory<DisruptorShortEventEntry>() {
+                public DisruptorShortEventEntry newInstance() {
+                    return new DisruptorShortEventEntry();
+                }
+            };
 
     /**
      * @inheritDoc
@@ -67,25 +62,25 @@ public class DisruptorShortEventEntry implements EventEntry {
         startTime = System.nanoTime();
         endTime = 0;
     }
-    
+
     /**
      * @inheritDoc
      */
     public final void end() {
         // User called this end() method directly, delegate the event publishing
-        publisher.end(eventName, this); 
+        publisher.end(eventName, this);
     }
-    
+
     /**
      * @inheritDoc
      */
     public final void setResult(Object result) {
         this.result = result;
     }
-    
+
     /**
-     * @return duration of time taken between start() and end() 
-     * or -1 if the measurement is not complete or available
+     * @return duration of time taken between start() and end() or -1 if the
+     *         measurement is not complete or available
      */
     public final long getDuration() {
         if (endTime != 0 && startTime != 0) {
@@ -94,18 +89,19 @@ public class DisruptorShortEventEntry implements EventEntry {
             return -1;
         }
     }
-    
+
     /**
-     * @return duration of time taken between start() and end() 
-     * in formatted form
+     * @return duration of time taken between start() and end() in formatted
+     *         form
      */
     String getFormattedDuration() {
         return StatisticsHandler.formatNsAsMs(getDuration());
     }
-    
+
     public String toString() {
         if (eventName != null) {
-            return "Event name: " + eventName.asString() + " duration: " + getFormattedDuration() + " payload: " + payload + " context: " + context + " result: " + result;
+            return "Event name: " + eventName.asString() + " duration: " + getFormattedDuration()
+                    + " payload: " + payload + " context: " + context + " result: " + result;
         } else {
             return "";
         }

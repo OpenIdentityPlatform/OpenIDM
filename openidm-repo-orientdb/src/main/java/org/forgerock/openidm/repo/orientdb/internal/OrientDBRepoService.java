@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -72,7 +71,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.repo.orientdb.internal.query.PrepareNotSupported;
 import org.forgerock.openidm.repo.orientdb.internal.query.TokenHandler;
-import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -156,7 +155,7 @@ public class OrientDBRepoService implements RequestHandler {
     private Map<String, String> predefinedQueries = null;
 
     protected String getPartition(ServerContext context) throws ResourceException {
-        Map<String, String> variables = ContextUtil.getUriTemplateVariables(context);
+        Map<String, String> variables = ResourceUtil.getUriTemplateVariables(context);
         if (null != variables && variables.containsKey("partition")) {
             return variables.get("partition");
         }
@@ -220,7 +219,7 @@ public class OrientDBRepoService implements RequestHandler {
      */
     public Resource read(String partition, ReadRequest request) throws ResourceException {
         // Parse the remaining resourceName
-        String[] resourceName = ContextUtil.parseResourceName(request.getResourceName());
+        String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
@@ -472,7 +471,7 @@ public class OrientDBRepoService implements RequestHandler {
      */
     public Resource update(String partition, UpdateRequest request) throws ResourceException {
         // Parse the remaining resourceName
-        String[] resourceName = ContextUtil.parseResourceName(request.getResourceName());
+        String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to update.");
@@ -579,7 +578,7 @@ public class OrientDBRepoService implements RequestHandler {
      */
     public Resource delete(String partition, DeleteRequest request) throws ResourceException {
         // Parse the remaining resourceName
-        String[] resourceName = ContextUtil.parseResourceName(request.getResourceName());
+        String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
         if (resourceName == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to update.");
