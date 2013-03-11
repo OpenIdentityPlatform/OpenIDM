@@ -41,7 +41,7 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -407,7 +407,7 @@ class RouteServiceImpl implements RouteService {
 
     @Override
     public ServerContext createServerContext() throws ResourceException {
-        return createServerContext(ContextUtil.createInternalSecurityContext(bundle
+        return createServerContext(ResourceUtil.createInternalSecurityContext(bundle
                 .getBundleContext()));
     }
 

@@ -16,11 +16,8 @@
 
 package org.forgerock.openidm.smartevent.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * Holds monitoring and statistics info 
+ * Holds monitoring and statistics info
  * 
  * @author aegloff
  */
@@ -36,10 +33,10 @@ public class MonitoringInfo {
         totalInvokes = 0;
         totalTime = 0;
     }
-    
+
     public String toString() {
-        return "Invocations: " + totalInvokes 
-                + " total time: " + StatisticsHandler.formatNsAsMs(totalTime) 
-                + " mean: " + StatisticsHandler.formatNsAsMs(totalInvokes > 0 ? totalTime/totalInvokes : -1);
+        return "Invocations: " + totalInvokes + " total time: "
+                + StatisticsHandler.formatNsAsMs(totalTime) + " mean: "
+                + StatisticsHandler.formatNsAsMs(totalInvokes > 0 ? totalTime / totalInvokes : -1);
     }
 }

@@ -16,45 +16,37 @@
 
 package org.forgerock.openidm.smartevent.core;
 
-import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.smartevent.Name;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.SingleThreadedClaimStrategy;
-import com.lmax.disruptor.SleepingWaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
+import com.lmax.disruptor.EventFactory;
 
 /**
  * @author aegloff
  */
-import com.lmax.disruptor.EventFactory;
 
 /**
- * Ring buffer event entry for the disruptor
- * Used to prepopulate the ring buffer with a (fixed) number of entries
- * for the purpose of processing the associated EventEntry
+ * Ring buffer event entry for the disruptor Used to prepopulate the ring buffer
+ * with a (fixed) number of entries for the purpose of processing the associated
+ * EventEntry
  * 
  * @author aegloff
- *
+ * 
  */
 public class DisruptorReferringEventEntry {
 
     // The event entry to process
     EventEntryImpl delegate;
-    // For processing optimization some data may get copied into the ring buffer entry directly
-    long startTime; 
+    // For processing optimization some data may get copied into the ring buffer
+    // entry directly
+    long startTime;
     long endTime;
-    
+
     PluggablePublisher publisher;
-    
-    public final static EventFactory<DisruptorReferringEventEntry> EVENT_FACTORY 
-            = new EventFactory<DisruptorReferringEventEntry>() {
-        public DisruptorReferringEventEntry newInstance(){
-            return new DisruptorReferringEventEntry();
-        }
-    };
+
+    public final static EventFactory<DisruptorReferringEventEntry> EVENT_FACTORY =
+            new EventFactory<DisruptorReferringEventEntry>() {
+                public DisruptorReferringEventEntry newInstance() {
+                    return new DisruptorReferringEventEntry();
+                }
+            };
 
     /**
      * @inheritDoc
@@ -64,10 +56,10 @@ public class DisruptorReferringEventEntry {
         // The low latency batching framework will assign the time
         endTime = System.nanoTime();
     }
-    
+
     /**
-     * @return duration of time taken between start() and end() 
-     * or -1 if the measurement is not complete or available
+     * @return duration of time taken between start() and end() or -1 if the
+     *         measurement is not complete or available
      */
     public final long getDuration() {
         if (endTime != 0 && startTime != 0) {
@@ -76,30 +68,36 @@ public class DisruptorReferringEventEntry {
             return -1;
         }
     }
-    
-    // Internal optimization when it is known that 
+
+    // Internal optimization when it is known that
     // both end and start time exist
     // Result is undefined if this precondition is not true.
     final long getRawDuration() {
         return endTime - startTime;
     }
-    
+
     /**
-     * @return duration of time taken between start() and end() 
-     * in formatted form
+     * @return duration of time taken between start() and end() in formatted
+     *         form
      */
     String getFormattedDuration() {
         return StatisticsHandler.formatNsAsMs(getDuration());
     }
-    
+
     public String toString() {
         if (delegate != null && delegate.eventName != null) {
-            return "Event name: " + delegate.eventName.asString() 
-                    + " duration: " + getFormattedDuration() 
-                    + " payload: " + delegate.payload 
-                    + " context: " + delegate.context 
-                    + " publisher set a result: " + delegate.publisherResultSet 
-                    + (delegate.eventName.getResultHistoryEnabled() ? " result: " + delegate.publisherResult : " result history is disabled.");
+            return "Event name: "
+                    + delegate.eventName.asString()
+                    + " duration: "
+                    + getFormattedDuration()
+                    + " payload: "
+                    + delegate.payload
+                    + " context: "
+                    + delegate.context
+                    + " publisher set a result: "
+                    + delegate.publisherResultSet
+                    + (delegate.eventName.getResultHistoryEnabled() ? " result: "
+                            + delegate.publisherResult : " result history is disabled.");
         } else {
             return "";
         }

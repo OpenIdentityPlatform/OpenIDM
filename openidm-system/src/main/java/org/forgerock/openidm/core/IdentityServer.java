@@ -262,7 +262,7 @@ public class IdentityServer implements PropertyAccessor {
         return URI.create(getServerRoot());
     }
 
-    public String getSiteName() {
+    public String getClusterName() {
         return getProperty("openidm.system.site.name", "default");
     }
 

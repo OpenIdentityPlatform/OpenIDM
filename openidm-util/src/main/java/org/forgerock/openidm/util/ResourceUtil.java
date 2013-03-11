@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +44,7 @@ import org.osgi.framework.Constants;
  * 
  * @author Laszlo Hordos
  */
-public class ContextUtil {
+public class ResourceUtil {
 
     /**
      * <p>
@@ -56,7 +58,7 @@ public class ContextUtil {
      * newBuilder to operate.
      * </p>
      */
-    public ContextUtil() {
+    public ResourceUtil() {
         super();
     }
 
@@ -168,5 +170,113 @@ public class ContextUtil {
             return new String[] { lastNonBlank };
         }
         return null;
+    }
+
+    public static class URLParser {
+
+        private final StringTokenizer tokenizer;
+        private String value;
+        private int index = 0;
+        private URLParser prev, next;
+
+
+        public static URLParser parse(String resourceName) {
+            return new URLParser(resourceName);
+        }
+
+        private URLParser(final URLParser parent) {
+            prev = parent;
+            tokenizer = null;
+            index = parent.index + 1;
+            StringTokenizer tk = getTokenizer();
+            try {
+                value = URLDecoder.decode(tk.nextToken(), "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                value = null;
+            }
+        }
+
+        private StringTokenizer getTokenizer() {
+            if (null != tokenizer) {
+                return tokenizer;
+            }
+            return prev.getTokenizer();
+        }
+
+        private StringBuilder getStringBuilder() {
+            if (this == prev) {
+                return new StringBuilder("/").append(value());
+            } else {
+                return previous().getStringBuilder().append("/").append(value());
+            }
+        }
+
+        public String resourceCollection() {
+            if (this == prev) {
+                return "/";
+            }
+            return previous().getStringBuilder().toString();
+        }
+
+        public URLParser(String resourceName) {
+            if (null == resourceName) {
+                throw new NullPointerException();
+            }
+            this.tokenizer = new StringTokenizer(resourceName.trim(), "/", false);
+            if (tokenizer.hasMoreTokens()) {
+                value = tokenizer.nextToken();
+            } else {
+                value = "";
+            }
+            //This is the head
+            prev = this;
+        }
+
+        public URLParser previous() {
+            return prev;
+        }
+
+        public URLParser next() {
+            if (null == next) {
+                if (getTokenizer().hasMoreTokens()){
+                    next = new URLParser(this);
+                } else {
+                    //This is the tail
+                    next = this;
+                }
+            }
+            return next;
+        }
+
+        public int index() {
+            return index;
+        }
+
+        public URLParser get(int idx) {
+            if (idx == index) {
+                return this;
+            } else if (idx < 0) {
+                return first();
+            } else if (idx < index) {
+                return previous().get(idx);
+            } else if (idx > index && next() == this) {
+                return this;
+            } else {
+                return next().get(idx);
+            }
+        }
+
+        public URLParser last() {
+            return next() != this ? next().last() : next();
+        }
+
+        public URLParser first() {
+            return previous() != this ? previous().first() : previous();
+        }
+
+        public String value() {
+            return value;
+        }
+
     }
 }

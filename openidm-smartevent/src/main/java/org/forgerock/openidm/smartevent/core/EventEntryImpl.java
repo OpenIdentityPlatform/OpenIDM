@@ -18,24 +18,16 @@ package org.forgerock.openidm.smartevent.core;
 
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.SingleThreadedClaimStrategy;
-import com.lmax.disruptor.SleepingWaitStrategy;
-import com.lmax.disruptor.dsl.Disruptor;
 
 /**
  * @author aegloff
  */
-import com.lmax.disruptor.EventFactory;
 
 /**
  * Event entry implementation exposed to the user
  * 
  * @author aegloff
- *
+ * 
  */
 public class EventEntryImpl implements EventEntry {
 
@@ -46,7 +38,7 @@ public class EventEntryImpl implements EventEntry {
     Object context;
     boolean publisherResultSet;
     Object publisherResult;
-    
+
     PluggablePublisher publisher;
 
     /**
@@ -54,19 +46,19 @@ public class EventEntryImpl implements EventEntry {
      */
     final void start() {
         // TODO: provide option for millis
-        //startTime = System.currentTimeMillis();
+        // startTime = System.currentTimeMillis();
         startTime = System.nanoTime();
         endTime = 0;
     }
-    
+
     /**
      * @inheritDoc
      */
     public final void end() {
         // User called this end() method directly, delegate the event publishing
-        publisher.end(eventName, this); 
+        publisher.end(eventName, this);
     }
-    
+
     /**
      * @inheritDoc
      */
@@ -77,10 +69,10 @@ public class EventEntryImpl implements EventEntry {
         }
         publisher.setResult(result, this);
     }
-    
+
     /**
-     * @return duration of time taken between start() and end() 
-     * or -1 if the measurement is not complete or available
+     * @return duration of time taken between start() and end() or -1 if the
+     *         measurement is not complete or available
      */
     public final long getDuration() {
         if (endTime != 0 && startTime != 0) {
@@ -89,23 +81,20 @@ public class EventEntryImpl implements EventEntry {
             return -1;
         }
     }
-    
+
     /**
-     * @return duration of time taken between start() and end() 
-     * in formatted form
+     * @return duration of time taken between start() and end() in formatted
+     *         form
      */
     String getFormattedDuration() {
         return StatisticsHandler.formatNsAsMs(getDuration());
     }
-    
+
     public String toString() {
         if (eventName != null) {
-            return "Event name: " + eventName.asString() 
-                    + " duration: " + getFormattedDuration() 
-                    + " payload: " + payload 
-                    + " context: " + context 
-                    + " result was set: " + publisherResultSet 
-                    + " result: " + publisherResult;
+            return "Event name: " + eventName.asString() + " duration: " + getFormattedDuration()
+                    + " payload: " + payload + " context: " + context + " result was set: "
+                    + publisherResultSet + " result: " + publisherResult;
         } else {
             return "";
         }

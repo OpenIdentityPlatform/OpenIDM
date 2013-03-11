@@ -20,8 +20,8 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 
 /**
- * Used when event publishing is disabled
- * Empty method calls may get optimized out by the JIT
+ * Used when event publishing is disabled Empty method calls may get optimized
+ * out by the JIT
  * 
  * @author aegloff
  */
@@ -29,25 +29,25 @@ import org.forgerock.openidm.smartevent.Name;
 public class DisabledEventEntry implements EventEntry {
 
     Name eventName;
-    
+
     /**
      * @inheritDoc
      */
     public final void start() {
     }
-    
+
     /**
      * @inheritDoc
      */
     public final void end() {
     }
-    
+
     /**
      * @inheritDoc
      */
     public final void setResult(Object result) {
     }
-    
+
     public String toString() {
         return "Event publishing disabled";
     }

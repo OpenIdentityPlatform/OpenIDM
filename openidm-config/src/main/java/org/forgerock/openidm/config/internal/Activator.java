@@ -24,12 +24,19 @@
 
 package org.forgerock.openidm.config.internal;
 
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.logging.LogServiceTracker;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
 
 /**
  * OSGi bundle activator
@@ -46,6 +53,8 @@ public class Activator implements BundleActivator {
     private LogServiceTracker logServiceTracker = null;
 
     private ConfigurationManagerImpl configurationManager = null;
+    
+    private ServiceRegistration<RequestHandler> configHandler = null;
 
     public void start(final BundleContext context) {
         logger.debug("Config Bundle starting");
@@ -56,6 +65,13 @@ public class Activator implements BundleActivator {
 
         configurationManager = new ConfigurationManagerImpl(context);
         configurationManager.start();
+
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(5);
+        properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
+        properties.put(Constants.SERVICE_DESCRIPTION, "OpenIDM configuration service");
+        properties.put(ServerConstants.ROUTER_PREFIX, "/config*");
+
+        configHandler = context.registerService(RequestHandler.class, new ConfigObjectService(configurationManager),properties);
 
         // Initiate configuration bootstrapping by registering the repository
         // based
@@ -83,6 +99,11 @@ public class Activator implements BundleActivator {
     }
 
     public void stop(BundleContext context) {
+        if (null != configHandler) {
+            configHandler.unregister();
+            configHandler = null;
+        }
+        
         if (null != logServiceTracker) {
             logServiceTracker.close();
             logServiceTracker = null;

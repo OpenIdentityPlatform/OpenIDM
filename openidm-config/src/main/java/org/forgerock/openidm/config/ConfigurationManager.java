@@ -24,11 +24,15 @@
 
 package org.forgerock.openidm.config;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.osgi.service.cm.Configuration;
 
 /**
  * A NAME does ...
@@ -37,15 +41,101 @@ import org.osgi.service.cm.Configuration;
  */
 public interface ConfigurationManager {
 
-    /**
-     * Default prefix for OpenIDM OSGi services
-     */
-    public static final String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
+    public class PID {
 
+        /**
+         * Default prefix for OpenIDM OSGi services
+         */
+        public static final String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
+        public static final String OBJECT_PROPERTY_ROLES = "_roles";
+
+        private final List<String> roles;
+
+        private final String serviceName;
+
+        private final String instanceAlias;
+
+        private PID(String serviceName, String instanceAlias, List<String> roles) {
+            this.serviceName = serviceName;
+            this.instanceAlias = instanceAlias;
+            this.roles = roles;
+        }
+
+        public static PID serviceName(final String serviceName) {
+            return serviceName(serviceName, (List<String>) null);
+        }
+
+        public static PID serviceName(final String serviceName, final List<String> roles) {
+            String pid =
+                    null != serviceName ? serviceName.trim()
+                            .replace(DEFAULT_SERVICE_RDN_PREFIX, "") : null;
+            if (null == pid || pid.isEmpty()) {
+                throw new IllegalArgumentException("ServiceName can not be blank");
+            }
+            return new PID(pid, null, null != roles ? Collections.unmodifiableList(roles) : null);
+        }
+
+        public static PID serviceName(final String serviceName, final String instanceAlias) {
+            return serviceName(serviceName, instanceAlias, null);
+        }
+
+        public static PID serviceName(final String serviceName, final String instanceAlias,
+                final List<String> roles) {
+            String pid =
+                    null != serviceName ? serviceName.trim()
+                            .replace(DEFAULT_SERVICE_RDN_PREFIX, "") : null;
+            if (null == pid || pid.isEmpty()) {
+                throw new IllegalArgumentException("ServiceName can not be blank");
+            }
+            String alias =
+                    null != instanceAlias ? instanceAlias.trim() : UUID.randomUUID().toString();
+            return new PID(pid, alias.isEmpty() ? UUID.randomUUID().toString() : alias,
+                    null != roles ? Collections.unmodifiableList(roles) : null);
+        }
+
+        public List<String> getRoles() {
+            return roles;
+        }
+
+        public String getQualifiedServiceName() {
+            return PID.DEFAULT_SERVICE_RDN_PREFIX + serviceName;
+        }
+
+        public String getServiceName() {
+            return serviceName;
+        }
+
+        public String getInstanceAlias() {
+            return instanceAlias;
+        }
+
+        public String getShortCanonicalName() {
+            if (null != instanceAlias) {
+                return (serviceName + "/" + instanceAlias).toLowerCase();
+            } else {
+                return serviceName.toLowerCase();
+            }
+        }
+
+        public String getLongCanonicalName() {
+            if (null != instanceAlias) {
+                return (DEFAULT_SERVICE_RDN_PREFIX + serviceName + "/" + instanceAlias)
+                        .toLowerCase();
+            } else {
+                return (DEFAULT_SERVICE_RDN_PREFIX + serviceName).toLowerCase();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return getShortCanonicalName();
+        }
+    }
 
     // Properties to set configuration file handling behavior
     // TODO Write JavaDoc
-    public static final String OPENIDM_FILEINSTALL_BUNDLES_NEW_START = "openidm.fileinstall.bundles.new.start";
+    public static final String OPENIDM_FILEINSTALL_BUNDLES_NEW_START =
+            "openidm.fileinstall.bundles.new.start";
     public static final String OPENIDM_FILEINSTALL_FILTER = "openidm.fileinstall.filter";
     public static final String OPENIDM_FILEINSTALL_DIR = "openidm.fileinstall.dir";
     public static final String OPENIDM_FILEINSTALL_POLL = "openidm.fileinstall.poll";
@@ -53,12 +143,17 @@ public interface ConfigurationManager {
 
     public static final String FELIX_FILEINSTALL_PID = "org.apache.felix.fileinstall";
 
-    public Resource installConfiguration(String pid, String factoryPid, JsonValue configuration)
+    public Resource createConfiguration(PID persistentIdentifier, JsonValue configuration)
             throws ResourceException;
 
-    public Configuration getConfiguration(String pid, String factoryPid);
+    public Resource readConfiguration(PID persistentIdentifier) throws ResourceException;
 
-    public void deleteConfiguration(String pid, String factoryPid);
+    public Resource updateConfiguration(PID persistentIdentifier, String revision,
+            JsonValue configuration) throws ResourceException;
 
-    public void listConfigurations(ResultHandler<Resource> handler);
+    public Resource deleteConfiguration(PID persistentIdentifier, String revision)
+            throws ResourceException;
+
+    public void queryConfigurations(QueryFilter filter, QueryResultHandler handler)
+            throws ResourceException;
 }

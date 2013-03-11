@@ -83,6 +83,8 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.AuditLogger;
+import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -95,7 +97,7 @@ import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistryService;
 import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.ResourceUtil;
 import org.identityconnectors.common.StringUtil;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -187,6 +189,20 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         connectorInfoProvider = null;
     }
 
+    /**
+     * ConnectorInfoProvider service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected AuditService auditService = null;
+
+    private void bindAuditService(final AuditService service) {
+        auditService = service;
+    }
+
+    private void unbindAuditService(final AuditService service) {
+        auditService = null;
+    }
+    
     /**
      * RouterRegistryService service.
      */
@@ -870,9 +886,13 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
     }
 
     @Override
-    public void actionInstance(ServerContext context, ActionRequest request,
-            ResultHandler<JsonValue> handler) {
+    public void actionInstance(final ServerContext context, final ActionRequest request,
+            final ResultHandler<JsonValue> resultHandler) {
+        AuditLogger<ActionRequest, ResultHandler<JsonValue>> auditLogger = auditService.before(context,request,resultHandler);
+        final ResultHandler<JsonValue> handler = auditLogger.getResultHandler();
         try {
+
+
             if (ConnectorAction.script.name().equalsIgnoreCase(request.getActionId())) {
                 // TODO NPE check
                 if (StringUtils.isBlank(request.getAdditionalActionParameters().get(
@@ -1104,7 +1124,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         public static final String OBJECTCLASS_TEMPLATE = "/{objectclass}";
 
         protected String getObjectClass(ServerContext context) throws ResourceException {
-            Map<String, String> variables = ContextUtil.getUriTemplateVariables(context);
+            Map<String, String> variables = ResourceUtil.getUriTemplateVariables(context);
             if (null != variables && variables.containsKey(OBJECTCLASS)) {
                 return variables.get(OBJECTCLASS);
             }
