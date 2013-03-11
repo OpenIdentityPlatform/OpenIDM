@@ -83,8 +83,6 @@ import org.forgerock.json.resource.ServerContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.AuditLogger;
-import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -189,19 +187,6 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
         connectorInfoProvider = null;
     }
 
-    /**
-     * ConnectorInfoProvider service.
-     */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected AuditService auditService = null;
-
-    private void bindAuditService(final AuditService service) {
-        auditService = service;
-    }
-
-    private void unbindAuditService(final AuditService service) {
-        auditService = null;
-    }
     
     /**
      * RouterRegistryService service.
@@ -887,9 +872,7 @@ public class OpenICFProvisionerService implements SingletonResourceProvider {
 
     @Override
     public void actionInstance(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> resultHandler) {
-        AuditLogger<ActionRequest, ResultHandler<JsonValue>> auditLogger = auditService.before(context,request,resultHandler);
-        final ResultHandler<JsonValue> handler = auditLogger.getResultHandler();
+            final ResultHandler<JsonValue> handler) {
         try {
 
 
