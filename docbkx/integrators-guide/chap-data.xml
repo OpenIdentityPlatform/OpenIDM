@@ -223,18 +223,244 @@
 
         </section>
 
-
-        <!-- OPENIDM-761 Query filters should be documented - Fix for 2.2
         <section xml:id="constructing-queries">
             <title>Constructing Queries</title>
 
-            <para>The <literal>openidm.query</literal> function performs a query
-            on the specified OpenIDM resource object. The following types
-            of queries are supported:</para>
-            <para>TBD</para>
+            <para>The <literal>openidm.query</literal> function enables you
+            to query OpenIDM resource objects for reconciliation processes
+            and workflows. Query syntax is
+            <literal>openidm.query(id, params)</literal>, where
+            <literal>id</literal> specifies the object on which the query should
+            be performed and <literal>params</literal> provides the parameters
+            that are passed to the query. For example:</para>
+            <programlisting language="javascript">
+var params = {
+    'query' : {
+        'Equals': {
+            'field' : 'uid',
+            'values' : [
+                id
+            ]
+        }
+    }
+};
+var results = openidm.query("system/ScriptedSQL/account", params)
+            </programlisting>
 
-        </section>
-        -->
+            <para>OpenIDM supports nine query filters and a range of keywords
+            that can be applied to these filters. Each filter takes a field
+            and a list as value. The following filters are supported:</para>
+
+            <bridgehead>Attribute Operations</bridgehead>
+            <variablelist>
+                <varlistentry>
+                    <term><literal>Equals</literal> Filter</term>
+                    <listitem>
+                        <para>Determines whether the resource contains an
+                        attribute that matches a specific attribute value.
+                        </para>
+                        <para>Returns <literal>true</literal> if the object
+                        satisfies all selection criteria of the filter, otherwise
+                        returns <literal>false</literal>.</para>
+                        <para>For example:</para>
+                        <programlisting language="javascript">
+{
+    "Equals":{
+        "field":"<replaceable>lastname</replaceable>",
+            "values":[
+                "<replaceable>Doe</replaceable>"
+            ]
+    }
+}
+                        </programlisting>
+                    </listitem>
+                </varlistentry>
+                    <varlistentry>
+                        <term><literal>ContainsAllValues</literal> Filter</term>
+                        <listitem>
+                            <para>Determines whether the external resource
+                            contains an attribute that has the same name as,
+                            and contains all of the values of, the attribute
+                            placed into the filter.
+                            </para>
+                            <para>Returns <literal>true</literal> if the object
+                            satisfies all the selection criteria of the filter,
+                            otherwise returns <literal>false</literal>.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            <bridgehead>Comparable Attribute Operations</bridgehead>
+            <para>Compares single-value attributes to a given filter.</para>
+            <variablelist>
+                <varlistentry>
+                    <term><literal>GreaterThan</literal> Filter</term>
+                    <listitem>
+                        <para>Determines whether the attribute value of the
+                         resource object is greater than the one provided in
+                         the filter.
+                        </para>
+                        <para>Returns <literal>true</literal> if the object
+                        value is greater, otherwise returns <literal>false</literal>.</para>
+                    </listitem>
+                </varlistentry>
+                    <varlistentry>
+                        <term><literal>GreaterThanOrEqual</literal> Filter</term>
+                        <listitem>
+                            <para>Determines whether the attribute value of the
+                                resource object is greater than or equal to the
+                                one provided in the filter.</para>
+                            <para>Returns <literal>true</literal> if the object
+                                value is greater than or equal, otherwise
+                                returns <literal>false</literal>.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><literal>LessThan</literal> Filter</term>
+                        <listitem>
+                            <para>Determines whether the attribute value of the
+                                resource object is less than the one provided in
+                                the filter.
+                            </para>
+                            <para>Returns <literal>true</literal> if the object
+                                value is less, otherwise returns
+                                <literal>false</literal>.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><literal>LessThanOrEqual</literal> Filter</term>
+                        <listitem>
+                            <para>Determines whether the attribute value of the
+                                resource object is less than or equal to the one
+                                provided in the filter.
+                            </para>
+                            <para>Returns <literal>true</literal> if the object
+                                value is less than or equal, otherwise returns
+                                <literal>false</literal>.</para>
+                        </listitem>
+                    </varlistentry>
+            </variablelist>
+            <bridgehead>String Attribute Operations</bridgehead>
+            <para>Compares string values to a given filter.</para>
+            <variablelist>
+                <varlistentry>
+                    <term><literal>StartsWith</literal> Filter</term>
+                    <listitem>
+                        <para>Returns attributes whose value starts with the
+                        string specified in the filter.
+                        </para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>Contains</literal> Filter</term>
+                    <listitem>
+                        <para>Returns attributes whose value contains the
+                        string specified in the filter.</para>
+                    </listitem>
+                </varlistentry>
+                <varlistentry>
+                    <term><literal>EndsWith</literal> Filter</term>
+                    <listitem>
+                        <para>Returns attributes whose value ends with the
+                        string specified in the filter.
+                        </para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+
+                <bridgehead>Filter Operations</bridgehead>
+                <para>Filter operations are used to construct more complex
+                filters by comparing two filters from the preceding section
+                or negating filters defined in the previous section.</para>
+                <variablelist>
+                    <varlistentry>
+                        <term><literal>AND Filter</literal></term>
+                        <listitem>
+                            <para>A filter that matches entries using the AND
+                            boolean operator on two filters.</para>
+                            <para>Example:</para>
+                            <programlisting language="javascript">{
+ "query":{
+   "AND":[
+     {
+        "Equals":{
+            "field":"lastname",
+            "values":[
+               "Doe"
+            ]
+        }
+     },
+     {
+         "Equals":{
+             "field":"firstname",
+             "values":[
+                "John"
+             ]
+         }
+     }
+   ]
+ }
+}
+                            </programlisting>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><literal>OR Filter</literal></term>
+                        <listitem>
+                            <para>A filter that matches entries using the OR
+                            boolean operator on two filters.</para>
+                            <para>Example:</para>
+                            <programlisting language="javascript">{
+  "query":{
+    "OR":[
+      {
+        "StartsWith":{
+            "field":"lastname",
+            "values":[
+              "A"
+            ]
+        }
+      },
+      {
+        "StartsWith":{
+            "field":"lastname",
+            "values":[
+              "B"
+            ]
+        }
+      }
+    ]
+  }
+}
+</programlisting>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><literal>NOT Filter</literal></term>
+                        <listitem>
+                            <para>A filter that filters out matched entries
+                            by negating another filter.</para>
+                            <para>Example:</para>
+                            <programlisting language="javascript">{
+  "query":{
+    "NOT":[
+      {
+        "Equals":{
+          "field":"lastname",
+          "values":[
+            "Doe"
+          ]
+        }
+      }
+    ]
+  }
+}
+</programlisting>
+                </listitem>
+                </varlistentry>
+                </variablelist>
+
     </section>
+
+  </section>
 
 </chapter>
