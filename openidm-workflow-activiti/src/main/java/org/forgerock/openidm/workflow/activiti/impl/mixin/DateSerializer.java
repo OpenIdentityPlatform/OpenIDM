@@ -32,7 +32,7 @@ import org.codehaus.jackson.map.SerializerProvider;
 import org.forgerock.openidm.util.DateUtil;
 
 /**
- *
+ * Custom serializer to transform Date objects
  * @author orsolyamebold
  */
 public class DateSerializer extends JsonSerializer<Date> {

@@ -26,6 +26,7 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
@@ -79,24 +80,16 @@ public class ActivitiUtil {
             val = val.copy();
             return new HashMap<String, Object>(val.expect(Map.class).asMap());
         } else {
-            return new HashMap(1);
+            return new HashMap<String, Object>(1);
         }
     }
     
     /**
-     * 
-     * @param request incoming request
+     * Fetch query parameters from the request
+     * @param request Request to be processed
+     * @param paramName parameter to be fetched
      * @return 
      */
-    public static String getIdFromRequest(JsonValue request) {
-        String[] id = request.get("id").asString().split("/");
-        return id[id.length-1];
-    }
-    
-    public static String getQueryIdFromRequest(JsonValue request) {
-        return request.get("params").get("_queryId").asString();
-    }
-    
     public static String getParamFromRequest(QueryRequest request, String paramName) {
         return request.getAdditionalQueryParameters().get(paramName);
     }
@@ -118,13 +111,12 @@ public class ActivitiUtil {
      *
      * @param request incoming request
      * @return map of the workflow/task parameters
-     * @throws JsonException
      */
-    public static Map fetchVarParams(QueryRequest request) {
-        Map wfParams = new HashMap();
-        Iterator itAll = request.getAdditionalQueryParameters().entrySet().iterator();
+    public static Map<String, String> fetchVarParams(QueryRequest request) {
+        Map<String, String> wfParams = new HashMap<String, String>();
+        Iterator<Entry<String, String>> itAll = request.getAdditionalQueryParameters().entrySet().iterator();
         while (itAll.hasNext()) {
-            Map.Entry<String, Object> e = (Map.Entry) itAll.next();
+            Map.Entry<String, String> e = itAll.next();
             if ((e.getKey().startsWith(ActivitiConstants.VARIABLE_QUERY_PREFIX))) {
                 wfParams.put(e.getKey().substring(5), e.getValue());
             }

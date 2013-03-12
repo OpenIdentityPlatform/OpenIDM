@@ -33,7 +33,7 @@
     <name>OpenIDM utility classes</name>
     <packaging>bundle</packaging>
     <properties>
-        <openidm.osgi.import.defaults>org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
+        <openidm.osgi.import.defaults>org.forgerock.json.resource.servlet;version="[2.0,2.1)",org.eclipse.wst.jsdt.debug.rhino.debugger;resolution:=optional</openidm.osgi.import.defaults>
     </properties>
     <dependencies>
         <dependency>

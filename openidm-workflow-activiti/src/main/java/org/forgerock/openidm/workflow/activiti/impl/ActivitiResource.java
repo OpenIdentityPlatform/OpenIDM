@@ -26,8 +26,10 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import java.util.HashMap;
 import java.util.Map;
 import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.impl.identity.Authentication;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.*;
+import org.forgerock.openidm.audit.util.ActivityLog;
 
 /**
  * Implementation of the Activiti Engine Resource
@@ -38,15 +40,15 @@ public class ActivitiResource implements RequestHandler {
 
     private Map<String, CollectionResourceProvider> resources = new HashMap<String, CollectionResourceProvider>(3);
 
-    public ActivitiResource(ProcessEngine engine) {
+    public ActivitiResource(ProcessEngine engine, PersistenceConfig config) {
         resources.put("processdefinition", new ProcessDefinitionResource(engine));
-        resources.put("processinstance", new ProcessInstanceResource(engine));
+        resources.put("processinstance", new ProcessInstanceResource(engine, config));
         resources.put("taskinstance", new TaskInstanceResource(engine));
     }
 
-    public void setProcessEngine(ProcessEngine engine) {
+    public void setProcessEngine(ProcessEngine engine, PersistenceConfig config) {
         resources.put("processdefinition", new ProcessDefinitionResource(engine));
-        resources.put("processinstance", new ProcessInstanceResource(engine));
+        resources.put("processinstance", new ProcessInstanceResource(engine, config));
         resources.put("taskinstance", new TaskInstanceResource(engine));
     }
 
@@ -57,6 +59,7 @@ public class ActivitiResource implements RequestHandler {
             if (resource == null) {
                 handler.handleError(new NotSupportedException("Action on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
             } else {
+                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
                 resource.actionInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
             }
         } catch (Exception ex) {
@@ -71,6 +74,7 @@ public class ActivitiResource implements RequestHandler {
             if (resource == null) {
                 handler.handleError(new NotSupportedException("Create on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
             } else {
+                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
                 resource.createInstance(context, request, handler);
             }
         } catch (Exception ex) {
@@ -85,6 +89,7 @@ public class ActivitiResource implements RequestHandler {
             if (resource == null) {
                 handler.handleError(new NotSupportedException("Delete on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
             } else {
+                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
                 resource.deleteInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
             }
         } catch (Exception ex) {
@@ -104,6 +109,7 @@ public class ActivitiResource implements RequestHandler {
             if (resource == null) {
                 handler.handleError(new NotSupportedException("Query on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
             } else {
+                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
                 resource.queryCollection(context, request, handler);
             }
         } catch (Exception ex) {
@@ -118,6 +124,7 @@ public class ActivitiResource implements RequestHandler {
             if (resource == null) {
                 handler.handleError(new NotSupportedException("Read on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
             } else {
+                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
                 resource.readInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
             }
         } catch (Exception ex) {
@@ -132,6 +139,7 @@ public class ActivitiResource implements RequestHandler {
             if (resource == null) {
                 handler.handleError(new NotSupportedException("Update on " + ((RouterContext) context).getUriTemplateVariables().get("activitiobj") + " not supported"));
             } else {
+                Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
                 resource.updateInstance(context, ((RouterContext) context).getUriTemplateVariables().get("objid"), request, handler);
             }
         } catch (Exception ex) {

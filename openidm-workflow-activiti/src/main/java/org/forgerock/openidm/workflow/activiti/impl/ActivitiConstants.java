@@ -40,12 +40,14 @@ public class ActivitiConstants {
     public static final String TASKDEFINITION_PATTERN = "/?taskdefinition.*";
     public static final String TASKDEFINITION_ID_PATTERN = "/?taskdefinition/.+$";
     public static final String ID = ServerConstants.OBJECT_PROPERTY_ID;
+    public static final String REVISION = ServerConstants.OBJECT_PROPERTY_REV;
     public static final String REQUEST_PARAMS = "params";
     public static final String REQUEST_BODY = "value";
     public static final String QUERY_ALL_IDS = "query-all-ids";
     public static final String QUERY_FILTERED = "filtered-query";
     public static final String QUERY_TASKDEF = "query-taskdefinition";
     public static final String VARIABLE_QUERY_PREFIX = "_var-";
+    public static final String OPENIDM_CONTEXT = "openidmcontext";
     public static final String ACTIVITI_PROCESSDEFINITIONID = "processDefinitionId";
     public static final String ACTIVITI_PROCESSDEFINITIONKEY = "processDefinitionKey";
     public static final String ACTIVITI_PROCESSDEFINITIONRESOURCENAME = "processDefinitionResourceName";
@@ -93,10 +95,4 @@ public class ActivitiConstants {
     public static final String FORMPROPERTY_VARIABLEEXPRESSION = "variableExpression";
     public static final String ENUM_VALUES = "values";
     public static final String DATE_PATTERN = "datePattern";
-    
-    public enum WorkflowPath {
-
-        processdefinition, processdefinitionid, processinstance, processinstanceid,
-        taskdefinition, taskdefinitionid, taskinstance, taskinstanceid, unknown
-    }
 }
