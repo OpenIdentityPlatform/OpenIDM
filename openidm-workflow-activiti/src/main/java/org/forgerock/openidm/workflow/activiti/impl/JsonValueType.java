@@ -73,7 +73,7 @@ public class JsonValueType implements VariableType {
             valueFields.setTextValue(null);
         } else {
             try {
-                Map jsonValue = new HashMap(2);
+                Map<String, Object> jsonValue = new HashMap<String, Object>(2);
                 jsonValue.put("pointer", ((JsonValue) value).getPointer().toString());
                 jsonValue.put("value", ((JsonValue) value).getObject());
                 StringWriter writer = new StringWriter();

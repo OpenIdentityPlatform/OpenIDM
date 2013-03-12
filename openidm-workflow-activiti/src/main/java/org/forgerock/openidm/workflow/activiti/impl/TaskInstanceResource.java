@@ -44,7 +44,7 @@ import org.forgerock.json.resource.*;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskEntityMixIn;
 
 /**
- *
+ * Resource implementation of TaskInstance related Activiti operations
  * @author orsolyamebold
  */
 public class TaskInstanceResource implements CollectionResourceProvider {
@@ -87,7 +87,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 } else {
                     handler.handleError(new BadRequestException("Unknown action"));
                 }
-                Map result = new HashMap();
+                Map<String, String> result = new HashMap<String, String>(1);
                 result.put("Task action performed", request.getActionId());
                 handler.handleResult(new JsonValue(result));
             }
@@ -164,7 +164,11 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 } else {
                     r.getContent().add(ActivitiConstants.ACTIVITI_ASSIGNEE, task.getAssignee());
                 }
-                r.getContent().add(ActivitiConstants.ACTIVITI_VARIABLES, processEngine.getTaskService().getVariables(task.getId()));
+                Map<String, Object> variables = new HashMap<String, Object>(processEngine.getTaskService().getVariables(task.getId()));
+                if (variables.containsKey(ActivitiConstants.OPENIDM_CONTEXT)){
+                    variables.remove(ActivitiConstants.OPENIDM_CONTEXT);
+                }
+                r.getContent().add(ActivitiConstants.ACTIVITI_VARIABLES, variables);
                 handler.handleResult(r);
             }
         } catch (Exception ex) {
@@ -194,7 +198,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                     task.setOwner(value.get(ActivitiConstants.ACTIVITI_OWNER).toString());
                 }
                 processEngine.getTaskService().saveTask(task);
-                Map result = new HashMap();
+                Map<String, String> result = new HashMap<String, String>(1);
                 result.put("Task updated", resourceId);
                 handler.handleResult(new Resource(resourceId, null, new JsonValue(result)));
             }
@@ -238,10 +242,10 @@ public class TaskInstanceResource implements CollectionResourceProvider {
         String taskOwner = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_OWNER);
         query = taskOwner == null ? query : query.taskOwner(taskOwner);
 
-        Map wfParams = ActivitiUtil.fetchVarParams(request);
-        Iterator itWf = wfParams.entrySet().iterator();
+        Map<String, String> wfParams = ActivitiUtil.fetchVarParams(request);
+        Iterator<Map.Entry<String, String>> itWf = wfParams.entrySet().iterator();
         while (itWf.hasNext()) {
-            Map.Entry<String, Object> e = (Map.Entry) itWf.next();
+            Map.Entry<String, String> e = itWf.next();
             query = query.processVariableValueEquals(e.getKey(), e.getValue());
         }
     }

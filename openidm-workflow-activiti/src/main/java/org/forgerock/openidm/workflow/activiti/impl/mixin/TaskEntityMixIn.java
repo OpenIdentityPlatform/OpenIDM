@@ -39,6 +39,8 @@ public class TaskEntityMixIn {
 
     @JsonProperty(ActivitiConstants.ID)
     protected String id;
+    @JsonProperty(ActivitiConstants.REVISION)
+    protected int revision;
     @JsonProperty(ActivitiConstants.ACTIVITI_NAME)
     protected String name;
     @JsonProperty(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID)

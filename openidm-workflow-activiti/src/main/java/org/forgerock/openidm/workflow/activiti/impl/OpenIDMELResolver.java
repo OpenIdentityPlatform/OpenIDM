@@ -26,7 +26,6 @@ package org.forgerock.openidm.workflow.activiti.impl;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.javax.el.ELContext;
 import org.activiti.engine.impl.javax.el.ELResolver;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServerContext;
 import org.osgi.service.component.ComponentConstants;
 import org.slf4j.Logger;
@@ -36,11 +35,21 @@ import java.beans.FeatureDescriptor;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.script.Bindings;
+import org.activiti.engine.ActivitiException;
 import org.activiti.engine.impl.context.Context;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.ScriptName;
+import org.forgerock.script.groovy.FunctionClosure;
+import org.forgerock.util.LazyMap;
 
 /**
  * Custom ExpressionResolver for OpenIDM
+ *
  * @author $author$
  * @version $Revision$ $Date$
  */
@@ -48,17 +57,37 @@ public class OpenIDMELResolver extends ELResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenIDMELResolver.class);
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
-    private ServerContext router;
+    private PersistenceConfig persistenceConfig;
+    private ScriptRegistry scriptRegistry;
 
+    @Override
     public Object getValue(ELContext context, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-        router = session.getOpenIDM();
+        persistenceConfig = session.getOpenIDMPersistenceConfig();
+        scriptRegistry = session.getOpenIDMScriptRegistry();
+        Map<String, String> scriptJson = new HashMap<String, String>(3);
+        Bindings bindings = null;
+        try {
+            JsonValue openidmContext = (JsonValue) context.getELResolver().getValue(context, base, ActivitiConstants.OPENIDM_CONTEXT);
+            ServerContext serverContext = ServerContext.loadFromJson(openidmContext, persistenceConfig);
+            ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
+            if (script == null) {
+                scriptJson.put("source", "");
+                scriptJson.put("type", "groovy");
+                scriptJson.put("name", "ActivitiScript");
+                script = scriptRegistry.takeScript(new JsonValue(scriptJson));
+            }
+            bindings = script.getScriptBindings(serverContext, null);
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
+            throw new ActivitiException(ex.getMessage(), ex);
+        }
         if (base == null) {
             // according to javadoc, can only be a String
             String key = (String) property;
-            if (null != router && "openidm".equals(key)) {
+            if (bindings.containsKey(key)) {
                 context.setPropertyResolved(true);
-                return router;
+                return bindings.get(key);
             } else {
                 for (String name : delegateMap.keySet()) {
                     if (name.equalsIgnoreCase(key)) {
@@ -68,7 +97,6 @@ public class OpenIDMELResolver extends ELResolver {
                 }
             }
         }
-
         return null;
     }
 
@@ -86,21 +114,26 @@ public class OpenIDMELResolver extends ELResolver {
         LOGGER.info("removed Activiti service from delegate cache " + name);
     }
 
+    @Override
     public boolean isReadOnly(ELContext context, Object base, Object property) {
         return true;
     }
 
+    @Override
     public void setValue(ELContext context, Object base, Object property, Object value) {
     }
 
+    @Override
     public Class<?> getCommonPropertyType(ELContext context, Object arg) {
         return Object.class;
     }
 
+    @Override
     public Iterator<FeatureDescriptor> getFeatureDescriptors(ELContext context, Object arg) {
         return null;
     }
 
+    @Override
     public Class<?> getType(ELContext context, Object arg1, Object arg2) {
         return Object.class;
     }
@@ -108,43 +141,13 @@ public class OpenIDMELResolver extends ELResolver {
     /**
      * Called when openidm.xxx() is called from an Expression
      * @return result of the call
-     */
+    */
     @Override
     public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
-        if (base instanceof ServerContext) {
-            OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-            router = session.getOpenIDM();
+        if (base instanceof LazyMap && ((LazyMap)base).containsKey(method)) {
             context.setPropertyResolved(true);
-//            try {
-//                ConnectionFunction.valueOf((String) method).call(null, params);
-//                switch (SimpleJsonResource.Method.valueOf((String) method)) {
-//                    case read:
-//                        return router.read((String) params[0]);
-//                    case query:
-//                        return router.query((String) params[0], (Map<String, Object>) params[1]);
-//                    case create:
-//                        router.create((String) params[0], (Map<String, Object>) params[1]);
-//                        return null;
-//                    case update:
-//                        router.update((String) params[0], (String) params[1], (Map<String, Object>) params[2]);
-//                        return null;
-//                    case delete:
-//                        router.delete((String) params[0], (String) params[1]);
-//                        return null;
-//                    case action:
-//                        return router.action((String) params[0], (Map<String, Object>) params[1]);
-//                    case patch:
-//                        router.patch((String) params[0], (String) params[1], (Patch) params[2]);
-//                        return null;
-//                    default:
-//                        throw new BadRequestException("The requested method is not available: " + method);
-//                }
-
-//            } catch (ResourceException ex) {
-//                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
-//            } catch (Exception ex) {
-//                LOGGER.error(OpenIDMELResolver.class.getName(), ex);
-//            }
+            FunctionClosure function = (FunctionClosure)((LazyMap)base).get(method);
+            return function.doCall(params);
         }
         return null;
     }

@@ -54,6 +54,7 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.config.InvalidException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSessionFactory;
 import org.h2.jdbcx.JdbcDataSource;
 import org.osgi.framework.Constants;
@@ -75,24 +76,18 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Workflow Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = {
-        ActivitiServiceImpl.ROUTER_PREFIX_OBJ, 
+        ActivitiServiceImpl.ROUTER_PREFIX_OBJ,
         ActivitiServiceImpl.ROUTER_PREFIX_OBJID,
         ActivitiServiceImpl.ROUTER_PREFIX_OBJID_SUBOBJ,
         ActivitiServiceImpl.ROUTER_PREFIX_OBJID_SUBOBJID})})
 @References({
-    @Reference(name = "JavaDelegateServiceReference",
-    referenceInterface = JavaDelegate.class,
-    bind = "bindService",
-    unbind = "unbindService",
-    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
-    policy = ReferencePolicy.DYNAMIC)//,
-//    @Reference(name = "ref_ActivitiServiceImpl_JsonResourceRouterService",
-//    referenceInterface = JsonResource.class,
-//    bind = "bindRouter",
-//    unbind = "unbindRouter",
-//    cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-//    policy = ReferencePolicy.DYNAMIC,
-//    target = "(service.pid=org.forgerock.openidm.router)")})
+    @Reference(name = "JavaDelegateServiceReference", referenceInterface = JavaDelegate.class,
+    bind = "bindService", unbind = "unbindService",
+    cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC),
+    @Reference(name = "ScriptRegistryService", referenceInterface = ScriptRegistry.class,
+    bind = "bindScriptRegistry", unbind = "unbindScriptRegistry",
+    cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
+    target = "(service.pid=org.forgerock.openidm.script)")
 })
 public class ActivitiServiceImpl implements RequestHandler {
 
@@ -121,28 +116,22 @@ public class ActivitiServiceImpl implements RequestHandler {
     public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
     private String jndiName;
     private boolean selfMadeProcessEngine = true;
-    @Reference(name = "processEngine",
-    referenceInterface = ProcessEngine.class,
-    bind = "bindProcessEngine",
-    unbind = "unbindProcessEngine",
-    cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    policy = ReferencePolicy.STATIC,
+    @Reference(name = "processEngine", referenceInterface = ProcessEngine.class,
+    bind = "bindProcessEngine", unbind = "unbindProcessEngine",
+    cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC,
     target = "(!openidm.activiti.engine=true)" //avoid register the self made service
     )
     private ProcessEngine processEngine;
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    bind = "bindConfigAdmin",
-    unbind = "unbindConfigAdmin")
+    bind = "bindConfigAdmin", unbind = "unbindConfigAdmin")
     private ConfigurationAdmin configurationAdmin = null;
     /**
      * Some need to register a TransactionManager or we need to create one.
      */
-    @Reference(bind = "bindTransactionManager",
-    unbind = "unbindTransactionManager")
+    @Reference(bind = "bindTransactionManager", unbind = "unbindTransactionManager")
     private TransactionManager transactionManager;
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    bind = "bindDataSource",
-    unbind = "unbindDataSource",
+    bind = "bindDataSource", unbind = "unbindDataSource",
     target = "(osgi.jndi.service.name=jdbc/openidm)")
     private DataSource dataSource;
     private final OpenIDMELResolver openIDMELResolver = new OpenIDMELResolver();
@@ -164,6 +153,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     private boolean starttls;
     private String historyLevel;
     private String workflowDir;
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private PersistenceConfig persistenceConfig;
 
     @Override
     public void handleAction(ServerContext context, ActionRequest request, ResultHandler<JsonValue> handler) {
@@ -261,7 +252,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                         if (customSessionFactories == null) {
                             customSessionFactories = new ArrayList<SessionFactory>();
                         }
-                        //customSessionFactories.add(idmSessionFactory);
+                        customSessionFactories.add(idmSessionFactory);
                         configuration.setCustomSessionFactories(customSessionFactories);
                         configuration.setExpressionManager(new OpenIDMExpressionManager());
 
@@ -291,6 +282,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                         List<ResolverFactory> resolverFactories = configuration.getResolverFactories();
                         resolverFactories.add(new OpenIDMResolverFactory());
                         configuration.setResolverFactories(resolverFactories);
+                        configuration.getVariableTypes().addType(new JsonValueType());
                         configuration.setScriptingEngines(new OsgiScriptingEngines(new ScriptBindingsFactory(resolverFactories)));
 
                         //We are done!!
@@ -304,9 +296,9 @@ public class ActivitiServiceImpl implements RequestHandler {
                         if (null != configurationAdmin) {
                             try {
                                 barInstallerConfiguration = configurationAdmin.createFactoryConfiguration("org.apache.felix.fileinstall", null);
-                                Dictionary props = barInstallerConfiguration.getProperties();
+                                Dictionary<String, String> props = barInstallerConfiguration.getProperties();
                                 if (props == null) {
-                                    props = new Hashtable();
+                                    props = new Hashtable<String, String>();
                                 }
                                 props.put("felix.fileinstall.poll", "2000");
                                 props.put("felix.fileinstall.noInitialDelay", "true");
@@ -320,11 +312,11 @@ public class ActivitiServiceImpl implements RequestHandler {
                                 java.util.logging.Logger.getLogger(ActivitiServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
-                        activitiResource = new ActivitiResource(processEngine);
+                        activitiResource = new ActivitiResource(processEngine, persistenceConfig);
                         logger.debug("Activiti ProcessEngine is enabled");
                         break;
                     case local: //ProcessEngine is connected by @Reference
-                        activitiResource = new ActivitiResource(processEngine);
+                        activitiResource = new ActivitiResource(processEngine, persistenceConfig);
                         break;
 //                    case remote: //fetch remote connection parameters
 //                        activitiResource = new HttpRemoteJsonResource(url, username, password);
@@ -412,15 +404,26 @@ public class ActivitiServiceImpl implements RequestHandler {
         logger.info("ProcessEngine stopped.");
     }
 
-//    protected void bindRouter(Router router) {
-//        this.idmSessionFactory.setRouter(new JsonResourceObjectSet(router));
-//        this.identityService.setRouter(router);
-//    }
-//
-//    protected void unbindRouter(Router router) {
-//        this.idmSessionFactory.setRouter(null);
-//        this.identityService.setRouter(null);
-//    }
+    protected void bindScriptRegistry(ScriptRegistry scriptRegistry) {
+        this.idmSessionFactory.setScriptRegistry(scriptRegistry);
+        //this.identityService.setRouter(router);
+    }
+
+    protected void unbindScriptRegistry(ScriptRegistry scriptRegistry) {
+        this.idmSessionFactory.setScriptRegistry(null);
+        //this.identityService.setRouter(null);
+    }
+
+    protected void bindPersistenceConfig(PersistenceConfig config) {
+        this.persistenceConfig = config;
+        this.idmSessionFactory.setPersistenceConfig(config);
+    }
+
+    protected void unbindPersistenceConfig(PersistenceConfig config) {
+        this.persistenceConfig = null;
+        this.idmSessionFactory.setPersistenceConfig(null);
+    }
+
     public void bindService(JavaDelegate delegate, Map props) {
         openIDMELResolver.bindService(delegate, props);
     }

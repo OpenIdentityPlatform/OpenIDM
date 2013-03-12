@@ -25,8 +25,6 @@ package org.forgerock.openidm.workflow.activiti.impl.mixin;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.annotate.JsonPropertyOrder;
-import org.codehaus.jackson.annotate.JsonWriteNullProperties;
 import org.forgerock.openidm.workflow.activiti.impl.ActivitiConstants;
 
 /**
@@ -46,6 +44,8 @@ public abstract class ProcessDefinitionMixIn {
     protected String diagramResourceName;
     @JsonProperty(ActivitiConstants.ID)
     protected String id;
+    @JsonProperty(ActivitiConstants.REVISION)
+    protected int revision;
     @JsonProperty(ActivitiConstants.ACTIVITI_KEY)
     protected String key;
     @JsonProperty(ActivitiConstants.ACTIVITI_NAME)

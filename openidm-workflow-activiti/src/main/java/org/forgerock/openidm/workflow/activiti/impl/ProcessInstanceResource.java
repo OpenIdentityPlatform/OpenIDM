@@ -40,13 +40,14 @@ import org.forgerock.json.resource.*;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.HistoricProcessInstanceMixIn;
 
 /**
- *
+ * Resource implementation of ProcessInstance related Activiti operations
  * @author orsolyamebold
  */
 public class ProcessInstanceResource implements CollectionResourceProvider {
 
     private final static ObjectMapper mapper;
     private ProcessEngine processEngine;
+    private PersistenceConfig persistenceConfig;
 
     static {
         mapper = new ObjectMapper();
@@ -55,8 +56,9 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
         mapper.configure(SerializationConfig.Feature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
-    public ProcessInstanceResource(ProcessEngine processEngine) {
+    public ProcessInstanceResource(ProcessEngine processEngine, PersistenceConfig config) {
         this.processEngine = processEngine;
+        this.persistenceConfig = config;
     }
 
     public void setProcessEngine(ProcessEngine processEngine) {
@@ -80,8 +82,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
             String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
             Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
-            //variables.put("openidmcontext", ObjectSetContext.get().get("parent"));
-//TODO: replace openidmcontext with some new concept
+            variables.put(ActivitiConstants.OPENIDM_CONTEXT, ServerContext.saveToJson(context, persistenceConfig));
             ProcessInstance instance;
             if (processDefinitionId == null) {
                 instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, businessKey, variables);
@@ -111,7 +112,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
         try {
             if (processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult() != null) {
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
-                Map result = new HashMap();
+                Map<String, String> result = new HashMap<String, String>(1);
                 result.put("Process instance deleted", resourceId);
                 handler.handleResult(new Resource(resourceId, null, new JsonValue(result)));
             } else {
@@ -199,10 +200,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
         String superProcessInstanceId = ActivitiUtil.getParamFromRequest(request, ActivitiConstants.ACTIVITI_SUPERPROCESSINSTANCEID);
         query = superProcessInstanceId == null ? query : query.superProcessInstanceId(superProcessInstanceId);
 
-        Map wfParams = ActivitiUtil.fetchVarParams(request);
-        Iterator itWf = wfParams.entrySet().iterator();
+        Map<String, String> wfParams = ActivitiUtil.fetchVarParams(request);
+        Iterator<Map.Entry<String, String>> itWf = wfParams.entrySet().iterator();
         while (itWf.hasNext()) {
-            Map.Entry<String, Object> e = (Map.Entry) itWf.next();
+            Map.Entry<String, String> e = itWf.next();
             query.variableValueEquals(e.getKey(), e.getValue());
         }
     }

@@ -23,24 +23,28 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-import org.activiti.engine.impl.context.Context;
+import javax.script.Bindings;
 import org.activiti.engine.impl.scripting.Resolver;
-import org.forgerock.openidm.workflow.activiti.impl.session.OpenIDMSession;
 
 /**
  * Custom resolver for OpenIDM (used in scripts)
+ *
  * @author orsolyamebold
  */
 public class OpenIDMResolver implements Resolver {
+    Bindings bindings;
+
+    public OpenIDMResolver(Bindings bindings) {
+        this.bindings = bindings;
+    }
 
     @Override
     public boolean containsKey(Object key) {
-        return "openidm".equals(key);
+        return bindings.containsKey(key);
     }
 
     @Override
     public Object get(Object key) {
-        OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-        return session.getOpenIDM();
+        return bindings.get(key);
     }
 }

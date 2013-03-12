@@ -40,7 +40,7 @@ import org.forgerock.json.resource.*;
 import org.forgerock.openidm.workflow.activiti.impl.mixin.TaskDefinitionMixIn;
 
 /**
- *
+ * Resource implementation of TaskDefinition related Activiti operations
  * @author orsolyamebold
  */
 public class TaskDefinitionResource implements CollectionResourceProvider {
@@ -152,7 +152,7 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLEEXPRESSION, h.getVariableExpression());
             entry.put(ActivitiConstants.FORMPROPERTY_VARIABLENAME, h.getVariableName());
             entry.put(ActivitiConstants.ACTIVITI_NAME, h.getName());
-            Map type = new HashMap(2);
+            Map<String, Object> type = new HashMap<String, Object>(3);
             if (h.getType() != null) {
                 type.put(ActivitiConstants.ACTIVITI_NAME, h.getType().getName());
                 type.put(ActivitiConstants.ENUM_VALUES, h.getType().getInformation("values"));
