@@ -386,7 +386,7 @@ OpenIDM version "2.1.0-SNAPSHOT" (revision: 1660)
      than the attributes you added in the previous step. The additional 
      attributes are added by a script named 
      <literal>onCreate-user-set-default-fields.js</literal> that is triggered 
-     whan a new user is created. For more information, see <link 
+     when a new user is created. For more information, see <link
      xlink:href="integrators-guide#managed-object-configuration" 
      xlink:role="http://docbook.org/xlink/role/olink"><citetitle>Managed Object 
      Configuration</citetitle></link> in the <citetitle>Integrator's Guide</citetitle>.
