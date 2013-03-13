@@ -267,9 +267,9 @@ SvN8ofdaEKi4DrLvBifkJvHdTm9DgZJo+bROM6LM9kac6CxNvwj9m/4g6mhnjxEV
   that lets you use either an HTTP Basic like mechanism or OpenIDM-specific 
   headers, setting a cookie in the response that you can use for subsequent 
   authentication. If you attempt to access OpenIDM URLs without the appropriate 
-  headers or session cookie, OpenIDM returns HTTP 401 Unauthorized. If you
-  use a session cookie, you must include an additional header that indicates
-  the origin of the request.</para>
+  headers or session cookie, OpenIDM returns HTTP 401 Unauthorized, or HTTP 403
+  Forbidden, depending on the situation. If you use a session cookie, you must
+  include an additional header that indicates the origin of the request.</para>
 
   <para>The following examples show successful authentications.</para>
 
