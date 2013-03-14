@@ -826,18 +826,18 @@
    operations. You can prevent a specific mapping from participating in
    automatic synchronization by setting the <literal>"enableSync"</literal>
    property of that mapping to false. In the following example, automatic
-   synchronization is disabled. This means that changes to objects in the LDAP
-   directory are not automatically propagated to the internal repository.
-   To propagate the changes to the internal repository, reconciliation must be
-   launched manually.</para>
+   synchronization is disabled. This means that changes to objects in internal
+   repository are not automatically propagated to the LDAP directory. To
+   propagate changes to the LDAP directory, reconciliation must be launched
+   manually.</para>
 
    <programlisting language="javascript">
 {
     "mappings" : [
         {
-            "name" : "systemLdapAccounts_managedUser",
-            "source" : "system/ldap/account",
-            "target" : "managed/user",
+            "name" : "managedUser_systemLdapAccounts",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
             "enableSync" : false,
              ....
 }
