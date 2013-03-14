@@ -1732,7 +1732,7 @@
       </programlisting>
 
       <para>The variables available to these scripts are described in
-      <link xlink:href="admin-guide#appendix-scripting"
+      <link xlink:href="integrators-guide#appendix-scripting"
       xlink:role="http://docbook.org/xlink/role/olink">
       <citetitle>Variables Available in Scripts</citetitle></link> in the
       <citetitle>Scripting Appendix</citetitle>.</para>
