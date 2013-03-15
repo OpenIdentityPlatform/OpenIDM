@@ -233,6 +233,58 @@
             file to uncomment the following line:
             <literal># openidm.fileinstall.enabled=false</literal>. </para>
         </section>
+
+        <!-- Section still in progress
+        <section xml:id="bootstrapping-config">
+            <title>Bootstrapping the OpenIDM Configuration</title>
+            <para>OpenIDM stores its configuration in the repository
+            (database), and provides a file-based view of this configuration.
+            For the system to start up with the configuration in the repository,
+            (or to store a new configuration in the repository), some basic
+            connectivity information is required to bootstrap the repository.</para>
+
+            <para>Bootstrapping information is provided in a combination of
+            the following three files, depending on how the configuration is
+            exposed:</para>
+            <itemizedlist>
+                <listitem>
+                    <para><filename>openidm/conf/boot/boot.properties</filename></para>
+                    <para><filename>openidm/conf/repo.*.json</filename></para>
+                    <para><filename>openidm/conf/system.properties</filename></para>
+                </listitem>
+            </itemizedlist>
+
+            <section>
+                <title>Bootstrapping Information in <filename>boot.properties</filename></title>
+                <para>The <filename>boot.properties</filename> file specifies
+                security information...</para>
+
+            </section>
+
+            <section>
+                <title>Bootstrapping Information in <filename>repo.*.json</filename></title>
+                <para>Specifically if you are using the file-based configuration view,
+                <filename>openidm/conf/repo.*.json</filename> contains basic
+                connectivity information that is loaded to bootstrap.</para>
+                <para>Examples of repo configuration files are provided in
+                <filename>conf/repo.orientdb.json</filename> and
+                <filename>samples/repo.jdbc.json</filename>. This file determines the
+                repository type that is configured for the system - do not add more
+                than one <filename>repo.*.json</filename> file to the
+                <literal>conf</literal> directory.</para>
+                <para>For bootstrapping, only the basic connectivity properties
+                are required. These properties correspond to the properties that
+                are documented in the system properties section.</para>
+            </section>
+
+            <section>
+                <title>Bootstrapping Information in <filename>system.properties</filename></title>
+                <para>If you have disabled the file-based configuration view,
+                bootstrapping information must be included in the the
+                <filename>system.properties</filename> file.</para>
+            </section>
+        </section>
+        -->
     </section>
 
  <section xml:id="configuring-over-rest">
@@ -528,7 +580,7 @@
   the <filename>router.json</filename> file to remove all filters, effectively 
   bypassing any policy validation.</para>
   
-  <programlisting language="javascript">$ curl
+  <screen>$ curl
  --header "X-OpenIDM-Username: openidm-admin"
  --header "X-OpenIDM-Password: openidm-admin"
  --request PUT
@@ -543,7 +595,7 @@
            ]
            }'
  "http://localhost:8080/openidm/config/router"
-  </programlisting>
+  </screen>
 
   <para>See the <link xlink:href="integrators-guide#appendix-rest"
   xlink:role="http://docbook.org/xlink/role/olink"><citetitle>REST API
