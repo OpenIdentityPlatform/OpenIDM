@@ -489,7 +489,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             } else if (jobExists(id, false)) {
                 scheduler = inMemoryScheduler;
             } else {
-                throw new ObjectSetException(ObjectSetException.NOT_FOUND, "Schedule does not exist");
+                throw new NotFoundException("Schedule does not exist");
             }
             job = scheduler.getJobDetail(id, GROUP_NAME);
             JobDataMap dataMap = job.getJobDataMap();
@@ -498,10 +498,7 @@ public class SchedulerService extends ObjectSetJsonResource {
             resultMap.put("_id", id);
 
         } catch (SchedulerException e) {
-            e.printStackTrace();
             throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         
         return resultMap;
@@ -555,7 +552,7 @@ public class SchedulerService extends ObjectSetJsonResource {
                 } else if (jobExists(id, false)) {
                     inMemoryScheduler.deleteJob(id, GROUP_NAME);
                 } else {
-                    throw new ObjectSetException(ObjectSetException.BAD_REQUEST, "Schedule does not exist");
+                    throw new NotFoundException("Schedule does not exist");
                 }
             } catch (SchedulerException e) {
                 throw new ObjectSetException(ObjectSetException.INTERNAL_ERROR, e);
