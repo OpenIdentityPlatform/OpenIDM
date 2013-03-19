@@ -1093,6 +1093,21 @@
      </listitem>
     </varlistentry>
    </variablelist>
+
+   <para>If you use the LDAP connector over SSL, you must set the
+   <literal>ssl</literal> property to <literal>true</literal> in the provisioner
+   configuration file. You must also specify the path to a truststore in the
+   <filename>system.properties</filename> file. A truststore is provided by
+   default at <filename>openidm/security/truststore</filename>. Add the
+   following line to the <filename>system.properties</filename> file,
+   substituting the path to your own truststore if you do not want to use the
+   default.</para>
+
+   <programlisting>
+# Set the truststore
+javax.net.ssl.trustStore=/path/to/openidm/security/truststore
+   </programlisting>
+
   </section>
 
   <section xml:id="active-directory-connector">
