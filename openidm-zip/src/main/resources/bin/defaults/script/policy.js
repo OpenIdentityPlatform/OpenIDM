@@ -761,12 +761,11 @@ additionalPolicyLoader = (function (config,impl) {
     };
     
     obj.load = function (additionPolicies) {
-        var i,j,scriptBody;
+        var i,j;
         //Load additional policy scripts if configured
         for (i = 0; i < additionalPolicies.length; i++) {
             try {
-                scriptBody = readFile(identityServer.getProjectLocation() + "/" + additionalPolicies[i]);
-                eval(scriptBody);
+                eval(additionalPolicies[i]);
                 
                 for (j=0;j<config.policies.length;j++) {
                     if (!policyImpl.hasOwnProperty(config.policies[j].policyExec) && 
