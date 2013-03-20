@@ -181,6 +181,8 @@ script task using expression resolver: [
   ]
 ]
   </screen>
+
+ </section>
  
  <section xml:id="setting-up-remote-integration">
   <title>Setting Up Remote Integration</title>
@@ -432,7 +434,6 @@ $ ./startup.sh
     </orderedlist>   
    </step>
   </procedure>
- </section>
  </section>
 
  <section xml:id="configuring-activiti-engine">
