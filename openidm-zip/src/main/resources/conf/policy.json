@@ -1,6 +1,7 @@
 {
     "type" : "text/javascript",
     "file" : "bin/defaults/script/policy.js",
+    "additionalFiles" : [],
     "resources" : [
         {
             "resource" : "managed/user/*",
