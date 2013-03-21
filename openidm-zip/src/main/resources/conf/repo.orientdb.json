@@ -4,19 +4,19 @@
     "poolMinSize" : 5,
     "poolMaxSize" : 20,
     "queries" : {
-        "get-by-field-value" : "select * FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value}",
-        "get-users-of-role" : "select userName FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$'",
-        "query-all-ids" : "select _openidm_id from ${unquoted:_resource}",
-        "query-all" : "select ${unquoted:fields} from ${unquoted:_resource}",
-        "links-for-firstId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND firstId = ${firstId}",
-        "links-for-secondId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND secondId = ${secondId}",
-        "links-for-linkType" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType}",
-        "credential-query" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${username}",
-        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
-        "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid}",
-        "get-notifications-for-user" : "select * FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
-        "scan-tasks" : "SELECT * FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${unquoted:taskState.completed} is NULL",
-        "query-cluster-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')"
+        "get-by-field-value" : "select * FROM ${_resource} WHERE ${field} = :value",
+        "get-users-of-role" : "select userName FROM ${_resource} WHERE roles matches '^(.*,)?${role}(,.*)?$'",
+        "query-all-ids" : "select _openidm_id from ${_resource}",
+        "query-all" : "select ${fields} from ${_resource}",
+        "links-for-firstId" : "SELECT * FROM ${_resource} WHERE linkType = :linkType AND firstId = :firstId",
+        "links-for-secondId" : "SELECT * FROM ${_resource} WHERE linkType = :linkType AND secondId = :secondId",
+        "links-for-linkType" : "SELECT * FROM ${_resource} WHERE linkType = :linkType",
+        "credential-query" : "SELECT * FROM ${_resource} WHERE userName = :username",
+        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = :username",
+        "for-userName" : "SELECT * FROM ${_resource} WHERE userName = :uid",
+        "get-notifications-for-user" : "select * FROM ${_resource} WHERE receiverId = :userId order by createDate desc",
+        "scan-tasks" : "SELECT * FROM ${_resource} WHERE ${dotnotation:property} < :condition.before AND ${taskState.completed} is NULL",
+        "query-cluster-instances" : "SELECT * FROM cluster_states WHERE timestamp <= :timestamp AND (state = '1' OR state = '2')"
     },
     "dbStructure" : {
         "orientdbClass" : {
@@ -48,6 +48,15 @@
                 ]
             },
             "managed_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_group" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",

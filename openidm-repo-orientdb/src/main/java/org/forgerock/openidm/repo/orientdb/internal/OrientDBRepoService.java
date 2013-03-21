@@ -69,9 +69,8 @@ import org.forgerock.openidm.config.JSONEnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.orientdb.internal.query.PrepareNotSupported;
-import org.forgerock.openidm.repo.orientdb.internal.query.TokenHandler;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.openidm.util.ResourceUtil.URLParser;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -97,6 +96,7 @@ import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.sql.OCommandExecutorSQLDelegate;
 import com.orientechnologies.orient.core.sql.query.OSQLAsynchQuery;
 import com.orientechnologies.orient.core.sql.query.OSQLSynchQuery;
+import org.forgerock.openidm.core.PropertyUtil;
 
 /**
  * Repository service implementation using OrientDB
@@ -187,7 +187,11 @@ public class OrientDBRepoService implements RequestHandler {
 
             } else {
                 // Use the Document Database
-                handler.handleResult(read(partition, request));
+                URLParser url = URLParser.parse(request.getResourceName()).last();
+                String orientClassName =
+                        resourceCollectionToOrientClassName(partition, url.resourceCollection());
+
+                handler.handleResult(read(orientClassName, url.value(), request));
             }
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -205,7 +209,7 @@ public class OrientDBRepoService implements RequestHandler {
      * {@code _id}, and object version {@code _rev} to enable optimistic
      * concurrency supported by OrientDB and OpenIDM.
      * 
-     * @param partition
+     * @param orientClassName
      *            the identifier of the object set to retrieve from.
      * @param request
      *            the identifier of the object to retrieve from the object set.
@@ -217,10 +221,10 @@ public class OrientDBRepoService implements RequestHandler {
      *             if the passed identifier is invalid
      * @return the requested object.
      */
-    public Resource read(String partition, ReadRequest request) throws ResourceException {
+    public Resource read(String orientClassName, String localId, ReadRequest request)
+            throws ResourceException {
         // Parse the remaining resourceName
-        String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
-        if (resourceName == null) {
+        if (localId == null) {
             throw new BadRequestException(
                     "The repository requires clients to supply an identifier for the object to read.");
         }
@@ -233,19 +237,18 @@ public class OrientDBRepoService implements RequestHandler {
 
         // partition and optional sub-type together defines the OrientDB
         // Document type!?
-        String localType = resourceName.length > 1 ? partition + "/" + resourceName[0] : partition;
-        String localId = resourceName.length > 1 ? resourceName[1] : resourceName[0];
 
         Resource result = null;
         ODatabaseDocumentTx db = getConnection();
         try {
-            ODocument doc = getByID(typeToOrientClassName(localType, null), localId, db);
+            ODocument doc = getByID(orientClassName, localId, db);
             if (doc == null) {
-                throw new NotFoundException("Object repo/" + localId + " not found in " + localType);
+                throw new NotFoundException("Object repo/" + localId + " not found in "
+                        + orientClassName);
             }
             result = DocumentUtil.toMap(doc, request.getFieldFilters());
-            logger.trace("Completed get for partition: {}, resourceName: {}, result: {}",
-                    new Object[] { partition, resourceName, result });
+            logger.trace("Completed get for orientType: {}, id: {}, result: {}", new Object[] {
+                orientClassName, localId, result });
         } finally {
             if (db != null) {
                 db.close();
@@ -275,7 +278,10 @@ public class OrientDBRepoService implements RequestHandler {
                     if ("/".equals(request.getResourceName())) {
                         edge = gdb.createEdge(iSourceVertexRid, iDestVertexRid);
                     } else {
-                        String iClassName = typeToOrientClassName(request.getResourceName().substring(1), null);
+                        // Use the Document Database
+                        URLParser url = URLParser.parse(request.getResourceName()).last();
+                        String iClassName =
+                                resourceCollectionToOrientClassName(url.resourceName(), "/");
                         if (gdb.getVertexType(iClassName) == null) {
                             OClass ce = gdb.createEdgeType(iClassName);
                             ce.createProperty("label", OType.STRING);
@@ -284,7 +290,8 @@ public class OrientDBRepoService implements RequestHandler {
                     }
 
                     for (Map.Entry<String, Object> entry : request.getContent().asMap().entrySet()) {
-                        if (entry.getKey().startsWith("_") || "firstId".equals(entry.getKey()) || "secondId".equals(entry.getKey()) ) {
+                        if (entry.getKey().startsWith("_") || "firstId".equals(entry.getKey())
+                                || "secondId".equals(entry.getKey())) {
                             continue;
                         }
                         if (entry.getValue() instanceof String) {
@@ -303,7 +310,10 @@ public class OrientDBRepoService implements RequestHandler {
 
             } else {
                 // Use the Document Database
-                handler.handleResult(create(partition, request));
+                URLParser url = URLParser.parse(request.getResourceName());
+                String orientClassName =
+                        resourceCollectionToOrientClassName(partition, url.last().resourceName());
+                handler.handleResult(create(orientClassName, request));
             }
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -319,10 +329,10 @@ public class OrientDBRepoService implements RequestHandler {
      * the object, and the {@code _rev} property to the revised object version
      * (For optimistic concurrency)
      * 
-     * @param fullId
+     * @param orientClassName
      *            the client-generated identifier to use, or {@code null} if
      *            server-generated identifier is requested.
-     * @param obj
+     * @param request
      *            the contents of the object to create in the object set.
      * @throws NotFoundException
      *             if the specified id could not be resolved.
@@ -331,13 +341,12 @@ public class OrientDBRepoService implements RequestHandler {
      * @throws PreconditionFailedException
      *             if an object with the same ID already exists.
      */
-    public Resource create(String partition, CreateRequest request) throws ResourceException {
+    public Resource create(String orientClassName, CreateRequest request) throws ResourceException {
         // It's a POST _action=create
         if (StringUtils.isBlank(request.getNewResourceId())) {
             request.setNewResourceId(UUID.randomUUID().toString());
         }
         // The ResourceName may be "/" only
-        String orientClassName = typeToOrientClassName(partition, request.getResourceName().substring(1));
 
         // if (fullId == null || localId == null) {
         // throw new
@@ -370,13 +379,13 @@ public class OrientDBRepoService implements RequestHandler {
             // Integer.toString(newDoc.getVersion()));
             if (logger.isTraceEnabled()) {
                 logger.trace(
-                        "Create payload for partition: {}, resourceName: {}, resourceId: {}, doc: {}",
-                        new Object[] { partition, request.getResourceName(),
+                        "Create payload for orientClass: {}, resourceName: {}, resourceId: {}, doc: {}",
+                        new Object[] { orientClassName, request.getResourceName(),
                             request.getNewResourceId(), newDoc });
             } else {
                 logger.debug(
                         "Completed create for partition: {}, resourceName: {}, resourceId: {}, revision: {}",
-                        new Object[] { partition, request.getResourceName(),
+                        new Object[] { orientClassName, request.getResourceName(),
                             request.getNewResourceId(), newDoc.getVersion() });
             }
 
@@ -431,7 +440,12 @@ public class OrientDBRepoService implements RequestHandler {
 
             } else {
                 // Use the Document Database
-                handler.handleResult(update(partition, request));
+                URLParser url = URLParser.parse(request.getResourceName());
+                String orientClassName =
+                        resourceCollectionToOrientClassName(partition, url.last()
+                                .resourceCollection());
+
+                handler.handleResult(update(orientClassName, url.last().value(), request));
             }
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -450,13 +464,13 @@ public class OrientDBRepoService implements RequestHandler {
      * object, including: a new {@code _rev} value for the revised object's
      * version
      * 
-     * @param fullId
+     * @param orientClassName
      *            the identifier of the object to be put, or {@code null} to
      *            request a generated identifier.
-     * @param rev
+     * @param localId
      *            the version of the object to update; or {@code null} if not
      *            provided.
-     * @param obj
+     * @param request
      *            the contents of the object to put in the object set.
      * @throws ConflictException
      *             if version is required but is {@code null}.
@@ -469,7 +483,8 @@ public class OrientDBRepoService implements RequestHandler {
      * @throws BadRequestException
      *             if the passed identifier is invalid
      */
-    public Resource update(String partition, UpdateRequest request) throws ResourceException {
+    public Resource update(String orientClassName, String localId, UpdateRequest request)
+            throws ResourceException {
         // Parse the remaining resourceName
         String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
         if (resourceName == null) {
@@ -487,10 +502,6 @@ public class OrientDBRepoService implements RequestHandler {
         // partition and optional sub-type together defines the OrientDB
         // Document type!?
 
-        String orientClassName =
-                typeToOrientClassName(partition, resourceName.length > 1 ? resourceName[0] : null);
-        String localId = resourceName.length > 1 ? resourceName[1] : resourceName[0];
-
         // TODO http://code.google.com/p/orient/wiki/JavaMultiThreading
         ODatabaseDocumentTx db = getConnection();
         try {
@@ -506,10 +517,11 @@ public class OrientDBRepoService implements RequestHandler {
 
             if (!StringUtils.isBlank(request.getRevision())) {
                 updatedDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
-                //request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV, request.getRevision());
+                // request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV,
+                // request.getRevision());
             }
-            logger.trace("Updated doc for partition: {}, resourceName: {}, to save {}",
-                    new Object[] { partition, request.getResourceName(), updatedDoc });
+            logger.trace("Updated doc for orientType: {}, resourceName: {}, to save {}",
+                    new Object[] { orientClassName, request.getResourceName(), updatedDoc });
 
             updatedDoc.save();
             db.commit();
@@ -550,7 +562,12 @@ public class OrientDBRepoService implements RequestHandler {
 
             } else {
                 // Use the Document Database
-                handler.handleResult(delete(partition, request));
+                URLParser url = URLParser.parse(request.getResourceName());
+                String orientClassName =
+                        resourceCollectionToOrientClassName(partition, url.last()
+                                .resourceCollection());
+
+                handler.handleResult(delete(orientClassName, url.last().value(), request));
             }
         } catch (final ResourceException e) {
             handler.handleError(e);
@@ -562,9 +579,9 @@ public class OrientDBRepoService implements RequestHandler {
     /**
      * Deletes the specified object from the object set.
      * 
-     * @param fullId
+     * @param orientClassName
      *            the identifier of the object to be deleted.
-     * @param rev
+     * @param localId
      *            the version of the object to delete or {@code null} if not
      *            provided.
      * @throws NotFoundException
@@ -576,7 +593,8 @@ public class OrientDBRepoService implements RequestHandler {
      * @throws PreconditionFailedException
      *             if version did not match the existing object in the set.
      */
-    public Resource delete(String partition, DeleteRequest request) throws ResourceException {
+    public Resource delete(String orientClassName, String localId, DeleteRequest request)
+            throws ResourceException {
         // Parse the remaining resourceName
         String[] resourceName = ResourceUtil.parseResourceName(request.getResourceName());
         if (resourceName == null) {
@@ -593,9 +611,6 @@ public class OrientDBRepoService implements RequestHandler {
 
         // partition and optional sub-type together defines the OrientDB
         // Document type!?
-        String orientClassName =
-                typeToOrientClassName(partition, resourceName.length > 1 ? resourceName[0] : null);
-        String localId = resourceName.length > 1 ? resourceName[1] : resourceName[0];
 
         // This throws ConflictException if parse fails
         int ver = DocumentUtil.parseVersion(request.getRevision());
@@ -612,7 +627,8 @@ public class OrientDBRepoService implements RequestHandler {
             if (!StringUtils.isBlank(request.getRevision())) {
                 // State the version we expect to delete for MVCC check
                 existingDoc.setVersion(DocumentUtil.parseVersion(request.getRevision()));
-                //request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV, request.getRevision());
+                // request.getNewContent().put(ServerConstants.OBJECT_PROPERTY_REV,
+                // request.getRevision());
             }
 
             db.delete(existingDoc);
@@ -647,9 +663,9 @@ public class OrientDBRepoService implements RequestHandler {
      * - The <code>QueryConstants</code> defines the map keys, including the
      * result records (QUERY_RESULT)
      * 
-     * @param fullId
+     * @param context
      *            identifies the object to query.
-     * @param params
+     * @param request
      *            the parameters of the query to perform.
      * @return the query results, which includes meta-data and the result
      *         records in JSON object structure format.
@@ -670,8 +686,6 @@ public class OrientDBRepoService implements RequestHandler {
             if (request.getQueryFilter() != null) {
                 handler.handleError(new NotSupportedException("Query by Filter not supported"));
                 return;
-            } else if (StringUtils.isNotBlank(request.getQueryExpression())) {
-                queryExpression = prepareQuery(request.getQueryExpression());
             } else if (StringUtils.isNotBlank(request.getQueryId())) {
                 if (!predefinedQueries.containsKey(request.getQueryId())) {
                     handler.handleError(new BadRequestException(
@@ -689,12 +703,13 @@ public class OrientDBRepoService implements RequestHandler {
 
             } else {
                 // Use the Document Database
-                logger.trace("Partition: {} resourceName: {}", partition, request.getResourceName());
+                URLParser url = URLParser.parse(request.getResourceName()).last();
+                logger.trace("Partition: {} resourceName: {}", partition, url.resourceName());
 
                 Map<String, String> params =
                         new HashMap<String, String>(request.getAdditionalQueryParameters());
-                params.put(QueryConstants.RESOURCE_NAME, typeToOrientClassName(partition, request
-                        .getResourceName().substring(1)));
+                params.put(QueryConstants.RESOURCE_NAME, resourceCollectionToOrientClassName(
+                        partition, url.resourceName()));
 
                 ODatabaseDocumentTx database = getConnection();
                 try {
@@ -706,9 +721,7 @@ public class OrientDBRepoService implements RequestHandler {
                     // TODO How to submit and make is async if the DB supports
                     // it?
                     OSQLAsynchQuery<ODocument> query =
-                            new OSQLAsynchQuery(TokenHandler
-                                    .replaceTokensWithOrientToken(TokenHandler
-                                            .replaceTokensWithValues(queryExpression, params))) {
+                            new OSQLAsynchQuery(((String)PropertyUtil.substVars(queryExpression, new OrientSQLPropertyAccessor(params), PropertyUtil.Delimiter.DOLLAR, true))) {
                                 @Override
                                 public List run(Object... iArgs) {
                                     super.run(iArgs);
@@ -718,7 +731,7 @@ public class OrientDBRepoService implements RequestHandler {
                                         final ORID lastRid = i.getIdentity();
                                         handler.handleResult(new QueryResult(lastRid.next(), -1));
                                     } else {
-                                        //TODO How to handle empty result???
+                                        // TODO How to handle empty result???
                                         handler.handleResult(new QueryResult(null, -1));
                                     }
 
@@ -820,12 +833,12 @@ public class OrientDBRepoService implements RequestHandler {
         return db;
     }
 
-    public String typeToOrientClassName(String partition, String resourceName) {
-        String localType =
-                (null == resourceName || "/".equals(resourceName.trim())) ? partition : partition + '_'
-                        + resourceName;
-        // TODO remove the trailing "/"
-        return localType.replace("/", "_");
+    String resourceCollectionToOrientClassName(String partition, String resourceName) {
+        if ("/".equals(resourceName)) {
+            return partition;
+        } else {
+            return (partition + resourceName).replace("/", "_");
+        }
     }
 
     // public static String idToOrientClassName(String id) {
@@ -980,34 +993,6 @@ public class OrientDBRepoService implements RequestHandler {
         DBHelper.closePools();
     }
 
-    /**
-     * Construct a prepared statement from the query String
-     * 
-     * The constructed prepared query can only be verified at query execution
-     * time and hence the query execution may later fall back onto non-prepared
-     * execution
-     * 
-     * @param queryString
-     *            the query expression, including tokens to replace
-     * @return the constructed (but not validated) prepared statement
-     */
-    protected String prepareQuery(String queryString) {
-        try {
-            return TokenHandler.replaceTokensWithOrientToken(queryString);
-        } catch (PrepareNotSupported ex) {
-            // Statement not in a format that it can be converted into prepared
-            // statement
-            logger.debug(
-                    "Statement not in a format that it can be converted into prepared statement: {}",
-                    queryString);
-        } catch (com.orientechnologies.orient.core.exception.OQueryParsingException ex) {
-            // With current OrientDB impl parsing will actually only fail on
-            // first use,
-            // hence unless the implementation changes this is unlikely to
-            // trigger
-        }
-        return queryString;
-    }
 
     /**
      * Set the pre-configured queries, which are identified by a query
@@ -1025,6 +1010,10 @@ public class OrientDBRepoService implements RequestHandler {
      */
     protected void setConfiguredQueries(JsonValue queries) {
         Map<String, String> prepQueries = new HashMap<String, String>();
+        
+        // Query all IDs is a mandatory query, default it and allow override.
+        prepQueries.put(QueryConstants.QUERY_ALL_IDS,
+                "select _openidm_id from ${_resource}");
 
         // Populate/Override with Queries configured
         if (queries != null && !queries.isNull()) {
@@ -1034,9 +1023,6 @@ public class OrientDBRepoService implements RequestHandler {
                 }
             }
         }
-        // Query all IDs is a mandatory query, default it and allow override.
-        prepQueries.put(QueryConstants.QUERY_ALL_IDS,
-                "select _openidm_id from ${unquoted:_resource}");
         predefinedQueries = Collections.unmodifiableMap(prepQueries);
     }
 
@@ -1070,7 +1056,7 @@ public class OrientDBRepoService implements RequestHandler {
                 return (ODocument) o;
             }
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid id {}", id, e);
+            logger.trace("Invalid id {}", id, e);
         } catch (ODatabaseException e) {
             logger.error("Invalid id {}", id, e);
         }

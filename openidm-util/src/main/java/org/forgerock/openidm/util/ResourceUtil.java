@@ -26,16 +26,32 @@ package org.forgerock.openidm.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Context;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.RootContext;
 import org.forgerock.json.resource.RouterContext;
 import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.json.resource.SortKey;
+import org.forgerock.json.resource.UpdateRequest;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
@@ -179,7 +195,6 @@ public class ResourceUtil {
         private int index = 0;
         private URLParser prev, next;
 
-
         public static URLParser parse(String resourceName) {
             return new URLParser(resourceName);
         }
@@ -228,7 +243,7 @@ public class ResourceUtil {
             } else {
                 value = "";
             }
-            //This is the head
+            // This is the head
             prev = this;
         }
 
@@ -238,10 +253,10 @@ public class ResourceUtil {
 
         public URLParser next() {
             if (null == next) {
-                if (getTokenizer().hasMoreTokens()){
+                if (getTokenizer().hasMoreTokens()) {
                     next = new URLParser(this);
                 } else {
-                    //This is the tail
+                    // This is the tail
                     next = this;
                 }
             }
@@ -278,5 +293,202 @@ public class ResourceUtil {
             return value;
         }
 
+        public String resourceName() {
+            String collection = resourceCollection();
+            if (null == value || value.isEmpty()) {
+                return collection;
+            } else {
+                if (collection.endsWith("/")) {
+                    return collection + value;
+                } else {
+                    return collection + "/" + value;
+                }
+            }
+        }
+    }
+
+    public static Request requestFromJsonValue(JsonValue request) {
+        Request result = null;
+        if (null != request && request.isMap()) {
+            // TODO Unit test if the methods value is not correct
+            String resourceName = request.get("resourceName").required().asString();
+            switch (request.get("method").asEnum(RequestType.class)) {
+            case CREATE:
+                result =
+                        Requests.newCreateRequest(resourceName, request.get("newResourceId")
+                                .asString(), request.get("content"));
+                break;
+            case READ:
+                result = Requests.newReadRequest(resourceName);
+                break;
+            case UPDATE:
+                UpdateRequest ur =
+                        Requests.newUpdateRequest(resourceName, request.get("newContent"));
+                ur.setRevision(request.get("revision").asString());
+                result = ur;
+                break;
+            case PATCH:
+                throw new IllegalArgumentException("Patch is not supported");
+                // break;
+            case QUERY:
+                QueryRequest qr = Requests.newQueryRequest(resourceName);
+                if (request.isDefined("filter") ^ request.isDefined("queryId")
+                        ^ request.isDefined("queryExpression")) {
+                    if (request.isDefined("filter")) {
+                        qr.setQueryFilter(QueryFilter.valueOf(request.get("filter").required()
+                                .asString()));
+                    } else if (request.isDefined("queryId")) {
+                        qr.setQueryId(request.get("queryId").required().asString());
+                    } else if (request.isDefined("queryExpression")) {
+                        qr.setQueryExpression(request.get("queryExpression").required().asString());
+                    }
+
+                    if (request.isDefined("sortKeys")) {
+                        for (JsonValue sortKey : request.get("sortKeys")) {
+                            qr.addSortKey(sortKey.asString());
+                        }
+                    }
+                    if (request.isDefined("pagedResultsCookie")) {
+                        qr.setPagedResultsCookie(request.get("pagedResultsCookie").asString());
+                    }
+                    if (request.isDefined("pagedResultsOffset")) {
+                        qr.setPagedResultsOffset(request.get("pagedResultsOffset").asInteger());
+                    }
+                    if (request.isDefined("pageSize")) {
+                        qr.setPageSize(request.get("pageSize").asInteger());
+                    }
+                } else {
+                    throw new JsonValueException(request,
+                            "The query request must contain only one of queryId, filter, queryExpression");
+                }
+                result = qr;
+                break;
+            case DELETE:
+                DeleteRequest dr = Requests.newDeleteRequest(resourceName);
+                dr.setRevision(request.get("revision").asString());
+                result = dr;
+                break;
+            case ACTION:
+                // TODO Should we convert it to CreateRequest?
+                ActionRequest ar =
+                        Requests.newActionRequest(resourceName, request.get("actionId").required()
+                                .asString());
+                ar.setContent(request.get("content"));
+                JsonValue params = request.get("additionalActionParameters");
+                for (String key : params.keys()) {
+                    ar.setAdditionalActionParameter(key, params.get(key).asString());
+                }
+                result = ar;
+                break;
+            default:
+                throw new JsonValueException(request.get("method"), "Unknown request method type");
+            }
+            JsonValue _fields = request.get("fieldFilters");
+            if (_fields.isList()) {
+                for (JsonValue field : _fields) {
+                    result.addField(field.asPointer());
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid input request");
+        }
+        return result;
+    }
+
+    public static JsonValue requestToJsonValue(Request request) {
+        if (null == request) {
+            throw new NullPointerException();
+        }
+        JsonValue result = new JsonValue(new LinkedHashMap<String, Object>());
+        result.put("method", request.getRequestType().name());
+        parseCommonParameter(result, request);
+        switch (request.getRequestType()) {
+        case READ: {
+            break;
+        }
+        case PATCH: {
+            break;
+        }
+        case UPDATE: {
+            UpdateRequest ur = (UpdateRequest) request;
+            if (null != ur.getRevision()) {
+                result.put("revision", ur.getRevision());
+            }
+            result.put("newContent", ur.getNewContent().getObject());
+            break;
+        }
+        case DELETE: {
+            DeleteRequest dr = (DeleteRequest) request;
+            if (null != dr.getRevision()) {
+                result.put("revision", dr.getRevision());
+            }
+            break;
+        }
+        case QUERY: {
+            QueryRequest qr = (QueryRequest) request;
+            if (null != qr.getQueryFilter() ^ null != qr.getQueryId()
+                    ^ null != qr.getQueryExpression()) {
+                if (null != qr.getQueryFilter()) {
+                    result.put("filter", qr.getQueryFilter().toString());
+                } else if (null != qr.getQueryId()) {
+                    result.put("queryId", qr.getQueryId());
+                } else if (null != qr.getQueryExpression()) {
+                    result.put("queryExpression", qr.getQueryExpression());
+                }
+                if (null != qr.getSortKeys() && !qr.getSortKeys().isEmpty()) {
+                    List<String> _sortKeys = new ArrayList<String>(qr.getSortKeys().size());
+                    for (SortKey sortKey : qr.getSortKeys()) {
+                        _sortKeys.add(sortKey.toString());
+                    }
+                    result.put("sortKeys", _sortKeys);
+                }
+                if (null != qr.getPagedResultsCookie()) {
+                    result.put("pagedResultsCookie", qr.getPagedResultsCookie());
+                }
+                result.put("pagedResultsOffset", qr.getPagedResultsOffset());
+                result.put("pageSize", qr.getPageSize());
+            } else {
+                throw new IllegalArgumentException(
+                        "The query request must contain only one of queryId, filter, queryExpression");
+            }
+            break;
+        }
+        case ACTION: {
+            // TODO Should we convert it to CreateRequest
+            ActionRequest ar = (ActionRequest) request;
+            parseCommonParameter(result, request);
+            result.put("actionId", ar.getActionId());
+
+            if (null != ar.getAdditionalActionParameters()
+                    && !ar.getAdditionalActionParameters().isEmpty()) {
+                result.put("additionalActionParameters", ar.getAdditionalActionParameters());
+            }
+
+            if (null != ar.getContent() && !ar.getContent().isNull()) {
+                result.put("content", ar.getContent().getObject());
+            }
+            break;
+        }
+        case CREATE: {
+            CreateRequest cr = (CreateRequest) request;
+            result.put("newResourceId", cr.getNewResourceId());
+            result.put("content", cr.getContent().getObject());
+            break;
+        }
+        default:
+            throw new IllegalArgumentException("Unknown request type");
+        }
+        return result;
+    }
+
+    private static void parseCommonParameter(final JsonValue json, final Request request) {
+        json.put("resourceName", request.getResourceName());
+        if (null != request.getFieldFilters() && !request.getFieldFilters().isEmpty()) {
+            List<String> _fields = new ArrayList<String>(request.getFieldFilters().size());
+            for (JsonPointer pointer : request.getFieldFilters()) {
+                _fields.add(pointer.toString());
+            }
+            json.put("fieldFilters", _fields);
+        }
     }
 }
