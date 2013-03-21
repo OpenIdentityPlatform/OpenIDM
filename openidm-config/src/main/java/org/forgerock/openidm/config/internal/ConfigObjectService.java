@@ -29,11 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -59,7 +54,6 @@ import org.forgerock.openidm.config.ConfigurationManager.PID;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.openidm.util.ResourceUtil.URLParser;
-import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +62,6 @@ import org.slf4j.LoggerFactory;
  * 
  * @author aegloff
  */
-//@Component(name = "org.forgerock.openidm.config", immediate = true,
-//        policy = ConfigurationPolicy.IGNORE)
-//@Service
-//@Properties({
-//    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-//    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM configuration service"),
-//    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/config*") })
 public class ConfigObjectService implements RequestHandler {
 
     /**
@@ -102,8 +89,8 @@ public class ConfigObjectService implements RequestHandler {
     public void handleRead(final ServerContext context, final ReadRequest request,
             final ResultHandler<Resource> handler) {
         try {
-            URLParser url = ResourceUtil.URLParser.parse(request.getResourceName());
-            if (url.value().isEmpty()) {
+            URLParser serviceName = ResourceUtil.URLParser.parse(request.getResourceName());
+            if (serviceName.value().isEmpty()) {
                 // GET /config
                 final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
                 JsonValue content = new JsonValue(new HashMap<String, Object>());
@@ -126,21 +113,20 @@ public class ConfigObjectService implements RequestHandler {
                     }
                 });
                 handler.handleResult(new Resource("/", null, content));
-            }
-            URLParser serviceName = url;
-            if (serviceName.next() == serviceName) {
+            } else if (serviceName.next() == serviceName) {
                 // GET /config/{serviceName}
                 PID pid = PID.serviceName(serviceName.value());
                 handler.handleResult(configurationManager.readConfiguration(pid));
-            }
-            URLParser instanceAlias = serviceName.next();
-            if (instanceAlias.next() == instanceAlias) {
-                // GET /config/{serviceName}/{instanceAlias}
-                PID pid = PID.serviceName(serviceName.value(), instanceAlias.value());
-                handler.handleResult(configurationManager.readConfiguration(pid));
             } else {
-                handler.handleError(new NotFoundException("Resource not found: "
-                        + request.getResourceName()));
+                URLParser instanceAlias = serviceName.next();
+                if (instanceAlias.next() == instanceAlias) {
+                    // GET /config/{serviceName}/{instanceAlias}
+                    PID pid = PID.serviceName(serviceName.value(), instanceAlias.value());
+                    handler.handleResult(configurationManager.readConfiguration(pid));
+                } else {
+                    handler.handleError(new NotFoundException("Resource not found: "
+                            + request.getResourceName()));
+                }
             }
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -193,28 +179,27 @@ public class ConfigObjectService implements RequestHandler {
     public void handleUpdate(ServerContext context, UpdateRequest request,
             ResultHandler<Resource> handler) {
         try {
-            URLParser url = ResourceUtil.URLParser.parse(request.getResourceName());
-            if (url.value().isEmpty()) {
+            URLParser serviceName = ResourceUtil.URLParser.parse(request.getResourceName());
+            if (serviceName.value().isEmpty()) {
                 // PUT /config
                 handler.handleError(new BadRequestException(
                         "The singleton resource '/' cannot be updated"));
-            }
-            URLParser serviceName = url.next();
-            if (serviceName.next() == serviceName) {
+            } else if (serviceName.next() == serviceName) {
                 // PUT /config/{serviceName}
                 PID pid = PID.serviceName(serviceName.value());
                 handler.handleResult(configurationManager.updateConfiguration(pid, request
                         .getRevision(), request.getNewContent()));
-            }
-            URLParser instanceAlias = serviceName.next();
-            if (instanceAlias.next() == instanceAlias) {
-                // PUT /config/{serviceName}/{instanceAlias}
-                PID pid = PID.serviceName(serviceName.value(), instanceAlias.value());
-                handler.handleResult(configurationManager.updateConfiguration(pid, request
-                        .getRevision(), request.getNewContent()));
             } else {
-                handler.handleError(new NotFoundException("Resource not found: "
-                        + request.getResourceName()));
+                URLParser instanceAlias = serviceName.next();
+                if (instanceAlias.next() == instanceAlias) {
+                    // PUT /config/{serviceName}/{instanceAlias}
+                    PID pid = PID.serviceName(serviceName.value(), instanceAlias.value());
+                    handler.handleResult(configurationManager.updateConfiguration(pid, request
+                            .getRevision(), request.getNewContent()));
+                } else {
+                    handler.handleError(new NotFoundException("Resource not found: "
+                            + request.getResourceName()));
+                }
             }
         } catch (ResourceException e) {
             handler.handleError(e);
@@ -247,6 +232,7 @@ public class ConfigObjectService implements RequestHandler {
                     } else {
                         handler.handleError(new BadRequestException("Not supported queryId:"
                                 + request.getQueryId()));
+                        return;
                     }
                 } else {
                     queryFilter = request.getQueryFilter();

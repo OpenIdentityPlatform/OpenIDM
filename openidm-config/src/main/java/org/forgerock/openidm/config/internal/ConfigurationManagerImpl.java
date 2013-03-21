@@ -178,8 +178,7 @@ public class ConfigurationManagerImpl
         String[] clazzes = null;
         // If we don't want to save configurations back to JSON files then
         // disable the ConfigurationListener service from registration
-        Object obj = bundleContext.getProperty(DirectoryWatcher.DISABLE_CONFIG_SAVE);
-        if (obj instanceof String && Boolean.valueOf((String) obj)) {
+        if (shouldSaveConfig()) {
             clazzes =
                     new String[] { ArtifactInstaller.class.getName(),
                         ConfigurationListener.class.getName() };
@@ -1024,6 +1023,38 @@ public class ConfigurationManagerImpl
         logger.debug("Parsed configuration for {}", serviceName);
 
         return jv;
+    }
+    /**
+    * Checks the felix.fileinstall.enableConfigSave and felix.fileinstall.disableConfigSave
+    * properties and determines if the configuration object changes should be
+    * saved in the original configuration files as well.
+    * 
+    * @return if the changes should be saved or not
+    */       
+    private boolean shouldSaveConfig()
+    {
+        Object obj = bundleContext.getProperty( DirectoryWatcher.ENABLE_CONFIG_SAVE );
+        if (obj instanceof String)
+        {
+            obj = Boolean.valueOf((String) obj);
+        }
+        if (Boolean.FALSE.equals( obj ))
+        {
+            return false;
+        }
+        else if ( !Boolean.TRUE.equals( obj ))
+        {
+            obj = bundleContext.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
+            if (obj instanceof String)
+            {
+                obj = Boolean.valueOf((String) obj);
+            }
+            if( Boolean.FALSE.equals( obj ) )
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     // ----- Inner Classes
