@@ -29,13 +29,14 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.ConflictException;
-import org.forgerock.openidm.objset.ForbiddenException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.ForbiddenException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 
 public interface TableHandler {
 
@@ -56,9 +57,9 @@ public interface TableHandler {
      * @throws InternalServerErrorException if the operation failed because of a (possibly transient) failure
      * @return the requested object.
      */
-    public abstract Map<String, Object> read(String fullId, String type,
+    public abstract Resource read(String fullId, String type,
             String localId, Connection connection) 
-            throws SQLException, IOException, ObjectSetException;
+            throws SQLException, IOException, ResourceException;
 
     /**
      * Creates a new object in the object set.
@@ -80,7 +81,7 @@ public interface TableHandler {
      */
     public abstract void create(String fullId, String type, String localId,
             Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException, ObjectSetException;
+            throws SQLException, IOException, ResourceException;
 
     /**
      * Updates the specified object in the object set. 
@@ -108,7 +109,7 @@ public interface TableHandler {
      */
     public abstract void update(String fullId, String type, String localId,
             String rev, Map<String, Object> obj, Connection connection)
-            throws SQLException, IOException, ObjectSetException;
+            throws SQLException, IOException, ResourceException;
 
     /**
      * Deletes the specified object from the object set.
@@ -128,7 +129,7 @@ public interface TableHandler {
      */
     public abstract void delete(String fullId, String type, String localId,
             String rev, Connection connection)
-            throws SQLException, IOException, ObjectSetException;
+            throws SQLException, IOException, ResourceException;
 
     /**
      * Performs the query on the specified object and returns the associated results.
@@ -153,7 +154,7 @@ public interface TableHandler {
      */
     
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
-                throws SQLException, ObjectSetException;
+                throws SQLException, ResourceException;
     
     /**
      * Query if a given exception signifies a well known error type

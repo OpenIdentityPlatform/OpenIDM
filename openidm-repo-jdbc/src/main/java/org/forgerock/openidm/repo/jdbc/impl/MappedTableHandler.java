@@ -39,11 +39,12 @@ import java.util.TreeSet;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.fluent.JsonPointer;
 import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.InvalidException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
@@ -137,9 +138,10 @@ public class MappedTableHandler implements TableHandler {
      * @see org.forgerock.openidm.repo.jdbc.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
      */
     @Override
-    public Map<String, Object> read(String fullId, String type, String localId, Connection connection) 
+    public Resource read(String fullId, String type, String localId, Connection connection) 
                     throws NotFoundException, SQLException, IOException {
-        JsonValue result = null;
+        JsonValue resultValue = null;
+        Resource result = null;
         PreparedStatement readStatement = null;
         ResultSet rs = null;
         try {
@@ -152,9 +154,10 @@ public class MappedTableHandler implements TableHandler {
             rs = readStatement.executeQuery();
             
             if (rs.next()) {
-                result = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
-                Object rev = result.get("_rev");  
-                logger.debug(" full id: {}, rev: {}, obj {}", new Object[] {fullId, rev, result});  
+            	resultValue = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
+                JsonValue rev = resultValue.get("_rev");  
+                logger.debug(" full id: {}, rev: {}, obj {}", new Object[] {fullId, rev, resultValue});  
+                result = new Resource(fullId, rev.asString(), resultValue);
             } else {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
@@ -163,7 +166,7 @@ public class MappedTableHandler implements TableHandler {
             CleanupHelper.loggedClose(readStatement);
         }
         
-        return result.asMap();
+        return result;
     }
     
     /**
@@ -396,7 +399,7 @@ public class MappedTableHandler implements TableHandler {
      */ 
     @Override
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection) 
-                throws ObjectSetException {
+                throws ResourceException {
         return queries.query(type, params, connection); 
     } 
 

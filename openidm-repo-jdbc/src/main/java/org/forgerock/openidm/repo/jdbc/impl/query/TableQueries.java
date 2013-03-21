@@ -23,21 +23,7 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl.query;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.openidm.objset.BadRequestException;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
-import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
-import org.forgerock.openidm.repo.util.TokenHandler;
-import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.smartevent.Name;
-import org.forgerock.openidm.smartevent.Publisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -48,6 +34,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
+import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
+import org.forgerock.openidm.repo.util.TokenHandler;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Configured and add-hoc query support on tables in generic (non-object specific) layout
@@ -63,6 +62,9 @@ public class TableQueries {
     
     // Monitoring event name prefix
     static final String EVENT_RAW_QUERY_PREFIX = "openidm/internal/repo/jdbc/raw/query/";
+    
+    public static final String QUERY_ID = "_queryId";
+    public static final String QUERY_EXPRESSION = "_queryExpression";
     
     // Pre-configured queries, key is query id
     Map<String, QueryInfo> queries = new HashMap<String, QueryInfo>();
@@ -151,10 +153,10 @@ public class TableQueries {
         params.put(QueryConstants.RESOURCE_NAME, type); 
         
 
-        String queryExpression = (String) params.get(QueryConstants.QUERY_EXPRESSION);        
-        String queryId = (String) params.get(QueryConstants.QUERY_ID);
+        String queryExpression = (String) params.get(QUERY_EXPRESSION);        
+        String queryId = (String) params.get(QUERY_ID);
         if (queryId == null && queryExpression == null) {
-            throw new BadRequestException("Either " + QueryConstants.QUERY_ID + " or " + QueryConstants.QUERY_EXPRESSION
+            throw new BadRequestException("Either " + QUERY_ID + " or " + QUERY_EXPRESSION
                     + " to identify/define a query must be passed in the parameters. " + params);
         }
         PreparedStatement foundQuery = null;

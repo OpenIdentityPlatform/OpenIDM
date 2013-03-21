@@ -23,38 +23,38 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.openidm.objset.InternalServerErrorException;
-import org.forgerock.openidm.objset.NotFoundException;
-import org.forgerock.openidm.objset.ObjectSetException;
-import org.forgerock.openidm.objset.PreconditionFailedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.repo.jdbc.ErrorType;
-import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
-import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
-import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
+import org.forgerock.json.fluent.JsonPointer;
+import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.repo.jdbc.ErrorType;
+import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
+import org.forgerock.openidm.repo.jdbc.TableHandler;
+import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
+import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handling of tables in a generic (not object specific) layout
@@ -169,10 +169,11 @@ public class GenericTableHandler implements TableHandler {
     * @see org.forgerock.openidm.repo.jdbc.impl.TableHandler#read(java.lang.String, java.lang.String, java.lang.String, java.sql.Connection)
     */
     @Override
-    public Map<String, Object> read(String fullId, String type, String localId, Connection connection)
-            throws NotFoundException, SQLException, IOException {
+    public Resource read(String fullId, String type, String localId, Connection connection)
+            throws ResourceException, SQLException, IOException {
 
-        Map<String, Object> result = null;
+    	Resource result = null;
+        Map<String, Object> resultMap = null;
         PreparedStatement readStatement = null; 
         ResultSet rs = null;
         try {
@@ -186,11 +187,13 @@ public class GenericTableHandler implements TableHandler {
             if (rs.next()) {
                 String rev = rs.getString("rev");
                 String objString = rs.getString("fullobject");
-                result = mapper.readValue(objString, typeRef);
-                result.put("_rev", rev);
-                logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, result});
+                resultMap = mapper.readValue(objString, typeRef);
+                resultMap.put("_rev", rev);
+                logger.debug(" full id: {}, rev: {}, obj {}", new Object[]{fullId, rev, resultMap});
+                result = new Resource(localId, rev, new JsonValue(resultMap));
             } else {
-                throw new NotFoundException("Object " + fullId + " not found in " + type);
+                throw ResourceException.getException(ResourceException.NOT_FOUND, 
+                		"Object " + fullId + " not found in " + type);
             }
         } finally {
             CleanupHelper.loggedClose(rs);
@@ -604,7 +607,7 @@ public class GenericTableHandler implements TableHandler {
      */
     @Override
     public List<Map<String, Object>> query(String type, Map<String, Object> params, Connection connection)
-            throws ObjectSetException {
+            throws ResourceException {
         return queries.query(type, params, connection);
     }
 
