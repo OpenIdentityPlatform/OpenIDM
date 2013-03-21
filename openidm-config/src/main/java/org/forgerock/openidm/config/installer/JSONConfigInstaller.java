@@ -117,14 +117,6 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         logger.debug("ConfigurationEvent {}, pid: {}, factoryPid: {}, type: {}", 
                 new Object[] {configurationEvent, configurationEvent.getPid(), 
                 configurationEvent.getFactoryPid(), configurationEvent.getType()});
-        // Check if writing back configurations has been disabled.
-        Object obj = this.context.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
-        if (obj instanceof String) {
-            obj = Boolean.valueOf((String) obj);
-        }
-        if (Boolean.FALSE.equals(obj)) {
-            return;
-        }
 
         String factoryPid = configurationEvent.getFactoryPid();
         //TODO do we still need this in 2.2?
